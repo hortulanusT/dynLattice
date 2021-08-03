@@ -7,3 +7,5 @@ nonlinRod*
 *.log
 *.res
 *.pvsm
+*.geo
+*.msh
