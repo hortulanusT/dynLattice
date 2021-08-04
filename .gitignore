@@ -1,6 +1,7 @@
 OBJ/*
-nonlinRod*
 .vscode/*
+
+nonlinRod*
 
 *.vtu
 *.png
