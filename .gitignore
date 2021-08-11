@@ -2,7 +2,6 @@ OBJ/*
 .vscode/*
 
 nonlinRod*
-modules/G*Module*
 
 *.vtu
 *.png
