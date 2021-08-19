@@ -17,7 +17,7 @@ MY_INCDIRS := $(subdirs)
 ##   Defining C++ Standard										                       ##
 #######################################################################
 
-# MY_CXX_STD_FLAGS := '-std=c++17'
+MY_CXX_STD_FLAGS := '-std=c++17'
 
 #######################################################################
 ##   Include Jive package and create executable                      ##
