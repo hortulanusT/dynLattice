@@ -1,6 +1,6 @@
-OBJ*
 .vscode/*
 
+OBJ*
 nonlinRod*
 
 *.vtu
@@ -9,3 +9,4 @@ nonlinRod*
 *.res
 *.pvsm
 *.csv
+*.dat
