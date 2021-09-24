@@ -11,3 +11,6 @@ nonlinRod*
 *.csv
 *.dat
 *.pdf
+
+!testing/test1.dat
+!testing/test2.dat
