@@ -1,6 +1,8 @@
-.vscode/*
-
+.vscode*
+documentation/html*
+documentation/latex*
 OBJ*
+
 nonlinRod*
 
 *.vtu
