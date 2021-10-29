@@ -8,6 +8,7 @@ program     = nonlinRod
 # Source file location
 subdirs 	 := models		 			# include all the custom models
 subdirs 	 += modules       	# include all the custom modules
+subdirs		 += shapes					# include all the custom shapes
 subdirs    += utils						# include all the utilities
 # Include directories
 MY_INCDIRS := $(subdirs)
@@ -17,7 +18,7 @@ MY_INCDIRS := $(subdirs)
 ##   Defining C++ Standard										                       ##
 #######################################################################
 
-MY_CXX_STD_FLAGS := '-std=c++17'
+MY_CXX_STD_FLAGS := '-std=c++17' # for better directory control
 
 #######################################################################
 ##   Include Jive package and create executable                      ##
