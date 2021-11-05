@@ -15,4 +15,4 @@ nonlinRod*
 *.pdf
 
 !testing/element/*.dat
-!testing/beam/*.dat
+!testing/beam/elem5.dat
