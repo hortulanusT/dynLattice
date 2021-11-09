@@ -14,5 +14,4 @@ nonlinRod*
 *.dat
 *.pdf
 
-!testing/element/*.dat
 !testing/beam/*.dat
