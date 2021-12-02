@@ -3,6 +3,7 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 
 
 ## Organization
+```
 .
 ├── .gitignore
 ├── LICENSE.md
@@ -25,6 +26,8 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 │   └── beam        <- tests from the Simo/Vu-Quoc Paper
 └── studies
     └── figures     <- all the studies to be conducted
+```
+
 
 ## LICENSE
 todo...
