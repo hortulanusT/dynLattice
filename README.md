@@ -29,5 +29,5 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ```
 
 
-## LICENSE
+## License
 todo...
