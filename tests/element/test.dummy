@@ -1,0 +1,19 @@
+<Nodes>
+	1	0.0	0.0	0.0;
+	2	0.0	0.0	1.0;
+</Nodes>
+
+<Elements>
+	3	1	2;
+	1	1;
+	2	2;
+</Elements>
+
+<ElementGroup name="rods">
+	{ 3 }
+</ElementGroup>
+
+<ElementGroup name="joints">
+	{ 1,	2 }
+</ElementGroup>
+

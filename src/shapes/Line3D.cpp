@@ -1,0 +1,265 @@
+/**
+ * @file Line3D.cpp
+ * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @brief shape function for implementing a 1D line function in a 3D space
+ * @version 0.1
+ * @date 2021-10-28
+ * 
+ * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
+ * 
+ */
+
+#include "Line3D.h"
+#include <jem/base/ClassTemplate.h>
+
+const String  Line3D::PROP_NODES  = "numPoints";
+const String  Line3D::PROP_INT    = "intScheme";
+const idx_t   Line3D::GLOB_RANK   = 3;
+
+Line3D::Line3D 
+  ( const String&       name,
+    const Properties&   conf,
+    const Properties&   props )
+    : Shape( name )
+{
+  idx_t         numNodes;
+  String        ischemeName;
+
+  Properties myProps = props.getProps( name );
+  Properties myConf  = conf.makeProps( name );
+  
+  myProps.get( numNodes, PROP_NODES );
+  myConf .set( PROP_NODES, numNodes );
+
+  Ref<StdLine> stdline = nullptr;
+  switch(numNodes)
+  {
+    case 2: stdline = newInstance<StdLine2>(); break;
+    case 3: stdline = newInstance<StdLine3>(); break;
+    case 4: stdline = newInstance<StdLine4>(); break;
+    default: throw jem::IllegalInputException( getContext(), "given number of nodes not supported!");
+  }
+
+  if (!myProps.find( ischemeName, PROP_INT ))
+    ischemeName = String::format("Gauss%d", numNodes-1); // reduced integration by default
+  myConf .set( PROP_INT, ischemeName );
+
+  Matrix ischeme = StdLine::getIntegrationScheme( ischemeName );
+
+  intLine_ = newInstance<ParametricLine>( "internalLine", ischeme, stdline );
+}
+
+void Line3D::getGlobalPoint
+  ( const Vector& x,
+    const Vector& u,
+    const Matrix& c ) const
+{
+  const Vector shapeFuncs;
+  intLine_->evalShapeFunctions( shapeFuncs, u );
+
+  x = matmul( c, shapeFuncs );
+}
+
+void Line3D::getShapeGradients
+  ( const Matrix& g,
+    const Vector& w,
+    const Matrix& c ) const
+{
+  Matrix c1( localRank(), nodeCount() );
+  for (idx_t iNode = 0; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
+    c1( 0, iNode ) = norm2( c[iNode] - c[0] );
+
+  Cubix     grads ( localRank(), shapeFuncCount(), ipointCount() ); 
+  intLine_->getShapeGradients( grads, w, c1 );
+  g = grads( 0, ALL, ALL );
+}
+
+void Line3D::getRotations
+  ( const Cubix& Ri,
+    const Cubix& Rn ) const
+{
+  Matrix Lambda_r ( globalRank(), globalRank() );
+  Matrix node_psi( globalRank(), nodeCount() );
+  getNodeRotVecs_( node_psi, Lambda_r, Rn );
+  
+  // get the _local_ rotations in the integration points
+  Matrix ip_psi( globalRank(), ipointCount() );
+  Matrix shapeFuncs = getShapeFunctions();
+
+  // get the rotation vectors associated with the local rotations
+  ip_psi = matmul( node_psi, shapeFuncs );
+  
+  // construc the local rotation matrices
+  for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
+  {
+    expVec( Ri[iIp], ip_psi[iIp] );
+    Ri[iIp] = matmul( Lambda_r, Ri[iIp] );
+  }
+}
+
+void Line3D::getXi
+  ( const Quadix& Xi,
+    const Vector& w,
+    const Matrix& c,
+    const Matrix& u ) const
+{
+  JEM_ASSERT2 ( Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size" );
+  Matrix  shapes  = getShapeFunctions();
+  Matrix  grads   ( shapeFuncCount(), ipointCount() );
+  getShapeGradients( grads, w, c );
+
+  Matrix  nodePhi = (Matrix)(c + u);  
+  Matrix  phiP    = matmul( nodePhi, grads );
+  
+  Xi = 0.;
+
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    {
+      for (idx_t i = 0; i < 6; i++) Xi(i, i, iNode, ip) = grads( iNode, ip );
+      Xi( SliceFrom(3), SliceTo(3), iNode, ip ) = -1. * shapes(iNode, ip) * skew(phiP[ip]);
+    }
+  }    
+}
+
+void Line3D::getPsi
+  ( const Quadix& Psi,
+    const Vector& w,
+    const Matrix& c ) const
+{
+  JEM_ASSERT2 ( Psi.size(0) == 6 && Psi.size(1) == 9 && Psi.size(2) == nodeCount() && Psi.size(3) == ipointCount(), "Psi size does not match the expected size" );
+  Matrix  shapes  = getShapeFunctions();
+  Matrix  grads   ( shapeFuncCount(), ipointCount() );
+  getShapeGradients( grads, w, c );
+
+  Psi = 0.;
+
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    {
+      for (idx_t i = 0; i < 6; i++) Psi(i, i, iNode, ip) = grads( iNode, ip );
+      for (idx_t i = 0; i < 3; i++) Psi(i+3, i+6, iNode, ip ) = shapes( iNode, ip );
+    }
+  }    
+}
+
+void Line3D::getRotStrain_local
+  ( const Matrix& omega,
+    const Vector& w,
+    const Matrix& c,
+    const Cubix& Rn ) const
+{
+  JEM_ASSERT2 ( omega.size(0) == globalRank() && omega.size(1) == ipointCount(), "omega size does not match the expected size" );
+  Matrix  node_psi  ( globalRank(), nodeCount() );
+  Matrix  Lambda_r  ( globalRank(), globalRank() );
+  getNodeRotVecs_( node_psi, Lambda_r, Rn );
+  // TEST_CONTEXT( Lambda_r )
+  // TEST_CONTEXT( matmul(Lambda_r, node_psi) )
+    
+  Matrix  shapes  = getShapeFunctions();
+  Matrix  grads   ( shapeFuncCount(), ipointCount() );
+  getShapeGradients( grads, w, c );
+
+  Matrix  psi     ( globalRank(), ipointCount() );
+  Matrix  psiP    ( globalRank(), ipointCount() );
+  psi     = matmul( node_psi, shapes );
+  psiP    = matmul( node_psi, grads );
+  // TEST_CONTEXT( matmul(Lambda_r, psi) )
+  // TEST_CONTEXT( matmul(Lambda_r, psiP) );
+
+  double  alpha   = NAN;
+
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    alpha     = norm2( psi[ip] );
+
+    if (jem::isTiny(alpha))
+      omega[ip] = psiP[ip];
+    else 
+    { // calc beta from Simo/Vu-Quoc 1985 (in local ref-frame from Crisfield/Jelenic)
+      omega[ip] = sin(alpha)/alpha * psiP[ip];
+      omega[ip] += (1 - sin(alpha)/alpha) * (dot(psi[ip], psiP[ip]) / alpha) * psi[ip]/alpha;
+      omega[ip] += 0.5 * (sin(.5*alpha)/.5/alpha) * (sin(.5*alpha)/.5/alpha) * matmul( skew(psi[ip]), psiP[ip] );
+    }
+
+    // rotate back to the spatial ref frame
+    omega[ip] = matmul( Lambda_r, omega[ip] );
+  }  
+
+  // TEST_CONTEXT(Rn)
+  // TEST_CONTEXT(node_psi)
+  // TEST_CONTEXT(omega)
+}
+
+void Line3D::getRotStrain_global
+  ( const Matrix& omega,
+    const Vector& w,
+    const Matrix& c,
+    const Matrix& theta) const
+{
+  JEM_ASSERT2 ( omega.size(0) == globalRank() && omega.size(1) == ipointCount(), "omega size does not match the expected size" );
+      
+  Matrix  shapes  = getShapeFunctions();
+  Matrix  grads   ( shapeFuncCount(), ipointCount() );
+  getShapeGradients( grads, w, c );
+
+  Matrix  psi     ( globalRank(), ipointCount() );
+  Matrix  psiP    ( globalRank(), ipointCount() );
+  psi     = matmul( theta, shapes );
+  psiP    = matmul( theta, grads );
+  // TEST_CONTEXT( matmul(Lambda_r, psi) )
+  // TEST_CONTEXT( matmul(Lambda_r, psiP) );
+
+  double  alpha   = NAN;
+
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    alpha     = norm2( psi[ip] );
+
+    if (jem::isTiny(alpha))
+      omega[ip] = psiP[ip];
+    else 
+    { // calc beta from Simo/Vu-Quoc 1985 
+      omega[ip] = sin(alpha)/alpha * psiP[ip];
+      omega[ip] += (1 - sin(alpha)/alpha) * (dot(psi[ip], psiP[ip]) / alpha) * psi[ip]/alpha;
+      omega[ip] += 0.5 * (sin(.5*alpha)/.5/alpha) * (sin(.5*alpha)/.5/alpha) * matmul( skew(psi[ip]), psiP[ip] );
+    }
+  }  
+
+  // TEST_CONTEXT(Rn)
+  // TEST_CONTEXT(node_psi)
+  // TEST_CONTEXT(omega)
+}
+
+//------------------------------------------------------
+// private helper functions
+//------------------------------------------------------
+void Line3D::getRefRot_
+  ( const Matrix Lambda_r,
+    const Cubix Rn ) const
+{
+  // first construct the reference rotation (use 0-based numbers instead of Crisfield/Jelenic 1-based numbers)
+  const idx_t I   = idx_t(0.5*(nodeCount()-1)); 
+  const idx_t J   = idx_t(0.5*(nodeCount()+0));
+  const double c  = 0.5;
+
+  Vector phi_IJ   ( globalRank() );
+
+  logMat( phi_IJ, matmul( Rn[I].transpose(), Rn[J] ) );
+  phi_IJ = c*phi_IJ;
+  expVec( Lambda_r, phi_IJ );
+  Lambda_r = matmul( Rn[I], Lambda_r );
+}
+
+void Line3D::getNodeRotVecs_
+  ( const Matrix psi,
+    const Matrix Lambda_r,
+    const Cubix Rn ) const
+{
+  getRefRot_( Lambda_r, Rn );
+
+  for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    logMat( psi[iNode], matmul( Lambda_r.transpose(), Rn[iNode] ) ); 
+}
