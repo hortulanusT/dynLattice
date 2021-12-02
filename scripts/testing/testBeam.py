@@ -33,8 +33,8 @@ for i in range(splits):
 
 if all(run_success):
   try:
-    sim_disp = np.loadtxt("tests/beam/test1-disp.res")
-    sim_resp = np.loadtxt("tests/beam/test1-resp.res")
+    sim_disp = np.loadtxt("tests/beam/test1/disp.res")
+    sim_resp = np.loadtxt("tests/beam/test1/resp.res")
 
     ideal_disp = np.array([[0, -1, 0, 4*np.pi*np.sin(alpha[i]), 0, 4*np.pi*np.cos(alpha[i])] for i in range(splits)])
     ideal_resp = np.array([[0,  0, 0, 8*np.pi*np.sin(alpha[i]), 0, 8*np.pi*np.cos(alpha[i])] for i in range(splits)])
@@ -56,10 +56,13 @@ print("...", end="", flush=True)
 
 test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test2.pro"], stdout=subprocess.DEVNULL) )
 
-sim_load = np.loadtxt("tests/beam/test2-load.res")
-sim_resp = np.loadtxt("tests/beam/test2-resp.res")
+try:
+  sim_load = np.loadtxt("tests/beam/test2/load.res")
+  sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
-test_passed[-1] &= np.allclose(sim_load, sim_resp)
+  test_passed[-1] &= np.allclose(sim_load, sim_resp)
+except IOError:
+  test_passed[-1] = False
 
 
 if test_passed[-1]:
@@ -80,9 +83,9 @@ else:
   print(colored(" FAILED", "red", attrs=["bold"]))
 
 ## POST PROCESSING
-sim_disp = np.loadtxt("tests/beam/test2-disp.res")
-sim_load = np.loadtxt("tests/beam/test2-load.res")
-sim_resp = np.loadtxt("tests/beam/test2-resp.res")
+sim_disp = np.loadtxt("tests/beam/test2/disp.res")
+sim_load = np.loadtxt("tests/beam/test2/load.res")
+sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
 plt.plot(sim_load[:,-1], sim_disp[:,2], 'k-', label="vertical")
 plt.plot(sim_load[:,-1], sim_disp[:,1]*-1, 'k-.', label="horizontal")
@@ -92,14 +95,12 @@ plt.xlim(left=0)
 plt.ylabel( "Displacement [m] ")
 plt.grid()
 
-plt.savefig("tests/beam/test2-res.png")
+plt.savefig("tests/beam/test2/results.png")
 
 ## finishing
-if True or all(test_passed):
+if all(test_passed):
   print(colored("> > > ALL TESTS PASSED < < <\t:))", "green"))
-  [os.remove(file) for file in glob.glob("tests/beam/test*-disp.res")]
-  [os.remove(file) for file in glob.glob("tests/beam/test*-load.res")]
-  [os.remove(file) for file in glob.glob("tests/beam/test*-resp.res")]
+  [shutil.rmtree(folder) for folder in glob.glob("tests/beam/test*/")]
   [os.remove(file) for file in glob.glob("tests/beam/test*.log")]
   [os.remove(file) for file in glob.glob("tests/beam/test5.dat")]
 else:
