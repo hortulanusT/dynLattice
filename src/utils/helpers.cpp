@@ -1,0 +1,187 @@
+#include "helpers.h"
+
+namespace jive_helpers
+{
+  Matrix eye 
+    ( const idx_t dim ) 
+  {
+    Matrix ret ( dim, dim );
+    ret = 0.0;
+
+    for (idx_t i = 0; i < dim; i++) 
+      ret(i,i) = 1.0;
+
+    return ret;
+  }
+
+  void logMat
+    ( const Vector& rv,
+      const Matrix& R )
+  {
+    double theta;     // angle of rotation
+    double tr_R = trace ( R ) <= 3. ? trace ( R ) : 3.; // trace of the matrix
+
+    theta       = acos ( ( tr_R - 1. ) / 2. );
+    rv          = unskew ( (Matrix)(R - R.transpose()) );
+
+    if (!jem::isTiny(theta)) 
+      rv       /= 2.*sin(theta);
+    else
+      rv       *= 0.;
+
+    rv         *= theta;
+    
+    // TEST_NO_CONTEXT(R)
+    // TEST_NO_CONTEXT(theta)
+    // TEST_NO_CONTEXT(rv)
+}
+
+  void vec2mat
+    ( const Matrix& mat,
+      const Vector& vec )
+  {
+    const idx_t  rows = mat.size(0);
+    const idx_t  cols = mat.size(1);
+    JEM_ASSERT2( rows*cols == vec.size(), "Vector and Matrix not of the same size!" );
+
+    for (idx_t irow = 0; irow < rows; irow++)
+    {
+      mat ( irow, ALL ) = vec [ SliceFromTo (irow*cols, (irow+1)*cols) ];
+    }
+  }
+
+  void expVec
+    ( const Matrix& Exp,
+      const Vector& psi )
+  {
+    // TEST_NO_CONTEXT(psi)
+    const double theta    = norm2(psi);
+    const Vector omega    ( psi.size() );
+    const Matrix K        ( psi.size(), psi.size() );    
+    
+    omega  = psi;
+    omega /= !jem::isTiny( theta ) ? theta : 1.;
+    K      = skew ( omega );
+
+    Exp  = eye();
+    Exp += sin(theta) * K;
+    Exp += (1-cos(theta)) * matmul ( K, K );
+    // TEST_NO_CONTEXT(Exp)
+  }
+
+  void rotMat2Quat 
+    ( const Vector& q,
+      const Matrix& Q )
+  {
+    double tr = trace ( Q ) <= 3. ? trace ( Q ) : 3.; // trace of the matrix;
+
+    if ( Q(0,0) > tr )
+    {
+      q[1] = sqrt ( 1./2. * Q(0,0) + 1./4. * ( 1. - tr ) );
+      q[0] = 1./4. * ( Q(2,1) - Q(1,2) ) / q[1];
+      q[2] = 1./4. * ( Q(1,0) + Q(0,1) ) / q[1];
+      q[3] = 1./4. * ( Q(2,0) + Q(0,2) ) / q[1];
+    }
+    else if ( Q(1,1) > tr )
+    {
+      q[2] = sqrt ( 1./2. * Q(1,1) + 1./4. * ( 1. - tr ) );
+      q[0] = 1./4. * ( Q(0,2) - Q(2,0) ) / q[2];
+      q[1] = 1./4. * ( Q(0,1) + Q(1,0) ) / q[2];
+      q[3] = 1./4. * ( Q(2,1) + Q(1,2) ) / q[2];
+    }
+    else if ( Q(2,2) > tr )
+    {
+      q[3] = sqrt ( 1./2. * Q(2,2) + 1./4. * ( 1. - tr ) );
+      q[0] = 1./4. * ( Q(1,0) - Q(0,1) ) / q[3];
+      q[1] = 1./4. * ( Q(0,2) + Q(2,0) ) / q[3];
+      q[2] = 1./4. * ( Q(1,2) + Q(2,1) ) / q[3];
+    }
+    else
+    {
+      q[0] = 1./2. * sqrt ( 1. + tr );
+      q[1] = 1./4. * ( Q(2,1) - Q(1,2) ) / q[0];
+      q[2] = 1./4. * ( Q(0,2) - Q(2,0) ) / q[0];
+      q[3] = 1./4. * ( Q(1,0) - Q(0,1) ) / q[0];
+    }
+  }
+
+  double trace
+    ( const Matrix& mat )
+  {
+    const idx_t rank = mat.size(0);
+    double      ret  = 0.;
+
+    for (idx_t i = 0; i < rank; i++)
+    {
+      ret += mat ( i,i );
+    }
+    return ret;  
+  }
+
+  idx_t factorial
+    ( const idx_t n )
+  {
+    JEM_PRECHECK2 ( n>=0, "Cannot calculate the factorial of a negative number");
+
+    if (n==0) return 1;
+    else return n * factorial(n-1);
+  }
+
+  idx_t binom
+    ( const idx_t n,
+      const idx_t k )
+  {
+    JEM_PRECHECK2 ( n>=k, "Cannot compute the binomial coefficient for n smaller than k");
+
+    return factorial(n)/factorial(k)/factorial(n-k);
+  }
+
+  double matrixNorm2
+    ( const Matrix& mat )
+  {
+    double sum = 0;
+
+    for (idx_t i = 0; i < mat.size(0); i++)
+      for (idx_t j = 0; j < mat.size(1); j++)
+        sum += mat(i,j) * mat(i,j);
+
+    return sqrt ( sum );  
+  }
+
+  Matrix skew
+    ( const Vector& vec )
+  {
+    Matrix res ( 3, 3 );
+    res = 0.;
+
+    res ( 0, 1 ) = -1 * vec[2];
+    res ( 0, 2 ) =  1 * vec[1];
+    res ( 1, 2 ) = -1 * vec[0];
+    res ( 1, 0 ) =  1 * vec[2];
+    res ( 2, 0 ) = -1 * vec[1];
+    res ( 2, 1 ) =  1 * vec[0];
+
+    return res;
+  };
+
+  Vector unskew
+    ( const Matrix& mat )
+  {
+    // TEST_NO_CONTEXT( mat )
+    JEM_ASSERT2( 
+      (fabs(mat(2,1) + mat(1,2) + mat(0,2) + mat(2,0) + mat(1,0) + mat(0,1))
+       + fabs( mat(0,0) + mat(1,1) + mat(2,2) ) ) <= 0.01 * matrixNorm2(mat),
+        "Matrix not skew-symmetric" );
+
+    Vector res ( 3 );
+    res = 0.;
+
+    res[0] = mat(2,1)-mat(1,2);
+    res[1] = mat(0,2)-mat(2,0);
+    res[2] = mat(1,0)-mat(0,1);
+
+    res /= 2.;
+
+    return res;
+  }
+}

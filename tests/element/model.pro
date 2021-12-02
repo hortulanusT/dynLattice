@@ -1,0 +1,41 @@
+// ACTUAL_MODEL
+model.type = "Debug";
+model.noiseLevel = 0;
+model.model.type = "Matrix";
+model.model.model.type = "Multi";
+model.model.model.models = [ "cosseratRod", "fixed", "force", "disp" ]; 
+model.model.model.cosseratRod.elements = "rods";
+model.model.model.cosseratRod.type = "specialCosseratRod";
+model.model.model.cosseratRod.young = 1000.;
+model.model.model.cosseratRod.shear_modulus = 1000.;
+model.model.model.cosseratRod.area = 1.;
+model.model.model.cosseratRod.area_moment = 1.;
+model.model.model.cosseratRod.shear_correction = 1.;
+model.model.model.cosseratRod.polar_moment = 1.;
+model.model.model.cosseratRod.dofNamesTrans = ["dx", "dy", "dz"];
+model.model.model.cosseratRod.dofNamesRot = ["rx", "ry", "rz"];
+model.model.model.cosseratRod.shape.numPoints = 0;
+
+model.model.model.fixed.type = "Dirichlet";
+model.model.model.fixed.maxDisp = 0.;
+model.model.model.fixed.dispIncr =  0.;
+model.model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
+model.model.model.fixed.dofs = model.model.model.cosseratRod.dofNamesTrans;
+model.model.model.fixed.factors = [ 0., 0., 0. ]; 
+model.model.model.fixed.nodeGroups += [ "fixed", "fixed", "fixed" ];
+model.model.model.fixed.dofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.fixed.factors += [ 0., 0., 0. ]; 
+
+model.model.model.force.type = "Neumann";
+model.model.model.force.initLoad = 0.;
+model.model.model.force.loadIncr = 10.;
+model.model.model.force.nodeGroups =  [ "fixed" ] ;
+model.model.model.force.factors = [ 0. ];
+model.model.model.force.dofs = [ "dx" ];
+
+model.model.model.disp.type = "Dirichlet";
+model.model.model.disp.initDisp = 10e-3;
+model.model.model.disp.dispIncr = 10e-3;
+model.model.model.disp.nodeGroups =  [ "fixed" ] ;
+model.model.model.disp.factors = [ 0. ];
+model.model.model.disp.dofs = [ "dx" ];
