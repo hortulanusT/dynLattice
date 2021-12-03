@@ -50,7 +50,7 @@ periodicBCModel::periodicBCModel
       else periodVector_[i] = 0.;
     }    
 
-    System::info() << "Peridocity direction " << iDir << " resulted in a periocity vector of " << periodVector_ << " \n";
+    System::info( getContext() ) << "Peridocity direction " << iDir << " resulted in a periocity vector of " << periodVector_ << " \n";
   }
   else myProps.get ( periodVector_, PERIOD_PROP );
 
@@ -69,22 +69,21 @@ bool      periodicBCModel::takeAction
 {
   using jive::model::Actions;
 
-  if (action == Actions::INIT)
+  if (action == Actions::GET_CONSTRAINTS)
   {
-    init_ ( globdat );
+    setConstraints_ ( globdat );
     return true;
   }
 
   return false;
 }
 
-void      periodicBCModel::init_ 
+void      periodicBCModel::setConstraints_ 
   
   ( const Properties&     globdat )
 {
   Vector    master_coords ( nodes_.rank() );
   Vector    slave_coords  ( nodes_.rank() );
-  idx_t     islave;
   IdxVector jtypes        ( periodDofs_.size() );
   idx_t     slaveDof      ( periodDofs_.size() );
   idx_t     masterDof     ( periodDofs_.size() );
@@ -98,22 +97,20 @@ void      periodicBCModel::init_
   for (idx_t i = 0; i<periodDofs_.size(); i++) jtypes[i] = dofs_->getTypeIndex ( periodDofs_[i] );
 
   // iterate through the master nodes
-  for (idx_t imaster = 0; imaster < masterNodes.size(); imaster++)
+  for (idx_t inode = 0; inode < masterNodes.size(); inode++)
   {
-    nodes_.getNodeCoords( master_coords, masterNodes[imaster] );
+    nodes_.getNodeCoords( master_coords, masterNodes[inode] );
+    nodes_.getNodeCoords ( slave_coords, slaveNodes[inode] );
     // find the slave node corresponding to the master node
-    for (islave = 0; islave < slaveNodes.size(); islave++)
-    {
-      nodes_.getNodeCoords ( slave_coords, slaveNodes[islave] );
-      if ( !jem::isTiny(norm2((master_coords + periodVector_) - slave_coords)) ) break;
-      if ( !jem::isTiny(norm2(master_coords - (slave_coords + periodVector_))) ) break;
-    }
-    
+    JEM_ASSERT2( jem::isTiny(norm2(master_coords+periodVector_-slave_coords)) 
+      || jem::isTiny(norm2(master_coords-periodVector_-slave_coords)), 
+      "master and slave nodes not ordered in the same way");
+
     // apply all the single periodic dofs
     for (idx_t i = 0; i < periodDofs_.size(); i++)
     {
-      masterDof = dofs_->getDofIndex( masterNodes[imaster], jtypes[i]);
-      slaveDof  = dofs_->getDofIndex( slaveNodes[islave], jtypes[i]);
+      masterDof = dofs_->getDofIndex( masterNodes[inode], jtypes[i]);
+      slaveDof  = dofs_->getDofIndex( slaveNodes[inode], jtypes[i]);
 
       cons_->addConstraint ( slaveDof, masterDof, 1.0 );
     }        

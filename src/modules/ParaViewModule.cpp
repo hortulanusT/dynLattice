@@ -321,20 +321,8 @@ void       ParaViewModule::writePiece_
       params.erase ( ActionParams::EXT_VECTOR );
       
       jive_helpers::vec2mat ( fext_mat, fext );
-      writeDataArray_( file, fext_mat, "Float32", "External Forces" );
-    }
-    else if (info.nodeData[iPtDatum] == "fext_f")
-    {
-      Vector      fext        ( dofs->dofCount() );
-      Matrix      fext_mat    ( points.size(), dofs->typeCount() );
-      fext                    = 0.;
-      
-      params.set ( ActionParams::EXT_VECTOR, fext );
-      model->takeAction (Actions::GET_EXT_VECTOR, params, globdat );
-      params.erase ( ActionParams::EXT_VECTOR );
-      
-      jive_helpers::vec2mat ( fext_mat, fext );
-      writeDataArray_( file, fext_mat(ALL, SliceTo(3)), "Float32", "External Forces (only)" );
+      writeDataArray_( file, fext_mat(ALL, SliceTo(3)), "Float32", "External Forces" );
+      writeDataArray_( file, fext_mat(ALL, SliceFrom(3)), "Float32", "External Torques" );
     }
     else if (info.nodeData[iPtDatum] == "fint")
     {
@@ -347,7 +335,8 @@ void       ParaViewModule::writePiece_
       params.erase ( ActionParams::INT_VECTOR );
 
       jive_helpers::vec2mat ( fint_mat, fint );
-      writeDataArray_( file, fint_mat, "Float32", "Internal Forces" );
+      writeDataArray_( file, fint_mat(ALL, SliceTo(3)), "Float32", "Internal Forces" );
+      writeDataArray_( file, fint_mat(ALL, SliceFrom(3)), "Float32", "Internal Torques" );
     }
     else if (info.nodeData[iPtDatum] == "fres")
     {
@@ -370,7 +359,8 @@ void       ParaViewModule::writePiece_
       fres = fext - fint;
 
       jive_helpers::vec2mat ( fres_mat, fres );
-      writeDataArray_( file, fres_mat, "Float32", "Resulting Forces" );
+      writeDataArray_( file, fres_mat(ALL, SliceTo(3)), "Float32", "Resulting Forces" );
+      writeDataArray_( file, fres_mat(ALL, SliceFrom(3)), "Float32", "Resulting Torques" );
     }
     else
     {

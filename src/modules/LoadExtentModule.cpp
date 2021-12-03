@@ -50,9 +50,7 @@ Module::Status LoadExtentModule::init
   
 Module::Status LoadExtentModule::run
   ( const Properties&   globdat )
-{
-
-    
+{    
   Properties myVars   = Globdat::getVariables( globdat );
   Properties currentVars, loadVars, respVars, dispVars, extentVars;
   NodeSet    nodes    = NodeSet::get( globdat, getContext() );
@@ -140,14 +138,15 @@ Module::Status LoadExtentModule::run
       disp = allDisp[dofIndices];
       load = allLoad[dofIndices];
 
-      // report back the extent, strain and stress
-      extentVars.set( elemDofNames_[iDof], max( coords[iDof] ) - min( coords[iDof] )); // LATER update with values from last timestep maybe?
+      // report back the extent
+      extentVars.set( elemDofNames_[iDof], max( coords[elemDofs_[iDof]] ) - min( coords[elemDofs_[iDof]] )); // LATER update with values from last timestep maybe?
 
       // LATER implement stress/strain measures      
     }
+    // TEST_CONTEXT(extentVars)
   }
 
-  // TEST_CONTEXT( globdat )
+  // TEST_CONTEXT( myVars )
   return Status::OK;
 }
 

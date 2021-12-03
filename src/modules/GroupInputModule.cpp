@@ -122,6 +122,19 @@ Ref<Module>  GroupInputModule::makeNew
   return newInstance<Self> ( name );
 }
 
+//-----------------------------------------------------------------------
+//   declare
+//-----------------------------------------------------------------------
+
+void GroupInputModule::declare ()
+{
+  using jive::app::ModuleFactory;
+
+  ModuleFactory::declare ( GroupInputModule::TYPE_NAME,
+                         & GroupInputModule::makeNew );
+}
+
+
 //=======================================================================
 //   class GroupInputModule::NGroup_
 //=======================================================================
@@ -914,20 +927,4 @@ void GroupInputModule::EGroup_::store_
   {
     System::warn() << "ElementGroup `" << myName_ << "' is empty.\n";
   }
-}
-
-//=======================================================================
-//   related functions
-//=======================================================================
-
-//-----------------------------------------------------------------------
-//   declareGroupInputModule
-//-----------------------------------------------------------------------
-
-void declareGroupInputModule ()
-{
-  using jive::app::ModuleFactory;
-
-  ModuleFactory::declare ( GroupInputModule::TYPE_NAME,
-                         & GroupInputModule::makeNew );
 }

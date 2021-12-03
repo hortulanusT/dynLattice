@@ -145,7 +145,7 @@ specialCosseratRodModel::specialCosseratRodModel
   C_material_ ( 4, 4 ) = young_ * areaMoment_;
   C_material_ ( 5, 5 ) = shearMod_ * polarMoment_;
 
-  TEST_CONTEXT ( C_material_ )
+  // TEST_CONTEXT ( C_material_ )
 }
 
 //-----------------------------------------------------------------------
@@ -167,11 +167,11 @@ bool specialCosseratRodModel::takeAction
 
   if ( action == Actions::INIT )
   {
-    REPORT ( Actions::INIT )
+    // REPORT ( Actions::INIT )
     init_rot_       ();
-    TEST_CONTEXT ( LambdaN_ )
+    // TEST_CONTEXT ( LambdaN_ )
     init_strain_    ();
-    TEST_CONTEXT ( mat_strain0_ )
+    // TEST_CONTEXT ( mat_strain0_ )
     return true;
   }
 

@@ -66,6 +66,8 @@ class GroupInputModule : public Module
       const Properties&       props,
       const Properties&       globdat );
 
+  static void         declare ();
+
  protected:
 
   virtual                  ~GroupInputModule  ();
@@ -237,7 +239,5 @@ class GroupInputModule : public Module
   };
 
 };
-
-void declareGroupInputModule ();
 
 #endif
