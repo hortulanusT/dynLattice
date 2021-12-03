@@ -72,6 +72,9 @@ bool      periodicBCModel::takeAction
   if (action == Actions::GET_CONSTRAINTS)
   {
     setConstraints_ ( globdat );
+
+    TEST_CONTEXT(cons_->toMatrix())
+    
     return true;
   }
 

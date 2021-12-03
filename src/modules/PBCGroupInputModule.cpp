@@ -43,7 +43,7 @@ const char* PBCGroupInputModule::EDGES[6] =
 const char* PBCGroupInputModule::CORNERS[4] =
       { "corner0", "cornerx", "cornery", "cornerz" };
 const char* PBCGroupInputModule::DUPEDNODES_PROP = "duplicatedNodes";
-const char* PBCGroupInputModule::RESTRICNODES_PROP = "restrictToGroup";
+const char* PBCGroupInputModule::NGROUPS_PROP = "groupSettings";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -58,7 +58,7 @@ PBCGroupInputModule::PBCGroupInputModule
 {
   rank_ = -1;
   dupedNodeGroup_ = "";
-  restrictGroup_ = "";
+  groupSettings_ = Properties();
   edges_ = true;
   corners_ = true;
 }
@@ -102,7 +102,8 @@ Module::Status PBCGroupInputModule::init
                   ( dupedNodeGroup_, DUPEDNODES_PROP );
 
   // get the restriction Group
-  props.findProps ( myName_ ).find ( restrictGroup_, RESTRICNODES_PROP );
+  props.findProps ( myName_ ).find
+                  ( groupSettings_, NGROUPS_PROP );
 
   // make default Properties object for Super
 
@@ -176,8 +177,9 @@ void PBCGroupInputModule::prepareProps_
   String MAX = "max";
 
   myProps.set  ( NODE_GROUPS, nGroupNames );
-  for (idx_t i = 0; i<j; i++)
-    myProps.makeProps( nGroupNames[i] ).set( RESTRICNODES_PROP, restrictGroup_ );
+  for (idx_t i = 0; i<j-1; i++)
+    myProps.set( nGroupNames[i], groupSettings_.clone() );
+  myProps.set( nGroupNames[j-1], groupSettings_ );
 
   if (edges_)
   {

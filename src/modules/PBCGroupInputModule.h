@@ -45,7 +45,7 @@ class PBCGroupInputModule : public GroupInputModule
   static const char*            EDGES[6];
   static const char*            CORNERS[4];
   static const char*            DUPEDNODES_PROP;
-  static const char*            RESTRICNODES_PROP;
+  static const char*            NGROUPS_PROP;
 
   explicit                  PBCGroupInputModule
 
@@ -86,10 +86,11 @@ class PBCGroupInputModule : public GroupInputModule
 
   idx_t                     rank_;
   double                    small_;
+
   bool                      edges_;
   bool                      corners_;
+  Properties                groupSettings_;
 
-  String                    restrictGroup_;
   String                    dupedNodeGroup_;
 };
 

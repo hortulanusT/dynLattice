@@ -46,7 +46,7 @@ rodJointModel::rodJointModel
   dofs_         = DofSpace::get ( globdat, getContext() ); //all the dofs 
   constraints_  = Constraints::get ( dofs_, globdat ); //all the constraints
 
-  // get the dofs to be locked (in init phase)
+  // get the dofs to be locked
   if ( myProps.find ( lockDofs_, "lockDofs" ) )
        myConf .set  ( "lockDofs", lockDofs_ );
   
@@ -99,6 +99,9 @@ bool rodJointModel::takeAction
   if ( action == Actions::GET_CONSTRAINTS )
   {
     getCons_ ();
+
+    TEST_CONTEXT(constraints_->toMatrix())
+
     return true;
   }
 
@@ -128,7 +131,6 @@ bool rodJointModel::takeAction
     // TEST ( disp )
     // TEST ( K )
     // TEST ( fint )
-
 
     return true;
   }
