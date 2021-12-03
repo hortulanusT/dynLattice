@@ -70,8 +70,12 @@ class periodicBCModel : public Model
  private:
   void                    init_ 
   
-  ( const Properties&     globdat );
+    ( const Properties&     globdat );
 
+  void                    setConstraints_ 
+  
+    ( const Properties&     globdat );
+    
  private:
   Assignable<NodeSet>     nodes_;
   Ref<DofSpace>           dofs_;
