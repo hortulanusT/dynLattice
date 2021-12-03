@@ -346,6 +346,7 @@ void DirichletModel::applyConstraints_
   // compress for more efficient storage
 
   cons_->compress();
+  TEST_CONTEXT(cons_->toMatrix())
 }
 
 //-----------------------------------------------------------------------

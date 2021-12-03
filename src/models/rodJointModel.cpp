@@ -99,9 +99,6 @@ bool rodJointModel::takeAction
   if ( action == Actions::GET_CONSTRAINTS )
   {
     getCons_ ();
-
-    TEST_CONTEXT(constraints_->toMatrix())
-
     return true;
   }
 

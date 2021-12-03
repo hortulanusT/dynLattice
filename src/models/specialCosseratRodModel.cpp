@@ -327,7 +327,7 @@ void   specialCosseratRodModel::get_strain_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_strains_( spat_strains, mat_strains, weights, ielem, u, theta );
+    get_strains_( spat_strains, mat_strains, weights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -391,7 +391,7 @@ void    specialCosseratRodModel::get_stress_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_stresses_( spat_stresses, mat_stresses, weights, ielem, u, theta );
+    get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -426,9 +426,7 @@ void     specialCosseratRodModel::init_strain_ ()
 
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    idx_t ielem = egroup_.getIndices()[ie];
-
-    get_strains_( spat_strains, mat_strains, weights, ielem, null_mat, null_mat );
+    get_strains_( spat_strains, mat_strains, weights, ie, null_mat, null_mat );
     mat_strain0_[ie] = mat_strains;
   }
 }
@@ -531,10 +529,10 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
 void specialCosseratRodModel::get_spatialC_
   ( const Cubix&        c,
     const Vector&       w,
-    const idx_t&        ielem,
+    const idx_t&        ie,
     const Matrix&       theta ) const
 {
-  const idx_t dofCount  = dofs_->typeCount    ();
+  const idx_t dofCount  = dofs_->typeCount  ();
   const idx_t globRank  = shape_->globalRank();
   const idx_t nodeCount = theta.size(1);
   const idx_t ipCount   = shape_->ipointCount();
@@ -550,7 +548,7 @@ void specialCosseratRodModel::get_spatialC_
   {
     expVec( nodeRots[iNode], theta[iNode] );
     // include initial rotations
-    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, ielem, iNode));
+    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, ie, iNode));
   }
   
   shape_->getRotations( ipRots, nodeRots );
@@ -602,10 +600,11 @@ void specialCosseratRodModel::get_strains_
   ( const Matrix&       spat_strains,
     const Matrix&       mat_strains,
     const Vector&       w,
-    const idx_t&        ielem,
+    const idx_t&        ie,
     const Matrix&       u,
     const Matrix&       theta ) const
 {
+  const idx_t ielem     = egroup_.getIndices()[ie];
   const idx_t globRank  = shape_->globalRank();
   const idx_t nodeCount = elems_.getElemNodeCount( ielem );
   const idx_t ipCount   = shape_->ipointCount();
@@ -633,14 +632,20 @@ void specialCosseratRodModel::get_strains_
   // get position derivative
   shapeVals = shape_->getShapeFunctions();
   shape_->getShapeGradients( shapeGrads, w, coords );
+  // TEST_CONTEXT( shapeGrads )
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
+  // TEST_CONTEXT( phiP )
   // get curvature
   for (idx_t iNode = 0; iNode < nodeCount; iNode++)
   {
     expVec( nodeRots[iNode], theta[iNode] );
+    // TEST_CONTEXT( nodeRots[iNode] )
+    // TEST_CONTEXT( LambdaN_.shape() )
+    // TEST_CONTEXT( LambdaN_(ALL, ALL, ie, iNode) )
     // include initial rotations
-    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, ielem, iNode));
+    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, ie, iNode));
+    // TEST_CONTEXT( nodeRots[iNode] )
   }
   // TEST_CONTEXT(nodeRots)
   // shape_->getRotStrain_global( curv, w, coords, theta );
@@ -657,9 +662,9 @@ void specialCosseratRodModel::get_strains_
     mat_strains( TRANS_PART, ip )   = matmul( Lambda[ip].transpose(), phiP[ip] );
     mat_strains( ROT_PART, ip )     = matmul( Lambda[ip].transpose(), curv[ip] );
     // TEST_CONTEXT(mat_strains[ip])
-    mat_strains[ip]                -= mat_strain0_[ielem][ip];
+    mat_strains[ip]                -= mat_strain0_[ie][ip];
     // TEST_CONTEXT(mat_strains[ip])
-
+    
     spat_strains( TRANS_PART, ip )  = matmul( Lambda[ip], mat_strains( TRANS_PART, ip ) );
     spat_strains( ROT_PART, ip )    = matmul( Lambda[ip], mat_strains( ROT_PART, ip ) );
   }
@@ -671,11 +676,12 @@ void specialCosseratRodModel::get_stresses_
   ( const Matrix&       spat_stresses,
     const Matrix&       mat_stresses,
     const Vector&       w,
-    const idx_t&        ielem,
+    const idx_t&        ie,
     const Matrix&       u,
     const Matrix&       theta ) const
 {
-  const idx_t dofCount = dofs_->typeCount    ();
+  const idx_t ielem     = egroup_.getIndices()[ie];
+  const idx_t dofCount  = dofs_->typeCount    ();
   const idx_t nodeCount = elems_.getElemNodeCount( ielem );
   const idx_t ipCount   = shape_->ipointCount();
 
@@ -685,10 +691,10 @@ void specialCosseratRodModel::get_stresses_
   Matrix      mat_strains( dofCount, ipCount );
 
   // get the strains
-  get_strains_( spat_strains, mat_strains, w, ielem, u, theta );
+  get_strains_( spat_strains, mat_strains, w, ie, u, theta );
 
   // get the stiffness matrices
-  get_spatialC_( c_spat, w, ielem, theta );
+  get_spatialC_( c_spat, w, ie, theta );
 
   // get the stresses (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -769,9 +775,9 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(XI)
     shape_->getPsi( PSI, weights, coords );
     // TEST_CONTEXT(PSI)
-    get_spatialC_( c, weights, ielem, theta ); 
+    get_spatialC_( c, weights, ie, theta ); 
     // TEST_CONTEXT(c)
-    get_stresses_( spat_stresses, mat_stresses, weights, ielem, u, theta );
+    get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT(spat_stresses)
     get_geomStiff_( B, weights, spat_stresses, coords, u );
     // TEST_CONTEXT(B)
@@ -843,7 +849,7 @@ void            specialCosseratRodModel::assembleFint_
     // REPORT(ielem)
  
     shape_->getXi( XI, weights, coords, u );
-    get_stresses_( spat_stresses, mat_stresses, weights, ielem, u, theta );
+    get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT( spat_stresses )
 
     for (idx_t ip = 0; ip < ipCount; ip++)

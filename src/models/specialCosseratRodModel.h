@@ -179,7 +179,7 @@ class specialCosseratRodModel : public Model
   void get_spatialC_ // LATER externalise to material?
     ( const Cubix&        c,      ///< c(.,.,i), where it refers to the spatial stiffness matrix at the i-th integration point
       const Vector&       w,      ///< integration point weights
-      const idx_t&        ielem,  ///< element to investigate
+      const idx_t&        ielem,  ///< element to investigate (local index)
       const Matrix&       theta) const; ///< matrix with the rotational displacments for the nodes of this element
 
   /**
@@ -199,7 +199,7 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       spat_strains, ///< strains(i,j), strain component i at the j-th integration points
       const Matrix&       mat_strains,  ///< strains(i,j), strain component i at the j-th integration points
       const Vector&       w,            ///< integration point weights
-      const idx_t&        ielem,        ///< element to investigate,
+      const idx_t&        ielem,        ///< element to investigate (local index)
       const Matrix&       u,            ///< translational displacements
       const Matrix&       theta ) const; ///< rotational displacements
 
@@ -210,7 +210,7 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       spat_stresses,  ///< stress(i,j), stress component i at the j-th integration points
       const Matrix&       mat_stresses,   ///< stress(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
-      const idx_t&        ielem,          ///< element to investigate
+      const idx_t&        ielem,          ///< element to investigate (local index)
       const Matrix&       u,              ///< translational displacements
       const Matrix&       theta ) const;  ///< rotational displacements
 
