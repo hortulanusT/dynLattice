@@ -25,7 +25,8 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 │   ├── element     <- test setups for single elments
 │   └── beam        <- tests from the Simo/Vu-Quoc Paper
 └── studies
-    └── figures     <- all the studies to be conducted
+    └── study*      <- all the studies to be conducted (containing raw outputs)
+        └── visual  <- paraview output / figures
 ```
 
 
