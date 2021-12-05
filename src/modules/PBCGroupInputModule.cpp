@@ -139,6 +139,8 @@ Module::Status PBCGroupInputModule::init
 
     System::out() << "  ...Sorted NodeGroup `" << EDGES[i*2+1] <<
       "' wrt `" << EDGES[i*2] << "'\n";
+
+    // TODO remove corner nodes from the Edges!
   }
 
   return DONE;

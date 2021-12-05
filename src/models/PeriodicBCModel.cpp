@@ -96,7 +96,7 @@ void      periodicBCModel::init_
     slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge+1], nodes_, globdat, getContext() );
     identical = jem::testall(masters.getIDs() == slaves.getIDs());
 
-    if ( !identical ) // check that the investigated element is not flat
+    if ( !identical ) // check that the investigated body is not flat (otherwise leave the vector empty to be ignored)
       for (idx_t iDof = 0; iDof < nodes_.rank(); iDof++ )
       {
         masterDofs_(iDof, iEdge).resize( masters.size() );
