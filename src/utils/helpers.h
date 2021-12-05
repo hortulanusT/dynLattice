@@ -29,10 +29,12 @@ using jem::numeric::MatmulChain;
 using jive::Cubix;
 using jive::Matrix;
 using jive::Vector;
+using jive::IdxVector;
 
 namespace jive_helpers
 {
-  typedef Array<double, 4> Quadix;
+  typedef Array<double, 4>    Quadix;
+  typedef Array<IdxVector, 2> IdxVectorMatrix;
 
   const Vector e1   = { 1., 0., 0. };
   const Vector e2   = { 0., 1., 0. };

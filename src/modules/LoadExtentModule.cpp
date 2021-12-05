@@ -45,7 +45,7 @@ Module::Status LoadExtentModule::init
   for (idx_t idof = 0; idof < nodeDofNames_.size(); idof++)
     nodeDofs_[idof] = dofs->getTypeIndex( nodeDofNames_[idof] );
 
-  return elemDofs_.size()+nodeDofs_.size()>0 ? Status::OK : Status::DONE;
+  return elemDofs_.size()+nodeDofs_.size()>0 ? run( globdat ) : Status::DONE;
 }
   
 Module::Status LoadExtentModule::run
