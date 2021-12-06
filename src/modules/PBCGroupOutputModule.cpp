@@ -12,10 +12,12 @@
 #include "PBCGroupOutputModule.h"
 
 const char*  PBCGroupOutputModule::TYPE_NAME = "PBCGroupOutput";
+const char*  PBCGroupOutputModule::CHILD_NAME = "sampling";
 
 PBCGroupOutputModule::PBCGroupOutputModule
   ( const String&       name) : Super ( name )
 {
+  child_ = newInstance<SampleModule>( myName_ + "." + CHILD_NAME );
 }
 
 Module::Status PBCGroupOutputModule::init
@@ -23,18 +25,45 @@ Module::Status PBCGroupOutputModule::init
     const Properties&   props,
     const Properties&   globdat )
 {
-  Ref<DofSpace> dofs = DofSpace::get( globdat, getContext() );
   StringVector  groups (6);
   for (idx_t i = 0; i < 6; i++)
     groups[i] = PBCGroupInputModule::EDGES[i];
 
-  Properties myProps = props.makeProps ( myName_ );
+  // fill the properties with the default node and element Groups
+  Properties myProps = props.getProps ( myName_ );
   myProps.set ( "nodeGroups", groups );
   myProps.set ( "elemGroups", "all" );
-  myProps.set ( "dofs", dofs->getTypeNames()[jem::SliceTo(3)] );
-  myProps.set ( "dimensions", dofs->getTypeNames()[jem::SliceTo(3)] );
 
-  return Super::init( conf, props, globdat );
+  JEM_ASSERT2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
+
+  // configure the output module
+  Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
+  // FIXME make with options & string constants
+  childProps.set( "header", "H22\tP11\tP22\tP33" );
+  childProps.set( "seperator", "\t" );
+  childProps.set( "dataSets", StringVector( { "-1*(i-1)*1e-2", "xmax.resp.dx", "ymax.resp.dy", "zmax.resp.dz" } ) );
+  
+  child_->configure( props, globdat );
+  child_->getConfig( conf, globdat );
+  JEM_ASSERT2( child_->init( conf, props, globdat) == Status::OK, "Error setting up the SampleModule!" );
+
+  return Status::OK;
+}
+
+Module::Status PBCGroupOutputModule::run
+  (const Properties&    globdat)
+{
+  Super::run(globdat);
+  child_->run(globdat);
+
+  return Status::OK;
+}
+
+void PBCGroupOutputModule::shutdown
+  (const Properties&    globdat)
+{
+  Super::shutdown(globdat);
+  child_->shutdown(globdat);
 }
 
 Ref<Module> PBCGroupOutputModule::makeNew

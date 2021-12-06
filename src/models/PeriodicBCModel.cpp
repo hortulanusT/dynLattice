@@ -128,7 +128,7 @@ void      periodicBCModel::setConstraints_
         // if the dispGrad for this is not configured and its a shear term, skip it
         continue;
       } 
-      Globdat::getVariables( "all.extent", globdat ).find( extent, dofNames_[iEdge]);
+      Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iEdge]);
 
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
       {
@@ -137,6 +137,8 @@ void      periodicBCModel::setConstraints_
         cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],  scale*dispGrad_(iDof, iEdge)*extent);
       }
     }
+  // cons_->printTo(jive::util::Printer::get());
+  // jive::util::Printer::flush();
 }
 
 Ref<Model>periodicBCModel::makeNew

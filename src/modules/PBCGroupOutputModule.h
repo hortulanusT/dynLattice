@@ -13,6 +13,9 @@
 #include "PBCGroupInputModule.h"
 
 #include <jem/base/Slice.h>
+#include <jive/app/SampleModule.h>
+
+using jive::app::SampleModule;
 
 class PBCGroupOutputModule : public GroupOutputModule
 {
@@ -22,6 +25,7 @@ class PBCGroupOutputModule : public GroupOutputModule
   typedef GroupOutputModule      Super;
 
   static const char*             TYPE_NAME;
+  static const char*             CHILD_NAME;
 
   explicit                  PBCGroupOutputModule
 
@@ -33,6 +37,12 @@ class PBCGroupOutputModule : public GroupOutputModule
       const Properties&       props,
       const Properties&       globdat );
 
+  virtual Status            run 
+    ( const Properties&       globdat );
+
+  virtual void              shutdown 
+    ( const Properties&       globdat );
+
   static Ref<Module>        makeNew
 
     ( const String&           name,
@@ -41,4 +51,7 @@ class PBCGroupOutputModule : public GroupOutputModule
       const Properties&       globdat );
 
   static void         declare ();  
+ 
+ protected:
+  Ref<SampleModule>   child_;
 };
