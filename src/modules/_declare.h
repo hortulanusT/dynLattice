@@ -19,8 +19,9 @@
 
 #include "ParaViewModule.h"
 #include "GroupInputModule.h"
-#include "LoadExtentModule.h"
+#include "GroupOutputModule.h"
 #include "PBCGroupInputModule.h"
+#include "PBCGroupOutputModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules
@@ -33,7 +34,8 @@ void declareModules ()
   jive::gl      ::declareModules ();
   jive::fem     ::declareModules ();
   ParaViewModule::declare        ();
-  LoadExtentModule::declare      ();
+  GroupOutputModule::declare      ();
+  PBCGroupOutputModule::declare  ();
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
 }

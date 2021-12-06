@@ -128,7 +128,7 @@ void      periodicBCModel::setConstraints_
         // if the dispGrad for this is not configured and its a shear term, skip it
         continue;
       } 
-      Globdat::getVariables( "all.extent", globdat ).find( extent, dofNames_[iEdge]); // TODO use this syntax for the LoadExtent Module
+      Globdat::getVariables( "all.extent", globdat ).find( extent, dofNames_[iEdge]);
 
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
       {

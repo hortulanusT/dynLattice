@@ -1,8 +1,8 @@
-#include "LoadExtentModule.h"
+#include "GroupOutputModule.h"
 
-const char*  LoadExtentModule::TYPE_NAME = "LoadExtent";
+const char*  GroupOutputModule::TYPE_NAME = "GroupOutput";
 
-LoadExtentModule::LoadExtentModule
+GroupOutputModule::GroupOutputModule
   ( const String&       name) : Module ( name )
 {
   // per default extract composite values for all elements
@@ -10,7 +10,7 @@ LoadExtentModule::LoadExtentModule
   elemGroups_[0] = "all";
 }
 
-Module::Status LoadExtentModule::init
+Module::Status GroupOutputModule::init
   ( const Properties&   conf,
     const Properties&   props,
     const Properties&   globdat )
@@ -48,7 +48,7 @@ Module::Status LoadExtentModule::init
   return elemDofs_.size()+nodeDofs_.size()>0 ? run( globdat ) : Status::DONE;
 }
   
-Module::Status LoadExtentModule::run
+Module::Status GroupOutputModule::run
   ( const Properties&   globdat )
 {    
   Properties myVars   = Globdat::getVariables( globdat );
@@ -139,27 +139,22 @@ Module::Status LoadExtentModule::run
       load = allLoad[dofIndices];
 
       // report back the extent
-      extentVars.set( elemDofNames_[iDof], max( coords[elemDofs_[iDof]] ) - min( coords[elemDofs_[iDof]] )); // LATER update with values from last timestep maybe?
-
-      // LATER implement stress/strain measures      
+      extentVars.set( elemDofNames_[iDof], max( coords[iDof] ) - min( coords[iDof] )); 
     }
-    // TEST_CONTEXT(extentVars)
   }
-
-  // TEST_CONTEXT( myVars )
   return Status::OK;
 }
 
-Ref<Module> LoadExtentModule::makeNew
+Ref<Module> GroupOutputModule::makeNew
   ( const String&       name,
     const Properties&   conf,
     const Properties&   props,
     const Properties&   globdat )
 {
-  return newInstance<LoadExtentModule> ( name );
+  return newInstance<GroupOutputModule> ( name );
 }
   
-void LoadExtentModule::declare ()
+void GroupOutputModule::declare ()
 {
   using jive::app::ModuleFactory;
 
