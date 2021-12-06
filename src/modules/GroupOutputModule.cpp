@@ -1,5 +1,5 @@
 #include "GroupOutputModule.h"
-
+// TODO differential displacements
 const char*  GroupOutputModule::TYPE_NAME = "GroupOutput";
 
 GroupOutputModule::GroupOutputModule
@@ -63,8 +63,11 @@ Module::Status GroupOutputModule::run
   Vector     allLoad  ( dofs->dofCount() );
   Vector     allResp  ( dofs->dofCount() );
   Vector     allDisp  ( dofs->dofCount() );
+  Vector     oldDisp  ( dofs->dofCount() );
   Matrix     coords   ( nodes.size(), nodes.rank() );
+
   StateVector::get    ( allDisp, dofs, globdat );
+
   Ref<Model> model    = Model::get( globdat, getContext() );
   Properties params   ( "actionParams" );
   allLoad             = 0.;
@@ -102,14 +105,14 @@ Module::Status GroupOutputModule::run
       dofs->getDofIndices (dofIndices, nodeIndices, nodeDofs_[iDof] );
 
       // get the displacements and loads for those dofs
-      disp = allDisp[dofIndices];
-      load = allLoad[dofIndices];
-      resp = allResp[dofIndices];
+      disp      = allDisp[dofIndices];
+      load      = allLoad[dofIndices];
+      resp      = allResp[dofIndices];
 
       // report it back (sum for load/resp and avg for disp)
-      loadVars.set( nodeDofNames_[iDof], sum( load ));
-      respVars.set( nodeDofNames_[iDof], sum( resp ));
-      dispVars.set( nodeDofNames_[iDof], sum( disp ) / disp.size() );
+      loadVars.set    ( nodeDofNames_[iDof], sum( load ));
+      respVars.set    ( nodeDofNames_[iDof], sum( resp ));
+      dispVars.set    ( nodeDofNames_[iDof], sum( disp ) / disp.size() );
     }
   }
 

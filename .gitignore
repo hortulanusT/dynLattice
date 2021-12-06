@@ -16,6 +16,9 @@ nonlinRod*
 *.pdf
 *.avi
 
+# backup files
+*.BU
+
 # save the resulting data files for testing
 !tests/beam/test1.dat
 !tests/beam/test2.dat

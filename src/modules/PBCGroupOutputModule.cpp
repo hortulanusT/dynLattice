@@ -39,9 +39,9 @@ Module::Status PBCGroupOutputModule::init
   // configure the output module
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
   // FIXME make with options & string constants
-  childProps.set( "header", "H22\tP11\tP22\tP33" );
+  childProps.set( "header", "Hyy\tnu_xy" );
   childProps.set( "seperator", "\t" );
-  childProps.set( "dataSets", StringVector( { "-1*(i-1)*1e-2", "xmax.resp.dx", "ymax.resp.dy", "zmax.resp.dz" } ) );
+  childProps.set( "dataSets", StringVector( { "ymax.disp.dy/all.extent.dy", "-1 * (ymax.diff_disp.dy/all.extent.dy) / (xmax.diff_disp.dx/all.extent.dx)" } ) );
   
   child_->configure( props, globdat );
   child_->getConfig( conf, globdat );
