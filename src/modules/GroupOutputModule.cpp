@@ -19,21 +19,22 @@ Module::Status GroupOutputModule::init
   Properties myProps = props.getProps( myName_ );
   Properties myConf  = conf.makeProps( myName_ );
 
-  // get the element groups
-  myProps.find( elemGroups_, "elementGroups" );
-  myConf .set ( "elementGroups", elemGroups_ );
-
   // get the node groups
   myProps.find( nodeGroups_, "nodeGroups" );
   myConf .set ( "nodeGroups", nodeGroups_ );
 
-  // get the dofs for the element group
-  myProps.find( elemDofNames_, "dimensions" );
-  myConf .set ( "dimensions", elemDofNames_ );
+  // get the element groups
+  myProps.find( elemGroups_, "elementGroups" );
+  myConf .set ( "elementGroups", elemGroups_ );
 
   // get the dofs for the node groups
   myProps.find( nodeDofNames_, "dofs" );
   myConf .set ( "dofs", nodeDofNames_ );
+
+  // get the dofs for the element group
+  if (!myProps.find( elemDofNames_, "dimensions" ))
+    elemDofNames_.ref(nodeDofNames_);
+  myConf .set ( "dimensions", elemDofNames_ );
 
   // translate the DOF Names to IDs
   elemDofs_.resize( elemDofNames_.size() );

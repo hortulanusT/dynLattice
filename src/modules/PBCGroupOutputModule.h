@@ -13,8 +13,10 @@
 #include "PBCGroupInputModule.h"
 
 #include <jem/base/Slice.h>
+#include <jem/util/ArrayBuffer.h>
 #include <jive/app/SampleModule.h>
 
+using jem::util::ArrayBuffer;
 using jive::app::SampleModule;
 
 class PBCGroupOutputModule : public GroupOutputModule
@@ -52,6 +54,11 @@ class PBCGroupOutputModule : public GroupOutputModule
 
   static void         declare ();  
  
+ protected:
+  String              getHeader_ () const;
+
+  StringVector        getDataSets_ () const;
+
  protected:
   Ref<SampleModule>   child_;
 };

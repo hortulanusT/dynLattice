@@ -37,11 +37,12 @@ Module::Status PBCGroupOutputModule::init
   JEM_ASSERT2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
 
   // configure the output module
+  // LATER get multiple Children for different kinds of outputs
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
-  // FIXME make with options & string constants
-  childProps.set( "header", "Hyy\tnu_xy" );
-  childProps.set( "seperator", "\t" );
-  childProps.set( "dataSets", StringVector( { "ymax.disp.dy/all.extent.dy", "-1 * (ymax.diff_disp.dy/all.extent.dy) / (xmax.diff_disp.dx/all.extent.dx)" } ) );
+  // HACK make with options & string constants
+  childProps.set( "header", getHeader_() );
+  childProps.set( "dataSets", getDataSets_() );
+  childProps.set( "separator",  "," );
   
   child_->configure( props, globdat );
   child_->getConfig( conf, globdat );
@@ -64,6 +65,72 @@ void PBCGroupOutputModule::shutdown
 {
   Super::shutdown(globdat);
   child_->shutdown(globdat);
+}
+
+String PBCGroupOutputModule::getHeader_ () const
+{
+  const idx_t dim = elemDofs_.size();
+
+  // step  
+  String head = "step,";
+
+  // displacement gradient
+  for (idx_t i = 1; i <= dim; i++)
+    for (idx_t j = 1; j <= dim; j++)
+      head = head + String::format( "H_%d%d,", i, j );  
+
+  // 1st PK Tensor
+  for (idx_t i = 1; i <= dim; i++)
+    for (idx_t j = 1; j <= dim; j++)      
+      head = head + String::format( "P_%d%d,", i, j );  
+
+  return head[SliceTo(head.size()-1)];
+}
+
+StringVector PBCGroupOutputModule::getDataSets_ () const
+{  
+  const idx_t dim = elemDofs_.size();
+
+  ArrayBuffer<String> dataSets;
+
+  // step
+  dataSets.pushBack( "i" );
+
+  // displacement gradient
+  for (idx_t i = 0; i < dim; i++)
+    for (idx_t j = 0; j < dim; j++)
+    {
+      dataSets.pushBack( String::format( "%s.disp.%s / all.extent.%s"
+        , PBCGroupInputModule::EDGES[1 + 2*j]
+        , nodeDofNames_[i]
+        , elemDofNames_[j] ) );
+    }  
+
+  // Prepare areas
+  StringVector areas (dim);
+  if (dim==3)
+  {
+    areas[0] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[2] );
+    areas[1] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[0], elemDofNames_[2] );
+    areas[2] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[0] );
+  }
+  else if (dim==2)
+  {
+    areas[0] = "all.extent." + elemDofNames_[1];
+    areas[1] = "all.extent." + elemDofNames_[0];
+  }
+  else
+    throw jem::Exception(getContext(), "unkown Dimension");
+  
+  // 1st PK Tensor
+  for (idx_t i = 0; i < dim; i++)
+    for (idx_t j = 0; j < dim; j++)
+        dataSets.pushBack( String::format( "%s.resp.%s / %s"
+          , PBCGroupInputModule::EDGES[1 + 2*i]
+          , nodeDofNames_[j] 
+          , areas[i] ) );  
+
+  return dataSets.toArray();
 }
 
 Ref<Module> PBCGroupOutputModule::makeNew

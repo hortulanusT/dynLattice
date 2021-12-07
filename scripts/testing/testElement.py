@@ -138,7 +138,6 @@ for eDir in elem_dir:
         # compare it with desired results
         sim_disp = np.loadtxt("tests/element/test-disp.res")
         sim_resp = np.loadtxt("tests/element/test-resp.res")
-        # FIXME get the corrct loading for point load bending
         disp_comp = np.allclose(sim_disp, ideal_disp[eDir][lDir], atol = 1e-6, rtol=1e-3)
         load_comp = np.allclose(sim_resp, ideal_resp[lDir], atol = 1e-6, rtol=1e-3)
 

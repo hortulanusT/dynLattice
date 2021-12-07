@@ -131,7 +131,7 @@ Module::Status PBCGroupInputModule::init
           "opposite edges do not have the same number of nodes" );
     }
 
-    sortBoundaryNodes_ ( inodes1, inodes0, nodes, globdat, i );
+    sortBoundaryNodes_ ( inodes1, inodes0, nodes, globdat, i );  
 
     NodeGroup updated = newNodeGroup ( inodes1, nodes );
 
@@ -139,8 +139,6 @@ Module::Status PBCGroupInputModule::init
 
     System::out() << "  ...Sorted NodeGroup `" << EDGES[i*2+1] <<
       "' wrt `" << EDGES[i*2] << "'\n";
-
-    // TODO remove corner nodes from the Edges!
   }
 
   return DONE;

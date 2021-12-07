@@ -47,6 +47,7 @@ class periodicBCModel : public Model
   static const char*      TYPE_NAME;
   static const char*      DISP_GRAD_PROP;
   static const char*      DOF_NAMES_PROP;
+  static const char*      ROT_NAMES_PROP;
 
   explicit                periodicBCModel
 
@@ -86,7 +87,9 @@ class periodicBCModel : public Model
   Ref<Constraints>        cons_;
   Matrix                  dispGrad_;
   StringVector            dofNames_;
+  StringVector            rotNames_;
   IdxVector               jdofs_;
   IdxVectorMatrix         masterDofs_;
   IdxVectorMatrix         slaveDofs_;
+  idx_t                   pbcRank_;
 };

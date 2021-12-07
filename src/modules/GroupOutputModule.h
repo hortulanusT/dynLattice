@@ -93,7 +93,7 @@ class GroupOutputModule : public Module
   
   static void         declare ();
 
- private:
+ protected:
   StringVector        nodeGroups_;    ///< groups of nodes used to calculate the singular element forces/displacements
   StringVector        elemGroups_;    ///< groups of elements used to calculate the extent/strain/stress values
   StringVector        nodeDofNames_;  ///< vector containing the names of the dofs used for singular calculations
