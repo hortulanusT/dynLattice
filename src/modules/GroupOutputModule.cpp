@@ -1,8 +1,8 @@
-#include "LoadExtentModule.h"
+#include "GroupOutputModule.h"
+// TODO differential displacements
+const char*  GroupOutputModule::TYPE_NAME = "GroupOutput";
 
-const char*  LoadExtentModule::TYPE_NAME = "LoadExtent";
-
-LoadExtentModule::LoadExtentModule
+GroupOutputModule::GroupOutputModule
   ( const String&       name) : Module ( name )
 {
   // per default extract composite values for all elements
@@ -10,7 +10,7 @@ LoadExtentModule::LoadExtentModule
   elemGroups_[0] = "all";
 }
 
-Module::Status LoadExtentModule::init
+Module::Status GroupOutputModule::init
   ( const Properties&   conf,
     const Properties&   props,
     const Properties&   globdat )
@@ -19,21 +19,22 @@ Module::Status LoadExtentModule::init
   Properties myProps = props.getProps( myName_ );
   Properties myConf  = conf.makeProps( myName_ );
 
-  // get the element groups
-  myProps.find( elemGroups_, "elementGroups" );
-  myConf .set ( "elementGroups", elemGroups_ );
-
   // get the node groups
   myProps.find( nodeGroups_, "nodeGroups" );
   myConf .set ( "nodeGroups", nodeGroups_ );
 
-  // get the dofs for the element group
-  myProps.find( elemDofNames_, "dimensions" );
-  myConf .set ( "dimensions", elemDofNames_ );
+  // get the element groups
+  myProps.find( elemGroups_, "elementGroups" );
+  myConf .set ( "elementGroups", elemGroups_ );
 
   // get the dofs for the node groups
   myProps.find( nodeDofNames_, "dofs" );
   myConf .set ( "dofs", nodeDofNames_ );
+
+  // get the dofs for the element group
+  if (!myProps.find( elemDofNames_, "dimensions" ))
+    elemDofNames_.ref(nodeDofNames_);
+  myConf .set ( "dimensions", elemDofNames_ );
 
   // translate the DOF Names to IDs
   elemDofs_.resize( elemDofNames_.size() );
@@ -45,14 +46,12 @@ Module::Status LoadExtentModule::init
   for (idx_t idof = 0; idof < nodeDofNames_.size(); idof++)
     nodeDofs_[idof] = dofs->getTypeIndex( nodeDofNames_[idof] );
 
-  return elemDofs_.size()+nodeDofs_.size()>0 ? Status::OK : Status::DONE;
+  return elemDofs_.size()+nodeDofs_.size()>0 ? run( globdat ) : Status::DONE;
 }
   
-Module::Status LoadExtentModule::run
+Module::Status GroupOutputModule::run
   ( const Properties&   globdat )
-{
-
-    
+{    
   Properties myVars   = Globdat::getVariables( globdat );
   Properties currentVars, loadVars, respVars, dispVars, extentVars;
   NodeSet    nodes    = NodeSet::get( globdat, getContext() );
@@ -65,8 +64,11 @@ Module::Status LoadExtentModule::run
   Vector     allLoad  ( dofs->dofCount() );
   Vector     allResp  ( dofs->dofCount() );
   Vector     allDisp  ( dofs->dofCount() );
+  Vector     oldDisp  ( dofs->dofCount() );
   Matrix     coords   ( nodes.size(), nodes.rank() );
+
   StateVector::get    ( allDisp, dofs, globdat );
+
   Ref<Model> model    = Model::get( globdat, getContext() );
   Properties params   ( "actionParams" );
   allLoad             = 0.;
@@ -104,14 +106,14 @@ Module::Status LoadExtentModule::run
       dofs->getDofIndices (dofIndices, nodeIndices, nodeDofs_[iDof] );
 
       // get the displacements and loads for those dofs
-      disp = allDisp[dofIndices];
-      load = allLoad[dofIndices];
-      resp = allResp[dofIndices];
+      disp      = allDisp[dofIndices];
+      load      = allLoad[dofIndices];
+      resp      = allResp[dofIndices];
 
       // report it back (sum for load/resp and avg for disp)
-      loadVars.set( nodeDofNames_[iDof], sum( load ));
-      respVars.set( nodeDofNames_[iDof], sum( resp ));
-      dispVars.set( nodeDofNames_[iDof], sum( disp ) / disp.size() );
+      loadVars.set    ( nodeDofNames_[iDof], sum( load ));
+      respVars.set    ( nodeDofNames_[iDof], sum( resp ));
+      dispVars.set    ( nodeDofNames_[iDof], sum( disp ) / disp.size() );
     }
   }
 
@@ -140,27 +142,23 @@ Module::Status LoadExtentModule::run
       disp = allDisp[dofIndices];
       load = allLoad[dofIndices];
 
-      // report back the extent, strain and stress
-      extentVars.set( elemDofNames_[iDof], max( coords[iDof] ) - min( coords[iDof] )); // LATER update with values from last timestep maybe?
-
-      // LATER implement stress/strain measures      
+      // report back the extent
+      extentVars.set( elemDofNames_[iDof], max( coords[iDof] ) - min( coords[iDof] )); 
     }
   }
-
-  // TEST_CONTEXT( globdat )
   return Status::OK;
 }
 
-Ref<Module> LoadExtentModule::makeNew
+Ref<Module> GroupOutputModule::makeNew
   ( const String&       name,
     const Properties&   conf,
     const Properties&   props,
     const Properties&   globdat )
 {
-  return newInstance<LoadExtentModule> ( name );
+  return newInstance<GroupOutputModule> ( name );
 }
   
-void LoadExtentModule::declare ()
+void GroupOutputModule::declare ()
 {
   using jive::app::ModuleFactory;
 

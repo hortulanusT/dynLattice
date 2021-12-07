@@ -8,12 +8,12 @@
  *
  */
 #include "PeriodicBCModel.h"
+#include <jive/util/Printer.h>
 
 const char*      periodicBCModel::TYPE_NAME       = "PeriodicBC";
-const char*      periodicBCModel::SETS_PROP       = "nodeSets";
-const char*      periodicBCModel::DIR_PROP        = "periodDir";
-const char*      periodicBCModel::PERIOD_PROP     = "periodicity";
-const char*      periodicBCModel::LOCK_DOFS_PROP  = "periodDofs";
+const char*      periodicBCModel::DISP_GRAD_PROP  = "dispGrad";
+const char*      periodicBCModel::DOF_NAMES_PROP  = "dofs";
+const char*      periodicBCModel::ROT_NAMES_PROP  = "rotDofs";
 
 periodicBCModel::periodicBCModel
 
@@ -29,36 +29,29 @@ periodicBCModel::periodicBCModel
   // get the global nodeSet, dofSpace and Constraints
   nodes_  = NodeSet::get      ( globdat, getContext() );
   dofs_   = DofSpace::get     ( nodes_.getData(), globdat, getContext() );
-  cons_   = Constraints::get  ( dofs_, globdat );
+  cons_   = Constraints::get  ( dofs_, globdat );  
+  
+  // get the dof names
+  myProps.get ( dofNames_, DOF_NAMES_PROP );
+  myConf .set ( DOF_NAMES_PROP, dofNames_ );
 
-  // get the name of the groups
-  myProps.get ( nodeSets_, SETS_PROP );
-  JEM_ASSERT2 ( nodeSets_.size() == 2, "Only 2 Nodesets at one time are supported");
-  myConf .set ( SETS_PROP, nodeSets_ );
+  pbcRank_ = dofNames_.size();
 
-  // periodicity direction
-  idx_t iDir = -1;
-  if (myProps.find ( iDir, DIR_PROP ) and iDir >= 0 and iDir <= nodes_.rank())
+  // get the rot names
+  myProps.get ( rotNames_, ROT_NAMES_PROP );
+  myConf .set ( ROT_NAMES_PROP, rotNames_ );
+
+  // get the displacement Gradient  
+  dispGrad_.resize(pbcRank_, pbcRank_);
+  dispGrad_ = NAN;
+  for (idx_t iDisp = 0; iDisp < pbcRank_; iDisp++)
   {
-    Matrix coords ( nodes_.rank(), nodes_.size() );
-    nodes_.getCoords ( coords );
-    periodVector_.resize ( nodes_.rank() );
-
-    for (idx_t i = 0; i < nodes_.rank(); i++)
-    {
-      if (iDir == i) periodVector_[i] = max(coords(i, ALL)) - min(coords(i, ALL));
-      else periodVector_[i] = 0.;
+    for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
+    { 
+      myProps.find( dispGrad_(iDisp, iDir), DISP_GRAD_PROP + String(iDisp+1) + String(iDir+1) );
+      myConf .set ( DISP_GRAD_PROP + String(iDisp+1) + String(iDir+1), dispGrad_(iDisp, iDir) );
     }    
-
-    System::info() << "Peridocity direction " << iDir << " resulted in a periocity vector of " << periodVector_ << " \n";
   }
-  else myProps.get ( periodVector_, PERIOD_PROP );
-
-  myConf .set ( PERIOD_PROP, periodVector_ );
-
-  // periodicity dofs
-  myProps.get ( periodDofs_, LOCK_DOFS_PROP );
-  myConf .set ( LOCK_DOFS_PROP, periodDofs_ );
 }
 
 bool      periodicBCModel::takeAction
@@ -68,56 +61,125 @@ bool      periodicBCModel::takeAction
     const Properties&     globdat )
 {
   using jive::model::Actions;
+  using jive::model::ActionParams;
 
   if (action == Actions::INIT)
   {
     init_ ( globdat );
+  }
+
+  if (action == Actions::GET_CONSTRAINTS)
+  {    
+    double scale;
+
+    // get the scale factor
+    params.get ( scale, ActionParams::SCALE_FACTOR );
+
+    setConstraints_ ( globdat, scale );    
     return true;
   }
 
   return false;
 }
 
-void      periodicBCModel::init_ 
-  
+
+void      periodicBCModel::init_  
   ( const Properties&     globdat )
 {
-  Vector    master_coords ( nodes_.rank() );
-  Vector    slave_coords  ( nodes_.rank() );
-  idx_t     islave;
-  IdxVector jtypes        ( periodDofs_.size() );
-  idx_t     slaveDof      ( periodDofs_.size() );
-  idx_t     masterDof     ( periodDofs_.size() );
+  IdxVector rdofs ( rotNames_.size() );  
+  for (idx_t iDof = 0; iDof < rdofs.size(); iDof++)
+    rdofs[iDof] = dofs_->getTypeIndex( rotNames_[iDof] ); 
 
-  NodeGroup masterGroup   = NodeGroup::get( nodeSets_[0], nodes_, globdat, getContext() );
-  NodeGroup slaveGroup    = NodeGroup::get( nodeSets_[1], nodes_, globdat, getContext() );
-  
-  IdxVector masterNodes   = masterGroup.getIndices();
-  IdxVector slaveNodes    = slaveGroup.getIndices();
+  jdofs_.resize( dofNames_.size() );
+  for (idx_t iDof = 0; iDof < jdofs_.size(); iDof++)
+    jdofs_[iDof] = dofs_->getTypeIndex( dofNames_[iDof] ); 
 
-  for (idx_t i = 0; i<periodDofs_.size(); i++) jtypes[i] = dofs_->getTypeIndex ( periodDofs_[i] );
+  masterDofs_.resize( pbcRank_, pbcRank_ );
+  slaveDofs_.resize( pbcRank_, pbcRank_ );
 
-  // iterate through the master nodes
-  for (idx_t imaster = 0; imaster < masterNodes.size(); imaster++)
+  IdxVector             masterRots;
+  IdxVector             slaveRots;
+
+  Assignable<NodeGroup> masters;
+  Assignable<NodeGroup> slaves;
+
+  for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
   {
-    nodes_.getNodeCoords( master_coords, masterNodes[imaster] );
-    // find the slave node corresponding to the master node
-    for (islave = 0; islave < slaveNodes.size(); islave++)
-    {
-      nodes_.getNodeCoords ( slave_coords, slaveNodes[islave] );
-      if ( !jem::isTiny(norm2((master_coords + periodVector_) - slave_coords)) ) break;
-      if ( !jem::isTiny(norm2(master_coords - (slave_coords + periodVector_))) ) break;
-    }
-    
-    // apply all the single periodic dofs
-    for (idx_t i = 0; i < periodDofs_.size(); i++)
-    {
-      masterDof = dofs_->getDofIndex( masterNodes[imaster], jtypes[i]);
-      slaveDof  = dofs_->getDofIndex( slaveNodes[islave], jtypes[i]);
+    masters   = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge  ], nodes_, globdat, getContext() );
+    slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge+1], nodes_, globdat, getContext() );
 
-      cons_->addConstraint ( slaveDof, masterDof, 1.0 );
-    }        
+    // save the translational DOFs for the 
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++ )
+    {
+      masterDofs_(iDof, iEdge).resize( masters.size() );
+      slaveDofs_(iDof, iEdge).resize( slaves.size() );
+      dofs_->getDofIndices( masterDofs_(iDof, iEdge), masters.getIndices(), jdofs_[iDof] );
+      dofs_->getDofIndices( slaveDofs_(iDof, iEdge), slaves.getIndices(), jdofs_[iDof] );
+      
+      // if the dispGrad isnt configured set some ground rules
+      if ( std::isnan(dispGrad_(iDof, iEdge)) )
+      {
+        if ( iDof == iEdge ) 
+          // if the dispGrad for this is not configured and its a normal term, just fix the master Nodes to the ground
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
+            cons_->addConstraint(masterDofs_(iDof, iEdge)[iNode]);
+        else
+          // if the dispGrad for this is not configured and its a shear term, just fix the slave Nodes to the master nodes
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
+            cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode], masterDofs_(iDof, iEdge)[iNode], 1.0);
+      }
+    } 
+
+    // lock the rotational DOFs for the edges
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++ )
+    {
+      masterRots.resize( masters.size() );
+      slaveRots.resize( slaves.size() );
+
+      dofs_->getDofIndices( masterRots, masters.getIndices(), rdofs[iDof] );
+      dofs_->getDofIndices( slaveRots, slaves.getIndices(), rdofs[iDof] );
+
+      for (idx_t iN = 0; iN < masterRots.size(); iN++)
+      {
+        cons_->addConstraint( slaveRots[iN], masterRots[iN], 1.0 );
+      }      
+    } 
   }  
+}
+
+void      periodicBCModel::setConstraints_   
+  ( const Properties&     globdat,
+    const double          scale )
+{  
+  // cons_->printTo(jive::util::Printer::get());
+  // jive::util::Printer::flush();
+  // REPORT( scale )
+  // TEST_CONTEXT(masterDofs_)
+  // TEST_CONTEXT(slaveDofs_)
+  // TEST_CONTEXT(cons_->getSlaveDofs())
+  double extent = 1.;
+
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++ )
+    {
+      if ( std::isnan(dispGrad_(iDof, iEdge)) )
+        continue;// if the dispGrad for this is not configured, skip it
+        
+      Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iEdge]);
+      
+      // TEST_CONTEXT(iDof)
+      // TEST_CONTEXT(iEdge)
+
+      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
+      {
+        // set the master DOF to zero and the slave DOF to the prescribed strain
+        cons_->addConstraint(masterDofs_(iDof, iEdge)[iNode]);
+        cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],  scale*dispGrad_(iDof, iEdge)*extent);
+      }
+    }
+
+  // cons_->printTo(jive::util::Printer::get());
+  // jive::util::Printer::flush();
 }
 
 Ref<Model>periodicBCModel::makeNew

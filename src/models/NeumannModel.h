@@ -95,6 +95,8 @@ class NeumannModel : public Model
       const Properties&       props,
       const Properties&       globdat );
 
+  static void               declare();
+
 
  protected:
 
@@ -170,7 +172,5 @@ class NeumannModel : public Model
   
   String                    varName_;
 };
-
-void declareNeumannModel ();
 
 #endif

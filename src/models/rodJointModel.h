@@ -97,6 +97,8 @@ class rodJointModel : public Model
 
 
   void                    init_ ();
+  
+  void                    getCons_ ();
 
  private:
   Assignable<ElementGroup>egroup_;

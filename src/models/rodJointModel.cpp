@@ -46,7 +46,7 @@ rodJointModel::rodJointModel
   dofs_         = DofSpace::get ( globdat, getContext() ); //all the dofs 
   constraints_  = Constraints::get ( dofs_, globdat ); //all the constraints
 
-  // get the dofs to be locked (in init phase)
+  // get the dofs to be locked
   if ( myProps.find ( lockDofs_, "lockDofs" ) )
        myConf .set  ( "lockDofs", lockDofs_ );
   
@@ -96,6 +96,12 @@ bool rodJointModel::takeAction
     return true;
   }
 
+  if ( action == Actions::GET_CONSTRAINTS )
+  {
+    getCons_ ();
+    return true;
+  }
+
   if ( action == Actions::GET_MATRIX0 )
   {
     Ref<MatrixBuilder>  mbld;
@@ -122,7 +128,6 @@ bool rodJointModel::takeAction
     // TEST ( disp )
     // TEST ( K )
     // TEST ( fint )
-
 
     return true;
   }
@@ -274,6 +279,17 @@ void  rodJointModel::assembleTrans_
 
 void rodJointModel::init_ ()
 {
+  // get all the spring dofs and store in array
+  for (idx_t iDof = 0; iDof < rotDofs_.size(); iDof++)    iRotDofs_[iDof]   = dofs_->getTypeIndex ( rotDofs_[iDof] );    
+  for (idx_t iDof = 0; iDof < transDofs_.size(); iDof++)  iTransDofs_[iDof] = dofs_->getTypeIndex ( transDofs_[iDof] );    
+}
+
+//-----------------------------------------------------------------------
+//   init_
+//-----------------------------------------------------------------------
+
+void rodJointModel::getCons_ ()
+{
   IdxVector   inodes      ( 0 );
   IdxVector   idofs       ( lockDofs_.size() );
 
@@ -281,10 +297,6 @@ void rodJointModel::init_ ()
   IdxVector   masterDofs  ( lockDofs_.size() );
   idx_t       slaveNode   = -1;
   IdxVector   slaveDofs   ( lockDofs_.size() );
-
-  // get all the spring dofs and store in array
-  for (idx_t iDof = 0; iDof < rotDofs_.size(); iDof++)    iRotDofs_[iDof]   = dofs_->getTypeIndex ( rotDofs_[iDof] );    
-  for (idx_t iDof = 0; iDof < transDofs_.size(); iDof++)  iTransDofs_[iDof] = dofs_->getTypeIndex ( transDofs_[iDof] );    
 
   // lock all dofs in the array
   for (idx_t iDof = 0; iDof < lockDofs_.size(); iDof++)

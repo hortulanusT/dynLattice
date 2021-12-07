@@ -88,6 +88,8 @@ class DirichletModel : public Model
       const Properties&       conf,
       const Properties&       props,
       const Properties&       globdat );
+    
+  static void               declare ();
 
 
  protected:
@@ -165,8 +167,5 @@ class DirichletModel : public Model
   Properties                lbcProps_;
   String                    varName_;
 };
-
-
-void declareDirichletModel ();
 
 #endif

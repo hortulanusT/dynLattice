@@ -1,7 +1,7 @@
 // OUTPUTS
 Output.modules = [  "loadextent", "disp", "load", "resp" ];
 
-Output.loadextent.type = "LoadExtent";
+Output.loadextent.type = "GroupOutput";
 Output.loadextent.nodeGroups = [ "free" ];
 Output.loadextent.dofs = model.model.model.cosseratRod.dofNamesTrans;
 Output.loadextent.dofs += model.model.model.cosseratRod.dofNamesRot;

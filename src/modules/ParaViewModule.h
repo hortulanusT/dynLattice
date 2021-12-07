@@ -24,13 +24,13 @@
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
-#include <jive/app/Globdat.h>
 #include <jive/util/XTable.h>
 #include <jive/util/SparseTable.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/ItemSet.h>
 #include <jive/util/ItemGroup.h>
+#include <jive/util/Globdat.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
@@ -54,13 +54,13 @@ using jem::io::FileOpenException;
 
 using namespace jive;
 using jive::app::Module;
-using jive::app::Globdat;
 using jive::util::Assignable;
 using jive::util::DofSpace;
 using jive::util::XTable;
 using jive::util::SparseTable;
 using jive::util::ItemSet;
 using jive::util::ItemGroup;
+using jive::util::Globdat;
 using jive::fem::NodeSet;
 using jive::fem::ElementSet;
 using jive::fem::ElementGroup;

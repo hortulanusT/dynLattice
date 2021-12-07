@@ -1,5 +1,5 @@
 /**
- * @file LoadExtentModule.h
+ * @file GroupOutputModule.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
  * @brief module that writes information into globdat
  * @version 0.1
@@ -17,7 +17,7 @@
 #include <jive/Array.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
-#include <jive/app/Globdat.h>
+#include <jive/util/Globdat.h>
 #include <jive/util/DofSpace.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/fem/ElementGroup.h>
@@ -39,7 +39,7 @@ using jive::StringVector;
 using jive::Vector;
 using jive::Matrix;
 using jive::app::Module;
-using jive::app::Globdat;
+using jive::util::Globdat;
 using jive::util::DofSpace;
 using jive::fem::NodeSet;
 using jive::fem::NodeGroup;
@@ -56,7 +56,7 @@ using jive::model::ActionParams;
  * @brief module to add desired values to the globdat
  * 
  */
-class LoadExtentModule : public Module
+class GroupOutputModule : public Module
 {
  public:
   static const char*  TYPE_NAME;
@@ -66,8 +66,8 @@ class LoadExtentModule : public Module
    * 
    * @param name name of the module
    */
-  explicit            LoadExtentModule
-    ( const String&       name = "loadExtent");
+  explicit            GroupOutputModule
+    ( const String&       name = "groupOutput");
 
   /**
    * @brief initalizes the module with the given values
@@ -93,7 +93,7 @@ class LoadExtentModule : public Module
   
   static void         declare ();
 
- private:
+ protected:
   StringVector        nodeGroups_;    ///< groups of nodes used to calculate the singular element forces/displacements
   StringVector        elemGroups_;    ///< groups of elements used to calculate the extent/strain/stress values
   StringVector        nodeDofNames_;  ///< vector containing the names of the dofs used for singular calculations

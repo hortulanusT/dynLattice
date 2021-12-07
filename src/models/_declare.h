@@ -22,6 +22,6 @@ void declareModels ()
   rodJointModel::declare          ();
   periodicBCModel::declare        ();
   FollowerLoadModel::declare      ();
-  declareDirichletModel           ();
-  declareNeumannModel             ();
+  DirichletModel::declare         ();
+  NeumannModel::declare           ();
 }

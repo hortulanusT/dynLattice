@@ -1,4 +1,3 @@
-// fixed Dirichlet Model
 // ACTUAL_MODEL
 model.type = "Debug";
 model.noiseLevel = 1;
