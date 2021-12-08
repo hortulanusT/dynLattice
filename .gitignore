@@ -15,6 +15,7 @@ nonlinRod*
 *.dat
 *.pdf
 *.avi
+*.info
 
 # backup files
 *.BU

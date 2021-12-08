@@ -40,7 +40,9 @@ Module::Status PBCGroupOutputModule::init
   // LATER get multiple Children for different kinds of outputs
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
   // HACK make with options & string constants
-  childProps.set( "header", getHeader_() );
+  bool append = false;
+  if (!childProps.find( append, "append" ) || !append)
+    childProps.set( "header", getHeader_() );
   childProps.set( "dataSets", getDataSets_() );
   childProps.set( "separator",  "," );
   
@@ -77,12 +79,12 @@ String PBCGroupOutputModule::getHeader_ () const
   // displacement gradient
   for (idx_t i = 1; i <= dim; i++)
     for (idx_t j = 1; j <= dim; j++)
-      head = head + String::format( "H_%d%d,", i, j );  
+      head = head + String::format( "H%d%d,", i, j );  
 
   // 1st PK Tensor
   for (idx_t i = 1; i <= dim; i++)
     for (idx_t j = 1; j <= dim; j++)      
-      head = head + String::format( "P_%d%d,", i, j );  
+      head = head + String::format( "P%d%d,", i, j );  
 
   return head[SliceTo(head.size()-1)];
 }

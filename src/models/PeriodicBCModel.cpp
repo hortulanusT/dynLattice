@@ -132,7 +132,7 @@ void      periodicBCModel::init_
     } 
 
     // lock the rotational DOFs for the edges
-    for (idx_t iDof = 0; iDof < pbcRank_; iDof++ )
+    for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++ )
     {
       masterRots.resize( masters.size() );
       slaveRots.resize( slaves.size() );
@@ -143,7 +143,7 @@ void      periodicBCModel::init_
       for (idx_t iN = 0; iN < masterRots.size(); iN++)
       {
         cons_->addConstraint( slaveRots[iN], masterRots[iN], 1.0 );
-      }      
+      }   
     } 
   }  
 }
@@ -159,6 +159,8 @@ void      periodicBCModel::setConstraints_
   // TEST_CONTEXT(slaveDofs_)
   // TEST_CONTEXT(cons_->getSlaveDofs())
   double extent = 1.;
+  
+  System::info() << "::> applying PBCs with factor " << scale << jem::io::endl;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++ )
