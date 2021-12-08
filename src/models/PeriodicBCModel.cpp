@@ -104,31 +104,18 @@ void      periodicBCModel::init_
   Assignable<NodeGroup> masters;
   Assignable<NodeGroup> slaves;
 
-  for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
+  for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
   {
-    masters   = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge  ], nodes_, globdat, getContext() );
-    slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge+1], nodes_, globdat, getContext() );
+    masters   = NodeGroup::get( PBCGroupInputModule::EDGES[2*iDir  ], nodes_, globdat, getContext() );
+    slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iDir+1], nodes_, globdat, getContext() );
 
     // save the translational DOFs for the 
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++ )
     {
-      masterDofs_(iDof, iEdge).resize( masters.size() );
-      slaveDofs_(iDof, iEdge).resize( slaves.size() );
-      dofs_->getDofIndices( masterDofs_(iDof, iEdge), masters.getIndices(), jdofs_[iDof] );
-      dofs_->getDofIndices( slaveDofs_(iDof, iEdge), slaves.getIndices(), jdofs_[iDof] );
-      
-      // if the dispGrad isnt configured set some ground rules
-      if ( std::isnan(dispGrad_(iDof, iEdge)) )
-      {
-        if ( iDof == iEdge ) 
-          // if the dispGrad for this is not configured and its a normal term, just fix the master Nodes to the ground
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
-            cons_->addConstraint(masterDofs_(iDof, iEdge)[iNode]);
-        else
-          // if the dispGrad for this is not configured and its a shear term, just fix the slave Nodes to the master nodes
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
-            cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode], masterDofs_(iDof, iEdge)[iNode], 1.0);
-      }
+      masterDofs_(iDof, iDir).resize( masters.size() );
+      slaveDofs_(iDof, iDir).resize( slaves.size() );
+      dofs_->getDofIndices( masterDofs_(iDof, iDir), masters.getIndices(), jdofs_[iDof] );
+      dofs_->getDofIndices( slaveDofs_(iDof, iDir), slaves.getIndices(), jdofs_[iDof] );
     } 
 
     // lock the rotational DOFs for the edges
@@ -145,7 +132,63 @@ void      periodicBCModel::init_
         cons_->addConstraint( slaveRots[iN], masterRots[iN], 1.0 );
       }   
     } 
-  }  
+  }
+    
+  
+  // set some ground rules depending on where the dispGrad is configured
+  BoolMatrix  not_given ( dispGrad_.shape() );
+  for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+      not_given(iDof, iDir) = std::isnan(dispGrad_(iDof, iDir));
+
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+  {
+    if (testall(not_given(iDof, ALL)) || ( !not_given(iDof, iDof) && sum(!not_given(iDof, ALL)) == 1 ) ) 
+    {
+      // if no dispGrad for this DOF is not configured fix normal direction and apply PBC to the shear directions
+      // do the same if only the normal DOF for a direction is configured
+      System::info( myName_ ) << " ...Locking for no or normal dispGrad w.r.t " << dofNames_[iDof] << "\n";
+      for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
+      {
+        if (iDof == iDir)
+        {
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir] << " to 0\n";
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
+            cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
+        }
+        else
+        {
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
+            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], masterDofs_(iDof, iDir)[iNode], 1.0);
+        }
+      }
+    }
+    else if (not_given(iDof, iDof) && sum(!not_given(iDof, ALL)) > 0)
+    {
+      // if a dispGrad for this DOF is set for a shear term, fix the base for this shear term (and set other shear terms to PBC)
+      System::info( myName_ ) << " ...Locking for shear dispGrad w.r.t " << dofNames_[iDof] << "\n";
+      for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
+      {
+        if (!not_given(iDof, iDir))
+        {
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir] << " to 0\n";
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
+            cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
+        }
+        else
+        {
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
+          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
+            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], masterDofs_(iDof, iDir)[iNode], 1.0);
+        }
+      }
+    }
+    else
+    {
+      throw jem::Exception( getContext(), "not supported comibnation of displacment gradients given!");
+    }
+  } 
 }
 
 void      periodicBCModel::setConstraints_   
@@ -159,25 +202,23 @@ void      periodicBCModel::setConstraints_
   // TEST_CONTEXT(slaveDofs_)
   // TEST_CONTEXT(cons_->getSlaveDofs())
   double extent = 1.;
-  
-  System::info() << "::> applying PBCs with factor " << scale << jem::io::endl;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++ )
+    for (idx_t iDir = 0; iDir < pbcRank_; iDir++ )
     {
-      if ( std::isnan(dispGrad_(iDof, iEdge)) )
+      if ( std::isnan(dispGrad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
         
-      Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iEdge]);
+      Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDir]);
+      System::info( myName_ ) << " ...Applying strain in direction of " << dofNames_[iDof] << "\n";
+      System::info( myName_ ) << "      of magnitude " << scale*dispGrad_(iDof, iDir) << "\n";
+      System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iDir] << " and " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
       
-      // TEST_CONTEXT(iDof)
-      // TEST_CONTEXT(iEdge)
-
-      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iEdge).size(); iNode++)
+      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {
         // set the master DOF to zero and the slave DOF to the prescribed strain
-        cons_->addConstraint(masterDofs_(iDof, iEdge)[iNode]);
-        cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],  scale*dispGrad_(iDof, iEdge)*extent);
+        cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
+        cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],  scale*dispGrad_(iDof, iDir)*extent);
       }
     }
 
