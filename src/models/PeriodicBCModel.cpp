@@ -42,6 +42,7 @@ periodicBCModel::periodicBCModel
   myConf .set ( ROT_NAMES_PROP, rotNames_ );
 
   // get the displacement Gradient  
+  // H_ij = du_i/dX_j
   dispGrad_.resize(pbcRank_, pbcRank_);
   dispGrad_ = NAN;
   for (idx_t iDisp = 0; iDisp < pbcRank_; iDisp++)
