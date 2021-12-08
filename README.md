@@ -25,11 +25,12 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 │   ├── element     <- test setups for single elments
 │   └── beam        <- tests from the Simo/Vu-Quoc Paper
 └── studies
-    ├── config      <- folder containing some standard settings
-    ├── study*.pro  <- main input file for each and every study
-    └── study*      <- all the studies to be conducted (containing raw outputs)
-        ├── visual  <- paraview output / figures
-        └── res*.csv<- csv files of the results
+    ├── configs     <- folder containing some standard settings
+    ├── <study>.pro <- main input file for each and every study
+    └── <study>     <- all the studies to be conducted (containing raw outputs)
+        ├── input   <- other input files for the study
+        ├── output  <- raw data output
+        └── results <- processed results
 ```
 
 
