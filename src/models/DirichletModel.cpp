@@ -299,7 +299,7 @@ void DirichletModel::advance_
 
   dispScale_   = dispScale0_ + dispIncr_;
 
-  System::info() << "::> new displacement factor " << dispScale_ << endl;
+  System::info() << " ...New displacement factor " << dispScale_ << endl;
   globdat.set ( varName_, dispScale_ );
 }
 

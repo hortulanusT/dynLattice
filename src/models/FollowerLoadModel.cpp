@@ -107,7 +107,7 @@ bool FollowerLoadModel::takeAction
     // get the scale factor
     params.get ( scale, ActionParams::SCALE_FACTOR );
 
-    System::info() << "::> Scale Factor for " << myName_ << ": " << scale << "\n";
+    System::info() << " ...Scale Factor for " << myName_ << ": " << scale << "\n";
 
     get_ext_vec_ ( f, scale, globdat );
 

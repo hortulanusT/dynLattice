@@ -308,7 +308,7 @@ void NeumannModel::advance_
   if ( accepted )
   {
     loadScale_ = loadScale0_ + loadIncr_;
-    System::info() << "::> new load factor " << loadScale_ << endl;
+    System::info() << " ...New load factor " << loadScale_ << endl;
     globdat.set ( varName_, loadScale_ );
   }
 }

@@ -210,6 +210,7 @@ void      periodicBCModel::setConstraints_
         continue;// if the dispGrad for this is not configured, skip it
         
       Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDir]);
+
       System::info( myName_ ) << " ...Applying strain in direction of " << dofNames_[iDof] << "\n";
       System::info( myName_ ) << "      of magnitude " << scale*dispGrad_(iDof, iDir) << "\n";
       System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iDir] << " and " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
