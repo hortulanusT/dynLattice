@@ -39,7 +39,6 @@ Module::Status PBCGroupOutputModule::init
   // configure the output module
   // LATER get multiple Children for different kinds of outputs
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
-  // HACK make with options & string constants
   bool append = false;
   if (!childProps.find( append, PropNames::APPEND ) || !append)
     childProps.set( PropNames::HEADER, getHeader_() );

@@ -170,56 +170,42 @@ void PBCGroupInputModule::prepareProps_
 
   // read names of Groups that are to be created
 
-  String XTYPE = ".xtype";
-  String YTYPE = ".ytype";
-  String ZTYPE = ".ztype";
+  StringVector TYPES = { ".xtype", ".ytype", ".ztype" };
+  StringVector VALS  = { ".xval", ".yval", ".zval" };
   String MIN = "min";
   String MAX = "max";
+  Properties groupProps;
+  double dummy;
 
   myProps.set  ( NODE_GROUPS, nGroupNames );
-  for (idx_t i = 0; i<j-1; i++)
-    myProps.set( nGroupNames[i], groupSettings_.clone() );
-  myProps.set( nGroupNames[j-1], groupSettings_ );
-
-  if (edges_)
+  for (idx_t i = 0; i<j; i++)
   {
-    myProps.set ( String(EDGES[0]) + XTYPE, MIN );
-    myProps.set ( String(EDGES[1]) + XTYPE, MAX );
-    myProps.set ( String(EDGES[2]) + YTYPE, MIN );
-    myProps.set ( String(EDGES[3]) + YTYPE, MAX );
+    groupProps = myProps.makeProps( nGroupNames[i] );
+    groupProps.mergeWith( groupSettings_ );
   }
 
-  if (corners_)
+  for (idx_t k = 0;  k < rank_; k++)
   {
-    myProps.set ( String(CORNERS[0]) + XTYPE, MIN );
-    myProps.set ( String(CORNERS[0]) + YTYPE, MIN );
-
-    myProps.set ( String(CORNERS[1]) + XTYPE, MAX );
-    myProps.set ( String(CORNERS[1]) + YTYPE, MIN );
-
-    myProps.set ( String(CORNERS[2]) + XTYPE, MIN );
-    myProps.set ( String(CORNERS[2]) + YTYPE, MAX );
+    if (!myProps.find( dummy, String(CORNERS[0]) + VALS[k]))
+      myProps.set ( String(CORNERS[0]) + TYPES[k], MIN );
   }
 
-  if ( rank_ > 2 )
+  for ( idx_t i = 0; i < rank_; ++i )
   {
-    if (edges_)
+    if(corners_)
+      for (idx_t k = 0;  k < rank_; k++)
+      {
+        if (!myProps.find( dummy, String(CORNERS[i+1]) + VALS[k]))
+          myProps.set ( String(CORNERS[i+1]) + TYPES[k], k == i ? MAX : MIN);
+      }
+    if(edges_)
     {
-      myProps.set ( String(EDGES[4]) + ZTYPE, MIN );
-      myProps.set ( String(EDGES[5]) + ZTYPE, MAX );
-    }
-    if (corners_)
-    {
-      myProps.set ( String(CORNERS[0]) + ZTYPE, MIN );
-      myProps.set ( String(CORNERS[1]) + ZTYPE, MIN );
-      myProps.set ( String(CORNERS[2]) + ZTYPE, MIN );
-
-      myProps.set ( String(CORNERS[3]) + XTYPE, MIN );
-      myProps.set ( String(CORNERS[3]) + YTYPE, MIN );
-      myProps.set ( String(CORNERS[3]) + ZTYPE, MAX );
-    }
+      if (!myProps.find( dummy, String(EDGES[i*2]) + VALS[i]))
+        myProps.set ( String(EDGES[i*2]) + TYPES[i], MIN );
+      if (!myProps.find( dummy, String(EDGES[i*2+1]) + VALS[i]))
+        myProps.set ( String(EDGES[i*2+1]) + TYPES[i], MAX );
+    }          
   }
-
 }
 
 //-----------------------------------------------------------------------

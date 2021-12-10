@@ -271,7 +271,6 @@ bool specialCosseratRodModel::takeAction
     StateVector::get  ( disp, dofs_, globdat );
 
     update_rot_ ( disp );
-    // TODO update coords ?
 
     return true;
   }

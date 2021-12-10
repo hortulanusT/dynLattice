@@ -1,5 +1,5 @@
 #include "GroupOutputModule.h"
-// TODO differential displacements
+
 const char*  GroupOutputModule::TYPE_NAME = "GroupOutput";
 
 GroupOutputModule::GroupOutputModule
