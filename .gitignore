@@ -9,13 +9,12 @@ nonlinRod*
 *.log
 *.dat
 
-studies/**/output
-studies/**/results
+studies/**/output/
+studies/**/results/
 studies/**/*.info
 
-tests/element/DIFF
-tests/element/FAILED
-
+tests/element/*/
+tests/element/*/
 tests/beam/test*/
 
 # save the resulting data files for testing
