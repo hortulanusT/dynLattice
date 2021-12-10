@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef GROUP_INPUT_MODULE_H
-#define GROUP_INPUT_MODULE_H
+#pragma once
 
 #include <jive/app/Module.h>
 #include <jive/fem/ElementGroup.h>
@@ -18,9 +17,20 @@
 #include <jive/util/XDofSpace.h>
 #include <jive/util/Assignable.h>
 
-using namespace jem;
-
+using jem::String;
+using jem::Ref;
+using jem::newInstance;
+using jem::Error;
+using jem::idx_t;
+using jem::Array;
+using jem::Tuple;
+using jem::maxOf;
+using jem::max;
+using jem::min;
+using jem::ALL;
+using jem::System;
 using jem::util::Properties;
+
 using jive::StringVector;
 using jive::app::Module;
 using jive::fem::ElementGroup;
@@ -239,5 +249,3 @@ class GroupInputModule : public Module
   };
 
 };
-
-#endif

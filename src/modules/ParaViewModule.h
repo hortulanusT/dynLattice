@@ -43,7 +43,14 @@
 #include "testing.h"
 #include "helpers.h"
 
-using namespace jem;
+using jem::Ref;
+using jem::newInstance;
+using jem::where;
+using jem::Limits;
+using jem::String;
+using jem::SliceTo;
+using jem::SliceFrom;
+using jem::IllegalArgumentException;
 using jem::util::Properties;
 using jem::io::endl;
 using jem::io::Writer;
@@ -52,7 +59,7 @@ using jem::io::PrintWriter;
 using jem::io::FileName;
 using jem::io::FileOpenException;
 
-using namespace jive;
+using jive::StringVector;
 using jive::app::Module;
 using jive::util::Assignable;
 using jive::util::DofSpace;

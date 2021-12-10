@@ -30,7 +30,7 @@
 
 using jem::util::Properties;
 
-using namespace jive;
+using jive::BoolMatrix;
 using jive::model::Model;
 using jive::util::DofSpace;
 using jive::util::Constraints;

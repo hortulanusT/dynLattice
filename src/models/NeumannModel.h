@@ -12,8 +12,7 @@
  */
 
 
-#ifndef NEUMANN_MODEL_H
-#define NEUMANN_MODEL_H
+#pragma once
 
 #include <jem/io/Writer.h>
 #include <jive/Array.h>
@@ -23,8 +22,14 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/XDofSpace.h>
 
-using namespace jem;
-
+using jem::String;
+using jem::idx_t;
+using jem::Ref;
+using jem::newInstance;
+using jem::System;
+using jem::Float;
+using jem::SliceFrom;
+using jem::IllegalInputException;
 using jem::util::Properties;
 using jem::io::Writer;
 using jive::Vector;
@@ -172,5 +177,3 @@ class NeumannModel : public Model
   
   String                    varName_;
 };
-
-#endif

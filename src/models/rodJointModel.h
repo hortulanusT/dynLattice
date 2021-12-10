@@ -29,9 +29,12 @@
 #include "testing.h"
 #include "helpers.h"
 
+using jem::Ref;
+using jem::newInstance;
+using jem::String;
 using jem::util::Properties;
 
-using namespace jive;
+using jive::StringVector;
 using jive::model::Model;
 using jive::util::Assignable;
 using jive::util::DofSpace;

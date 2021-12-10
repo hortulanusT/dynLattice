@@ -25,9 +25,13 @@
 #include "testing.h"
 #include "helpers.h"
 
+using jem::String;
+using jem::Ref;
+using jem::newInstance;
+using jem::System;
 using jem::util::Properties;
 
-using namespace jive;
+using jive::StringVector;
 using jive::model::Model;
 using jive::model::Actions;
 using jive::model::ActionParams;

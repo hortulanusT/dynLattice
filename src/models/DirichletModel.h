@@ -10,8 +10,7 @@
  */
 
 
-#ifndef DIRICHLET_MODEL_H
-#define DIRICHLET_MODEL_H
+#pragma once
 
 #include <jem/util/Properties.h>
 #include <jem/io/Writer.h>
@@ -22,8 +21,15 @@
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
 
-using namespace jem;
-
+using jem::String;
+using jem::Ref;
+using jem::newInstance;
+using jem::idx_t;
+using jem::Float;
+using jem::NIL;
+using jem::SliceFrom;
+using jem::IllegalInputException;
+using jem::System;
 using jem::util::Properties;
 using jem::io::Writer;
 using jive::Vector;
@@ -167,5 +173,3 @@ class DirichletModel : public Model
   Properties                lbcProps_;
   String                    varName_;
 };
-
-#endif

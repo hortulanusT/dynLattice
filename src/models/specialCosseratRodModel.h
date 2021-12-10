@@ -38,14 +38,14 @@
 #include "testing.h"
 #include "helpers.h"
 
-using namespace jem;
+using jem::Slice;
+using jem::SliceFrom;
 using jem::util::Properties;
 using jem::numeric::norm2;
 using jem::numeric::matmul;
 using jem::numeric::MatmulChain;
 using jem::numeric::Quaternion;
 
-using namespace jive;
 using jive::algebra::MatrixBuilder;
 using jive::model::Model;
 using jive::util::XTable;

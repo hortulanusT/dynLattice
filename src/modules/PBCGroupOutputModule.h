@@ -15,9 +15,12 @@
 #include <jem/base/Slice.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jive/app/SampleModule.h>
+#include <jive/app/Names.h>
 
+using jem::SliceTo;
 using jem::util::ArrayBuffer;
 using jive::app::SampleModule;
+using jive::app::PropNames;
 
 class PBCGroupOutputModule : public GroupOutputModule
 {

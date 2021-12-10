@@ -20,12 +20,16 @@
 
 #define WARN(key) jem::System::warn( getContext() ) << key << "\n";
 
-using namespace jem;
+using jem::Array;
+using jem::idx_t;
+using jem::ALL;
+using jem::SliceFromTo;
 using jem::numeric::norm2;
 using jem::numeric::Quaternion;
 using jem::numeric::matmul;
 using jem::numeric::dotProduct;
 using jem::numeric::MatmulChain;
+
 using jive::Cubix;
 using jive::Matrix;
 using jive::Vector;

@@ -33,6 +33,8 @@ using jem::END;
 using jem::BEGIN;
 using jem::idx_t;
 using jem::String;
+using jem::SliceTo;
+using jem::SliceFrom;
 using jem::util::Properties;
 using jem::numeric::matmul;
 using jem::numeric::norm2;

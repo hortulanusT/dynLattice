@@ -34,21 +34,21 @@ Module::Status PBCGroupOutputModule::init
   myProps.set ( "nodeGroups", groups );
   myProps.set ( "elemGroups", "all" );
 
-  JEM_ASSERT2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
+  JEM_PRECHECK2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
 
   // configure the output module
   // LATER get multiple Children for different kinds of outputs
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
   // HACK make with options & string constants
   bool append = false;
-  if (!childProps.find( append, "append" ) || !append)
-    childProps.set( "header", getHeader_() );
-  childProps.set( "dataSets", getDataSets_() );
-  childProps.set( "separator",  "," );
+  if (!childProps.find( append, PropNames::APPEND ) || !append)
+    childProps.set( PropNames::HEADER, getHeader_() );
+  childProps.set( PropNames::DATA_SETS, getDataSets_() );
+  childProps.set( PropNames::SEPARATOR,  "," );
   
   child_->configure( props, globdat );
   child_->getConfig( conf, globdat );
-  JEM_ASSERT2( child_->init( conf, props, globdat) == Status::OK, "Error setting up the SampleModule!" );
+  JEM_PRECHECK2( child_->init( conf, props, globdat) == Status::OK, "Error setting up the SampleModule!" );
 
   return Status::OK;
 }
@@ -122,7 +122,7 @@ StringVector PBCGroupOutputModule::getDataSets_ () const
     areas[1] = "all.extent." + elemDofNames_[0];
   }
   else
-    throw jem::Exception(getContext(), "unkown Dimension");
+    throw jem::Exception(JEM_FUNC, String::format("unkown dimension number %d", dim));
   
   // 1st PK Tensor
   for (idx_t i = 0; i < dim; i++)

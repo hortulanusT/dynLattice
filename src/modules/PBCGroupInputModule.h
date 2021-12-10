@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef PBC_GROUP_INPUT_MODULE_H
-#define PBC_GROUP_INPUT_MODULE_H
+#pragma once
 
 #include <jive/app/Module.h>
 #include <jive/fem/ElementGroup.h>
@@ -93,7 +92,3 @@ class PBCGroupInputModule : public GroupInputModule
 
   String                    dupedNodeGroup_;
 };
-
-
-
-#endif
