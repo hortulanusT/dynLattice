@@ -1,15 +1,27 @@
 # ToDo 
 ## code
-- Cleanup Import/Using (use a single import header file; use forward.h from JIVE)
-- Setup proper PBC's
+- Create Custom Sample Module for advanced options
+  - append without extra header
+  - non-float output
+- write log to central file (dont write log-files, but capture output in python)
+- GMSHInputModule with gmsh C++ API??
+- investigate options for parallel computing
 ## environment
-- Create repositrory structure (cookiecutter?)
+- make link for multiple identical geom-files
+- think of smarter ways to handle data
+## RUC investigations
+1. Notes
+    - higher aspect ratios differ from the analytical solution ==> nonlinear effects stronger
+    - higher strains seem to amplify the trends from low strains
+2. Questions
+    - extension simulation as well as compression simulation
+    - XY-shear differs from YX-shear (small strain case too?)
 ## test-cases
 - single element (cantilever):
-  - get point force load to work
+  - point force fails for large magnitudes
 - test cases [Simo/Vu-Quoc]:
-  - get TEST 7.2 to work with bigger step sizes
-  - get TEST 7.5 to work
+  - TEST 7.2 small step sized due to error in the way the follower load is applied `THIS IS FINE`
+  - TEST 7.5 sufers the same problem as the single elements
  
 # Information
 ## debugging
