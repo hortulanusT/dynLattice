@@ -9,8 +9,8 @@ nonlinRod*
 *.log
 *.dat
 
-studies/**/output/
-studies/**/results/
+studies/**/output/*
+studies/**/results/*
 studies/**/*.info
 
 tests/element/*/
@@ -20,3 +20,6 @@ tests/beam/test*/
 # save the resulting data files for testing
 !tests/beam/test1.dat
 !tests/beam/test2.dat
+
+# save teh folder structure
+!.gitkeep
