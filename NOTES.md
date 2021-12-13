@@ -7,13 +7,18 @@
 - write \lambda (strain factor) instead of step to the files
 - GMSHInputModule with gmsh C++ API??
 - investigate options for parallel computing
+- PBC Output extent other side ?? (du/dX = (u2-u1)/deltaX)
 ## environment
 - make link for multiple identical geom-files
 - think of smarter ways to handle data
+
+# Ideas
 ## RUC investigations
 1. Notes
     - higher aspect ratios differ from the analytical solution ==> nonlinear effects stronger
     - higher strains seem to amplify the trends from low strains
+    - smaller step size not always leads to better convergence
+    - Global Buckling due to contacts?
 2. Questions
     - extension simulation as well as compression simulation
     - XY-shear differs from YX-shear (small strain case too?)
