@@ -32,7 +32,7 @@ Ref<Module> mainModule ()
   // the order that they have been added to the chain.
   Ref<ChainModule>    chain = newInstance<ChainModule> ();
 
-  // Input Module: reads user input
+  // UserConf: reads user input
   chain->pushBack ( newInstance<UserconfModule> ( "Input") );
 
   // Shepe Module: Stores all the shapes needed by other modules
