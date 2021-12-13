@@ -4,6 +4,7 @@
   - append without extra header
   - non-float output
 - write log to central file (dont write log-files, but capture output in python)
+- write \lambda (strain factor) instead of step to the files
 - GMSHInputModule with gmsh C++ API??
 - investigate options for parallel computing
 ## environment
@@ -22,6 +23,8 @@
 - test cases [Simo/Vu-Quoc]:
   - TEST 7.2 small step sized due to error in the way the follower load is applied `THIS IS FINE`
   - TEST 7.5 sufers the same problem as the single elements
+## homogenization ideas
+- for 2.5D structure use 2D homogenization with prism shear modulus/Youngs modulus in third direction scaled up to density?
  
 # Information
 ## debugging
