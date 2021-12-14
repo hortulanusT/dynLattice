@@ -8,6 +8,9 @@
 - GMSHInputModule with gmsh C++ API??
 - investigate options for parallel computing
 - PBC Output extent other side ?? (du/dX = (u2-u1)/deltaX)
+- ParaviewOutput write wrapper file for exported files (.pvd???)
+- Output studied values (for plotting)
+- export some standard actions to seperate script
 ## environment
 - think of smarter ways to handle data
 

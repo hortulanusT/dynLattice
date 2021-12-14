@@ -85,6 +85,7 @@ class specialCosseratRodModel : public Model
   static const char*      TRANS_DOF_NAMES;
   static const char*      ROT_DOF_NAMES;
   static const char*      INCREMENTAL;
+  static const char*      MATERIAL_Y_DIR;
   static const idx_t      TRANS_DOF_COUNT;
   static const idx_t      ROT_DOF_COUNT;
   static const Slice      TRANS_PART;
@@ -241,6 +242,7 @@ class specialCosseratRodModel : public Model
   double                  polarMoment_;
   double                  shearParam_;
 
+  Vector                  material_ey_;
   Matrix                  C_material_;
 
   Quadix                  LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,i,j) is for the j-th node in the i-th element

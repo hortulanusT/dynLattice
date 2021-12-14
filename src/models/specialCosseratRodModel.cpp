@@ -34,6 +34,7 @@ const char*   specialCosseratRodModel::SHEAR_FACTOR       = "shear_correction";
 const char*   specialCosseratRodModel::TRANS_DOF_NAMES    = "dofNamesTrans";
 const char*   specialCosseratRodModel::ROT_DOF_NAMES      = "dofNamesRot";
 const char*   specialCosseratRodModel::INCREMENTAL        = "incremental";
+const char*   specialCosseratRodModel::MATERIAL_Y_DIR     = "material_ey";
 const idx_t   specialCosseratRodModel::TRANS_DOF_COUNT    = 3;
 const idx_t   specialCosseratRodModel::ROT_DOF_COUNT      = 3;
 const Slice   specialCosseratRodModel::TRANS_PART         = jem::SliceFromTo ( 0, TRANS_DOF_COUNT );
@@ -113,6 +114,13 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf .set ( INCREMENTAL, incremental_ );
 
   // Get the material parameters. //LATER non-isotropic features
+  if (myProps.find ( material_ey_, MATERIAL_Y_DIR ))
+  {
+    JEM_ASSERT( material_ey_.size() == nodes_.rank() );
+    JEM_ASSERT( norm2(material_ey_) == 1. );
+    myConf.set( MATERIAL_Y_DIR, material_ey_ );
+  }
+
   myProps.get ( young_, YOUNGS_MODULUS );  
   if (!myProps.find ( shearMod_, SHEAR_MODULUS))
   {
@@ -167,9 +175,9 @@ bool specialCosseratRodModel::takeAction
 
   if ( action == Actions::INIT )
   {
-    // REPORT ( Actions::INIT )
+    REPORT ( Actions::INIT )
     init_rot_       ();
-    // TEST_CONTEXT ( LambdaN_ )
+    TEST_CONTEXT ( LambdaN_ )
     init_strain_    ();
     // TEST_CONTEXT ( mat_strain0_ )
     return true;
@@ -488,6 +496,9 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   Vector        turnRot       ( ROT_DOF_COUNT );
   Vector        delta_phi     ( TRANS_DOF_COUNT );
   Vector        v             ( TRANS_DOF_COUNT );
+  Vector        e_x           ( TRANS_DOF_COUNT );
+  Vector        e_y           ( TRANS_DOF_COUNT );
+  Vector        e_z           ( TRANS_DOF_COUNT );
   double        c;
 
 
@@ -511,14 +522,28 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
     for ( idx_t inode = 0; inode < elemNodes; inode++)
     {
       delta_phi = node_dirs ( ALL, inode ) / norm2( node_dirs ( ALL, inode ) );
-      v = matmul ( e3, skew ( delta_phi ) );
-      c = dotProduct ( delta_phi, e3 );
 
-      rotMat = eye();
-      if ( c != -1.) // 180 deg turn == point mirroring
-        rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
-      else
-        rotMat *= -1.;
+      if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
+      {
+        e_y = material_ey_;
+        e_z = delta_phi;
+        e_x = matmul( skew(e_y), e_z );
+
+        rotMat[0] = e_x;
+        rotMat[1] = e_y;
+        rotMat[2] = e_z;
+      }
+      else // no y-direction given
+      {
+        v = matmul ( e3, skew ( delta_phi ) );
+        c = dotProduct ( delta_phi, e3 );
+
+        rotMat = eye();
+        if ( c != -1.) // 180 deg turn == point mirroring
+          rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
+        else
+          rotMat *= -1.;
+      }
 
       LambdaN_( ALL, ALL, ie, inode ) = rotMat;    
     }    

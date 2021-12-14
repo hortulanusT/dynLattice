@@ -20,11 +20,11 @@
   #define TEST_STD( key ) std::clog << "> > > " << #key << " ::\n" << key << "\n";
   #define STOP_DEBUG throw jem::RuntimeException(__FUNCTION__, "I want to end here :)");
 #else
-  #define REPORT( key ) void;
-  #define TEST_CONTEXT( key ) void;
-  #define TEST_NO_CONTEXT( key ) void;
-  #define TEST_STD( key ) void;
-  #define STOP_DEBUG void;
+  #define REPORT( key )
+  #define TEST_CONTEXT( key )
+  #define TEST_NO_CONTEXT( key )
+  #define TEST_STD( key )
+  #define STOP_DEBUG
 #endif
 
 #define NOT_IMPLEMENTED throw jem::RuntimeException( __PRETTY_FUNCTION__, "Function not implemented!" );

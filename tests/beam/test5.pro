@@ -21,6 +21,7 @@ params.rod_details.young = 1e7;
 params.rod_details.shear_modulus = .5e7;
 params.rod_details.area = 1.;
 params.rod_details.area_moment = "1/12";
+params.rod_details.material_ey = [0., 0., 1. ];
 
 params.force_model.type = "Neumann";
 params.force_model.loadIncr = params.Steps;

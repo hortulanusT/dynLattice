@@ -155,6 +155,9 @@ void      periodicBCModel::init_
           System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir] << " to 0\n";
           for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to each other\n";
+          for (idx_t iNode = 1; iNode < slaveDofs_(iDof, iDir).size(); iNode++)
+            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], slaveDofs_(iDof, iDir)[0], 1.0);
         }
         else
         {
