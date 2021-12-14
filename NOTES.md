@@ -9,7 +9,6 @@
 - investigate options for parallel computing
 - PBC Output extent other side ?? (du/dX = (u2-u1)/deltaX)
 ## environment
-- make link for multiple identical geom-files
 - think of smarter ways to handle data
 
 # Ideas
@@ -18,7 +17,7 @@
     - higher aspect ratios differ from the analytical solution ==> nonlinear effects stronger
     - higher strains seem to amplify the trends from low strains
     - smaller step size not always leads to better convergence
-    - Global Buckling due to contacts?
+    - Global Buckling due to contacts/due to dynamic effects?
 2. Questions
     - extension simulation as well as compression simulation
     - XY-shear differs from YX-shear (small strain case too?)
