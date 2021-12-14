@@ -220,8 +220,7 @@ void      periodicBCModel::setConstraints_
       
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {
-        // set the master DOF to zero and the slave DOF to the prescribed strain
-        cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
+        // set the slave DOFs to the prescribed strain
         cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],  scale*dispGrad_(iDof, iDir)*extent);
       }
     }

@@ -127,9 +127,9 @@ StringVector PBCGroupOutputModule::getDataSets_ () const
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
         dataSets.pushBack( String::format( "%s.resp.%s / %s"
-          , PBCGroupInputModule::EDGES[1 + 2*i]
-          , nodeDofNames_[j] 
-          , areas[i] ) );  
+          , PBCGroupInputModule::EDGES[1 + 2*j]
+          , nodeDofNames_[i] 
+          , areas[j] ) );  
 
   return dataSets.toArray();
 }
