@@ -1,6 +1,6 @@
 // ACTUAL_MODEL
 model.type = "Debug";
-model.noiseLevel = 1;
+model.noiseLevel = 2;
 model.model.type = "Matrix";
 model.model.model.type = "Multi";
 model.model.model.models = [ "cosseratRod", "diriFixed", "force" ]; 

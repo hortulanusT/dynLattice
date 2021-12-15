@@ -50,25 +50,25 @@ if test_passed[-1]:
 else:
   print(colored(" FAILED", "red", attrs=["bold"]))
 
-## TEST 2 ( QUADRATIC ELEMENTS )
-print(colored("EX 7.2", "cyan"), end=" ")
-print("...", end="", flush=True)
+# ## TEST 2 ( QUADRATIC ELEMENTS )
+# print(colored("EX 7.2", "cyan"), end=" ")
+# print("...", end="", flush=True)
 
-test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test2.pro"], stdout=subprocess.DEVNULL) )
+# test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test2.pro"], stdout=subprocess.DEVNULL) )
 
-try:
-  sim_load = np.loadtxt("tests/beam/test2/load.res")
-  sim_resp = np.loadtxt("tests/beam/test2/resp.res")
+# try:
+#   sim_load = np.loadtxt("tests/beam/test2/load.res")
+#   sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
-  test_passed[-1] &= np.allclose(sim_load, sim_resp)
-except IOError:
-  test_passed[-1] = False
+#   test_passed[-1] &= np.allclose(sim_load, sim_resp)
+# except IOError:
+#   test_passed[-1] = False
 
 
-if test_passed[-1]:
-  print(colored(" RUN THROUGH", "green", attrs=["bold"]))
-else:
-  print(colored(" FAILED", "red", attrs=["bold"]))
+# if test_passed[-1]:
+#   print(colored(" RUN THROUGH", "green", attrs=["bold"]))
+# else:
+#   print(colored(" FAILED", "red", attrs=["bold"]))
 
 ## TEST 5 ( BEND GEOMETRY )
 print(colored("EX 7.5", "cyan"), end=" ")
