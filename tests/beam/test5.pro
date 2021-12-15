@@ -2,10 +2,10 @@
 /////// SIMO/VU-QUOC EX 7.5 ///////
 ///////////////////////////////////
 
-params.Steps = 0.05;
+params.Steps = 10.;
 
 // LOGGING
-log.pattern = "*.info | model.debug";
+log.pattern = "*.info"; // | model.debug
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL

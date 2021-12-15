@@ -28,14 +28,14 @@ model.model.model.fixed.factors += [ 0., 0., 0. ];
 
 model.model.model.force.type = "Neumann";
 model.model.model.force.initLoad = 0.;
-model.model.model.force.loadIncr = 10.;
+model.model.model.force.loadIncr = params.Incr;
 model.model.model.force.nodeGroups =  [ "fixed" ] ;
 model.model.model.force.factors = [ 0. ];
 model.model.model.force.dofs = [ "dx" ];
 
 model.model.model.disp.type = "Dirichlet";
-model.model.model.disp.initDisp = 10e-3;
-model.model.model.disp.dispIncr = 10e-3;
+model.model.model.disp.initDisp = "$(params.Incr) * 1e-3";
+model.model.model.disp.dispIncr = "$(params.Incr) * 1e-3";
 model.model.model.disp.nodeGroups =  [ "fixed" ] ;
 model.model.model.disp.factors = [ 0. ];
 model.model.model.disp.dofs = [ "dx" ];

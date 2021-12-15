@@ -47,9 +47,20 @@ for eDir in elem_dir:
       if lDir[0] == "r" and dDir[0] == "d": # rotational load and translational displacment
         fixed_groups[eDir][lDir].append("fixed" if dDir[1] != lDir[1] else "all")
 
+y_Dir = {eDir:{} for eDir in elem_dir}
+y_Dir["x"]["x"] = "[0.,1.,0.]"
+y_Dir["x"]["y"] = "[0.,0.,1.]"
+y_Dir["x"]["z"] = "[0.,1.,0.]"
+y_Dir["y"]["x"] = "[0.,0.,1.]"
+y_Dir["y"]["y"] = "[0.,0.,1.]"
+y_Dir["y"]["z"] = "[1.,0.,0.]"
+y_Dir["z"]["x"] = "[0.,1.,0.]"
+y_Dir["z"]["y"] = "[1.,0.,0.]"
+y_Dir["z"]["z"] = "[0.,1.,0.]"
+
 # prepare some analytical solutions
 steps = 50
-incr = 10
+incr = 500/steps
 forces = [(i+1)*incr for i in range(steps)]
 displs = [(i+1)*incr*1e-3 for i in range(steps)]
 bending_u = lambda d: 1-(math.sin(d)/d)
@@ -111,9 +122,12 @@ for eDir in elem_dir:
       for lTyp in load_typ:
         print("...", end="", flush=True)
         # prepare the list for this load and run it
-        running_list = ["./bin/nonlinRod", "tests/element/test.pro"
+        running_list = ["./bin/nonlinRod"
+            , "-p", f"params.Incr={incr:f}"
+            , "tests/element/test.pro"
             , "-p", f"control.runWhile=\"i<{steps}\""
             , "-p", f"model.model.model.cosseratRod.shape.numPoints={eNodes}"
+            , "-p", f"model.model.model.cosseratRod.material_ey={y_Dir[eDir][lDir[1]]}" 
             , "-p", f"model.model.model.{lTyp}.nodeGroups=[\"free\"]"
             , "-p", f"model.model.model.{lTyp}.dofs=[\"{lDir}\"]"
             , "-p", f"model.model.model.{lTyp}.factors=[1.]" ]

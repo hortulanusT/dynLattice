@@ -21,7 +21,6 @@ params.rod_details.young = 2.1e7;
 params.rod_details.poission_ratio = .3;
 params.rod_details.area = 20.;
 params.rod_details.area_moment = 1.666666666666667;
-params.rod_details.material_ey = [ 0., 1., 0. ];
 
 params.force_model.type = "LoadScale";
 params.force_model.scaleFunc = "(i-1)*$(params.Steps)";

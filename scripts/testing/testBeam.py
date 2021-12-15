@@ -77,25 +77,36 @@ print("...", end="", flush=True)
 subprocess.run(["./scripts/utils/geo_to_dat.py", "tests/beam/test5.geo"], stdout=subprocess.DEVNULL)
 test_passed.append(not subprocess.call(["./bin/nonlinRod", "tests/beam/test5.pro"], stdout=subprocess.DEVNULL) )
 
+try:
+  sim_load = np.loadtxt("tests/beam/test5/load.res")
+  sim_resp = np.loadtxt("tests/beam/test5/resp.res")
+
+  test_passed[-1] &= np.allclose(sim_load, sim_resp)
+except IOError:
+  test_passed[-1] = False
+
 if test_passed[-1]:
   print(colored(" RUN THROUGH", "green", attrs=["bold"]))
 else:
   print(colored(" FAILED", "red", attrs=["bold"]))
 
 ## POST PROCESSING
-sim_disp = np.loadtxt("tests/beam/test2/disp.res")
-sim_load = np.loadtxt("tests/beam/test2/load.res")
-sim_resp = np.loadtxt("tests/beam/test2/resp.res")
+try:
+  sim_disp = np.loadtxt("tests/beam/test2/disp.res")
+  sim_load = np.loadtxt("tests/beam/test2/load.res")
+  sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
-plt.plot(sim_load[:,-1], sim_disp[:,2], 'k-', label="vertical")
-plt.plot(sim_load[:,-1], sim_disp[:,1]*-1, 'k-.', label="horizontal")
-plt.legend(loc="upper left")
-plt.xlabel( "Tip Load [N]" )
-plt.xlim(left=0)
-plt.ylabel( "Displacement [m] ")
-plt.grid()
+  plt.plot(sim_load[:,-1], sim_disp[:,2], 'k-', label="vertical")
+  plt.plot(sim_load[:,-1], sim_disp[:,1]*-1, 'k-.', label="horizontal")
+  plt.legend(loc="upper left")
+  plt.xlabel( "Tip Load [N]" )
+  plt.xlim(left=0)
+  plt.ylabel( "Displacement [m] ")
+  plt.grid()
 
-plt.savefig("tests/beam/test2/results.png")
+  plt.savefig("tests/beam/test2/results.png")
+except:
+  pass
 
 ## finishing
 if all(test_passed):
