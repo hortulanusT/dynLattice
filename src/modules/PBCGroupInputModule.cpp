@@ -137,7 +137,7 @@ Module::Status PBCGroupInputModule::init
 
     updated.store ( EDGES[i*2+1], globdat );
 
-    System::out() << "  ...Sorted NodeGroup `" << EDGES[i*2+1] <<
+    System::info( myName_ ) << " ...Sorted NodeGroup `" << EDGES[i*2+1] <<
       "' wrt `" << EDGES[i*2] << "'\n";
   }
 
@@ -175,9 +175,14 @@ void PBCGroupInputModule::prepareProps_
   String MIN = "min";
   String MAX = "max";
   Properties groupProps;
+  StringVector existingGroups;
   double dummy;
 
-  myProps.set  ( NODE_GROUPS, nGroupNames );
+  myProps.find ( existingGroups, NODE_GROUPS );
+  StringVector newGroups (existingGroups.size() + nGroupNames.size() );
+  newGroups[jem::SliceTo(existingGroups.size())] = existingGroups;
+  newGroups[jem::SliceFrom(existingGroups.size())] = nGroupNames;
+  myProps.set  ( NODE_GROUPS, newGroups );
   for (idx_t i = 0; i<j; i++)
   {
     groupProps = myProps.makeProps( nGroupNames[i] );

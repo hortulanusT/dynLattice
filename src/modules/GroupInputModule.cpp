@@ -74,6 +74,20 @@ Module::Status GroupInputModule::init
   Properties  myConf  = conf .makeProps ( myName_ );
   Properties  myProps = props.findProps ( myName_ );
 
+  // fill variables which specify the size
+  Properties    mySizeVars    = Globdat::getVariables( globdat ).makeProps( "SIZE" );
+  Properties    myOriginVars  = Globdat::getVariables( globdat ).makeProps( "ORIGIN" );
+  NodeSet       allNodes      = NodeSet::get( globdat, getContext() );
+  Matrix        coords        ( allNodes.size(), allNodes.rank() );
+  StringVector  names         = { "X", "Y", "Z" };
+  allNodes.getCoords          ( coords.transpose() );
+  for (idx_t i = 0; i < allNodes.rank(); i++)
+    mySizeVars.set            ( names[i], max(coords[i]) - min(coords[i]) );
+  System::info( myName_ ) << " ...SIZE of the System:\n" << mySizeVars << "\n";
+  for (idx_t i = 0; i < allNodes.rank(); i++)
+    myOriginVars.set          ( names[i], min(coords[i]) );
+  System::info( myName_ ) << " ...ORIGIN of the System:\n" << myOriginVars << "\n";
+
   StringVector nGroupNames;
   StringVector eGroupNames;
 

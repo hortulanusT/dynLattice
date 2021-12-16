@@ -16,6 +16,7 @@
 #include <jive/util/Constraints.h>
 #include <jive/util/XDofSpace.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/Globdat.h>
 
 using jem::String;
 using jem::Ref;
@@ -39,6 +40,7 @@ using jive::fem::ElementSet;
 using jive::util::Constraints;
 using jive::util::XDofSpace;
 using jive::util::Assignable;
+using jive::util::Globdat;
 using jive::Vector;
 using jive::Matrix;
 using jive::IdxVector;

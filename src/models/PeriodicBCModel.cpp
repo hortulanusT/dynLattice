@@ -38,7 +38,7 @@ periodicBCModel::periodicBCModel
   pbcRank_ = dofNames_.size();
 
   // get the rot names
-  myProps.get ( rotNames_, ROT_NAMES_PROP );
+  myProps.find( rotNames_, ROT_NAMES_PROP );
   myConf .set ( ROT_NAMES_PROP, rotNames_ );
 
   // get the displacement Gradient  

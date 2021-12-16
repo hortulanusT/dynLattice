@@ -9,7 +9,7 @@
 - GMSHInputModule with gmsh C++ API
 - investigate options for parallel computing
 - PBC Output extent other side
-  - $\frac{du}{dX} \approx \frac{u_2-u_1}{\delta X}$
+  - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
 - ParaviewOutput write wrapper file for exported files ~ `.pvd`
 - export some standard actions to seperate script
   - plotting
@@ -22,13 +22,16 @@
 - do RUC also with extension (use two sided colormap)
 - do other auxetics (with a non-re-entrant mechanism)
 - do patch sets
+  - compare with Sanne's results from the TNO Report
 ## Literature/Report
 - Sort the Libary in EndNote + put some papers on the reMarkable
 - Investigate stretching vs bending dominated auxetic effects
+- Investigate Prism-Type homogenization for lattices
 - write around 20pp progress report
   - Some background
   - How did I test my simulation
   - What are some first results
+- MSc Thesis Proposal for Prism Lattice Homogenization ?
 
 # Notes
 ## test-cases
@@ -52,3 +55,4 @@
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
+- use the `*.tiny` setting of the solver module to enable convergence for smaller load steps
