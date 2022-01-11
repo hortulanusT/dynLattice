@@ -43,7 +43,7 @@
 ## homogenization ideas
 - for 2.5D structure use 2D homogenization with prism shear modulus/Youngs modulus in third direction scaled up to density?
  
-# :bangbang: Information
+# :heavy_check_mark: Information
 ## debugging
 - call (dbg) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
