@@ -1,4 +1,4 @@
-# TODO 
+# :dektop_computer: TO DO 
 ## Code
 - Create Custom Sample Module for advanced options
   - append without extra header
@@ -33,7 +33,7 @@
   - What are some first results
 - MSc Thesis Proposal for Prism Lattice Homogenization ?
 
-# Notes
+# :scroll: Notes
 ## test-cases
 - single element (cantilever):
   - point force fails for large magnitudes (and small step sizes?!?)
@@ -43,7 +43,7 @@
 ## homogenization ideas
 - for 2.5D structure use 2D homogenization with prism shear modulus/Youngs modulus in third direction scaled up to density?
  
-# Information
+# :bangbang: Information
 ## debugging
 - call (dbg) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
