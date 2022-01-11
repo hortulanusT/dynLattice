@@ -605,7 +605,7 @@ void specialCosseratRodModel::get_geomStiff_
 
   // get phi_prime
   shape_->getShapeGradients( shapeGrads, w, coords );
-  nodePhi = coords + u;  
+  nodePhi = coords + u;  // FIXME addition of different values is no good (vgl Erik Jan)
   phiP = matmul( nodePhi, shapeGrads );
 
   // for every iPoint assemble the B-Matrix
