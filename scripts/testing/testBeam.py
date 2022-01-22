@@ -50,45 +50,45 @@ if test_passed[-1]:
 else:
   print(colored(" FAILED", "red", attrs=["bold"]))
 
-# ## TEST 2 ( QUADRATIC ELEMENTS )
-# print(colored("EX 7.2", "cyan"), end=" ")
-# print("...", end="", flush=True)
-
-# test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test2.pro"], stdout=subprocess.DEVNULL) )
-
-# try:
-#   sim_load = np.loadtxt("tests/beam/test2/load.res")
-#   sim_resp = np.loadtxt("tests/beam/test2/resp.res")
-
-#   test_passed[-1] &= np.allclose(sim_load, sim_resp)
-# except IOError:
-#   test_passed[-1] = False
-
-
-# if test_passed[-1]:
-#   print(colored(" RUN THROUGH", "green", attrs=["bold"]))
-# else:
-#   print(colored(" FAILED", "red", attrs=["bold"]))
-
-## TEST 5 ( BEND GEOMETRY )
-print(colored("EX 7.5", "cyan"), end=" ")
+## TEST 2 ( QUADRATIC ELEMENTS )
+print(colored("EX 7.2", "cyan"), end=" ")
 print("...", end="", flush=True)
 
-subprocess.run(["./scripts/utils/geo_to_dat.py", "tests/beam/test5.geo"], stdout=subprocess.DEVNULL)
-test_passed.append(not subprocess.call(["./bin/nonlinRod", "tests/beam/test5.pro"], stdout=subprocess.DEVNULL) )
+test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test2.pro"], stdout=subprocess.DEVNULL) )
 
 try:
-  sim_load = np.loadtxt("tests/beam/test5/load.res")
-  sim_resp = np.loadtxt("tests/beam/test5/resp.res")
+  sim_load = np.loadtxt("tests/beam/test2/load.res")
+  sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
   test_passed[-1] &= np.allclose(sim_load, sim_resp)
 except IOError:
   test_passed[-1] = False
 
+
 if test_passed[-1]:
   print(colored(" RUN THROUGH", "green", attrs=["bold"]))
 else:
   print(colored(" FAILED", "red", attrs=["bold"]))
+
+# ## TEST 5 ( BEND GEOMETRY )
+# print(colored("EX 7.5", "cyan"), end=" ")
+# print("...", end="", flush=True)
+
+# subprocess.run(["./scripts/utils/geo_to_dat.py", "tests/beam/test5.geo"], stdout=subprocess.DEVNULL)
+# test_passed.append(not subprocess.call(["./bin/nonlinRod", "tests/beam/test5.pro"], stdout=subprocess.DEVNULL) )
+
+# try:
+#   sim_load = np.loadtxt("tests/beam/test5/load.res")
+#   sim_resp = np.loadtxt("tests/beam/test5/resp.res")
+
+#   test_passed[-1] &= np.allclose(sim_load, sim_resp)
+# except IOError:
+#   test_passed[-1] = False
+
+# if test_passed[-1]:
+#   print(colored(" RUN THROUGH", "green", attrs=["bold"]))
+# else:
+#   print(colored(" FAILED", "red", attrs=["bold"]))
 
 ## POST PROCESSING
 try:
@@ -96,13 +96,15 @@ try:
   sim_load = np.loadtxt("tests/beam/test2/load.res")
   sim_resp = np.loadtxt("tests/beam/test2/resp.res")
 
-  plt.plot(sim_load[:,-1], sim_disp[:,2], 'k-', label="vertical")
-  plt.plot(sim_load[:,-1], sim_disp[:,1]*-1, 'k-.', label="horizontal")
+  plt.plot(sim_load[:,-1]/1e3, sim_disp[:,2], 'k-', label="vertical")
+  plt.plot(sim_load[:,-1]/1e3, sim_disp[:,1]*-1, 'k-.', label="horizontal")
   plt.legend(loc="upper left")
-  plt.xlabel( "Tip Load [N]" )
-  plt.xlim(left=0)
+  plt.xlabel( "Tip Load [kN]" )
   plt.ylabel( "Displacement [m] ")
-  plt.grid()
+  plt.xlim([0, 140])
+  plt.axhline(y=0, color="grey")
+
+  plt.gcf().set_size_inches(10, 6)
 
   plt.savefig("tests/beam/test2/results.png")
 except:
