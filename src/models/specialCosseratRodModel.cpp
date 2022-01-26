@@ -338,9 +338,9 @@ void   specialCosseratRodModel::get_strain_table_
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      if (!mat_vals) strain_table.addRowValues ( ie, icols, spat_strains ( ALL, ip ) );
-      else strain_table.addRowValues ( ie, icols, mat_strains ( ALL, ip ) );
-      weights[ie]              += ipWeights[ip];
+      if (!mat_vals) strain_table.addRowValues ( ielem, icols, spat_strains ( ALL, ip ) );
+      else strain_table.addRowValues ( ielem, icols, mat_strains ( ALL, ip ) );
+      weights[ielem]              += ipWeights[ip];
     }    
   }
 }
@@ -402,9 +402,9 @@ void    specialCosseratRodModel::get_stress_table_
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      if (!mat_vals) stress_table.addRowValues ( ie, icols, spat_stresses ( ALL, ip ) );
-      else stress_table.addRowValues ( ie, icols, mat_stresses ( ALL, ip ) );
-      weights[ie]              += ipWeights[ip];
+      if (!mat_vals) stress_table.addRowValues ( ielem, icols, spat_stresses ( ALL, ip ) );
+      else stress_table.addRowValues ( ielem, icols, mat_stresses ( ALL, ip ) );
+      weights[ielem]              += ipWeights[ip];
     }
   }
 }

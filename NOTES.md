@@ -18,6 +18,7 @@
 ## Environment
 - think of smarter ways to handle data
 - rethink the folder structure
+- structure git repos with "submodules"
 ## Investigations
 - do RUC also with extension (use two sided colormap)
 - do other auxetics (with a non-re-entrant mechanism)

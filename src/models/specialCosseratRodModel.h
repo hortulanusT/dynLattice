@@ -28,6 +28,7 @@
 #include <jive/util/XTable.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/XDofSpace.h>
+#include <jive/util/Printer.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
