@@ -173,11 +173,13 @@ bool specialCosseratRodModel::takeAction
   using jive::model::ActionParams;
   using jive::model::StateVector;
 
+  // REPORT(action)
+  // TEST_CONTEXT(params)
+
   if ( action == Actions::INIT )
   {
-    REPORT ( Actions::INIT )
     init_rot_       ();
-    TEST_CONTEXT ( LambdaN_ )
+    // TEST_CONTEXT ( LambdaN_ )
     init_strain_    ();
     // TEST_CONTEXT ( mat_strain0_ )
     return true;
@@ -605,7 +607,9 @@ void specialCosseratRodModel::get_geomStiff_
 
   // get phi_prime
   shape_->getShapeGradients( shapeGrads, w, coords );
-  JEM_ASSERT2(testall(abs(TINY*coords) < abs(u) | u == 0), "Addition of displacement with coordinates would result in large round off-errors");
+  // TEST_CONTEXT( coords )
+  // TEST_CONTEXT( u )
+  // WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
 
@@ -658,6 +662,7 @@ void specialCosseratRodModel::get_strains_
   shapeVals = shape_->getShapeFunctions();
   shape_->getShapeGradients( shapeGrads, w, coords );
   // TEST_CONTEXT( shapeGrads )
+  // WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
   // TEST_CONTEXT( phiP )
@@ -804,8 +809,6 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(c)
     get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT(spat_stresses)
-    // TEST_CONTEXT(coords)
-    // TEST_CONTEXT(u)
     get_geomStiff_( B, weights, spat_stresses, coords, u );
     // TEST_CONTEXT(B)
     // TEST_CONTEXT(weights)

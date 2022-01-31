@@ -11,7 +11,7 @@
 #include <jive/util/Printer.h>
 
 const char*      periodicBCModel::TYPE_NAME       = "PeriodicBC";
-const char*      periodicBCModel::DISP_GRAD_PROP  = "dispGrad";
+const char*      periodicBCModel::MODE_PROP       = "mode";
 const char*      periodicBCModel::DOF_NAMES_PROP  = "dofs";
 const char*      periodicBCModel::ROT_NAMES_PROP  = "rotDofs";
 
@@ -41,16 +41,38 @@ periodicBCModel::periodicBCModel
   myProps.find( rotNames_, ROT_NAMES_PROP );
   myConf .set ( ROT_NAMES_PROP, rotNames_ );
 
-  // get the displacement Gradient  
+  // get the mode name
+  String mode = "DISP";
+  myProps.find( mode, MODE_PROP );
+  myConf .set ( MODE_PROP, mode.toLower() );
+  if (mode.toUpper() == "DISP")
+  {  
+    gradName_ = "H";
+    mode_ = DISP;
+  }
+  else if (mode.toUpper() == "LOAD")
+  {
+    gradName_ = "P";
+    mode_ = LOAD;
+  }
+  else if (mode.toUpper() == "ARCLEN" )
+  {
+    gradName_ = "grad";
+    mode_ = ARCLEN;
+  }
+  else
+    throw jem::IllegalInputException("Unknown mode");
+
+  // get the Gradient  
   // H_ij = du_i/dX_j
-  dispGrad_.resize(pbcRank_, pbcRank_);
-  dispGrad_ = NAN;
+  grad_.resize(pbcRank_, pbcRank_);
+  grad_ = NAN;
   for (idx_t iDisp = 0; iDisp < pbcRank_; iDisp++)
   {
     for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
     { 
-      myProps.find( dispGrad_(iDisp, iDir), DISP_GRAD_PROP + String(iDisp+1) + String(iDir+1) );
-      myConf .set ( DISP_GRAD_PROP + String(iDisp+1) + String(iDir+1), dispGrad_(iDisp, iDir) );
+      myProps.find( grad_(iDisp, iDir), gradName_ + String(iDisp+1) + String(iDir+1) );
+      myConf .set ( gradName_ + String(iDisp+1) + String(iDir+1), grad_(iDisp, iDir) );
     }    
   }
 }
@@ -69,7 +91,7 @@ bool      periodicBCModel::takeAction
     init_ ( globdat );
   }
 
-  if (action == Actions::GET_CONSTRAINTS)
+  if (action == Actions::GET_CONSTRAINTS && mode_ == DISP)
   {    
     double scale;
 
@@ -77,6 +99,20 @@ bool      periodicBCModel::takeAction
     params.get ( scale, ActionParams::SCALE_FACTOR );
 
     setConstraints_ ( globdat, scale );    
+    return true;
+  }
+
+  if (action == Actions::GET_EXT_VECTOR && mode_ == LOAD)
+  {
+    double scale;
+    Vector f;
+
+    // get the scale factor
+    params.get ( scale, ActionParams::SCALE_FACTOR );
+    params.get ( f, ActionParams::EXT_VECTOR );
+
+    if (scale != 0.0)
+      getExtVec_( f, globdat, scale );
     return true;
   }
 
@@ -136,10 +172,10 @@ void      periodicBCModel::init_
     
   
   // set some ground rules depending on where the dispGrad is configured
-  BoolMatrix  not_given ( dispGrad_.shape() );
+  BoolMatrix  not_given ( grad_.shape() );
   for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-      not_given(iDof, iDir) = std::isnan(dispGrad_(iDof, iDir));
+      not_given(iDof, iDir) = std::isnan(grad_(iDof, iDir));
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
   {
@@ -147,7 +183,7 @@ void      periodicBCModel::init_
     {
       // if no dispGrad for this DOF is not configured fix normal direction and apply PBC to the shear directions
       // do the same if only the normal DOF for a direction is configured
-      System::info( myName_ ) << " ...Locking for no or normal dispGrad w.r.t " << dofNames_[iDof] << "\n";
+      System::info( myName_ ) << " ...Locking for no or normal grad w.r.t " << dofNames_[iDof] << "\n";
       for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
       {
         if (iDof == iDir)
@@ -170,7 +206,7 @@ void      periodicBCModel::init_
     else if (not_given(iDof, iDof) && sum(!not_given(iDof, ALL)) > 0)
     {
       // if a dispGrad for this DOF is set for a shear term, fix the base for this shear term (and set other shear terms to PBC)
-      System::info( myName_ ) << " ...Locking for shear dispGrad w.r.t " << dofNames_[iDof] << "\n";
+      System::info( myName_ ) << " ...Locking for shear grad w.r.t " << dofNames_[iDof] << "\n";
       for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
       {
         if (!not_given(iDof, iDir))
@@ -209,25 +245,66 @@ void      periodicBCModel::setConstraints_
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iDir = 0; iDir < pbcRank_; iDir++ )
     {
-      if ( std::isnan(dispGrad_(iDof, iDir)) )
+      if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
         
       Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDir]);
 
       System::info( myName_ ) << " ...Applying strain in direction of " << dofNames_[iDof] << "\n";
-      System::info( myName_ ) << "      of magnitude " << scale*dispGrad_(iDof, iDir) << "\n";
+      System::info( myName_ ) << "      of magnitude " << scale*grad_(iDof, iDir) << "\n";
       System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iDir] << " and " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
       
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {
         // set the slave DOFs to the prescribed strain
-        cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],  scale*dispGrad_(iDof, iDir)*extent);
+        cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],  scale*grad_(iDof, iDir)*extent);
       }
     }
 
   // cons_->printTo(jive::util::Printer::get());
   // jive::util::Printer::flush();
 }
+
+void      periodicBCModel::getExtVec_
+  ( const Vector&         f,
+    const Properties&     globdat,
+    const double          scale )
+{
+  double extent = 1.;
+  double area   = 1.;
+  idx_t  nNodes = 0.;
+
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    for (idx_t iDir = 0; iDir < pbcRank_; iDir++ )
+    {
+      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+      if ( std::isnan(grad_(iDof, iDir)) )
+        continue;// if the dispGrad for this is not configured, skip it
+      
+      area = 1.;
+      for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
+        if (iDim != iDir)
+        {
+          Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDim]);
+          area *= extent;
+        }
+      nNodes = masterDofs_(iDof, iDir).size();
+      // TEST_CONTEXT(area)
+      
+      System::info( myName_ ) << " ...Applying stress in direction of " << dofNames_[iDof] << "\n";
+      System::info( myName_ ) << "      of magnitude " << scale*grad_(iDof, iDir) << "\n";
+      System::info( myName_ ) << "      at " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
+      
+      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
+      {
+        // set the unit load at the slave nodes
+        f[slaveDofs_(iDof, iDir)[iNode]] += scale*grad_(iDof, iDir)*area / nNodes;
+      }
+
+      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+    }
+}
+
 
 Ref<Model>periodicBCModel::makeNew
 

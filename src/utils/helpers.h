@@ -46,7 +46,7 @@ namespace jive_helpers
   const Vector vec0 = { 0., 0., 0. };
   const double PI   = 3.1415926535897932384626433;
   const double PI_2 = PI/2.;
-  const double TINY = __DBL_EPSILON__ * 1e5;
+  const double TINY = __DBL_EPSILON__ * 1e6;
 
   /**
    * @brief generates an identity matrix of the given dimension

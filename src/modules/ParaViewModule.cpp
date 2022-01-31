@@ -405,7 +405,7 @@ void       ParaViewModule::writePiece_
     Ref<ItemSet>   cellSet   = ItemSet::get   ( "elements", globdat, getContext() );
 
     Ref<XTable>    datumTable = newInstance<SparseTable>( "paraView", cellSet );
-    TEST_CONTEXT(datumTable->rowCount())
+    // TEST_CONTEXT(datumTable->rowCount())
     Vector         weights    ( datumTable->rowCount() );
     Properties     params     ( "actionParams" );
 
