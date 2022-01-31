@@ -605,7 +605,8 @@ void specialCosseratRodModel::get_geomStiff_
 
   // get phi_prime
   shape_->getShapeGradients( shapeGrads, w, coords );
-  nodePhi = coords + u;  // FIXME addition of different values is no good (vgl Erik Jan)
+  JEM_ASSERT2(testall(abs(TINY*coords) < abs(u) | u == 0), "Addition of displacement with coordinates would result in large round off-errors");
+  nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
 
   // for every iPoint assemble the B-Matrix
@@ -803,6 +804,8 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(c)
     get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT(spat_stresses)
+    // TEST_CONTEXT(coords)
+    // TEST_CONTEXT(u)
     get_geomStiff_( B, weights, spat_stresses, coords, u );
     // TEST_CONTEXT(B)
     // TEST_CONTEXT(weights)

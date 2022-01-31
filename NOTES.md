@@ -20,20 +20,8 @@
 - rethink the folder structure
 - structure git repos with "submodules"
 ## Investigations
-- do RUC also with extension (use two sided colormap)
-- do other auxetics (with a non-re-entrant mechanism)
-- do patch sets
-  - compare with Sanne's results from the TNO Report
-## Literature/Report
-- Sort the Libary in EndNote + put some papers on the reMarkable
-- Investigate stretching vs bending dominated auxetic effects
-- Investigate Prism-Type homogenization for lattices
-- write around 20pp progress report
-  - Some background
-  - How did I test my simulation
-  - What are some first results
-- MSc Thesis Proposal for Prism Lattice Homogenization ?
-
+- Implement Arc-Length 
+- do the remaining test cases from [Simo/Vu-Quoc]
 # :scroll: Notes
 ## test-cases
 - single element (cantilever):
