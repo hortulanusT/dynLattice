@@ -21,7 +21,7 @@ tests/beam/test*/
 # save the resulting data files for testing
 !tests/beam/test1.dat
 !tests/beam/test2.dat
-!tests/arclen/re-entrant.dat
+!tests/arclen/*.dat
 
 # save the folder structure
 !.gitkeep

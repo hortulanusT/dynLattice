@@ -91,7 +91,7 @@ class periodicBCModel : public Model
 
     ( const Vector&         f,
       const Properties&     globdat,
-      const double          scale );
+      const double          scale = 1. );
     
  private:
   Assignable<NodeSet>     nodes_;

@@ -3,11 +3,11 @@ log.pattern = "*.info | *.debug"; //
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM CONTROL
-control.runWhile = "i<100";
+control.runWhile = "(xmax.disp.dx - xmin.disp.dx) / all.extent.dx < 0.75";
 
 // SOLVER
 Solver.modules = [ "solver" ];
-Solver.solver.type = "Nonlin";
+Solver.solver.type = "Arclen";
 
 // SETUP
 params.dofNames = ["dx", "dy", "dz"];
@@ -22,25 +22,29 @@ params.material.dofNamesTrans = params.dofNames;
 params.material.dofNamesRot = params.rotNames;
 // pbc settings
 params.pbcDofs = [ "dx", "dy" ];
-params.load.type = "LoadScale";
-params.load.scaleFunc = "10 * i";
+params.load.type = "StdArclen";
+params.load.arcFunc = "UNP";
+params.load.weightTable = "arclenWeights";
+params.load.loadIncr = 1e-3;
 params.load.model.type = "PeriodicBC";
-params.load.model.mode = "LOAD";
+params.load.model.mode = "arclen";
 params.load.model.dofs = ["dx", "dy"];
 params.load.model.rotDofs = [ "rz" ];
-params.load.model.P22 = -1.;
+params.load.model.grad11 = -1.;
 // 2D settings
 params.dofs2D = ["dz", "rx", "ry"];
 params.groups2D = [ "all", "all", "all" ];
 
 // INPUT
-Input.modules = [ "input", "nodeInput" ];
+Input.modules = [ "input", "nodeInput", "tables" ];
 Input.input.type = "FEInput";
 Input.input.file = "$(_DIR_)/re-entrant.dat";
 Input.nodeInput.type = "PBCGroupInput";
 Input.nodeInput.groupSettings.restrictToGroup = "joints";
 Input.nodeInput.groupSettings.restrictPartial = 0;
 Input.nodeInput.corners = false;
+Input.tables.type = "FEInput";
+Input.tables.file = "$(_DIR_)/groups.dat";
 
 // ACTUAL_MODEL
 model.type = "Matrix";
@@ -66,16 +70,18 @@ model.model.fixed2D.nodeGroups = params.groups2D;
 model.model.fixed2D.dofs = params.dofs2D;
 
 // OUTPUTS
-Output.modules = [ "pbcOut", "paraview" ];
+Output.modules = [ "pbcOut", "view" ];
 
 Output.pbcOut.type = "PBCGroupOutput";
 Output.pbcOut.dofs = params.pbcDofs;
 Output.pbcOut.sampling.file = "$(CASE_NAME).csv";
 
-Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/custom-step%d";
-Output.paraview.groups = [ "rods" ];
-Output.paraview.rods.shape = "Line$(params.material.shape.numPoints)";
-Output.paraview.rods.disps = params.dofNames;
-Output.paraview.rods.otherDofs = params.rotNames;
-Output.paraview.rods.el_data = [ "strain", "stress", "mat_strain", "mat_stress" ];
+// Output.view.type = "FemView";
+
+// Output.view.type = "ParaView";
+// Output.view.output_format = "$(CASE_NAME)/custom-step%d";
+// Output.view.groups = [ "rods" ];
+// Output.view.rods.shape = "Line$(params.material.shape.numPoints)";
+// Output.view.rods.disps = params.dofNames;
+// Output.view.rods.otherDofs = params.rotNames;
+// Output.view.rods.el_data = [ "strain", "stress", "mat_strain", "mat_stress" ];

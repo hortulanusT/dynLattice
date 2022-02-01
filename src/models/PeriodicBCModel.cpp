@@ -107,12 +107,23 @@ bool      periodicBCModel::takeAction
     double scale;
     Vector f;
 
-    // get the scale factor
+    // get the scale factor & external force vector
     params.get ( scale, ActionParams::SCALE_FACTOR );
     params.get ( f, ActionParams::EXT_VECTOR );
 
-    if (scale != 0.0)
-      getExtVec_( f, globdat, scale );
+    getExtVec_( f, globdat, scale );
+    return true;
+  }
+
+  
+  if (action == Actions::GET_EXT_VECTOR && mode_ == ARCLEN)
+  {
+    Vector f;
+
+    // get the external force vector
+    params.get ( f, ActionParams::EXT_VECTOR );
+
+    getExtVec_( f, globdat );
     return true;
   }
 
@@ -228,6 +239,8 @@ void      periodicBCModel::init_
       throw jem::Exception( getContext(), "not supported comibnation of displacment gradients given!");
     }
   } 
+  // cons_->printTo(jive::util::Printer::get());
+  // jive::util::Printer::flush();
 }
 
 void      periodicBCModel::setConstraints_   
@@ -282,12 +295,13 @@ void      periodicBCModel::getExtVec_
         continue;// if the dispGrad for this is not configured, skip it
       
       area = 1.;
-      for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
-        if (iDim != iDir)
-        {
-          Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDim]);
-          area *= extent;
-        }
+      if (mode_ != ARCLEN)
+        for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
+          if (iDim != iDir)
+          {
+            Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDim]);
+            area *= extent;
+          }
       nNodes = masterDofs_(iDof, iDir).size();
       // TEST_CONTEXT(area)
       
@@ -304,7 +318,6 @@ void      periodicBCModel::getExtVec_
       // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
     }
 }
-
 
 Ref<Model>periodicBCModel::makeNew
 

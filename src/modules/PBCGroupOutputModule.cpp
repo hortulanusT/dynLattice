@@ -101,8 +101,10 @@ StringVector PBCGroupOutputModule::getDataSets_ () const
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
     {
-      dataSets.pushBack( String::format( "%s.disp.%s / all.extent.%s"
+      dataSets.pushBack( String::format( "(%s.disp.%s - %s.disp.%s) / all.extent.%s"
         , PBCGroupInputModule::EDGES[1 + 2*j]
+        , nodeDofNames_[i]
+        , PBCGroupInputModule::EDGES[0 + 2*j]
         , nodeDofNames_[i]
         , elemDofNames_[j] ) );
     }  
