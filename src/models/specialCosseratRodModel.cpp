@@ -173,11 +173,13 @@ bool specialCosseratRodModel::takeAction
   using jive::model::ActionParams;
   using jive::model::StateVector;
 
+  // REPORT(action)
+  // TEST_CONTEXT(params)
+
   if ( action == Actions::INIT )
   {
-    REPORT ( Actions::INIT )
     init_rot_       ();
-    TEST_CONTEXT ( LambdaN_ )
+    // TEST_CONTEXT ( LambdaN_ )
     init_strain_    ();
     // TEST_CONTEXT ( mat_strain0_ )
     return true;
@@ -193,18 +195,22 @@ bool specialCosseratRodModel::takeAction
     params.get  ( weights,  ActionParams::TABLE_WEIGHTS);                                                                                                                                                                                                 
     params.get  ( name,     ActionParams::TABLE_NAME);
 
+    // TEST_CONTEXT(weights)
+
     // Check whether the requested table is supported by
     // this model.
     if ( table->getRowItems() == elems_.getData() )
     {                                                                              
       Vector              disp;    
       StateVector::get  ( disp, dofs_, globdat );
-
+      
       if (name=="strain") get_strain_table_ ( *table, weights, disp );
       else if (name=="stress") get_stress_table_ ( *table, weights, disp );
       else if (name=="mat_strain") get_strain_table_ ( *table, weights, disp, true );
       else if (name=="mat_stress") get_stress_table_ ( *table, weights, disp, true );
       else return false;
+
+      // TEST_CONTEXT(weights)
 
       return true;
     }
@@ -334,13 +340,13 @@ void   specialCosseratRodModel::get_strain_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_strains_( spat_strains, mat_strains, weights, ie, u, theta );
+    get_strains_( spat_strains, mat_strains, ipWeights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      if (!mat_vals) strain_table.addRowValues ( ie, icols, spat_strains ( ALL, ip ) );
-      else strain_table.addRowValues ( ie, icols, mat_strains ( ALL, ip ) );
-      weights[ie]              += ipWeights[ip];
+      if (!mat_vals) strain_table.addRowValues ( ielem, icols, spat_strains ( ALL, ip ) );
+      else strain_table.addRowValues ( ielem, icols, mat_strains ( ALL, ip ) );
+      weights[ielem]              += ipWeights[ip];
     }    
   }
 }
@@ -398,13 +404,13 @@ void    specialCosseratRodModel::get_stress_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
+    get_stresses_( spat_stresses, mat_stresses, ipWeights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      if (!mat_vals) stress_table.addRowValues ( ie, icols, spat_stresses ( ALL, ip ) );
-      else stress_table.addRowValues ( ie, icols, mat_stresses ( ALL, ip ) );
-      weights[ie]              += ipWeights[ip];
+      if (!mat_vals) stress_table.addRowValues ( ielem, icols, spat_stresses ( ALL, ip ) );
+      else stress_table.addRowValues ( ielem, icols, mat_stresses ( ALL, ip ) );
+      weights[ielem]              += ipWeights[ip];
     }
   }
 }
@@ -605,7 +611,10 @@ void specialCosseratRodModel::get_geomStiff_
 
   // get phi_prime
   shape_->getShapeGradients( shapeGrads, w, coords );
-  nodePhi = coords + u;  
+  // TEST_CONTEXT( coords )
+  // TEST_CONTEXT( u )
+  // WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
+  nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
 
   // for every iPoint assemble the B-Matrix
@@ -657,6 +666,7 @@ void specialCosseratRodModel::get_strains_
   shapeVals = shape_->getShapeFunctions();
   shape_->getShapeGradients( shapeGrads, w, coords );
   // TEST_CONTEXT( shapeGrads )
+  // WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
   // TEST_CONTEXT( phiP )

@@ -3,7 +3,7 @@
 ///////////////////////////////////
 
 // LOGGING
-log.pattern = "*.info | model.debug";
+log.pattern = "*.info "; //| model.debug
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL

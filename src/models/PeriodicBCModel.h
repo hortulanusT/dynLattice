@@ -23,6 +23,7 @@
 #include <jive/util/Globdat.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/NodeGroup.h>
+#include <jive/implict/ArclenActions.h>
 
 #include "testing.h"
 #include "helpers.h"
@@ -38,6 +39,8 @@ using jive::util::Assignable;
 using jive::util::Globdat;
 using jive::fem::NodeSet;
 using jive::fem::NodeGroup;
+using jive::implict::ArclenActions;
+using jive::implict::ArclenParams;
 
 using namespace jive_helpers;
 
@@ -45,9 +48,12 @@ class periodicBCModel : public Model
 {
  public:
   static const char*      TYPE_NAME;
-  static const char*      DISP_GRAD_PROP;
+  static const char*      MODE_PROP;
+  static const char*      GRAD_PROP;
   static const char*      DOF_NAMES_PROP;
   static const char*      ROT_NAMES_PROP;
+
+  enum                    Mode      { LOAD, DISP };
 
   explicit                periodicBCModel
 
@@ -80,16 +86,24 @@ class periodicBCModel : public Model
   
     ( const Properties&     globdat,
       const double          scale );
+
+  void                    getExtVec_
+
+    ( const Vector&         f,
+      const Properties&     globdat,
+      const double          scale = 1. );
     
  private:
   Assignable<NodeSet>     nodes_;
   Ref<DofSpace>           dofs_;
   Ref<Constraints>        cons_;
-  Matrix                  dispGrad_;
+  String                  gradName_;
+  Matrix                  grad_;
   StringVector            dofNames_;
   StringVector            rotNames_;
   IdxVector               jdofs_;
   IdxVectorMatrix         masterDofs_;
   IdxVectorMatrix         slaveDofs_;
   idx_t                   pbcRank_;
+  Mode                    mode_;
 };
