@@ -55,11 +55,6 @@ periodicBCModel::periodicBCModel
     gradName_ = "P";
     mode_ = LOAD;
   }
-  else if (mode.toUpper() == "ARCLEN" )
-  {
-    gradName_ = "grad";
-    mode_ = ARCLEN;
-  }
   else
     throw jem::IllegalInputException("Unknown mode");
 
@@ -108,22 +103,13 @@ bool      periodicBCModel::takeAction
     Vector f;
 
     // get the scale factor & external force vector
-    params.get ( scale, ActionParams::SCALE_FACTOR );
     params.get ( f, ActionParams::EXT_VECTOR );
 
-    getExtVec_( f, globdat, scale );
-    return true;
-  }
+    if (params.find( scale, ActionParams::SCALE_FACTOR ))
+      getExtVec_( f, globdat, scale );
+    else 
+      getExtVec_( f, globdat );
 
-  
-  if (action == Actions::GET_EXT_VECTOR && mode_ == ARCLEN)
-  {
-    Vector f;
-
-    // get the external force vector
-    params.get ( f, ActionParams::EXT_VECTOR );
-
-    getExtVec_( f, globdat );
     return true;
   }
 
@@ -294,14 +280,15 @@ void      periodicBCModel::getExtVec_
       if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
       
+
       area = 1.;
-      if (mode_ != ARCLEN)
-        for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
-          if (iDim != iDir)
-          {
-            Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDim]);
-            area *= extent;
-          }
+      for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
+        if (iDim != iDir)
+        {
+          if (! Globdat::getVariables( "all.extent", globdat ).find( extent, dofNames_[iDim]) )
+            Globdat::getVariables ( "SIZE", globdat ).get( extent, jem::String(dofNames_[iDim].back()).toUpper() );
+          area *= extent;
+        }
       nNodes = masterDofs_(iDof, iDir).size();
       // TEST_CONTEXT(area)
       

@@ -3,7 +3,8 @@ log.pattern = "*.info | *.debug"; //
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM CONTROL
-control.runWhile = "(xmax.disp.dx - xmin.disp.dx) / all.extent.dx < 0.75";
+control.runWhile = "(xmax.disp.dx - xmin.disp.dx) / all.extent.dx > -0.75";
+control.fgMode = true;
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -23,14 +24,13 @@ params.material.dofNamesRot = params.rotNames;
 // pbc settings
 params.pbcDofs = [ "dx", "dy" ];
 params.load.type = "StdArclen";
-params.load.arcFunc = "UNP";
 params.load.weightTable = "arclenWeights";
-params.load.loadIncr = 1e-3;
+// params.load.loadIncr = 5e-1;
 params.load.model.type = "PeriodicBC";
-params.load.model.mode = "arclen";
+params.load.model.mode = "load";
 params.load.model.dofs = ["dx", "dy"];
 params.load.model.rotDofs = [ "rz" ];
-params.load.model.grad11 = -1.;
+params.load.model.P11 = -1.;
 // 2D settings
 params.dofs2D = ["dz", "rx", "ry"];
 params.groups2D = [ "all", "all", "all" ];
@@ -76,7 +76,11 @@ Output.pbcOut.type = "PBCGroupOutput";
 Output.pbcOut.dofs = params.pbcDofs;
 Output.pbcOut.sampling.file = "$(CASE_NAME).csv";
 
-// Output.view.type = "FemView";
+Output.view.type = "Graph";
+Output.view.dataSets = [ "plot" ];
+Output.view.plot.xData = "(xmax.disp.dx - xmin.disp.dx) / all.extent.dx";
+Output.view.plot.yData = "xmax.resp.dx / all.extent.dy";
+Output.view.plot.key = "P11 vs H11";
 
 // Output.view.type = "ParaView";
 // Output.view.output_format = "$(CASE_NAME)/custom-step%d";

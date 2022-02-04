@@ -195,18 +195,22 @@ bool specialCosseratRodModel::takeAction
     params.get  ( weights,  ActionParams::TABLE_WEIGHTS);                                                                                                                                                                                                 
     params.get  ( name,     ActionParams::TABLE_NAME);
 
+    // TEST_CONTEXT(weights)
+
     // Check whether the requested table is supported by
     // this model.
     if ( table->getRowItems() == elems_.getData() )
     {                                                                              
       Vector              disp;    
       StateVector::get  ( disp, dofs_, globdat );
-
+      
       if (name=="strain") get_strain_table_ ( *table, weights, disp );
       else if (name=="stress") get_stress_table_ ( *table, weights, disp );
       else if (name=="mat_strain") get_strain_table_ ( *table, weights, disp, true );
       else if (name=="mat_stress") get_stress_table_ ( *table, weights, disp, true );
       else return false;
+
+      // TEST_CONTEXT(weights)
 
       return true;
     }
@@ -336,7 +340,7 @@ void   specialCosseratRodModel::get_strain_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_strains_( spat_strains, mat_strains, weights, ie, u, theta );
+    get_strains_( spat_strains, mat_strains, ipWeights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -400,7 +404,7 @@ void    specialCosseratRodModel::get_stress_table_
     elems_.getElemNodes( inodes, ielem );    
     get_disps_( u, theta, inodes, disp );
 
-    get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
+    get_stresses_( spat_stresses, mat_stresses, ipWeights, ie, u, theta );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {

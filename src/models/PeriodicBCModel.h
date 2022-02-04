@@ -53,7 +53,7 @@ class periodicBCModel : public Model
   static const char*      DOF_NAMES_PROP;
   static const char*      ROT_NAMES_PROP;
 
-  enum                    Mode      { LOAD, DISP, ARCLEN };
+  enum                    Mode      { LOAD, DISP };
 
   explicit                periodicBCModel
 

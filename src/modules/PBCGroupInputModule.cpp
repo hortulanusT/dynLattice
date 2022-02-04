@@ -93,8 +93,10 @@ Module::Status PBCGroupInputModule::init
   nodes.getCoords ( coords );
 
   double dx = max(coords(0,ALL)) - min(coords(0,ALL));
+  double dz = max(coords(1,ALL)) - min(coords(1,ALL));
+  double dy = max(coords(2,ALL)) - min(coords(2,ALL));
 
-  small_ = dx / 1.e6;
+  small_ = max(dx, dy, dz) / 1.e6;
 
   // get duplicated nodes, if they exist
 
