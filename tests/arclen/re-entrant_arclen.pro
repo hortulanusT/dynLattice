@@ -25,7 +25,8 @@ params.material.dofNamesRot = params.rotNames;
 params.pbcDofs = [ "dx", "dy" ];
 params.load.type = "StdArclen";
 params.load.weightTable = "arclenWeights";
-// params.load.loadIncr = 5e-1;
+params.load.loadIncr = 5e-1;
+params.load.minIncr = 1e-1;
 params.load.model.type = "PeriodicBC";
 params.load.model.mode = "load";
 params.load.model.dofs = ["dx", "dy"];
@@ -81,6 +82,7 @@ Output.view.dataSets = [ "plot" ];
 Output.view.plot.xData = "(xmax.disp.dx - xmin.disp.dx) / all.extent.dx";
 Output.view.plot.yData = "xmax.resp.dx / all.extent.dy";
 Output.view.plot.key = "P11 vs H11";
+Output.view.snapshot = "$(_DIR_)/re-entrant_arclen.png";
 
 // Output.view.type = "ParaView";
 // Output.view.output_format = "$(CASE_NAME)/custom-step%d";
