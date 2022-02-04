@@ -1,3 +1,3 @@
 # ParaViewModule
 
-Repository for an existing ParaViewModule to be integrated into other projects via git submodules
+This Repository contains a JEM/JIVE Module, that enables outputting the results of a calculation to ParaView in XML-Format
