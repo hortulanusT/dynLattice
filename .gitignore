@@ -9,6 +9,7 @@ nonlinRod*
 *.log
 *.dat
 *.csv
+*.res
 
 studies/**/output/*
 studies/**/results/*
@@ -19,8 +20,7 @@ tests/element/*/
 tests/beam/test*/
 
 # save the resulting data files for testing
-!tests/beam/test1.dat
-!tests/beam/test2.dat
+!tests/beam/test*.dat
 !tests/arclen/*.dat
 
 # save the folder structure
