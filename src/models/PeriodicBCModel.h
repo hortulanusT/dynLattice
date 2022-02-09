@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <jem/util/Properties.h>
+#include <jem/util/PropertyException.h>
 
 #include <jive/Array.h>
 #include <jive/model/Model.h>
