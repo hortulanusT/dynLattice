@@ -67,7 +67,7 @@ void Line3D::getShapeGradients
 {
   Matrix c1( localRank(), nodeCount() );
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
-    c1( 0, iNode ) = norm2( c[iNode] - c[0] );
+    c1( 0, iNode ) = norm2( c[iNode] );
 
   Cubix     grads ( localRank(), shapeFuncCount(), ipointCount() ); 
   intLine_->getShapeGradients( grads, w, c1 );
@@ -108,9 +108,12 @@ void Line3D::getXi
   Matrix  grads   ( shapeFuncCount(), ipointCount() );
   getShapeGradients( grads, w, c );
 
-  Matrix  nodePhi = (Matrix)(c + u);  
-  Matrix  phiP    = matmul( nodePhi, grads );
-  
+  // Matrix  nodePhi = (Matrix)(c + u); 
+  // TEST_CONTEXT(nodePhi) 
+  // TEST_CONTEXT(grads)
+  Matrix  phiP    = matmul( c, grads );
+  // TEST_CONTEXT(phiP)
+
   Xi = 0.;
 
   for (idx_t ip = 0; ip < ipointCount(); ip++)

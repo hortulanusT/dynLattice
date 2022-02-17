@@ -153,7 +153,7 @@ specialCosseratRodModel::specialCosseratRodModel
   C_material_ ( 4, 4 ) = young_ * areaMoment_;
   C_material_ ( 5, 5 ) = shearMod_ * polarMoment_;
 
-  // TEST_CONTEXT ( C_material_ )
+  TEST_CONTEXT ( C_material_ )
 }
 
 //-----------------------------------------------------------------------
@@ -179,9 +179,13 @@ bool specialCosseratRodModel::takeAction
   if ( action == Actions::INIT )
   {
     init_rot_       ();
-    // TEST_CONTEXT ( LambdaN_ )
+    for (idx_t ie = 0; ie < elems_.size(); ie++)
+    {
+      REPORT (egroup_.getIndex(ie));
+      TEST_CONTEXT ( LambdaN_(ALL, ALL, ie, ALL) );
+    }
     init_strain_    ();
-    // TEST_CONTEXT ( mat_strain0_ )
+    TEST_CONTEXT ( mat_strain0_ )
     return true;
   }
 
@@ -774,6 +778,8 @@ void            specialCosseratRodModel::assemble_
   Matrix       coords         ( rank, nodeCount );
   Matrix       u              ( rank, nodeCount );
   Matrix       theta          ( rank, nodeCount );
+  Matrix       u_old          ( rank, nodeCount );
+  Matrix       theta_old      ( rank, nodeCount );
   Vector       weights        ( ipCount );
   Quadix       XI             ( dofCount, dofCount, nodeCount, ipCount );
   Quadix       PSI            ( dofCount, dofCount+TRANS_DOF_COUNT, nodeCount, ipCount );
@@ -798,19 +804,20 @@ void            specialCosseratRodModel::assemble_
     idx_t ielem = egroup_.getIndices()[ie];
     elems_.getElemNodes( inodes, ielem );
     nodes_.getSomeCoords( coords, inodes );
-    // REPORT(ielem)
+    REPORT(ielem)
 
     get_disps_( u, theta, inodes, disp );
+    get_disps_( u_old, theta_old, inodes, dispOld );
     // TEST_CONTEXT( u )
     // TEST_CONTEXT( theta )
 
     // get the XI and PSI values for this 
-    shape_->getXi( XI, weights, coords, u );
+    shape_->getXi( XI, weights, coords, u ); //TODO u_old???
     // TEST_CONTEXT(XI)
     shape_->getPsi( PSI, weights, coords );
     // TEST_CONTEXT(PSI)
     get_spatialC_( c, weights, ie, theta ); 
-    // TEST_CONTEXT(c)
+    TEST_CONTEXT(c)
     get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT(spat_stresses)
     get_geomStiff_( B, weights, spat_stresses, coords, u );
@@ -828,15 +835,18 @@ void            specialCosseratRodModel::assemble_
         { 
           dofs_->getDofIndices ( Jdofs, inodes[Jnode], jtypes_ ); 
           // TEST_CONTEXT(Jdofs)
+          SUBHEADER2( Inode, Jnode )
+          TEST_CONTEXT(XI(ALL, ALL, Inode, ip))
+          TEST_CONTEXT(XI(ALL, ALL, Jnode, ip))
 
           // Stiffness contribution S ( element stiffness matrix )
           addS = weights[ip] * mc3.matmul ( XI(ALL, ALL, Inode, ip), c[ip], XI(ALL, ALL, Jnode, ip).transpose() );
-          // TEST_CONTEXT(addS)
+          TEST_CONTEXT(addS)
           mbld.addBlock( Idofs, Jdofs, addS );
 
           // Stiffness contribution T ( element geometric stiffness matrix)
           addT = weights[ip] * mc3.matmul ( PSI(ALL, ALL, Inode, ip), B[ip], PSI(ALL, ALL, Jnode, ip).transpose() );
-          // TEST_CONTEXT(addT)
+          TEST_CONTEXT(addT)
           mbld.addBlock( Idofs, Jdofs, addT );
         }
         // TEST_CONTEXT( matmul ( XI(ALL, ALL, Inode, ip), spat_stresses ( ALL, ip ) ) )

@@ -15,6 +15,7 @@
 
 #ifndef NDEBUG
   #define REPORT( key ) jem::System::debug( myName_ ) << "\n-=-=-=-=-=-=-=-=-=-=- " << #key << " :: " << key << " -=-=-=-=-=-=-=-=-=-=-\n";
+  #define SUBHEADER2( a, b ) jem::System::debug( myName_ ) << "-=-=-=-=- " << #a << " :: " << a << " -=-=-=-=- " << #b << " :: " << b << " -=-=-=-=-\n";
   #define TEST_CONTEXT( key ) jem::System::debug( myName_ ) << "> > > " << #key << " in \"" << getContext() << "\" function \"" << __FUNCTION__ <<  "\" ::\n" << key << "\n";
   #define TEST_NO_CONTEXT( key ) jem::System::debug( __FUNCTION__ ) << "> > > " << #key << " in \"" << __PRETTY_FUNCTION__ << "\" ::\n" << key << "\n";
   #define TEST_STD( key ) std::clog << "> > > " << #key << " ::\n" << key << "\n";
@@ -22,6 +23,7 @@
   #define STOP_DEBUG throw jem::RuntimeException(__FUNCTION__, "I want to end here :)");
 #else
   #define REPORT( key )
+  #define SUBHEADER2( a, b )
   #define TEST_CONTEXT( key )
   #define TEST_NO_CONTEXT( key )
   #define TEST_STD( key )

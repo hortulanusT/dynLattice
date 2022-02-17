@@ -202,7 +202,7 @@ void  rodJointModel::assembleRot_
         mbld.addBlock  ( jdofs, idofs, (Matrix)(-1. * stiff_mat) );   
         mbld.addBlock  ( jdofs, jdofs, (Matrix)(+1. * stiff_mat) );
 
-        // REPORT2 ( inodes[inode], inodes[jnode] )
+        // SUBHEADER2 ( inodes[inode], inodes[jnode] )
         // TEST2 ( torque, stiff_mat )
       }     
     }    

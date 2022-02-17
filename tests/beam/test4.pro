@@ -7,7 +7,7 @@ log.pattern = "*.info | *.debug";
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<15";
+control.runWhile = "i<10000";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -25,7 +25,7 @@ params.rod_details.area_moment = 2.;
 // params.force_model.minIncr = .01;
 // params.force_model.maxIncr = 10.;
 params.force_model.type = "LoadScale";
-params.force_model.scaleFunc = "(i-1)*0.1";
+params.force_model.scaleFunc = "(i-1)*1";
 params.force_model.model.type = "PointLoad" ;
 params.force_model.model.loadTable = "force";
 
@@ -45,12 +45,10 @@ Input.groupInput.free =
   yval = 120.;
 };
 
+model.noiseLevel = 0;
+
 model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
-
-Output.disp.append = false;
-Output.resp.append = false;
-Output.load.append = false;
 
 model.model.model.diriFixed.type = "Dirichlet";
 model.model.model.diriFixed.maxDisp = 0.;
@@ -64,3 +62,9 @@ model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 model.model.model.diriFixed.nodeGroups += [ "all", "all", "all" ];
 model.model.model.diriFixed.dofs += ["dz", "rx", "ry"];
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
+
+Output.disp.append = false;
+Output.resp.append = false;
+Output.load.append = false;
+
+Output.paraview.type = "None";
