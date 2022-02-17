@@ -306,10 +306,12 @@ void rodJointModel::getCons_ ()
   // iterate through all the elements
   for (idx_t ie = 0; ie < egroup_.size(); ie++)
   {
-    idx_t ielem = egroup_.getIndices()[ie];      
+    idx_t ielem = egroup_.getIndex(ie); 
     // get the nodes of the element
     inodes.resize ( elems_.getElemNodeCount ( ielem ) );
     elems_.getElemNodes ( inodes, ielem );
+    // skip if element is empty
+    if (inodes.size() < 1)  continue;
     // define the first node of the element as master node
     masterNode = inodes [0];
     dofs_->getDofIndices ( masterDofs, masterNode, idofs );

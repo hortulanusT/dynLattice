@@ -180,7 +180,7 @@ bool specialCosseratRodModel::takeAction
   {
     init_rot_       ();    
     init_strain_    ();
-    for (idx_t ie = 0; ie < elems_.size(); ie++)
+    for (idx_t ie = 0; ie < egroup_.size(); ie++)
     {
       REPORT (egroup_.getIndex(ie));
       TEST_CONTEXT ( LambdaN_(ALL, ALL, ie, ALL) )
@@ -668,6 +668,7 @@ void specialCosseratRodModel::get_strains_
 
   // get position derivative
   shapeVals = shape_->getShapeFunctions();
+  // TEST_CONTEXT(coords)
   shape_->getShapeGradients( shapeGrads, w, coords );
   // TEST_CONTEXT( shapeGrads )
   // WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
@@ -844,10 +845,10 @@ void            specialCosseratRodModel::assemble_
           // TEST_CONTEXT(addS)
           mbld.addBlock( Idofs, Jdofs, addS );
 
-          // // Stiffness contribution T ( element geometric stiffness matrix)
-          // addT = weights[ip] * mc3.matmul ( PSI(ALL, ALL, Inode, ip), B[ip], PSI(ALL, ALL, Jnode, ip).transpose() );
-          // // TEST_CONTEXT(addT)
-          // mbld.addBlock( Idofs, Jdofs, addT );
+          // Stiffness contribution T ( element geometric stiffness matrix)
+          addT = weights[ip] * mc3.matmul ( PSI(ALL, ALL, Inode, ip), B[ip], PSI(ALL, ALL, Jnode, ip).transpose() );
+          // TEST_CONTEXT(addT)
+          mbld.addBlock( Idofs, Jdofs, addT );
         }
         // TEST_CONTEXT( matmul ( XI(ALL, ALL, Inode, ip), spat_stresses ( ALL, ip ) ) )
         fint[ Idofs ]   += weights[ip] * matmul ( XI(ALL, ALL, Inode, ip), spat_stresses ( ALL, ip ) );

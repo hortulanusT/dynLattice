@@ -7,27 +7,35 @@ log.pattern = "*.info | *.debug";
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<10000";
+control.runWhile = "i<200";
 
 // SOLVER
 Solver.modules = [ "solver" ];
-Solver.solver.type = "Nonlin";
 
 // SETTINGS
-params.rod_details.shape.numPoints = "3";
-params.rod_details.young = 7.2e6;
+params.rod_details.shape.numPoints = 2;
+params.rod_details.young = 200e6;
 params.rod_details.poission_ratio = .3;
-params.rod_details.area = 2.;
-params.rod_details.area_moment = 2.;
+params.rod_details.area = 1e-4;
+params.rod_details.area_moment = 8.333333333333333333333333e-10;
+params.rod_details.material_ey = [0.,0.,1.];
 
+// Solver.solver.type = "Arclen";
 // params.force_model.type = "StdArclen";
 // params.force_model.loadIncr = 8.064;
 // params.force_model.minIncr = .01;
 // params.force_model.maxIncr = 10.;
+
+Solver.solver.type = "Nonlin";
 params.force_model.type = "LoadScale";
-params.force_model.scaleFunc = "(i-1)*-.05";
+
+params.force_model.scaleFunc = "(i-1)*-.005";
 params.force_model.model.type = "Constraints" ;
-params.force_model.model.conTable = "force";
+params.force_model.model.conTable = "top_y";
+
+// params.force_model.scaleFunc = "(i-1)*-1";
+// params.force_model.model.type = "PointLoad" ;
+// params.force_model.model.loadTable = "top_y";
 
 // include model and i/o files
 include "input.pro";
@@ -37,13 +45,9 @@ include "output.pro";
 Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right", "free" ];
 Input.groupInput.fixed_left.ytype = "min";
 Input.groupInput.fixed_left.xtype = "min";
-Input.groupInput.fixed_right.ytype = "max";
+Input.groupInput.fixed_right.ytype = "min";
 Input.groupInput.fixed_right.xtype = "max";
-Input.groupInput.free = 
-{
-  xval = 24.;
-  yval = 120.;
-};
+Input.groupInput.free.ytype = "max";
 
 model.noiseLevel = 0;
 
@@ -59,9 +63,9 @@ model.model.model.diriFixed.factors = [ 0., 0., 0. ];
 model.model.model.diriFixed.nodeGroups += [ "fixed_left", "fixed_left", "fixed_left" ];
 model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesTrans;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
-model.model.model.diriFixed.nodeGroups += [ "all", "all", "all" ];
-model.model.model.diriFixed.dofs += ["dz", "rx", "ry"];
-model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
+// model.model.model.diriFixed.nodeGroups += [ "all", "all", "all" ];
+// model.model.model.diriFixed.dofs += ["dz", "rx", "ry"];
+// model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
 
 Output.disp.append = false;
 Output.resp.append = false;

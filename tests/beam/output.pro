@@ -32,4 +32,4 @@ Output.paraview.rods.shape = "Line$(params.rod_details.shape.numPoints)";
 Output.paraview.rods.disps = model.model.model.cosseratRod.dofNamesTrans;
 Output.paraview.rods.otherDofs = model.model.model.cosseratRod.dofNamesRot;
 Output.paraview.rods.node_data = ["fint", "fext", "fres"];
-Output.paraview.rods.el_data = ["strain", "stress"];
+Output.paraview.rods.el_data = ["strain", "stress", "mat_stress", "mat_strain"];

@@ -4,7 +4,7 @@
 
 // LOGGING
 log.pattern = "*.info | *.debug";
-log.file = "$(CASE_NAME).log";
+log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
 control.runWhile = "i<200";
@@ -42,6 +42,8 @@ params.force_model.factors = -1.;
 include "input.pro";
 include "model.pro";
 include "output.pro";
+
+model.noiseLevel=0;
 
 Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right", "free" ];
 Input.groupInput.fixed_left.ytype = "min";
