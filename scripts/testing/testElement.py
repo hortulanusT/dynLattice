@@ -21,6 +21,7 @@ try:
   [os.remove(file) for file in glob.glob("tests/element/FAILED/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/DIFF/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/DIFF/*.log")]
+  os.remove("tests/element/FAILED/_runs.txt")
 except FileNotFoundError:
   pass
 try:  

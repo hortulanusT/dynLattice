@@ -2,10 +2,10 @@
 /////// SIMO/VU-QUOC EX 7.5 ///////
 ///////////////////////////////////
 
-params.Steps = 300.;
+params.Steps = 150.;
 
 // LOGGING
-log.pattern = "*.info "; // | *.debug
+log.pattern = "*.info | *.debug"; // 
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
@@ -44,4 +44,4 @@ Output.disp.append = false;
 Output.resp.append = false;
 Output.load.append = false;
 
-Output.paraview.type = "None";
+// Output.paraview.type = "None";

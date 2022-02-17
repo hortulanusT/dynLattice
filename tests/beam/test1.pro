@@ -36,3 +36,4 @@ include "output.pro";
 
 model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
+model.model.model.joint.type = "None";
