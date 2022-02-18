@@ -450,6 +450,7 @@ void     specialCosseratRodModel::init_strain_ ()
 void     specialCosseratRodModel::update_rot_ 
   ( const Vector& disp ) // LATER non-straight rods?
 {
+  NOT_IMPLEMENTED
   const idx_t   elemCount     = egroup_.size();
   const idx_t   rank          = shape_->globalRank();
 
@@ -479,7 +480,7 @@ void     specialCosseratRodModel::update_rot_
       dofs_->getDofIndices( iDofs, iNodes[inode], trans_types_ );
       coords[inode] += disp[iDofs];
 
-      LambdaN_(ALL, ALL, iNodes[inode]) = matmul ( Theta, LambdaN_(ALL, ALL, iNodes[inode]));
+      LambdaN_(ALL, ALL, ielem, iNodes[inode]) = matmul ( Theta, LambdaN_(ALL, ALL, ielem, iNodes[inode]));
     }    
   }  
 }
@@ -510,7 +511,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   double        c;
 
 
-  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, ipCount, elemCount );
+  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, elemNodes, elemCount );
   LambdaN_         = NAN;  
   node_dirs        = 0.;
 
@@ -519,27 +520,31 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   // get the direction for each element //ONLY APPROXIMATION FOR NON-STRAIGHT ELEMENTS
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
+    // REPORT(ie)
     idx_t ielem = egroup_.getIndices()[ie];
     elems_.getElemNodes ( inodes, ielem );
 
-    node_dirs ( ALL, 0 ) += coords ( ALL, inodes[1] ) - coords ( ALL, inodes[0] );
+    // TEST_CONTEXT(inodes)
+    node_dirs ( ALL, 0 ) = coords ( ALL, inodes[1] ) - coords ( ALL, inodes[0] );
     for (idx_t in = 1; in < elemNodes-1; in++)
-      node_dirs ( ALL, in ) += coords ( ALL, inodes[in+1] ) - coords ( ALL, inodes[in-1] );
-    node_dirs ( ALL, elemNodes-1 ) += coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
+      node_dirs ( ALL, in ) = coords ( ALL, inodes[in+1] ) - coords ( ALL, inodes[in-1] );
+    node_dirs ( ALL, elemNodes-1 ) = coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
     
-    for ( idx_t inode = 0; inode < nodeCount; inode++)
+    // TEST_CONTEXT(node_dirs)
+
+    for ( idx_t inode = 0; inode < elemNodes; inode++)
       node_dirs[inode] = node_dirs[inode] / norm2( node_dirs[inode] );
     
-    TEST_CONTEXT(node_dirs)
-    ip_dirs = matmul( shape_->getShapeFunctions(), node_dirs );
-    TEST_CONTEXT(ip_dirs)
+    // TEST_CONTEXT(node_dirs)
+    // ip_dirs = matmul( node_dirs, shape_->getShapeFunctions() );
+    // TEST_CONTEXT(ip_dirs)
 
-    for ( idx_t ip = 0; ip < ipCount; ip++ )
+    for ( idx_t iNode = 0; iNode < elemNodes; iNode++ )
     {
       if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
       {
         e_y = material_ey_;
-        e_z = ip_dirs[ip];
+        e_z = node_dirs[iNode];
         e_x = matmul( skew(e_y), e_z );
 
         rotMat[0] = e_x;
@@ -548,8 +553,8 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
       }
       else // no y-direction given
       {
-        v = matmul ( e3, skew ( ip_dirs[ip] ) );
-        c = dotProduct ( ip_dirs[ip], e3 );
+        v = matmul ( e3, skew ( node_dirs[iNode] ) );
+        c = dotProduct ( node_dirs[iNode], e3 );
 
         rotMat = eye();
         if ( c != -1.) // 180 deg turn == point mirroring
@@ -557,8 +562,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
         else
           rotMat *= -1.;
       }
-
-      LambdaN_( ALL, ALL, ie, ip ) = rotMat;    
+      LambdaN_[ie][iNode] = rotMat;    
     }    
   }
 }
@@ -577,19 +581,17 @@ void specialCosseratRodModel::get_spatialC_
 
   Matrix      Pi_mat      ( dofCount, dofCount );
   IdxVector   elNodes     ( nodeCount );
-  Cubix       nodeRots    ( globRank, globRank, nodeCount );
   IdxVector   rotDofs     ( globRank );
+  Cubix       nodeRots    ( globRank, globRank, nodeCount );
   Cubix       ipRots      ( globRank, globRank, ipCount );
 
   elems_.getElemNodes( elNodes, ie );
 
-  for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+  for (idx_t iNode = 0; iNode < nodeCount; iNode ++) 
   {
-    expVec( nodeRots[iNode], theta[iNode] );
-    // include initial rotations
-    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, elNodes[iNode]));
-  }
-  
+    expVec ( nodeRots[iNode], theta[iNode] );
+    nodeRots[iNode] = matmul( nodeRots[iNode], LambdaN_[ie][iNode] );
+  }  
   shape_->getRotations( ipRots, nodeRots );
 
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -662,13 +664,13 @@ void specialCosseratRodModel::get_strains_
   Matrix    nodePhi     ( globRank, nodeCount );
   Matrix    phiP        ( globRank, ipCount );
 
-  REPORT( ielem )
+  // REPORT( ielem )
 
   elems_.getElemNodes ( elNodes, ielem );
   nodes_.getSomeCoords( coords, elNodes);
 
-  TEST_CONTEXT( coords )
-  TEST_CONTEXT( u )
+  // TEST_CONTEXT( coords )
+  // TEST_CONTEXT( u )
   // TEST_CONTEXT( theta )
 
   // get position derivative
@@ -678,33 +680,26 @@ void specialCosseratRodModel::get_strains_
   WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
-  TEST_CONTEXT( nodePhi )
-  TEST_CONTEXT( phiP )
-  // get curvature
-  for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+  
+  for (idx_t iNode = 0; iNode < nodeCount; iNode ++) 
   {
-    expVec( nodeRots[iNode], theta[iNode] );
-    // TEST_CONTEXT( nodeRots[iNode] )
-    // TEST_CONTEXT( LambdaN_.shape() )
-    // TEST_CONTEXT( LambdaN_(ALL, ALL, elNodes[iNode]) )
-    // include initial rotations
-    nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, elNodes[iNode]));
-    // TEST_CONTEXT( nodeRots[iNode] )
-  }
-  TEST_CONTEXT(nodeRots)
-  // shape_->getRotStrain_global( curv, w, coords, theta );
-  shape_->getRotStrain_local( curv, w, coords, nodeRots );
+    expVec ( nodeRots[iNode], theta[iNode] );
+    nodeRots[iNode] = matmul( nodeRots[iNode], LambdaN_[ie][iNode] );
+  }  
+  TEST_CONTEXT( nodePhi )
+  TEST_CONTEXT( nodeRots )
+  shape_->getRotationGradients( LambdaP, w, nodePhi, nodeRots );
   shape_->getRotations( Lambda, nodeRots );
-  TEST_CONTEXT(Lambda)
-
-  // TEST_CONTEXT(phiP)
-  // TEST_CONTEXT(curv)
 
   // calculate the material strains + spatial strains
   for (idx_t ip = 0; ip < ipCount; ip++)
   { 
+    // TEST_CONTEXT(LambdaP[ip])
+    // TEST_CONTEXT(Lambda[ip].transpose())
+    // TEST_CONTEXT(matmul( Lambda[ip].transpose(), LambdaP[ip] ))
+
     mat_strains( TRANS_PART, ip )   = matmul( Lambda[ip].transpose(), phiP[ip] );
-    mat_strains( ROT_PART, ip )     = matmul( Lambda[ip].transpose(), curv[ip] );
+    mat_strains( ROT_PART, ip )     = unskew( matmul( Lambda[ip].transpose(), LambdaP[ip] ) );
     // TEST_CONTEXT(mat_strains[ip])
     mat_strains[ip]                -= mat_strain0_[ie][ip];
     // TEST_CONTEXT(mat_strains[ip])
@@ -780,9 +775,10 @@ void            specialCosseratRodModel::assemble_
   const idx_t  rank           = shape_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
 
-// PER ELEMENT VALUEs
+// PER ELEMENT VALUES
   Matrix       coords         ( rank, nodeCount );
   Matrix       u              ( rank, nodeCount );
+  Matrix       node_phi       ( rank, nodeCount );
   Matrix       theta          ( rank, nodeCount );
   Matrix       u_old          ( rank, nodeCount );
   Matrix       theta_old      ( rank, nodeCount );
@@ -810,17 +806,19 @@ void            specialCosseratRodModel::assemble_
     idx_t ielem = egroup_.getIndices()[ie];
     elems_.getElemNodes( inodes, ielem );
     nodes_.getSomeCoords( coords, inodes );
-    // REPORT(ielem)
+    REPORT(ielem)
 
     get_disps_( u, theta, inodes, disp );
     get_disps_( u_old, theta_old, inodes, dispOld );
-    // TEST_CONTEXT( u )
-    // TEST_CONTEXT( theta )
+    TEST_CONTEXT( u )
+    TEST_CONTEXT( theta )
+
+    node_phi = coords + u;
 
     // get the XI and PSI values for this 
-    shape_->getXi( XI, weights, coords, u ); //TODO u_old???
+    shape_->getXi( XI, weights, node_phi );
     // TEST_CONTEXT(XI)
-    shape_->getPsi( PSI, weights, coords );
+    shape_->getPsi( PSI, weights, node_phi );
     // TEST_CONTEXT(PSI)
     get_spatialC_( c, weights, ie, theta ); 
     // TEST_CONTEXT(c)
@@ -877,6 +875,7 @@ void            specialCosseratRodModel::assembleFint_
 // PER ELEMENT VALUES
   Matrix       coords         ( rank, nodeCount );
   Matrix       u              ( rank, nodeCount );
+  Matrix       node_phi       ( rank, nodeCount );
   Matrix       theta          ( rank, nodeCount );
   Vector       weights        ( ipCount );
   Quadix       XI             ( dofCount, dofCount, nodeCount, ipCount );
@@ -896,9 +895,10 @@ void            specialCosseratRodModel::assembleFint_
     nodes_.getSomeCoords( coords, inodes );
 
     get_disps_( u, theta, inodes, disp );
-    // REPORT(ielem)
+    // REPORT(ielem)    
+    node_phi = coords + u;
  
-    shape_->getXi( XI, weights, coords, u );
+    shape_->getXi( XI, weights, node_phi );
     get_stresses_( spat_stresses, mat_stresses, weights, ie, u, theta );
     // TEST_CONTEXT( spat_stresses )
 

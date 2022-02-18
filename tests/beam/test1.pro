@@ -3,8 +3,8 @@
 ///////////////////////////////////
 
 // LOGGING
-log.pattern = "*.info "; //| model.debug
-log.file = "$(CASE_NAME).log";
+log.pattern = "*.info | *.debug"; //
+log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
 control.runWhile = false;

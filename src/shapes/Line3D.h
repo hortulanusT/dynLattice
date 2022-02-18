@@ -114,8 +114,8 @@ class Line3D : public Shape
 
   /**
    * @brief return the rotations at the integration points  
-   * @param[out] Ri Ri(.,.,i), where i are the integration points
-   * @param[in] Rn rotation matrices at the nodes. Rn(.,.,i) is the rotation matrix at the i-th node
+   * @param[out] Ri Ri(.,.,i) rotational matrix at the integration points 
+   * @param[in] Rn rotation at the nodes. Rn(.,.,i) rotational matrix at the nodes
    */
   void getRotations
     ( const Cubix& Ri,
@@ -127,13 +127,11 @@ class Line3D : public Shape
    * @param[out] Xi Xi(.,.,j,i) where j are the nodes and i are the integration points
    * @param[out] w weights of the integration points
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] u displacements of the nodes, u(i,j) is the i-th coordinate of the j-th node
    */
   void getXi
     ( const Quadix& Xi,
       const Vector& w,
-      const Matrix& c,
-      const Matrix& u ) const;
+      const Matrix& c ) const;
 
   /**
    * @brief Get the Psi at the integration points
@@ -148,32 +146,18 @@ class Line3D : public Shape
       const Matrix& c ) const;
 
   /**
-   * @brief Get the curvature at the integration points from the rotations (Crisfield/Jelenic)
+   * @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
    * 
-   * @param[out] omega curvature at the integration points
+   * @param[out] LambdaP curvature at the integration points
    * @param[out] w integration weights
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] Rn rotation matrices at the nodes. Rn(.,.,i) is the rotation matrix at the i-th node
+   * @param[in] Rn rotation at the nodes. Rn(.,.,i) rotational matrix at the nodes
    */
-  void getRotStrain_local
-    ( const Matrix& omega,
+  void getRotationGradients
+    ( const Cubix& LambdaP,
       const Vector& w,
       const Matrix& c,
       const Cubix& Rn ) const;
-
-  /**
-   * @brief Get the curvature at the integration points from the rotations (Simo/Vu-Quoc)
-   * 
-   * @param[out] omega curvature at the integration points
-   * @param[out] w integration weights
-   * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] theta matrix of rotational displacements at the nodes
-   */
-  void getRotStrain_global
-    ( const Matrix& omega,
-      const Vector& w,
-      const Matrix& c,
-      const Matrix& theta ) const;
 
 //------------------------------------------------
 // local location functions
