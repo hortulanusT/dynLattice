@@ -246,6 +246,6 @@ class specialCosseratRodModel : public Model
   Vector                  material_ey_;
   Matrix                  C_material_;
 
-  Quadix                  LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,i,j) is for the j-th node in the i-th element
+  Cubix                   LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,i) is for the i-th node
   Cubix                   mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
 };

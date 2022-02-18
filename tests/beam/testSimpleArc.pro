@@ -7,7 +7,7 @@ log.pattern = "*.info | *.debug";
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<200";
+control.runWhile = "i<41";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -27,15 +27,11 @@ params.rod_details.material_ey = [0.,0.,1.];
 // params.force_model.maxIncr = 10.;
 
 Solver.solver.type = "Nonlin";
-params.force_model.type = "LoadScale";
-
-params.force_model.scaleFunc = "(i-1)*-.005";
-params.force_model.model.type = "Constraints" ;
-params.force_model.model.conTable = "top_y";
-
-// params.force_model.scaleFunc = "(i-1)*-1";
-// params.force_model.model.type = "PointLoad" ;
-// params.force_model.model.loadTable = "top_y";
+params.force_model.type = "Dirichlet";
+params.force_model.dispIncr = -5e-3;
+params.force_model.dofs = "dy";
+params.force_model.nodeGroups = "free";
+params.force_model.factors = 1.;
 
 // include model and i/o files
 include "input.pro";

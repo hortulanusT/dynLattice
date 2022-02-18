@@ -15,10 +15,3 @@
 
 <ElementGroup name="joints">
 </ElementGroup>
-
-<NodeTable name="top_y">
-  <Section columns="dy">
-    1 1.;
-  </Section>
-</NodeTable>
-
