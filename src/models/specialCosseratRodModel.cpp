@@ -492,9 +492,11 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   const idx_t   nodeCount     = nodes_.size();
   const idx_t   elemCount     = egroup_.size();
   const idx_t   elemNodes     = shape_->nodeCount();
+  const idx_t   ipCount       = shape_->ipointCount();
   IdxVector     inodes        ( elemNodes );
   IdxVector     allnodes      = egroup_.getNodeIndices();
-  Matrix        node_dirs     ( TRANS_DOF_COUNT, nodeCount );
+  Matrix        node_dirs     ( TRANS_DOF_COUNT, elemNodes );
+  Matrix        ip_dirs       ( TRANS_DOF_COUNT, ipCount );
   Matrix        coords        ( TRANS_DOF_COUNT, nodeCount );
   Matrix        rotMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix        oldMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
@@ -508,7 +510,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   double        c;
 
 
-  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, nodeCount );
+  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, ipCount, elemCount );
   LambdaN_         = NAN;  
   node_dirs        = 0.;
 
@@ -520,42 +522,45 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
     idx_t ielem = egroup_.getIndices()[ie];
     elems_.getElemNodes ( inodes, ielem );
 
-    node_dirs ( ALL, inodes[0] ) += coords ( ALL, inodes[1] ) - coords ( ALL, inodes[0] );
+    node_dirs ( ALL, 0 ) += coords ( ALL, inodes[1] ) - coords ( ALL, inodes[0] );
     for (idx_t in = 1; in < elemNodes-1; in++)
-      node_dirs ( ALL, inodes[in] ) += coords ( ALL, inodes[in+1] ) - coords ( ALL, inodes[in-1] );
-    node_dirs ( ALL, inodes[elemNodes-1] ) += coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
+      node_dirs ( ALL, in ) += coords ( ALL, inodes[in+1] ) - coords ( ALL, inodes[in-1] );
+    node_dirs ( ALL, elemNodes-1 ) += coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
+    
+    for ( idx_t inode = 0; inode < nodeCount; inode++)
+      node_dirs[inode] = node_dirs[inode] / norm2( node_dirs[inode] );
+    
+    TEST_CONTEXT(node_dirs)
+    ip_dirs = matmul( shape_->getShapeFunctions(), node_dirs );
+    TEST_CONTEXT(ip_dirs)
+
+    for ( idx_t ip = 0; ip < ipCount; ip++ )
+    {
+      if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
+      {
+        e_y = material_ey_;
+        e_z = ip_dirs[ip];
+        e_x = matmul( skew(e_y), e_z );
+
+        rotMat[0] = e_x;
+        rotMat[1] = e_y;
+        rotMat[2] = e_z;
+      }
+      else // no y-direction given
+      {
+        v = matmul ( e3, skew ( ip_dirs[ip] ) );
+        c = dotProduct ( ip_dirs[ip], e3 );
+
+        rotMat = eye();
+        if ( c != -1.) // 180 deg turn == point mirroring
+          rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
+        else
+          rotMat *= -1.;
+      }
+
+      LambdaN_( ALL, ALL, ie, ip ) = rotMat;    
+    }    
   }
-
-  TEST_CONTEXT(node_dirs)
-
-  for ( idx_t inode = 0; inode < nodeCount; inode++)
-  {
-    delta_phi = node_dirs ( ALL, inode ) / norm2( node_dirs ( ALL, inode ) );
-
-    if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
-    {
-      e_y = material_ey_;
-      e_z = delta_phi;
-      e_x = matmul( skew(e_y), e_z );
-
-      rotMat[0] = e_x;
-      rotMat[1] = e_y;
-      rotMat[2] = e_z;
-    }
-    else // no y-direction given
-    {
-      v = matmul ( e3, skew ( delta_phi ) );
-      c = dotProduct ( delta_phi, e3 );
-
-      rotMat = eye();
-      if ( c != -1.) // 180 deg turn == point mirroring
-        rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
-      else
-        rotMat *= -1.;
-    }
-
-    LambdaN_( ALL, ALL, inode ) = rotMat;    
-  }    
 }
 
 void specialCosseratRodModel::get_spatialC_
