@@ -167,6 +167,7 @@ void Line3D::getPi
 
   getRotations( Ri, theta );
 
+  Pi  = 0.;
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     Pi[ip](SliceTo(3), SliceTo(3))      = Ri[ip];
@@ -183,10 +184,11 @@ void Line3D::getPi
 
   getRotations( Ri, Rn, theta );
 
+  Pi  = 0.;
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     Pi[ip](SliceTo(3), SliceTo(3))      = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3))  = Ri[ip];
+    Pi[ip](SliceFrom(3), SliceFrom(3))  = Ri[ip];    
   } 
 }
 

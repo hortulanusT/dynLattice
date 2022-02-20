@@ -44,11 +44,15 @@ Input.groupInput.fixed_left.xtype = "min";
 Input.groupInput.fixed_right.ytype = "min";
 Input.groupInput.fixed_right.xtype = "max";
 Input.groupInput.free.ytype = "max";
+Input.groupInput.free.restrictToGroup = "joints";
+Input.groupInput.free.restrictPartial = 0;
 
 model.noiseLevel = 0;
 
 model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
+
+model.model.model.joint.lockDofs = model.model.model.cosseratRod.dofNamesTrans;
 
 model.model.model.diriFixed.type = "Dirichlet";
 model.model.model.diriFixed.maxDisp = 0.;
