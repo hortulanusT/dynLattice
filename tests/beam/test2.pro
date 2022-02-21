@@ -5,8 +5,8 @@
 params.Steps = 1;
 
 // LOGGING
-log.pattern = "*.info | model.debug";
-log.file = "$(CASE_NAME).log";
+log.pattern = "*.info | *.debug";
+log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
 control.runWhile = "i<150000/$(params.Steps)";
@@ -37,6 +37,8 @@ include "output.pro";
 
 model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
+
+model.model.model.joint.type = "None";
 
 Output.load.dataSets += "sqrt(free.load.dx^2 + free.load.dy^2 + free.load.dz^2)";
 Output.resp.dataSets += "sqrt(free.resp.dx^2 + free.resp.dy^2 + free.resp.dz^2)";

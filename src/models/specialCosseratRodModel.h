@@ -134,7 +134,7 @@ class specialCosseratRodModel : public Model
    * @param[in]  disp current values for the DOFs 
    * @param[in]  dispOld last values for the DOFs 
    */
-  void                    assembleFint_
+  void                    assemble_
   ( const Vector&         fint,
     const Vector&         disp,
     const Vector&         dispOld  ) const;
@@ -165,70 +165,56 @@ class specialCosseratRodModel : public Model
   void                    init_rot_ ();
 
   /**
-   * @brief update the rotation of the elements
-   */
-  void                    update_rot_ 
-    ( const Vector& disp );
-
-  /**
-   * @brief initializes the initial curvature of the elements
+   * @brief initializes the initial strain of the elements
    */
   void                    init_strain_ ();
-
-  /**
-   * @brief Get the spatial stiffness matrix per integration point
-   */
-  void get_spatialC_ // LATER externalise to material?
-    ( const Cubix&        c,      ///< c(.,.,i), where it refers to the spatial stiffness matrix at the i-th integration point
-      const Vector&       w,      ///< integration point weights
-      const idx_t&        ielem,  ///< element to investigate (local index)
-      const Matrix&       theta) const; ///< matrix with the rotational displacments for the nodes of this element
 
   /**
    * @brief Get the geometric stiffness matrix
    */
   void get_geomStiff_
     ( const Cubix&        B,              ///< B(.,.,i), where it refers to the B-matrix at the i-th integration point
-      const Vector&       w,              ///< integration point weights
-      const Matrix&       spat_stresses,  ///< stress(i,j), stress component i at the j-th integration points
-      const Matrix&       coords,         ///< translational displacements
-      const Matrix&       u ) const;      ///< translational displacements
+      const Matrix&       stresses,       ///< spatial stress(i,j), stress component i at the j-th integration points
+      const Matrix&       nodePhi_0,      ///< location of the nodes
+      const Matrix&       nodeU ) const;  ///< nodeU(.,j), translational displacement j-th node 
 
   /**
    * @brief Get the strains in the integration points of an element
    */
   void get_strains_
-    ( const Matrix&       spat_strains, ///< strains(i,j), strain component i at the j-th integration points
-      const Matrix&       mat_strains,  ///< strains(i,j), strain component i at the j-th integration points
-      const Vector&       w,            ///< integration point weights
-      const idx_t&        ielem,        ///< element to investigate (local index)
-      const Matrix&       u,            ///< translational displacements
-      const Matrix&       theta ) const; ///< rotational displacements
+    ( const Matrix&       strains,        ///< strains(i,j), stress component i at the j-th integration points
+      const Vector&       w,              ///< integration point weights
+      const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
+      const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
+      const idx_t         ie,
+      const bool          spatial = true ) const;  ///< rotational displacements
 
   /**
    * @brief Get the stresses in the integration points of an element
    */
   void get_stresses_
-    ( const Matrix&       spat_stresses,  ///< stress(i,j), stress component i at the j-th integration points
-      const Matrix&       mat_stresses,   ///< stress(i,j), stress component i at the j-th integration points
+    ( const Matrix&       stresses,       ///< stress(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
-      const idx_t&        ielem,          ///< element to investigate (local index)
-      const Matrix&       u,              ///< translational displacements
-      const Matrix&       theta ) const;  ///< rotational displacements
+      const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
+      const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
+      const idx_t         ie,
+      const bool          spatial = true ) const;  ///< rotational displacements
 
   /**
-   * @brief Get the u and theta displacement for the given nodes 
+   * @brief format the displacements nicely
    */
   void get_disps_
-    ( const Matrix&       u,
-      const Matrix&       theta,
-      const IdxVector&    inodes,
-      const Vector&       disp ) const;
+    ( const Matrix&       nodePhi_0,
+      const Matrix&       nodeU,
+      const Matrix&       nodeTheta,
+      const Vector&       disp  ) const;
 
  private: 
-  Assignable<ElementGroup>egroup_;
-  Assignable<NodeSet>     nodes_;
-  Assignable<ElementSet>  elems_;
+  Assignable<ElementGroup>rodGroup_;
+  Assignable<NodeSet>     allNodes_;
+  Assignable<ElementSet>  allElems_;
   Ref<DofSpace>           dofs_;
   Ref<Line3D>             shape_;
   IdxVector               trans_types_;
@@ -244,8 +230,8 @@ class specialCosseratRodModel : public Model
   double                  shearParam_;
 
   Vector                  material_ey_;
-  Matrix                  C_material_;
+  Matrix                  materialC_;
 
-  Cubix                   LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,i) is for the i-th node
+  Quadix                  LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,j,k) is for the j-th integration point at the k-th element
   Cubix                   mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
 };

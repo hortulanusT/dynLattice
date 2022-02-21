@@ -1,5 +1,5 @@
 ///////////////////////////////////
-/////// SIMO/VU-QUOC EX 7.3 ///////
+//////// SHALLOW  TRIANGLE ////////
 ///////////////////////////////////
 
 // LOGGING
@@ -7,7 +7,8 @@ log.pattern = "*.info | *.debug";
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<41";
+// control.runWhile = "i<=80";
+control.runWhile = "free.disp.dy >= -.4";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -20,23 +21,33 @@ params.rod_details.area = 1e-4;
 params.rod_details.area_moment = 8.333333333333333333333333e-10;
 params.rod_details.material_ey = [0.,0.,1.];
 
-// Solver.solver.type = "Arclen";
-// params.force_model.type = "StdArclen";
-// params.force_model.loadIncr = 8.064;
-// params.force_model.minIncr = .01;
-// params.force_model.maxIncr = 10.;
+Solver.solver.type = "Arclen";
+params.force_model.type = "StdArclen";
+params.force_model.loadIncr = 1.;
+params.force_model.minIncr = .01;
+params.force_model.maxIncr = 5.;
+params.force_model.model.type = "Neumann";
+params.force_model.model.initLoad = 1.;
+params.force_model.model.loadIncr = 0.;
+params.force_model.model.dofs = "dy";
+params.force_model.model.nodeGroups = "free";
+params.force_model.model.factors = -1.;
 
-Solver.solver.type = "Nonlin";
-params.force_model.type = "Dirichlet";
-params.force_model.dispIncr = -5e-3;
-params.force_model.dofs = "dy";
-params.force_model.nodeGroups = "free";
-params.force_model.factors = 1.;
+// Solver.solver.type = "Nonlin";
+// params.force_model.type = "Dirichlet";
+// params.force_model.dispIncr = 0.005;
+// params.force_model.dofs = "dy";
+// params.force_model.nodeGroups = "free";
+// params.force_model.factors = -1.;
 
 // include model and i/o files
 include "input.pro";
 include "model.pro";
 include "output.pro";
+
+// Output.resp.file = "$(CASE_NAME)/resp_ref.res";
+// Output.disp.file = "$(CASE_NAME)/disp_ref.res";
+// Output.paraview.output_format = "$(CASE_NAME)/visual_ref/step%d";
 
 Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right", "free" ];
 Input.groupInput.fixed_left.ytype = "min";
@@ -44,11 +55,15 @@ Input.groupInput.fixed_left.xtype = "min";
 Input.groupInput.fixed_right.ytype = "min";
 Input.groupInput.fixed_right.xtype = "max";
 Input.groupInput.free.ytype = "max";
+Input.groupInput.free.restrictToGroup = "joints";
+Input.groupInput.free.restrictPartial = 0;
 
 model.noiseLevel = 0;
 
 model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
+
+model.model.model.joint.lockDofs = model.model.model.cosseratRod.dofNamesTrans;
 
 model.model.model.diriFixed.type = "Dirichlet";
 model.model.model.diriFixed.maxDisp = 0.;
