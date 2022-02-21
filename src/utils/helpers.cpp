@@ -55,17 +55,19 @@ namespace jive_helpers
       const Vector& psi )
   {
     // TEST_NO_CONTEXT(psi)
+    Exp                   = eye();
     const double theta    = norm2(psi);
-    const Vector k    ( psi.size() );
+
+    if (jem::isTiny( theta )) return;
+
+    const Vector k        ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );    
     
-    k  = psi;
-    k /= !jem::isTiny( theta ) ? theta : 1.;
-    K      = skew ( k );
+    k       = psi / theta;
+    K       = skew ( k );
 
-    Exp  = eye();
-    Exp += sin(theta) * K;
-    Exp += (1-cos(theta)) * matmul ( K, K );
+    Exp    += sin(theta) * K;
+    Exp    += (1-cos(theta)) * matmul ( K, K );
     // TEST_NO_CONTEXT(Exp)
   }
 
@@ -75,19 +77,24 @@ namespace jive_helpers
       const Vector& psiP )
   {
     const double theta    = norm2(psi);
+
+    if (jem::isTiny( theta ))
+    {
+      ExpP = skew ( psiP ); 
+      return;
+    }
+
     // derivative of norm
-    const double thetaP   = dot(psi, psiP) / !jem::isTiny( theta ) ? theta : 1.;
+    const double thetaP   = dot(psi, psiP) / theta;
 
     const Vector k        ( psi.size() );
     const Vector kP       ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );    
     const Matrix KP       ( psi.size(), psi.size() );    
     
-    k      = psi;
-    k     /= !jem::isTiny( theta ) ? theta : 1.;
+    k      = psi / theta;
     // product rule
-    kP     = psiP * theta + psi * thetaP;
-    kP    /= !jem::isTiny( theta ) ? theta*theta : 1.;
+    kP     = psiP * theta + psi * thetaP / theta / theta;
 
     K      = skew ( k );
     KP     = skew ( kP );
