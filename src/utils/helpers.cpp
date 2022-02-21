@@ -58,7 +58,7 @@ namespace jive_helpers
     Exp                   = eye();
     const double theta    = norm2(psi);
 
-    if (jem::isTiny( theta )) return;
+    if (theta < TINY) return;
 
     const Vector k        ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );    
@@ -78,11 +78,12 @@ namespace jive_helpers
   {
     const double theta    = norm2(psi);
 
-    if (jem::isTiny( theta ))
+    if ( theta < TINY )
     {
       ExpP = skew ( psiP ); 
       return;
     }
+    TEST_NO_CONTEXT(skew(psiP))
 
     // derivative of norm
     const double thetaP   = dot(psi, psiP) / theta;
@@ -110,7 +111,7 @@ namespace jive_helpers
     ExpP  += sin(theta) * thetaP * matmul ( K, K );
     ExpP  += (1-cos(theta)) * matmul ( K, KP );
     ExpP  += (1-cos(theta)) * matmul ( KP, K );
-    // TEST_NO_CONTEXT(ExpP)
+    TEST_NO_CONTEXT(ExpP)
   }
 
   void rotMat2Quat 
