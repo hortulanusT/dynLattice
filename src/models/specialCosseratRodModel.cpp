@@ -657,13 +657,13 @@ void specialCosseratRodModel::get_strains_
   Matrix    nodePhi     ( globRank, nodeCount );
   Matrix    phiP        ( globRank, ipCount );
 
-  REPORT( ielem )
+  // REPORT( ielem )
 
   elems_.getElemNodes ( elNodes, ielem );
   nodes_.getSomeCoords( coords, elNodes);
 
-  TEST_CONTEXT( coords )
-  TEST_CONTEXT( u )
+  // TEST_CONTEXT( coords )
+  // TEST_CONTEXT( u )
   // TEST_CONTEXT( theta )
 
   // get position derivative
@@ -673,8 +673,8 @@ void specialCosseratRodModel::get_strains_
   WARN_ASSERT2(testall( (abs(TINY*coords)<abs(u)) | (u==0) ), "Addition of displacement with coordinates would result in large round off-errors");
   nodePhi = coords + u;
   phiP = matmul( nodePhi, shapeGrads );
-  TEST_CONTEXT( nodePhi )
-  TEST_CONTEXT( phiP )
+  // TEST_CONTEXT( nodePhi )
+  // TEST_CONTEXT( phiP )
   // get curvature
   for (idx_t iNode = 0; iNode < nodeCount; iNode++)
   {
@@ -686,11 +686,11 @@ void specialCosseratRodModel::get_strains_
     nodeRots[iNode] = matmul(nodeRots[iNode], LambdaN_(ALL, ALL, elNodes[iNode]));
     // TEST_CONTEXT( nodeRots[iNode] )
   }
-  TEST_CONTEXT(nodeRots)
+  // TEST_CONTEXT(nodeRots)
   // shape_->getRotStrain_global( curv, w, coords, theta );
   shape_->getRotStrain_local( curv, w, coords, nodeRots );
   shape_->getRotations( Lambda, nodeRots );
-  TEST_CONTEXT(Lambda)
+  // TEST_CONTEXT(Lambda)
 
   // TEST_CONTEXT(phiP)
   // TEST_CONTEXT(curv)
@@ -707,7 +707,7 @@ void specialCosseratRodModel::get_strains_
     spat_strains( TRANS_PART, ip )  = matmul( Lambda[ip], mat_strains( TRANS_PART, ip ) );
     spat_strains( ROT_PART, ip )    = matmul( Lambda[ip], mat_strains( ROT_PART, ip ) );
   }
-  TEST_CONTEXT(mat_strains)
+  // TEST_CONTEXT(mat_strains)
   // TEST_CONTEXT(spat_strains)
 }
 
@@ -731,6 +731,7 @@ void specialCosseratRodModel::get_stresses_
 
   // get the strains
   get_strains_( spat_strains, mat_strains, w, ie, u, theta );
+  // TEST_CONTEXT(spat_strains)
 
   // get the stiffness matrices
   get_spatialC_( c_spat, w, ie, theta );
@@ -805,7 +806,7 @@ void            specialCosseratRodModel::assemble_
     idx_t ielem = egroup_.getIndices()[ie];
     elems_.getElemNodes( inodes, ielem );
     nodes_.getSomeCoords( coords, inodes );
-    // REPORT(ielem)
+    REPORT(ielem)
 
     get_disps_( u, theta, inodes, disp );
     get_disps_( u_old, theta_old, inodes, dispOld );
@@ -814,7 +815,7 @@ void            specialCosseratRodModel::assemble_
 
     // get the XI and PSI values for this 
     shape_->getXi( XI, weights, coords, u ); //TODO u_old???
-    // TEST_CONTEXT(XI)
+    TEST_CONTEXT(XI)
     shape_->getPsi( PSI, weights, coords );
     // TEST_CONTEXT(PSI)
     get_spatialC_( c, weights, ie, theta ); 
