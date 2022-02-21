@@ -118,6 +118,7 @@ void Line3D::getRotations
 void Line3D::getXi
   ( const Quadix& Xi,
     const Vector& w,
+    const Matrix& u,
     const Matrix& c ) const
 {
   JEM_ASSERT2 ( Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size" );
@@ -125,7 +126,7 @@ void Line3D::getXi
   Matrix  grads   ( shapeFuncCount(), ipointCount() );
   getShapeGradients( grads, w, c );
 
-  Matrix  phiP    = matmul( c, grads );
+  Matrix  phiP    = matmul( (Matrix)(c+u), grads );
 
   Xi = 0.;
 

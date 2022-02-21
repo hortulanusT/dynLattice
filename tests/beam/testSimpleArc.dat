@@ -21,7 +21,7 @@
 </Elements>
 
 <ElementGroup name="rods">
-	 { 1, 2 } <!--, 3, 4 -->
+	 { 1, 2 } <!-- , 3, 4 -->
 </ElementGroup>
 
 <ElementGroup name="joints">

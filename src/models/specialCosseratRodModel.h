@@ -175,15 +175,17 @@ class specialCosseratRodModel : public Model
   void get_geomStiff_
     ( const Cubix&        B,              ///< B(.,.,i), where it refers to the B-matrix at the i-th integration point
       const Matrix&       stresses,       ///< spatial stress(i,j), stress component i at the j-th integration points
-      const Matrix&       nodePhi ) const;///< location of the nodes
+      const Matrix&       nodePhi_0,      ///< location of the nodes
+      const Matrix&       nodeU ) const;  ///< nodeU(.,j), translational displacement j-th node 
 
   /**
    * @brief Get the strains in the integration points of an element
    */
   void get_strains_
-    ( const Matrix&       strains,       ///< strains(i,j), stress component i at the j-th integration points
+    ( const Matrix&       strains,        ///< strains(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
-      const Matrix&       nodePhi,        ///< nodePhi(.,j), location of the j-th node
+      const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
       const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
       const idx_t         ie,
       const bool          spatial = true ) const;  ///< rotational displacements
@@ -194,7 +196,8 @@ class specialCosseratRodModel : public Model
   void get_stresses_
     ( const Matrix&       stresses,       ///< stress(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
-      const Matrix&       nodePhi,        ///< nodePhi(.,j), location of the j-th node
+      const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
       const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
       const idx_t         ie,
       const bool          spatial = true ) const;  ///< rotational displacements
@@ -202,8 +205,9 @@ class specialCosseratRodModel : public Model
   /**
    * @brief format the displacements nicely
    */
-  void getDisps
-    ( const Matrix&       nodePhi,
+  void get_disps_
+    ( const Matrix&       nodePhi_0,
+      const Matrix&       nodeU,
       const Matrix&       nodeTheta,
       const Vector&       disp  ) const;
 

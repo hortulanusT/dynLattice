@@ -142,6 +142,7 @@ class Line3D : public Shape
   void getXi
     ( const Quadix& Xi,
       const Vector& w,
+      const Matrix& u,
       const Matrix& c ) const;
 
   /**

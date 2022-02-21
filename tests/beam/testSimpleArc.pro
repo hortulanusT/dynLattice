@@ -7,7 +7,7 @@ log.pattern = "*.info | *.debug";
 log.file = "-$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<41";
+control.runWhile = "i<=8";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -28,10 +28,10 @@ params.rod_details.material_ey = [0.,0.,1.];
 
 Solver.solver.type = "Nonlin";
 params.force_model.type = "Dirichlet";
-params.force_model.dispIncr = -5e-3;
+params.force_model.dispIncr = 0.05;
 params.force_model.dofs = "dy";
 params.force_model.nodeGroups = "free";
-params.force_model.factors = 1.;
+params.force_model.factors = -1.;
 
 // include model and i/o files
 include "input.pro";
