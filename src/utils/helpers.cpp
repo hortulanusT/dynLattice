@@ -83,7 +83,7 @@ namespace jive_helpers
       ExpP = skew ( psiP ); 
       return;
     }
-    TEST_NO_CONTEXT(skew(psiP))
+    // TEST_NO_CONTEXT(skew(psiP))
 
     // derivative of norm
     const double thetaP   = dot(psi, psiP) / theta;
@@ -94,8 +94,8 @@ namespace jive_helpers
     const Matrix KP       ( psi.size(), psi.size() );    
     
     k      = psi / theta;
-    // product rule
-    kP     = psiP * theta + psi * thetaP / theta / theta;
+    // Quotient rule
+    kP     = (psiP * theta - psi * thetaP) / theta / theta;
 
     K      = skew ( k );
     KP     = skew ( kP );
@@ -111,7 +111,7 @@ namespace jive_helpers
     ExpP  += sin(theta) * thetaP * matmul ( K, K );
     ExpP  += (1-cos(theta)) * matmul ( K, KP );
     ExpP  += (1-cos(theta)) * matmul ( KP, K );
-    TEST_NO_CONTEXT(ExpP)
+    // TEST_NO_CONTEXT(ExpP)
   }
 
   void rotMat2Quat 
