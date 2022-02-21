@@ -531,9 +531,9 @@ void specialCosseratRodModel::get_geomStiff_
   for (idx_t ip = 0; ip < ipCount; ip++)
   {  
     B[ip] = 0.;
-    B[ip]( SliceFrom( dofCount ), TRANS_PART ) += skew( stresses[ip][TRANS_PART] );
     B[ip]( TRANS_PART, SliceFrom( dofCount ) ) -= skew( stresses[ip][TRANS_PART] );
     B[ip]( ROT_PART, SliceFrom( dofCount ) )   -= skew( stresses[ip][ROT_PART] );
+    B[ip]( SliceFrom( dofCount ), TRANS_PART ) += skew( stresses[ip][TRANS_PART] );
     B[ip]( SliceFrom( dofCount ), SliceFrom( dofCount ) ) += matmul( stresses[ip][TRANS_PART], phiP[ip] );
     B[ip]( SliceFrom( dofCount ), SliceFrom( dofCount ) ) -= dot( stresses[ip][TRANS_PART], phiP[ip] ) * eye();
   }  
@@ -548,6 +548,9 @@ void specialCosseratRodModel::get_strains_
     const idx_t         ie,     
     const bool          spatial ) const
 {
+  // TEST_CONTEXT(nodePhi_0)
+  // TEST_CONTEXT(nodeU)
+
   const idx_t   ipCount   = shape_->ipointCount();
   const idx_t   globRank  = shape_->globalRank();
   const idx_t   dofCount  = dofs_->typeCount();
@@ -568,6 +571,8 @@ void specialCosseratRodModel::get_strains_
   ipPhiP  = matmul( (Matrix)(nodePhi_0+nodeU), grads );
   shape_->getRotations ( ipLambda, LambdaN_[ie], nodeTheta );  
   shape_->getRotationGradients ( ipLambdaP, w, LambdaN_[ie], nodePhi_0, nodeTheta ); 
+  // TEST_CONTEXT(ipLambda)
+
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
@@ -575,17 +580,20 @@ void specialCosseratRodModel::get_strains_
     strains[ip][ROT_PART]   = unskew( matmul( ipLambda[ip].transpose(), ipLambdaP[ip] ) ); 
   }  
   
+  // TEST_CONTEXT(strains)
   strains -= mat_strain0_[ie];
-  
+  // TEST_CONTEXT(strains)
+
   if (spatial)
   {
     Cubix        PI             ( dofCount, dofCount, ipCount );
-    MatmulChain<double, 3>      mc3;
     shape_->getPi ( PI, LambdaN_[ie], nodeTheta );
+    // TEST_CONTEXT(PI)
 
     for (idx_t ip = 0; ip < ipCount; ip++)
       strains[ip] = matmul( PI[ip], strains[ip] );
   }
+  // TEST_CONTEXT(strains)
 }
 
 void specialCosseratRodModel::get_stresses_
@@ -606,6 +614,7 @@ void specialCosseratRodModel::get_stresses_
 
   // get the strains
   get_strains_( strains, w, nodePhi_0, nodeU, nodeTheta, ie, spatial );
+  // TEST_CONTEXT( strains )
 
   // get the stresses (material + spatial );
   if (spatial)
@@ -689,23 +698,33 @@ void            specialCosseratRodModel::assemble_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    // REPORT(ie)
+    REPORT(ie)
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+
+    // TEST_CONTEXT(nodePhi_0[inodes])
+    // TEST_CONTEXT(nodeU[inodes])
+    // TEST_CONTEXT(nodeTheta[inodes])
 
     // get the XI, PSI and PI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
     shape_->getPsi( PSI, weights, (Matrix)nodePhi_0[inodes] );
     shape_->getPi( PI, LambdaN_[ie], (Matrix)nodeTheta[inodes] );
+    // TEST_CONTEXT(XI)
+    // TEST_CONTEXT(PSI)
+    // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Matrix)nodeTheta[inodes], ie );
+    // TEST_CONTEXT( stress )
     // get the gemetric stiffness
     get_geomStiff_( geomStiff, stress, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes] );
+    // TEST_CONTEXT(geomStiff)
     
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
     {     
       // get the spatial stiffness
       spatialC = mc3.matmul( PI[ip], materialC_, PI[ip].transpose() );
+      TEST_CONTEXT(spatialC)
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
@@ -713,6 +732,7 @@ void            specialCosseratRodModel::assemble_
 
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         { 
+          // SUBHEADER2( Inode, Jnode)
           dofs_->getDofIndices ( Jdofs, inodes[Jnode], jtypes_ ); 
 
           // Stiffness contribution S ( element stiffness matrix )
