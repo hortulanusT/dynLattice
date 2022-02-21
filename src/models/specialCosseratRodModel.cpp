@@ -550,6 +550,7 @@ void specialCosseratRodModel::get_strains_
 {
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
+  // TEST_CONTEXT(nodeTheta)
 
   const idx_t   ipCount   = shape_->ipointCount();
   const idx_t   globRank  = shape_->globalRank();
@@ -566,12 +567,15 @@ void specialCosseratRodModel::get_strains_
   
   shapes = shape_->getShapeFunctions();
   shape_->getShapeGradients( grads, w, nodePhi_0 );
+  // TEST_CONTEXT(shapes)
+  // TEST_CONTEXT(grads)
 
   ipPhi   = matmul( (Matrix)(nodePhi_0+nodeU), shapes );
   ipPhiP  = matmul( (Matrix)(nodePhi_0+nodeU), grads );
   shape_->getRotations ( ipLambda, LambdaN_[ie], nodeTheta );  
-  shape_->getRotationGradients ( ipLambdaP, w, LambdaN_[ie], nodePhi_0, nodeTheta ); 
   // TEST_CONTEXT(ipLambda)
+  shape_->getRotationGradients ( ipLambdaP, w, LambdaN_[ie], nodePhi_0, nodeTheta ); 
+  // TEST_CONTEXT(ipLambdaP)
 
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -698,7 +702,7 @@ void            specialCosseratRodModel::assemble_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    REPORT(ie)
+    // REPORT(ie)
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
 
     // TEST_CONTEXT(nodePhi_0[inodes])
@@ -724,7 +728,7 @@ void            specialCosseratRodModel::assemble_
     {     
       // get the spatial stiffness
       spatialC = mc3.matmul( PI[ip], materialC_, PI[ip].transpose() );
-      TEST_CONTEXT(spatialC)
+      // TEST_CONTEXT(spatialC)
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
