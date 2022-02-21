@@ -7,7 +7,7 @@ log.pattern = "*.info "; //| *.debug
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "free.disp.dy > -80";
+control.runWhile = "free.disp.dy > -95 && i < 25000";
 
 // SOLVER
 Solver.modules = [ "solver" ];
