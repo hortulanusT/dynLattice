@@ -50,6 +50,7 @@ Module::Status    ParaViewModule::init
 
   myProps.find( report_intervall_, "reportIntervall" );
   myConf .set ( "reportIntervall", report_intervall_ );
+  // LATER get something that reports after a variable
 
   myProps.get ( elemSets_, "groups" );
   myConf .set ( "groups", elemSets_ );
