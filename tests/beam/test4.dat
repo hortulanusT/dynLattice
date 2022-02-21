@@ -49,7 +49,7 @@
 
 <NodeTable name="force">
   <Section columns="dy">
-    13 1.;
+    13 -1.;
   </Section>
 </NodeTable>
 
