@@ -35,6 +35,8 @@ const char*   specialCosseratRodModel::TRANS_DOF_NAMES    = "dofNamesTrans";
 const char*   specialCosseratRodModel::ROT_DOF_NAMES      = "dofNamesRot";
 const char*   specialCosseratRodModel::INCREMENTAL        = "incremental";
 const char*   specialCosseratRodModel::MATERIAL_Y_DIR     = "material_ey";
+const char*   specialCosseratRodModel::GIVEN_NODES        = "given_dir_nodes";
+const char*   specialCosseratRodModel::GIVEN_DIRS         = "given_dir_dirs";
 const idx_t   specialCosseratRodModel::TRANS_DOF_COUNT    = 3;
 const idx_t   specialCosseratRodModel::ROT_DOF_COUNT      = 3;
 const Slice   specialCosseratRodModel::TRANS_PART         = jem::SliceFromTo ( 0, TRANS_DOF_COUNT );
@@ -142,6 +144,19 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set ( SHEAR_MODULUS, shearMod_ );
   myConf.set ( POLAR_MOMENT, polarMoment_ );
   myConf.set ( SHEAR_FACTOR, shearParam_ );
+
+  // get given node dirs
+  if (myProps.find( givenNodes_, GIVEN_NODES ))
+  {
+    Vector givenDirs ( givenNodes_.size() * TRANS_DOF_COUNT );
+    givenDirs_.resize( TRANS_DOF_COUNT, givenNodes_.size() );
+
+    myProps.get( givenDirs, GIVEN_DIRS );
+    myConf. set( GIVEN_NODES, givenNodes_ );
+    myConf. set( GIVEN_DIRS, givenDirs );
+
+    vec2mat ( givenDirs_.transpose(), givenDirs );
+  }
 
   // Prepare linear stiffness matrix //LATER nonlinear material?
   materialC_.resize( 6, 6 );
@@ -438,6 +453,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   Matrix        rotMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix        oldMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix        newMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
+  Cubix         nodeLambda    ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, nodeCount );
   Vector        turnRot       ( ROT_DOF_COUNT );
   Vector        delta_phi     ( TRANS_DOF_COUNT );
   Vector        v             ( TRANS_DOF_COUNT );
@@ -457,7 +473,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     // REPORT(ie)
-    idx_t ielem = rodGroup_.getIndices()[ie];
+    idx_t ielem = rodGroup_.getIndex(ie);
     allElems_.getElemNodes ( inodes, ielem );
 
     // TEST_CONTEXT(inodes)
@@ -467,44 +483,43 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
     node_dirs ( ALL, inodes[elemNodes-1] ) += coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
   }
 
+  for ( idx_t igiven = 0; igiven < givenNodes_.size(); igiven++)
+    node_dirs[givenNodes_[igiven]] = givenDirs_[igiven];
+
   for ( idx_t inode = 0; inode < nodeCount; inode++)
     node_dirs[inode] = node_dirs[inode] / norm2( node_dirs[inode] );
     
-    // TEST_CONTEXT(node_dirs)
-    // ip_dirs = matmul( node_dirs, shape_->getShapeFunctions() );
-    // TEST_CONTEXT(ip_dirs)
-  for (idx_t ie = 0; ie < elemCount; ie++)
+  for ( idx_t inode = 0; inode < nodeCount; inode++)
   {    
-    idx_t ielem = rodGroup_.getIndices()[ie];
-    allElems_.getElemNodes ( inodes, ielem );
-
-    ip_dirs = matmul( (Matrix)node_dirs[inodes], shape_->getShapeFunctions() );
-
-    for ( idx_t ip = 0; ip < ipCount; ip++ )
+    if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
     {
-      if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
-      {
-        e_y = material_ey_;
-        e_z = ip_dirs[ip];
-        e_x = matmul( skew(e_y), e_z );
+      e_y = material_ey_;
+      e_z = node_dirs[inode];
+      e_x = matmul( skew(e_y), e_z );
 
-        rotMat[0] = e_x;
-        rotMat[1] = e_y;
-        rotMat[2] = e_z;
-      }
-      else // no y-direction given
-      {
-        v = matmul ( e3, skew ( ip_dirs[ip] ) );
-        c = dotProduct ( ip_dirs[ip], e3 );
+      rotMat[0] = e_x;
+      rotMat[1] = e_y;
+      rotMat[2] = e_z;
+    }
+    else // no y-direction given
+    {
+      v = matmul ( e3, skew ( node_dirs[inode] ) );
+      c = dotProduct ( node_dirs[inode], e3 );
 
-        rotMat = eye();
-        if ( c != -1.) // 180 deg turn == point mirroring
-          rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
-        else
-          rotMat *= -1.;
-      }
-      LambdaN_[ie][ip] = rotMat;    
-    }    
+      rotMat = eye();
+      if ( c != -1.) // 180 deg turn == point mirroring
+        rotMat += skew ( v ) + 1/( 1 + c ) * matmul ( skew(v), skew(v) ); 
+      else
+        rotMat *= -1.;
+    }
+    nodeLambda[inode] = rotMat;      
+  }
+
+  for ( idx_t ie = 0; ie < elemCount; ie++ )
+  {
+    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+
+    shape_->getRotations( LambdaN_[ie], (Cubix)nodeLambda[inodes] );
   }
 }
 

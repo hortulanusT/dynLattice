@@ -78,14 +78,11 @@ void Line3D::getShapeGradients
 
 void Line3D::getRotations
   ( const Cubix& Ri,
-    const Matrix& theta ) const
+    const Cubix& Rn  ) const
 {
-  Cubix   Rn            ( globalRank(), globalRank(), nodeCount() );
   Matrix  Lambda_r      ( globalRank(), globalRank() );
   Matrix  node_psi      ( globalRank(), nodeCount() );
   Matrix  ip_psi        ( globalRank(), ipointCount() );
-
-  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Rn[inode], theta[inode] );
 
   // get the Rotaion matrices and the relative rotations between them 
   getNodeRotVecs_( node_psi, Lambda_r, Rn );
@@ -109,7 +106,10 @@ void Line3D::getRotations
     const Cubix& Rn, 
     const Matrix& theta ) const
 {
-  getRotations( Ri, theta );
+  Cubix   Theta   ( globalRank(), globalRank(), nodeCount() ); 
+  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Theta[inode], theta[inode] );
+
+  getRotations( Ri, Theta );
 
   for (idx_t ip = 0; ip < ipointCount(); ip++) Ri[ip] = matmul( Ri[ip], Rn[ip] );
 }
@@ -164,8 +164,10 @@ void Line3D::getPi
       const Matrix& theta ) const
 {
   const Cubix Ri  ( globalRank(), globalRank(), ipointCount() );
+  Cubix   Theta   ( globalRank(), globalRank(), nodeCount() ); 
+  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Theta[inode], theta[inode] );
 
-  getRotations( Ri, theta );
+  getRotations( Ri, Theta );
 
   Pi  = 0.;
   for (idx_t ip = 0; ip < ipointCount(); ip++)

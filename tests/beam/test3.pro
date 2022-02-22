@@ -4,10 +4,10 @@
 
 // LOGGING
 log.pattern = "*.info | *.debug";
-log.file = "-$(CASE_NAME).log";
+log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "i<200";
+control.runWhile = "free.disp.dy > -0.5 && i < 25000";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -15,15 +15,18 @@ Solver.solver.type = "Nonlin";
 
 // SETTINGS
 params.rod_details.shape.numPoints = "2";
-params.rod_details.young = 100.;
-params.rod_details.poission_ratio = .3;
-params.rod_details.area = 34.641;
-params.rod_details.area_moment = 100.; // square with side length of 5.88566
+params.rod_details.young = 6.895e10;
+params.rod_details.shear_modulus = 2.16e10;
+params.rod_details.area = "1.27e-3";
+params.rod_details.area_moment = "1.27e-3 ^ 3 / 12";
+params.rod_details.material_ey = [0.,0.,-1.];
+params.rod_details.given_dir_nodes = [0, 40];
+params.rod_details.given_dir_dirs = [0.,1.,0., 0.,-1.,0.];
 
 // params.force_model.type = "StdArclen";
-// params.force_model.loadIncr = 8.064;
-// params.force_model.minIncr = .01;
-// params.force_model.maxIncr = 10.;
+// params.force_model.loadIncr = .1;
+// params.force_model.minIncr = .001;
+// params.force_model.maxIncr = 100.;
 // params.force_model.model.type = "Neumann" ;
 // params.force_model.model.initLoad = 1.;
 // params.force_model.model.loadIncr = 0.;
@@ -31,9 +34,8 @@ params.rod_details.area_moment = 100.; // square with side length of 5.88566
 // params.force_model.model.dofs = "dy";
 // params.force_model.model.factors = -1.;
 
-params.force_model.type = "Neumann" ;
-params.force_model.initLoad = 0.;
-params.force_model.loadIncr = 100.;
+params.force_model.type = "Dirichlet" ;
+params.force_model.dispIncr = 0.001;
 params.force_model.nodeGroups = "free" ;
 params.force_model.dofs = "dy";
 params.force_model.factors = -1.;
@@ -74,3 +76,5 @@ model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 model.model.model.diriFixed.nodeGroups += [ "all", "all", "all" ];
 model.model.model.diriFixed.dofs += ["dz", "rx", "ry"];
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
+
+// Output.paraview.reportIntervall = 100;

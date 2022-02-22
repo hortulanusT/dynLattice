@@ -21,7 +21,7 @@ params.rod_details.area = 2.;
 params.rod_details.area_moment = 2.;
 
 params.force_model.type = "StdArclen";
-params.force_model.loadIncr = 100.;
+params.force_model.loadIncr = 150.;
 params.force_model.minIncr = .01;
 params.force_model.maxIncr = 5.;
 // params.force_model.type = "LoadScale";

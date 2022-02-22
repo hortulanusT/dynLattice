@@ -115,11 +115,11 @@ class Line3D : public Shape
   /**
    * @brief return the rotations at the integration points  
    * @param[out] Ri Ri(.,.,i) rotational matrix at the integration points 
-   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
+   * @param[in] Rn rotation at the nodes. Rn(.,i) rotational displacement at the nodes
    */
   void getRotations
     ( const Cubix& Ri,
-      const Matrix& theta ) const;
+      const Cubix& Rn ) const;
 
   /**
    * @brief return the rotations at the integration points  

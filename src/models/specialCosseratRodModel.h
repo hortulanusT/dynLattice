@@ -87,6 +87,8 @@ class specialCosseratRodModel : public Model
   static const char*      ROT_DOF_NAMES;
   static const char*      INCREMENTAL;
   static const char*      MATERIAL_Y_DIR;
+  static const char*      GIVEN_NODES;
+  static const char*      GIVEN_DIRS;
   static const idx_t      TRANS_DOF_COUNT;
   static const idx_t      ROT_DOF_COUNT;
   static const Slice      TRANS_PART;
@@ -231,6 +233,9 @@ class specialCosseratRodModel : public Model
 
   Vector                  material_ey_;
   Matrix                  materialC_;
+
+  IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
+  Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)
 
   Quadix                  LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,j,k) is for the j-th integration point at the k-th element
   Cubix                   mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
