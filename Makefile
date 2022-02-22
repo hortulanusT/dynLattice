@@ -3,12 +3,8 @@ program     = bin/nonlinRod
 #######################################################################
 ##   Add desired directories (include sub-dirs seperately)           ##
 #######################################################################
-subdirs    := src          # head of the source directory for the main file
-subdirs    += src/models   # include all the custom models
-subdirs    += src/modules  # include all the custom modules
-subdirs    += src/modules/paraview  # include the paraview submodule
-subdirs    += src/shapes   # include all the custom shapes
-subdirs    += src/utils    # include all the utilities
+subdirs			:= src/ src/*/ src/*/*/
+subdirs		 	:= $(sort $(dir $(wildcard $(subdirs))))
 MY_INCDIRS := $(subdirs)
 
 #######################################################################
