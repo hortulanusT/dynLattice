@@ -45,36 +45,8 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
-model.noiseLevel=0;
-
-Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right", "free" ];
-Input.groupInput.fixed_left.ytype = "min";
-Input.groupInput.fixed_left.xtype = "min";
-Input.groupInput.fixed_right.ytype = "min";
-Input.groupInput.fixed_right.xtype = "max";
-Input.groupInput.free.ytype = "max";
-
-model.model.model.cosseratRod += params.rod_details;
-model.model.model.force = params.force_model;
-
-Output.disp.append = false;
-Output.resp.append = false;
-Output.load.append = false;
-
-model.model.model.diriFixed.type = "Dirichlet";
-model.model.model.diriFixed.maxDisp = 0.;
-model.model.model.diriFixed.dispIncr =  0.;
-model.model.model.diriFixed.nodeGroups = [ "fixed_right", "fixed_right", "fixed_right" ];
-model.model.model.diriFixed.dofs = model.model.model.cosseratRod.dofNamesTrans;
-model.model.model.diriFixed.factors = [ 0., 0., 0. ]; 
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
 model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesRot;
-model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
-model.model.model.diriFixed.nodeGroups += [ "fixed_left", "fixed_left", "fixed_left" ];
-model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesTrans;
-model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
-model.model.model.diriFixed.nodeGroups += [ "all", "all", "all" ];
-model.model.model.diriFixed.dofs += ["dz", "rx", "ry"];
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
 
 // Output.paraview.reportIntervall = 100;

@@ -4,7 +4,7 @@
 
 // LOGGING
 log.pattern = "*.info | *.debug"; //
-log.file = "-$(CASE_NAME).log";
+log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
 control.runWhile = false;
@@ -34,7 +34,6 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
-model.noiseLevel = 0;
-model.model.model.cosseratRod += params.rod_details;
-model.model.model.force = params.force_model;
-model.model.model.joint.type = "None";
+model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
+model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.diriFixed.factors += [ 0., 0., 0. ];
