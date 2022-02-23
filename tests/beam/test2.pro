@@ -2,7 +2,7 @@
 /////// SIMO/VU-QUOC EX 7.2 ///////
 ///////////////////////////////////
 
-params.Steps = .1;
+params.Steps = 1000.;
 
 // LOGGING
 log.pattern = "*.info | *.debug";
@@ -14,8 +14,7 @@ control.runWhile = "i<150000/$(params.Steps)";
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.type = "Nonlin";
-Solver.solver.precision = 1e-6;
-Solver.solver.maxIter = 250;
+// Solver.solver.precision = 1e-9;
 
 // SETTINGS
 params.rod_details.shape.numPoints = "3";
