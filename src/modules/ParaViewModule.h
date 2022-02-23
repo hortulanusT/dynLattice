@@ -40,8 +40,8 @@
 
 #include <filesystem>
 
-#include "testing.h"
-#include "helpers.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using jem::Ref;
 using jem::newInstance;
