@@ -1,4 +1,4 @@
-# ParaViewModule
+# :information_source:ParaViewModule 
 
 This Repository contains a JEM/JIVE Module, that enables outputting the results of a calculation to ParaView in XML-Format
 
@@ -11,3 +11,7 @@ whereas the desired folder needs to be empty. After this make sure, the Module i
 subdirs     += <desired folder>
 MY_INCDIRS  := $(subdirs)
 ```
+
+## :heavy_exclamation_mark:Requirements:heavy_exclamation_mark:
+- `utils/testing.h`
+- `utils/helpers.h`
