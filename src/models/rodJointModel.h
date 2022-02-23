@@ -26,8 +26,8 @@
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeSet.h>
 
-#include "testing.h"
-#include "helpers.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using jem::Ref;
 using jem::newInstance;

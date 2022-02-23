@@ -19,8 +19,8 @@
 #include <jive/util/XDofSpace.h>
 
 #include "DirichletModel.h"
-#include "SolverNames.h"
-#include "testing.h"
+#include "utils/SolverNames.h"
+#include "utils/testing.h"
 
 using jem::io::endl;
 

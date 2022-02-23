@@ -26,9 +26,9 @@
 #include <jive/fem/NodeGroup.h>
 #include <jive/implict/ArclenActions.h>
 
-#include "testing.h"
-#include "helpers.h"
-#include "PBCGroupInputModule.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
+#include "modules/PBCGroupInputModule.h"
 
 using jem::util::Properties;
 

@@ -25,7 +25,7 @@
 #include <jive/model/StateVector.h>
 #include <jive/model/Actions.h>
 
-#include "testing.h"
+#include "utils/testing.h"
 
 using jem::idx_t;
 using jem::String;

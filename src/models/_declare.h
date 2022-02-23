@@ -4,12 +4,12 @@
 #include <jive/model/declare.h>
 #include <jive/implict/declare.h>
 
-#include "specialCosseratRodModel.h"
-#include "rodJointModel.h"
-#include "DirichletModel.h"
-#include "NeumannModel.h"
-#include "PeriodicBCModel.h"
-#include "FollowerLoadModel.h"
+#include "models/specialCosseratRodModel.h"
+#include "models/rodJointModel.h"
+#include "models/DirichletModel.h"
+#include "models/NeumannModel.h"
+#include "models/PeriodicBCModel.h"
+#include "models/FollowerLoadModel.h"
 
 //-----------------------------------------------------------------------
 //   declareModels

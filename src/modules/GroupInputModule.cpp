@@ -20,7 +20,7 @@
 #include <jive/fem/ElementGroup.h>
 
 #include "GroupInputModule.h"
-#include "testing.h"
+#include "utils/testing.h"
 
 using jem::io::endl;
 using jem::util::ArrayBuffer;

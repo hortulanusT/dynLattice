@@ -16,7 +16,7 @@
 #include <jem/numeric/Quaternion.h>
 #include <jive/Array.h>
 
-#include "testing.h"
+#include "utils/testing.h"
 
 #define WARN(key) jem::System::warn( getContext() ) << key << "\n";
 

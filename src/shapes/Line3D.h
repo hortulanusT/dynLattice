@@ -21,8 +21,8 @@
 #include <jive/geom/ParametricLine.h>
 #include <jive/geom/ShapeFactory.h>
 
-#include "testing.h"
-#include "helpers.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using namespace jive_helpers;
 

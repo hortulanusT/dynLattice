@@ -29,7 +29,7 @@
 #include <jive/implict/SolverInfo.h>
 
 #include "NeumannModel.h"
-#include "testing.h"
+#include "utils/testing.h"
 
 using jem::io::endl;
 using jem::util::StringUtils;

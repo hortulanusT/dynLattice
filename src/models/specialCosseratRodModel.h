@@ -35,9 +35,9 @@
 
 #include <math.h>
 
-#include "Line3D.h"
-#include "testing.h"
-#include "helpers.h"
+#include "shapes/Line3D.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using jem::Slice;
 using jem::SliceFrom;

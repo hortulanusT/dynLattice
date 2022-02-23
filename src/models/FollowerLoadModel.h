@@ -22,8 +22,8 @@
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/NodeGroup.h>
 
-#include "testing.h"
-#include "helpers.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using jem::String;
 using jem::Ref;
