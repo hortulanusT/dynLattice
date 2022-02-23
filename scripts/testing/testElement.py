@@ -189,10 +189,13 @@ for eDir in elem_dir:
 
     if all(test_passed.loc[eOrder+"_"+eDir] == "analytical"):
       print(colored(" PASSED", "green", attrs=["bold"]))
+    elif not any(test_passed.loc[eOrder+"_"+eDir] == "_ALL_Diff_") and not any(test_passed.loc[eOrder+"_"+eDir] == ">< FAIL ><"):
+      print(colored(" MIXED RESULTS", "yellow", attrs=["bold"]))
     else:
       print(colored(" FAILED", "red", attrs=["bold"]))
 
 # finishing
+print("\n")
 if (test_passed == "analytical").all().all():
   print(colored("> > > ALL TESTS PASSED < < <\t:))", "green"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
@@ -200,6 +203,13 @@ if (test_passed == "analytical").all().all():
   os.remove("tests/element/test.dat")
   os.rmdir("tests/element/FAILED")
   os.rmdir("tests/element/DIFF")
+elif (test_passed != "_ALL_Diff_").all().all() and (test_passed != ">< FAIL ><").all().all():
+  print(colored("> > > MIXED RESULTS FROM SOME TESTS < < <\t://\n", "yellow"))
+  [os.remove(file) for file in glob.glob("tests/element/*.res")]
+  [os.remove(file) for file in glob.glob("tests/element/*.log")]
+  os.rename("tests/element/test.dat", "tests/element/test.dummy")
+  print("Overview:\n")
+  print(test_passed)
 else:
   print(colored("> > > ONE (OR MORE) TESTS FAILED < < <\t:((\n", "red"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
