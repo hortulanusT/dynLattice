@@ -166,7 +166,7 @@ try:
   plt.figure()
   plt.plot(sim_resp[:,-1]/1e3, sim_disp[:,2], label="vertical")
   plt.plot(sim_resp[:,-1]/1e3, -1*sim_disp[:,1], label="horizontal")
-  plt.legend(loc="upper left")
+  plt.legend()
   plt.xlabel( "Tip Load [kN]" )
   plt.ylabel( "Displacement [m] ")
   plt.xlim([0, 140])
