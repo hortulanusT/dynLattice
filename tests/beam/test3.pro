@@ -24,7 +24,7 @@ params.rod_details.given_dir_nodes = [0, 40];
 params.rod_details.given_dir_dirs = [0.,1.,0., 0.,-1.,0.];
 
 params.force_model.type = "StdArclen";
-params.force_model.loadIncr = .1;
+params.force_model.loadIncr = 1.;
 params.force_model.minIncr = .001;
 params.force_model.maxIncr = 100.;
 params.force_model.model.type = "Neumann" ;
