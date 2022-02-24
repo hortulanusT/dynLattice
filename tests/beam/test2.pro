@@ -2,7 +2,7 @@
 /////// SIMO/VU-QUOC EX 7.2 ///////
 ///////////////////////////////////
 
-params.Steps = 1000.;
+params.Steps = 1.;
 
 // LOGGING
 log.pattern = "*.info | *.debug";
