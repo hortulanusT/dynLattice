@@ -319,7 +319,7 @@ void   specialCosseratRodModel::get_strain_table_
   Matrix       Lambda_r       ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix       nodePhi_0      ( TRANS_DOF_COUNT, allNodes_.size() );
   Matrix       nodeU          ( TRANS_DOF_COUNT, allNodes_.size() );
-  Matrix       nodeTheta      ( TRANS_DOF_COUNT, allNodes_.size() );
+  Cubix        nodeLambda     ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, allNodes_.size() );
 
   Matrix       strain         ( TRANS_DOF_COUNT + ROT_DOF_COUNT, ipCount );
 
@@ -331,7 +331,7 @@ void   specialCosseratRodModel::get_strain_table_
     else                        icols[idof] = strain_table.addColumn( "kappa_" + dofName[SliceFrom(dofName.size() - 1)] );
   }      
     
-  get_disps_( nodePhi_0, nodeU, nodeTheta, disp );
+  get_disps_( nodePhi_0, nodeU, nodeLambda, disp );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -339,7 +339,7 @@ void   specialCosseratRodModel::get_strain_table_
     idx_t ielem = rodGroup_.getIndices()[ie];
     allElems_.getElemNodes( inodes, ielem );
 
-    get_strains_( strain, ipWeights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Matrix)nodeTheta[inodes], ie, !mat_vals );
+    get_strains_( strain, ipWeights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie, !mat_vals );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -371,7 +371,7 @@ void    specialCosseratRodModel::get_stress_table_
   Matrix       Lambda_r       ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix       nodePhi_0      ( TRANS_DOF_COUNT, allNodes_.size() );
   Matrix       nodeU          ( TRANS_DOF_COUNT, allNodes_.size() );
-  Matrix       nodeTheta      ( TRANS_DOF_COUNT, allNodes_.size() );
+  Cubix        nodeLambda     ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, allNodes_.size() );
 
   Matrix       stress         ( TRANS_DOF_COUNT + ROT_DOF_COUNT, ipCount );
 
@@ -383,7 +383,7 @@ void    specialCosseratRodModel::get_stress_table_
     else                        icols[idof] = stress_table.addColumn( "m_" + dofName[SliceFrom(dofName.size() - 1)] );
   }    
     
-  get_disps_( nodePhi_0, nodeU, nodeTheta, disp );
+  get_disps_( nodePhi_0, nodeU, nodeLambda, disp );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -391,7 +391,7 @@ void    specialCosseratRodModel::get_stress_table_
     idx_t ielem = rodGroup_.getIndices()[ie];
     allElems_.getElemNodes( inodes, ielem );  
 
-    get_stresses_( stress, ipWeights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Matrix)nodeTheta[inodes], ie, !mat_vals );
+    get_stresses_( stress, ipWeights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie, !mat_vals );
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -430,7 +430,7 @@ void     specialCosseratRodModel::init_strain_ ()
     allElems_.getElemNodes ( inodes, ielem );
     allNodes_.getSomeCoords( coords, inodes );
 
-    get_strains_( strains, weights, coords, null_mat, null_mat, ie, false);
+    get_strains_( strains, weights, coords, null_mat, (Cubix)LambdaN_[inodes], ie, false);
     mat_strain0_[ie] = strains;
   }
 }
@@ -463,7 +463,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   double        c;
 
 
-  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, ipCount, elemCount );
+  LambdaN_.resize  ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, nodeCount );
   LambdaN_         = NAN;  
   node_dirs        = 0.;
 
@@ -512,14 +512,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
       else
         rotMat *= -1.;
     }
-    nodeLambda[inode] = rotMat;      
-  }
-
-  for ( idx_t ie = 0; ie < elemCount; ie++ )
-  {
-    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
-
-    shape_->getRotations( LambdaN_[ie], (Cubix)nodeLambda[inodes] );
+    LambdaN_[inode] = rotMat;      
   }
 }
 
@@ -558,8 +551,8 @@ void specialCosseratRodModel::get_strains_
   ( const Matrix&       strains,    
     const Vector&       w,             
     const Matrix&       nodePhi_0,
-    const Matrix&       nodeU,      
-    const Matrix&       nodeTheta, 
+    const Matrix&       nodeU,     
+    const Cubix&        nodeLambda, 
     const idx_t         ie,     
     const bool          spatial ) const
 {
@@ -587,9 +580,9 @@ void specialCosseratRodModel::get_strains_
 
   ipPhi   = matmul( (Matrix)(nodePhi_0+nodeU), shapes );
   ipPhiP  = matmul( (Matrix)(nodePhi_0+nodeU), grads );
-  shape_->getRotations ( ipLambda, LambdaN_[ie], nodeTheta );  
+  shape_->getRotations ( ipLambda, nodeLambda );  
   // TEST_CONTEXT(ipLambda)
-  shape_->getRotationGradients ( ipLambdaP, w, LambdaN_[ie], nodePhi_0, nodeTheta ); 
+  shape_->getRotationGradients ( ipLambdaP, w, nodePhi_0, nodeLambda ); 
   // TEST_CONTEXT(ipLambdaP)
 
   // get the strains (material + spatial );
@@ -606,7 +599,7 @@ void specialCosseratRodModel::get_strains_
   if (spatial)
   {
     Cubix        PI             ( dofCount, dofCount, ipCount );
-    shape_->getPi ( PI, LambdaN_[ie], nodeTheta );
+    shape_->getPi ( PI, nodeLambda );
     // TEST_CONTEXT(PI)
 
     for (idx_t ip = 0; ip < ipCount; ip++)
@@ -620,7 +613,7 @@ void specialCosseratRodModel::get_stresses_
       const Vector&       w,                     
       const Matrix&       nodePhi_0,
       const Matrix&       nodeU,      
-      const Matrix&       nodeTheta, 
+      const Cubix&        nodeLambda, 
       const idx_t         ie,      
       const bool          spatial ) const
 {
@@ -632,13 +625,13 @@ void specialCosseratRodModel::get_stresses_
   MatmulChain<double, 3>      mc3;
 
   // get the strains
-  get_strains_( strains, w, nodePhi_0, nodeU, nodeTheta, ie, spatial );
+  get_strains_( strains, w, nodePhi_0, nodeU, nodeLambda, ie, spatial );
   // TEST_CONTEXT( strains )
 
   // get the stresses (material + spatial );
   if (spatial)
   {
-    shape_->getPi(PI, LambdaN_[ie], nodeTheta);
+    shape_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++) 
       stiffness[ip]   = mc3.matmul(PI[ip], materialC_, PI[ip].transpose());
   }
@@ -653,16 +646,13 @@ void specialCosseratRodModel::get_stresses_
 void            specialCosseratRodModel::get_disps_
   ( const Matrix&       nodePhi_0,
     const Matrix&       nodeU,
-    const Matrix&       nodeTheta,
+    const Cubix&        nodeLambda,
     const Vector&       disp ) const
 {
   const idx_t   nodeCount       = allNodes_.size();
   
   IdxVector     idofs_trans     ( TRANS_DOF_COUNT );
   IdxVector     idofs_rot       ( ROT_DOF_COUNT );
-  Matrix        theta           ( ROT_DOF_COUNT, nodeCount );
-  Cubix         Theta           ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, nodeCount );
-  Cubix         nodeLambda      ( TRANS_DOF_COUNT, TRANS_DOF_COUNT, allElems_.maxElemNodeCount() );
   IdxVector     inodes          ( allElems_.maxElemNodeCount() );
 
   allNodes_.getSomeCoords( nodePhi_0, rodGroup_.getNodeIndices() );
@@ -673,7 +663,8 @@ void            specialCosseratRodModel::get_disps_
     dofs_->getDofIndices( idofs_rot, inode, rot_types_ );
 
     nodeU[inode] = disp[idofs_trans];
-    nodeTheta[inode] = disp[idofs_rot];
+    expVec( nodeLambda[inode], (Vector)disp[idofs_rot] );
+    nodeLambda[inode] = matmul (nodeLambda[inode], LambdaN_[inode]);
   }  
 }
 
@@ -692,8 +683,8 @@ void            specialCosseratRodModel::assemble_
 
 // PER ELEMENT VALUES
   Matrix       nodeU          ( rank, allNodes_.size() );
-  Matrix       nodeTheta      ( rank, allNodes_.size() );
   Matrix       nodePhi_0      ( rank, allNodes_.size() );
+  Cubix        nodeLambda     ( rank, rank, allNodes_.size() );
   Matrix       stress         ( dofCount, ipCount );
   Vector       weights        ( ipCount );
   Quadix       XI             ( dofCount, dofCount, nodeCount, ipCount );
@@ -712,7 +703,7 @@ void            specialCosseratRodModel::assemble_
   Matrix       addT           ( dofCount, dofCount );
 
   // get the nice positions
-  get_disps_ ( nodePhi_0, nodeU, nodeTheta, disp );
+  get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -727,12 +718,12 @@ void            specialCosseratRodModel::assemble_
     // get the XI, PSI and PI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
     shape_->getPsi( PSI, weights, (Matrix)nodePhi_0[inodes] );
-    shape_->getPi( PI, LambdaN_[ie], (Matrix)nodeTheta[inodes] );
+    shape_->getPi( PI, (Cubix)nodeLambda[inodes] );
     // TEST_CONTEXT(XI)
     // TEST_CONTEXT(PSI)
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
-    get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Matrix)nodeTheta[inodes], ie );
+    get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie );
     // TEST_CONTEXT( stress )
     // get the gemetric stiffness
     get_geomStiff_( geomStiff, stress, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes] );
@@ -785,8 +776,8 @@ void            specialCosseratRodModel::assemble_
 
 // PER ELEMENT VALUES
   Matrix       nodeU          ( rank, allNodes_.size() );
-  Matrix       nodeTheta      ( rank, allNodes_.size() );
   Matrix       nodePhi_0      ( rank, allNodes_.size() );
+  Cubix        nodeLambda     ( rank, rank, allNodes_.size() );
   Matrix       stress         ( dofCount, ipCount );
   Vector       weights        ( ipCount );
   Quadix       XI             ( dofCount, dofCount, nodeCount, ipCount );
@@ -795,7 +786,7 @@ void            specialCosseratRodModel::assemble_
   IdxVector    Idofs          ( dofCount );
 
   // get the nice positions
-  get_disps_ ( nodePhi_0, nodeU, nodeTheta, disp );
+  get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -805,7 +796,7 @@ void            specialCosseratRodModel::assemble_
     // get the XI, PSI and PI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
     // get the (spatial) stresses
-    get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Matrix)nodeTheta[inodes], ie );
+    get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie );
     
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)

@@ -101,19 +101,6 @@ void Line3D::getRotations
   }
 }
 
-void Line3D::getRotations
-  ( const Cubix& Ri,
-    const Cubix& Rn, 
-    const Matrix& theta ) const
-{
-  Cubix   Theta   ( globalRank(), globalRank(), nodeCount() ); 
-  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Theta[inode], theta[inode] );
-
-  getRotations( Ri, Theta );
-
-  for (idx_t ip = 0; ip < ipointCount(); ip++) Ri[ip] = matmul( Ri[ip], Rn[ip] );
-}
-
 void Line3D::getXi
   ( const Quadix& Xi,
     const Vector& w,
@@ -161,30 +148,11 @@ void Line3D::getPsi
 
 void Line3D::getPi
     ( const Cubix& Pi,
-      const Matrix& theta ) const
-{
-  const Cubix Ri  ( globalRank(), globalRank(), ipointCount() );
-  Cubix   Theta   ( globalRank(), globalRank(), nodeCount() ); 
-  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Theta[inode], theta[inode] );
-
-  getRotations( Ri, Theta );
-
-  Pi  = 0.;
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    Pi[ip](SliceTo(3), SliceTo(3))      = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3))  = Ri[ip];
-  }  
-}
-
-void Line3D::getPi
-    ( const Cubix& Pi,
-      const Cubix& Rn,
-      const Matrix& theta ) const
+      const Cubix& Rn ) const
 {
   const Cubix Ri  ( globalRank(), globalRank(), ipointCount() );
 
-  getRotations( Ri, Rn, theta );
+  getRotations( Ri, Rn );
 
   Pi  = 0.;
   for (idx_t ip = 0; ip < ipointCount(); ip++)
@@ -198,19 +166,16 @@ void Line3D::getRotationGradients
   ( const Cubix& LambdaP,
     const Vector& w,
     const Matrix& c,
-    const Matrix& theta ) const
+    const Cubix& nodeLambda ) const
 {
   JEM_ASSERT2 ( LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size" );
 
-  Cubix   Rn            ( globalRank(), globalRank(), nodeCount() );
   Matrix  Lambda_r      ( globalRank(), globalRank() );
   Matrix  node_psi      ( globalRank(), nodeCount() );
   Matrix  ip_psi        ( globalRank(), ipointCount() );
   
-  for (idx_t inode = 0; inode<nodeCount(); inode++) expVec( Rn[inode], theta[inode] );
-
   // get the Rotaion matrices and the relative rotations between them 
-  getNodeRotVecs_( node_psi, Lambda_r, Rn );
+  getNodeRotVecs_( node_psi, Lambda_r, nodeLambda );
     
   Matrix  shapes  = getShapeFunctions();
   Matrix  grads   ( shapeFuncCount(), ipointCount() );
@@ -227,19 +192,6 @@ void Line3D::getRotationGradients
     LambdaP[ip]   = matmul( Lambda_r, LambdaP[ip] );
   } 
 }
-
-void Line3D::getRotationGradients
-  ( const Cubix& LambdaP,
-    const Vector& w,
-    const Cubix& Rn,
-    const Matrix& c,
-    const Matrix& theta ) const
-{
-  getRotationGradients( LambdaP, w, c, theta );
-
-  for (idx_t ip = 0; ip < ipointCount(); ip++) LambdaP[ip] = matmul( LambdaP[ip], Rn[ip] );
-}
-
 
 //------------------------------------------------------
 // private helper functions

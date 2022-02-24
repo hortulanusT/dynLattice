@@ -187,8 +187,8 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       strains,        ///< strains(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
       const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
-      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
-      const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node        
+      const Cubix&        nodeLambda,     ///< nodeLambda(.,.,j), rotational orientation j-th node
       const idx_t         ie,
       const bool          spatial = true ) const;  ///< rotational displacements
 
@@ -199,8 +199,8 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       stresses,       ///< stress(i,j), stress component i at the j-th integration points
       const Vector&       w,              ///< integration point weights
       const Matrix&       nodePhi_0,      ///< nodePhi_0(.,j), location of the j-th node
-      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node 
-      const Matrix&       nodeTheta,      ///< nodeTheta(.,j), rotational displacement j-th node
+      const Matrix&       nodeU,          ///< nodeU(.,j), translational displacement j-th node     
+      const Cubix&        nodeLambda,     ///< nodeLambda(.,.,j), rotational orientation j-th node
       const idx_t         ie,
       const bool          spatial = true ) const;  ///< rotational displacements
 
@@ -210,7 +210,7 @@ class specialCosseratRodModel : public Model
   void get_disps_
     ( const Matrix&       nodePhi_0,
       const Matrix&       nodeU,
-      const Matrix&       nodeTheta,
+      const Cubix&        nodeLambda,
       const Vector&       disp  ) const;
 
  private: 
@@ -237,6 +237,6 @@ class specialCosseratRodModel : public Model
   IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
   Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)
 
-  Quadix                  LambdaN_; ///< reference rotations per node per element; LambdaN_(.,.,j,k) is for the j-th integration point at the k-th element
+  Cubix                   LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is for the j-th node
   Cubix                   mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
 };

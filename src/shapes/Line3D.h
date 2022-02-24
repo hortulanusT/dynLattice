@@ -122,21 +122,11 @@ class Line3D : public Shape
       const Cubix& Rn ) const;
 
   /**
-   * @brief return the rotations at the integration points  
-   * @param[out] Ri Ri(.,.,i) rotational matrix at the integration points 
-   * @param[in] Rn initial rotations at the integration points. Rn(.,.,i) initial rotation at the integration points
-   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
-   */
-  void getRotations
-    ( const Cubix& Ri,
-      const Cubix& Rn, 
-      const Matrix& theta ) const;
-
-  /**
    * @brief Get the Xi at the integration points
    * 
    * @param[out] Xi Xi(.,.,j,i) where j are the nodes and i are the integration points
    * @param[out] w weights of the integration points
+   * @param[in] u displacements of the nodes, c(i,j) is the i-th displacement of the j-th node
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
    */
   void getXi
@@ -156,28 +146,15 @@ class Line3D : public Shape
     ( const Quadix& Psi,
       const Vector& w,
       const Matrix& c ) const;
-
   /**
    * @brief Get the Pi at the integration points
    * 
    * @param[out] Pi Pi(.,.,i) where j are the nodes and i are the integration points
-   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
+   * @param[in] Rn rotations at the integration points. Rn(.,.,i) rotation at the integration points
    */
   void getPi
     ( const Cubix& Pi,
-      const Matrix& theta ) const;
-
-        /**
-   * @brief Get the Pi at the integration points
-   * 
-   * @param[out] Pi Pi(.,.,i) where j are the nodes and i are the integration points
-   * @param[in] Rn initial rotations at the integration points. Rn(.,.,i) initial rotation at the integration points
-   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
-   */
-  void getPi
-    ( const Cubix& Pi,
-      const Cubix& Rn,
-      const Matrix& theta ) const;
+      const Cubix& Rn ) const;
 
   /**
    * @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
@@ -185,13 +162,13 @@ class Line3D : public Shape
    * @param[out] LambdaP curvature at the integration points
    * @param[out] w integration weights
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
+   * @param[in] nodeLambda rotation at the nodes.
    */
   void getRotationGradients
     ( const Cubix& LambdaP,
       const Vector& w,
       const Matrix& c,
-      const Matrix& theta ) const;
+      const Cubix& nodeLambda ) const;
 
     
   /**
