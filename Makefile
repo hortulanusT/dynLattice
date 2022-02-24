@@ -3,8 +3,9 @@ program     = bin/nonlinRod
 #######################################################################
 ##   Add desired directories (include sub-dirs seperately)           ##
 #######################################################################
-subdirs		 	:= ${shell find src -type d}
-MY_INCDIRS 	:= src
+SRCDIR			:= src
+subdirs		 	:= ${shell find $(SRCDIR) -type d}
+MY_INCDIRS 	:= $(SRCDIR)
 
 #######################################################################
 ##   Defining C++ Standard                                           ##
