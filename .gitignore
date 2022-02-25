@@ -12,6 +12,7 @@ nonlinRod*
 *.res
 *.dummy
 *.png
+*.tar
 
 studies/**/output/*
 studies/**/results/*
@@ -22,8 +23,8 @@ tests/element/*/
 tests/beam/test*/
 
 # save the resulting data files for testing
-!tests/beam/test*.dat
-!tests/arclen/*.dat
+!tests/beam/input_data/*.dat
+!tests/beam/ref_data/*.csv
 
 # save the folder structure
 !.gitkeep

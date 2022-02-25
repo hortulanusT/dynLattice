@@ -7,7 +7,7 @@ log.pattern = "*.info | *.debug"; //
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
-control.runWhile = "free.disp.dy > -95 && i < 250";
+control.runWhile = "free.disp.dy > -95 && i < 2500";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -21,9 +21,9 @@ params.rod_details.area = 2.;
 params.rod_details.area_moment = 2.;
 
 params.force_model.type = "StdArclen";
-params.force_model.loadIncr = 100.;
-params.force_model.minIncr = 5.;
-params.force_model.maxIncr = 500.;
+params.force_model.loadIncr = 10.;
+params.force_model.minIncr = .5;
+params.force_model.maxIncr = 50.;
 params.force_model.model.type = "PointLoad" ;
 params.force_model.model.loadTable = "force";
 
@@ -46,3 +46,5 @@ model.model.model.cosseratRod += params.rod_details;
 model.model.model.force = params.force_model;
 
 model.model.model.joint.lockDofs += model.model.model.cosseratRod.dofNamesRot;
+
+Output.paraview.reportIntervall = 10;
