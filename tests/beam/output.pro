@@ -1,3 +1,8 @@
+
+// LOGGING
+log.pattern = "*.info | *.debug";
+log.file = "$(CASE_NAME)/run.log";
+
 // OUTPUTS
 Output.modules = [  "loadextent", "disp", "resp", "paraview" ];
 
@@ -8,12 +13,12 @@ Output.loadextent.dofs += model.model.model.cosseratRod.dofNamesRot;
 Output.loadextent.dimensions = model.model.model.cosseratRod.dofNamesTrans;
 
 Output.disp.type = "Sample";
-Output.disp.file = "$(CASE_NAME)/disp.res";
+Output.disp.file = "$(CASE_NAME)/disp.csv";
 Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
 Output.disp.separator = ",";
 
 Output.resp.type = "Sample";
-Output.resp.file = "$(CASE_NAME)/resp.res";
+Output.resp.file = "$(CASE_NAME)/resp.csv";
 Output.resp.dataSets = [ "free.resp.dx", "free.resp.dy", "free.resp.dz", "free.resp.rx", "free.resp.ry", "free.resp.rz" ];
 Output.resp.separator = ",";
 

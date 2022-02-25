@@ -2,10 +2,6 @@
 //////// SHALLOW  TRIANGLE ////////
 ///////////////////////////////////
 
-// LOGGING
-log.pattern = "*.info | *.debug";
-log.file = "$(CASE_NAME).log";
-
 // PROGRAM_CONTROL
 control.runWhile = "free.disp.dy >= -.4";
 
@@ -31,6 +27,12 @@ params.force_model.model.loadIncr = 0.;
 params.force_model.model.dofs = "dy";
 params.force_model.model.nodeGroups = "free";
 params.force_model.model.factors = -1.;
+
+params.force_model_disp.type = "Dirichlet";
+params.force_model_disp.dispIncr = 0.005;
+params.force_model_disp.dofs = "dy";
+params.force_model_disp.nodeGroups = "free";
+params.force_model_disp.factors = -1.;
 
 
 // include model and i/o files
