@@ -35,4 +35,4 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 
 
 ## License
-todo...
+[MIT License](LICENSE)
