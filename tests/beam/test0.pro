@@ -28,6 +28,12 @@ params.force_model.model.dofs = "dy";
 params.force_model.model.nodeGroups = "free";
 params.force_model.model.factors = -1.;
 
+params.force_model_disp.type = "Dirichlet";
+params.force_model_disp.dispIncr = 0.005;
+params.force_model_disp.dofs = "dy";
+params.force_model_disp.nodeGroups = "free";
+params.force_model_disp.factors = -1.;
+
 
 // include model and i/o files
 include "input.pro";

@@ -26,6 +26,15 @@ test_passed = []
 print(colored("EX 7.0", "cyan"), end=" ")
 print("...", end="", flush=True)
 
+test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test0.pro"
+            , "-p", "model.model.model.force=params.force_model_disp;"
+            , "-p", "Solver.solver.type=\"Nonlin\";"], stdout=subprocess.DEVNULL) )
+
+os.rename("tests/beam/test0/resp.csv", "tests/beam/test0/resp_ref.csv")
+os.rename("tests/beam/test0/disp.csv", "tests/beam/test0/disp_ref.csv")
+os.rename("tests/beam/test0/run.log", "tests/beam/test0/run_ref.log")
+os.rename("tests/beam/test0/visual", "tests/beam/test0/visual_ref")
+
 test_passed.append( not subprocess.call(["./bin/nonlinRod", "tests/beam/test0.pro"], stdout=subprocess.DEVNULL) )
 
 try:
@@ -152,15 +161,17 @@ try:
   # PLOT TEST 0
   sim_disp = np.loadtxt("tests/beam/test0/disp.csv", delimiter=',')
   sim_resp = np.loadtxt("tests/beam/test0/resp.csv", delimiter=',')
+  ref_disp = np.loadtxt("tests/beam/test0/disp_ref.csv", delimiter=',')
+  ref_resp = np.loadtxt("tests/beam/test0/resp_ref.csv", delimiter=',')
 
   plt.figure()
-  plt.plot(-1*sim_disp[:,1]-0.2, sim_resp[:,1], label="arc-length")
+  plt.plot(-1*ref_disp[:,1]-0.2, ref_resp[:,1], label="displacment")
+  plt.plot(-1*sim_disp[:,1]-0.2, sim_resp[:,1], "--", label="arc-length")
   plt.legend()
   plt.xlabel( "displacment" )
   plt.ylabel( "load" )
-  plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test0/results.png")
+  plt.savefig("tests/beam/test0/results.pdf")
 except:
   pass
 
@@ -185,7 +196,7 @@ try:
   plt.ylabel( "normed residual" )
   plt.xticks( range(len(sim_conv)) )
 
-  plt.savefig("tests/beam/test1/results.png")
+  plt.savefig("tests/beam/test1/results.pdf")
 except:
   pass
 
@@ -208,7 +219,7 @@ try:
   plt.axhline(y=0, color="grey")
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test2/results.png")
+  plt.savefig("tests/beam/test2/results.pdf")
 except:
   pass
 
@@ -225,7 +236,7 @@ try:
   plt.ylabel( "load" )
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test3/results.png")
+  plt.savefig("tests/beam/test3/results.pdf")
 except:
   pass
 
@@ -246,7 +257,7 @@ try:
   plt.ylabel( "load" )
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test4/results.png")
+  plt.savefig("tests/beam/test4/results.pdf")
 except:
   pass
 
@@ -270,7 +281,7 @@ try:
   plt.ylabel( "displacment" )
   plt.xlim( left=0, right=3000 )
 
-  plt.savefig("tests/beam/test5/results.png")
+  plt.savefig("tests/beam/test5/results.pdf")
 except:
   pass
 
