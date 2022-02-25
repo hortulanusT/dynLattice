@@ -2,7 +2,11 @@
 Input.modules = [ "input", "groupInput" ];
 Input.input.type = "FEInput";
 Input.input.file = "$(CASE_NAME).dat";
+
 Input.groupInput.type = "GroupInput";
-Input.groupInput.nodeGroups = [ "fixed", "free" ];
-Input.groupInput.fixed.ytype = "min";
+Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right", "free" ];
+Input.groupInput.fixed_left.ytype = "min";
+Input.groupInput.fixed_left.xtype = "min";
+Input.groupInput.fixed_right.ytype = "min";
+Input.groupInput.fixed_right.xtype = "max";
 Input.groupInput.free.ytype = "max";

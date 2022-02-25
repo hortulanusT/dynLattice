@@ -17,11 +17,11 @@
 #include <jive/fem/InitModule.h>
 #include <jive/gl/declare.h>
 
-#include "ParaViewModule.h"
-#include "GroupInputModule.h"
-#include "GroupOutputModule.h"
-#include "PBCGroupInputModule.h"
-#include "PBCGroupOutputModule.h"
+#include "modules/paraview/ParaViewModule.h"
+#include "modules/GroupInputModule.h"
+#include "modules/GroupOutputModule.h"
+#include "modules/PBCGroupInputModule.h"
+#include "modules/PBCGroupOutputModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules

@@ -20,7 +20,7 @@
 #include <jive/fem/NodeGroup.h>
 
 #include "PBCGroupInputModule.h"
-#include "testing.h"
+#include "utils/testing.h"
 
 using jem::Error;
 using jem::io::endl;

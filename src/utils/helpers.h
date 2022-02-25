@@ -16,7 +16,7 @@
 #include <jem/numeric/Quaternion.h>
 #include <jive/Array.h>
 
-#include "testing.h"
+#include "utils/testing.h"
 
 #define WARN(key) jem::System::warn( getContext() ) << key << "\n";
 
@@ -46,7 +46,7 @@ namespace jive_helpers
   const Vector vec0 = { 0., 0., 0. };
   const double PI   = 3.1415926535897932384626433;
   const double PI_2 = PI/2.;
-  const double TINY = __DBL_EPSILON__ * 1e6;
+  const double TINY = __DBL_EPSILON__ * 1e9;
 
   /**
    * @brief generates an identity matrix of the given dimension
@@ -91,6 +91,18 @@ namespace jive_helpers
   void expVec
     ( const Matrix& Exp,
       const Vector& v );
+
+  /**
+   * @brief derivative of jive_helpers::expVec
+   * 
+   * @param[out] ExpP resulting matrix exponential
+   * @param[in] v axial rotation vector
+   * @param[in] vP derivative of the axial rotation vector
+   */
+  void expVecP
+  ( const Matrix& ExpP,
+    const Vector& v,
+    const Vector& vP );  
       
   /**
    * @brief turn a rotation matrix into a quaterion

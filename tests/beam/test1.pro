@@ -3,7 +3,7 @@
 ///////////////////////////////////
 
 // LOGGING
-log.pattern = "*.info "; //| model.debug
+log.pattern = "*.info | *.debug"; //
 log.file = "$(CASE_NAME).log";
 
 // PROGRAM_CONTROL
@@ -34,5 +34,6 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
-model.model.model.cosseratRod += params.rod_details;
-model.model.model.force = params.force_model;
+model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
+model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.diriFixed.factors += [ 0., 0., 0. ];

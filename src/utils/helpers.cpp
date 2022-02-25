@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "utils/helpers.h"
 
 namespace jive_helpers
 {
@@ -55,18 +55,63 @@ namespace jive_helpers
       const Vector& psi )
   {
     // TEST_NO_CONTEXT(psi)
+    Exp                   = eye();
     const double theta    = norm2(psi);
-    const Vector omega    ( psi.size() );
+
+    if (theta < TINY) return;
+
+    const Vector k        ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );    
     
-    omega  = psi;
-    omega /= !jem::isTiny( theta ) ? theta : 1.;
-    K      = skew ( omega );
+    k       = psi / theta;
+    K       = skew ( k );
 
-    Exp  = eye();
-    Exp += sin(theta) * K;
-    Exp += (1-cos(theta)) * matmul ( K, K );
+    Exp    += sin(theta) * K;
+    Exp    += (1-cos(theta)) * matmul ( K, K );
     // TEST_NO_CONTEXT(Exp)
+  }
+
+  void expVecP
+    ( const Matrix& ExpP,
+      const Vector& psi,
+      const Vector& psiP )
+  {
+    const double theta    = norm2(psi);
+
+    if ( theta < TINY )
+    {
+      ExpP = skew ( psiP ); 
+      return;
+    }
+    // TEST_NO_CONTEXT(skew(psiP))
+
+    // derivative of norm
+    const double thetaP   = dot(psi, psiP) / theta;
+
+    const Vector k        ( psi.size() );
+    const Vector kP       ( psi.size() );
+    const Matrix K        ( psi.size(), psi.size() );    
+    const Matrix KP       ( psi.size(), psi.size() );    
+    
+    k      = psi / theta;
+    // Quotient rule
+    kP     = (psiP * theta - psi * thetaP) / theta / theta;
+
+    K      = skew ( k );
+    KP     = skew ( kP );
+
+    // Exp  = eye();
+    ExpP   = 0;
+    // TEST_NO_CONTEXT(ExpP)
+    //Exp   += sin(theta) * K;
+    ExpP  += cos(theta) * thetaP * K;
+    ExpP  += sin(theta) * KP;
+    // TEST_NO_CONTEXT(ExpP)
+    //Exp   += (1-cos(theta)) * matmul ( K, K );
+    ExpP  += sin(theta) * thetaP * matmul ( K, K );
+    ExpP  += (1-cos(theta)) * matmul ( K, KP );
+    ExpP  += (1-cos(theta)) * matmul ( KP, K );
+    // TEST_NO_CONTEXT(ExpP)
   }
 
   void rotMat2Quat 
@@ -167,11 +212,8 @@ namespace jive_helpers
   Vector unskew
     ( const Matrix& mat )
   {
-    // TEST_NO_CONTEXT( mat )
-    JEM_ASSERT2( 
-      (fabs(mat(2,1) + mat(1,2) + mat(0,2) + mat(2,0) + mat(1,0) + mat(0,1))
-       + fabs( mat(0,0) + mat(1,1) + mat(2,2) ) ) <= TINY * matrixNorm2(mat),
-        "Matrix not skew-symmetric" );
+    JEM_ASSERT2(fabs(mat(2,1) + mat(1,2) + mat(0,2) + mat(2,0) + mat(1,0) + mat(0,1)) <= TINY * matrixNorm2(mat) , "Matrix not skew-symmetric");
+    JEM_ASSERT2(fabs(mat(0,0) + mat(1,1) + mat(2,2)) <= TINY, "Matrix trace not zero" );
 
     Vector res ( 3 );
     res = 0.;

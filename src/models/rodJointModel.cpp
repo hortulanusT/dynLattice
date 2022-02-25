@@ -202,7 +202,7 @@ void  rodJointModel::assembleRot_
         mbld.addBlock  ( jdofs, idofs, (Matrix)(-1. * stiff_mat) );   
         mbld.addBlock  ( jdofs, jdofs, (Matrix)(+1. * stiff_mat) );
 
-        // REPORT2 ( inodes[inode], inodes[jnode] )
+        // SUBHEADER2 ( inodes[inode], inodes[jnode] )
         // TEST2 ( torque, stiff_mat )
       }     
     }    
@@ -306,10 +306,12 @@ void rodJointModel::getCons_ ()
   // iterate through all the elements
   for (idx_t ie = 0; ie < egroup_.size(); ie++)
   {
-    idx_t ielem = egroup_.getIndices()[ie];      
+    idx_t ielem = egroup_.getIndex(ie); 
     // get the nodes of the element
     inodes.resize ( elems_.getElemNodeCount ( ielem ) );
     elems_.getElemNodes ( inodes, ielem );
+    // skip if element is empty
+    if (inodes.size() < 1)  continue;
     // define the first node of the element as master node
     masterNode = inodes [0];
     dofs_->getDofIndices ( masterDofs, masterNode, idofs );

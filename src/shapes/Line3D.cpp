@@ -66,28 +66,32 @@ void Line3D::getShapeGradients
     const Matrix& c ) const
 {
   Matrix c1( localRank(), nodeCount() );
-  for (idx_t iNode = 0; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
-    c1( 0, iNode ) = norm2( c[iNode] - c[0] );
+  c1( 0,0 ) = 0.;
+  for (idx_t iNode = 1; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
+    c1[iNode][0] = norm2( c[iNode] - c[iNode-1] ) + c1[iNode-1][0];
 
-  Cubix     grads ( localRank(), shapeFuncCount(), ipointCount() ); 
-  intLine_->getShapeGradients( grads, w, c1 );
-  g = grads( 0, ALL, ALL );
+  Cubix     g1 ( localRank(), shapeFuncCount(), ipointCount() ); 
+  intLine_->getShapeGradients( g1, w, c1 );
+
+  g = g1( 0, ALL, ALL );
 }
 
 void Line3D::getRotations
   ( const Cubix& Ri,
-    const Cubix& Rn ) const
+    const Cubix& Rn  ) const
 {
-  Matrix Lambda_r ( globalRank(), globalRank() );
-  Matrix node_psi( globalRank(), nodeCount() );
+  Matrix  Lambda_r      ( globalRank(), globalRank() );
+  Matrix  node_psi      ( globalRank(), nodeCount() );
+  Matrix  ip_psi        ( globalRank(), ipointCount() );
+
+  // get the Rotaion matrices and the relative rotations between them 
   getNodeRotVecs_( node_psi, Lambda_r, Rn );
   
   // get the _local_ rotations in the integration points
-  Matrix ip_psi( globalRank(), ipointCount() );
-  Matrix shapeFuncs = getShapeFunctions();
+  Matrix  shapeFuncs    = getShapeFunctions();
 
   // get the rotation vectors associated with the local rotations
-  ip_psi = matmul( node_psi, shapeFuncs );
+  ip_psi  = matmul( node_psi, shapeFuncs );
   
   // construc the local rotation matrices
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
@@ -100,27 +104,24 @@ void Line3D::getRotations
 void Line3D::getXi
   ( const Quadix& Xi,
     const Vector& w,
-    const Matrix& c,
-    const Matrix& u ) const
+    const Matrix& u,
+    const Matrix& c ) const
 {
   JEM_ASSERT2 ( Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size" );
   Matrix  shapes  = getShapeFunctions();
   Matrix  grads   ( shapeFuncCount(), ipointCount() );
   getShapeGradients( grads, w, c );
 
-  Matrix  nodePhi = (Matrix)(c + u);  
-  Matrix  phiP    = matmul( nodePhi, grads );
-  
+  Matrix  phiP    = matmul( (Matrix)(c+u), grads );
+
   Xi = 0.;
 
   for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
     for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
     {
-      for (idx_t i = 0; i < 6; i++) Xi(i, i, iNode, ip) = grads( iNode, ip );
+      for (idx_t i = 0; i < 6; i++)   Xi(i, i, iNode, ip) = grads( iNode, ip );
       Xi( SliceFrom(3), SliceTo(3), iNode, ip ) = -1. * shapes(iNode, ip) * skew(phiP[ip]);
     }
-  }    
 }
 
 void Line3D::getPsi
@@ -145,18 +146,36 @@ void Line3D::getPsi
   }    
 }
 
-void Line3D::getRotStrain_local
-  ( const Matrix& omega,
+void Line3D::getPi
+    ( const Cubix& Pi,
+      const Cubix& Rn ) const
+{
+  const Cubix Ri  ( globalRank(), globalRank(), ipointCount() );
+
+  getRotations( Ri, Rn );
+
+  Pi  = 0.;
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    Pi[ip](SliceTo(3), SliceTo(3))      = Ri[ip];
+    Pi[ip](SliceFrom(3), SliceFrom(3))  = Ri[ip];    
+  } 
+}
+
+void Line3D::getRotationGradients
+  ( const Cubix& LambdaP,
     const Vector& w,
     const Matrix& c,
-    const Cubix& Rn ) const
+    const Cubix& nodeLambda ) const
 {
-  JEM_ASSERT2 ( omega.size(0) == globalRank() && omega.size(1) == ipointCount(), "omega size does not match the expected size" );
-  Matrix  node_psi  ( globalRank(), nodeCount() );
-  Matrix  Lambda_r  ( globalRank(), globalRank() );
-  getNodeRotVecs_( node_psi, Lambda_r, Rn );
-  // TEST_CONTEXT( Lambda_r )
-  // TEST_CONTEXT( matmul(Lambda_r, node_psi) )
+  JEM_ASSERT2 ( LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size" );
+
+  Matrix  Lambda_r      ( globalRank(), globalRank() );
+  Matrix  node_psi      ( globalRank(), nodeCount() );
+  Matrix  ip_psi        ( globalRank(), ipointCount() );
+  
+  // get the Rotaion matrices and the relative rotations between them 
+  getNodeRotVecs_( node_psi, Lambda_r, nodeLambda );
     
   Matrix  shapes  = getShapeFunctions();
   Matrix  grads   ( shapeFuncCount(), ipointCount() );
@@ -166,71 +185,12 @@ void Line3D::getRotStrain_local
   Matrix  psiP    ( globalRank(), ipointCount() );
   psi     = matmul( node_psi, shapes );
   psiP    = matmul( node_psi, grads );
-  // TEST_CONTEXT( matmul(Lambda_r, psi) )
-  // TEST_CONTEXT( matmul(Lambda_r, psiP) );
-
-  double  alpha   = NAN;
 
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
-    alpha     = norm2( psi[ip] );
-
-    if (jem::isTiny(alpha))
-      omega[ip] = psiP[ip];
-    else 
-    { // calc beta from Simo/Vu-Quoc 1985 (in local ref-frame from Crisfield/Jelenic)
-      omega[ip] = sin(alpha)/alpha * psiP[ip];
-      omega[ip] += (1 - sin(alpha)/alpha) * (dot(psi[ip], psiP[ip]) / alpha) * psi[ip]/alpha;
-      omega[ip] += 0.5 * (sin(.5*alpha)/.5/alpha) * (sin(.5*alpha)/.5/alpha) * matmul( skew(psi[ip]), psiP[ip] );
-    }
-
-    // rotate back to the spatial ref frame
-    omega[ip] = matmul( Lambda_r, omega[ip] );
-  }  
-
-  // TEST_CONTEXT(Rn)
-  // TEST_CONTEXT(node_psi)
-  // TEST_CONTEXT(omega)
-}
-
-void Line3D::getRotStrain_global
-  ( const Matrix& omega,
-    const Vector& w,
-    const Matrix& c,
-    const Matrix& theta) const
-{
-  JEM_ASSERT2 ( omega.size(0) == globalRank() && omega.size(1) == ipointCount(), "omega size does not match the expected size" );
-      
-  Matrix  shapes  = getShapeFunctions();
-  Matrix  grads   ( shapeFuncCount(), ipointCount() );
-  getShapeGradients( grads, w, c );
-
-  Matrix  psi     ( globalRank(), ipointCount() );
-  Matrix  psiP    ( globalRank(), ipointCount() );
-  psi     = matmul( theta, shapes );
-  psiP    = matmul( theta, grads );
-  // TEST_CONTEXT( matmul(Lambda_r, psi) )
-  // TEST_CONTEXT( matmul(Lambda_r, psiP) );
-
-  double  alpha   = NAN;
-
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    alpha     = norm2( psi[ip] );
-
-    if (jem::isTiny(alpha))
-      omega[ip] = psiP[ip];
-    else 
-    { // calc beta from Simo/Vu-Quoc 1985 
-      omega[ip] = sin(alpha)/alpha * psiP[ip];
-      omega[ip] += (1 - sin(alpha)/alpha) * (dot(psi[ip], psiP[ip]) / alpha) * psi[ip]/alpha;
-      omega[ip] += 0.5 * (sin(.5*alpha)/.5/alpha) * (sin(.5*alpha)/.5/alpha) * matmul( skew(psi[ip]), psiP[ip] );
-    }
-  }  
-
-  // TEST_CONTEXT(Rn)
-  // TEST_CONTEXT(node_psi)
-  // TEST_CONTEXT(omega)
+    expVecP( LambdaP[ip], psi[ip], psiP[ip] );
+    LambdaP[ip]   = matmul( Lambda_r, LambdaP[ip] );
+  } 
 }
 
 //------------------------------------------------------

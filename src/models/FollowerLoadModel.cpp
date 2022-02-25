@@ -90,7 +90,7 @@ bool FollowerLoadModel::takeAction
     Vector d;
 
     // Get the last loadstep displacements
-    StateVector::getOld ( d, dofs_, globdat );
+    StateVector::get ( d, dofs_, globdat );
 
     advance_rots_ ( d );
 

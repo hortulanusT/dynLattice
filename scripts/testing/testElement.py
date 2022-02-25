@@ -2,13 +2,16 @@
 
 import os, subprocess, glob, math, sys
 import numpy as np
-from numpy.core.numeric import load
-from numpy.lib.ufunclike import fix
 import pandas as pd
 from itertools import product
 from termcolor import colored
 
+# MANUAL SETTINGS
 sim2D = False
+elem_order = [ "lin", "quad", "cub" ] #
+elem_dir = [ "x", "y", "z" ] #
+load_dir = [ "dx", "dy", "dz", "rx", "ry", "rz" ] # 
+load_typ = [  "disp","force" ] #
 
 # cleanup the workshop
 try:  
@@ -18,20 +21,21 @@ try:
   [os.remove(file) for file in glob.glob("tests/element/FAILED/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/DIFF/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/DIFF/*.log")]
-  os.mkdir("tests/element/FAILED")
-  os.mkdir("tests/element/DIFF")
+  os.remove("tests/element/FAILED/_runs.txt")
 except FileNotFoundError:
   pass
+try:  
+  os.mkdir("tests/element/FAILED")
+except FileExistsError:
+  pass
+try:  
+  os.mkdir("tests/element/DIFF")
 except FileExistsError:
   pass
 
 # get some settings
 nel = sys.argv[1] if len(sys.argv) > 1 else "1"
-elem_order = [ "lin", "quad", "cub" ] #
 elem_nodes = [ 2, 3, 4 ]
-elem_dir = [ "x", "y", "z" ] #
-load_dir = [ "dx", "dy", "dz", "rx", "ry", "rz" ] # 
-load_typ = [ "disp", "force" ] #
 
 fixed_groups = {eDir:{} for eDir in elem_dir}
 for eDir in elem_dir:
@@ -47,7 +51,7 @@ for eDir in elem_dir:
       if lDir[0] == "r" and dDir[0] == "d": # rotational load and translational displacment
         fixed_groups[eDir][lDir].append("fixed" if dDir[1] != lDir[1] else "all")
 
-y_Dir = {eDir:{} for eDir in elem_dir}
+y_Dir = {eDir:{} for eDir in ["x","y","z"]}
 y_Dir["x"]["x"] = "[0.,1.,0.]"
 y_Dir["x"]["y"] = "[0.,0.,1.]"
 y_Dir["x"]["z"] = "[0.,1.,0.]"
@@ -59,14 +63,14 @@ y_Dir["z"]["y"] = "[1.,0.,0.]"
 y_Dir["z"]["z"] = "[0.,1.,0.]"
 
 # prepare some analytical solutions
-steps = 50
-incr = 500/steps
+steps = 100
+incr = 1000/steps
 forces = [(i+1)*incr for i in range(steps)]
 displs = [(i+1)*incr*1e-3 for i in range(steps)]
 bending_u = lambda d: 1-(math.sin(d)/d)
 bending_v = lambda d: (1-math.cos(d))/d
 
-ideal_disp = {eDir:{} for eDir in elem_dir}
+ideal_disp = {eDir:{} for eDir in ["x","y","z"]}
 ideal_resp = {}
 
 # FIXME find some expressions for point force bending
@@ -139,6 +143,10 @@ for eDir in elem_dir:
 
         if prog_ret: #nonzero return code == failed execution
           test_passed.at[eOrder+"_"+eDir, lTyp+"_"+lDir] = ">< FAIL ><"
+          running_list.append("-p")
+          running_list.append("Output.modules+=[\"paraview\"]")
+          running_list.append("-p")
+          running_list.append("Input.input.file=\"$(CASE_NAME).dummy\"")
           failed_runs.append(" ".join(running_list))
           try:
             os.rename("tests/element/test.log", f"tests/element/FAILED/{eOrder}-{eDir}_{lTyp}-{lDir}.log")
@@ -181,10 +189,13 @@ for eDir in elem_dir:
 
     if all(test_passed.loc[eOrder+"_"+eDir] == "analytical"):
       print(colored(" PASSED", "green", attrs=["bold"]))
+    elif not any(test_passed.loc[eOrder+"_"+eDir] == "_ALL_Diff_") and not any(test_passed.loc[eOrder+"_"+eDir] == ">< FAIL ><"):
+      print(colored(" MIXED RESULTS", "yellow", attrs=["bold"]))
     else:
       print(colored(" FAILED", "red", attrs=["bold"]))
 
 # finishing
+print("\n")
 if (test_passed == "analytical").all().all():
   print(colored("> > > ALL TESTS PASSED < < <\t:))", "green"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
@@ -192,18 +203,29 @@ if (test_passed == "analytical").all().all():
   os.remove("tests/element/test.dat")
   os.rmdir("tests/element/FAILED")
   os.rmdir("tests/element/DIFF")
+elif (test_passed != "_ALL_Diff_").all().all() and (test_passed != ">< FAIL ><").all().all():
+  print(colored("> > > MIXED RESULTS FROM SOME TESTS < < <\t://\n", "yellow"))
+  [os.remove(file) for file in glob.glob("tests/element/*.res")]
+  [os.remove(file) for file in glob.glob("tests/element/*.log")]
+  os.rename("tests/element/test.dat", "tests/element/test.dummy")
+  print("Overview:\n")
+  print(test_passed)
 else:
   print(colored("> > > ONE (OR MORE) TESTS FAILED < < <\t:((\n", "red"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/*.log")]
-  os.remove("tests/element/test.dat")
+  os.rename("tests/element/test.dat", "tests/element/test.dummy")
   print("Overview:\n")
   print(test_passed)
 
-  if len(failed_runs)>10:
-    print("\ntoo many runs failed....\n")
-  elif len(failed_runs):
-    print("\nFailed Runs:\n"+"\n".join(failed_runs))
+  if len(failed_runs):
+    failed_runs = [run.replace("\"", "\\\"") for run in failed_runs]
+    failed_runs = [run.replace("<", "\\<") for run in failed_runs]
+    failed_runs = [run.replace("$", "\\$") for run in failed_runs]
+    failed_runs = [run.replace("(", "\\(") for run in failed_runs]
+    failed_runs = [run.replace(")", "\\)") for run in failed_runs]
+    with open("tests/element/FAILED/_runs.txt", "w") as f:
+      f.writelines("\n".join(failed_runs))
   else:
     os.rmdir("tests/element/FAILED")
 
@@ -211,5 +233,9 @@ else:
     print("\nDifferent Load Response Runs:\n"+";\t".join(load_diff_runs))
   if len(disp_diff_runs):
     print("\nDifferent Displacement Runs:\n"+";\t".join(disp_diff_runs))
+  try:
+    os.rmdir("tests/element/DIFF")
+  except OSError:
+    pass
 
 print("\n")

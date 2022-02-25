@@ -21,8 +21,8 @@
 #include <jive/geom/ParametricLine.h>
 #include <jive/geom/ShapeFactory.h>
 
-#include "testing.h"
-#include "helpers.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
 
 using namespace jive_helpers;
 
@@ -114,8 +114,8 @@ class Line3D : public Shape
 
   /**
    * @brief return the rotations at the integration points  
-   * @param[out] Ri Ri(.,.,i), where i are the integration points
-   * @param[in] Rn rotation matrices at the nodes. Rn(.,.,i) is the rotation matrix at the i-th node
+   * @param[out] Ri Ri(.,.,i) rotational matrix at the integration points 
+   * @param[in] Rn rotation at the nodes. Rn(.,i) rotational displacement at the nodes
    */
   void getRotations
     ( const Cubix& Ri,
@@ -126,14 +126,14 @@ class Line3D : public Shape
    * 
    * @param[out] Xi Xi(.,.,j,i) where j are the nodes and i are the integration points
    * @param[out] w weights of the integration points
+   * @param[in] u displacements of the nodes, c(i,j) is the i-th displacement of the j-th node
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] u displacements of the nodes, u(i,j) is the i-th coordinate of the j-th node
    */
   void getXi
     ( const Quadix& Xi,
       const Vector& w,
-      const Matrix& c,
-      const Matrix& u ) const;
+      const Matrix& u,
+      const Matrix& c ) const;
 
   /**
    * @brief Get the Psi at the integration points
@@ -146,32 +146,44 @@ class Line3D : public Shape
     ( const Quadix& Psi,
       const Vector& w,
       const Matrix& c ) const;
-
   /**
-   * @brief Get the curvature at the integration points from the rotations (Crisfield/Jelenic)
+   * @brief Get the Pi at the integration points
    * 
-   * @param[out] omega curvature at the integration points
-   * @param[out] w integration weights
-   * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] Rn rotation matrices at the nodes. Rn(.,.,i) is the rotation matrix at the i-th node
+   * @param[out] Pi Pi(.,.,i) where j are the nodes and i are the integration points
+   * @param[in] Rn rotations at the integration points. Rn(.,.,i) rotation at the integration points
    */
-  void getRotStrain_local
-    ( const Matrix& omega,
-      const Vector& w,
-      const Matrix& c,
+  void getPi
+    ( const Cubix& Pi,
       const Cubix& Rn ) const;
 
   /**
-   * @brief Get the curvature at the integration points from the rotations (Simo/Vu-Quoc)
+   * @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
    * 
-   * @param[out] omega curvature at the integration points
+   * @param[out] LambdaP curvature at the integration points
    * @param[out] w integration weights
    * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-   * @param[in] theta matrix of rotational displacements at the nodes
+   * @param[in] nodeLambda rotation at the nodes.
    */
-  void getRotStrain_global
-    ( const Matrix& omega,
+  void getRotationGradients
+    ( const Cubix& LambdaP,
       const Vector& w,
+      const Matrix& c,
+      const Cubix& nodeLambda ) const;
+
+    
+  /**
+   * @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
+   * 
+   * @param[out] LambdaP curvature at the integration points
+   * @param[out] w integration weights
+   * @param[in] Rn initial rotations at the integration points. Rn(.,.,i) initial rotation at the integration points
+   * @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
+   * @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
+   */
+  void getRotationGradients
+    ( const Cubix& LambdaP,
+      const Vector& w,
+      const Cubix& Rn,
       const Matrix& c,
       const Matrix& theta ) const;
 

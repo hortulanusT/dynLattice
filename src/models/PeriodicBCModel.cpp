@@ -280,13 +280,21 @@ void      periodicBCModel::getExtVec_
       if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
       
+      TEST_CONTEXT ( Globdat::getVariables( globdat ) );
 
       area = 1.;
       for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
         if (iDim != iDir)
         {
-          if (! Globdat::getVariables( "all.extent", globdat ).find( extent, dofNames_[iDim]) )
+          try
+          {
+            Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDim]);  
+          } 
+          catch(const jem::util::PropertyException& e)
+          {
             Globdat::getVariables ( "SIZE", globdat ).get( extent, jem::String(dofNames_[iDim].back()).toUpper() );
+          }
+          
           area *= extent;
         }
       nNodes = masterDofs_(iDof, iDir).size();

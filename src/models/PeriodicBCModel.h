@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include <jem/util/Properties.h>
+#include <jem/util/PropertyException.h>
 
 #include <jive/Array.h>
 #include <jive/model/Model.h>
@@ -25,9 +26,9 @@
 #include <jive/fem/NodeGroup.h>
 #include <jive/implict/ArclenActions.h>
 
-#include "testing.h"
-#include "helpers.h"
-#include "PBCGroupInputModule.h"
+#include "utils/testing.h"
+#include "utils/helpers.h"
+#include "modules/PBCGroupInputModule.h"
 
 using jem::util::Properties;
 

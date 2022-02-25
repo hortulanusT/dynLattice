@@ -1,5 +1,0 @@
-<NodeTable name = "arclenWeights">
-  <Section columns = "dx">
-    xmax 1.0;
-  </Section>
-</NodeTable>
