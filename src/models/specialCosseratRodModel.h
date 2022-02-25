@@ -85,7 +85,7 @@ class specialCosseratRodModel : public Model
   static const char*      POLAR_MOMENT;
   static const char*      TRANS_DOF_NAMES;
   static const char*      ROT_DOF_NAMES;
-  static const char*      INCREMENTAL;
+  static const char*      SYMMETRIC_ONLY;
   static const char*      MATERIAL_Y_DIR;
   static const char*      GIVEN_NODES;
   static const char*      GIVEN_DIRS;
@@ -222,7 +222,7 @@ class specialCosseratRodModel : public Model
   IdxVector               trans_types_;
   IdxVector               rot_types_;
   IdxVector               jtypes_;
-  bool                    incremental_;
+  bool                    symmetric_only_;
 
   double                  young_;
   double                  area_;

@@ -33,7 +33,7 @@ const char*   specialCosseratRodModel::POLAR_MOMENT       = "polar_moment";
 const char*   specialCosseratRodModel::SHEAR_FACTOR       = "shear_correction";
 const char*   specialCosseratRodModel::TRANS_DOF_NAMES    = "dofNamesTrans";
 const char*   specialCosseratRodModel::ROT_DOF_NAMES      = "dofNamesRot";
-const char*   specialCosseratRodModel::INCREMENTAL        = "incremental";
+const char*   specialCosseratRodModel::SYMMETRIC_ONLY     = "symmetric_tanget_stiffness";
 const char*   specialCosseratRodModel::MATERIAL_Y_DIR     = "material_ey";
 const char*   specialCosseratRodModel::GIVEN_NODES        = "given_dir_nodes";
 const char*   specialCosseratRodModel::GIVEN_DIRS         = "given_dir_dirs";
@@ -109,11 +109,9 @@ specialCosseratRodModel::specialCosseratRodModel
   dofs_ = dofs;
 
   // get the incremental property
-  incremental_ = false;
-  myProps.find( incremental_, INCREMENTAL );
-  if (incremental_) jem::System::warn() << "incremental update procedure not yet implemented! Setting will be ignored.";
-  incremental_ = false;
-  myConf .set ( INCREMENTAL, incremental_ );
+  symmetric_only_ = false;
+  myProps.find( symmetric_only_, SYMMETRIC_ONLY );
+  myConf .set ( SYMMETRIC_ONLY, symmetric_only_ );
 
   // Get the material parameters. //LATER non-isotropic features
   if (myProps.find ( material_ey_, MATERIAL_Y_DIR ))
@@ -753,7 +751,7 @@ void            specialCosseratRodModel::assemble_
           // Stiffness contribution T ( element geometric stiffness matrix)
           addT = weights[ip] * mc3.matmul ( PSI[ip][Inode], geomStiff[ip], PSI[ip][Jnode].transpose() );
           // TEST_CONTEXT(addT)
-          mbld.addBlock( Idofs, Jdofs, addT );
+          if (!symmetric_only_) mbld.addBlock( Idofs, Jdofs, addT );
         }
         fint[Idofs]   += weights[ip] * matmul ( XI[ip][Inode], stress[ip] );
       }    

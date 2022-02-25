@@ -2,7 +2,7 @@
 /////// SIMO/VU-QUOC EX 7.2 ///////
 ///////////////////////////////////
 
-params.Steps = 1.;
+params.Steps = 10.;
 
 // LOGGING
 log.pattern = "*.info | *.debug";
@@ -22,6 +22,7 @@ params.rod_details.young = 2.1e7;
 params.rod_details.poission_ratio = .3;
 params.rod_details.area = 20.;
 params.rod_details.area_moment = 1.666666666666667;
+params.rod_details.symmetric_tanget_stiffness =  true;
 
 params.force_model.type = "LoadScale";
 params.force_model.scaleFunc = "(i-1)*$(params.Steps)";
