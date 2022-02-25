@@ -1,4 +1,7 @@
 # :hammer_and_pick: TO DO 
+## Investigations
+- Implement Dynamics
+- Find Test-Cases for Dynamic Beams
 ## Code
 - Create Custom Sample Module for advanced options
   - append without extra header
@@ -19,16 +22,11 @@
 - think of smarter ways to handle data
 - rethink the folder structure
 - structure git repos with "submodules"
-## Investigations
-- Implement Arc-Length 
-- do the remaining test cases from [Simo/Vu-Quoc]
 # :scroll: Notes
 ## test-cases
-- single element (cantilever):
-  - point force fails for large magnitudes (and small step sizes?!?)
 - test cases [Simo/Vu-Quoc]:
-  - TEST 7.2 small step sized due to error in the way the follower load is applied `THIS IS FINE`
-  - TEST 7.5 sufers the same problem as the single elements
+  - TEST 7.2 only works properly with shut off geometric stiffness matrix (i.e. only the symmetric part)
+  - TEST 7.5 worse convergence steps compared to literature (30 instead of 300)
 ## homogenization ideas
 - for 2.5D structure use 2D homogenization with prism shear modulus/Youngs modulus in third direction scaled up to density?
  
