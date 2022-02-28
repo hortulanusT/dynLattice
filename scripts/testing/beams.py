@@ -120,7 +120,7 @@ except IOError:
   test_passed[-1] = False
 
 if test_passed[-1]:
-  print(colored(" RUN THROUGH", "green", attrs=["bold"]))
+  print(colored(" ??????", "yellow", attrs=["bold"]))
 else:
   print(colored(" FAILED", "red", attrs=["bold"]))
 
@@ -168,10 +168,11 @@ try:
   plt.plot(-1*ref_disp[:,1]-0.2, ref_resp[:,1], label="displacment")
   plt.plot(-1*sim_disp[:,1]-0.2, sim_resp[:,1], "--", label="arc-length")
   plt.legend()
-  plt.xlabel( "displacment" )
-  plt.ylabel( "load" )
+  plt.xlabel( "displacment [m]" )
+  plt.ylabel( "load [N]" )
 
-  plt.savefig("tests/beam/test0/results.pdf")
+  plt.tight_layout
+  plt.savefig("tests/beam/test0/result_7_0.pdf")
 except:
   pass
 
@@ -189,14 +190,15 @@ try:
   ref_conv = [8*pi, .425e2, .441e-13]
 
   plt.figure()
-  plt.semilogy(sim_conv, label="custom_implementation")
-  plt.semilogy(ref_conv, label="Simo/Vu-Quoc")
+  plt.semilogy(sim_conv, 'x', label="custom_implementation")
+  plt.semilogy(ref_conv, 'o', label="Simo/Vu-Quoc")
   plt.legend()
   plt.xlabel( "iteration" )
   plt.ylabel( "normed residual" )
   plt.xticks( range(len(sim_conv)) )
 
-  plt.savefig("tests/beam/test1/results.pdf")
+  plt.tight_layout()
+  plt.savefig("tests/beam/test1/result_7_1.pdf")
 except:
   pass
 
@@ -216,10 +218,11 @@ try:
   plt.xlabel( "Tip Load [kN]" )
   plt.ylabel( "Displacement [m] ")
   plt.xlim([0, 140])
-  plt.axhline(y=0, color="grey")
+  plt.axhline( y=0, color="grey" )
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test2/results.pdf")
+  plt.tight_layout()
+  plt.savefig("tests/beam/test2/result_7_2.pdf")
 except:
   pass
 
@@ -232,11 +235,12 @@ try:
   plt.plot(-1*sim_disp[:,0], -1*sim_resp[:,1], label="horizontal")
   plt.plot(-1*sim_disp[:,1], -1*sim_resp[:,1], label="vertical")
   plt.legend()
-  plt.xlabel( "displacment" )
-  plt.ylabel( "load" )
+  plt.xlabel( "displacment [N]" )
+  plt.ylabel( "load [N]" )
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test3/results.pdf")
+  plt.tight_layout()
+  plt.savefig("tests/beam/test3/result_7_3.pdf")
 except:
   pass
 
@@ -253,11 +257,12 @@ try:
   plt.plot(ref_data_vertical[:,0], ref_data_vertical[:,1]*1e3, ":", label="vertical (Simo/Vu-Quoc)")
   plt.plot(ref_data_horizontal[:,0], ref_data_horizontal[:,1]*1e3, ":", label="horizontal (Simo/Vu-Quoc)")
   plt.legend()
-  plt.xlabel( "displacment" )
-  plt.ylabel( "load" )
+  plt.xlabel( "displacment [m]" )
+  plt.ylabel( "load [N]" )
   plt.xlim( left=0 )
 
-  plt.savefig("tests/beam/test4/results.pdf")
+  plt.tight_layout()
+  plt.savefig("tests/beam/test4/result_7_4.pdf")
 except:
   pass
 
@@ -277,11 +282,12 @@ try:
   plt.plot(ref_data_u2[:,0], ref_data_u2[:,1], ":", label="u_2 (Simo/Vu-Quoc)")
   plt.plot(ref_data_u3[:,0], ref_data_u3[:,1], ":", label="u_3 (Simo/Vu-Quoc)")
   plt.legend()
-  plt.xlabel( "load" )
-  plt.ylabel( "displacment" )
+  plt.xlabel( "load [N]" )
+  plt.ylabel( "displacment [m]" )
   plt.xlim( left=0, right=3000 )
 
-  plt.savefig("tests/beam/test5/results.pdf")
+  plt.tight_layout()
+  plt.savefig("tests/beam/test5/result_7_5.pdf")
 except:
   pass
 
