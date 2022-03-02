@@ -164,7 +164,7 @@ try:
   ref_disp = np.loadtxt("tests/beam/test0/disp_ref.csv", delimiter=',')
   ref_resp = np.loadtxt("tests/beam/test0/resp_ref.csv", delimiter=',')
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.plot(-1*ref_disp[:,1]-0.2, ref_resp[:,1], label="displacment")
   plt.plot(-1*sim_disp[:,1]-0.2, sim_resp[:,1], "--", label="arc-length")
   plt.legend()
@@ -189,7 +189,7 @@ try:
       sim_conv.append(float(line.split('=')[2]) * res_scale)
   ref_conv = [8*pi, .425e2, .441e-13]
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.semilogy(sim_conv, 'x', label="custom_implementation")
   plt.semilogy(ref_conv, 'o', label="Simo/Vu-Quoc")
   plt.legend()
@@ -209,7 +209,7 @@ try:
   ref_data_vertical = np.loadtxt("tests/beam/ref_data/test2_ref.csv", delimiter=',', skiprows=2, usecols=(0,1))
   ref_data_horizontal = np.loadtxt("tests/beam/ref_data/test2_ref.csv", delimiter=',', skiprows=2, usecols=(2,3), max_rows=96)
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.plot(sim_resp[:,-1]/1e3, sim_disp[:,2], label="vertical (custom implementation)")
   plt.plot(sim_resp[:,-1]/1e3, -1*sim_disp[:,1], label="horizontal (custom implementation)")
   plt.plot(ref_data_vertical[:,0], ref_data_vertical[:,1], ":", label="vertical (Simo/Vu-Quoc)")
@@ -231,7 +231,7 @@ try:
   sim_disp = np.loadtxt("tests/beam/test3/disp.csv", delimiter=',')
   sim_resp = np.loadtxt("tests/beam/test3/resp.csv", delimiter=',')
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.plot(-1*sim_disp[:,0], -1*sim_resp[:,1], label="horizontal")
   plt.plot(-1*sim_disp[:,1], -1*sim_resp[:,1], label="vertical")
   plt.legend()
@@ -251,7 +251,7 @@ try:
   ref_data_vertical = np.loadtxt("tests/beam/ref_data/test4_ref_vertical.csv", delimiter=',', skiprows=1)
   ref_data_horizontal = np.loadtxt("tests/beam/ref_data/test4_ref_horizontal.csv", delimiter=',', skiprows=1)
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.plot(+1*sim_disp[:,0], -1*sim_resp[:,1], label="horizontal (custom implementation)")
   plt.plot(-1*sim_disp[:,1], -1*sim_resp[:,1], label="vertical (custom implementation)")
   plt.plot(ref_data_vertical[:,0], ref_data_vertical[:,1]*1e3, ":", label="vertical (Simo/Vu-Quoc)")
@@ -274,14 +274,14 @@ try:
   ref_data_u2 = np.loadtxt("tests/beam/ref_data/test5_ref.csv", delimiter=',', skiprows=2, usecols=(2,3), max_rows=48)
   ref_data_u3 = np.loadtxt("tests/beam/ref_data/test5_ref.csv", delimiter=',', skiprows=2, usecols=(4,5), max_rows=51)
 
-  plt.figure()
+  plt.figure(figsize=(32/3, 6))
   plt.plot(sim_resp[:,2], sim_disp[:,0], label="u_1 (custom_implementation)")
   plt.plot(sim_resp[:,2], sim_disp[:,1], label="u_2 (custom_implementation)")
   plt.plot(sim_resp[:,2], sim_disp[:,2], label="u_3 (custom_implementation)")
   plt.plot(ref_data_u1[:,0], ref_data_u1[:,1], ":", label="u_1 (Simo/Vu-Quoc)")
   plt.plot(ref_data_u2[:,0], ref_data_u2[:,1], ":", label="u_2 (Simo/Vu-Quoc)")
   plt.plot(ref_data_u3[:,0], ref_data_u3[:,1], ":", label="u_3 (Simo/Vu-Quoc)")
-  plt.legend()
+  plt.legend( loc = "upper left")
   plt.xlabel( "load [N]" )
   plt.ylabel( "displacment [m]" )
   plt.xlim( left=0, right=3000 )
