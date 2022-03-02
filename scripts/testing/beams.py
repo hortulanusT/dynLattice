@@ -191,7 +191,7 @@ try:
 
   plt.figure()
   plt.semilogy(sim_conv, 'x', label="custom_implementation")
-  plt.semilogy(ref_conv, 'o', label="Simo/Vu-Quoc")
+  plt.semilogy(ref_conv, '+', label="Simo/Vu-Quoc")
   plt.legend()
   plt.xlabel( "iteration" )
   plt.ylabel( "normed residual" )
