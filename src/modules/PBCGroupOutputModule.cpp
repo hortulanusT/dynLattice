@@ -41,8 +41,15 @@ Module::Status PBCGroupOutputModule::init
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
   bool append = false;
   if (!childProps.find( append, PropNames::APPEND ) || !append)
-    childProps.set( PropNames::HEADER, getHeader_() );
-  childProps.set( PropNames::DATA_SETS, getDataSets_() );
+  {
+    String header = "";
+    childProps.find( header, PropNames::HEADER);
+    childProps.set( PropNames::HEADER, getHeader_( header ) );
+  }
+  String data_sets = "";
+  childProps.find( data_sets, PropNames::DATA_SETS);
+  childProps.set( PropNames::DATA_SETS, getDataSets_( data_sets ) );
+
   childProps.set( PropNames::SEPARATOR,  "," );
   
   child_->configure( props, globdat );
@@ -68,12 +75,16 @@ void PBCGroupOutputModule::shutdown
   child_->shutdown(globdat);
 }
 
-String PBCGroupOutputModule::getHeader_ () const
+String PBCGroupOutputModule::getHeader_ ( String head ) const
 {
   const idx_t dim = elemDofs_.size();
 
   // step  
-  String head = "step,";
+  if (head.size() < 1)
+    head = "step,";
+  
+  if (head.back() != ',')
+    head = head + ",";
 
   // displacement gradient
   for (idx_t i = 1; i <= dim; i++)
@@ -88,14 +99,17 @@ String PBCGroupOutputModule::getHeader_ () const
   return head[SliceTo(head.size()-1)];
 }
 
-StringVector PBCGroupOutputModule::getDataSets_ () const
+StringVector PBCGroupOutputModule::getDataSets_ ( String existingDataSets ) const
 {  
   const idx_t dim = elemDofs_.size();
 
   ArrayBuffer<String> dataSets;
 
   // step
-  dataSets.pushBack( "i" );
+  if (existingDataSets.size() > 0)
+    dataSets.pushBack( existingDataSets );
+  else
+    dataSets.pushBack( "i" );
 
   // displacement gradient
   for (idx_t i = 0; i < dim; i++)
