@@ -1,26 +1,40 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
+- Patch-Sets with Arc-Length
 - Implement Dynamics
 - Find Test-Cases for Dynamic Beams
 ## Code
-- Create Custom Sample Module for advanced options
-  - append without extra header
-  - non-float output
-- write `.log` to central file?
-  - dont write log-files, but capture output in python?
-- write $\lambda$ (strain factor) instead of step to the `.res` files
-- GMSHInputModule with gmsh C++ API
 - investigate options for parallel computing
 - PBC Output extent other side
   - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
-- ParaviewOutput write wrapper file for exported files ~ `.pvd`
+### Models
+- Mesh Model
+  - consisting out of multiple Rod-Modules as child
+  - adapt Input to represent this
+- Rod Model
+  - Mixed collocation?
+### Modules
+- Custom Sample Module
+  - append without extra header
+  - non-float output
+  - HDF5 output `pandas`-format
+  - write variables to the `.res` files
+- Custom Log Module
+  - write `.log` to central file?
+- Custom Init Module
+  - add shortcuts for `$(CASE_NAME)` without folder
+  - enable multiple `.pro` files in command line
+- GMSHInputModule with gmsh C++ API
+- ParaviewOutputModule
+  - write wrapper file for exported files ~ `.pvd`
+### Python
 - export some standard actions to seperate script
   - plotting
   - setting up the enviroment
   - running a simulatio with added parameters
 ## Environment
-- think of smarter ways to handle data
-- rethink the folder structure
+- smarter ways to handle data
+- cleanup folder structure
 - structure git repos with "submodules"
 # :scroll: Notes
 ## test-cases
