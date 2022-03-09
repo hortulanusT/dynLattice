@@ -21,7 +21,7 @@
   - write variables to the `.res` files
 - Custom Log Module
   - write `.log` to central file?
-- Custom Init Module
+- Custom Application
   - add shortcuts for `$(CASE_NAME)` without folder
   - enable multiple `.pro` files in command line
 - GMSHInputModule with gmsh C++ API
