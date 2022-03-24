@@ -28,6 +28,7 @@ const char*   specialCosseratRodModel::YOUNGS_MODULUS     = "young";
 const char*   specialCosseratRodModel::SHEAR_MODULUS      = "shear_modulus";
 const char*   specialCosseratRodModel::POISSION_RATIO     = "poission_ratio";
 const char*   specialCosseratRodModel::AREA               = "area";
+const char*   specialCosseratRodModel::DENSITY            = "density";
 const char*   specialCosseratRodModel::AREA_MOMENT        = "area_moment";
 const char*   specialCosseratRodModel::POLAR_MOMENT       = "polar_moment";
 const char*   specialCosseratRodModel::SHEAR_FACTOR       = "shear_correction";
@@ -134,6 +135,8 @@ specialCosseratRodModel::specialCosseratRodModel
   myProps.find( polarMoment_, POLAR_MOMENT);
   shearParam_ = 5./6.;
   myProps.find( shearParam_, SHEAR_FACTOR);
+  density_ = 0.;
+  myProps.find( density_, DENSITY);
 
   // Report the used material parameters.
   myConf.set ( YOUNGS_MODULUS, young_ );
@@ -142,6 +145,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set ( SHEAR_MODULUS, shearMod_ );
   myConf.set ( POLAR_MOMENT, polarMoment_ );
   myConf.set ( SHEAR_FACTOR, shearParam_ );
+  myConf.set ( DENSITY, density_ );
 
   // get given node dirs
   if (myProps.find( givenNodes_, GIVEN_NODES ))
@@ -266,6 +270,17 @@ bool specialCosseratRodModel::takeAction
 
     return true;
   } 
+
+  if ( action == Actions::GET_MATRIX2 )
+  {
+    Ref<MatrixBuilder>  mbld;
+    
+    params.get ( mbld, ActionParams::MATRIX2 );
+
+    for (idx_t idof = 0; idof < dofs_->dofCount(); idof++)
+      if ( idof % 6 < 3 )
+        mbld->addValue(idof, idof, density_);   
+  }
   
   if ( action == Actions::GET_INT_VECTOR )
   {

@@ -2,6 +2,7 @@
 ## Investigations
 - Patch-Sets with Arc-Length
 - Implement Dynamics
+  - Use TimeStepper Factory for Stepping determination
 - Find Test-Cases for Dynamic Beams
 ## Code
 - investigate options for parallel computing
@@ -14,6 +15,7 @@
 - Rod Model
   - Mixed collocation?
 ### Modules
+- Touch GroupSettings in PBC Input
 - Custom Sample Module
   - append without extra header
   - non-float output

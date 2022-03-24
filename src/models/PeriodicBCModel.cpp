@@ -279,8 +279,6 @@ void      periodicBCModel::getExtVec_
       // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
       if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
-      
-      TEST_CONTEXT ( Globdat::getVariables( globdat ) );
 
       area = 1.;
       for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
