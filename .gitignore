@@ -13,6 +13,7 @@ nonlinRod*
 *.dummy
 *.png
 *.tar
+*.psvm
 
 studies/**/output/*
 studies/**/results/*

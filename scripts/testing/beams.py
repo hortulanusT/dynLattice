@@ -171,7 +171,7 @@ try:
   plt.xlabel( "displacment [m]" )
   plt.ylabel( "load [N]" )
 
-  plt.tight_layout
+  plt.tight_layout()
   plt.savefig("tests/beam/test0/result_7_0.pdf")
 except:
   pass
@@ -274,7 +274,7 @@ try:
   ref_data_u2 = np.loadtxt("tests/beam/ref_data/test5_ref.csv", delimiter=',', skiprows=2, usecols=(2,3), max_rows=48)
   ref_data_u3 = np.loadtxt("tests/beam/ref_data/test5_ref.csv", delimiter=',', skiprows=2, usecols=(4,5), max_rows=51)
 
-  plt.figure(figsize=(16/3, 6))
+  plt.figure(figsize=(12, 4))
   plt.plot(sim_resp[:,2], sim_disp[:,0], label="u_1 (custom_implementation)")
   plt.plot(sim_resp[:,2], sim_disp[:,1], label="u_2 (custom_implementation)")
   plt.plot(sim_resp[:,2], sim_disp[:,2], label="u_3 (custom_implementation)")
