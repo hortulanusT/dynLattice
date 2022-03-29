@@ -115,10 +115,10 @@ StringVector PBCGroupOutputModule::getDataSets_ ( String existingDataSets ) cons
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
     {
-      dataSets.pushBack( String::format( "(%s.disp.%s - %s.disp.%s) / all.extent.%s"
-        , PBCGroupInputModule::EDGES[1 + 2*j]
+      dataSets.pushBack( String::format( "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s"
+        , elemDofNames_[j].back()
         , nodeDofNames_[i]
-        , PBCGroupInputModule::EDGES[0 + 2*j]
+        , elemDofNames_[j].back()
         , nodeDofNames_[i]
         , elemDofNames_[j] ) );
     }  
@@ -136,14 +136,18 @@ StringVector PBCGroupOutputModule::getDataSets_ ( String existingDataSets ) cons
     areas[0] = "all.extent." + elemDofNames_[1];
     areas[1] = "all.extent." + elemDofNames_[0];
   }
+  else if (dim==1)
+  {
+    areas[0] = "1";
+  }
   else
     throw jem::Exception(JEM_FUNC, String::format("unkown dimension number %d", dim));
   
   // 1st PK Tensor
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
-        dataSets.pushBack( String::format( "%s.resp.%s / %s"
-          , PBCGroupInputModule::EDGES[1 + 2*j]
+        dataSets.pushBack( String::format( "%cmax.resp.%s / %s"
+          , elemDofNames_[j].back()
           , nodeDofNames_[i] 
           , areas[j] ) );  
 
