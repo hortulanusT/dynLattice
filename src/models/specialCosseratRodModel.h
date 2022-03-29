@@ -143,6 +143,13 @@ class specialCosseratRodModel : public Model
     const Vector&         dispOld  ) const;
 
   /**
+   * @brief assemble the mass matrix 
+   * @param[out] mbld mass matrix 
+   */
+  void                    assembleM_
+  ( MatrixBuilder&        mbld ) const;
+
+  /**
    * @brief fill the table with the strain values per element 
    */
   void                    get_strain_table_

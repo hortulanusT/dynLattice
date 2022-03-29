@@ -277,9 +277,7 @@ bool specialCosseratRodModel::takeAction
     
     params.get ( mbld, ActionParams::MATRIX2 );
 
-    for (idx_t idof = 0; idof < dofs_->dofCount(); idof++)
-      if ( idof % 6 < 3 )
-        mbld->addValue(idof, idof, density_);   
+    assembleM_ ( *mbld );
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -806,7 +804,7 @@ void            specialCosseratRodModel::assemble_
   {
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
 
-    // get the XI, PSI and PI values for this 
+    // get the XI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
     // get the (spatial) stresses
     get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie );
@@ -823,6 +821,44 @@ void            specialCosseratRodModel::assemble_
     }
   }    
 }
+
+//FIXME add rotational inertias?
+void          specialCosseratRodModel::assembleM_
+  ( MatrixBuilder&        mbld ) const
+{
+  const idx_t  ipCount        = shape_->ipointCount ();
+  const idx_t  nodeCount      = shape_->nodeCount   ();
+  const idx_t  rank           = shape_->globalRank  (); 
+  const idx_t  elemCount      = rodGroup_.size      ();
+  IdxVector    inodes         ( nodeCount );
+  IdxVector    idofs          ( trans_types_.size() );
+
+  Matrix       coords         ( rank, nodeCount );
+  Vector       weights        ( ipCount );
+  Matrix       shapes         ( rank, trans_types_.size() );
+  Matrix       addM           ( trans_types_.size(), trans_types_.size() );
+
+  // iterate through the elements
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    allNodes_.getSomeCoords( coords, inodes );
+    dofs_->getDofIndices( idofs, inodes, trans_types_ );
+
+    shape_->getIntegrationWeights( weights, coords );
+    shapes = shape_->getShapeFunctions();
+
+    addM = 0.0;
+    for (idx_t ip = 0; ip < shape_->ipointCount(); ip++)
+    {
+      addM += weights[ip] * density_ * area_ * matmul ( shapes[ip], shapes[ip]);    
+    }
+    REPORT(ie)
+    TEST_CONTEXT(addM)
+    mbld.addBlock(idofs, idofs, addM);
+  }
+}
+
 //-----------------------------------------------------------------------
 //   makeNew
 //-----------------------------------------------------------------------
