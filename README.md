@@ -6,7 +6,7 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ```
 .
 ├── .gitignore
-├── LICENSE.md
+├── LICENSE
 ├── README.md
 ├── NOTES.md
 ├── Makefile
