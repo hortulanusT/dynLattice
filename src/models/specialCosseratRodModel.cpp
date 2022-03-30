@@ -274,10 +274,18 @@ bool specialCosseratRodModel::takeAction
   if ( action == Actions::GET_MATRIX2 )
   {
     Ref<MatrixBuilder>  mbld;
-    
+
     params.get ( mbld, ActionParams::MATRIX2 );
 
     assembleM_ ( *mbld );
+
+    // // DEBUGGING
+    // IdxVector   dofList ( dofs_->dofCount() );
+    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    // mbld->getBlock( M, dofList, dofList );
+    // REPORT( action )
+    // TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -831,19 +839,18 @@ void          specialCosseratRodModel::assembleM_
   const idx_t  rank           = shape_->globalRank  (); 
   const idx_t  elemCount      = rodGroup_.size      ();
   IdxVector    inodes         ( nodeCount );
-  IdxVector    idofs          ( trans_types_.size() );
+  IdxVector    idofs          ( nodeCount );
 
   Matrix       coords         ( rank, nodeCount );
   Vector       weights        ( ipCount );
-  Matrix       shapes         ( rank, trans_types_.size() );
-  Matrix       addM           ( trans_types_.size(), trans_types_.size() );
+  Matrix       shapes         ( nodeCount, ipCount );
+  Matrix       addM           ( nodeCount, nodeCount);
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
     allNodes_.getSomeCoords( coords, inodes );
-    dofs_->getDofIndices( idofs, inodes, trans_types_ );
 
     shape_->getIntegrationWeights( weights, coords );
     shapes = shape_->getShapeFunctions();
@@ -853,9 +860,12 @@ void          specialCosseratRodModel::assembleM_
     {
       addM += weights[ip] * density_ * area_ * matmul ( shapes[ip], shapes[ip]);    
     }
-    REPORT(ie)
-    TEST_CONTEXT(addM)
-    mbld.addBlock(idofs, idofs, addM);
+
+    for (idx_t iDof = 0; iDof < TRANS_DOF_COUNT; iDof++)
+    {    
+      dofs_->getDofIndices( idofs, inodes, trans_types_[iDof] );
+      mbld.addBlock(idofs, idofs, addM);
+    }
   }
 }
 
