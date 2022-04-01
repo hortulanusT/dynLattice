@@ -46,7 +46,7 @@ Module::Status PBCGroupOutputModule::init
     childProps.find( header, PropNames::HEADER);
     childProps.set( PropNames::HEADER, getHeader_( header ) );
   }
-  String data_sets = "";
+  StringVector data_sets;
   childProps.find( data_sets, PropNames::DATA_SETS);
   childProps.set( PropNames::DATA_SETS, getDataSets_( data_sets ) );
 
@@ -64,7 +64,7 @@ Module::Status PBCGroupOutputModule::run
 {
   Super::run(globdat);
   child_->run(globdat);
-
+  
   return Status::OK;
 }
 
@@ -99,7 +99,7 @@ String PBCGroupOutputModule::getHeader_ ( String head ) const
   return head[SliceTo(head.size()-1)];
 }
 
-StringVector PBCGroupOutputModule::getDataSets_ ( String existingDataSets ) const
+StringVector PBCGroupOutputModule::getDataSets_ ( StringVector existingDataSets ) const
 {  
   const idx_t dim = elemDofs_.size();
 
@@ -107,7 +107,7 @@ StringVector PBCGroupOutputModule::getDataSets_ ( String existingDataSets ) cons
 
   // step
   if (existingDataSets.size() > 0)
-    dataSets.pushBack( existingDataSets );
+    dataSets.pushBack( existingDataSets.begin(), existingDataSets.end() );
   else
     dataSets.pushBack( "i" );
 

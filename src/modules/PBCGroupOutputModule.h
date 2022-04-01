@@ -60,7 +60,7 @@ class PBCGroupOutputModule : public GroupOutputModule
  protected:
   String              getHeader_ ( String existing ) const;
 
-  StringVector        getDataSets_ ( String existing ) const;
+  StringVector        getDataSets_ ( StringVector existing ) const;
 
  protected:
   Ref<SampleModule>   child_;
