@@ -41,8 +41,15 @@ Module::Status PBCGroupOutputModule::init
   Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
   bool append = false;
   if (!childProps.find( append, PropNames::APPEND ) || !append)
-    childProps.set( PropNames::HEADER, getHeader_() );
-  childProps.set( PropNames::DATA_SETS, getDataSets_() );
+  {
+    String header = "";
+    childProps.find( header, PropNames::HEADER);
+    childProps.set( PropNames::HEADER, getHeader_( header ) );
+  }
+  StringVector data_sets;
+  childProps.find( data_sets, PropNames::DATA_SETS);
+  childProps.set( PropNames::DATA_SETS, getDataSets_( data_sets ) );
+
   childProps.set( PropNames::SEPARATOR,  "," );
   
   child_->configure( props, globdat );
@@ -57,7 +64,7 @@ Module::Status PBCGroupOutputModule::run
 {
   Super::run(globdat);
   child_->run(globdat);
-
+  
   return Status::OK;
 }
 
@@ -68,12 +75,16 @@ void PBCGroupOutputModule::shutdown
   child_->shutdown(globdat);
 }
 
-String PBCGroupOutputModule::getHeader_ () const
+String PBCGroupOutputModule::getHeader_ ( String head ) const
 {
   const idx_t dim = elemDofs_.size();
 
   // step  
-  String head = "step,";
+  if (head.size() < 1)
+    head = "step,";
+  
+  if (head.back() != ',')
+    head = head + ",";
 
   // displacement gradient
   for (idx_t i = 1; i <= dim; i++)
@@ -88,23 +99,26 @@ String PBCGroupOutputModule::getHeader_ () const
   return head[SliceTo(head.size()-1)];
 }
 
-StringVector PBCGroupOutputModule::getDataSets_ () const
+StringVector PBCGroupOutputModule::getDataSets_ ( StringVector existingDataSets ) const
 {  
   const idx_t dim = elemDofs_.size();
 
   ArrayBuffer<String> dataSets;
 
   // step
-  dataSets.pushBack( "i" );
+  if (existingDataSets.size() > 0)
+    dataSets.pushBack( existingDataSets.begin(), existingDataSets.end() );
+  else
+    dataSets.pushBack( "i" );
 
   // displacement gradient
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
     {
-      dataSets.pushBack( String::format( "(%s.disp.%s - %s.disp.%s) / all.extent.%s"
-        , PBCGroupInputModule::EDGES[1 + 2*j]
+      dataSets.pushBack( String::format( "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s"
+        , elemDofNames_[j].back()
         , nodeDofNames_[i]
-        , PBCGroupInputModule::EDGES[0 + 2*j]
+        , elemDofNames_[j].back()
         , nodeDofNames_[i]
         , elemDofNames_[j] ) );
     }  
@@ -122,14 +136,18 @@ StringVector PBCGroupOutputModule::getDataSets_ () const
     areas[0] = "all.extent." + elemDofNames_[1];
     areas[1] = "all.extent." + elemDofNames_[0];
   }
+  else if (dim==1)
+  {
+    areas[0] = "1";
+  }
   else
     throw jem::Exception(JEM_FUNC, String::format("unkown dimension number %d", dim));
   
   // 1st PK Tensor
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
-        dataSets.pushBack( String::format( "%s.resp.%s / %s"
-          , PBCGroupInputModule::EDGES[1 + 2*j]
+        dataSets.pushBack( String::format( "%cmax.resp.%s / %s"
+          , elemDofNames_[j].back()
           , nodeDofNames_[i] 
           , areas[j] ) );  
 

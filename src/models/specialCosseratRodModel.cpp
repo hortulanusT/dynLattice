@@ -28,6 +28,7 @@ const char*   specialCosseratRodModel::YOUNGS_MODULUS     = "young";
 const char*   specialCosseratRodModel::SHEAR_MODULUS      = "shear_modulus";
 const char*   specialCosseratRodModel::POISSION_RATIO     = "poission_ratio";
 const char*   specialCosseratRodModel::AREA               = "area";
+const char*   specialCosseratRodModel::DENSITY            = "density";
 const char*   specialCosseratRodModel::AREA_MOMENT        = "area_moment";
 const char*   specialCosseratRodModel::POLAR_MOMENT       = "polar_moment";
 const char*   specialCosseratRodModel::SHEAR_FACTOR       = "shear_correction";
@@ -134,6 +135,8 @@ specialCosseratRodModel::specialCosseratRodModel
   myProps.find( polarMoment_, POLAR_MOMENT);
   shearParam_ = 5./6.;
   myProps.find( shearParam_, SHEAR_FACTOR);
+  density_ = 0.;
+  myProps.find( density_, DENSITY);
 
   // Report the used material parameters.
   myConf.set ( YOUNGS_MODULUS, young_ );
@@ -142,6 +145,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set ( SHEAR_MODULUS, shearMod_ );
   myConf.set ( POLAR_MOMENT, polarMoment_ );
   myConf.set ( SHEAR_FACTOR, shearParam_ );
+  myConf.set ( DENSITY, density_ );
 
   // get given node dirs
   if (myProps.find( givenNodes_, GIVEN_NODES ))
@@ -266,6 +270,23 @@ bool specialCosseratRodModel::takeAction
 
     return true;
   } 
+
+  if ( action == Actions::GET_MATRIX2 )
+  {
+    Ref<MatrixBuilder>  mbld;
+
+    params.get ( mbld, ActionParams::MATRIX2 );
+
+    assembleM_ ( *mbld );
+
+    // // DEBUGGING
+    // IdxVector   dofList ( dofs_->dofCount() );
+    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    // mbld->getBlock( M, dofList, dofList );
+    // REPORT( action )
+    // TEST_CONTEXT ( M )
+  }
   
   if ( action == Actions::GET_INT_VECTOR )
   {
@@ -791,7 +812,7 @@ void            specialCosseratRodModel::assemble_
   {
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
 
-    // get the XI, PSI and PI values for this 
+    // get the XI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
     // get the (spatial) stresses
     get_stresses_( stress, weights, (Matrix)nodePhi_0[inodes], (Matrix)nodeU[inodes], (Cubix)nodeLambda[inodes], ie );
@@ -808,6 +829,46 @@ void            specialCosseratRodModel::assemble_
     }
   }    
 }
+
+//FIXME add rotational inertias?
+void          specialCosseratRodModel::assembleM_
+  ( MatrixBuilder&        mbld ) const
+{
+  const idx_t  ipCount        = shape_->ipointCount ();
+  const idx_t  nodeCount      = shape_->nodeCount   ();
+  const idx_t  rank           = shape_->globalRank  (); 
+  const idx_t  elemCount      = rodGroup_.size      ();
+  IdxVector    inodes         ( nodeCount );
+  IdxVector    idofs          ( nodeCount );
+
+  Matrix       coords         ( rank, nodeCount );
+  Vector       weights        ( ipCount );
+  Matrix       shapes         ( nodeCount, ipCount );
+  Matrix       addM           ( nodeCount, nodeCount);
+
+  // iterate through the elements
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    allNodes_.getSomeCoords( coords, inodes );
+
+    shape_->getIntegrationWeights( weights, coords );
+    shapes = shape_->getShapeFunctions();
+
+    addM = 0.0;
+    for (idx_t ip = 0; ip < shape_->ipointCount(); ip++)
+    {
+      addM += weights[ip] * density_ * area_ * matmul ( shapes[ip], shapes[ip]);    
+    }
+
+    for (idx_t iDof = 0; iDof < TRANS_DOF_COUNT; iDof++)
+    {    
+      dofs_->getDofIndices( idofs, inodes, trans_types_[iDof] );
+      mbld.addBlock(idofs, idofs, addM);
+    }
+  }
+}
+
 //-----------------------------------------------------------------------
 //   makeNew
 //-----------------------------------------------------------------------

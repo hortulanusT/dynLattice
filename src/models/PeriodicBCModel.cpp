@@ -139,8 +139,10 @@ void      periodicBCModel::init_
 
   for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
   {
-    masters   = NodeGroup::get( PBCGroupInputModule::EDGES[2*iDir  ], nodes_, globdat, getContext() );
-    slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iDir+1], nodes_, globdat, getContext() );
+    idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
+
+    masters   = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge  ], nodes_, globdat, getContext() );
+    slaves    = NodeGroup::get( PBCGroupInputModule::EDGES[2*iEdge+1], nodes_, globdat, getContext() );
 
     // save the translational DOFs for the 
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++ )
@@ -183,18 +185,20 @@ void      periodicBCModel::init_
       System::info( myName_ ) << " ...Locking for no or normal grad w.r.t " << dofNames_[iDof] << "\n";
       for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
       {
+        idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
+
         if (iDof == iDir)
         {
-          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir] << " to 0\n";
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iEdge] << " to 0\n";
           for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
-          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to each other\n";
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iEdge+1] << " to each other\n";
           for (idx_t iNode = 1; iNode < slaveDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], slaveDofs_(iDof, iDir)[0], 1.0);
         }
         else
         {
-          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iEdge+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
           for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], masterDofs_(iDof, iDir)[iNode], 1.0);
         }
@@ -206,15 +210,16 @@ void      periodicBCModel::init_
       System::info( myName_ ) << " ...Locking for shear grad w.r.t " << dofNames_[iDof] << "\n";
       for (idx_t iDir = 0; iDir < pbcRank_; iDir++)     
       {
+        idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
         if (!not_given(iDof, iDir))
         {
-          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir] << " to 0\n";
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iEdge] << " to 0\n";
           for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
         }
         else
         {
-          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iDir+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
+          System::info( myName_ ) << "       at " << PBCGroupInputModule::EDGES[2*iEdge+1] << " to " << PBCGroupInputModule::EDGES[2*iDir] << "\n";
           for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
             cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode], masterDofs_(iDof, iDir)[iNode], 1.0);
         }
@@ -244,6 +249,7 @@ void      periodicBCModel::setConstraints_
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iDir = 0; iDir < pbcRank_; iDir++ )
     {
+      idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
       if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
         
@@ -251,7 +257,7 @@ void      periodicBCModel::setConstraints_
 
       System::info( myName_ ) << " ...Applying strain in direction of " << dofNames_[iDof] << "\n";
       System::info( myName_ ) << "      of magnitude " << scale*grad_(iDof, iDir) << "\n";
-      System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iDir] << " and " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
+      System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iEdge] << " and " << PBCGroupInputModule::EDGES[2*iEdge+1] << " \n";
       
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {
@@ -276,11 +282,10 @@ void      periodicBCModel::getExtVec_
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iDir = 0; iDir < pbcRank_; iDir++ )
     {
+      idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
       // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
       if ( std::isnan(grad_(iDof, iDir)) )
         continue;// if the dispGrad for this is not configured, skip it
-      
-      TEST_CONTEXT ( Globdat::getVariables( globdat ) );
 
       area = 1.;
       for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
@@ -302,7 +307,7 @@ void      periodicBCModel::getExtVec_
       
       System::info( myName_ ) << " ...Applying stress in direction of " << dofNames_[iDof] << "\n";
       System::info( myName_ ) << "      of magnitude " << scale*grad_(iDof, iDir) << "\n";
-      System::info( myName_ ) << "      at " << PBCGroupInputModule::EDGES[2*iDir+1] << " \n";
+      System::info( myName_ ) << "      at " << PBCGroupInputModule::EDGES[2*iEdge+1] << " \n";
       
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {

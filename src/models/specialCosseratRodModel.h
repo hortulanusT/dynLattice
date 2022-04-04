@@ -80,6 +80,7 @@ class specialCosseratRodModel : public Model
   static const char*      SHEAR_MODULUS;
   static const char*      POISSION_RATIO;
   static const char*      AREA;
+  static const char*      DENSITY;
   static const char*      AREA_MOMENT;
   static const char*      SHEAR_FACTOR;
   static const char*      POLAR_MOMENT;
@@ -140,6 +141,13 @@ class specialCosseratRodModel : public Model
   ( const Vector&         fint,
     const Vector&         disp,
     const Vector&         dispOld  ) const;
+
+  /**
+   * @brief assemble the mass matrix 
+   * @param[out] mbld mass matrix 
+   */
+  void                    assembleM_
+  ( MatrixBuilder&        mbld ) const;
 
   /**
    * @brief fill the table with the strain values per element 
@@ -225,6 +233,7 @@ class specialCosseratRodModel : public Model
   bool                    symmetric_only_;
 
   double                  young_;
+  double                  density_;
   double                  area_;
   double                  shearMod_;
   double                  areaMoment_;
