@@ -12,16 +12,33 @@
 
 #pragma once
 
+#include <gmsh.h>
+
+#include <jem/base/CString.h>
 #include <jem/util/Properties.h>
+#include <jem/util/ArrayBuffer.h>
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/fem/XNodeSet.h>
+#include <jive/fem/XElementSet.h>
+#include <jive/fem/ElementGroup.h>
+#include <jive/util/Assignable.h>
 
+using jive::idx_t;
 using jive::Properties;
 using jive::String;
 using jive::Ref;
+using jive::Vector;
+using jive::IdxVector;
 
 using jive::app::Module;
+using jive::fem::XNodeSet;
+using jive::fem::XElementSet;
+using jive::fem::ElementGroup;
+using jive::util::Assignable;
+
+typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
 /**
  * @brief Class GMSHInputModule to translate GMSH Geometry to JIVE-Data
@@ -35,6 +52,8 @@ class GMSHInputModule : public Module
   typedef                 Module            Super;
   
   static const char*      TYPE_NAME;
+  static const char*      GEO_FILE;
+  static const char*      ORDER;
 
 
   explicit                  GMSHInputModule
@@ -69,4 +88,9 @@ class GMSHInputModule : public Module
  protected:
 
                             ~GMSHInputModule   ();
+
+  void                      createMesh_ 
+  
+    ( const idx_t             order,
+      const Properties&       globdat ) const;
 };
