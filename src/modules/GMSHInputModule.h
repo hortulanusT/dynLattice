@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <jem/util/Properties.h>
+
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
 
@@ -32,7 +34,7 @@ class GMSHInputModule : public Module
   typedef                 GMSHInputModule   Self;
   typedef                 Module            Super;
   
-  static const char*        TYPE_NAME;
+  static const char*      TYPE_NAME;
 
 
   explicit                  GMSHInputModule

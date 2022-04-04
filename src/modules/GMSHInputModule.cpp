@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------
 
 
-const char*  GMSHInputModule::TYPE_NAME = "None";
+const char*  GMSHInputModule::TYPE_NAME = "GMSHInput";
 
 
 //-----------------------------------------------------------------------
@@ -38,7 +38,10 @@ Module::Status GMSHInputModule::init
   ( const Properties&  conf,
     const Properties&  props,
     const Properties&  globdat )
-{
+{  
+  Properties  myProps = props.findProps ( myName_ );
+  Properties  myConf  = conf .makeProps ( myName_ );
+
   return OK;
 }
 
@@ -90,5 +93,4 @@ void GMSHInputModule::declare ()
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare ( TYPE_NAME,  & makeNew );
-  ModuleFactory::declare ( CLASS_NAME, & makeNew );
 }
