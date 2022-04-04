@@ -13,7 +13,7 @@ MY_INCDIRS 	:= $(SRCDIR)
 #######################################################################
 ##   Defining C++ Standard                                           ##
 #######################################################################
-MY_CXX_STD_FLAGS := '-std=c++17' # for better directory control
+MY_CXX_STD_FLAGS := '-std=c++17'
 
 #######################################################################
 ##   Move OBJ-dirs to the bin dir							                       ##
@@ -29,9 +29,14 @@ include $(JIVEDIR)/makefiles/prog.mk
 #######################################################################
 ##   Some User defined make targets								                   ##
 #######################################################################
-
-.PHONY: anew anew-opt anew-dbg 
+.PHONY: anew anew-opt anew-dbg
 
 anew: clean all
 anew-opt: clean opt
 anew-dbg: clean dbg
+
+#######################################################################
+##   Include Test Cases													                     ##
+#######################################################################
+
+include tests/testing.mk
