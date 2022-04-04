@@ -1,6 +1,5 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Patch-Sets with Arc-Length
 - Implement Dynamics
   - Use TimeStepper Factory for Stepping determination
 - Find Test-Cases for Dynamic Beams
@@ -15,7 +14,6 @@
 - Rod Model
   - Mixed collocation?
 ### Modules
-- Touch GroupSettings in PBC Input
 - Custom Sample Module
   - append without extra header
   - non-float output
@@ -35,9 +33,8 @@
   - setting up the enviroment
   - running a simulatio with added parameters
 ## Environment
-- smarter ways to handle data
-- cleanup folder structure
-- structure git repos with "submodules"
+- move test-cases to makefile targets
+- move studies to makefile targets
 # :scroll: Notes
 ## test-cases
 - test cases [Simo/Vu-Quoc]:
