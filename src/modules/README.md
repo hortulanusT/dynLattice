@@ -8,6 +8,9 @@ git submodule add --name GMSHInput https://gitlab.tudelft.nl/cm/phds/gmshinputmo
 ```
 whereas the desired folder needs to be empty. After this make sure, the Module is found by the JEM/JIVE compile enviroment, e.g. by adding to your makefile the following lines
 ```
-subdirs     += <desired folder>
-MY_INCDIRS  += <desired folder>
+include <desired folder>/gmsh.mk
+```
+also, you need to ensure, that the libraries are found by the compiler, this may be done by setting the environment variable `GMSHDIR` just like `JEMDIR` and `JIVEDIR`, e.g.
+```
+export GMSHDIR=/path/to/the/gmsh-sdk
 ```

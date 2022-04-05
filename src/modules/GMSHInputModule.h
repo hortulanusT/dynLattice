@@ -15,6 +15,8 @@
 #include <gmsh.h>
 
 #include <jem/base/CString.h>
+#include <jem/base/Array.h>
+#include <jem/base/System.h>
 #include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>
 
@@ -25,12 +27,18 @@
 #include <jive/fem/ElementGroup.h>
 #include <jive/util/Assignable.h>
 
+using jem::max;
+using jem::Array;
+
+using jive::ALL;
 using jive::idx_t;
 using jive::Properties;
 using jive::String;
 using jive::Ref;
 using jive::Vector;
+using jive::Matrix;
 using jive::IdxVector;
+using jive::IdxMatrix;
 
 using jive::app::Module;
 using jive::fem::XNodeSet;
@@ -54,6 +62,8 @@ class GMSHInputModule : public Module
   static const char*      TYPE_NAME;
   static const char*      GEO_FILE;
   static const char*      ORDER;
+  static const char*      MESH_DIM;
+  static const char*      ENTITY_NAMES[4];
 
 
   explicit                  GMSHInputModule
@@ -89,8 +99,42 @@ class GMSHInputModule : public Module
 
                             ~GMSHInputModule   ();
 
-  void                      createMesh_ 
+  /**
+   * @brief opens a file, reads in the geometry and generates a mesh from it
+   * 
+   * @param geoFile name of the .geo file
+   * @param order order of the mesh (1=linear elements, 2=quadratic elements, ...)
+   */
+  void                      openMesh_ 
   
-    ( const idx_t             order,
-      const Properties&       globdat ) const;
+    ( const String&           geoFile,
+      const idx_t             order );
+
+  /**
+   * @brief poplulates the nodes stored in the global databse
+   * 
+   * @param dim dimension of the embedding space (i.e. number of coordinates per node)
+   */
+  void                      createNodes_  
+  
+    ( const idx_t             dim);
+
+  /**
+   * @brief populates the elements stored in the global database
+   * 
+   * @param globdat global database
+   * @param offset offset for the numbering, e.g. between the JIVE and the GMSH lists
+   */
+  void                      createElems_  
+  
+    ( const Properties&       globdat, 
+      const idx_t             offset = 1);
+
+ 
+ private:
+
+  Assignable<XNodeSet>        nodes_;
+  IdxVector                   nodeIDs_;
+  Assignable<XElementSet>     elements_;
+  IdxMatrix                   entities_;
 };

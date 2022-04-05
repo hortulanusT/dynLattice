@@ -1,7 +1,5 @@
 #include "GMSHInputModule.h"
 
-#include "utils/testing.h" //HACK remove me
-
 //=======================================================================
 //   class GMSHInputModule
 //=======================================================================
@@ -11,9 +9,11 @@
 //-----------------------------------------------------------------------
 
 
-const char*   GMSHInputModule::TYPE_NAME  = "GMSHInput";
-const char*   GMSHInputModule::GEO_FILE   = "geo_file";
-const char*   GMSHInputModule::ORDER      = "order";
+const char*   GMSHInputModule::TYPE_NAME        = "GMSHInput";
+const char*   GMSHInputModule::GEO_FILE         = "geo_file";
+const char*   GMSHInputModule::ORDER            = "order";
+const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
+const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -44,24 +44,49 @@ Module::Status GMSHInputModule::init
 {  
   String      geoFile = "";
   idx_t       order   = 1;
+  idx_t       dim     = 3;
 
   Properties  myProps = props.findProps ( myName_ );
   Properties  myConf  = conf .makeProps ( myName_ );
 
-  myProps.get ( geoFile, GEO_FILE );
+  // READ OUT THE PROPERTIES
+  myProps.find( geoFile, GEO_FILE );
   myConf .set ( GEO_FILE, geoFile );
 
   myProps.find( order, ORDER );
   myConf .set ( ORDER, order );
 
-  gmsh::initialize();
-  gmsh::open ( makeCString(geoFile).addr() );
+  myProps.find( dim, MESH_DIM, 1, 3 );
+  myConf .set ( MESH_DIM, dim );
+
+  // TRY GETTING THE GLOBAL ELEMENTS
+  nodes_    = XNodeSet::find( globdat );
+  elements_ = XElementSet::find( globdat );
   
-  createMesh_ ( order, globdat );
+  if ( !nodes_ )
+  {
+    nodes_ = jive::fem::newXNodeSet();
+    nodes_.store( globdat );
+  }
+  if ( !elements_ )
+  {
+    elements_ = jive::fem::newXElementSet( nodes_ );
+    elements_.store( globdat );
+  }
+
+  // HANDLE GMSH
+  gmsh::initialize(); 
+  gmsh::option::setNumber( "General.Verbosity", 2 ); // 2 corresponds to warning level
+
+  if ( geoFile.size() ) openMesh_ ( geoFile, order ); // TODO Leon's function
+  
+  createNodes_ ( dim );
+
+  createElems_ ( globdat ); 
 
   gmsh::finalize();
 
-  return EXIT;
+  return DONE;
 }
 
 
@@ -86,82 +111,138 @@ void GMSHInputModule::shutdown ( const Properties& globdat )
 
 
 //-----------------------------------------------------------------------
-//   createMesh_
+//   openMesh_
 //-----------------------------------------------------------------------
 
 
-void GMSHInputModule::createMesh_
+void GMSHInputModule::openMesh_
 
-  ( const idx_t       order,
-    const Properties& globdat ) const
+  ( const String&     geoFile,
+    const idx_t       order )
 
 {
-  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized before calling the function to store the mesh in the global database");
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+  gmsh::vectorpair gmsh_entities;
 
-  std::vector<std::size_t> nodeTags;
-  std::vector<double> coord;
-  std::vector<double> parametricCoord;
+  gmsh::open( makeCString(geoFile).addr() );
+  gmsh::model::getEntities( gmsh_entities );   
 
-  gmsh::vectorpair entities;
+  entities_.resize( 2, gmsh_entities.size() );
+  for (idx_t i = 0; i < entities_.size(1); i++) entities_[i] = { gmsh_entities[i].first, gmsh_entities[i].second };
 
-  std::vector<int> elementTypes;
-  std::vector<std::vector<std::size_t> > elementTags;
-  std::vector<std::vector<std::size_t> > elementNodeTags;
+  gmsh::model::mesh::generate( max( entities_(0, ALL) ) );  
+  gmsh::model::mesh::setOrder( order );
+}
 
-  Vector  node_coords ( 3 ); 
 
-  Assignable<XNodeSet>    globalNodes = XNodeSet::find ( globdat );
-  if ( !globalNodes ) 
-  { 
-    globalNodes = jive::fem::newXNodeSet();
-    globalNodes.store( globdat );
-  }
-  Assignable<XElementSet> globalElements = XElementSet::find ( globdat );
-  if ( !globalElements ) 
-  { 
-    globalElements = jive::fem::newXElementSet ( globalNodes );
-    globalElements.store( globdat );
-  }
-  IdxBuffer entity_elems;
+//-----------------------------------------------------------------------
+//   createNodes_
+//-----------------------------------------------------------------------
 
-  std::string name;
-  int dim, elOrder, numNodes, numPrimaryNodes;
-  std::vector<double> localCoords;
 
-  // generate the mesh and read out the nodes
-  gmsh::model::mesh::generate ( 1 ); // TODO make somewhat adaptive?
-  gmsh::model::mesh::setOrder ( order );
-  gmsh::model::mesh::getNodes ( nodeTags, coord, parametricCoord );
-  // store all the Nodes in the global database
-  for (idx_t iNode = 0; iNode < (idx_t)nodeTags.size(); iNode++)
+void GMSHInputModule::createNodes_ 
+
+  ( const idx_t         dim )
+
+{
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+
+  std::vector<std::size_t>  gmsh_tags;
+  std::vector<double>       gmsh_coords;
+  std::vector<double>       gmsh_paraCoords;
+
+  Vector                    coords ( dim );
+
+  gmsh::model::mesh::getNodes ( gmsh_tags, gmsh_coords, gmsh_paraCoords);
+
+  for (size_t inode = 0; inode < gmsh_tags.size(); inode++)
   {
-    node_coords = { coord[iNode*3], coord[iNode*3+1], coord[iNode*3+2] };
-    globalNodes.addNode(nodeTags[iNode], node_coords);
-  }
+    for (idx_t icoord = 0; icoord < dim; icoord++) 
+      coords[icoord]  = gmsh_coords[inode*dim + icoord];
 
-  gmsh::model::getEntities( entities ); // TODO get the max generate order from the dims in the entities!  
-
-  for (idx_t i = 0; i < entities.size(); i++)
-  {  
-    entity_elems.clear();
-    gmsh::model::mesh::getElements(elementTypes, elementTags, elementNodeTags, entities[i].first, entities[i].second);  
-    JEM_PRECHECK(elementTypes.size() == 1); // entities should only contain one element type!
-    gmsh::model::mesh::getElementProperties( elementTypes[0], name, dim, elOrder, numNodes, localCoords, numPrimaryNodes );
-    IdxVector elemNodes (numNodes);
-    
-    for (idx_t iElem = 0; iElem < (idx_t)elementTags[0].size(); iElem++)
-    {
-      for (idx_t inode = 0; inode < numNodes; inode++)
-      {
-        elemNodes[inode] = elementNodeTags[0][iElem*numNodes+inode]-1; // TODO reordering for higher order elements?
-      }
-      entity_elems.pushBack( globalElements.addElement( elementTags[0][iElem], elemNodes ));
-    }    
-
-    ElementGroup egroup = jive::fem::newElementGroup( entity_elems.toArray(), globalElements );
-    egroup.store( String(name.c_str()) + i, globdat );
+    nodes_.addNode( coords );
   }
 }
+
+//-----------------------------------------------------------------------
+//   createElems_
+//-----------------------------------------------------------------------
+
+
+void GMSHInputModule::createElems_ 
+
+  ( const Properties&   globdat,
+    const idx_t         offset )
+
+{
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+
+  std::vector<int>                      types;
+  std::vector<std::vector<std::size_t>> elemTags;
+  std::vector<std::vector<std::size_t>> nodeTags;
+
+  std::string                           elemName;
+  int                                   dim, order, numNodes, numPrimaryNodes;
+  std::vector<double>                   localCoords;
+
+  idx_t                                 addedElem = 0;
+
+  IdxBuffer                             groupElems;
+  IdxBuffer                             elemNodes;
+
+  Assignable<ElementGroup>              elementGroup;
+  String                                groupName;
+
+  Array<IdxBuffer>                      entityBuffer (4);
+  IdxVector                             entityNumbering (4);
+  entityNumbering                       = 0;
+
+  for (idx_t i = 0; i < 4; i++ ) entityBuffer[i].clear();
+
+  for (idx_t ientity = 0; ientity < entities_.size(); ientity++)
+  {
+    gmsh::model::mesh::getElements( types, elemTags, nodeTags, entities_[ientity][0], entities_[ientity][1]);
+    
+    groupName   = String(ENTITY_NAMES[entities_[ientity][0]]) + String('_') + String(++entityNumbering[entities_[ientity][0]]);    
+
+    groupElems.clear();
+    for (size_t itype = 0; itype < types.size(); itype++)
+    {    
+      gmsh::model::mesh::getElementProperties( types[itype], elemName, dim, order, numNodes, localCoords, numPrimaryNodes );
+      
+      for (size_t ielem = 0; ielem < elemTags[itype].size(); ielem++)
+      {      
+        elemNodes.clear();
+        for (idx_t inode = 0; inode < numNodes; inode++)
+          elemNodes.pushBack( nodeTags[itype][ielem*numNodes + inode]-1 ); 
+
+        addedElem = elements_.addElement( elemNodes.toArray() ); // TODO check for reordering of the elements!!!
+
+        groupElems.pushBack( addedElem );
+        entityBuffer[entities_[ientity][0]].pushBack( addedElem ); 
+      }
+    }
+
+    elementGroup =  jive::fem::newElementGroup( groupElems.toArray(), elements_ );
+    elementGroup.store( groupName, globdat );
+    jem::System::info( myName_ ) << " ...Created element group for geometry entity '" << groupName << "'\n";
+  } 
+  jem::System::info( myName_ ) << "\n";
+
+  // store all the super element groups
+  for (idx_t i = 0; i < 4; i++)
+  {
+    elementGroup = jive::fem::newElementGroup( entityBuffer[i].toArray(), elements_ );
+    if (elementGroup.size() > 0)
+    { 
+      elementGroup.store( String(ENTITY_NAMES[i]) + String('s'), globdat );
+    
+      jem::System::info( myName_ ) << " ...Created element group for geometry entities of type '" << String(ENTITY_NAMES[i]) + String('s') << "'\n";
+    }
+  }  
+  jem::System::info( myName_ ) << "\n";
+}
+
 
 //-----------------------------------------------------------------------
 //   makeNew
