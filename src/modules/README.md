@@ -14,3 +14,4 @@ also, you need to ensure, that the libraries are found by the compiler, this may
 ```
 export GMSHDIR=/path/to/the/gmsh-sdk
 ```
+The GMSH sdk can be downloaded [here](http://gmsh.info/bin/Linux/) (version 4.9.5) 
