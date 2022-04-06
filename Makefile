@@ -16,14 +16,19 @@ subdirs		 	:= ${shell find $(SRCDIR) -type d}
 MY_INCDIRS 	:= $(SRCDIR)
 
 #######################################################################
+##   Defining C++ Standard                                           ##
+#######################################################################
+MY_CXX_STD_FLAGS := '-std=c++17'
+
+#######################################################################
 ##   Include submodules specifics                                    ##
 #######################################################################
 include ${shell find $(SRCDIR) -name *.mk}
 
 #######################################################################
-##   Defining C++ Standard                                           ##
+##   add opemMPI libraries                                           ##
 #######################################################################
-MY_CXX_STD_FLAGS := '-std=c++17'
+export LD_RUN_PATH := /home/tgartner/jemjive/openmpi/lib:$(LD_RUN_PATH)
 
 #######################################################################
 ##   Include Jive package and create executable                      ##
