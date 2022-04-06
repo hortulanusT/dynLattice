@@ -14,6 +14,7 @@ const char*   GMSHInputModule::GEO_FILE         = "geo_file";
 const char*   GMSHInputModule::ORDER            = "order";
 const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
+const char*   GMSHInputModule::ONELAB_PROPS     = "onelab";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -45,6 +46,7 @@ Module::Status GMSHInputModule::init
   String      geoFile = "";
   idx_t       order   = 1;
   idx_t       dim     = 3;
+  Properties  onelab;
 
   Properties  myProps = props.findProps ( myName_ );
   Properties  myConf  = conf .makeProps ( myName_ );
@@ -58,6 +60,9 @@ Module::Status GMSHInputModule::init
 
   myProps.find( dim, MESH_DIM, 1, 3 );
   myConf .set ( MESH_DIM, dim );
+
+  myProps.find( onelab, ONELAB_PROPS );
+  myConf. set ( ONELAB_PROPS, onelab );
 
   // TRY GETTING THE GLOBAL ELEMENTS
   nodes_    = XNodeSet::find( globdat );
@@ -78,8 +83,15 @@ Module::Status GMSHInputModule::init
   gmsh::initialize(); 
   gmsh::option::setNumber( "General.Verbosity", 2 ); // 2 corresponds to warning level
 
-  if ( geoFile.size() ) openMesh_ ( geoFile, order ); // TODO Leon's function
-  
+  if ( geoFile.size() )
+  {
+    prepareOnelab_ ( onelab );
+    openMesh_ ( geoFile, order ); 
+  }
+  else
+  {
+    // TODO Leon's function
+  }
   createNodes_ ( dim );
 
   createElems_ ( globdat ); 
@@ -134,6 +146,37 @@ void GMSHInputModule::openMesh_
   gmsh::model::mesh::setOrder( order );
 }
 
+
+//-----------------------------------------------------------------------
+//   prepareOnelab_
+//-----------------------------------------------------------------------
+
+
+void GMSHInputModule::prepareOnelab_
+
+  ( const Properties&   onelabProps )
+
+{
+  auto onelabSettings = onelabProps.getContents();
+  auto onelabEnumerator = onelabSettings->getDictEnum();
+
+  String              onelabKey = "";
+  std::vector<double> onelabVal { 0. };
+
+  jem::System::info( myName_ ) << "\n";
+  while ( !onelabEnumerator->atEnd() )
+  {
+    onelabKey = onelabEnumerator->getKey();
+    onelabProps.get( onelabVal[0], onelabKey);
+
+    gmsh::onelab::setNumber( makeCString(onelabKey).addr(), onelabVal );
+
+    jem::System::info( myName_ ) << " ...Set GMSH variable '" << onelabKey << "' to a value of " << onelabVal[0] << "\n";
+  
+    onelabEnumerator->toNext();
+  }
+  jem::System::info( myName_ ) << "\n";
+}
 
 //-----------------------------------------------------------------------
 //   createNodes_

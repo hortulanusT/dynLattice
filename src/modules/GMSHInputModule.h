@@ -19,6 +19,7 @@
 #include <jem/base/System.h>
 #include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>
+#include <jem/util/HashDictionary.h>
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
@@ -64,7 +65,7 @@ class GMSHInputModule : public Module
   static const char*      ORDER;
   static const char*      MESH_DIM;
   static const char*      ENTITY_NAMES[4];
-
+  static const char*      ONELAB_PROPS;
 
   explicit                  GMSHInputModule
 
@@ -109,6 +110,15 @@ class GMSHInputModule : public Module
   
     ( const String&           geoFile,
       const idx_t             order );
+
+  /**
+   * @brief prepares the onllab properties for the mesh, that are given in the settings
+   * 
+   * @param onelabProps Onelab Properties to set
+   */
+  void                      prepareOnelab_
+
+    ( const Properties&       onelabProps );
 
   /**
    * @brief poplulates the nodes stored in the global databse
