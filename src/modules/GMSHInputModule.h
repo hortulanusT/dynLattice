@@ -23,6 +23,7 @@
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/app/Names.h>
 #include <jive/fem/XNodeSet.h>
 #include <jive/fem/XElementSet.h>
 #include <jive/fem/ElementGroup.h>
@@ -65,7 +66,6 @@ class GMSHInputModule : public Module
   typedef                 Module            Super;
   
   static const char*      TYPE_NAME;
-  static const char*      GEO_FILE;
   static const char*      ORDER;
   static const char*      MESH_DIM;
   static const char*      ENTITY_NAMES[4];

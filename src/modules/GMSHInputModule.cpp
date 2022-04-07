@@ -10,7 +10,6 @@
 
 
 const char*   GMSHInputModule::TYPE_NAME        = "GMSHInput";
-const char*   GMSHInputModule::GEO_FILE         = "geo_file";
 const char*   GMSHInputModule::ORDER            = "order";
 const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
@@ -52,8 +51,8 @@ Module::Status GMSHInputModule::init
   Properties  myConf  = conf .makeProps ( myName_ );
 
   // READ OUT THE PROPERTIES
-  myProps.find( geoFile, GEO_FILE );
-  myConf .set ( GEO_FILE, geoFile );
+  myProps.find( geoFile, jive::app::PropNames::FILE );
+  myConf .set ( jive::app::PropNames::FILE, geoFile );
 
   myProps.find( order, ORDER );
   myConf .set ( ORDER, order );
