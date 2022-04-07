@@ -110,7 +110,6 @@ test_passed = pd.DataFrame(columns=[lTyp+"_"+lDir for lTyp, lDir in product(load
                         , index=[eOrder+"_"+eDir for eOrder, eDir in product(elem_order, elem_dir)])
 
 # prepare the testing
-subprocess.run(["make"])
 print("\n")
 print(colored("> > Testing simple analytical " + ("2D " if sim2D else "") + f"scenarios for {nel} element" + ("s" if int(nel)>1 else "") + " < <", "yellow"))
 

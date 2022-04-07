@@ -17,7 +17,6 @@ for folder in glob.glob("tests/beam/test*/"):
 for i in range(6):
   os.mkdir(f"tests/beam/test{i}")
 
-subprocess.run(["make"])
 print("\n")
 print(colored("> > Testing different scenarios from [Simo/Vu-Quoc 1986] < <", "yellow"))
 test_passed = []

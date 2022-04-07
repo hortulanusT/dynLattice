@@ -1,6 +1,4 @@
-.PHONY: test-elems
-
-test-elems: all
-			@echo Elements tested!
-			@echo 
-			@echo
+test-%: all
+	@./scripts/testing/$*.py
+	@echo 
+	@echo
