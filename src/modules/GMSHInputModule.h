@@ -49,6 +49,10 @@ using jive::util::Assignable;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
+static_assert( GMSH_API_VERSION_MAJOR == 4, "Wrong GMSH API version, please use 4.9.5" );
+static_assert( GMSH_API_VERSION_MINOR == 9, "Wrong GMSH API version, please use 4.9.5" );
+static_assert( GMSH_API_VERSION_PATCH == 5, "Wrong GMSH API version, please use 4.9.5" );
+
 /**
  * @brief Class GMSHInputModule to translate GMSH Geometry to JIVE-Data
  * 
