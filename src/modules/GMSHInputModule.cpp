@@ -156,6 +156,7 @@ void GMSHInputModule::prepareOnelab_
   ( const Properties&   onelabProps )
 
 {
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
   auto onelabSettings = onelabProps.getContents();
   auto onelabEnumerator = onelabSettings->getDictEnum();
 
@@ -201,9 +202,10 @@ void GMSHInputModule::createNodes_
   {
     for (idx_t icoord = 0; icoord < dim; icoord++) 
       coords[icoord]  = gmsh_coords[inode*dim + icoord];
-
-    nodes_.addNode( coords );
+    
+    jem::System::info( myName_ ) << " ...Created node " << nodes_.addNode( coords ) << " at coordinates " << coords << "\n";
   }
+  jem::System::info( myName_ ) << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -227,18 +229,18 @@ void GMSHInputModule::createElems_
   int                                   dim, order, numNodes, numPrimaryNodes;
   std::vector<double>                   localCoords;
 
-  idx_t                                 addedElem = 0;
+  idx_t                                 addedElem;
 
   IdxBuffer                             groupElems;
-  IdxBuffer                             elemNodes;
+  IdxVector                             elemNodes;
 
   Assignable<ElementGroup>              elementGroup;
   String                                groupName;
 
   Array<IdxBuffer>                      entityBuffer (4);
   IdxVector                             entityNumbering (4);
-  entityNumbering                       = 0;
 
+  entityNumbering                       = 0;
   for (idx_t i = 0; i < 4; i++ ) entityBuffer[i].clear();
 
   for (idx_t ientity = 0; ientity < entities_.size(); ientity++)
@@ -246,19 +248,27 @@ void GMSHInputModule::createElems_
     gmsh::model::mesh::getElements( types, elemTags, nodeTags, entities_[ientity][0], entities_[ientity][1]);
     
     groupName   = String(ENTITY_NAMES[entities_[ientity][0]]) + String('_') + String(++entityNumbering[entities_[ientity][0]]);    
-
     groupElems.clear();
+
     for (size_t itype = 0; itype < types.size(); itype++)
     {    
       gmsh::model::mesh::getElementProperties( types[itype], elemName, dim, order, numNodes, localCoords, numPrimaryNodes );
-      
+          
       for (size_t ielem = 0; ielem < elemTags[itype].size(); ielem++)
-      {      
-        elemNodes.clear();
-        for (idx_t inode = 0; inode < numNodes; inode++)
-          elemNodes.pushBack( nodeTags[itype][ielem*numNodes + inode]-1 ); 
+      {
+        elemNodes.resize( numNodes );
 
-        addedElem = elements_.addElement( elemNodes.toArray() ); // TODO check for reordering of the elements!!!
+        for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
+        {
+          elemNodes[inode*order] = nodeTags[itype][ielem*numNodes + inode]-offset;
+
+          if (inode*order+1 == numNodes) break;
+          for (idx_t jnode = 1; jnode < order; jnode++)
+            elemNodes[inode*order+jnode] = nodeTags[itype][ielem*numNodes + numPrimaryNodes + inode*(order-1) + jnode-1]-offset;
+        }
+
+        addedElem = elements_.addElement( elemNodes ); 
+        jem::System::info( myName_ ) << " ...Created element " << addedElem << " with nodes " << elemNodes << "\n";
 
         groupElems.pushBack( addedElem );
         entityBuffer[entities_[ientity][0]].pushBack( addedElem ); 
