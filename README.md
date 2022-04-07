@@ -9,6 +9,7 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ```
 .
 ├── .gitignore
+├── .gitmodules
 ├── LICENSE
 ├── README.md
 ├── NOTES.md
@@ -25,6 +26,7 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 │   ├── running     <- ptyhon scripts for the real runs
 │   └── utils       <- ptyhon scripts for some convienence in the execution
 ├── tests
+│   ├── testing.mk  <- makefile for testing setup
 │   ├── element     <- test setups for single elments
 │   └── beam        <- tests from the Simo/Vu-Quoc Paper
 └── studies

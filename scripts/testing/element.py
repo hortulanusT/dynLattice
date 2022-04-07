@@ -34,7 +34,7 @@ except FileExistsError:
   pass
 
 # get some settings
-nel = sys.argv[1] if len(sys.argv) > 1 else "1"
+nel = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 elem_nodes = [ 2, 3, 4 ]
 
 fixed_groups = {eDir:{} for eDir in elem_dir}
@@ -116,10 +116,8 @@ print(colored("> > Testing simple analytical " + ("2D " if sim2D else "") + f"sc
 # Iterate over elements
 for eDir in elem_dir:
   for eOrder, eNodes in zip(elem_order, elem_nodes):
-    # build the .dat file for this element
     print(colored(f"{eOrder.upper():5}ELEMENT - "+eDir.upper(), "cyan"), end=" ")
-    subprocess.call(["./scripts/utils/geo_to_dat.py", "tests/element/test.geo", eDir, "1", "-o", str(eNodes-1), "nel", nel], stdout=subprocess.DEVNULL)
-
+ 
     # iterate over loads
     for lDir in load_dir:
       for lTyp in load_typ:
@@ -128,6 +126,9 @@ for eDir in elem_dir:
         running_list = ["./bin/nonlinRod"
             , "-p", f"params.Incr={incr:f}"
             , "tests/element/test.pro"
+            , "-p", f"Input.input.order={eNodes-1}"
+            , "-p", f"Input.input.onelab.{eDir}=1."
+            , "-p", f"Input.input.onelab.nel={nel:f}"
             , "-p", f"control.runWhile=\"i<{steps}\""
             , "-p", f"model.model.model.cosseratRod.shape.numPoints={eNodes}"
             , "-p", f"model.model.model.cosseratRod.material_ey={y_Dir[eDir][lDir[1]]}" 
@@ -142,10 +143,6 @@ for eDir in elem_dir:
 
         if prog_ret: #nonzero return code == failed execution
           test_passed.at[eOrder+"_"+eDir, lTyp+"_"+lDir] = ">< FAIL ><"
-          running_list.append("-p")
-          running_list.append("Output.modules+=[\"paraview\"]")
-          running_list.append("-p")
-          running_list.append("Input.input.file=\"$(CASE_NAME).dummy\"")
           failed_runs.append(" ".join(running_list))
           try:
             os.rename("tests/element/test.log", f"tests/element/FAILED/{eOrder}-{eDir}_{lTyp}-{lDir}.log")
@@ -199,21 +196,18 @@ if (test_passed == "analytical").all().all():
   print(colored("> > > ALL TESTS PASSED < < <\t:))", "green"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/*.log")]
-  os.remove("tests/element/test.dat")
   os.rmdir("tests/element/FAILED")
   os.rmdir("tests/element/DIFF")
 elif (test_passed != "_ALL_Diff_").all().all() and (test_passed != ">< FAIL ><").all().all():
   print(colored("> > > MIXED RESULTS FROM SOME TESTS < < <\t://\n", "yellow"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/*.log")]
-  os.rename("tests/element/test.dat", "tests/element/test.dummy")
   print("Overview:\n")
   print(test_passed)
 else:
   print(colored("> > > ONE (OR MORE) TESTS FAILED < < <\t:((\n", "red"))
   [os.remove(file) for file in glob.glob("tests/element/*.res")]
   [os.remove(file) for file in glob.glob("tests/element/*.log")]
-  os.rename("tests/element/test.dat", "tests/element/test.dummy")
   print("Overview:\n")
   print(test_passed)
 
