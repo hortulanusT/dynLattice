@@ -24,7 +24,7 @@ tests/element/*/
 tests/beam/test*/
 
 # save the resulting data files for testing
-!tests/beam/input_data/*.dat
+!tests/beam/*.dat
 !tests/beam/ref_data/*.csv
 
 # save the folder structure

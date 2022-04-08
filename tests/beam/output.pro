@@ -1,6 +1,6 @@
 
 // LOGGING
-log.pattern = "*.info | *.debug";
+log.pattern = "*.info ";//| *.debug
 log.file = "$(CASE_NAME)/run.log";
 
 // OUTPUTS
