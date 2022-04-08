@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+import sys
+
+raise NotImplementedError(sys.argv[-1])
 
 import os, subprocess, glob, math, sys
 import numpy as np

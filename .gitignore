@@ -19,8 +19,7 @@ studies/**/output/*
 studies/**/results/*
 studies/**/*.info
 
-tests/arclen/*/
-tests/element/*/
+tests/element/runs/
 tests/beam/test*/
 
 # save the resulting data files for testing

@@ -1,9 +1,9 @@
 // LOGGING
 log.pattern = "*.info | *.debug";
-log.file = "$(CASE_NAME).log";
+log.file = "-";
 
 // PROGRAM_CONTROL
-control.runWhile = false;
+control.runWhile = "i<100";
 
 // SOLVER
 Solver.modules = [ "solver" ];

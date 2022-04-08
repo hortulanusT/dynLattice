@@ -24,7 +24,6 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ├── scripts
 │   ├── testing     <- ptyhon scripts for some testing runs
 │   ├── running     <- ptyhon scripts for the real runs
-│   └── utils       <- ptyhon scripts for some convienence in the execution
 ├── tests
 │   ├── testing.mk  <- makefile for testing setup
 │   ├── element     <- test setups for single elments
