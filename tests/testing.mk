@@ -14,20 +14,20 @@ element-tests: $(program)
 beam-tests: $(addprefix tests/beam/test, \
 						$(addsuffix /result.pdf, 0 1 2 3 4 5))
 
-tests/beam/test0/result.pdf: scripts/testing/beam0.py\
- 														 tests/beam/test0/disp.csv\
- 														 tests/beam/test0/resp.csv\
- 														 tests/beam/test0_ref/disp.csv\
- 														 tests/beam/test0_ref/resp.csv
+tests/beam/test0/result.pdf:  scripts/testing/beam0.py\
+ 														  tests/beam/test0/disp.csv\
+ 														  tests/beam/test0/resp.csv\
+ 														  tests/beam/test0_ref/disp.csv\
+ 														  tests/beam/test0_ref/resp.csv
 	@$<
 
-tests/beam/test%/result.pdf: scripts/testing/beam%.py\
- 														 tests/beam/test%/disp.csv\
- 														 tests/beam/test%/resp.csv
+tests/beam/test%/result.pdf:  scripts/testing/beam%.py\
+ 														  tests/beam/test%/disp.csv\
+ 														  tests/beam/test%/resp.csv
 	@$<
 
 tests/beam/test%/disp.csv tests/beam/test%/resp.csv:\
-														$(program) tests/beam/test%.pro
+														  $(program) tests/beam/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
