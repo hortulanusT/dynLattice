@@ -1,7 +1,7 @@
 
 // LOGGING
-log.pattern = "*.info ";//| *.debug
-log.file = "$(CASE_NAME)/run.log";
+log.pattern = "*.info | *.debug";
+log.file = "-";
 
 // OUTPUTS
 Output.modules = [  "loadextent", "disp", "resp", "paraview" ];
