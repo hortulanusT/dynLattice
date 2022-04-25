@@ -114,7 +114,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myProps.find( symmetric_only_, SYMMETRIC_ONLY );
   myConf .set ( SYMMETRIC_ONLY, symmetric_only_ );
 
-  // Get the material parameters. //LATER non-isotropic features
+  // Get the material parameters. //LATER non-isotropic features ?
   if (myProps.find ( material_ey_, MATERIAL_Y_DIR ))
   {
     JEM_ASSERT( material_ey_.size() == allNodes_.rank() );
@@ -830,7 +830,8 @@ void            specialCosseratRodModel::assemble_
   }    
 }
 
-//FIXME add rotational inertias?
+//FIXME add rotational inertia
+//FIXME no reduced integration for weights
 void          specialCosseratRodModel::assembleM_
   ( MatrixBuilder&        mbld ) const
 {
@@ -855,6 +856,7 @@ void          specialCosseratRodModel::assembleM_
     shape_->getIntegrationWeights( weights, coords );
     shapes = shape_->getShapeFunctions();
 
+    // TRANSLATIONAL INERTIA
     addM = 0.0;
     for (idx_t ip = 0; ip < shape_->ipointCount(); ip++)
     {
