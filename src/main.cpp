@@ -2,6 +2,7 @@
 
 #include "models/_declare.h"
 #include "modules/_declare.h"
+#include "misc/_declare.h"
 
 //-----------------------------------------------------------------------
 //   mainModule
@@ -23,10 +24,13 @@ Ref<Module> mainModule ()
   using jive::fem::ShapeModule;
 
   // Declare everything, that is needed for the models
-  declareModels   ();
+  declareModels       ();
 
   // Declare everything, that is needed for the modules
-  declareModules  ();
+  declareModules      ();
+
+  // Declare everything, that is needed for the timesteppers
+  declareTimeSteppers ();
 
   // Set up the module chain. These modules will be called by Jive in
   // the order that they have been added to the chain.

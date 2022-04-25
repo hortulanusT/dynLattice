@@ -279,13 +279,13 @@ bool specialCosseratRodModel::takeAction
 
     assembleM_ ( *mbld );
 
-    // // DEBUGGING
-    // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( M, dofList, dofList );
-    // REPORT( action )
-    // TEST_CONTEXT ( M )
+    // DEBUGGING
+    IdxVector   dofList ( dofs_->dofCount() );
+    Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    mbld->getBlock( M, dofList, dofList );
+    REPORT( action )
+    TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -449,6 +449,7 @@ void     specialCosseratRodModel::init_strain_ ()
     allElems_.getElemNodes ( inodes, ielem );
     allNodes_.getSomeCoords( coords, inodes );
 
+    TEST_CONTEXT((Cubix(LambdaN_[inodes])))
     get_strains_( strains, weights, coords, null_mat, (Cubix)LambdaN_[inodes], ie, false);
     mat_strain0_[ie] = strains;
   }
@@ -577,7 +578,6 @@ void specialCosseratRodModel::get_strains_
 {
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
-  // TEST_CONTEXT(nodeTheta)
 
   const idx_t   ipCount   = shape_->ipointCount();
   const idx_t   globRank  = shape_->globalRank();

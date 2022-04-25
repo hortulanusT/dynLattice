@@ -10,6 +10,7 @@
  */
 
 // LATER implement function for norming along a dimension (cubix->matrix, matrix->vector, vector->double)
+#pragma once
 
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/Array.h>

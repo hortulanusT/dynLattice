@@ -23,6 +23,7 @@
 #include "modules/GroupOutputModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
+#include "modules/NewmarkRotModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules
@@ -40,4 +41,5 @@ void declareModules ()
   PBCGroupOutputModule::declare  ();
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
+  NewmarkRotModule::declare      ();
 }

@@ -28,6 +28,7 @@
     - move test-cases to makefile targets
     - move studies to makefile targets
     - investigate options for parallel computing
+    - add .cpp for all headers...
  
 # :heavy_check_mark: Information
 ## debugging

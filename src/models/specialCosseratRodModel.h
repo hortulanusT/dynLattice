@@ -35,7 +35,7 @@
 
 #include <math.h>
 
-#include "shapes/Line3D.h"
+#include "misc/Line3D.h"
 #include "utils/testing.h"
 #include "utils/helpers.h"
 
