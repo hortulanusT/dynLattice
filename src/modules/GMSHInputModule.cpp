@@ -91,11 +91,13 @@ Module::Status GMSHInputModule::init
   {
     // TODO Leon's function
   }
-  createNodes_ ( dim );
 
+  createNodes_ ( dim );
   createElems_ ( globdat ); 
 
   gmsh::finalize();
+
+  // TODO record stored mesh
 
   return DONE;
 }
