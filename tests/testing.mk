@@ -9,6 +9,7 @@ element_results := $(addprefix tests/element/result_, $(addsuffix .txt, $(ELEMEN
 ELEMENT_LOADS := $(foreach dir, dx dy dz rx ry rz, force_$(dir) disp_$(dir))
 load_results := $(addprefix tests/element/runs/%_, $(addsuffix .log, $(ELEMENT_LOADS)))
 
+# ELEMENT TEST RESULTS
 element-tests: $(element_results)
 
 tests/element/result_%.txt: scripts/testing/element.py $(load_results)
@@ -35,6 +36,7 @@ tests/element/runs/%.log: $(program) tests/element/test.pro
 
 beam_cases = 0 1 2 3 4 5
 
+# BEAM TEST RESULTS
 beam-tests: $(addprefix tests/beam/test, $(addsuffix /result.pdf, $(beam_cases)))
 
 tests/beam/test0/result.pdf:  scripts/testing/beam0.py\
@@ -55,6 +57,7 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv:\
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
 
+# CLEAN UP THE TESTS
 clean-tests:
 	@$(RM_R) tests/element/runs
 	@$(RM_R) tests/beam/test*/
