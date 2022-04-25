@@ -113,6 +113,12 @@ Module::Status PBCGroupInputModule::init
 
   prepareProps_ ( myProps );
 
+  // Touch the pre settings to get rid of warinings
+  Ref<Object>  dummyObj;
+
+  for (idx_t i = 0; i < groupSettings_.size(); i++)
+    groupSettings_.find(dummyObj, groupSettings_.listProps()[i]);
+
   // make NodeGroups
 
   Super::init ( conf, props, globdat );

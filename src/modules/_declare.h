@@ -18,6 +18,7 @@
 #include <jive/gl/declare.h>
 
 #include "modules/paraview/ParaViewModule.h"
+#include "modules/gmshInput/GMSHInputModule.h"
 #include "modules/GroupInputModule.h"
 #include "modules/GroupOutputModule.h"
 #include "modules/PBCGroupInputModule.h"
@@ -33,8 +34,9 @@ void declareModules ()
   jive::implict ::declareModules ();
   jive::gl      ::declareModules ();
   jive::fem     ::declareModules ();
+  GMSHInputModule::declare       ();
   ParaViewModule::declare        ();
-  GroupOutputModule::declare      ();
+  GroupOutputModule::declare     ();
   PBCGroupOutputModule::declare  ();
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();

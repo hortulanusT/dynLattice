@@ -11,6 +11,7 @@
 #pragma once
 #include <jem/base/System.h>
 #include <jem/base/Exception.h>
+#include <jem/base/RuntimeException.h>
 #include <iostream>
 
 #ifndef NDEBUG
