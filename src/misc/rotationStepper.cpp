@@ -39,7 +39,7 @@ void          rotationStepper::updateState
 {
   Super::updateState(globdat);
 
-  jem::System::debug() << "> > > STATE VARIABLES UPDATED! \n ";
+  jem::System::warn() << "> > > STATE VARIABLES UPDATED! \n ";
 }
 
 

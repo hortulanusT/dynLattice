@@ -10,6 +10,7 @@
  */
 
 #include "NewmarkRotModule.h"
+#include <jem/base/System.h>
 
 const char* NewmarkRotModule::TYPE_NAME = "NewmarkRot";
 
@@ -24,7 +25,9 @@ NewmarkRotModule::NewmarkRotModule
     Ref<SolverModule>     solver ) :
 
     Super ( name, order, solver )
-{}
+{
+  jem::System::warn() << "> > > NewmarkRotModule created!\n";
+}
 
 //-----------------------------------------------------------------------
 //   makeNew
@@ -37,7 +40,22 @@ Ref<Module> NewmarkRotModule::makeNew
     const Properties&  props,
     const Properties&  globdat )
 {
-  return Super::makeNew( name, conf, props, globdat );
+  using jive::util::joinNames;
+
+  Ref<SolverModule>  solver =
+
+    jive::implict::newSolverModule ( joinNames( name, jive::implict::PropNames::SOLVER ),
+                      conf, props, globdat );
+
+  Properties  myConf  = conf .makeProps ( name );
+  Properties  myProps = props.findProps ( name );
+
+  int         order   = 2;
+
+  myProps.find ( order, jive::implict::PropNames::ORDER, 1, 2 );
+  myConf .set  ( jive::implict::PropNames::ORDER, order );
+
+  return newInstance<Self> ( name, order, solver );
 }
 
 //-----------------------------------------------------------------------
@@ -62,6 +80,8 @@ Ref<Model> NewmarkRotModule::newTransModel_
     const Properties&  globdat )
 
 {
+  using jive::util::joinNames;
+  
   const String         context = getContext ();
 
   Ref<DofSpace>        dofs    =
@@ -70,7 +90,7 @@ Ref<Model> NewmarkRotModule::newTransModel_
 
   Ref<TimeStepper>  stepper =
 
-    TSFactory::newInstance ( myName_, conf, props, globdat );
+    TSFactory::newInstance ( joinNames ( myName_, jive::implict::PropNames::TIME_STEPPER ), conf, props, globdat );
 
   Ref<TransientModel>  tmodel  =
 

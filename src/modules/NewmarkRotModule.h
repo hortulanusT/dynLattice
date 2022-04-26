@@ -11,8 +11,11 @@
 
 #pragma once
 
+#include <jem/util/Properties.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/utilities.h>
+#include <jive/implict/Names.h>
 #include <jive/implict/TransientModel.h>
 #include <jive/implict/NewmarkModule.h>
 #include <jive/implict/TimeStepperFactory.h>
