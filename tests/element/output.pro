@@ -3,9 +3,9 @@ Output.modules = [  "loadextent", "disp", "load", "resp" ];
 
 Output.loadextent.type = "GroupOutput";
 Output.loadextent.nodeGroups = [ "free" ];
-Output.loadextent.dofs = model.model.model.cosseratRod.dofNamesTrans;
-Output.loadextent.dofs += model.model.model.cosseratRod.dofNamesRot;
-Output.loadextent.dimensions = model.model.model.cosseratRod.dofNamesTrans;
+Output.loadextent.dofs = model.model.model.rodMesh.child.dofNamesTrans;
+Output.loadextent.dofs += model.model.model.rodMesh.child.dofNamesRot;
+Output.loadextent.dimensions = model.model.model.rodMesh.child.dofNamesTrans;
 
 Output.disp.type = "Sample";
 Output.disp.file = "$(CASE_NAME)-disp.res";

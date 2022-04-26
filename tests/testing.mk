@@ -32,7 +32,7 @@ tests/element/runs/%-load.res tests/element/runs/%-disp.res tests/element/runs/%
 	$(eval loadD := $(word 4, $(options)))
 	@$^ -p Input.input.order=$(order)\
 			-p Input.input.onelab.$(elemD)=1.\
-			-p model.model.model.cosseratRod.shape.numPoints=$(nodes)\
+			-p model.model.model.rodMesh.child.shape.numPoints=$(nodes)\
 			-p model.model.model.$(loadT).nodeGroups=[\"free\"]\
 			-p model.model.model.$(loadT).dofs=[\"$(loadD)\"]\
 			-p model.model.model.$(loadT).factors=[1.]\
