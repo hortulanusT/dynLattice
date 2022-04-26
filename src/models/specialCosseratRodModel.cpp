@@ -279,13 +279,13 @@ bool specialCosseratRodModel::takeAction
 
     assembleM_ ( *mbld );
 
-    // DEBUGGING
-    IdxVector   dofList ( dofs_->dofCount() );
-    Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
-    for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    mbld->getBlock( M, dofList, dofList );
-    REPORT( action )
-    TEST_CONTEXT ( M )
+    // // DEBUGGING
+    // IdxVector   dofList ( dofs_->dofCount() );
+    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    // mbld->getBlock( M, dofList, dofList );
+    // REPORT( action )
+    // TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )

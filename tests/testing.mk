@@ -17,6 +17,7 @@ beam_cases = 0 1 2 3 4 5
 
 # ELEMENT TEST RESULTS
 element-tests : $(element_results)
+	@$(RM) tests/element/test.msh22
 
 tests/element/result_%.txt : scripts/testing/element.py $(load_results) $(disp_results) $(resp_results)
 	@$< $*
