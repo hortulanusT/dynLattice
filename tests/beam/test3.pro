@@ -13,7 +13,6 @@ control.runWhile = "free.disp.dy > -0.5 && i < 5000";
 Solver.modules = [ "solver" ];
 Solver.solver.type = "Arclen";
 
-// SETTINGS ?????????????????????
 params.rod_details.shape.numPoints = "2";
 params.rod_details.young = 6.895e10;
 params.rod_details.shear_modulus = 2.16e10;

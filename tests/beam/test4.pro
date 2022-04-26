@@ -42,9 +42,9 @@ Input.groupInput.free =
   yval = 120.;
 };
 
-model.model.model.cosseratRod += params.rod_details;
+model.model.model.lattice.child += params.rod_details;
 model.model.model.force = params.force_model;
 
-model.model.model.joint.lockDofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.joint.lockDofs += model.model.model.lattice.child.dofNamesRot;
 
 Output.paraview.reportIntervall = 10;

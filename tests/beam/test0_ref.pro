@@ -40,6 +40,8 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
-Input.groupInput.free.restrictToGroup = "joints";
+Input.groupInput.free.restrictToGroup = "points";
 Input.groupInput.free.restrictPartial = 0;
 model.model.model.force=params.force_model_disp;
+
+Output.modules = [  "loadextent", "disp", "resp" ]; //HACK enable real paraview again

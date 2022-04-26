@@ -13,6 +13,7 @@
 
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
+#include <jem/base/CString.h>
 #include <jem/base/array/Array.h>
 #include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>

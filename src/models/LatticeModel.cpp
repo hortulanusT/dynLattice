@@ -50,7 +50,6 @@ LatticeModel::LatticeModel
   
   // Get the children Properties
   myProps.find( childProps, CHILD_PROPS );
-  myConf .set ( CHILD_PROPS, childProps );
 
   // Find the children  
   elems = ElementSet::get( globdat, getContext() );
@@ -58,13 +57,17 @@ LatticeModel::LatticeModel
   { 
     childName = prefix + String(++igroup);
     if ( !ElementGroup::find( childName, elems, globdat ) ) break;
+
     jem::System::info( myName_ ) << " ...Creating Model for ElementGroup '" << childName << "'\n";
+
     childProps.set( "elements", childName );
     myProps.makeProps( childName ).mergeWith( childProps );
     childBuffer.pushBack( ModelFactory::newInstance( jive::util::joinNames( myName_, childName ), conf, props, globdat ) );
   }   
   children_.resize( childBuffer.size() );
   children_ = childBuffer.toArray();
+
+  JEM_PRECHECK2( children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)) );
 
   // Touch the pre settings to get rid of warnings
   Ref<Object>  dummyObj;

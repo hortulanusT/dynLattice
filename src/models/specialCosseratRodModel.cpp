@@ -363,7 +363,7 @@ void   specialCosseratRodModel::get_strain_table_
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       strain_table.addRowValues ( ielem, icols, strain ( ALL, ip ) );
-      weights[ielem]              += ipWeights[ip];
+      weights[ielem]            += ipWeights[ip];
     }
   }
 }
@@ -449,7 +449,7 @@ void     specialCosseratRodModel::init_strain_ ()
     allElems_.getElemNodes ( inodes, ielem );
     allNodes_.getSomeCoords( coords, inodes );
 
-    TEST_CONTEXT((Cubix(LambdaN_[inodes])))
+    // TEST_CONTEXT((Cubix(LambdaN_[inodes])))
     get_strains_( strains, weights, coords, null_mat, (Cubix)LambdaN_[inodes], ie, false);
     mat_strain0_[ie] = strains;
   }
@@ -695,7 +695,7 @@ void            specialCosseratRodModel::assemble_
 {
   const idx_t  ipCount        = shape_->ipointCount ();
   const idx_t  nodeCount      = shape_->nodeCount   ();
-  const idx_t  elemCount      = rodGroup_.size        ();
+  const idx_t  elemCount      = rodGroup_.size      ();
   const idx_t  dofCount       = dofs_->typeCount    ();
   const idx_t  rank           = shape_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
@@ -732,7 +732,7 @@ void            specialCosseratRodModel::assemble_
 
     // TEST_CONTEXT(nodePhi_0[inodes])
     // TEST_CONTEXT(nodeU[inodes])
-    // TEST_CONTEXT(nodeTheta[inodes])
+    // TEST_CONTEXT(nodeLambda[inodes])
 
     // get the XI, PSI and PI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );
@@ -811,6 +811,10 @@ void            specialCosseratRodModel::assemble_
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    
+    // TEST_CONTEXT(nodePhi_0[inodes])
+    // TEST_CONTEXT(nodeU[inodes])
+    // TEST_CONTEXT(nodeLambda[inodes])
 
     // get the XI values for this 
     shape_->getXi( XI, weights, (Matrix)nodeU[inodes], (Matrix)nodePhi_0[inodes] );

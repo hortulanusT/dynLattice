@@ -246,6 +246,6 @@ class specialCosseratRodModel : public Model
   IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
   Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)
 
-  Cubix                   LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is for the j-th node
+  Cubix                   LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is for the j-th node //TODO store only the nodes of the relevant group!
   Cubix                   mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
 };
