@@ -289,7 +289,7 @@ void GMSHInputModule::createElems_
       }
     }
 
-    elementGroup =  jive::fem::newElementGroup( groupElems.toArray(), elements_ );
+    elementGroup =  jive::fem::newElementGroup( groupElems.toArray().clone(), elements_ );
     elementGroup.store( groupName, globdat );
     jem::System::info( myName_ ) << " ...Created element group for geometry entity '" << groupName << "'\n";
   } 
