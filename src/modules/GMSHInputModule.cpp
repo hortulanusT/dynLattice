@@ -84,8 +84,11 @@ Module::Status GMSHInputModule::init
 
   if ( geoFile.size() )
   {
+    String mshFile = geoFile[jem::SliceTo(geoFile.size()-4)] + ".msh22";
+
     prepareOnelab_ ( onelab );
     openMesh_ ( geoFile, order ); 
+    gmsh::write( makeCString(mshFile).addr() );
   }
   else
   {
