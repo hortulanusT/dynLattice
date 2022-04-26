@@ -28,6 +28,7 @@
 #include <jive/fem/XElementSet.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/Globdat.h>
 
 using jem::max;
 using jem::Array;
@@ -68,6 +69,7 @@ class GMSHInputModule : public Module
   static const char*      TYPE_NAME;
   static const char*      ORDER;
   static const char*      MESH_DIM;
+  static const char*      SAVE_MSH;
   static const char*      ENTITY_NAMES[4];
   static const char*      ONELAB_PROPS;
 

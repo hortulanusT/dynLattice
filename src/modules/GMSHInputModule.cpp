@@ -12,6 +12,7 @@
 const char*   GMSHInputModule::TYPE_NAME        = "GMSHInput";
 const char*   GMSHInputModule::ORDER            = "order";
 const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
+const char*   GMSHInputModule::SAVE_MSH         = "save_mesh";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
 const char*   GMSHInputModule::ONELAB_PROPS     = "onelab";
 
@@ -45,6 +46,7 @@ Module::Status GMSHInputModule::init
   String      geoFile = "";
   idx_t       order   = 1;
   idx_t       dim     = 3;
+  bool        saveMsh = true;
   Properties  onelab;
 
   Properties  myProps = props.findProps ( myName_ );
@@ -59,6 +61,9 @@ Module::Status GMSHInputModule::init
 
   myProps.find( dim, MESH_DIM, 1, 3 );
   myConf .set ( MESH_DIM, dim );
+
+  myProps.find( saveMsh, SAVE_MSH );
+  myConf .set ( SAVE_MSH, saveMsh );
 
   myProps.find( onelab, ONELAB_PROPS );
   myConf. set ( ONELAB_PROPS, onelab );
@@ -84,11 +89,15 @@ Module::Status GMSHInputModule::init
 
   if ( geoFile.size() )
   {
-    String mshFile = geoFile[jem::SliceTo(geoFile.size()-4)] + ".msh22";
-
     prepareOnelab_ ( onelab );
     openMesh_ ( geoFile, order ); 
-    gmsh::write( makeCString(mshFile).addr() );
+    if (saveMsh)
+    {      
+      String mshFile;
+      props.get( mshFile, CASE_NAME );
+      mshFile = mshFile + ".msh22";
+      gmsh::write( makeCString(mshFile).addr() );
+    }
   }
   else
   {
