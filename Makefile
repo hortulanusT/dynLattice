@@ -33,23 +33,14 @@ include ${shell find $(SRCDIR) -name *.mk}
 #######################################################################
 ##   add opemMPI libraries                                           ##
 #######################################################################
-## TODO change to variable
-export LD_RUN_PATH := /home/tgartner/jemjive/openmpi/lib:$(LD_RUN_PATH)
+
+export LD_RUN_PATH := $(MPIDIR):$(LD_RUN_PATH)
 
 #######################################################################
 ##   Include Jive package and create executable                      ##
 #######################################################################
 include $(JIVEDIR)/makefiles/packages/*.mk
 include $(JIVEDIR)/makefiles/prog.mk
-
-#######################################################################
-##   Some User defined make targets								                   ##
-#######################################################################
-.PHONY: anew anew-opt anew-debug
-
-anew : clean all
-anew-opt : clean opt
-anew-debug : clean debug
 
 #######################################################################
 ##   Include Test Cases													                     ##

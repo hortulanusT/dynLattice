@@ -24,7 +24,7 @@ bending_v = lambda d: (1-math.cos(d))/d
 ideal_disp = {eDir:{} for eDir in ["x","y","z"]}
 ideal_resp = {}
 
-# FIXME find some expressions for point force bending
+# TODO find some expressions for point force bending
 ideal_disp["x"]["dx"] = np.array([[d, 0, 0, 0, 0, 0] for d in displs])
 ideal_disp["x"]["dy"] = np.array([[math.nan, math.nan, math.nan, math.nan, math.nan, math.nan] for _ in displs])
 ideal_disp["x"]["dz"] = np.array([[math.nan, math.nan, math.nan, math.nan, math.nan, math.nan] for _ in displs])

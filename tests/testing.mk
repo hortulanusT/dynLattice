@@ -1,7 +1,12 @@
-.PHONY: element-tests beam-tests clean-tests
+.PHONY: tests all-tests element-tests beam-tests clean-tests
 
 .PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv 
 .PRECIOUS: tests/element/runs/%-load.res tests/element/runs/%-resp.res tests/element/runs/%-disp.res
+
+tests: clean-tests clean
+	@$(MAKE) all-tests
+
+all-tests: element-tests beam-tests
 
 # SETTINGS
 getoptions = $(subst _, ,$(notdir $(basename $(1))))
