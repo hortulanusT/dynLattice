@@ -184,6 +184,7 @@ void       ParaViewModule::writePiece_
 
 {
   IdxVector groupNodes = group.getNodeIndices();
+  IdxVector groupElems = group.getIndices();
 
   *file << "<Piece "
     << "NumberOfPoints=\"" << points.size() << "\" "
@@ -386,7 +387,7 @@ void       ParaViewModule::writePiece_
                           1.0, 1.0 / weights );
       datumTable->scaleRows ( weights );
 
-      writeDataArray_ ( file, datumTable, "Float32", info.nodeData[iPtDatum] ); 
+      writeDataArray_ ( file, datumTable, groupNodes, "Float32", info.nodeData[iPtDatum] ); 
     }  
   }
   
@@ -405,7 +406,7 @@ void       ParaViewModule::writePiece_
     
     Ref<ItemSet>   cellSet   = ItemSet::get   ( "elements", globdat, getContext() );
 
-    Ref<XTable>    datumTable = newInstance<SparseTable>( "paraView", cellSet );
+    Ref<XTable>    datumTable = newInstance<SparseTable>( info.elemData[iElDatum], cellSet );
     // TEST_CONTEXT(datumTable->rowCount())
     Vector         weights    ( datumTable->rowCount() );
     Properties     params     ( "actionParams" );
@@ -423,13 +424,11 @@ void       ParaViewModule::writePiece_
     params.erase ( ActionParams::TABLE );
     params.erase ( ActionParams::TABLE_WEIGHTS );
 
-    // TEST_CONTEXT(weights)
-
     weights = where ( abs( weights ) < Limits<double>::TINY_VALUE,
                         1.0, 1.0 / weights );
     datumTable->scaleRows ( weights );
 
-    writeDataArray_ ( file, datumTable, "Float32", info.elemData[iElDatum] );   
+    writeDataArray_ ( file, datumTable, groupElems, "Float32", info.elemData[iElDatum] );   
   }
 
   file->decrIndentLevel ();
@@ -471,21 +470,16 @@ void      ParaViewModule::writeDataArray_
 
 ( const Ref<PrintWriter>&       file,
   const Ref<XTable>&            data,
+  const IdxVector&              rows,
   const String&                 type,
   const String&                 name   )
 {
-  const idx_t columns = data->columnCount();
-  const idx_t rows    = data->size()/columns;
-  Matrix      mat     ( rows, columns  );
+  const idx_t icolumns = data->columnCount();
+  const idx_t irows    = data->rowCount();
+  Matrix      mat     ( irows, icolumns );
 
-  IdxVector   icols   ( columns );
-  IdxVector   irows   ( rows );
-
-  for ( idx_t icol = 0; icol<columns; icol++) icols[icol] = icol;
-  for ( idx_t irow = 0; irow<rows;    irow++) irows[irow] = irow;
-
-  data->getBlock      ( mat, irows, icols );
-  writeDataArray_     ( file, mat, type, name );
+  data->findAllValues( mat );  ;
+  writeDataArray_     ( file, Matrix(mat.transpose()[rows]).transpose(), type, name );
 }
 
 void      ParaViewModule::writeDataArray_

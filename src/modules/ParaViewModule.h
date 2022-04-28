@@ -197,6 +197,7 @@ class ParaViewModule : public Module
 
   ( const Ref<PrintWriter>&       file,
     const Ref<XTable>&            data,
+    const IdxVector&              rows,
     const String&                 type,
     const String&                 name   );
 
