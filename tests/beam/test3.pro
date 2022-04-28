@@ -39,7 +39,7 @@ include "model.pro";
 include "output.pro";
 
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
-model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
 
 Output.paraview.reportIntervall = 100;

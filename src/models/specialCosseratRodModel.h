@@ -219,7 +219,8 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       nodePhi_0,
       const Matrix&       nodeU,
       const Cubix&        nodeLambda,
-      const Vector&       disp  ) const;
+      const Vector&       disp,
+      const IdxVector&    inodes  ) const;
 
  private: 
   Assignable<ElementGroup>rodGroup_;

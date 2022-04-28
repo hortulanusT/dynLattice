@@ -37,8 +37,10 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
+Input.input.order = 2;
+
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
-model.model.model.diriFixed.dofs += model.model.model.cosseratRod.dofNamesRot;
+model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 
 Output.resp.dataSets += "sqrt(free.resp.dx^2 + free.resp.dy^2 + free.resp.dz^2)";

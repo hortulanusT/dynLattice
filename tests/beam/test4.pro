@@ -24,13 +24,19 @@ params.force_model.type = "StdArclen";
 params.force_model.loadIncr = 10.;
 params.force_model.minIncr = .5;
 params.force_model.maxIncr = 50.;
-params.force_model.model.type = "PointLoad" ;
-params.force_model.model.loadTable = "force";
+params.force_model.model.type = "Neumann" ;
+params.force_model.model.initLoad = 1.;
+params.force_model.model.loadIncr = 0.;
+params.force_model.model.nodeGroups = "free" ;
+params.force_model.model.dofs = "dy";
+params.force_model.model.factors = -1.;
 
 // include model and i/o files
 include "input.pro";
 include "model.pro";
 include "output.pro";
+
+Input.input.order = 2;
 
 Input.groupInput.fixed_left.ytype = "min";
 Input.groupInput.fixed_left.xtype = "min";
@@ -44,7 +50,5 @@ Input.groupInput.free =
 
 model.model.model.lattice.child += params.rod_details;
 model.model.model.force = params.force_model;
-
-model.model.model.joint.lockDofs += model.model.model.lattice.child.dofNamesRot;
 
 Output.paraview.reportIntervall = 10;
