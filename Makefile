@@ -46,3 +46,8 @@ include $(JIVEDIR)/makefiles/prog.mk
 ##   Include Test Cases													                     ##
 #######################################################################
 include tests/testing.mk
+
+#######################################################################
+##   Include the Study Cases  									                     ##
+#######################################################################
+include studies/running.mk
