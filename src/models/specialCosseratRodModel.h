@@ -29,6 +29,8 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/XDofSpace.h>
 #include <jive/util/Printer.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/utilities.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
@@ -53,6 +55,8 @@ using jive::util::XTable;
 using jive::util::Assignable;
 using jive::util::XDofSpace;
 using jive::util::DofSpace;
+using jive::util::Globdat;
+using jive::util::joinNames;
 using jive::fem::NodeSet;
 using jive::fem::ElementSet;
 using jive::fem::ElementGroup;

@@ -61,7 +61,9 @@ specialCosseratRodModel::specialCosseratRodModel
   Properties  myProps = props.findProps ( myName_ );
   Properties  myConf  = conf .makeProps ( myName_ );
 
-  // Get the elements and inodes from the global database.
+  // Get the elements and inodes from the global database
+  String      elementsName;
+  myProps.find( elementsName, "elements" );
   rodGroup_ = ElementGroup::get ( myConf, myProps, globdat, getContext() ); // only the desired group
   allElems_  = rodGroup_.getElements();  // all the elements
   allNodes_  = allElems_.getNodes (); //all the inodes
@@ -154,6 +156,20 @@ specialCosseratRodModel::specialCosseratRodModel
     givenDirs_.resize( TRANS_DOF_COUNT, givenNodes_.size() );
 
     myProps.get( givenDirs, GIVEN_DIRS );
+    myConf. set( GIVEN_NODES, givenNodes_ );
+    myConf. set( GIVEN_DIRS, givenDirs );
+
+    vec2mat ( givenDirs_.transpose(), givenDirs );
+  }
+  else if ( Globdat::hasVariable( joinNames( "tangents", elementsName ), globdat ))
+  {
+    Properties tangentVars = Globdat::getVariables( joinNames( "tangents", elementsName ), globdat );
+    tangentVars.get( givenNodes_, GIVEN_NODES );
+
+    Vector givenDirs ( givenNodes_.size() * TRANS_DOF_COUNT );
+    givenDirs_.resize( TRANS_DOF_COUNT, givenNodes_.size() );
+    
+    tangentVars.get( givenDirs, GIVEN_DIRS );
     myConf. set( GIVEN_NODES, givenNodes_ );
     myConf. set( GIVEN_DIRS, givenDirs );
 
