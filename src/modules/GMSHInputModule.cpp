@@ -12,7 +12,7 @@
 const char*   GMSHInputModule::TYPE_NAME        = "GMSHInput";
 const char*   GMSHInputModule::ORDER            = "order";
 const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
-const char*   GMSHInputModule::SAVE_MSH         = "save_mesh";
+const char*   GMSHInputModule::SAVE_MSH         = "mesh_file";
 const char*   GMSHInputModule::STORE_TANGENTS   = "store_tangents";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
 const char*   GMSHInputModule::ONELAB_PROPS     = "onelab";
@@ -47,8 +47,8 @@ Module::Status GMSHInputModule::init
   String      geoFile = "";
   idx_t       order   = 1;
   idx_t       dim     = 3;
-  bool        saveMsh = true;
   bool        storeTan= false;
+  String      saveMsh;
   Properties  onelab;
 
   Properties  myProps = props.findProps ( myName_ );
@@ -63,9 +63,6 @@ Module::Status GMSHInputModule::init
 
   myProps.find( dim, MESH_DIM, 1, 3 );
   myConf .set ( MESH_DIM, dim );
-
-  myProps.find( saveMsh, SAVE_MSH );
-  myConf .set ( SAVE_MSH, saveMsh );
 
   myProps.find( storeTan, STORE_TANGENTS );
   myConf .set ( STORE_TANGENTS, storeTan );
@@ -96,17 +93,17 @@ Module::Status GMSHInputModule::init
   {
     prepareOnelab_ ( onelab );
     openMesh_ ( geoFile, order ); 
-    if (saveMsh)
-    {      
-      String mshFile;
-      props.get( mshFile, CASE_NAME );
-      mshFile = mshFile + ".msh22";
-      gmsh::write( makeCString(mshFile).addr() );
-    }
   }
   else
   {
     // TODO Leon's function
+  }
+
+  if ( myProps.find( saveMsh, SAVE_MSH ) )
+  { 
+    if ( saveMsh.find( "." ) < 0 ) saveMsh = saveMsh + ".msh22";
+    gmsh::write( makeCString(saveMsh).addr() );  
+    myConf .set ( SAVE_MSH, saveMsh );
   }
 
   createNodes_ ( dim );
