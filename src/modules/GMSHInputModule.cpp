@@ -13,6 +13,7 @@ const char*   GMSHInputModule::TYPE_NAME        = "GMSHInput";
 const char*   GMSHInputModule::ORDER            = "order";
 const char*   GMSHInputModule::MESH_DIM         = "mesh_dim";
 const char*   GMSHInputModule::SAVE_MSH         = "save_mesh";
+const char*   GMSHInputModule::STORE_TANGENTS   = "store_tangents";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
 const char*   GMSHInputModule::ONELAB_PROPS     = "onelab";
 
@@ -47,6 +48,7 @@ Module::Status GMSHInputModule::init
   idx_t       order   = 1;
   idx_t       dim     = 3;
   bool        saveMsh = true;
+  bool        storeTan= false;
   Properties  onelab;
 
   Properties  myProps = props.findProps ( myName_ );
@@ -64,6 +66,9 @@ Module::Status GMSHInputModule::init
 
   myProps.find( saveMsh, SAVE_MSH );
   myConf .set ( SAVE_MSH, saveMsh );
+
+  myProps.find( storeTan, STORE_TANGENTS );
+  myConf .set ( STORE_TANGENTS, storeTan );
 
   myProps.find( onelab, ONELAB_PROPS );
   myConf. set ( ONELAB_PROPS, onelab );
@@ -107,9 +112,9 @@ Module::Status GMSHInputModule::init
   createNodes_ ( dim );
   createElems_ ( globdat ); 
 
-  gmsh::finalize();
+  if (storeTan) storeTangents_ ( globdat );
 
-  // TODO record stored mesh
+  gmsh::finalize();
 
   return DONE;
 }
@@ -309,6 +314,57 @@ void GMSHInputModule::createElems_
   jem::System::info( myName_ ) << "\n";
 }
 
+//-----------------------------------------------------------------------
+//   storeTangents_
+//-----------------------------------------------------------------------
+
+
+void GMSHInputModule::storeTangents_ 
+
+  ( const Properties&       globdat,
+    const idx_t             offset )
+
+{
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+
+  std::vector<std::size_t>  gmsh_tags;
+  std::vector<double>       gmsh_coords;
+  std::vector<double>       gmsh_localCoords;
+  std::vector<double>       gmsh_paras;
+  std::vector<double>       gmsh_derivatives;
+
+  Properties tangentVars = jive::util::Globdat::getVariables( "tangents", globdat );
+  Properties entityVars;
+
+  IdxVector                 jive_tags;
+  Vector                    jive_derivatives;
+
+  for (idx_t ientity = 0; ientity < entities_.size(); ientity++)
+  {
+    if (entities_[ientity][0] != 1) continue;
+
+    entityVars = tangentVars.makeProps( String(ENTITY_NAMES[1]) + String("_") + String(entities_[ientity][1]) );
+    
+    gmsh::model::mesh::getNodes( gmsh_tags, gmsh_coords, gmsh_localCoords, entities_[ientity][0], entities_[ientity][1], true );
+    gmsh::model::getParametrization( entities_[ientity][0], entities_[ientity][1], gmsh_coords, gmsh_paras );
+    gmsh::model::getDerivative( entities_[ientity][0], entities_[ientity][1], gmsh_paras, gmsh_derivatives );
+
+    jive_tags.resize( gmsh_tags.size() );
+    jive_derivatives.resize( 3 * gmsh_tags.size() );
+
+    for (idx_t inode = 0; inode < (idx_t)gmsh_tags.size(); inode++)
+    {
+      jive_tags[inode] = gmsh_tags[inode] - offset;
+      for (idx_t icoord = 0; icoord < 3; icoord++)
+        jive_derivatives[ inode*3 + icoord ] = gmsh_derivatives[ inode*3 + icoord ];
+    }
+
+    entityVars.set( "given_dir_nodes", jive_tags.clone() );
+    entityVars.set( "given_dir_dirs", jive_derivatives.clone() );  
+
+    jem::System::info( myName_ ) << " ...Stored derivatives in '" << entityVars.getName() << "'\n";
+  }
+}
 
 //-----------------------------------------------------------------------
 //   makeNew

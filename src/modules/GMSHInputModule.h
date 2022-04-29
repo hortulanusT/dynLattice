@@ -70,6 +70,7 @@ class GMSHInputModule : public Module
   static const char*      ORDER;
   static const char*      MESH_DIM;
   static const char*      SAVE_MSH;
+  static const char*      STORE_TANGENTS;
   static const char*      ENTITY_NAMES[4];
   static const char*      ONELAB_PROPS;
 
@@ -145,6 +146,11 @@ class GMSHInputModule : public Module
   
     ( const Properties&       globdat, 
       const idx_t             offset = 1);
+
+  void                      storeTangents_
+
+    ( const Properties&       globdat, 
+      const idx_t             offset = 1 );
 
  
  private:
