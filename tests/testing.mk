@@ -1,12 +1,11 @@
-.PHONY: tests all-tests element-tests beam-tests clean-tests
+.PHONY: tests element-tests beam-tests clean-tests
 
 .PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv 
-.PRECIOUS: tests/element/runs/%-load.res tests/element/runs/%-resp.res tests/element/runs/%-disp.res
+.PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-resp.csv tests/element/runs/%-disp.csv
 
-tests: clean-tests clean
-	@$(MAKE) all-tests
+tests: element-tests beam-tests
 
-all-tests: element-tests beam-tests
+clean-all: clean-tests
 
 # SETTINGS
 getoptions = $(subst _, ,$(notdir $(basename $(1))))
@@ -14,20 +13,19 @@ getoptions = $(subst _, ,$(notdir $(basename $(1))))
 ELEMENT_TYPES := lin_x lin_y lin_z quad_x quad_y quad_z cub_x cub_y cub_z
 element_results := $(addprefix tests/element/result_, $(addsuffix .txt, $(ELEMENT_TYPES)))
 ELEMENT_LOADS := $(foreach dir, dx dy dz rx ry rz, force_$(dir) disp_$(dir))
-load_results := $(addprefix tests/element/runs/%_, $(addsuffix -load.res, $(ELEMENT_LOADS)))
-disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.res, $(ELEMENT_LOADS)))
-resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.res, $(ELEMENT_LOADS)))
+load_results := $(addprefix tests/element/runs/%_, $(addsuffix -load.csv, $(ELEMENT_LOADS)))
+disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEMENT_LOADS)))
+resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
 
 # ELEMENT TEST RESULTS
 element-tests : $(element_results)
-	@$(RM) tests/element/test.msh22
 
 tests/element/result_%.txt : scripts/testing/element.py $(load_results) $(disp_results) $(resp_results)
 	@$< $*
 
-tests/element/runs/%-load.res tests/element/runs/%-disp.res tests/element/runs/%-resp.res : $(program) tests/element/test.pro
+tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv : $(program) tests/element/test.pro
 	@mkdir -p $(dir $@)
 	$(eval options := $(call getoptions, $*))
 	$(eval order := $(patsubst lin, 1, $(patsubst quad, 2, $(patsubst cub, 3, $(word 1,$(options))))))
@@ -41,9 +39,9 @@ tests/element/runs/%-load.res tests/element/runs/%-disp.res tests/element/runs/%
 			-p model.model.model.$(loadT).nodeGroups=[\"free\"]\
 			-p model.model.model.$(loadT).dofs=[\"$(loadD)\"]\
 			-p model.model.model.$(loadT).factors=[1.]\
-			-p Output.disp.file=\"tests/element/runs/$*-disp.res\"\
-			-p Output.resp.file=\"tests/element/runs/$*-resp.res\"\
-			-p Output.load.file=\"tests/element/runs/$*-load.res\"\
+			-p Output.disp.file=\"tests/element/runs/$*-disp.csv\"\
+			-p Output.resp.file=\"tests/element/runs/$*-resp.csv\"\
+			-p Output.load.file=\"tests/element/runs/$*-load.csv\"\
 			> tests/element/runs/$*.log
 
 # BEAM TEST RESULTS

@@ -7,25 +7,20 @@ nonlinRod*
 
 # results
 *.log
+*.info
 *.dat
 *.csv
-*.res
-*.dummy
-*.png
-*.tar
 *.pvsm
-*.msh22
+*.tar
 
 studies/**/output/*
 studies/**/results/*
-studies/**/*.info
 
 tests/element/runs/
 tests/element/*.txt
 tests/beam/test*/
 
-# save the resulting data files for testing
-!tests/beam/*.dat
+# save the reference data files for beam testing
 !tests/beam/ref_data/*.csv
 
 # save the folder structure
