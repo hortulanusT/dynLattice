@@ -200,7 +200,7 @@ void       ParaViewModule::writePiece_
   for (idx_t inode = 0; inode < groupNodes.size(); inode++)
   {
     Vector  coords ( points.rank() );
-    points.getNodeCoords ( coords, groupNodes[inode] );
+    points.getNodeCoords ( coords, inode );
     *file << coords[0] << SPACING 
       << (points.rank() >= 2 ? coords[1] : 0.0) << SPACING
       << (points.rank() >= 3 ? coords[2] : 0.0) << SPACING
@@ -222,7 +222,7 @@ void       ParaViewModule::writePiece_
   // iterate through the elements
   for (idx_t ie = 0; ie < group.size(); ie++)
   {
-    idx_t ielem = group.getIndices()[ie];
+    idx_t ielem = group.getIndex(ie);
 
     IdxVector     elNodes   ( cells.getElemNodeCount ( ielem ) );
     cells.getElemNodes( elNodes, ielem );
