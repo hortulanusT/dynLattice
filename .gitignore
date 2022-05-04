@@ -11,6 +11,7 @@ nonlinRod*
 *.dat
 *.csv
 *.msh22
+*.vtu
 *.pvsm
 *.tar
 

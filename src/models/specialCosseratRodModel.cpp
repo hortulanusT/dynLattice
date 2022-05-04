@@ -175,6 +175,7 @@ specialCosseratRodModel::specialCosseratRodModel
 
     vec2mat ( givenDirs_.transpose(), givenDirs );
   }
+  // TEST_CONTEXT(givenDirs_)
 
   // Prepare linear stiffness matrix //LATER nonlinear material?
   materialC_.resize( 6, 6 );
@@ -186,7 +187,7 @@ specialCosseratRodModel::specialCosseratRodModel
   materialC_ ( 4, 4 ) = young_ * areaMoment_;
   materialC_ ( 5, 5 ) = shearMod_ * polarMoment_;
 
-  TEST_CONTEXT ( materialC_ )
+  // TEST_CONTEXT ( materialC_ )
 }
 
 //-----------------------------------------------------------------------
@@ -745,7 +746,7 @@ void            specialCosseratRodModel::assemble_
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
 
     // TEST_CONTEXT(inodes)
-    // TEST_CONTEXT(nodePhi_0)
+    TEST_CONTEXT(nodePhi_0)
     // TEST_CONTEXT(nodeU)
     // TEST_CONTEXT(nodeLambda)
 
@@ -758,7 +759,7 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_( stress, weights, nodePhi_0, nodeU, nodeLambda, ie );
-    // TEST_CONTEXT( stress )
+    TEST_CONTEXT( stress )
     // get the gemetric stiffness
     get_geomStiff_( geomStiff, stress, nodePhi_0, nodeU );
     // TEST_CONTEXT(geomStiff)
