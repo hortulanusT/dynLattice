@@ -184,7 +184,12 @@ void       ParaViewModule::writePiece_
 
 {
   IdxVector groupNodes = group.getNodeIndices();
+  IdxVector nodeNums   ( groupNodes.size() );
   IdxVector groupElems = group.getIndices();
+
+  nodeNums = -1;
+  TEST_CONTEXT(groupNodes)
+  TEST_CONTEXT(groupElems)
 
   *file << "<Piece "
     << "NumberOfPoints=\"" << points.size() << "\" "
@@ -200,7 +205,8 @@ void       ParaViewModule::writePiece_
   for (idx_t inode = 0; inode < groupNodes.size(); inode++)
   {
     Vector  coords ( points.rank() );
-    points.getNodeCoords ( coords, inode );
+    nodeNums[groupNodes[inode]] = inode;
+    points.getNodeCoords ( coords, groupNodes[inode] );
     *file << coords[0] << SPACING 
       << (points.rank() >= 2 ? coords[1] : 0.0) << SPACING
       << (points.rank() >= 3 ? coords[2] : 0.0) << SPACING
@@ -234,7 +240,7 @@ void       ParaViewModule::writePiece_
 
     for (idx_t inode = 0; inode < elNodes.size(); inode++)
     {
-      *file << paraNodes[inode] << SPACING;
+      *file << nodeNums[elNodes[inode]] << SPACING;
     }    
     *file << endl;
   }
