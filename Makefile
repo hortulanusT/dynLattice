@@ -42,6 +42,8 @@ export LD_RUN_PATH := $(MPIDIR):$(LD_RUN_PATH)
 include $(JIVEDIR)/makefiles/packages/*.mk
 include $(JIVEDIR)/makefiles/prog.mk
 
+MKDIR_P	= mkdir -p --
+
 #######################################################################
 ##   Include Test Cases													                     ##
 #######################################################################

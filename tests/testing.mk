@@ -26,7 +26,7 @@ tests/element/result_%.txt : scripts/testing/element.py $(load_results) $(disp_r
 	@$< $*
 
 tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv : $(program) tests/element/test.pro
-	@mkdir -p $(dir $@)
+	@$(MKDIR_P) $(dir $@)
 	$(eval options := $(call getoptions, $*))
 	$(eval order := $(patsubst lin, 1, $(patsubst quad, 2, $(patsubst cub, 3, $(word 1,$(options))))))
 	$(eval nodes := $(patsubst lin, 2, $(patsubst quad, 3, $(patsubst cub, 4, $(word 1,$(options))))))
