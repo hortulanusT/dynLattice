@@ -184,12 +184,14 @@ void       ParaViewModule::writePiece_
 
 {
   IdxVector groupNodes = group.getNodeIndices();
-  IdxVector nodeNums   ( groupNodes.size() );
+  IdxVector nodeNums   ( max(groupNodes) + 1 );
   IdxVector groupElems = group.getIndices();
 
   nodeNums = -1;
-  TEST_CONTEXT(groupNodes)
-  TEST_CONTEXT(groupElems)
+
+  // TEST_CONTEXT(groupNodes)
+  // TEST_CONTEXT(nodeNums)
+  // TEST_CONTEXT(groupElems)
 
   *file << "<Piece "
     << "NumberOfPoints=\"" << points.size() << "\" "
