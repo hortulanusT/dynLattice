@@ -742,11 +742,13 @@ void            specialCosseratRodModel::assemble_
   {
     // REPORT(ie)
     allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    // TEST_CONTEXT( rodGroup_.getIndex(ie) )
+    // TEST_CONTEXT( inodes )
     // get nice Positions
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
 
     // TEST_CONTEXT(inodes)
-    TEST_CONTEXT(nodePhi_0)
+    // TEST_CONTEXT(nodePhi_0)
     // TEST_CONTEXT(nodeU)
     // TEST_CONTEXT(nodeLambda)
 
@@ -759,7 +761,7 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_( stress, weights, nodePhi_0, nodeU, nodeLambda, ie );
-    TEST_CONTEXT( stress )
+    // TEST_CONTEXT( stress )
     // get the gemetric stiffness
     get_geomStiff_( geomStiff, stress, nodePhi_0, nodeU );
     // TEST_CONTEXT(geomStiff)
