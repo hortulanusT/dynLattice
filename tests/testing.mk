@@ -1,8 +1,5 @@
 .PHONY: tests element-tests beam-tests clean-tests
 
-.PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv 
-.PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-resp.csv tests/element/runs/%-disp.csv
-
 tests: element-tests beam-tests
 
 clean-all: clean-tests
@@ -20,6 +17,8 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 beam_cases = 0 1 2 3 4 5
 
 # ELEMENT TEST RESULTS
+.PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
+
 element-tests : $(element_results)
 
 tests/element/result_%.txt : scripts/testing/element.py $(load_results) $(disp_results) $(resp_results)
@@ -45,6 +44,8 @@ tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%
 			> tests/element/runs/$*.log
 
 # BEAM TEST RESULTS
+.PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv
+
 beam-tests : $(addprefix tests/beam/test, $(addsuffix /result.pdf, $(beam_cases)))
 
 tests/beam/test0/result.pdf : scripts/testing/beam0.py\
