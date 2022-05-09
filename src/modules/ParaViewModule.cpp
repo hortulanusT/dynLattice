@@ -1,5 +1,7 @@
 #include "ParaViewModule.h"
 
+//BUG FORCES are not associated with the correct node
+
 //=======================================================================
 //   class ParaViewModule
 //=======================================================================
