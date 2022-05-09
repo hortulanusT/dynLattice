@@ -5,6 +5,9 @@
 OBJ*
 nonlinRod*
 
+# scribbling script
+scripts/scribbling.py
+
 # results
 *.log
 *.info

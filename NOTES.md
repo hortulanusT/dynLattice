@@ -8,11 +8,11 @@
 - Find Test-Cases for Dynamic Beams
 ## Code
 1. Models
-    - Lattice Model
-      - consisting out of multiple Rod-Modules as child
-      - adapt input to represent this
     - Rod Model
       - Mixed collocation?
+    - PBC Model
+      - proper adressing of H in the boundary conditions (allow for mixed loadings)
+      - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
 2. Modules
     - ParaviewOutputModule
       - write wrapper file for exported files ~ `.pvd`
