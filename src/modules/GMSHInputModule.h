@@ -73,6 +73,7 @@ class GMSHInputModule : public Module
   static const char*      STORE_TANGENTS;
   static const char*      ENTITY_NAMES[4];
   static const char*      ONELAB_PROPS;
+  static const char*      VERBOSE;
 
   explicit                  GMSHInputModule
 
@@ -159,4 +160,5 @@ class GMSHInputModule : public Module
   IdxVector                   nodeIDs_;
   Assignable<XElementSet>     elements_;
   IdxMatrix                   entities_;
+  bool                        verbose_;
 };

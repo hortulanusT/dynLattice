@@ -16,6 +16,7 @@ const char*   GMSHInputModule::SAVE_MSH         = "mesh_file";
 const char*   GMSHInputModule::STORE_TANGENTS   = "store_tangents";
 const char*   GMSHInputModule::ENTITY_NAMES[4]  = { "point", "beam", "shell", "body" };
 const char*   GMSHInputModule::ONELAB_PROPS     = "onelab";
+const char*   GMSHInputModule::VERBOSE          = "verbose";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -26,7 +27,9 @@ GMSHInputModule::GMSHInputModule ( const String& name ) :
 
   Super ( name )
 
-{}
+{
+  verbose_ = true;
+}
 
 
 GMSHInputModule::~GMSHInputModule ()
@@ -69,6 +72,9 @@ Module::Status GMSHInputModule::init
 
   myProps.find( onelab, ONELAB_PROPS );
   myConf. set ( ONELAB_PROPS, onelab );
+
+  myProps.find( verbose_, VERBOSE );
+  myConf. set ( VERBOSE, verbose_ );
 
   // TRY GETTING THE GLOBAL ELEMENTS
   nodes_    = XNodeSet::find( globdat );
@@ -179,7 +185,7 @@ void GMSHInputModule::prepareOnelab_
   String              onelabKey = "";
   std::vector<double> onelabVal { 0. };
 
-  jem::System::info( myName_ ) << "\n";
+  if (verbose_) jem::System::info( myName_ ) << "\n";
   while ( !onelabEnumerator->atEnd() )
   {
     onelabKey = onelabEnumerator->getKey();
@@ -187,11 +193,11 @@ void GMSHInputModule::prepareOnelab_
 
     gmsh::onelab::setNumber( makeCString(onelabKey).addr(), onelabVal );
 
-    jem::System::info( myName_ ) << " ...Set GMSH variable '" << onelabKey << "' to a value of " << onelabVal[0] << "\n";
+    if (verbose_) jem::System::info( myName_ ) << " ...Set GMSH variable '" << onelabKey << "' to a value of " << onelabVal[0] << "\n";
   
     onelabEnumerator->toNext();
   }
-  jem::System::info( myName_ ) << "\n";
+  if (verbose_) jem::System::info( myName_ ) << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -219,9 +225,9 @@ void GMSHInputModule::createNodes_
     for (idx_t icoord = 0; icoord < dim; icoord++) 
       coords[icoord]  = gmsh_coords[inode*dim + icoord];
     
-    jem::System::info( myName_ ) << " ...Created node " << nodes_.addNode( coords ) << " at coordinates " << coords << "\n";
+    if (verbose_) jem::System::info( myName_ ) << " ...Created node " << nodes_.addNode( coords ) << " at coordinates " << coords << "\n";
   }
-  jem::System::info( myName_ ) << "\n";
+  if (verbose_) jem::System::info( myName_ ) << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -284,7 +290,7 @@ void GMSHInputModule::createElems_
         }
 
         addedElem = elements_.addElement( elemNodes ); 
-        jem::System::info( myName_ ) << " ...Created element " << addedElem << " with nodes " << elemNodes << "\n";
+        if (verbose_) jem::System::info( myName_ ) << " ...Created element " << addedElem << " with nodes " << elemNodes << "\n";
 
         groupElems.pushBack( addedElem );
         entityBuffer[entities_[ientity][0]].pushBack( addedElem ); 
@@ -293,9 +299,9 @@ void GMSHInputModule::createElems_
 
     elementGroup =  jive::fem::newElementGroup( groupElems.toArray().clone(), elements_ );
     elementGroup.store( groupName, globdat );
-    jem::System::info( myName_ ) << " ...Created element group for geometry entity '" << groupName << "'\n";
+    if (verbose_) jem::System::info( myName_ ) << " ...Created element group for geometry entity '" << groupName << "'\n";
   } 
-  jem::System::info( myName_ ) << "\n";
+  if (verbose_) jem::System::info( myName_ ) << "\n";
 
   // store all the super element groups
   for (idx_t i = 0; i < 4; i++)
@@ -305,10 +311,10 @@ void GMSHInputModule::createElems_
     { 
       elementGroup.store( String(ENTITY_NAMES[i]) + String('s'), globdat );
     
-      jem::System::info( myName_ ) << " ...Created element group for geometry entities of type '" << String(ENTITY_NAMES[i]) + String('s') << "'\n";
+      if (verbose_) jem::System::info( myName_ ) << " ...Created element group for geometry entities of type '" << String(ENTITY_NAMES[i]) + String('s') << "'\n";
     }
   }  
-  jem::System::info( myName_ ) << "\n";
+  if (verbose_) jem::System::info( myName_ ) << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -359,7 +365,7 @@ void GMSHInputModule::storeTangents_
     entityVars.set( "given_dir_nodes", jive_tags.clone() );
     entityVars.set( "given_dir_dirs", jive_derivatives.clone() );  
 
-    jem::System::info( myName_ ) << " ...Stored derivatives in '" << entityVars.getName() << "'\n";
+    if (verbose_) jem::System::info( myName_ ) << " ...Stored derivatives in '" << entityVars.getName() << "'\n";
   }
 }
 
