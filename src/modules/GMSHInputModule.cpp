@@ -226,6 +226,7 @@ void GMSHInputModule::createNodes_
       coords[icoord]  = gmsh_coords[inode*dim + icoord];
     
     if (verbose_) jem::System::info( myName_ ) << " ...Created node " << nodes_.addNode( coords ) << " at coordinates " << coords << "\n";
+    else nodes_.addNode( coords );
   }
   if (verbose_) jem::System::info( myName_ ) << "\n";
 }
@@ -335,6 +336,7 @@ void GMSHInputModule::storeTangents_
   std::vector<double>       gmsh_localCoords;
   std::vector<double>       gmsh_paras;
   std::vector<double>       gmsh_derivatives;
+  idx_t                     ibeam = 0;
 
   Properties tangentVars = jive::util::Globdat::getVariables( "tangents", globdat );
   Properties entityVars;
@@ -346,7 +348,7 @@ void GMSHInputModule::storeTangents_
   {
     if (entities_[ientity][0] != 1) continue;
 
-    entityVars = tangentVars.makeProps( String(ENTITY_NAMES[1]) + String("_") + String(entities_[ientity][1]) );
+    entityVars = tangentVars.makeProps( String(ENTITY_NAMES[1]) + String("_") + String(++ibeam) );
     
     gmsh::model::mesh::getNodes( gmsh_tags, gmsh_coords, gmsh_localCoords, entities_[ientity][0], entities_[ientity][1], true );
     gmsh::model::getParametrization( entities_[ientity][0], entities_[ientity][1], gmsh_coords, gmsh_paras );
