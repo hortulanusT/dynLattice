@@ -35,6 +35,8 @@ LatticeModel::LatticeModel
 {
   String                    prefix;  
   Properties                childProps;
+  Properties                latticeProps;
+  Properties                latticeConf;
   Assignable<ElementSet>    elems;
   ArrayBuffer<Ref<Model>>   childBuffer;
   idx_t                     igroup = 0;
@@ -61,8 +63,8 @@ LatticeModel::LatticeModel
     jem::System::info( myName_ ) << " ...Creating Model for ElementGroup '" << childName << "'\n";
 
     childProps.set( "elements", childName );
-    myProps.makeProps( childName ).mergeWith( childProps );
-    childBuffer.pushBack( ModelFactory::newInstance( jive::util::joinNames( myName_, childName ), conf, props, globdat ) );
+    latticeProps.makeProps( childName ).mergeWith( childProps );
+    childBuffer.pushBack( ModelFactory::newInstance( childName, latticeConf, latticeProps, globdat ) );
   }   
   children_.resize( childBuffer.size() );
   children_ = childBuffer.toArray();
