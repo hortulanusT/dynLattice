@@ -23,6 +23,7 @@
 #include <jive/fem/ElementSet.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/utilities.h>
+#include <jive/util/ObjectConverter.h>
 
 using jem::newInstance;
 using jem::Ref;

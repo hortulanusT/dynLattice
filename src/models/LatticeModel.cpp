@@ -35,11 +35,9 @@ LatticeModel::LatticeModel
 {
   String                    prefix;  
   Properties                childProps;
-  Properties                latticeProps;
-  Properties                latticeConf;
   Assignable<ElementSet>    elems;
   ArrayBuffer<Ref<Model>>   childBuffer;
-  idx_t                     igroup = 0;
+  idx_t                     ichild = 0;
   String                    childName;
 
   // Get the Properties associated with this model
@@ -51,31 +49,24 @@ LatticeModel::LatticeModel
   myConf .set( NAME_PREFIX, prefix );
   
   // Get the children Properties
-  myProps.find( childProps, CHILD_PROPS );
+  myProps.get( childProps, CHILD_PROPS );
 
   // Find the children  
   elems = ElementSet::get( globdat, getContext() );
   while (true)
   { 
-    childName = prefix + String(++igroup);
+    childName = prefix + String(++ichild);
     if ( !ElementGroup::find( childName, elems, globdat ) ) break;
 
     jem::System::info( myName_ ) << " ...Creating Model for ElementGroup '" << childName << "'\n";
 
     childProps.set( "elements", childName );
-    latticeProps.makeProps( childName ).mergeWith( childProps );
-    childBuffer.pushBack( ModelFactory::newInstance( childName, latticeConf, latticeProps, globdat ) );
+    childBuffer.pushBack( ModelFactory::newInstance( CHILD_PROPS, myConf, myProps, globdat ) );
   }   
   children_.resize( childBuffer.size() );
   children_ = childBuffer.toArray();
 
   JEM_PRECHECK2( children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)) );
-
-  // Touch the pre settings to get rid of warnings
-  Ref<Object>  dummyObj;
-
-  for (idx_t i = 0; i < childProps.size(); i++)
-    childProps.find(dummyObj, childProps.listProps()[i]);
 }
 
 //-----------------------------------------------------------------------
