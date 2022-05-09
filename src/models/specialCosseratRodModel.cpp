@@ -61,18 +61,23 @@ specialCosseratRodModel::specialCosseratRodModel
   Properties  myProps = props.findProps ( myName_ );
   Properties  myConf  = conf .makeProps ( myName_ );
 
-  // Get the elements and inodes from the global database
+  // Get the elements and nodes from the global database
   String      elementsName;
   myProps.find( elementsName, "elements" );
-  rodGroup_ = ElementGroup::get ( myConf, myProps, globdat, getContext() ); // only the desired group
-  allElems_  = rodGroup_.getElements();  // all the elements
-  allNodes_  = allElems_.getNodes (); //all the inodes
+  rodElems_   = ElementGroup::get ( myConf, myProps, globdat, getContext() ); // only the desired group
+  allElems_   = rodElems_.getElements();  // all the elements
+  allNodes_   = allElems_.getNodes (); //all the inodes
 
+  // store the inverse relation from the global node ids to the local indizes on this rod  
+  rodNodes_.resize(allNodes_.size());
+  rodNodes_ = -1;
+  rodNodes_[rodElems_.getNodeIndices()] = jem::iarray(rodElems_.getNodeIndices().size());
+  
   // Initialize the internal shape.
   shape_ = newInstance<Line3D> ( SHAPE_IDENTIFIER, myConf, myProps );
 
   // Check whether the mesh is valid.
-  rodGroup_.checkElements ( getContext(), shape_->nodeCount() );
+  rodElems_.checkElements ( getContext(), shape_->nodeCount() );
 
   // Define the DOFs.
   Ref<XDofSpace>  dofs = XDofSpace::get ( allNodes_.getData(), globdat ); 
@@ -175,7 +180,6 @@ specialCosseratRodModel::specialCosseratRodModel
 
     vec2mat ( givenDirs_.transpose(), givenDirs );
   }
-  // TEST_CONTEXT(givenDirs_)
 
   // Prepare linear stiffness matrix //LATER nonlinear material?
   materialC_.resize( 6, 6 );
@@ -339,7 +343,7 @@ void   specialCosseratRodModel::get_strain_table_
   const Vector&         disp,
   const bool            mat_vals  )
 {
-  const idx_t  elemCount      = rodGroup_.size();
+  const idx_t  elemCount      = rodElems_.size();
   const idx_t  nodeCount      = shape_->nodeCount();
   const idx_t  ipCount        = shape_->ipointCount();
   String       dofName        = ""; 
@@ -367,7 +371,7 @@ void   specialCosseratRodModel::get_strain_table_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    idx_t ielem = rodGroup_.getIndices()[ie];
+    idx_t ielem = rodElems_.getIndices()[ie];
     allElems_.getElemNodes( inodes, ielem );
     get_disps_( nodePhi_0, nodeU, nodeLambda, disp, inodes );
 
@@ -391,7 +395,7 @@ void    specialCosseratRodModel::get_stress_table_
   const Vector&         disp,
   const bool            mat_vals )
 {
-  const idx_t  elemCount      = rodGroup_.size();
+  const idx_t  elemCount      = rodElems_.size();
   const idx_t  nodeCount      = shape_->nodeCount();
   const idx_t  ipCount        = shape_->ipointCount();
   String       dofName        = ""; 
@@ -418,7 +422,7 @@ void    specialCosseratRodModel::get_stress_table_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    idx_t ielem = rodGroup_.getIndices()[ie];
+    idx_t ielem = rodElems_.getIndex(ie);
     allElems_.getElemNodes( inodes, ielem );     
     get_disps_( nodePhi_0, nodeU, nodeLambda, disp, inodes ); 
 
@@ -440,11 +444,12 @@ void     specialCosseratRodModel::init_strain_ ()
   const idx_t   rank          = shape_->globalRank();
   const idx_t   dofCount      = dofs_->typeCount    ();
   const idx_t   ipCount       = shape_->ipointCount ();
-  const idx_t   elemCount     = rodGroup_.size();
+  const idx_t   elemCount     = rodElems_.size();
   const idx_t   nodeCount     = shape_->nodeCount   ();  
   
 // PER ELEMENT VALUES
   Vector        weights       ( ipCount );
+  IdxVector     ins           ( nodeCount ); 
   IdxVector     inodes        ( nodeCount ); 
   Matrix        coords        ( rank, nodeCount );
 // STRAINS
@@ -457,11 +462,11 @@ void     specialCosseratRodModel::init_strain_ ()
 
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    idx_t ielem = rodGroup_.getIndices()[ie];
-    allElems_.getElemNodes ( inodes, ielem );
-    allNodes_.getSomeCoords( coords, inodes );
+    idx_t ielem = rodElems_.getIndex(ie);
+    allElems_.getElemNodes ( ins, ielem );
+    allNodes_.getSomeCoords( coords, ins );
     // TEST_CONTEXT(coords)
-
+    inodes = rodNodes_[ins];
     // TEST_CONTEXT((Cubix(LambdaN_[inodes])))
     get_strains_( strains, weights, coords, null_mat, (Cubix)LambdaN_[inodes], ie, false);
     mat_strain0_[ie] = strains;
@@ -474,15 +479,16 @@ void     specialCosseratRodModel::init_strain_ ()
 //-----------------------------------------------------------------------
 void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
 {  
-  const idx_t   nodeCount     = allNodes_.size();
-  const idx_t   elemCount     = rodGroup_.size();
+  const idx_t   nodeCount     = rodElems_.getNodeIndices().size();
+  const idx_t   elemCount     = rodElems_.size();
   const idx_t   elemNodes     = shape_->nodeCount();
   const idx_t   ipCount       = shape_->ipointCount();
+  IdxVector     ins           ( elemNodes );
   IdxVector     inodes        ( elemNodes );
-  IdxVector     allnodes      = rodGroup_.getNodeIndices();
+  IdxVector     allnodes      = rodElems_.getNodeIndices();
   Matrix        node_dirs     ( TRANS_DOF_COUNT, nodeCount );
   Matrix        ip_dirs       ( TRANS_DOF_COUNT, ipCount );
-  Matrix        coords        ( TRANS_DOF_COUNT, nodeCount );
+  Matrix        coords        ( TRANS_DOF_COUNT, allNodes_.size() );
   Matrix        rotMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix        oldMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
   Matrix        newMat        ( TRANS_DOF_COUNT, TRANS_DOF_COUNT );
@@ -506,28 +512,32 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     // REPORT(ie)
-    idx_t ielem = rodGroup_.getIndex(ie);
-    allElems_.getElemNodes ( inodes, ielem );
+    idx_t ielem = rodElems_.getIndex(ie);
+    allElems_.getElemNodes ( ins, ielem );
+
+    inodes = rodNodes_[ins];
 
     // TEST_CONTEXT(inodes)
-    node_dirs ( ALL, inodes[0] ) += coords ( ALL, inodes[1] ) - coords ( ALL, inodes[0] );
+    node_dirs ( ALL, inodes[0] ) += coords ( ALL, ins[1] ) - coords ( ALL, ins[0] );
     for (idx_t in = 1; in < elemNodes-1; in++)
-      node_dirs ( ALL, inodes[in] ) += coords ( ALL, inodes[in+1] ) - coords ( ALL, inodes[in-1] );
-    node_dirs ( ALL, inodes[elemNodes-1] ) += coords ( ALL, inodes[elemNodes-1] ) - coords ( ALL, inodes[elemNodes-2] );
+      node_dirs ( ALL, inodes[in] ) += coords ( ALL, ins[in+1] ) - coords ( ALL, ins[in-1] );
+    node_dirs ( ALL, inodes[elemNodes-1] ) += coords ( ALL, ins[elemNodes-1] ) - coords ( ALL, ins[elemNodes-2] );
   }
 
   for ( idx_t igiven = 0; igiven < givenNodes_.size(); igiven++)
-    node_dirs[givenNodes_[igiven]] = givenDirs_[igiven];
+    node_dirs[rodNodes_[givenNodes_[igiven]]] = givenDirs_[igiven];
 
-  for ( idx_t inode = 0; inode < nodeCount; inode++)
-    node_dirs[inode] = node_dirs[inode] / norm2( node_dirs[inode] );
-    
-  for ( idx_t inode = 0; inode < nodeCount; inode++)
+  for ( idx_t in = 0; in < nodeCount; in++)
+  {
+    node_dirs[in] = node_dirs[in] / norm2( node_dirs[in] );
+  }
+
+  for ( idx_t in = 0; in < nodeCount; in++)
   {    
     if ( material_ey_.size() ) // if the y-direction is given, construct the z direction and then the x-direction
     {
       e_y = material_ey_;
-      e_z = node_dirs[inode];
+      e_z = node_dirs[in];
       e_x = matmul( skew(e_y), e_z );
 
       rotMat[0] = e_x;
@@ -536,8 +546,8 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
     }
     else // no y-direction given
     {
-      v = matmul ( e3, skew ( node_dirs[inode] ) );
-      c = dotProduct ( node_dirs[inode], e3 );
+      v = matmul ( e3, skew ( node_dirs[in] ) );
+      c = dotProduct ( node_dirs[in], e3 );
 
       rotMat = eye();
       if ( c != -1.) // 180 deg turn == point mirroring
@@ -545,7 +555,7 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
       else
         rotMat *= -1.;
     }
-    LambdaN_[inode] = rotMat;      
+    LambdaN_[in] = rotMat;      
   }
 }
 
@@ -698,7 +708,7 @@ void            specialCosseratRodModel::get_disps_
 
     nodeU[inode] = disp[idofs_trans];
     expVec( nodeLambda[inode], (Vector)disp[idofs_rot] );
-    nodeLambda[inode] = matmul (nodeLambda[inode], LambdaN_[inodes[inode]]);
+    nodeLambda[inode] = matmul (nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
   }  
 }
 
@@ -710,7 +720,7 @@ void            specialCosseratRodModel::assemble_
 {
   const idx_t  ipCount        = shape_->ipointCount ();
   const idx_t  nodeCount      = shape_->nodeCount   ();
-  const idx_t  elemCount      = rodGroup_.size      ();
+  const idx_t  elemCount      = rodElems_.size      ();
   const idx_t  dofCount       = dofs_->typeCount    ();
   const idx_t  rank           = shape_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
@@ -741,8 +751,8 @@ void            specialCosseratRodModel::assemble_
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     // REPORT(ie)
-    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
-    // TEST_CONTEXT( rodGroup_.getIndex(ie) )
+    allElems_.getElemNodes( inodes, rodElems_.getIndex(ie) );
+    // TEST_CONTEXT( rodElems_.getIndex(ie) )
     // TEST_CONTEXT( inodes )
     // get nice Positions
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
@@ -806,7 +816,7 @@ void            specialCosseratRodModel::assemble_
 {
   const idx_t  ipCount        = shape_->ipointCount ();
   const idx_t  nodeCount      = shape_->nodeCount   ();
-  const idx_t  elemCount      = rodGroup_.size        ();
+  const idx_t  elemCount      = rodElems_.size        ();
   const idx_t  dofCount       = dofs_->typeCount    ();
   const idx_t  rank           = shape_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
@@ -826,7 +836,7 @@ void            specialCosseratRodModel::assemble_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    allElems_.getElemNodes( inodes, rodElems_.getIndex(ie) );
     // get the nice positions
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
     
@@ -861,7 +871,7 @@ void          specialCosseratRodModel::assembleM_
   const idx_t  ipCount        = shape_->ipointCount ();
   const idx_t  nodeCount      = shape_->nodeCount   ();
   const idx_t  rank           = shape_->globalRank  (); 
-  const idx_t  elemCount      = rodGroup_.size      ();
+  const idx_t  elemCount      = rodElems_.size      ();
   IdxVector    inodes         ( nodeCount );
   IdxVector    idofs          ( nodeCount );
 
@@ -873,7 +883,7 @@ void          specialCosseratRodModel::assembleM_
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    allElems_.getElemNodes( inodes, rodGroup_.getIndex(ie) );
+    allElems_.getElemNodes( inodes, rodElems_.getIndex(ie) );
     allNodes_.getSomeCoords( coords, inodes );
 
     shape_->getIntegrationWeights( weights, coords );

@@ -34,6 +34,7 @@
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/NodeGroup.h>
 
 #include <math.h>
 
@@ -60,6 +61,8 @@ using jive::util::joinNames;
 using jive::fem::NodeSet;
 using jive::fem::ElementSet;
 using jive::fem::ElementGroup;
+using jive::fem::NodeGroup;
+using jive::fem::newNodeGroup;
 using jive::geom::IShape;
 using jive::geom::ShapeFactory;
 
@@ -227,9 +230,10 @@ class specialCosseratRodModel : public Model
       const IdxVector&    inodes  ) const;
 
  private: 
-  Assignable<ElementGroup>rodGroup_;
-  Assignable<NodeSet>     allNodes_;
+  Assignable<ElementGroup>rodElems_;
+  IdxVector               rodNodes_;
   Assignable<ElementSet>  allElems_;
+  Assignable<NodeSet>     allNodes_;
   Ref<DofSpace>           dofs_;
   Ref<Line3D>             shape_;
   IdxVector               trans_types_;
