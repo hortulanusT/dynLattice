@@ -235,7 +235,8 @@ class specialCosseratRodModel : public Model
   Assignable<ElementSet>  allElems_;
   Assignable<NodeSet>     allNodes_;
   Ref<DofSpace>           dofs_;
-  Ref<Line3D>             shape_;
+  Ref<Line3D>             shapeK_;
+  Ref<Line3D>             shapeM_;
   IdxVector               trans_types_;
   IdxVector               rot_types_;
   IdxVector               jtypes_;

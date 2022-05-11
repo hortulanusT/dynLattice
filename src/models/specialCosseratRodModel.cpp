@@ -74,10 +74,12 @@ specialCosseratRodModel::specialCosseratRodModel
   rodNodes_[rodElems_.getNodeIndices()] = jem::iarray(rodElems_.getNodeIndices().size());
   
   // Initialize the internal shape.
-  shape_ = newInstance<Line3D> ( SHAPE_IDENTIFIER, myConf, myProps );
+  shapeK_ = newInstance<Line3D> ( SHAPE_IDENTIFIER, myConf, myProps );
+  myProps.makeProps( String(SHAPE_IDENTIFIER) + "M" ).set( "intScheme", shapeK_->nodeCount() );  
+  shapeM_ = newInstance<Line3D> ( String(SHAPE_IDENTIFIER) + "M", myConf, myProps );
 
   // Check whether the mesh is valid.
-  rodElems_.checkElements ( getContext(), shape_->nodeCount() );
+  rodElems_.checkElements ( getContext(), shapeK_->nodeCount() );
 
   // Define the DOFs.
   Ref<XDofSpace>  dofs = XDofSpace::get ( allNodes_.getData(), globdat ); 
@@ -344,8 +346,8 @@ void   specialCosseratRodModel::get_strain_table_
   const bool            mat_vals  )
 {
   const idx_t  elemCount      = rodElems_.size();
-  const idx_t  nodeCount      = shape_->nodeCount();
-  const idx_t  ipCount        = shape_->ipointCount();
+  const idx_t  nodeCount      = shapeK_->nodeCount();
+  const idx_t  ipCount        = shapeK_->ipointCount();
   String       dofName        = ""; 
 
   IdxVector    icols          ( dofs_->typeCount() );
@@ -396,8 +398,8 @@ void    specialCosseratRodModel::get_stress_table_
   const bool            mat_vals )
 {
   const idx_t  elemCount      = rodElems_.size();
-  const idx_t  nodeCount      = shape_->nodeCount();
-  const idx_t  ipCount        = shape_->ipointCount();
+  const idx_t  nodeCount      = shapeK_->nodeCount();
+  const idx_t  ipCount        = shapeK_->ipointCount();
   String       dofName        = ""; 
 
   IdxVector    icols          ( dofs_->typeCount() );
@@ -441,11 +443,11 @@ void    specialCosseratRodModel::get_stress_table_
 //-----------------------------------------------------------------------
 void     specialCosseratRodModel::init_strain_ ()
 {
-  const idx_t   rank          = shape_->globalRank();
+  const idx_t   rank          = shapeK_->globalRank();
   const idx_t   dofCount      = dofs_->typeCount    ();
-  const idx_t   ipCount       = shape_->ipointCount ();
+  const idx_t   ipCount       = shapeK_->ipointCount ();
   const idx_t   elemCount     = rodElems_.size();
-  const idx_t   nodeCount     = shape_->nodeCount   ();  
+  const idx_t   nodeCount     = shapeK_->nodeCount   ();  
   
 // PER ELEMENT VALUES
   Vector        weights       ( ipCount );
@@ -481,8 +483,8 @@ void     specialCosseratRodModel::init_rot_ () // LATER non-straight rods?
 {  
   const idx_t   nodeCount     = rodElems_.getNodeIndices().size();
   const idx_t   elemCount     = rodElems_.size();
-  const idx_t   elemNodes     = shape_->nodeCount();
-  const idx_t   ipCount       = shape_->ipointCount();
+  const idx_t   elemNodes     = shapeK_->nodeCount();
+  const idx_t   ipCount       = shapeK_->ipointCount();
   IdxVector     ins           ( elemNodes );
   IdxVector     inodes        ( elemNodes );
   IdxVector     allnodes      = rodElems_.getNodeIndices();
@@ -566,16 +568,16 @@ void specialCosseratRodModel::get_geomStiff_
     const Matrix&       nodeU ) const
 {
   const idx_t dofCount  = dofs_->typeCount    ();
-  const idx_t globRank  = shape_->globalRank();
-  const idx_t nodeCount = shape_->nodeCount();
-  const idx_t ipCount   = shape_->ipointCount();
+  const idx_t globRank  = shapeK_->globalRank();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t ipCount   = shapeK_->ipointCount();
 
   Vector    w           ( ipCount );
   Matrix    shapeGrads  ( nodeCount, ipCount );
   Matrix    phiP        ( globRank, ipCount );
 
   // get phi_prime
-  shape_->getShapeGradients( shapeGrads, w, nodePhi_0 );
+  shapeK_->getShapeGradients( shapeGrads, w, nodePhi_0 );
   phiP = matmul( (Matrix)(nodePhi_0+nodeU), shapeGrads );
 
   // for every iPoint assemble the B-Matrix
@@ -602,29 +604,29 @@ void specialCosseratRodModel::get_strains_
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
 
-  const idx_t   ipCount   = shape_->ipointCount();
-  const idx_t   globRank  = shape_->globalRank();
+  const idx_t   ipCount   = shapeK_->ipointCount();
+  const idx_t   globRank  = shapeK_->globalRank();
   const idx_t   dofCount  = dofs_->typeCount();
 
   const Cubix   ipLambda  ( globRank, globRank, ipCount );
   const Cubix   ipLambdaP ( globRank, globRank, ipCount );
   const Matrix  ipPhi     ( globRank, ipCount );
   const Matrix  ipPhiP    ( globRank, ipCount );
-  const IdxVector inodes  ( shape_->nodeCount() );
+  const IdxVector inodes  ( shapeK_->nodeCount() );
 
-  Matrix        shapes          ( shape_->shapeFuncCount(), shape_->ipointCount() );
-  Matrix        grads           ( shape_->shapeFuncCount(), shape_->ipointCount() );
+  Matrix        shapes          ( shapeK_->shapeFuncCount(), shapeK_->ipointCount() );
+  Matrix        grads           ( shapeK_->shapeFuncCount(), shapeK_->ipointCount() );
   
-  shapes = shape_->getShapeFunctions();
-  shape_->getShapeGradients( grads, w, nodePhi_0 );
+  shapes = shapeK_->getShapeFunctions();
+  shapeK_->getShapeGradients( grads, w, nodePhi_0 );
   // TEST_CONTEXT(shapes)
   // TEST_CONTEXT(grads)
 
   ipPhi   = matmul( (Matrix)(nodePhi_0+nodeU), shapes );
   ipPhiP  = matmul( (Matrix)(nodePhi_0+nodeU), grads );
-  shape_->getRotations ( ipLambda, nodeLambda );  
+  shapeK_->getRotations ( ipLambda, nodeLambda );  
   // TEST_CONTEXT(ipLambda)
-  shape_->getRotationGradients ( ipLambdaP, w, nodePhi_0, nodeLambda ); 
+  shapeK_->getRotationGradients ( ipLambdaP, w, nodePhi_0, nodeLambda ); 
   // TEST_CONTEXT(ipLambdaP)
 
   // get the strains (material + spatial );
@@ -641,7 +643,7 @@ void specialCosseratRodModel::get_strains_
   if (spatial)
   {
     Cubix        PI             ( dofCount, dofCount, ipCount );
-    shape_->getPi ( PI, nodeLambda );
+    shapeK_->getPi ( PI, nodeLambda );
     // TEST_CONTEXT(PI)
 
     for (idx_t ip = 0; ip < ipCount; ip++)
@@ -659,7 +661,7 @@ void specialCosseratRodModel::get_stresses_
       const idx_t         ie,      
       const bool          spatial ) const
 {
-  const idx_t   ipCount   = shape_->ipointCount ();
+  const idx_t   ipCount   = shapeK_->ipointCount ();
   const idx_t   dofCount  = dofs_->typeCount();
   const Matrix  strains   ( stresses.shape() );
   const Cubix   stiffness ( dofCount, dofCount, ipCount );
@@ -673,7 +675,7 @@ void specialCosseratRodModel::get_stresses_
   // get the stresses (material + spatial );
   if (spatial)
   {
-    shape_->getPi(PI, nodeLambda);
+    shapeK_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++) 
       stiffness[ip]   = mc3.matmul(PI[ip], materialC_, PI[ip].transpose());
   }
@@ -718,11 +720,11 @@ void            specialCosseratRodModel::assemble_
     const Vector&         disp,
     const Vector&         dispOld ) const
 {
-  const idx_t  ipCount        = shape_->ipointCount ();
-  const idx_t  nodeCount      = shape_->nodeCount   ();
+  const idx_t  ipCount        = shapeK_->ipointCount ();
+  const idx_t  nodeCount      = shapeK_->nodeCount   ();
   const idx_t  elemCount      = rodElems_.size      ();
   const idx_t  dofCount       = dofs_->typeCount    ();
-  const idx_t  rank           = shape_->globalRank  ();  
+  const idx_t  rank           = shapeK_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
 
 // PER ELEMENT VALUES
@@ -763,9 +765,9 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(nodeLambda)
 
     // get the XI, PSI and PI values for this 
-    shape_->getXi( XI, weights, nodeU, nodePhi_0 );
-    shape_->getPsi( PSI, weights, nodePhi_0 );
-    shape_->getPi( PI, nodeLambda );
+    shapeK_->getXi( XI, weights, nodeU, nodePhi_0 );
+    shapeK_->getPsi( PSI, weights, nodePhi_0 );
+    shapeK_->getPi( PI, nodeLambda );
     // TEST_CONTEXT(XI)
     // TEST_CONTEXT(PSI)
     // TEST_CONTEXT(PI)
@@ -814,11 +816,11 @@ void            specialCosseratRodModel::assemble_
     const Vector&         disp,
     const Vector&         dispOld ) const
 {
-  const idx_t  ipCount        = shape_->ipointCount ();
-  const idx_t  nodeCount      = shape_->nodeCount   ();
+  const idx_t  ipCount        = shapeK_->ipointCount ();
+  const idx_t  nodeCount      = shapeK_->nodeCount   ();
   const idx_t  elemCount      = rodElems_.size        ();
   const idx_t  dofCount       = dofs_->typeCount    ();
-  const idx_t  rank           = shape_->globalRank  ();  
+  const idx_t  rank           = shapeK_->globalRank  ();  
   MatmulChain<double, 3>      mc3;
 
 // PER ELEMENT VALUES
@@ -846,7 +848,7 @@ void            specialCosseratRodModel::assemble_
     // TEST_CONTEXT(nodeLambda)
 
     // get the XI values for this 
-    shape_->getXi( XI, weights, nodeU, nodePhi_0 );
+    shapeK_->getXi( XI, weights, nodeU, nodePhi_0 );
     // get the (spatial) stresses
     get_stresses_( stress, weights, nodePhi_0, nodeU, nodeLambda, ie );
     
@@ -864,13 +866,12 @@ void            specialCosseratRodModel::assemble_
 }
 
 //FIXME add rotational inertia
-//FIXME no reduced integration for weights
 void          specialCosseratRodModel::assembleM_
   ( MatrixBuilder&        mbld ) const
 {
-  const idx_t  ipCount        = shape_->ipointCount ();
-  const idx_t  nodeCount      = shape_->nodeCount   ();
-  const idx_t  rank           = shape_->globalRank  (); 
+  const idx_t  ipCount        = shapeM_->ipointCount ();
+  const idx_t  nodeCount      = shapeM_->nodeCount   ();
+  const idx_t  rank           = shapeM_->globalRank  (); 
   const idx_t  elemCount      = rodElems_.size      ();
   IdxVector    inodes         ( nodeCount );
   IdxVector    idofs          ( nodeCount );
@@ -879,6 +880,7 @@ void          specialCosseratRodModel::assembleM_
   Vector       weights        ( ipCount );
   Matrix       shapes         ( nodeCount, ipCount );
   Matrix       addM           ( nodeCount, nodeCount);
+  Matrix       addI           ( nodeCount*ROT_DOF_COUNT, nodeCount*ROT_DOF_COUNT );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -886,12 +888,12 @@ void          specialCosseratRodModel::assembleM_
     allElems_.getElemNodes( inodes, rodElems_.getIndex(ie) );
     allNodes_.getSomeCoords( coords, inodes );
 
-    shape_->getIntegrationWeights( weights, coords );
-    shapes = shape_->getShapeFunctions();
+    shapeM_->getIntegrationWeights( weights, coords );
+    shapes = shapeM_->getShapeFunctions();
 
     // TRANSLATIONAL INERTIA
     addM = 0.0;
-    for (idx_t ip = 0; ip < shape_->ipointCount(); ip++)
+    for (idx_t ip = 0; ip < ipCount; ip++)
     {
       addM += weights[ip] * density_ * area_ * matmul ( shapes[ip], shapes[ip]);    
     }
@@ -901,6 +903,9 @@ void          specialCosseratRodModel::assembleM_
       dofs_->getDofIndices( idofs, inodes, trans_types_[iDof] );
       mbld.addBlock(idofs, idofs, addM);
     }
+
+    // ROTATIONAL INERTIA
+    addI = 0.0;
   }
 }
 

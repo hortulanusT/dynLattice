@@ -9,6 +9,7 @@
 ## Code
 1. Models
     - Rod Model
+      - Better way of giving geometry
       - Mixed collocation?
     - PBC Model
       - proper adressing of H in the boundary conditions (allow for mixed loadings)
