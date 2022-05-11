@@ -149,12 +149,26 @@ class specialCosseratRodModel : public Model
     const Vector&         disp,
     const Vector&         dispOld  ) const;
 
+
+  /**
+   * @brief construct the gyroscopic forces (omega x Theta*omega)
+   * @param[out] fgyro gyroscopic force Vector
+   * @param[in]  velo current values for the DOF - velocities 
+   * @param[in]  mbld current mass matrix
+   */
+  void                    assembleGyro_
+  ( const Vector&         fint,
+    const Vector&         velo,
+    MatrixBuilder&        mbld  ) const;
+
   /**
    * @brief assemble the mass matrix 
    * @param[out] mbld mass matrix 
+   * @param[in]  disp current values for the DOFs 
    */
   void                    assembleM_
-  ( MatrixBuilder&        mbld ) const;
+  ( MatrixBuilder&        mbld,
+    Vector&               disp ) const;
 
   /**
    * @brief fill the table with the strain values per element 
@@ -252,6 +266,7 @@ class specialCosseratRodModel : public Model
 
   Vector                  material_ey_;
   Matrix                  materialC_;
+  Matrix                  materialJp_; ///< moment of inertia density
 
   IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
   Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)

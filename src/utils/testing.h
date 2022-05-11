@@ -22,7 +22,6 @@
   #define TEST_NO_CONTEXT( key ) jem::System::debug( __FUNCTION__ ) << "> > > " << #key << " in \"" << __PRETTY_FUNCTION__ << "\" ::\n" << key << "\n";
   #define TEST_PRINTER( key ) key->printTo( jive::util::Printer::get() ); jive::util::Printer::flush();
   #define TEST_STD( key ) std::clog << "> > > " << #key << " ::\n" << key << "\n";
-  #define WARN_ASSERT2( expr, msg ) if ( ! expr ) jem::System::warn() << msg << "\n";
   #define STOP_DEBUG throw jem::RuntimeException(__FUNCTION__, "I want to end here :)");
 #else
   #define REPORT( key )
@@ -31,8 +30,8 @@
   #define TEST_NO_CONTEXT( key )
   #define TEST_PRINTER ( key )
   #define TEST_STD( key )
-  #define WARN_ASSERT2( expr, msg )
   #define STOP_DEBUG
 #endif
 
+#define WARN_ASSERT2( expr, msg ) if ( ! (expr) ) jem::System::warn() << msg << "\n";
 #define NOT_IMPLEMENTED throw jem::RuntimeException( __PRETTY_FUNCTION__, "Function not implemented!" );

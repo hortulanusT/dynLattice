@@ -93,7 +93,7 @@ void Line3D::getRotations
   // get the rotation vectors associated with the local rotations
   ip_psi  = matmul( node_psi, shapeFuncs );
   
-  // construc the local rotation matrices
+  // construct the local rotation matrices
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec( Ri[iIp], ip_psi[iIp] );

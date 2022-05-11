@@ -75,7 +75,8 @@ specialCosseratRodModel::specialCosseratRodModel
   
   // Initialize the internal shape.
   shapeK_ = newInstance<Line3D> ( SHAPE_IDENTIFIER, myConf, myProps );
-  myProps.makeProps( String(SHAPE_IDENTIFIER) + "M" ).set( "intScheme", shapeK_->nodeCount() );  
+  myProps.makeProps( String(SHAPE_IDENTIFIER) + "M" ).set( "intScheme", String(shapeK_->nodeCount()) );  
+  myProps.makeProps( String(SHAPE_IDENTIFIER) + "M" ).set( "numPoints", shapeK_->nodeCount() );  
   shapeM_ = newInstance<Line3D> ( String(SHAPE_IDENTIFIER) + "M", myConf, myProps );
 
   // Check whether the mesh is valid.
@@ -142,7 +143,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myProps.get ( areaMoment_, AREA_MOMENT);
   polarMoment_= 2. * areaMoment_;
   myProps.find( polarMoment_, POLAR_MOMENT);
-  shearParam_ = 5./6.;
+  shearParam_ = 5./6.; // for rectangular cross section, for circle 9/10
   myProps.find( shearParam_, SHEAR_FACTOR);
   density_ = 0.;
   myProps.find( density_, DENSITY);
@@ -192,6 +193,13 @@ specialCosseratRodModel::specialCosseratRodModel
   materialC_ ( 3, 3 ) = young_ * areaMoment_;
   materialC_ ( 4, 4 ) = young_ * areaMoment_;
   materialC_ ( 5, 5 ) = shearMod_ * polarMoment_;
+
+  materialJp_.resize( 6, 6 ); //LATER more complex geometries
+  materialJp_ = 0.0;
+  materialJp_ ( TRANS_PART, TRANS_PART ) = eye() * density_ * area_; 
+  materialJp_ ( 3, 3 ) = density_ * areaMoment_; // HACK incredibly thin sheet ( compare TM3 p180)
+  materialJp_ ( 4, 4 ) = density_ * areaMoment_;
+  materialJp_ ( 5, 5 ) = density_ * polarMoment_;
 
   // TEST_CONTEXT ( materialC_ )
 }
@@ -293,10 +301,12 @@ bool specialCosseratRodModel::takeAction
   if ( action == Actions::GET_MATRIX2 )
   {
     Ref<MatrixBuilder>  mbld;
+    Vector              disp;
 
     params.get ( mbld, ActionParams::MATRIX2 );
+    StateVector::get    ( disp, dofs_, globdat );
 
-    assembleM_ ( *mbld );
+    assembleM_ ( *mbld, disp );
 
     // // DEBUGGING
     // IdxVector   dofList ( dofs_->dofCount() );
@@ -330,6 +340,25 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT ( F )
 
     return true;
+  }
+
+  if ( action == "GET_GYRO_VECTOR" )
+  {
+    Ref<MatrixBuilder>  mbld;
+    Vector              fgyro;
+    Vector              disp;
+    Vector              velo;
+
+    // Get the action-specific parameters.
+    params.get ( fgyro, ActionParams::INT_VECTOR );
+
+    // Get the current velocities.
+    StateVector::get( disp, dofs_, globdat );
+    StateVector::get( velo, jive::model::STATE[1], dofs_, globdat );
+
+    // assemble mass matrix
+    assembleM_( *mbld, disp );
+    assembleGyro_ ( fgyro, velo, *mbld );
   }
 
   return false;
@@ -865,22 +894,53 @@ void            specialCosseratRodModel::assemble_
   }    
 }
 
-//FIXME add rotational inertia
-void          specialCosseratRodModel::assembleM_
-  ( MatrixBuilder&        mbld ) const
+
+void            specialCosseratRodModel::assembleGyro_
+  ( const Vector&         fgyro,
+    const Vector&         velo,
+    MatrixBuilder&        mbld  ) const
 {
+  IdxVector     idofs     ( ROT_DOF_COUNT );
+  Matrix        Theta     ( ROT_DOF_COUNT, ROT_DOF_COUNT );
+  Vector        omega     ( ROT_DOF_COUNT );
+
+  for (idx_t inode : rodElems_.getNodeIndices() )
+  {
+    dofs_->getDofIndices ( idofs, inode, rot_types_ );
+    mbld.getBlock( Theta, idofs, idofs );
+    omega = velo[idofs];
+
+    fgyro[idofs] += matmul( skew(omega), matmul( Theta, omega ) );
+  }  
+}
+
+void          specialCosseratRodModel::assembleM_
+  ( MatrixBuilder&        mbld,
+    Vector&               disp ) const
+{
+  WARN_ASSERT2( density_ > 0, "Mass Matrix will have no effect without density!")
+  MatmulChain<double, 3>      mc3;
+  
   const idx_t  ipCount        = shapeM_->ipointCount ();
   const idx_t  nodeCount      = shapeM_->nodeCount   ();
+  const idx_t  dofCount       = dofs_->typeCount();
   const idx_t  rank           = shapeM_->globalRank  (); 
   const idx_t  elemCount      = rodElems_.size      ();
+
+// PER ELEMENT VALUES
+  Matrix       nodeU          ( rank, nodeCount );
+  Matrix       nodePhi_0      ( rank, nodeCount );
+  Cubix        nodeLambda     ( rank, rank, nodeCount );
   IdxVector    inodes         ( nodeCount );
-  IdxVector    idofs          ( nodeCount );
+  IdxVector    idofs          ( dofCount );
+  IdxVector    jdofs          ( dofCount );
 
   Matrix       coords         ( rank, nodeCount );
   Vector       weights        ( ipCount );
+  Cubix        ipPI           ( dofCount, dofCount, ipCount );
   Matrix       shapes         ( nodeCount, ipCount );
-  Matrix       addM           ( nodeCount, nodeCount);
-  Matrix       addI           ( nodeCount*ROT_DOF_COUNT, nodeCount*ROT_DOF_COUNT );
+  Matrix       spatialM       ( dofCount, dofCount );
+  Matrix       nodeFactors    ( nodeCount, nodeCount );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -890,22 +950,27 @@ void          specialCosseratRodModel::assembleM_
 
     shapeM_->getIntegrationWeights( weights, coords );
     shapes = shapeM_->getShapeFunctions();
+    
+    get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
+    shapeM_->getPi( ipPI, nodeLambda );
 
-    // TRANSLATIONAL INERTIA
-    addM = 0.0;
+    spatialM = 0.0;
+    nodeFactors = 0.0;
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      addM += weights[ip] * density_ * area_ * matmul ( shapes[ip], shapes[ip]);    
+      spatialM += weights[ip] * mc3.matmul( ipPI[ip], materialJp_, ipPI[ip].transpose() );   
+      nodeFactors += matmul(shapes[ip], shapes[ip]);
     }
 
-    for (idx_t iDof = 0; iDof < TRANS_DOF_COUNT; iDof++)
-    {    
-      dofs_->getDofIndices( idofs, inodes, trans_types_[iDof] );
-      mbld.addBlock(idofs, idofs, addM);
+    for (idx_t Inode = 0; Inode < nodeCount; Inode++)
+    {
+      dofs_->getDofIndices( idofs, inodes[Inode], jtypes_ );
+      for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
+      {
+        dofs_->getDofIndices( jdofs, inodes[Jnode], jtypes_ );
+        mbld.addBlock( idofs, jdofs, (Matrix)(nodeFactors(Inode, Jnode) * spatialM) );
+      }
     }
-
-    // ROTATIONAL INERTIA
-    addI = 0.0;
   }
 }
 
