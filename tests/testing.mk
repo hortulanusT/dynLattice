@@ -1,4 +1,4 @@
-.PHONY: tests element-tests beam-tests clean-tests
+.PHONY: tests element-tests beam-tests clean-tests manual-test
 
 tests: element-tests beam-tests
 
@@ -15,6 +15,10 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
+
+# Manual testing
+manual-test: $(program) tests/manual/testing.pro
+	@$^
 
 # ELEMENT TEST RESULTS
 .PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
@@ -68,6 +72,9 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 
 # CLEAN UP THE TESTS
 clean-tests :
+	@$(RM_R) tets/manual/visual
+	@$(RM) tets/manual/*.csv
+	@$(RM) tets/manual/*.log
 	@$(RM_R) tests/element/runs
 	@$(RM) tests/element/result_*.txt
 	@$(RM_R) tests/beam/test*/

@@ -344,10 +344,10 @@ bool specialCosseratRodModel::takeAction
 
   if ( action == "GET_GYRO_VECTOR" )
   {
-    Ref<MatrixBuilder>  mbld;
-    Vector              fgyro;
-    Vector              disp;
-    Vector              velo;
+    Ref<FlexMBuilder> mbld;
+    Vector            fgyro;
+    Vector            disp;
+    Vector            velo;
 
     // Get the action-specific parameters.
     params.get ( fgyro, ActionParams::INT_VECTOR );
@@ -355,6 +355,8 @@ bool specialCosseratRodModel::takeAction
     // Get the current velocities.
     StateVector::get( disp, dofs_, globdat );
     StateVector::get( velo, jive::model::STATE[1], dofs_, globdat );
+
+    mbld = newInstance<FlexMBuilder>("inertia");
 
     // assemble mass matrix
     assembleM_( *mbld, disp );
@@ -956,6 +958,7 @@ void          specialCosseratRodModel::assembleM_
 
     spatialM = 0.0;
     nodeFactors = 0.0;
+    
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       spatialM += weights[ip] * mc3.matmul( ipPI[ip], materialJp_, ipPI[ip].transpose() );   

@@ -60,6 +60,18 @@ void Line3D::getGlobalPoint
   x = matmul( c, shapeFuncs );
 }
 
+void Line3D::getIntegrationWeights
+  ( const Vector& w,
+    const Matrix& c ) const
+{
+  Matrix c1( localRank(), nodeCount() );
+  c1( 0,0 ) = 0.;
+  for (idx_t iNode = 1; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
+    c1[iNode][0] = norm2( c[iNode] - c[iNode-1] ) + c1[iNode-1][0];
+
+  intLine_->getIntegrationWeights( w, c1 );
+}
+
 void Line3D::getShapeGradients
   ( const Matrix& g,
     const Vector& w,

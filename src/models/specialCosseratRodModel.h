@@ -21,6 +21,7 @@
 
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
+#include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/Model.h>
 #include <jive/model/Actions.h>
@@ -51,6 +52,7 @@ using jem::numeric::MatmulChain;
 using jem::numeric::Quaternion;
 
 using jive::algebra::MatrixBuilder;
+using jive::algebra::FlexMBuilder;
 using jive::model::Model;
 using jive::util::XTable;
 using jive::util::Assignable;

@@ -85,7 +85,7 @@ class Line3D : public Shape
   inline bool containsLocalPoint
     ( const Vector& u ) const override;
 
-  inline void getIntegrationWeights
+  void getIntegrationWeights
     ( const Vector& w,
       const Matrix& c ) const override;
 
@@ -269,13 +269,6 @@ bool Line3D::containsLocalPoint
   ( const Vector& u ) const
 {
   return intLine_->containsLocalPoint( u );
-}
-
-void Line3D::getIntegrationWeights
-  ( const Vector& w,
-    const Matrix& c ) const
-{
-  intLine_->getIntegrationWeights( w, c );
 }
 
 Matrix Line3D::getVertexFunctions() const
