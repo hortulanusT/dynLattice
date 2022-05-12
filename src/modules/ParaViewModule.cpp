@@ -150,13 +150,15 @@ void      ParaViewModule::writeFile_
 
     // get the current displacements
     Ref<DofSpace>           dofs    = DofSpace::get ( globdat, getContext() );
-    Vector                  disp;
-    StateVector::get        ( disp, dofs, globdat );
+    Vector                  disp, velo, acce;
+    StateVector::get        ( disp, jive::model::STATE0, dofs, globdat );
+    StateVector::get        ( velo, jive::model::STATE1, dofs, globdat );
+    StateVector::get        ( acce, jive::model::STATE2, dofs, globdat );
 
     // get the current model
     Ref<Model>              model   = Model::get ( globdat, getContext() );
 
-    writePiece_ ( file_frmt, nodes, elems, egroup, disp, dofs, model, globdat, setInfo_[igroup] );
+    writePiece_ ( file_frmt, nodes, elems, egroup, disp, velo, acce, dofs, model, globdat, setInfo_[igroup] );
   }
 
   file_frmt->decrIndentLevel ();
@@ -179,6 +181,8 @@ void       ParaViewModule::writePiece_
     const Assignable<ElementSet>&   cells,
     const Assignable<ElementGroup>& group,
     const Vector&                   disp,
+    const Vector&                   velo,
+    const Vector&                   acce,
     const Ref<DofSpace>&            dofs,
     const Ref<Model>&               model,
     const Properties&               globdat,
@@ -280,19 +284,23 @@ void       ParaViewModule::writePiece_
   IdxVector   iDofs           ( info.dispData.size() );  
   IdxVector   iDisps          ( info.dispData.size() );
   Matrix      disp_mat        ( groupNodes.size(), info.dispData.size() );
+  Matrix      velo_mat        ( groupNodes.size(), info.dispData.size() );
+  Matrix      acce_mat        ( groupNodes.size(), info.dispData.size() );
 
   for (idx_t idof = 0; idof < iDisps.size(); idof++)
-  {
     iDofs[idof] = dofs->findType ( info.dispData[idof] );
-  }
 
   for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
   {
     dofs->getDofIndices( iDisps, groupNodes[ipoint], iDofs ); 
     disp_mat(ipoint, ALL) = disp[iDisps];
+    velo_mat(ipoint, ALL) = velo[iDisps];
+    acce_mat(ipoint, ALL) = acce[iDisps];
   }
 
   writeDataArray_ ( file, disp_mat, "Float32", "Displacement" );
+  writeDataArray_ ( file, velo_mat, "Float32", "Velocity" );
+  writeDataArray_ ( file, acce_mat, "Float32", "Acceleration" );
 
   // Next write other Dofs
   if (info.dofData.size() > 0)

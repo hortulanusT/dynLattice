@@ -161,7 +161,9 @@ class ParaViewModule : public Module
    * @param points NodeSet with all the information regarding the points
    * @param cells ElemenSet with all the information regarding the elements 
    * @param group ElemenGroup from which the information should be extracted
-   * @param disp StateVector
+   * @param disp StateVector 0
+   * @param velo StateVector 1
+   * @param acce StateVector 2
    * @param dofs DofSpace with all available information
    * @param model root for the modeltree
    * @param globdat Global Properties Database
@@ -174,6 +176,8 @@ class ParaViewModule : public Module
     const Assignable<ElementSet>&   cells,
     const Assignable<ElementGroup>& group,
     const Vector&                   disp,
+    const Vector&                   velo,
+    const Vector&                   acce,
     const Ref<DofSpace>&            dofs,
     const Ref<Model>&               model,
     const Properties&               globdat,
