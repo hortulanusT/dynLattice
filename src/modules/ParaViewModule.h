@@ -105,11 +105,15 @@ class ParaViewModule : public Module
 
     ( const Properties&        conf,
       const Properties&        props,
-      const Properties&        globdat      );
+      const Properties&        globdat      ) override;
 
   virtual Status             run
 
-    ( const Properties&  globdat            );
+    ( const Properties&  globdat            ) override;
+
+  virtual void                shutdown
+
+    ( const Properties&       globdat       ) override;
 
   static Ref<Module>         makeNew
 
@@ -213,9 +217,10 @@ class ParaViewModule : public Module
     const String&                 name   );
 
  private:
-  String          nameFormat_;
-  String          fileType_;
-  StringVector    elemSets_;
-  Array<elInfo>   setInfo_;
-  idx_t           report_intervall_;
+  String            nameFormat_;
+  String            fileType_;
+  StringVector      elemSets_;
+  Array<elInfo>     setInfo_;
+  idx_t             report_intervall_;
+  Ref<PrintWriter>  pvd_printer_;
 };

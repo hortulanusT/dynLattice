@@ -88,6 +88,19 @@ Module::Status    ParaViewModule::init
   paraFolder.remove_filename();
   std::filesystem::create_directories( paraFolder );
 
+  // write the pvd file
+  String            pvdName   = String::format ( makeCString(nameFormat_).addr(), 0) + ".pvd";
+  idx_t             format_pos= pvdName.find( "0" );
+                    pvdName   = pvdName[SliceTo(format_pos)] + pvdName[SliceFrom(format_pos+1)];
+  Ref<Writer>       pvd_raw   = newInstance<FileWriter>  ( pvdName );
+  pvd_printer_                = newInstance<PrintWriter> ( pvd_raw );
+
+  *pvd_printer_ << "<?xml version=\"1.0\"?>" << endl;
+  *pvd_printer_ << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
+  pvd_printer_->incrIndentLevel();
+  *pvd_printer_ << "<Collection>" << endl;
+  pvd_printer_->incrIndentLevel();
+
   return OK;
 }
 
@@ -101,17 +114,46 @@ Module::Status     ParaViewModule::run
 
 {
   idx_t                   currentStep;
+  double                  currentTime;
   String                  currentFile;
+  idx_t                   folder_sep;
 
   // get the current timeStep and format the given format accordingly
   globdat.get ( currentStep, Globdat::TIME_STEP);
+  currentStep -= 1;
   currentFile = String::format ( makeCString(nameFormat_).addr(), currentStep/report_intervall_);
   currentFile = currentFile + "." + fileType_;
 
   // write everything to file
   if ( currentStep % report_intervall_ == 0) writeFile_ ( currentFile, globdat );
 
+  // report file to pvd
+  if (! globdat.find ( currentTime, Globdat::TIME )) currentTime = currentStep;
+  folder_sep    = currentFile.rfind( "/" ) + 1; // TODO make compatible with other OS's?
+
+  *pvd_printer_ << "<DataSet ";
+  *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
+  *pvd_printer_ << "group=\"\" part=\"0\" ";
+  *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)] << "\" ";
+  *pvd_printer_ << "/>" << endl;
+
   return OK;
+}
+
+//-----------------------------------------------------------------------
+//   shutdown
+//-----------------------------------------------------------------------
+
+void    ParaViewModule::shutdown
+
+    ( const Properties&        globdat )
+{
+  pvd_printer_->decrIndentLevel();
+  *pvd_printer_ << "</Collection>" << endl;
+  pvd_printer_->decrIndentLevel();
+  *pvd_printer_ << "</VTKFile>" << endl;
+
+  pvd_printer_->close();
 }
 
 //-----------------------------------------------------------------------
@@ -277,7 +319,7 @@ void       ParaViewModule::writePiece_
   *file << "</Cells>" << endl;
 
   // Write the pointdata to the file
-  *file << "<PointData>" << endl;
+  *file << "<PointData Vectors=\"Displacement\">" << endl;
   file->incrIndentLevel ();
 
   // Start by writing Displacements
@@ -308,6 +350,8 @@ void       ParaViewModule::writePiece_
     iDofs.resize           ( info.dofData.size() );  
     iDisps.resize          ( info.dofData.size() );
     disp_mat .resize       ( groupNodes.size(), info.dofData.size() );
+    velo_mat .resize       ( groupNodes.size(), info.dofData.size() );
+    acce_mat .resize       ( groupNodes.size(), info.dofData.size() );
 
     for (idx_t idof = 0; idof < iDisps.size(); idof++)
     {
@@ -318,9 +362,13 @@ void       ParaViewModule::writePiece_
     {
       dofs->getDofIndices( iDisps, groupNodes[ipoint], iDofs ); 
       disp_mat(ipoint, ALL) = disp[iDisps];
+      velo_mat(ipoint, ALL) = velo[iDisps];
+      acce_mat(ipoint, ALL) = acce[iDisps];
     }
 
-    writeDataArray_ ( file, disp_mat, "Float32", "otherDofs" );
+    writeDataArray_ ( file, disp_mat, "Float32", "otherDofsDisp" );
+    writeDataArray_ ( file, velo_mat, "Float32", "otherDofsVelo" );
+    writeDataArray_ ( file, acce_mat, "Float32", "otherDofsAcc" );
   }
 
   // iterate through all other data ( see OutputModule for more advanced features )
