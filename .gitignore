@@ -15,6 +15,7 @@ scripts/scribbling.py
 *.csv
 *.msh22
 *.vtu
+*.pvd
 *.pvsm
 *.tar
 
