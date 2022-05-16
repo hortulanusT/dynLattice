@@ -1,9 +1,9 @@
 // LOGGING
 log.pattern = "*";
-log.file = "-$(CASE_NAME).log";
+log.file = "$(CASE_NAME).log";
 
 // PROGRAM CONTROL
-control.runWhile = "i < 50";
+control.runWhile = "t < 5e-3";
 
 // SETUP
 params.dofNames = ["dx", "dy", "dz"];
@@ -34,11 +34,11 @@ Solver.modules = [ "solver" ];
 Solver.solver.deltaTime = 1e-4;
 // Solver.solver.type = "Newmark";
 // Solver.solver.solver.type = "Nonlin";
-Solver.solver.type = "TimeStep";
-Solver.solver.dtAssembly = 1;
+Solver.solver.type = "Explicit";
 
 // ACTUAL MODEL
 model.type = "Matrix";
+// model.matrix2.type = "Lumped";
 model.model.type = "Multi";
 model.model.models = [ "lattice", "load" ];
 
@@ -61,11 +61,12 @@ model.model.load.type = "Multi";
 model.model.load.models = [ "fixed", "impact" ];
 model.model.load.fixed.type = "Dirichlet";
 model.model.load.fixed.dispIncr = 0.;
-model.model.load.fixed.nodeGroups = [ "zmin", "zmin", "zmin" ];
-model.model.load.fixed.dofs = [ "dx", "dy", "dz" ];
-model.model.load.fixed.factors = [ 0., 0., 0. ]; 
-model.model.load.impact.type = "Dirichlet";
-model.model.load.impact.dispIncr = 0.005;
+model.model.load.fixed.nodeGroups = [ "zmin", "zmin", "zmin", "zmin", "all", "all" ];
+model.model.load.fixed.dofs = [ "dx", "dy", "dz", "rx", "ry", "rz" ];
+model.model.load.fixed.factors = [ 0., 0., 0., 0., 0., 0. ]; 
+model.model.load.impact.type = "Neumann";
+model.model.load.impact.initLoad = 0.1;
+model.model.load.impact.loadIncr = 0.;
 model.model.load.impact.nodeGroups = [ "zmax", "zmax" ];
 model.model.load.impact.dofs = [ "dx", "dy" ];
 model.model.load.impact.factors = [ 0., -1. ];
@@ -79,7 +80,7 @@ Output.pbcOut.type = "None";
 // Output.pbcOut.sampling.file = "$(CASE_NAME)/PBCOut.csv";
 
 Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/step%d_Explicit";
+Output.paraview.output_format = "$(CASE_NAME)/step%d_$(Solver.solver.type)";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.disps = params.dofNames;
 Output.paraview.beams.otherDofs = params.rotNames;

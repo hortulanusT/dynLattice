@@ -54,7 +54,7 @@ void Line3D::getGlobalPoint
     const Vector& u,
     const Matrix& c ) const
 {
-  const Vector shapeFuncs;
+  const Vector shapeFuncs ( nodeCount() );
   intLine_->evalShapeFunctions( shapeFuncs, u );
 
   x = matmul( c, shapeFuncs );

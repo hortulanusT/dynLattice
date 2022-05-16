@@ -197,11 +197,12 @@ specialCosseratRodModel::specialCosseratRodModel
   materialJp_.resize( 6, 6 ); //LATER more complex geometries
   materialJp_ = 0.0;
   materialJp_ ( TRANS_PART, TRANS_PART ) = eye() * density_ * area_; 
-  materialJp_ ( 3, 3 ) = density_ * areaMoment_; // HACK incredibly thin sheet ( compare TM3 p180)
+  materialJp_ ( 3, 3 ) = density_ * areaMoment_; // HACK incredibly thin sheet ( compare TM3 p180 ) get Steiner-Anteile
   materialJp_ ( 4, 4 ) = density_ * areaMoment_;
   materialJp_ ( 5, 5 ) = density_ * polarMoment_;
 
-  // TEST_CONTEXT ( materialC_ )
+  TEST_CONTEXT ( materialC_ )
+  TEST_CONTEXT ( materialJp_ )
 }
 
 //-----------------------------------------------------------------------
@@ -309,12 +310,12 @@ bool specialCosseratRodModel::takeAction
     assembleM_ ( *mbld, disp );
 
     // // DEBUGGING
-    // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( M, dofList, dofList );
-    // REPORT( action )
-    // TEST_CONTEXT ( M )
+    IdxVector   dofList ( dofs_->dofCount() );
+    Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    mbld->getBlock( M, dofList, dofList );
+    REPORT( action )
+    TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -938,11 +939,13 @@ void          specialCosseratRodModel::assembleM_
   IdxVector    jdofs          ( dofCount );
 
   Matrix       coords         ( rank, nodeCount );
+  Matrix       ipCoords       ( rank, ipCount );
   Vector       weights        ( ipCount );
+  Vector       distI          ( rank );
+  Vector       distJ          ( rank );
   Cubix        ipPI           ( dofCount, dofCount, ipCount );
   Matrix       shapes         ( nodeCount, ipCount );
   Matrix       spatialM       ( dofCount, dofCount );
-  Matrix       nodeFactors    ( nodeCount, nodeCount );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -951,19 +954,14 @@ void          specialCosseratRodModel::assembleM_
     allNodes_.getSomeCoords( coords, inodes );
 
     shapeM_->getIntegrationWeights( weights, coords );
+    shapeM_->getGlobalIntegrationPoints( ipCoords, coords );
     shapes = shapeM_->getShapeFunctions();
+
+    TEST_CONTEXT(weights)
+    TEST_CONTEXT(ipCoords)
     
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
     shapeM_->getPi( ipPI, nodeLambda );
-
-    spatialM = 0.0;
-    nodeFactors = 0.0;
-    
-    for (idx_t ip = 0; ip < ipCount; ip++)
-    {
-      spatialM += weights[ip] * mc3.matmul( ipPI[ip], materialJp_, ipPI[ip].transpose() );   
-      nodeFactors += matmul(shapes[ip], shapes[ip]);
-    }
 
     for (idx_t Inode = 0; Inode < nodeCount; Inode++)
     {
@@ -971,7 +969,22 @@ void          specialCosseratRodModel::assembleM_
       for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
       {
         dofs_->getDofIndices( jdofs, inodes[Jnode], jtypes_ );
-        mbld.addBlock( idofs, jdofs, (Matrix)(nodeFactors(Inode, Jnode) * spatialM) );
+        spatialM = 0.0;
+        for (idx_t ip = 0; ip < ipCount; ip++)
+        {
+          spatialM += weights[ip] * shapes( Inode, ip ) * shapes ( Jnode, ip) 
+              * mc3.matmul( ipPI[ip], materialJp_, ipPI[ip].transpose() );   
+          
+          // HACK nasty way to calculate Jy and Jx
+          if (Inode == Jnode) 
+          {
+            spatialM( 3,3 ) = weights[ip]/weights.size() * density_ * area_ *
+              ( ( weights[ip]/weights.size() * weights[ip]/weights.size() + area_ ) / 12 +
+              ( weights[ip]/weights.size() / 2 ) * ( weights[ip]/weights.size() / 2 ));
+          }
+
+          mbld.addBlock( idofs, jdofs, spatialM );
+        }        
       }
     }
   }
