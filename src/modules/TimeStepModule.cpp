@@ -382,6 +382,8 @@ void TimeStepModule::restart_ ( const Properties& globdat )
   model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
 
   matrix_ = mbuilder->getMatrix();
+
+  TEST_CONTEXT(params)
 }
 
 

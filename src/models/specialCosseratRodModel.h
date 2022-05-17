@@ -18,6 +18,7 @@
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/Quaternion.h>
+#include <jem/base/IllegalInputException.h>
 
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
@@ -99,6 +100,9 @@ class specialCosseratRodModel : public Model
   static const char*      MATERIAL_Y_DIR;
   static const char*      GIVEN_NODES;
   static const char*      GIVEN_DIRS;
+  static const char*      CROSS_SECTION;
+  static const char*      RADIUS;
+  static const char*      SIDE_LENGTH;
   static const idx_t      TRANS_DOF_COUNT;
   static const idx_t      ROT_DOF_COUNT;
   static const Slice      TRANS_PART;
@@ -264,11 +268,14 @@ class specialCosseratRodModel : public Model
   double                  shearMod_;
   double                  areaMoment_;
   double                  polarMoment_;
+  String                  cross_section_;
+  double                  radius_;
+  double                  side_length_;
   double                  shearParam_;
 
   Vector                  material_ey_;
   Matrix                  materialC_;
-  Matrix                  materialJp_; ///< moment of inertia density
+  Matrix                  materialM_; 
 
   IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
   Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)

@@ -38,6 +38,9 @@ const char*   specialCosseratRodModel::SYMMETRIC_ONLY     = "symmetric_tanget_st
 const char*   specialCosseratRodModel::MATERIAL_Y_DIR     = "material_ey";
 const char*   specialCosseratRodModel::GIVEN_NODES        = "given_dir_nodes";
 const char*   specialCosseratRodModel::GIVEN_DIRS         = "given_dir_dirs";
+const char*   specialCosseratRodModel::CROSS_SECTION      = "cross_section";
+const char*   specialCosseratRodModel::RADIUS             = "radius";
+const char*   specialCosseratRodModel::SIDE_LENGTH        = "side_length";
 const idx_t   specialCosseratRodModel::TRANS_DOF_COUNT    = 3;
 const idx_t   specialCosseratRodModel::ROT_DOF_COUNT      = 3;
 const Slice   specialCosseratRodModel::TRANS_PART         = jem::SliceFromTo ( 0, TRANS_DOF_COUNT );
@@ -139,13 +142,36 @@ specialCosseratRodModel::specialCosseratRodModel
     myProps.get ( nu, POISSION_RATIO );
     shearMod_ = young_ / 2. / ( nu + 1.);
   }
-  myProps.get ( area_,  AREA );
-  myProps.get ( areaMoment_, AREA_MOMENT);
-  polarMoment_= 2. * areaMoment_;
-  myProps.find( polarMoment_, POLAR_MOMENT);
-  shearParam_ = 5./6.; // for rectangular cross section, for circle 9/10
-  myProps.find( shearParam_, SHEAR_FACTOR);
-  density_ = 0.;
+
+  if (!myProps.find( cross_section_, CROSS_SECTION ))
+  {
+    myProps.get ( area_,  AREA );
+    myProps.get ( areaMoment_, AREA_MOMENT);
+    polarMoment_= 2. * areaMoment_;
+    myProps.find( polarMoment_, POLAR_MOMENT);
+    shearParam_ = 5./6.; // for rectangular cross section, for circle 9/10
+    myProps.find( shearParam_, SHEAR_FACTOR);
+    density_ = 0.;
+  } 
+  else if (cross_section_ == "square")
+  {
+    myProps.get( side_length_, SIDE_LENGTH );
+    area_ = pow(side_length_, 2);
+    areaMoment_ = pow(side_length_, 4) / 12.;
+    polarMoment_ = 2 * areaMoment_;
+    shearParam_ = 5./6.;
+  }
+  else if (cross_section_ == "circle")
+  {
+    myProps.get( radius_, RADIUS );
+    area_ = PI * pow(radius_, 2);
+    areaMoment_ = PI * pow(side_length_, 4) / 4.;
+    polarMoment_ = 2 * areaMoment_;
+    shearParam_ = 9./10.;
+  }
+  else
+    throw jem::IllegalInputException( getContext(), "unknown cross section, only 'square' and 'circle' are supported");
+
   myProps.find( density_, DENSITY);
 
   // Report the used material parameters.
@@ -194,15 +220,11 @@ specialCosseratRodModel::specialCosseratRodModel
   materialC_ ( 4, 4 ) = young_ * areaMoment_;
   materialC_ ( 5, 5 ) = shearMod_ * polarMoment_;
 
-  materialJp_.resize( 6, 6 ); //LATER more complex geometries
-  materialJp_ = 0.0;
-  materialJp_ ( TRANS_PART, TRANS_PART ) = eye() * density_ * area_; 
-  materialJp_ ( 3, 3 ) = density_ * areaMoment_; // HACK incredibly thin sheet ( compare TM3 p180 ) get Steiner-Anteile
-  materialJp_ ( 4, 4 ) = density_ * areaMoment_;
-  materialJp_ ( 5, 5 ) = density_ * polarMoment_;
+  materialM_.resize( 3, 3 ); 
+  materialM_ = eye() * density_ * area_; 
 
-  TEST_CONTEXT ( materialC_ )
-  TEST_CONTEXT ( materialJp_ )
+  // TEST_CONTEXT ( materialC_ )
+  // TEST_CONTEXT ( materialM_ )
 }
 
 //-----------------------------------------------------------------------
@@ -310,12 +332,12 @@ bool specialCosseratRodModel::takeAction
     assembleM_ ( *mbld, disp );
 
     // // DEBUGGING
-    IdxVector   dofList ( dofs_->dofCount() );
-    Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
-    for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    mbld->getBlock( M, dofList, dofList );
-    REPORT( action )
-    TEST_CONTEXT ( M )
+    // IdxVector   dofList ( dofs_->dofCount() );
+    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    // mbld->getBlock( M, dofList, dofList );
+    // REPORT( action )
+    // TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -921,7 +943,8 @@ void          specialCosseratRodModel::assembleM_
   ( MatrixBuilder&        mbld,
     Vector&               disp ) const
 {
-  WARN_ASSERT2( density_ > 0, "Mass Matrix will have no effect without density!")
+  JEM_ASSERT2( cross_section_ == "square" || cross_section_ == "circle", "Mass Matrix cannot be constructed without knowing the type of crossection");
+  WARN_ASSERT2( density_ > 0, "Mass Matrix will have no effect without density!");
   MatmulChain<double, 3>      mc3;
   
   const idx_t  ipCount        = shapeM_->ipointCount ();
@@ -940,12 +963,15 @@ void          specialCosseratRodModel::assembleM_
 
   Matrix       coords         ( rank, nodeCount );
   Matrix       ipCoords       ( rank, ipCount );
+  double       node_len;
   Vector       weights        ( ipCount );
   Vector       distI          ( rank );
   Vector       distJ          ( rank );
-  Cubix        ipPI           ( dofCount, dofCount, ipCount );
+  Cubix        ipLambda       ( rank, rank, ipCount );
   Matrix       shapes         ( nodeCount, ipCount );
-  Matrix       spatialM       ( dofCount, dofCount );
+  Matrix       spatialM       ( rank, rank );
+  Matrix       materialJ      ( rank, rank );
+  Matrix       spatialJ       ( rank, rank );
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -954,14 +980,12 @@ void          specialCosseratRodModel::assembleM_
     allNodes_.getSomeCoords( coords, inodes );
 
     shapeM_->getIntegrationWeights( weights, coords );
-    shapeM_->getGlobalIntegrationPoints( ipCoords, coords );
     shapes = shapeM_->getShapeFunctions();
 
-    TEST_CONTEXT(weights)
-    TEST_CONTEXT(ipCoords)
+    // TEST_CONTEXT(weights)
     
     get_disps_ ( nodePhi_0, nodeU, nodeLambda, disp, inodes );
-    shapeM_->getPi( ipPI, nodeLambda );
+    shapeM_->getRotations( ipLambda, nodeLambda );
 
     for (idx_t Inode = 0; Inode < nodeCount; Inode++)
     {
@@ -973,18 +997,40 @@ void          specialCosseratRodModel::assembleM_
         for (idx_t ip = 0; ip < ipCount; ip++)
         {
           spatialM += weights[ip] * shapes( Inode, ip ) * shapes ( Jnode, ip) 
-              * mc3.matmul( ipPI[ip], materialJp_, ipPI[ip].transpose() );   
+              * mc3.matmul( ipLambda[ip], materialM_, ipLambda[ip].transpose() );   
+
+          mbld.addBlock( idofs[TRANS_PART], jdofs[TRANS_PART], spatialM );
+        }        
+
+        materialJ = 0.0;
+        node_len = 0.0;
+        if (Inode == Jnode) // TODO find some nicer expression for this
+        {
+          if (Inode == 0)                 node_len = norm2(coords[1] - coords[0])/2.;
+          else if (Inode == nodeCount-1)  node_len = norm2(coords[nodeCount-1] - coords[nodeCount-2])/2.;
+          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/2.;         
           
-          // HACK nasty way to calculate Jy and Jx
-          if (Inode == Jnode) 
+          if (cross_section_ == "circle")
           {
-            spatialM( 3,3 ) = weights[ip]/weights.size() * density_ * area_ *
-              ( ( weights[ip]/weights.size() * weights[ip]/weights.size() + area_ ) / 12 +
-              ( weights[ip]/weights.size() / 2 ) * ( weights[ip]/weights.size() / 2 ));
+            materialJ( 0,0 ) = materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(radius_,2)*3 + pow(node_len, 2));
+            materialJ( 2,2 ) = density_*area_*node_len / 2. * pow(radius_,2); 
+          }
+          if (cross_section_ == "square")
+          {
+            materialJ( 0,0 ) = materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
+            materialJ( 2,2 ) = density_*area_*node_len / 6. * pow(side_length_, 2);
           }
 
-          mbld.addBlock( idofs, jdofs, spatialM );
-        }        
+          if ( Inode == 0 || Inode == nodeCount-1 )
+          {
+            materialJ( 0,0 ) += density_*area_*node_len * pow(node_len/2., 2);
+            materialJ( 1,1 ) += density_*area_*node_len * pow(node_len/2., 2);
+          }
+
+          spatialJ = mc3.matmul( nodeLambda[Inode], materialJ, nodeLambda[Inode].transpose() );
+
+          mbld.addBlock( idofs[ROT_PART], jdofs[ROT_PART], spatialJ );
+        }
       }
     }
   }
