@@ -10,6 +10,8 @@
 #include "models/NeumannModel.h"
 #include "models/PeriodicBCModel.h"
 #include "models/FollowerLoadModel.h"
+#include "models/LatticeModel.h"
+#include "models/InitLoadModel.h"
 
 //-----------------------------------------------------------------------
 //   declareModels
@@ -27,4 +29,6 @@ void declareModels ()
   FollowerLoadModel::declare      ();
   DirichletModel::declare         ();
   NeumannModel::declare           ();
+  LatticeModel::declare           ();
+  InitLoadModel::declare          ();
 }

@@ -39,6 +39,3 @@ params.force_model_disp.factors = -1.;
 include "input.pro";
 include "model.pro";
 include "output.pro";
-
-Input.groupInput.free.restrictToGroup = "joints";
-Input.groupInput.free.restrictPartial = 0;

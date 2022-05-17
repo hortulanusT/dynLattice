@@ -3,18 +3,18 @@
 - Sort out time plan for the future
 - Implement Dynamics
   - Rotational Inertia
-  - Adaptive Time-Stepping(?)
+    - no reduced integration for mass matrices
+  - Adaptive Time-Stepping
 - Find Test-Cases for Dynamic Beams
 ## Code
 1. Models
-    - Mesh Model
-      - consisting out of multiple Rod-Modules as child
-      - adapt input to represent this
     - Rod Model
+      - Better way of giving geometry
       - Mixed collocation?
+    - PBC Model
+      - proper adressing of H in the boundary conditions (allow for mixed loadings)
+      - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
 2. Modules
-    - GMSHInputModule with gmsh C++ API
-      - export mesh so it may be reimported with the regular FEInput module (for documentation purposes)
     - ParaviewOutputModule
       - write wrapper file for exported files ~ `.pvd`
     - PBC Output extent other side
@@ -25,9 +25,9 @@
       - HDF5 output `pandas`-format
       - write variables to the `.res` files
 4. Environment
-    - move test-cases to makefile targets
     - move studies to makefile targets
     - investigate options for parallel computing
+    - add .cpp for all headers...
  
 # :heavy_check_mark: Information
 ## debugging

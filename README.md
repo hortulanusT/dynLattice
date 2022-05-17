@@ -14,27 +14,28 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ├── README.md
 ├── NOTES.md
 ├── Makefile
-├── bin             <- Compiled and external code, ignored by git
+├── bin                 <- Compiled and external code, ignored by git
 ├── src
-│   ├── main.cpp    <- origin file for the JEM/JIVE program
-│   ├── models      <- custom JIVE models
-│   ├── modules     <- custom JIVE modules
-│   ├── shapes      <- custom JIVE shapes
-│   └── utils       <- utility functions and macros
+│   ├── main.cpp        <- origin file for the JEM/JIVE program
+│   ├── models          <- custom JIVE models
+│   ├── modules         <- custom JIVE modules
+│   ├── misc            <- other custom JIVE files
+│   └── utils           <- utility functions and macros
 ├── scripts
-│   ├── testing     <- ptyhon scripts for some testing runs
-│   ├── running     <- ptyhon scripts for the real runs
+│   ├── testing         <- ptyhon scripts for some testing runs
+│   ├── running         <- ptyhon scripts for the real runs
 ├── tests
-│   ├── testing.mk  <- makefile for testing setup
-│   ├── element     <- test setups for single elments
-│   └── beam        <- tests from the Simo/Vu-Quoc Paper
+│   ├── testing.mk      <- makefile for testing setup
+│   ├── element         <- test setups for single elments
+│   └── beam            <- tests from the Simo/Vu-Quoc Paper
 └── studies
-    ├── configs     <- folder containing some standard settings
-    ├── <study>.pro <- main input file for each and every study
-    └── <study>     <- all the studies to be conducted (containing raw outputs)
-        ├── input   <- other input files for the study
-        ├── output  <- raw data output
-        └── results <- processed results
+    ├── running.mk      <- makefile for running studies
+    ├── configs         <- folder containing some standard settings
+    └── <class>         <- folder for geometry classes (re-entrant, arrow3D, ...)
+        ├── geom.geo    <- GMSH .geo file describing the geometry
+        ├── <case>.pro  <- cases to run with this geometry
+        ├── output      <- raw data output
+        └── results     <- processed results
 ```
 
 

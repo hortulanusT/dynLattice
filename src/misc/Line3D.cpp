@@ -54,10 +54,22 @@ void Line3D::getGlobalPoint
     const Vector& u,
     const Matrix& c ) const
 {
-  const Vector shapeFuncs;
+  const Vector shapeFuncs ( nodeCount() );
   intLine_->evalShapeFunctions( shapeFuncs, u );
 
   x = matmul( c, shapeFuncs );
+}
+
+void Line3D::getIntegrationWeights
+  ( const Vector& w,
+    const Matrix& c ) const
+{
+  Matrix c1( localRank(), nodeCount() );
+  c1( 0,0 ) = 0.;
+  for (idx_t iNode = 1; iNode < nodeCount(); iNode++) //LATER get something more elaborate that also includes real shapes for higher order elements
+    c1[iNode][0] = norm2( c[iNode] - c[iNode-1] ) + c1[iNode-1][0];
+
+  intLine_->getIntegrationWeights( w, c1 );
 }
 
 void Line3D::getShapeGradients
@@ -93,7 +105,7 @@ void Line3D::getRotations
   // get the rotation vectors associated with the local rotations
   ip_psi  = matmul( node_psi, shapeFuncs );
   
-  // construc the local rotation matrices
+  // construct the local rotation matrices
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec( Ri[iIp], ip_psi[iIp] );

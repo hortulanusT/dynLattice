@@ -54,7 +54,7 @@ namespace jive_helpers
     ( const Matrix& Exp,
       const Vector& psi )
   {
-    // TEST_NO_CONTEXT(psi)
+    // TEST_NO_CONTEXT(Exp)
     Exp                   = eye();
     const double theta    = norm2(psi);
 

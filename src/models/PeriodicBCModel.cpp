@@ -254,11 +254,13 @@ void      periodicBCModel::setConstraints_
         continue;// if the dispGrad for this is not configured, skip it
         
       Globdat::getVariables( "all.extent", globdat ).get( extent, dofNames_[iDir]);
+      // TEST_CONTEXT( extent )
 
       System::info( myName_ ) << " ...Applying strain in direction of " << dofNames_[iDof] << "\n";
       System::info( myName_ ) << "      of magnitude " << scale*grad_(iDof, iDir) << "\n";
       System::info( myName_ ) << "      between " << PBCGroupInputModule::EDGES[2*iEdge] << " and " << PBCGroupInputModule::EDGES[2*iEdge+1] << " \n";
       
+      // TEST_CONTEXT( scale*grad_(iDof, iDir)*extent )
       for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size(); iNode++)
       {
         // set the slave DOFs to the prescribed strain

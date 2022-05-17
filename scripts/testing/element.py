@@ -24,7 +24,7 @@ bending_v = lambda d: (1-math.cos(d))/d
 ideal_disp = {eDir:{} for eDir in ["x","y","z"]}
 ideal_resp = {}
 
-# FIXME find some expressions for point force bending
+# TODO find some expressions for point force bending
 ideal_disp["x"]["dx"] = np.array([[d, 0, 0, 0, 0, 0] for d in displs])
 ideal_disp["x"]["dy"] = np.array([[math.nan, math.nan, math.nan, math.nan, math.nan, math.nan] for _ in displs])
 ideal_disp["x"]["dz"] = np.array([[math.nan, math.nan, math.nan, math.nan, math.nan, math.nan] for _ in displs])
@@ -64,8 +64,8 @@ for lDir in load_dir:
   for lTyp in load_typ:    
     # compare it with desired results
     try:
-      sim_disp = np.loadtxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-disp.res")
-      sim_resp = np.loadtxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-resp.res")
+      sim_disp = np.loadtxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-disp.csv")
+      sim_resp = np.loadtxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-resp.csv")
     except:
       test_runs[lTyp+"_"+lDir] = ">< FAIL ><"
       continue
@@ -85,8 +85,8 @@ for lDir in load_dir:
       test_runs[lTyp+"_"+lDir] = "_ALL_Diff_"
 
     if "Diff" in test_runs[lTyp+"_"+lDir] or "???" == test_runs[lTyp+"_"+lDir]:
-      np.savetxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-disp-ana.res", ideal_disp[elem_dir][lDir], fmt="%16.8e")
-      np.savetxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-resp-ana.res", ideal_resp[lDir], fmt="%16.8e")
+      np.savetxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-disp-ana.csv", ideal_disp[elem_dir][lDir], fmt="%16.8e")
+      np.savetxt(f"tests/element/runs/{sys.argv[1]}_{lTyp}_{lDir}-resp-ana.csv", ideal_resp[lDir], fmt="%16.8e")
 
 # finishing
 with open(f"tests/element/result_{sys.argv[1]}.txt", "w") as result_file:

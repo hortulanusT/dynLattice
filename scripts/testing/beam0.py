@@ -23,7 +23,7 @@ try:
   idx_max = sim_resp[:,1].argmax()
   idx_min = sim_resp[:,1].argmin()
 
-  test_passed = idx_min < len(sim_disp[:,1])/2 < idx_max and np.abs(np.interp( 0.2, -1*sim_disp[:,1], sim_resp[:,1])) < 0.1
+  test_passed = idx_min < len(sim_disp[:,1])/2 < idx_max and np.abs(np.interp( 0.2, -1*sim_disp[:,1], sim_resp[:,1])) < 1
 except:
   pass
 

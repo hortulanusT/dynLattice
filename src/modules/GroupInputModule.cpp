@@ -238,8 +238,8 @@ void GroupInputModule::NGroup_::configure
     restrictTo_.resize ( 1 );
     restrictTo_[0] = restrictTo1;
 
-    myProps.find ( restrictPartial_, "restrictPartial" );
-    myConf.set   ( "restrictPartial", restrictPartial_ );
+    if ( myProps.find ( restrictPartial_, "restrictPartial" ) )
+      myConf .set   ( "restrictPartial", restrictPartial_ );
   }
   else
   {

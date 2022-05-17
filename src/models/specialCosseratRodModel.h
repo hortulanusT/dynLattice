@@ -18,9 +18,11 @@
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/Quaternion.h>
+#include <jem/base/IllegalInputException.h>
 
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
+#include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/Model.h>
 #include <jive/model/Actions.h>
@@ -29,13 +31,16 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/XDofSpace.h>
 #include <jive/util/Printer.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/utilities.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/NodeGroup.h>
 
 #include <math.h>
 
-#include "shapes/Line3D.h"
+#include "misc/Line3D.h"
 #include "utils/testing.h"
 #include "utils/helpers.h"
 
@@ -48,14 +53,19 @@ using jem::numeric::MatmulChain;
 using jem::numeric::Quaternion;
 
 using jive::algebra::MatrixBuilder;
+using jive::algebra::FlexMBuilder;
 using jive::model::Model;
 using jive::util::XTable;
 using jive::util::Assignable;
 using jive::util::XDofSpace;
 using jive::util::DofSpace;
+using jive::util::Globdat;
+using jive::util::joinNames;
 using jive::fem::NodeSet;
 using jive::fem::ElementSet;
 using jive::fem::ElementGroup;
+using jive::fem::NodeGroup;
+using jive::fem::newNodeGroup;
 using jive::geom::IShape;
 using jive::geom::ShapeFactory;
 
@@ -90,6 +100,9 @@ class specialCosseratRodModel : public Model
   static const char*      MATERIAL_Y_DIR;
   static const char*      GIVEN_NODES;
   static const char*      GIVEN_DIRS;
+  static const char*      CROSS_SECTION;
+  static const char*      RADIUS;
+  static const char*      SIDE_LENGTH;
   static const idx_t      TRANS_DOF_COUNT;
   static const idx_t      ROT_DOF_COUNT;
   static const Slice      TRANS_PART;
@@ -142,12 +155,26 @@ class specialCosseratRodModel : public Model
     const Vector&         disp,
     const Vector&         dispOld  ) const;
 
+
+  /**
+   * @brief construct the gyroscopic forces (omega x Theta*omega)
+   * @param[out] fgyro gyroscopic force Vector
+   * @param[in]  velo current values for the DOF - velocities 
+   * @param[in]  mbld current mass matrix
+   */
+  void                    assembleGyro_
+  ( const Vector&         fint,
+    const Vector&         velo,
+    MatrixBuilder&        mbld  ) const;
+
   /**
    * @brief assemble the mass matrix 
    * @param[out] mbld mass matrix 
+   * @param[in]  disp current values for the DOFs 
    */
   void                    assembleM_
-  ( MatrixBuilder&        mbld ) const;
+  ( MatrixBuilder&        mbld,
+    Vector&               disp ) const;
 
   /**
    * @brief fill the table with the strain values per element 
@@ -219,14 +246,17 @@ class specialCosseratRodModel : public Model
     ( const Matrix&       nodePhi_0,
       const Matrix&       nodeU,
       const Cubix&        nodeLambda,
-      const Vector&       disp  ) const;
+      const Vector&       disp,
+      const IdxVector&    inodes  ) const;
 
  private: 
-  Assignable<ElementGroup>rodGroup_;
-  Assignable<NodeSet>     allNodes_;
+  Assignable<ElementGroup>rodElems_;
+  IdxVector               rodNodes_;
   Assignable<ElementSet>  allElems_;
+  Assignable<NodeSet>     allNodes_;
   Ref<DofSpace>           dofs_;
-  Ref<Line3D>             shape_;
+  Ref<Line3D>             shapeK_;
+  Ref<Line3D>             shapeM_;
   IdxVector               trans_types_;
   IdxVector               rot_types_;
   IdxVector               jtypes_;
@@ -238,10 +268,14 @@ class specialCosseratRodModel : public Model
   double                  shearMod_;
   double                  areaMoment_;
   double                  polarMoment_;
+  String                  cross_section_;
+  double                  radius_;
+  double                  side_length_;
   double                  shearParam_;
 
   Vector                  material_ey_;
   Matrix                  materialC_;
+  Matrix                  materialM_; 
 
   IdxVector               givenNodes_; ///< given directions for nodes (especially end-nodes)
   Matrix                  givenDirs_; ///< given directions for nodes (especially end-nodes)
