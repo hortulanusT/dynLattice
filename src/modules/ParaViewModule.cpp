@@ -125,17 +125,20 @@ Module::Status     ParaViewModule::run
   currentFile = currentFile + "." + fileType_;
 
   // write everything to file
-  if ( currentStep % report_intervall_ == 0) writeFile_ ( currentFile, globdat );
+  if ( currentStep % report_intervall_ == 0)
+  {
+    writeFile_ ( currentFile, globdat );
 
-  // report file to pvd
-  if (! globdat.find ( currentTime, Globdat::TIME )) currentTime = currentStep;
-  folder_sep    = currentFile.rfind( "/" ) + 1; // TODO make compatible with other OS's?
+    // report file to pvd
+    if (! globdat.find ( currentTime, Globdat::TIME )) currentTime = currentStep;
+    folder_sep    = currentFile.rfind( "/" ) + 1; // TODO make compatible with other OS's?
 
-  *pvd_printer_ << "<DataSet ";
-  *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
-  *pvd_printer_ << "group=\"\" part=\"0\" ";
-  *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)] << "\" ";
-  *pvd_printer_ << "/>" << endl;
+    *pvd_printer_ << "<DataSet ";
+    *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
+    *pvd_printer_ << "group=\"\" part=\"0\" ";
+    *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)] << "\" ";
+    *pvd_printer_ << "/>" << endl;
+  }
 
   return OK;
 }
