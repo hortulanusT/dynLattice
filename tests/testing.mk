@@ -72,7 +72,7 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 
 # CLEAN UP THE TESTS
 clean-tests :
-	@$(RM_R) tets/manual/visual
+	@$(RM_R) tets/manual/testing
 	@$(RM) tets/manual/*.csv
 	@$(RM) tets/manual/*.log
 	@$(RM_R) tests/element/runs
