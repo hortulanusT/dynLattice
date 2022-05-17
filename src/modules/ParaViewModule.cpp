@@ -90,7 +90,7 @@ Module::Status    ParaViewModule::init
 
   // write the pvd file
   String            pvdName   = String::format ( makeCString(nameFormat_).addr(), 0) + ".pvd";
-  idx_t             format_pos= pvdName.find( "0" );
+  idx_t             format_pos= pvdName.rfind( "0" );
                     pvdName   = pvdName[SliceTo(format_pos)] + pvdName[SliceFrom(format_pos+1)];
   Ref<Writer>       pvd_raw   = newInstance<FileWriter>  ( pvdName );
   pvd_printer_                = newInstance<PrintWriter> ( pvd_raw );
