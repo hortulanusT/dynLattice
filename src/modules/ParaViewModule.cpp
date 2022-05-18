@@ -91,15 +91,20 @@ Module::Status    ParaViewModule::init
   // write the pvd file
   String            pvdName   = String::format ( makeCString(nameFormat_).addr(), 0) + ".pvd";
   idx_t             format_pos= pvdName.rfind( "0" );
-                    pvdName   = pvdName[SliceTo(format_pos)] + pvdName[SliceFrom(format_pos+1)];
-  Ref<Writer>       pvd_raw   = newInstance<FileWriter>  ( pvdName );
-  pvd_printer_                = newInstance<PrintWriter> ( pvd_raw );
+  if (format_pos > 0)
+  {
+                pvdName       = pvdName[SliceTo(format_pos)] + pvdName[SliceFrom(format_pos+1)];
+    Ref<Writer> pvd_raw       = newInstance<FileWriter>  ( pvdName );
+                pvd_printer_  = newInstance<PrintWriter> ( pvd_raw );
 
-  *pvd_printer_ << "<?xml version=\"1.0\"?>" << endl;
-  *pvd_printer_ << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
-  pvd_printer_->incrIndentLevel();
-  *pvd_printer_ << "<Collection>" << endl;
-  pvd_printer_->incrIndentLevel();
+    *pvd_printer_ << "<?xml version=\"1.0\"?>" << endl;
+    *pvd_printer_ << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
+    pvd_printer_->incrIndentLevel();
+    *pvd_printer_ << "<Collection>" << endl;
+    pvd_printer_->incrIndentLevel();
+  }
+  else
+    pvd_printer_ = nullptr;
 
   return OK;
 }
@@ -133,11 +138,14 @@ Module::Status     ParaViewModule::run
     if (! globdat.find ( currentTime, Globdat::TIME )) currentTime = currentStep;
     folder_sep    = currentFile.rfind( "/" ) + 1; // TODO make compatible with other OS's?
 
-    *pvd_printer_ << "<DataSet ";
-    *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
-    *pvd_printer_ << "group=\"\" part=\"0\" ";
-    *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)] << "\" ";
-    *pvd_printer_ << "/>" << endl;
+    if (pvd_printer_)
+    {
+      *pvd_printer_ << "<DataSet ";
+      *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
+      *pvd_printer_ << "group=\"\" part=\"0\" ";
+      *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)] << "\" ";
+      *pvd_printer_ << "/>" << endl;
+    }
   }
 
   return OK;
@@ -151,12 +159,15 @@ void    ParaViewModule::shutdown
 
     ( const Properties&        globdat )
 {
-  pvd_printer_->decrIndentLevel();
-  *pvd_printer_ << "</Collection>" << endl;
-  pvd_printer_->decrIndentLevel();
-  *pvd_printer_ << "</VTKFile>" << endl;
+  if (pvd_printer_)
+  {
+    pvd_printer_->decrIndentLevel();
+    *pvd_printer_ << "</Collection>" << endl;
+    pvd_printer_->decrIndentLevel();
+    *pvd_printer_ << "</VTKFile>" << endl;
 
-  pvd_printer_->close();
+    pvd_printer_->close();
+  }
 }
 
 //-----------------------------------------------------------------------
