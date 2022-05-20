@@ -26,6 +26,7 @@ using jem::io::endl;
 
 using jive::fem::NodeGroup;
 using jive::model::Actions;
+using jive::model::ActionParams;
 using jive::util::XDofSpace;
 
 
@@ -107,47 +108,54 @@ bool DirichletModel::takeAction
   // apply displacement increment
 
   if ( action == Actions::GET_CONSTRAINTS )
-  {
+  {    
+    if (method_ == LOADSCALE) 
+      params.get( dispScale_, ActionParams::SCALE_FACTOR );
+    
     applyConstraints_ ( params, globdat );
 
     return true;
   }
 
-  // check state
-
-  if ( action == SolverNames::CHECK_COMMIT )
+  if ( method_ != LOADSCALE)
   {
-    checkCommit_ ( params, globdat );
+    // check state
 
-    return true;
+    if ( action == SolverNames::CHECK_COMMIT )
+    {
+      checkCommit_ ( params, globdat );
+
+      return true;
+    }
+
+    // proceed to next time step
+
+    if ( action == Actions::COMMIT )
+    {
+      commit_ ( params, globdat );
+
+      return true;
+    }
+
+    // advance to next time step
+
+    if ( action == Actions::ADVANCE )
+    {
+      globdat.set ( "var.accepted", true );
+
+      advance_ ( globdat );
+
+      return true;
+    }
+
+    // adapt step size
+
+    else if ( action == SolverNames::SET_STEP_SIZE )
+    {
+      setDT_ ( params );
+    }
   }
 
-  // proceed to next time step
-
-  if ( action == Actions::COMMIT )
-  {
-    commit_ ( params, globdat );
-
-    return true;
-  }
-
-  // advance to next time step
-
-  if ( action == Actions::ADVANCE )
-  {
-    globdat.set ( "var.accepted", true );
-
-    advance_ ( globdat );
-
-    return true;
-  }
-
-  // adapt step size
-
-  else if ( action == SolverNames::SET_STEP_SIZE )
-  {
-    setDT_ ( params );
-  }
   return false;
 }
 
@@ -173,14 +181,17 @@ void DirichletModel::configure
     method_     = RATE;
     dispScale0_ = dispScale_ = 0.;
   }
-  else
+  else if ( myProps.find( dispIncr0_, DISP_INCR_PROP ) )
   {
     myProps.find ( initDisp_,  INIT_DISP_PROP );
-    myProps.get ( dispIncr0_, DISP_INCR_PROP );
 
     method_     = INCREMENT;
     dispIncr_   = dispIncr0_;
     dispScale0_ = dispScale_ = initDisp_ - dispIncr0_;  // cancel first increment
+  }
+  else
+  {
+    method_     = LOADSCALE;
   }
 
   myProps.find ( maxDispVal_,  MAX_DISP_PROP, 0.0, maxD );
@@ -233,14 +244,19 @@ void DirichletModel::getConfig
 {
   Properties  myConf = conf.makeProps ( myName_ );
 
-  if ( method_ == INCREMENT )
+  switch (method_)
   {
+  case INCREMENT:
     myConf.set ( DISP_INCR_PROP, dispIncr0_  );
     myConf.set ( INIT_DISP_PROP, initDisp_   );
-  }
-  else
-  {
+    break;
+  
+  case RATE:    
     myConf.set ( DISP_RATE_PROP, dispRate_   );
+    break;
+
+  default:
+    break;
   }
 
   myConf.set ( MAX_DISP_PROP,  maxDispVal_   );

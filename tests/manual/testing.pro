@@ -34,7 +34,7 @@ Solver.modules = [ "solver" ];
 Solver.solver.deltaTime = 5e-6;
 // Solver.solver.type = "Newmark";
 // Solver.solver.solver.type = "Nonlin";
-Solver.solver.type = "Explicit";
+Solver.solver.type = "EulerForward";
 
 // ACTUAL MODEL
 model.type = "Matrix";
@@ -58,22 +58,22 @@ model.model.lattice.child.dofNamesTrans = params.dofNames;
 model.model.lattice.child.dofNamesRot = params.rotNames;
 
 model.model.load.type = "Multi";
-model.model.load.models = [ "fixed", "impact" ];
+model.model.load.models = [ "fixed", "impact", "initial" ];
 model.model.load.fixed.type = "Dirichlet";
 model.model.load.fixed.dispIncr = 0.;
 model.model.load.fixed.nodeGroups = [ "all", "zmin", "zmin", "zmin", "all", "all" ];
 model.model.load.fixed.dofs = [ "dx", "dy", "dz", "rx", "ry", "rz" ];
 model.model.load.fixed.factors = [ 0., 0., 0., 0., 0., 0. ]; 
-// model.model.load.impact.type = "InitLoad";
-// model.model.load.impact.veloGroups = "zmax";
-// model.model.load.impact.veloDofs = "dy";
-// model.model.load.impact.veloVals = 200.;
-model.model.load.impact.type = "Dirichlet";
-model.model.load.impact.initDisp = 1e4;
-model.model.load.impact.dispIncr = -1e1;
-model.model.load.impact.nodeGroups = [ "zmax" ];
-model.model.load.impact.dofs = [ "dy" ];
-model.model.load.impact.factors = [ 1. ]; 
+model.model.load.impact.type = "LoadScale";
+model.model.load.impact.scaleFunc = "-0.1 * (80*PI)^2 * sin(80*PI * t)";
+model.model.load.impact.model.type = "Dirichlet";
+model.model.load.impact.model.nodeGroups = [ "zmax" ];
+model.model.load.impact.model.dofs = [ "dy" ];
+model.model.load.impact.model.factors = [ 1. ]; 
+model.model.load.initial.type = "InitLoad";
+model.model.load.initial.veloGroups = "zmax";
+model.model.load.initial.veloDofs = "dy";
+model.model.load.initial.veloVals = "0.1 * (80*PI)";
 
 
 // OUTPUTS
