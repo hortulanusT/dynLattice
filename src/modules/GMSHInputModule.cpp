@@ -1,3 +1,7 @@
+// Possible Issues:
+// - Conversion of node numbering between GMSH and JIVE
+//
+
 #include "GMSHInputModule.h"
 
 //=======================================================================
