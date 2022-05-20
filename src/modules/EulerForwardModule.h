@@ -2,9 +2,26 @@
 
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/app/Module.h>
-#include <jive/util/DofSpace.h>
 #include <jive/solver/Solver.h>
 #include <jive/implict/Names.h>
+#include <jem/base/array/operators.h>
+#include <jem/util/Event.h>
+#include <jem/util/Properties.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/Constraints.h>
+#include <jive/app/ModuleFactory.h>
+#include <jive/implict/utilities.h>
+#include <jive/model/Model.h>
+#include <jive/model/Actions.h>
+#include <jive/model/StateVector.h>
+#include <jive/solver/declare.h>
+#include <jive/solver/utilities.h>
+#include <jive/solver/SolverParams.h>
+
+using jem::newInstance;
+using jem::NIL;
+using jem::idx_t;
 
 using jive::Vector;
 using jive::Ref;
@@ -15,22 +32,29 @@ using jive::app::Module;
 using jive::model::Model;
 using jive::util::DofSpace;
 using jive::solver::Solver;
+using jive::solver::newSolver;
+using jive::util::Constraints;
+using jive::util::Globdat;
+using jive::model::Actions;
+using jive::model::ActionParams;
+using jive::model::StateVector;
+using jive::implict::newSolverParams;
 
 //-----------------------------------------------------------------------
-//   class TimeStepModule
+//   class EulerForwardModule
 //-----------------------------------------------------------------------
 
 
-class TimeStepModule : public Module
+class EulerForwardModule : public Module
 {
  public:
 
   typedef Module            Super;
-  typedef TimeStepModule    Self;
+  typedef EulerForwardModule    Self;
 
-  explicit                  TimeStepModule
+  explicit                  EulerForwardModule
 
-    ( const String&           name = "step" );
+    ( const String&           name = "EulerForward" );
 
   virtual Status            init
 
@@ -67,7 +91,7 @@ class TimeStepModule : public Module
 
  protected:
 
-  virtual                  ~TimeStepModule  ();
+  virtual                  ~EulerForwardModule  ();
 
 
  private:
@@ -81,15 +105,9 @@ class TimeStepModule : public Module
 
  private:
 
-  bool                      lumped_;
+  bool                      valid_;
   Ref<Model>                model_;
   Ref<DofSpace>             dofs_;
-  Vector                    rmass_;
   double                    dtime_;
-  int                       istep_;
-  int                       dofCount_;
-  int                       interval_;
-
   Ref<Solver>               solver_;
-  Ref<AbstractMatrix>       matrix_;
 };

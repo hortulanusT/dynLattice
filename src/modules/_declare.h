@@ -23,7 +23,7 @@
 #include "modules/GroupOutputModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
-#include "modules/TimeStepModule.h"
+#include "modules/EulerForwardModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules
@@ -41,5 +41,5 @@ void declareModules ()
   PBCGroupOutputModule::declare  ();
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
-  TimeStepModule::declare        ();
+  EulerForwardModule::declare    ();
 }

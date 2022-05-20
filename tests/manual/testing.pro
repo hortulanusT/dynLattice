@@ -32,12 +32,13 @@ Input.nodeInput.corners = false;
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.deltaTime = 5e-6;
-Solver.solver.type = "Newmark";
-Solver.solver.solver.type = "Nonlin";
-// Solver.solver.type = "Explicit";
+// Solver.solver.type = "Newmark";
+// Solver.solver.solver.type = "Nonlin";
+Solver.solver.type = "Explicit";
 
 // ACTUAL MODEL
 model.type = "Matrix";
+model.matrix2.type = "Lumped";
 model.model.type = "Multi";
 model.model.models = [ "lattice", "load" ];
 
@@ -63,10 +64,17 @@ model.model.load.fixed.dispIncr = 0.;
 model.model.load.fixed.nodeGroups = [ "all", "zmin", "zmin", "zmin", "all", "all" ];
 model.model.load.fixed.dofs = [ "dx", "dy", "dz", "rx", "ry", "rz" ];
 model.model.load.fixed.factors = [ 0., 0., 0., 0., 0., 0. ]; 
-model.model.load.impact.type = "InitLoad";
-model.model.load.impact.veloGroups = "zmax";
-model.model.load.impact.veloDofs = "dy";
-model.model.load.impact.veloVals = 200.;
+// model.model.load.impact.type = "InitLoad";
+// model.model.load.impact.veloGroups = "zmax";
+// model.model.load.impact.veloDofs = "dy";
+// model.model.load.impact.veloVals = 200.;
+model.model.load.impact.type = "Dirichlet";
+model.model.load.impact.initDisp = 1e4;
+model.model.load.impact.dispIncr = -1e1;
+model.model.load.impact.nodeGroups = [ "zmax" ];
+model.model.load.impact.dofs = [ "dy" ];
+model.model.load.impact.factors = [ 1. ]; 
+
 
 // OUTPUTS
 Output.modules = [ "pbcOut", "paraview" ];
