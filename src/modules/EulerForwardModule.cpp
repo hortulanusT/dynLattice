@@ -6,10 +6,11 @@
 //   class EulerForwardModule
 //=======================================================================
 
+const char* EulerForwardModule::TYPE_NAME = "EulerForward";
+
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
-
 
 EulerForwardModule::EulerForwardModule 
 
@@ -18,7 +19,8 @@ EulerForwardModule::EulerForwardModule
   Super ( name )
 
 {
-  dtime_  =  1.0;
+  dtime_  = 1.0;
+  valid_  = false;
 }
 
 
@@ -64,17 +66,12 @@ Module::Status EulerForwardModule::init
   jive::solver::declareSolvers();
 
   Ref<Constraints> cons = Constraints::find ( dofs_, globdat );
-
   params.set ( ActionParams::CONSTRAINTS, cons );
-
   model_->takeAction ( Actions::NEW_MATRIX2, params, globdat );
-
   params.get ( inertia, ActionParams::MATRIX2 );
 
   Properties sparams = newSolverParams ( globdat, inertia, nullptr, dofs_ );
-
   model_->takeAction ( Actions::GET_SOLVER_PARAMS, sparams, globdat );
-
   solver_ = newSolver ( "solver", myConf, myProps, sparams, globdat );
 
   // Initialize the global simulation time and the time step number.
@@ -105,39 +102,25 @@ Module::Status EulerForwardModule::run
     return DONE;
 
   // update time in models (for boundary conditions)
-
   Globdat::advanceTime( dtime_, globdat );
   Globdat::advanceStep( globdat );
   model_->takeAction ( Actions::ADVANCE, params, globdat );
+  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // update mass matrix if necessary 
-  // solver_->getMatrix()->printTo( jive::util::Printer::get() );
-  // jive::util::Printer::flush();
-
-  // TEST_CONTEXT( solver_->getMatrix()->getType()->getName() )
-  if ( ! valid_ ) 
-    restart_ ( globdat );
-
-  // solver_->getMatrix()->printTo( jive::util::Printer::get() );
-  // jive::util::Printer::flush();
+  if ( ! valid_ )  restart_ ( globdat );
 
   // initialize some variables
-
-  Ref<Constraints>  cons;
-
   Vector        fint     ( dofCount );
   Vector        fext     ( dofCount );
   Vector        fres     ( dofCount );
-  Vector        u        ( dofCount );
+  Vector        u_new    ( dofCount );
   Vector        du       ( dofCount );
-  Vector        v        ( dofCount );
-  Vector        a        ( dofCount );
-
-  Vector        u_1, v_1, a_1;
+  Vector        v_new    ( dofCount );
+  Vector        a_new    ( dofCount );
+  Vector        u_old, v_old, a_old;
 
   // Get the internal and external force vectors.
-  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
-
   fint = 0.0;
   fext = 0.0;
 
@@ -149,49 +132,45 @@ Module::Status EulerForwardModule::run
   model_->takeAction ( Actions::GET_EXT_VECTOR, params, globdat );
 
   fres = fext - fint;
+  params.clear();
 
   // Get the state vectors and compute the state vector at the next
   // time step.
+  StateVector::get  ( u_old, STATE[0], dofs_, globdat );
+  StateVector::get  ( v_old, STATE[1], dofs_, globdat );
+  StateVector::get  ( a_old, STATE[2], dofs_, globdat );
 
-  StateVector::get    ( u_1, STATE[0], dofs_, globdat );
-  StateVector::get    ( v_1, STATE[1], dofs_, globdat );
-  StateVector::get    ( a_1, STATE[2], dofs_, globdat );
-
-  a = 0.0;
-  v = 0.0;
-  du = 0.0;
-  u = 0.0;
   // Compute new displacement values 
+  solver_->solve ( a_new, fres );
+
+  v_new = v_old + a_new * dtime_;
+  du = v_new; // HACK to proper SO(3) conversion
+  u_new = u_old + du * dtime_; 
+
   // jive::Matrix F ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
-  // vec2mat( F.transpose(), fres );
+  // vec2mat( F.transpose(), f_res );
   // TEST_CONTEXT(F)
-
-  solver_->solve ( a, fres );
-
-  v = v_1 + a * dtime_;
-  du = v; // HACK to proper SO(3) conversion
-  u = u_1 + du * dtime_; 
-
   // jive::Matrix A ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
-  // vec2mat( A.transpose(), a );
+  // vec2mat( A.transpose(), a_new );
   // TEST_CONTEXT(A)
   // jive::Matrix V ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
-  // vec2mat( V.transpose(), v );
+  // vec2mat( V.transpose(), v_new );
   // TEST_CONTEXT(V)
   // jive::Matrix U ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
-  // vec2mat( U.transpose(), u );
+  // vec2mat( U.transpose(), u_new );
   // TEST_CONTEXT(U)
 
   // Store                
   StateVector::updateOld( dofs_, globdat );
-  a_1 = a;
-  v_1 = v;
-  u_1 = u;
+  a_old = a_new;
+  v_old = v_new;
+  u_old = u_new;
 
   // commit everything
+  // TODO check commit beforehand!
+  model_->takeAction ( Actions::COMMIT, params, globdat ); 
   Globdat::commitStep( globdat );
   Globdat::commitTime( globdat );
-  model_->takeAction ( Actions::COMMIT, params, globdat ); 
 
   return OK;
 }
@@ -204,7 +183,9 @@ Module::Status EulerForwardModule::run
 
 void EulerForwardModule::shutdown ( const Properties& globdat )
 {
-  model_ = NIL;
+  model_  = NIL;
+  solver_ = NIL;
+  dofs_   = NIL;
 }
 
 
@@ -288,6 +269,6 @@ void EulerForwardModule::declare ()
 {
   using jive::app::ModuleFactory;
 
-  ModuleFactory::declare ( "EulerForward", &EulerForwardModule::makeNew );
+  ModuleFactory::declare ( TYPE_NAME, &EulerForwardModule::makeNew );
 }
 

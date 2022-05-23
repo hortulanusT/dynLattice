@@ -52,6 +52,8 @@ class EulerForwardModule : public Module
   typedef Module            Super;
   typedef EulerForwardModule    Self;
 
+  static const char*        TYPE_NAME;
+
   explicit                  EulerForwardModule
 
     ( const String&           name = "EulerForward" );
@@ -106,8 +108,8 @@ class EulerForwardModule : public Module
  private:
 
   bool                      valid_;
+  double                    dtime_;
   Ref<Model>                model_;
   Ref<DofSpace>             dofs_;
-  double                    dtime_;
   Ref<Solver>               solver_;
 };

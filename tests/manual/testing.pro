@@ -4,6 +4,7 @@ log.file = "$(CASE_NAME).log";
 
 // PROGRAM CONTROL
 control.runWhile = "t < 0.1";
+control.fgMode = true;
 
 // SETUP
 params.dofNames = ["dx", "dy", "dz"];
@@ -95,5 +96,5 @@ Output.paraview.reportIntervall = 100;
 
 Output.view.type = "Graph";
 Output.view.dataSets = "disp_tip";
-Output.view.disp_tip.yData = "disp.zmax.dy";
+Output.view.disp_tip.yData = "zmax.disp.dy";
 Output.view.disp_tip.xData = "t";
