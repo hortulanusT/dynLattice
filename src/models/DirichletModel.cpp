@@ -110,7 +110,10 @@ bool DirichletModel::takeAction
   if ( action == Actions::GET_CONSTRAINTS )
   {    
     if (method_ == LOADSCALE) 
+    {
       params.get( dispScale_, ActionParams::SCALE_FACTOR );
+      System::info() << " ...Applying displacment factor " << dispScale_ << endl;
+    }
     
     applyConstraints_ ( params, globdat );
 
