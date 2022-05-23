@@ -77,12 +77,11 @@ model.model.load.initial.veloVals = "0.1 * (80*PI)";
 
 
 // OUTPUTS
-Output.modules = [ "pbcOut", "paraview" ];
+Output.modules = [ "pbcOut", "paraview", "view" ];
 
-Output.pbcOut.type = "None";
-// Output.pbcOut.type = "PBCGroupOutput";
-// Output.pbcOut.dofs = params.pbcDofs;
-// Output.pbcOut.sampling.file = "$(CASE_NAME)/PBCOut.csv";
+Output.pbcOut.type = "GroupOutput";
+Output.pbcOut.nodeGroups = "zmax";
+Output.pbcOut.dofs = "dy";
 
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/step%d_$(Solver.solver.type)";
@@ -93,3 +92,8 @@ Output.paraview.beams.el_data = [ "strain", "stress", "mat_strain", "mat_stress"
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.shape = "Line2";
 Output.paraview.reportIntervall = 100;
+
+Output.view.type = "Graph";
+Output.view.dataSets = "disp_tip";
+Output.view.disp_tip.yData = "disp.zmax.dy";
+Output.view.disp_tip.xData = "t";
