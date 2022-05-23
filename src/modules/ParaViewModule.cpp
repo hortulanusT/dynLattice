@@ -304,7 +304,7 @@ void       ParaViewModule::writePiece_
 
     for (idx_t inode = 0; inode < elNodes.size(); inode++)
     {
-      *file << nodeNums[elNodes[inode]] << SPACING;
+      *file << nodeNums[paraNodes[inode]] << SPACING;
     }    
     *file << endl;
   }
