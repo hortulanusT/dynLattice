@@ -24,6 +24,7 @@
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/app/Names.h>
 #include <jive/util/XTable.h>
 #include <jive/util/SparseTable.h>
 #include <jive/util/Assignable.h>
@@ -31,6 +32,7 @@
 #include <jive/util/ItemSet.h>
 #include <jive/util/ItemGroup.h>
 #include <jive/util/Globdat.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
@@ -68,6 +70,7 @@ using jive::util::SparseTable;
 using jive::util::ItemSet;
 using jive::util::ItemGroup;
 using jive::util::Globdat;
+using jive::util::Function;
 using jive::fem::NodeSet;
 using jive::fem::ElementSet;
 using jive::fem::ElementGroup;
@@ -221,6 +224,6 @@ class ParaViewModule : public Module
   String            fileType_;
   StringVector      elemSets_;
   Array<elInfo>     setInfo_;
-  idx_t             report_intervall_;
+  Ref<Function>     sampleCond_;
   Ref<PrintWriter>  pvd_printer_;
 };

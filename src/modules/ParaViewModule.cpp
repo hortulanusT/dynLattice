@@ -27,7 +27,6 @@ ParaViewModule::ParaViewModule
   fileType_         = "vtu";
   elemSets_.resize  ( 0 );
   setInfo_.resize   ( 0 );  
-  report_intervall_ = 1;
 }
 
 //-----------------------------------------------------------------------
@@ -50,9 +49,8 @@ Module::Status    ParaViewModule::init
   myProps.find( fileType_, "output_file" );
   myConf .set ( "output_file", fileType_ ); 
 
-  myProps.find( report_intervall_, "reportIntervall" );
-  myConf .set ( "reportIntervall", report_intervall_ );
-  // LATER get something that reports after a variable
+  jive::util::FuncUtils::configCond( sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat );
+  jive::util::FuncUtils::getConfig( myConf, sampleCond_, jive::app::PropNames::SAMPLE_COND );
 
   myProps.get ( elemSets_, "groups" );
   myConf .set ( "groups", elemSets_ );
@@ -125,12 +123,13 @@ Module::Status     ParaViewModule::run
 
   // get the current timeStep and format the given format accordingly
   globdat.get ( currentStep, Globdat::TIME_STEP);
-  currentStep -= 1;
-  currentFile = String::format ( makeCString(nameFormat_).addr(), currentStep/report_intervall_);
+  currentFile = String::format ( makeCString(nameFormat_).addr(), currentStep);
   currentFile = currentFile + "." + fileType_;
 
   // write everything to file
-  if ( currentStep % report_intervall_ == 0)
+  bool  cond = jive::util::FuncUtils::evalCond ( *sampleCond_, globdat );
+
+  if ( cond )
   {
     writeFile_ ( currentFile, globdat );
 
