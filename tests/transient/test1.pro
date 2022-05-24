@@ -6,9 +6,9 @@ log.file = "-";
 control.runWhile = "t < 30";
 
 // SOLVER
-Solver.modules = [ "solver" ];
-Solver.solver.type = "EulerForward";
-Solver.solver.deltaTime = 1e-4;
+Solver.modules = [ "integrator" ];
+Solver.integrator.type = "EulerForward";
+Solver.integrator.deltaTime = 1e-4;
 
 // settings
 params.rod_details.cross_section = "square";
@@ -26,8 +26,6 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
-model.matrix2.type = "Lumped";
-
 model.model.model.force.type = "None";
 
 model.model.model.disp.type = "LoadScale";
@@ -40,7 +38,7 @@ model.model.model.disp.model.dofs = [ "rz" ];
 Output.modules = [ "loadextent", "disp", "paraview" ];
 Output.disp.dataSets += "fixed.disp.rz";
 Output.disp.dataSets += "t";
-Output.disp.sampleWhen = "t % 0.1 < $(Solver.solver.deltaTime)";
+Output.disp.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";

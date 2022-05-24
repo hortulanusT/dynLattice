@@ -1,6 +1,10 @@
 #pragma once
 
+#include <jem/base/ClassTemplate.h>
+#include <jem/base/Array.h>
+#include <jem/base/ArithmeticException.h>
 #include <jive/algebra/AbstractMatrix.h>
+#include <jive/algebra/DiagMatrixObject.h>
 #include <jive/app/Module.h>
 #include <jive/solver/Solver.h>
 #include <jive/implict/Names.h>
@@ -28,6 +32,7 @@ using jive::Ref;
 using jive::Properties;
 using jive::String;
 using jive::algebra::AbstractMatrix;
+using jive::algebra::DiagMatrixObject;
 using jive::app::Module;
 using jive::model::Model;
 using jive::util::DofSpace;
@@ -48,6 +53,8 @@ using jive::implict::newSolverParams;
 class EulerForwardModule : public Module
 {
  public:
+
+  enum MassMode { LUMPED, CONSISTENT };
 
   typedef Module            Super;
   typedef EulerForwardModule    Self;
@@ -109,7 +116,10 @@ class EulerForwardModule : public Module
 
   bool                      valid_;
   double                    dtime_;
+  MassMode                  mode_;
   Ref<Model>                model_;
   Ref<DofSpace>             dofs_;
+
+  Vector                    mass_;
   Ref<Solver>               solver_;
 };

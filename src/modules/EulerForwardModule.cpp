@@ -1,5 +1,6 @@
 
 #include "modules/EulerForwardModule.h"
+#include "utils/testing.h"
 
 
 //=======================================================================
@@ -42,10 +43,12 @@ Module::Status EulerForwardModule::init
 {
   using jem::util::connect;
 
-  Properties    myConf  = conf .makeProps ( myName_ );
-  Properties    myProps = props.findProps ( myName_ );
-  Properties    params;
-  Ref<AbstractMatrix> inertia;
+  Properties            myConf  = conf .makeProps ( myName_ );
+  Properties            myProps = props.findProps ( myName_ );
+  Properties            params;
+  Properties            sparams;
+  Ref<AbstractMatrix>   inertia;
+  Ref<DiagMatrixObject> diagInertia;
 
   // returning an address of an object pointing to the Model
 
@@ -59,7 +62,6 @@ Module::Status EulerForwardModule::init
 
   connect ( dofs_->newSizeEvent,  this, &Self::invalidate_ );
   connect ( dofs_->newOrderEvent, this, &Self::invalidate_ );
-  valid_ = false;
 
   // Initialize solver
 
@@ -69,10 +71,32 @@ Module::Status EulerForwardModule::init
   params.set ( ActionParams::CONSTRAINTS, cons );
   model_->takeAction ( Actions::NEW_MATRIX2, params, globdat );
   params.get ( inertia, ActionParams::MATRIX2 );
+  params.clear();
 
-  Properties sparams = newSolverParams ( globdat, inertia, nullptr, dofs_ );
-  model_->takeAction ( Actions::GET_SOLVER_PARAMS, sparams, globdat );
-  solver_ = newSolver ( "solver", myConf, myProps, sparams, globdat );
+  diagInertia = jem::ClassTemplate<DiagMatrixObject>::dynamicCast( *inertia );
+
+  if (diagInertia)
+    mode_ = LUMPED;
+  else
+    mode_ = CONSISTENT;
+
+  // prepare solver for modes
+  switch (mode_)
+  {
+  case LUMPED:
+    mass_.resize( dofs_->dofCount() );
+    break;
+  
+  case CONSISTENT:
+    sparams = newSolverParams ( globdat, inertia );
+    model_->takeAction ( Actions::GET_SOLVER_PARAMS, sparams, globdat );
+    solver_ = newSolver ( "solver", myConf, myProps, sparams, globdat );
+    solver_->configure( myProps );
+    solver_->getConfig( myConf );
+    break;
+  }
+
+  valid_ = false;
 
   // Initialize the global simulation time and the time step number.
   Globdat::initTime( globdat );
@@ -105,9 +129,9 @@ Module::Status EulerForwardModule::run
   Globdat::advanceTime( dtime_, globdat );
   Globdat::advanceStep( globdat );
   model_->takeAction ( Actions::ADVANCE, params, globdat );
-  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // update mass matrix if necessary 
+  valid_ = false;
   if ( ! valid_ )  restart_ ( globdat );
 
   // initialize some variables
@@ -141,7 +165,10 @@ Module::Status EulerForwardModule::run
   StateVector::get  ( a_old, STATE[2], dofs_, globdat );
 
   // Compute new displacement values 
-  solver_->solve ( a_new, fres );
+  if (mode_ == CONSISTENT)
+    solver_->solve ( a_new, fres );
+  if (mode_ == LUMPED)
+    a_new = mass_ * fres;
 
   v_new = v_old + a_new * dtime_;
   du = v_new; // HACK to proper SO(3) conversion
@@ -159,6 +186,8 @@ Module::Status EulerForwardModule::run
   // jive::Matrix U ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
   // vec2mat( U.transpose(), u_new );
   // TEST_CONTEXT(U)
+
+    model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // Store                
   StateVector::updateOld( dofs_, globdat );
@@ -231,9 +260,18 @@ void EulerForwardModule::getConfig
 
 void EulerForwardModule::restart_ ( const Properties& globdat )
 {
-  Properties    params;
-
+  Properties              params;
+  Ref<DiagMatrixObject>   inertia;
   model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
+
+  if ( mode_ == LUMPED )
+  {
+    params.get( inertia, ActionParams::MATRIX2 );
+    mass_ = inertia->getValues();
+    if ( jem::testany( mass_ <= jem::Limits<double>::TINY_VALUE ) ) 
+      throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");
+    mass_ = 1 / mass_;
+  }
 }
 
 

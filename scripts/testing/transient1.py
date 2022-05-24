@@ -18,6 +18,15 @@ try:
   py = sim_disp[:, 1]
   rz = sim_disp[:, 5]
 
+  sim_psi = np.arctan2( py, px )
+  grad_sim = np.diff(sim_psi)
+  add = 0
+  for i in range(len(grad_sim)):
+    sim_psi[i] += add*np.pi
+    if grad_sim[i] < -0.5*np.pi:
+      add += 2
+  sim_psi[-1] += add*np.pi
+
   sim_u1 = np.sqrt( px**2 + py**2 );
 
   shadow_px = 10*np.cos(rz)
@@ -27,6 +36,7 @@ try:
   out_vect = np.stack([np.cos(rz), np.sin(rz)], -1)
 
   dev_rz = np.rad2deg(psi - rz)
+  dev_psi = np.rad2deg(psi - sim_psi)
   dev_u1 = sim_u1 - 10
   dev_u2 = np.cross(out_vect, delta_vect)
 except IOError:
@@ -47,7 +57,9 @@ if test_passed:
     pdf.savefig()
     plt.close()
     
-    plt.plot( t, dev_rz )
+    plt.plot( t, dev_rz, label="crossection of the tip" )
+    plt.plot( t, dev_psi, label="position of the tip" )
+    plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
     plt.xlim([min(t), max(t)])

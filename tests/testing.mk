@@ -76,8 +76,8 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 
 transient-tests : $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
 
-tests/transient/test%/result.pdf : scripts/testing/transient%.py\
- 														  tests/transient/test%/disp.csv
+tests/transient/test%/result.pdf: scripts/testing/transient%.py\
+ 														  		tests/transient/test%/disp.csv
 	@$<
 
 tests/transient/test%/disp.csv: $(program) tests/transient/test%.pro

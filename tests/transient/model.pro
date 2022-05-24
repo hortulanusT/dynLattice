@@ -2,7 +2,9 @@
 model.type = "Debug";
 model.noiseLevel = 0;
 model.model.type = "Matrix";
+model.model.matrix2.type = "Lumped";
 model.model.model.type = "Multi";
+
 model.model.model.models = [ "rodMesh", "fixed", "force", "disp" ]; 
 model.model.model.rodMesh.type = "Lattice";
 model.model.model.rodMesh.prefix = "beam_";
