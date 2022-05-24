@@ -162,12 +162,13 @@ Module::Status EulerForwardModule::run
 
   // Store                
   StateVector::updateOld( dofs_, globdat );
-  a_old = a_new;
-  v_old = v_new;
-  u_old = u_new;
+  StateVector::store( a_new, STATE[2], dofs_, globdat );
+  StateVector::store( v_new, STATE[1], dofs_, globdat );
+  StateVector::store( u_new, STATE[0], dofs_, globdat );
 
   // commit everything
   // TODO check commit beforehand!
+  // TODO how does this commitStep/commitTime actually work
   model_->takeAction ( Actions::COMMIT, params, globdat ); 
   Globdat::commitStep( globdat );
   Globdat::commitTime( globdat );

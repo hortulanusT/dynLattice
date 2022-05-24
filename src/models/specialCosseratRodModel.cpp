@@ -223,8 +223,8 @@ specialCosseratRodModel::specialCosseratRodModel
   materialM_.resize( 3, 3 ); 
   materialM_ = eye() * density_ * area_; 
 
-  // TEST_CONTEXT ( materialC_ )
-  // TEST_CONTEXT ( materialM_ )
+  jem::System::info( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
+  jem::System::info( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
 }
 
 //-----------------------------------------------------------------------
