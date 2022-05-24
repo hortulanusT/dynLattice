@@ -25,6 +25,7 @@ studies/**/results/*
 tests/element/runs/
 tests/element/*.txt
 tests/beam/test*/
+tests/transient/test*/
 
 # save the reference data files for beam testing
 !tests/beam/ref_data/*.csv

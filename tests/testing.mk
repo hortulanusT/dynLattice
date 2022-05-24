@@ -1,6 +1,6 @@
-.PHONY: tests element-tests beam-tests clean-tests manual-test
+.PHONY: tests element-tests beam-tests transient-tests clean-tests manual-test
 
-tests: element-tests beam-tests
+tests: element-tests beam-tests transient-tests
 
 clean-all: clean-tests
 
@@ -15,6 +15,7 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
+transient_cases = 1
 
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro
@@ -70,6 +71,20 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
 
+# TRANSIENT TEST RESULTS
+.PRECIOUS: tests/transient/test%/disp.csv
+
+transient-tests : $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
+
+tests/transient/test%/result.pdf : scripts/testing/beam%.py\
+ 														  tests/beam/test%/disp.csv
+	@$<
+
+tests/beam/test%/disp.csv: $(program) tests/beam/test%.pro
+	@$(RM_R) $(dir $@)
+	@$(MKDIR) $(dir $@)
+	@$^ > tests/beam/test$*/run.log
+
 # CLEAN UP THE TESTS
 clean-tests :
 	@$(RM_R) tets/manual/testing
@@ -78,3 +93,4 @@ clean-tests :
 	@$(RM_R) tests/element/runs
 	@$(RM) tests/element/result_*.txt
 	@$(RM_R) tests/beam/test*/
+	@$(RM_R) tests/transient/test*/
