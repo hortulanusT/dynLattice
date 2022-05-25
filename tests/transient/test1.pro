@@ -3,7 +3,7 @@ log.pattern = "*.info | *.debug";
 log.file = "-";
 
 // PROGRAM_CONTROL
-control.runWhile = "t < 30";
+control.runWhile = "i < 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -26,7 +26,6 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
-model.model.matrix2.type = "Sparse";
 model.model.model.force.type = "None";
 
 model.model.model.disp.type = "LoadScale";

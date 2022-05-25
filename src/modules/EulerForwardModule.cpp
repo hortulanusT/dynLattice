@@ -1,8 +1,5 @@
 
 #include "modules/EulerForwardModule.h"
-#include "utils/testing.h"
-#include "utils/helpers.h"
-using namespace jive_helpers;
 
 //=======================================================================
 //   class EulerForwardModule
@@ -64,8 +61,15 @@ Module::Status EulerForwardModule::init
   connect ( dofs_->newSizeEvent,  this, &Self::invalidate_ );
   connect ( dofs_->newOrderEvent, this, &Self::invalidate_ );
 
-  // Initialize solver
+  // Initialize update condition
+  if ( myProps.contains( PropNames::UPDATE_COND) )
+    FuncUtils::configCond( updCond_, PropNames::UPDATE_COND, myProps, globdat );
+  else
+    updCond_ = FuncUtils::newCond( false );
+  FuncUtils::getConfig( myConf, updCond_, PropNames::UPDATE_COND );
 
+  // Initialize solver
+  
   jive::solver::declareSolvers();
 
   Ref<Constraints> cons = Constraints::find ( dofs_, globdat );
@@ -74,7 +78,7 @@ Module::Status EulerForwardModule::init
   params.get ( inertia, ActionParams::MATRIX2 );
   params.clear();
 
-  diagInertia = jem::ClassTemplate<DiagMatrixObject>::dynamicCast( *inertia );
+  diagInertia = jem::dynamicCast<DiagMatrixObject>( inertia );
 
   if (diagInertia)
     mode_ = LUMPED;
@@ -121,35 +125,33 @@ Module::Status EulerForwardModule::run
   ( const Properties& globdat )
 
 {
+  using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
 
-  using jive::model::STATE;
+  Properties  params;
+  Vector      fint     ( dofCount );
+  Vector      fext     ( dofCount );
+  Vector      fres     ( dofCount );
+  Vector      u_new    ( dofCount );
+  Vector      du       ( dofCount );
+  Vector      v_new    ( dofCount );
+  Vector      a_new    ( dofCount );
+  Vector      u_old, v_old, a_old;
 
-  Properties    params;
-
+  // skip if no model exists
   if ( model_ == NIL )
     return DONE;
 
-  // update time in models (for boundary conditions)
-  Globdat::advanceTime( dtime_, globdat );
-  Globdat::advanceStep( globdat );
-  model_->takeAction ( Actions::ADVANCE, params, globdat );
-  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
-
   // update mass matrix if necessary 
-  if ( ! valid_ )  restart_ ( globdat );
+  if ( ! valid_ )
+    restart_ ( globdat );
 
-  // initialize some variables
-  Vector        fint     ( dofCount );
-  Vector        fext     ( dofCount );
-  Vector        fres     ( dofCount );
-  Vector        u_new    ( dofCount );
-  Vector        du       ( dofCount );
-  Vector        v_new    ( dofCount );
-  Vector        a_new    ( dofCount );
-  Vector        u_old, v_old, a_old;
+  // Get the state vectors from the last time step
+  StateVector::get  ( u_old, STATE[0], dofs_, globdat );
+  StateVector::get  ( v_old, STATE[1], dofs_, globdat );
+  StateVector::get  ( a_old, STATE[2], dofs_, globdat );
 
-  // Get the internal and external force vectors.
+  // Get the internal and external force vectors last time step
   fint = 0.0;
   fext = 0.0;
 
@@ -163,47 +165,37 @@ Module::Status EulerForwardModule::run
   fres = fext - fint;
   params.clear();
 
-  // Get the state vectors and compute the state vector at the next
-  // time step.
-  StateVector::get  ( u_old, STATE[0], dofs_, globdat );
-  StateVector::get  ( v_old, STATE[1], dofs_, globdat );
-  StateVector::get  ( a_old, STATE[2], dofs_, globdat );
+  // update time in models and boundary conditions
+  Globdat::advanceTime( dtime_, globdat );
+  Globdat::advanceStep( globdat );
+  model_->takeAction ( Actions::ADVANCE, params, globdat );
+  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // Compute new displacement values 
-  // if (mode_ == CONSISTENT)
+  if (mode_ == CONSISTENT)
     solver_->solve ( a_new, fres );
-  // if (mode_ == LUMPED)
-  //   a_new = massInv_ * fres;
+  if (mode_ == LUMPED)
+  {
+    a_new = massInv_ * fres;
+  }
 
   v_new = v_old + a_new * dtime_;
   du = v_new; // HACK to proper SO(3) conversion
   u_new = u_old + du * dtime_; 
 
-  // jive::Matrix F ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
-  // vec2mat( F.transpose(), fres );
-  // TEST_CONTEXT(F)
-  // jive::Matrix A ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
-  // vec2mat( A.transpose(), a_new );
-  // TEST_CONTEXT(A)
-  // jive::Matrix V ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
-  // vec2mat( V.transpose(), v_new );
-  // TEST_CONTEXT(V)
-  // jive::Matrix U ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
-  // vec2mat( U.transpose(), u_new );
-  // TEST_CONTEXT(U)
-
-  // Store                
+  // commit everything
+  Globdat::commitStep( globdat );
+  Globdat::commitTime( globdat );  
   StateVector::updateOld( dofs_, globdat );
+
+  model_->takeAction ( Actions::COMMIT, params, globdat );
+
   StateVector::store( a_new, STATE[2], dofs_, globdat );
   StateVector::store( v_new, STATE[1], dofs_, globdat );
   StateVector::store( u_new, STATE[0], dofs_, globdat );
 
-  // commit everything
-  // TODO check commit beforehand!
-  // TODO how does this commitStep/commitTime actually work
-  model_->takeAction ( Actions::COMMIT, params, globdat ); 
-  Globdat::commitStep( globdat );
-  Globdat::commitTime( globdat );
+  // check if the mass matrix is still valid
+  valid_ = ! FuncUtils::evalCond( *updCond_, globdat );
 
   return OK;
 }
@@ -264,14 +256,16 @@ void EulerForwardModule::getConfig
 void EulerForwardModule::restart_ ( const Properties& globdat )
 {
   Properties              params;
-  Ref<DiagMatrixObject>   inertia;
   model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
+
+  jem::System::info( myName_ ) << " ...Updating mass information for explicit solver\n";
 
   if ( mode_ == LUMPED )
   {
+    Ref<DiagMatrixObject>   inertia;
     Globdat::findFor( inertia, "LumpedMass", this, globdat );
-    TEST_CONTEXT( bool(inertia) )
-    massInv_ = inertia->getValues();
+
+    massInv_ = inertia->getValues();    
     if ( jem::testany( massInv_ <= jem::Limits<double>::TINY_VALUE ) ) 
       throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");
     massInv_ = 1 / massInv_;

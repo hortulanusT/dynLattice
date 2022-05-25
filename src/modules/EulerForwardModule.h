@@ -2,6 +2,7 @@
 
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/Array.h>
+#include <jem/base/System.h>
 #include <jem/base/ArithmeticException.h>
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/DiagMatrixObject.h>
@@ -14,6 +15,7 @@
 #include <jive/util/Globdat.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/Constraints.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/implict/utilities.h>
 #include <jive/model/Model.h>
@@ -26,6 +28,7 @@
 using jem::newInstance;
 using jem::NIL;
 using jem::idx_t;
+using jem::numeric::Function;
 
 using jive::Vector;
 using jive::Ref;
@@ -40,9 +43,11 @@ using jive::solver::Solver;
 using jive::solver::newSolver;
 using jive::util::Constraints;
 using jive::util::Globdat;
+using jive::util::FuncUtils;
 using jive::model::Actions;
 using jive::model::ActionParams;
 using jive::model::StateVector;
+using jive::implict::PropNames;
 using jive::implict::newSolverParams;
 
 //-----------------------------------------------------------------------
@@ -114,12 +119,14 @@ class EulerForwardModule : public Module
 
  private:
 
-  bool                      valid_;
-  double                    dtime_;
-  MassMode                  mode_;
-  Ref<Model>                model_;
-  Ref<DofSpace>             dofs_;
+  bool          valid_;
+  double        dtime_;
+  MassMode      mode_;
+  Ref<Model>    model_;
+  Ref<DofSpace> dofs_;
 
-  Vector                    massInv_;
-  Ref<Solver>               solver_;
+  Vector        massInv_;
+  Ref<Solver>   solver_;
+
+  Ref<Function> updCond_;
 };
