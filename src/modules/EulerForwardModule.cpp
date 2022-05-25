@@ -85,6 +85,7 @@ Module::Status EulerForwardModule::init
   {
   case LUMPED:
     mass_.resize( dofs_->dofCount() );
+    Globdat::storeFor( "LumpedMass", diagInertia, this, globdat );
     break;
   
   case CONSISTENT:
@@ -266,7 +267,8 @@ void EulerForwardModule::restart_ ( const Properties& globdat )
 
   if ( mode_ == LUMPED )
   {
-    params.get( inertia, ActionParams::MATRIX2 );
+    Globdat::findFor( inertia, "LumpedMass", this, globdat );
+    TEST_CONTEXT( bool(inertia) )
     mass_ = inertia->getValues();
     if ( jem::testany( mass_ <= jem::Limits<double>::TINY_VALUE ) ) 
       throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");

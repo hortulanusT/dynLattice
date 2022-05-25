@@ -92,7 +92,7 @@ Output.paraview.beams.otherDofs = params.rotNames;
 Output.paraview.beams.el_data = [ "strain", "stress", "mat_strain", "mat_stress" ];
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.shape = "Line2";
-Output.paraview.reportIntervall = 100;
+Output.paraview.sampleWhen = "i % 100 < 1";
 
 Output.view.type = "Graph";
 Output.view.dataSets = "disp_tip";
