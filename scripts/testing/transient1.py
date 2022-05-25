@@ -2,6 +2,7 @@
 
 # TEST 1 (Ex 5.1 from dynamic Simo Paper)
 import numpy as np
+import pandas as pd
 from termcolor import colored
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -10,6 +11,10 @@ test_passed = False
 
 try:
   sim_disp = np.loadtxt("tests/transient/test1/disp.csv", delimiter=",")
+  BC_ref = np.loadtxt("tests/transient/ref_data/test1_ref_BC.csv", delimiter=",")
+  angle_ref = pd.read_csv("tests/transient/ref_data/test1_ref_angle.csv", delimiter=";", decimal=",").values
+  u1_ref = pd.read_csv("tests/transient/ref_data/test1_ref_u1.csv", delimiter=";", decimal=",").values
+  u2_ref = pd.read_csv("tests/transient/ref_data/test1_ref_u2.csv", delimiter=";", decimal=",").values
 
   t = sim_disp[:, -1]
   psi = sim_disp[:, -2]
@@ -48,7 +53,9 @@ if test_passed:
   print(colored("TEST 1 RUN THROUGH", "green"))
 
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
-    plt.plot( t, psi )
+    plt.plot( BC_ref[:,0], BC_ref[:,1], label="Simo et al. 1988")
+    plt.plot( t, psi, "--", label="Simulation" )
+    plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("rotation [rad]")
     plt.xlim([min(t), max(t)])
@@ -57,8 +64,9 @@ if test_passed:
     pdf.savefig()
     plt.close()
     
-    plt.plot( t, dev_rz, label="crossection of the tip" )
-    plt.plot( t, dev_psi, label="position of the tip" )
+    plt.plot( angle_ref[:,0], angle_ref[:,1], label="Simo et al. 1988")
+    plt.plot( t, dev_rz, "--", label="orientation of the tip" )
+    plt.plot( t, dev_psi, "--", label="position of the tip" )
     plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
@@ -68,7 +76,9 @@ if test_passed:
     pdf.savefig()
     plt.close()
 
-    plt.plot( t, dev_u1 )
+    plt.plot( u1_ref[:,0], u1_ref[:,1], label="Simo et al. 1988")
+    plt.plot( t, dev_u1, "--", label="Simulation")
+    plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("u1 deviation [m]")
     plt.xlim([min(t), max(t)])
@@ -77,7 +87,9 @@ if test_passed:
     pdf.savefig()
     plt.close()
 
-    plt.plot( t, dev_u2 )
+    plt.plot( u2_ref[:,0], u2_ref[:,1], label="Simo et al. 1988")
+    plt.plot( t, dev_u2 , "--", label="Simulation" )
+    plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("u2 deviation [m]")
     plt.xlim([min(t), max(t)])

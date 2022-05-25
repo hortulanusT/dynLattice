@@ -12,7 +12,6 @@ scripts/scribbling.py
 *.log
 *.info
 *.dat
-*.csv
 *.msh22
 *.vtu
 *.pvd

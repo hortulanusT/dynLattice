@@ -120,6 +120,6 @@ class EulerForwardModule : public Module
   Ref<Model>                model_;
   Ref<DofSpace>             dofs_;
 
-  Vector                    mass_;
+  Vector                    massInv_;
   Ref<Solver>               solver_;
 };

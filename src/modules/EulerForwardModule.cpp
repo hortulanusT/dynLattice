@@ -1,7 +1,8 @@
 
 #include "modules/EulerForwardModule.h"
 #include "utils/testing.h"
-
+#include "utils/helpers.h"
+using namespace jive_helpers;
 
 //=======================================================================
 //   class EulerForwardModule
@@ -81,20 +82,23 @@ Module::Status EulerForwardModule::init
     mode_ = CONSISTENT;
 
   // prepare solver for modes
-  switch (mode_)
+  if (mode_ == LUMPED)
   {
-  case LUMPED:
-    mass_.resize( dofs_->dofCount() );
+    massInv_.resize( dofs_->dofCount() );
     Globdat::storeFor( "LumpedMass", diagInertia, this, globdat );
-    break;
   
-  case CONSISTENT:
-    sparams = newSolverParams ( globdat, inertia );
+    myConf.set( "mode", "lumped" );
+  }
+  
+  if (mode_ == CONSISTENT)
+  {
+    sparams = newSolverParams ( globdat, inertia, nullptr, dofs_ );
     model_->takeAction ( Actions::GET_SOLVER_PARAMS, sparams, globdat );
     solver_ = newSolver ( "solver", myConf, myProps, sparams, globdat );
     solver_->configure( myProps );
     solver_->getConfig( myConf );
-    break;
+
+    myConf.set( "mode", "consistent" );
   }
 
   valid_ = false;
@@ -130,9 +134,9 @@ Module::Status EulerForwardModule::run
   Globdat::advanceTime( dtime_, globdat );
   Globdat::advanceStep( globdat );
   model_->takeAction ( Actions::ADVANCE, params, globdat );
+  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // update mass matrix if necessary 
-  valid_ = false;
   if ( ! valid_ )  restart_ ( globdat );
 
   // initialize some variables
@@ -166,29 +170,27 @@ Module::Status EulerForwardModule::run
   StateVector::get  ( a_old, STATE[2], dofs_, globdat );
 
   // Compute new displacement values 
-  if (mode_ == CONSISTENT)
+  // if (mode_ == CONSISTENT)
     solver_->solve ( a_new, fres );
-  if (mode_ == LUMPED)
-    a_new = mass_ * fres;
+  // if (mode_ == LUMPED)
+  //   a_new = massInv_ * fres;
 
   v_new = v_old + a_new * dtime_;
   du = v_new; // HACK to proper SO(3) conversion
   u_new = u_old + du * dtime_; 
 
-  // jive::Matrix F ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
-  // vec2mat( F.transpose(), f_res );
+  // jive::Matrix F ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
+  // vec2mat( F.transpose(), fres );
   // TEST_CONTEXT(F)
-  // jive::Matrix A ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
+  // jive::Matrix A ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
   // vec2mat( A.transpose(), a_new );
   // TEST_CONTEXT(A)
-  // jive::Matrix V ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
+  // jive::Matrix V ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
   // vec2mat( V.transpose(), v_new );
   // TEST_CONTEXT(V)
-  // jive::Matrix U ( dofs_->typeCount(), dofCount_/dofs_->typeCount() );
+  // jive::Matrix U ( dofs_->typeCount(), dofs_->dofCount()/dofs_->typeCount() );
   // vec2mat( U.transpose(), u_new );
   // TEST_CONTEXT(U)
-
-    model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   // Store                
   StateVector::updateOld( dofs_, globdat );
@@ -269,10 +271,10 @@ void EulerForwardModule::restart_ ( const Properties& globdat )
   {
     Globdat::findFor( inertia, "LumpedMass", this, globdat );
     TEST_CONTEXT( bool(inertia) )
-    mass_ = inertia->getValues();
-    if ( jem::testany( mass_ <= jem::Limits<double>::TINY_VALUE ) ) 
+    massInv_ = inertia->getValues();
+    if ( jem::testany( massInv_ <= jem::Limits<double>::TINY_VALUE ) ) 
       throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");
-    mass_ = 1 / mass_;
+    massInv_ = 1 / massInv_;
   }
 }
 

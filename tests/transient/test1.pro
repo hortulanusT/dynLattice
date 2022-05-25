@@ -26,6 +26,7 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
+model.model.matrix2.type = "Sparse";
 model.model.model.force.type = "None";
 
 model.model.model.disp.type = "LoadScale";
