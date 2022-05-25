@@ -47,7 +47,6 @@ using jive::util::FuncUtils;
 using jive::model::Actions;
 using jive::model::ActionParams;
 using jive::model::StateVector;
-using jive::implict::PropNames;
 using jive::implict::newSolverParams;
 
 //-----------------------------------------------------------------------

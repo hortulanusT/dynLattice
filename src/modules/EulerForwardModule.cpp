@@ -1,5 +1,6 @@
 
 #include "modules/EulerForwardModule.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class EulerForwardModule
@@ -40,6 +41,7 @@ Module::Status EulerForwardModule::init
 
 {
   using jem::util::connect;
+  using jive::implict::PropNames;
 
   Properties            myConf  = conf .makeProps ( myName_ );
   Properties            myProps = props.findProps ( myName_ );
@@ -62,6 +64,7 @@ Module::Status EulerForwardModule::init
   connect ( dofs_->newOrderEvent, this, &Self::invalidate_ );
 
   // Initialize update condition
+
   if ( myProps.contains( PropNames::UPDATE_COND) )
     FuncUtils::configCond( updCond_, PropNames::UPDATE_COND, myProps, globdat );
   else
@@ -128,7 +131,8 @@ Module::Status EulerForwardModule::run
   using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
 
-  Properties  params;
+  Properties            params;
+  Ref<Constraints>      cons = Constraints::find ( dofs_, globdat );
   Vector      fint     ( dofCount );
   Vector      fext     ( dofCount );
   Vector      fres     ( dofCount );
@@ -166,6 +170,7 @@ Module::Status EulerForwardModule::run
   params.clear();
 
   // update time in models and boundary conditions
+  params.set ( ActionParams::CONSTRAINTS, cons );
   Globdat::advanceTime( dtime_, globdat );
   Globdat::advanceStep( globdat );
   model_->takeAction ( Actions::ADVANCE, params, globdat );
@@ -174,10 +179,15 @@ Module::Status EulerForwardModule::run
   // Compute new displacement values 
   if (mode_ == CONSISTENT)
     solver_->solve ( a_new, fres );
+
   if (mode_ == LUMPED)
   {
     a_new = massInv_ * fres;
+    params.get( cons, ActionParams::CONSTRAINTS );
+    jive::util::setSlaveDofs( a_new, *cons );
   }
+
+  params.clear();
 
   v_new = v_old + a_new * dtime_;
   du = v_new; // HACK to proper SO(3) conversion
@@ -195,7 +205,7 @@ Module::Status EulerForwardModule::run
   StateVector::store( u_new, STATE[0], dofs_, globdat );
 
   // check if the mass matrix is still valid
-  valid_ = ! FuncUtils::evalCond( *updCond_, globdat );
+  if ( FuncUtils::evalCond( *updCond_, globdat ) ) invalidate_();
 
   return OK;
 }
@@ -208,9 +218,10 @@ Module::Status EulerForwardModule::run
 
 void EulerForwardModule::shutdown ( const Properties& globdat )
 {
-  model_  = NIL;
-  solver_ = NIL;
-  dofs_   = NIL;
+  model_  = nullptr;
+  solver_ = nullptr;
+  dofs_   = nullptr;
+  updCond_= nullptr;
 }
 
 
@@ -270,6 +281,8 @@ void EulerForwardModule::restart_ ( const Properties& globdat )
       throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");
     massInv_ = 1 / massInv_;
   }
+
+  valid_ = true;
 }
 
 

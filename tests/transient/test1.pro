@@ -3,7 +3,7 @@ log.pattern = "*.info | *.debug";
 log.file = "-";
 
 // PROGRAM_CONTROL
-control.runWhile = "i < 30";
+control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
