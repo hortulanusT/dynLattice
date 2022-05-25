@@ -21,3 +21,7 @@ Output.resp.type = "Sample";
 Output.resp.file = "$(CASE_NAME)/resp.csv";
 Output.resp.dataSets = [ "free.resp.dx", "free.resp.dy", "free.resp.dz", "free.resp.rx", "free.resp.ry", "free.resp.rz" ];
 Output.resp.separator	= ",";
+
+// LOGGING
+log.pattern = "*.info";
+log.file = "-";

@@ -1,12 +1,12 @@
 
 #include "modules/EulerForwardModule.h"
-#include "utils/testing.h"
 
 //=======================================================================
 //   class EulerForwardModule
 //=======================================================================
 
 const char* EulerForwardModule::TYPE_NAME = "EulerForward";
+const char* EulerForwardModule::SO3_DOFS  = "dofs_SO3";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -45,6 +45,7 @@ Module::Status EulerForwardModule::init
 
   Properties            myConf  = conf .makeProps ( myName_ );
   Properties            myProps = props.findProps ( myName_ );
+  StringVector          SO3_dof_names;
   Properties            params;
   Properties            sparams;
   Ref<AbstractMatrix>   inertia;
@@ -62,6 +63,17 @@ Module::Status EulerForwardModule::init
 
   connect ( dofs_->newSizeEvent,  this, &Self::invalidate_ );
   connect ( dofs_->newOrderEvent, this, &Self::invalidate_ );
+
+  // get the SO3 dof names
+
+  if ( myProps.find( SO3_dof_names, SO3_DOFS ) )
+  {
+    JEM_PRECHECK( SO3_dof_names.size() == 3 );
+    SO3_dofs_.resize( SO3_dof_names.size() );
+    for (idx_t i = 0; i < SO3_dof_names.size(); i++)
+      SO3_dofs_[i] = dofs_->getTypeIndex( SO3_dof_names[i] );
+    myConf .set( SO3_DOFS, SO3_dof_names );
+  }
 
   // Initialize update condition
 
@@ -133,6 +145,10 @@ Module::Status EulerForwardModule::run
 
   Properties            params;
   Ref<Constraints>      cons = Constraints::find ( dofs_, globdat );
+  IdxMatrix   rdofs    ( SO3_dofs_.size(), dofs_->getItems()->size() );
+  IdxVector   iitems   ( dofs_->getItems()->size() );
+  idx_t       nnodes   = 0;
+  Matrix      inv_tang ( SO3_dofs_.size(), SO3_dofs_.size() );
   Vector      fint     ( dofCount );
   Vector      fext     ( dofCount );
   Vector      fres     ( dofCount );
@@ -143,7 +159,7 @@ Module::Status EulerForwardModule::run
   Vector      u_old, v_old, a_old;
 
   // skip if no model exists
-  if ( model_ == NIL )
+  if ( !(model_) )
     return DONE;
 
   // update mass matrix if necessary 
@@ -190,7 +206,16 @@ Module::Status EulerForwardModule::run
   params.clear();
 
   v_new = v_old + a_new * dtime_;
-  du = v_new; // HACK to proper SO(3) conversion
+
+  du = v_new;
+  for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
+    nnodes = dofs_->getDofsForType( rdofs( idof, ALL ), iitems, SO3_dofs_[idof] );
+  for ( idx_t inode = 0; inode < nnodes; inode++)
+  {
+    inverseTangentOp( inv_tang, (Vector)u_old[rdofs[inode]] );
+    du[rdofs[inode]] = matmul ( inv_tang, (Vector)v_new[rdofs[inode]] );
+  }
+
   u_new = u_old + du * dtime_; 
 
   // commit everything

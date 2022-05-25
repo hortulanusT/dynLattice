@@ -102,7 +102,20 @@ namespace jive_helpers
   void expVecP
   ( const Matrix& ExpP,
     const Vector& v,
-    const Vector& vP );  
+    const Vector& vP ); 
+
+  /**
+   * It computes inverse tangent operator for an exponential mapping
+   * (see DOI: 10.1007/s11044-021-09778-w)
+   * 
+   * @brief compute the inverste tangent operator
+   * 
+   * @param[out] T_1 inverse tangent operator
+   * @param[in] v axial rotation vector
+   */
+  void inverseTangentOp
+  ( const Matrix& T_1,
+    const Vector& v );
       
   /**
    * @brief turn a rotation matrix into a quaterion

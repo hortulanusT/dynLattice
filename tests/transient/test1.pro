@@ -1,7 +1,3 @@
-// LOGGING
-log.pattern = "*.info | *.debug";
-log.file = "-";
-
 // PROGRAM_CONTROL
 control.runWhile = "t <= 30";
 

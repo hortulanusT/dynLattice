@@ -34,7 +34,7 @@ namespace jive_helpers
     // TEST_NO_CONTEXT(R)
     // TEST_NO_CONTEXT(theta)
     // TEST_NO_CONTEXT(rv)
-}
+  }
 
   void vec2mat
     ( const Matrix& mat,
@@ -112,6 +112,25 @@ namespace jive_helpers
     ExpP  += (1-cos(theta)) * matmul ( K, KP );
     ExpP  += (1-cos(theta)) * matmul ( KP, K );
     // TEST_NO_CONTEXT(ExpP)
+  }
+
+  void inverseTangentOp
+    ( const Matrix& T_1,
+      const Vector& psi )
+  {
+    T_1 = eye();
+    const double theta    = norm2(psi);
+
+    if (theta < TINY) return;
+
+    const Vector k        ( psi.size() );
+    const Matrix K        ( psi.size(), psi.size() );
+
+    k       = psi / theta;
+    K       = skew ( k );
+
+    T_1    += 0.5 * K * theta;
+    T_1    += (1.0 - theta/2.0 * 1.0/tan(theta/2.0)) * matmul ( K, K );
   }
 
   void rotMat2Quat 

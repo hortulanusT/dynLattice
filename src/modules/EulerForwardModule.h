@@ -2,6 +2,9 @@
 
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/Array.h>
+#include <jem/base/array/operators.h>
+#include <jem/util/Event.h>
+#include <jem/util/Properties.h>
 #include <jem/base/System.h>
 #include <jem/base/ArithmeticException.h>
 #include <jive/algebra/AbstractMatrix.h>
@@ -9,10 +12,8 @@
 #include <jive/app/Module.h>
 #include <jive/solver/Solver.h>
 #include <jive/implict/Names.h>
-#include <jem/base/array/operators.h>
-#include <jem/util/Event.h>
-#include <jem/util/Properties.h>
 #include <jive/util/Globdat.h>
+#include <jive/util/ItemSet.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/FuncUtils.h>
@@ -24,16 +25,18 @@
 #include <jive/solver/declare.h>
 #include <jive/solver/utilities.h>
 #include <jive/solver/SolverParams.h>
+#include "utils/helpers.h"
 
 using jem::newInstance;
-using jem::NIL;
 using jem::idx_t;
 using jem::numeric::Function;
 
 using jive::Vector;
+using jive::StringVector;
 using jive::Ref;
 using jive::Properties;
 using jive::String;
+using jive::IdxMatrix;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::DiagMatrixObject;
 using jive::app::Module;
@@ -48,6 +51,8 @@ using jive::model::Actions;
 using jive::model::ActionParams;
 using jive::model::StateVector;
 using jive::implict::newSolverParams;
+
+using jive_helpers::inverseTangentOp;
 
 //-----------------------------------------------------------------------
 //   class EulerForwardModule
@@ -64,6 +69,7 @@ class EulerForwardModule : public Module
   typedef EulerForwardModule    Self;
 
   static const char*        TYPE_NAME;
+  static const char*        SO3_DOFS;
 
   explicit                  EulerForwardModule
 
@@ -121,11 +127,12 @@ class EulerForwardModule : public Module
   bool          valid_;
   double        dtime_;
   MassMode      mode_;
+  Ref<Function> updCond_;
+  IdxVector     SO3_dofs_;
+
   Ref<Model>    model_;
   Ref<DofSpace> dofs_;
 
   Vector        massInv_;
   Ref<Solver>   solver_;
-
-  Ref<Function> updCond_;
 };
