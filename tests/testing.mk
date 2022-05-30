@@ -15,7 +15,7 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
-transient_cases = 1 2
+transient_cases = 1 #2 3
 
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro

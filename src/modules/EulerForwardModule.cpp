@@ -172,15 +172,15 @@ Module::Status EulerForwardModule::run
   StateVector::get  ( a_old, STATE[2], dofs_, globdat );
 
   // Get the internal and external force vectors last time step
-  fint = 0.0;
   fext = 0.0;
+  fint = 0.0;
 
-  params.set ( ActionParams::INT_VECTOR, fint );
   params.set ( ActionParams::EXT_VECTOR, fext );
+  params.set ( ActionParams::INT_VECTOR, fint );
 
+  model_->takeAction ( Actions::GET_EXT_VECTOR, params, globdat );
   model_->takeAction ( Actions::GET_INT_VECTOR, params, globdat );
   model_->takeAction ( "GET_GYRO_VECTOR", params, globdat );
-  model_->takeAction ( Actions::GET_EXT_VECTOR, params, globdat );
 
   fres = fext - fint;
   params.clear();
