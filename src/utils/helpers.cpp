@@ -125,12 +125,16 @@ namespace jive_helpers
 
     const Vector k        ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );
+    const Matrix T        ( T_1.shape() );
 
     k       = psi / theta;
     K       = skew ( k );
 
-    T_1    += 0.5 * K * theta;
-    T_1    += (1.0 - theta/2.0 * 1.0/tan(theta/2.0)) * matmul ( K, K );
+    T       = (sin(theta) / theta) * eye();
+    T      += (1.0 - sin(theta)/theta) * matmul(k, k);
+    T      += (1.0 - cos(theta)) * K;
+
+    T_1     = jem::numeric::inverse( T );
   }
 
   void rotMat2Quat 

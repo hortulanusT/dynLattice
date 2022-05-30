@@ -149,9 +149,7 @@ specialCosseratRodModel::specialCosseratRodModel
     myProps.get ( areaMoment_, AREA_MOMENT);
     polarMoment_= 2. * areaMoment_;
     myProps.find( polarMoment_, POLAR_MOMENT);
-    shearParam_ = 5./6.; // for rectangular cross section, for circle 9/10
-    myProps.find( shearParam_, SHEAR_FACTOR);
-    density_ = 0.;
+    myProps.get( shearParam_, SHEAR_FACTOR);
   } 
   else if (cross_section_ == "square")
   {
@@ -172,6 +170,9 @@ specialCosseratRodModel::specialCosseratRodModel
   else
     throw jem::IllegalInputException( getContext(), "unknown cross section, only 'square' and 'circle' are supported");
 
+  myProps.find( shearParam_, SHEAR_FACTOR);
+  
+  density_ = 0.;
   myProps.find( density_, DENSITY);
 
   // Report the used material parameters.

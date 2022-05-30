@@ -210,6 +210,7 @@ Module::Status EulerForwardModule::run
   du = v_new;
   for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
     nnodes = dofs_->getDofsForType( rdofs( idof, ALL ), iitems, SO3_dofs_[idof] );
+  
   for ( idx_t inode = 0; inode < nnodes; inode++)
   {
     inverseTangentOp( inv_tang, (Vector)u_old[rdofs[inode]] );

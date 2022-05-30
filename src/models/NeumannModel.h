@@ -119,6 +119,12 @@ class NeumannModel : public Model
     ( const Vector&           fext,
       const Properties&       globdat ) const;
 
+  void                      getExtVector_
+
+    ( const Vector&           fext,
+      const Properties&       globdat,
+      const double            scale ) const;
+
   void                      advance_
 
     ( const Properties&       globdat );
@@ -176,4 +182,5 @@ class NeumannModel : public Model
 
   
   String                    varName_;
+  bool                      extScale_;
 };

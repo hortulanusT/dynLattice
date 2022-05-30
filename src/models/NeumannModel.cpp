@@ -79,6 +79,7 @@ NeumannModel::NeumannModel
   minLoadIncr_ = 0.0;
   maxLoadVal_  = Float::MAX_VALUE;
   varName_     = myName_;
+  extScale_    = false;
 
   idx_t  i     = myName_.find('.');
   while (i>0)
@@ -121,17 +122,25 @@ bool NeumannModel::takeAction
   if ( action == Actions::GET_EXT_VECTOR  )
   {
     Vector f;
+    double scale;
 
     params.get ( f, ActionParams::EXT_VECTOR );
 
-    getExtVector_ ( f, globdat );
+    if ( extScale_ )
+    {
+      params.get ( scale, ActionParams::SCALE_FACTOR );
+      System::info( myName_ ) << " ...Applying load with factor " << scale << endl;
+      getExtVector_ ( f, globdat, scale );
+    }
+    else
+      getExtVector_ ( f, globdat );
 
     return true;
   }
 
   // proceed to next time step
 
-  if ( action == Actions::COMMIT )
+  if ( action == Actions::COMMIT && !extScale_)
   {
     commit_ ( params, globdat );
 
@@ -140,7 +149,7 @@ bool NeumannModel::takeAction
 
   // advance to next time step
 
-  if ( action == Actions::ADVANCE )
+  if ( action == Actions::ADVANCE && !extScale_ )
   {
     globdat.set ( "var.accepted", true );
 
@@ -171,7 +180,8 @@ void NeumannModel::configure
 
   myProps.find ( reduction_, REDUCTION_PROP,   0.0, 1.0 );
 
-  myProps.get  ( loadIncr0_, LOAD_INCR_PROP ); 
+  if (!myProps.find ( loadIncr0_, LOAD_INCR_PROP ))
+    extScale_ = true;
   myProps.find ( initLoad_,  INIT_LOAD_PROP );
 
   loadIncr_  = loadIncr0_;
@@ -289,6 +299,36 @@ void NeumannModel::getExtVector_
     dofs_->findDofIndices ( idofs, inodes, itype );
 
     select ( fext, idofs ) += loadScale_ * factors_[ig];
+  }
+}
+
+void NeumannModel::getExtVector_ 
+
+  ( const Vector&     fext,
+    const Properties& globdat,
+    const double      scale ) const
+{
+  idx_t                 nn;
+  IdxVector             itype ( 1 );
+  Assignable<NodeGroup> group;
+  IdxVector             inodes;
+  IdxVector             idofs;
+  String                context = getContext();
+
+  for ( idx_t ig = 0; ig < ngroups_; ++ig )
+  {
+    group  = NodeGroup::get ( nodeGroups_[ig], nodes_, globdat, context );
+    nn     = group.size();
+
+    inodes . resize ( nn );
+    idofs  . resize ( nn );
+    inodes = group.getIndices ();
+
+    itype[0] = dofs_->findType ( dofTypes_[ig] );
+
+    dofs_->findDofIndices ( idofs, inodes, itype );
+
+    select ( fext, idofs ) += scale * factors_[ig];
   }
 }
 
