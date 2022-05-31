@@ -31,9 +31,9 @@ else:
   test_passed = True
 
 if test_passed:
-  print(colored("TEST 5 RUN THROUGH", "green"))
+  print(colored("STATIC TEST 5 RUN THROUGH", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/beam/test5/result.pdf")
 else:
-  print(colored("TEST 5 FAILED", "red", attrs=["bold"]))
+  print(colored("STATIC TEST 5 FAILED", "red", attrs=["bold"]))

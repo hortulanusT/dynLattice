@@ -149,7 +149,8 @@ specialCosseratRodModel::specialCosseratRodModel
     myProps.get ( areaMoment_, AREA_MOMENT);
     polarMoment_= 2. * areaMoment_;
     myProps.find( polarMoment_, POLAR_MOMENT);
-    myProps.get( shearParam_, SHEAR_FACTOR);
+    shearParam_ = 5./6.; // assume standard square cross-section
+    myProps.find( shearParam_, SHEAR_FACTOR);
   } 
   else if (cross_section_ == "square")
   {

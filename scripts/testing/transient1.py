@@ -50,8 +50,6 @@ else:
   test_passed = True
 
 if test_passed:
-  print(colored("TEST 1 RUN THROUGH", "green"))
-
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
     plt.plot( BC_ref[:,0], BC_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, psi, "--", label="Simulation" )
@@ -97,5 +95,7 @@ if test_passed:
     plt.tight_layout()
     pdf.savefig()
     plt.close()
+
+  print(colored("TRANSIENT TEST 1 RUN THROUGH", "green"))
 else:
-  print(colored("TEST 0 FAILED", "red", attrs=["bold"]))
+  print(colored("TRANSIENT TEST 0 FAILED", "red", attrs=["bold"]))
