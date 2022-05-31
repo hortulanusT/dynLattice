@@ -1,5 +1,6 @@
 // PROGRAM_CONTROL
 control.runWhile = "t <= 30";
+control.fgMode = true;
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -31,7 +32,7 @@ model.model.model.disp.model.nodeGroups =  [ "fixed" ] ;
 model.model.model.disp.model.factors = [ 1. ];
 model.model.model.disp.model.dofs = [ "rz" ];
 
-Output.modules = [ "loadextent", "disp", "paraview" ];
+Output.modules = [ "loadextent", "disp", "paraview", "graph" ];
 Output.disp.dataSets += "fixed.disp.rz";
 Output.disp.dataSets += "t";
 Output.disp.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
@@ -45,3 +46,18 @@ Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 Output.paraview.sampleWhen = Output.disp.sampleWhen;
+
+Output.graph.type = "Graph";
+Output.graph.dataSets = ["pos", "velo", "acce"];
+Output.graph.pos.key = "angular position";
+Output.graph.pos.xData = "t";
+Output.graph.pos.yData = "fixed.disp.rz";
+Output.graph.pos.lineWidth	= 2.;
+Output.graph.velo.key = "tangential Velocity";
+Output.graph.velo.xData = "t";
+Output.graph.velo.yData = "sqrt(free.velo.dx^2 + free.velo.dy^2)";
+Output.graph.velo.lineWidth	= 2.;
+Output.graph.acce.key = "centrifugal Acceleration";
+Output.graph.acce.xData = "t";
+Output.graph.acce.yData = "sqrt(free.acce.dx^2 + free.acce.dy^2)";
+Output.graph.acce.lineWidth	= 2.;
