@@ -49,6 +49,7 @@ Module::Status    ParaViewModule::init
   myProps.find( fileType_, "output_file" );
   myConf .set ( "output_file", fileType_ ); 
 
+  sampleCond_ = jive::util::FuncUtils::newCond();
   jive::util::FuncUtils::configCond( sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat );
   jive::util::FuncUtils::getConfig( myConf, sampleCond_, jive::app::PropNames::SAMPLE_COND );
 
@@ -207,8 +208,16 @@ void      ParaViewModule::writeFile_
     Ref<DofSpace>           dofs    = DofSpace::get ( globdat, getContext() );
     Vector                  disp, velo, acce;
     StateVector::get        ( disp, jive::model::STATE0, dofs, globdat );
-    StateVector::get        ( velo, jive::model::STATE1, dofs, globdat );
-    StateVector::get        ( acce, jive::model::STATE2, dofs, globdat );
+    if (! StateVector::find ( velo, jive::model::STATE1, dofs, globdat ) )
+    {
+      velo.resize ( disp.shape() );
+      velo = 0.0;
+    }
+    if (! StateVector::find ( acce, jive::model::STATE2, dofs, globdat ) )
+    {
+      acce.resize ( disp.shape() );
+      acce = 0.0;
+    }
 
     // get the current model
     Ref<Model>              model   = Model::get ( globdat, getContext() );
