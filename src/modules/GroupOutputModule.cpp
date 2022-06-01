@@ -70,7 +70,7 @@ Module::Status GroupOutputModule::run
 
   StateVector::get    ( allDisp, dofs, globdat );
   bool doVelo = StateVector::find ( allVelo, jive::model::STATE1, dofs, globdat );
-  bool doAcce = StateVector::find ( allDisp, jive::model::STATE2, dofs, globdat );
+  bool doAcce = StateVector::find ( allAcce, jive::model::STATE2, dofs, globdat );
 
   Ref<Model> model    = Model::get( globdat, getContext() );
   Properties params   ( "actionParams" );
