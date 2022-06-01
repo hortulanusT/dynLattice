@@ -333,13 +333,14 @@ bool specialCosseratRodModel::takeAction
 
     assembleM_ ( *mbld, disp );
 
-    // // DEBUGGING
-    // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( M, dofList, dofList );
-    // REPORT( action )
-    // TEST_CONTEXT ( M )
+    // DEBUGGING
+    IdxVector   dofList ( dofs_->dofCount() );
+    Matrix      M ( dofList.size(), dofList.size() );
+    for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
+    mbld->getBlock(M, dofList, dofList );
+    REPORT( action )
+    TEST_CONTEXT ( mbld->toString() )
+    TEST_CONTEXT ( M )
   }
   
   if ( action == Actions::GET_INT_VECTOR )
@@ -1000,17 +1001,16 @@ void          specialCosseratRodModel::assembleM_
         {
           spatialM += weights[ip] * shapes( Inode, ip ) * shapes ( Jnode, ip) 
               * mc3.matmul( ipLambda[ip], materialM_, ipLambda[ip].transpose() );   
-
-          mbld.addBlock( idofs[TRANS_PART], jdofs[TRANS_PART], spatialM );
-        }        
-
+        }
+        mbld.addBlock( idofs[TRANS_PART], jdofs[TRANS_PART], spatialM );
+       
         materialJ = 0.0;
         node_len = 0.0;
-        if (Inode == Jnode) // TODO find some nicer expression for this
+        if (Inode == Jnode) // HACK consistent rotational inertia matrix?
         {
           if (Inode == 0)                 node_len = norm2(coords[1] - coords[0])/2.;
           else if (Inode == nodeCount-1)  node_len = norm2(coords[nodeCount-1] - coords[nodeCount-2])/2.;
-          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/2.;         
+          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/4.;         
           
           if (cross_section_ == "circle")
           {

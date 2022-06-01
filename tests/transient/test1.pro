@@ -4,7 +4,7 @@ control.runWhile = "t <= 30";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 1e-4;
+Solver.integrator.deltaTime = 5e-5;
 
 // settings
 params.rod_details.cross_section = "square";
@@ -66,3 +66,4 @@ Output.graph.resp.key = "centrifugal acc from centripetal force";
 Output.graph.resp.xData = "t";
 Output.graph.resp.yData = "2 * sqrt(fixed.resp.dx^2 + fixed.resp.dy^2) / ( 10 * 200 * 12/2e3 )";
 Output.graph.resp.lineWidth	= 3.;
+log.pattern = "*";

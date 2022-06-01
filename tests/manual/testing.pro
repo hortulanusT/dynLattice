@@ -17,6 +17,7 @@ Input.input.type = "GMSHInput";
 Input.input.file = "$(CASE_NAME).geo";
 Input.input.verbose = true;
 Input.input.store_tangents = true;
+Input.input.order = 2;
 Input.input.onelab.RepX = 1.;
 Input.input.onelab.RepY = 1.;
 Input.input.onelab.TopBar = 1.;
@@ -39,7 +40,7 @@ Solver.solver.type = "EulerForward";
 
 // ACTUAL MODEL
 model.type = "Matrix";
-model.matrix2.type = "Lumped";
+// model.matrix2.type = "Lumped";
 model.model.type = "Multi";
 model.model.models = [ "lattice", "load" ];
 
@@ -49,12 +50,12 @@ model.model.lattice.prefix = "beam_";
 model.model.lattice.child.type = "specialCosseratRod";
 model.model.lattice.child.dofNamesTrans = ["dx", "dy", "dz"];
 model.model.lattice.child.dofNamesRot = ["rx", "ry", "rz"];
-model.model.lattice.child.shape.numPoints = 2;
+model.model.lattice.child.shape.numPoints = 3;
 model.model.lattice.child.young = 210e9;
 model.model.lattice.child.poission_ratio = 0.3;
 model.model.lattice.child.cross_section = "square";
 model.model.lattice.child.side_length = 0.01;
-model.model.lattice.child.density = 1;
+model.model.lattice.child.density = 1000.;
 model.model.lattice.child.dofNamesTrans = params.dofNames;
 model.model.lattice.child.dofNamesRot = params.rotNames;
 

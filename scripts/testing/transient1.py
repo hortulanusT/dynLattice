@@ -64,7 +64,6 @@ if test_passed:
     
     plt.plot( angle_ref[:,0], angle_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, dev_rz, "--", label="orientation of the tip" )
-    plt.plot( t, dev_psi, "--", label="position of the tip" )
     plt.legend()
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
