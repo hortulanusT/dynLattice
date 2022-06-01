@@ -293,9 +293,9 @@ void EulerForwardModule::getConfig
 void EulerForwardModule::restart_ ( const Properties& globdat )
 {
   Properties              params;
-  model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
 
   jem::System::info( myName_ ) << " ...Updating mass information for explicit solver\n";
+  model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
 
   if ( mode_ == LUMPED )
   {

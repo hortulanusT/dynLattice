@@ -1,6 +1,5 @@
 // PROGRAM_CONTROL
 control.runWhile = "t <= 30";
-control.fgMode = true;
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -47,17 +46,23 @@ Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 Output.paraview.sampleWhen = Output.disp.sampleWhen;
 
+control.fgMode = true;
 Output.graph.type = "Graph";
-Output.graph.dataSets = ["pos", "velo", "acce"];
-Output.graph.pos.key = "angular position";
+Output.graph.window.title = "Error hunting";
+Output.graph.dataSets = ["pos", "velo", "acce", "resp"];
+Output.graph.pos.key = "centrifugal acc from rotational velo";
 Output.graph.pos.xData = "t";
-Output.graph.pos.yData = "fixed.disp.rz";
-Output.graph.pos.lineWidth	= 2.;
-Output.graph.velo.key = "tangential Velocity";
+Output.graph.pos.yData = "fixed.velo.rz^2 * 10.";
+Output.graph.pos.lineWidth	= 3.;
+Output.graph.velo.key = "centrifugal acc from tangential velo";
 Output.graph.velo.xData = "t";
-Output.graph.velo.yData = "sqrt(free.velo.dx^2 + free.velo.dy^2)";
-Output.graph.velo.lineWidth	= 2.;
-Output.graph.acce.key = "centrifugal Acceleration";
+Output.graph.velo.yData = "(free.velo.dx^2 + free.velo.dy^2) / 10.";
+Output.graph.velo.lineWidth	= 3.;
+Output.graph.acce.key = "centrifugal acc as computed";
 Output.graph.acce.xData = "t";
 Output.graph.acce.yData = "sqrt(free.acce.dx^2 + free.acce.dy^2)";
-Output.graph.acce.lineWidth	= 2.;
+Output.graph.acce.lineWidth	= 1.;
+Output.graph.resp.key = "centrifugal acc from centripetal force";
+Output.graph.resp.xData = "t";
+Output.graph.resp.yData = "2 * sqrt(fixed.resp.dx^2 + fixed.resp.dy^2) / ( 10 * 200 * 12/2e3 )";
+Output.graph.resp.lineWidth	= 3.;
