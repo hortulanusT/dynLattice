@@ -23,11 +23,11 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-model.model.matrix2.type = "Sparse";
+Input.input.onelab.size = 0.1;
 
 model.model.model.force.type = "Neumann";
 model.model.model.force.loadIncr = 0.;
-model.model.model.force.initLoad = "PI * (5e-3)^2 * 0.1 * 1.1e3 * 9.81";
+model.model.model.force.initLoad = "PI * (5e-3)^2 * $(Input.input.onelab.size) * 1.1e3 * 9.81";
 model.model.model.force.nodeGroups =  [ "all", "free", "fixed" ] ;
 model.model.model.force.factors = [ -1., 0.5, 0.5 ];
 model.model.model.force.dofs = [ "dz", "dz", "dz" ];
