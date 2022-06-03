@@ -49,7 +49,8 @@ ax.invert_yaxis()
 fig.tight_layout()
 fig.savefig("tests/transient/test0/speed.pdf")
 
-eigenfreqs = wave_speed_ana * np.pi * (2*np.arange(5) + 1)/2 / 1e3
+eigenfreqs = wave_speed_ana * np.pi * (2*np.arange(10) + 1)/2 / 1e3
+eigenfreqs /= 2*np.pi
 end_spec = np.fft.rfft(data[node])
 ipeaks, _ = signal.find_peaks(np.abs(end_spec))
 frequencies = np.fft.rfftfreq(data.shape[0], time_step) / 1e3
@@ -66,9 +67,9 @@ with PdfPages("tests/transient/test0/spectrum.pdf") as pdf:
       modes[i].append(spectrum[ipeaks[i]])
     
     axs[0].plot(frequencies, np.abs(spectrum), c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-    axs[0].vlines(eigenfreqs, 0, 100, "r", alpha=0.5, lw=0.5)
+    axs[0].vlines(eigenfreqs, 0, 100, "k", alpha=0.5, lw=0.5)
     axs[0].set_ylabel("Amplitude [m]")
-    axs[0].set_xlim(0, 12)
+    axs[0].set_xlim(0, 20)
     axs[0].set_ylim(0, 2e-2)
     # axs[0].legend(ncol=3, loc="upper right")
 
