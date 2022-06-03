@@ -4,7 +4,7 @@ control.runWhile = "t <= 1e-2";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = .1e-6;
+Solver.integrator.deltaTime = 1e-6;
 
 // settings
 params.rod_details.cross_section = "circle";

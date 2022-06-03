@@ -1,21 +1,20 @@
-// Lang et al 2011 "Multibody Dynamics Simulation of geometrically exact Cossrat rods Example 1
-
 // PROGRAM_CONTROL
-control.runWhile = "t <= 1";
+control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 1e-4;
+Solver.integrator.deltaTime = 1e-5;
+Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
-params.rod_details.cross_section = "circle";
-params.rod_details.radius = 5e-3;
-params.rod_details.young = 5e6;
-params.rod_details.poission_ratio = 0.5;
-params.rod_details.shear_correction = 1.;
-params.rod_details.density = 1.1e3;
-params.rod_details.shape.numPoints = 2;
+params.rod_details.cross_section = "square";
+params.rod_details.side_length = "sqrt(12/1e3)";
+params.rod_details.young = "1e9/12";
+params.rod_details.shear_modulus = "1e9/24";
+params.rod_details.shear_correction	= 2.;
+params.rod_details.density = "1e3/12";
+params.rod_details.shape.numPoints = 3;
 
 // include model and i/o files
 include "input.pro";
@@ -23,24 +22,26 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Input.input.onelab.size = 0.1;
+Input.input.order = 2;
 
-model.model.model.force.type = "Neumann";
-model.model.model.force.loadIncr = 0.;
-model.model.model.force.initLoad = "PI * (5e-3)^2 * $(Input.input.onelab.size) * 1.1e3 * 9.81";
-model.model.model.force.nodeGroups =  [ "all", "free", "fixed" ] ;
-model.model.model.force.factors = [ -1., 0.5, 0.5 ];
-model.model.model.force.dofs = [ "dz", "dz", "dz" ];
+Input.groupInput.fixed.ytype = "max";
+Input.groupInput.free.ytype = "min";
+Input.groupInput.nodeGroups += "elbow";
+Input.groupInput.elbow.xtype = "max";
+Input.groupInput.elbow.ytype = "max";
 
-model.model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
-model.model.model.fixed.dofs = model.model.model.rodMesh.child.dofNamesTrans;
-model.model.model.fixed.factors = [ 0., 0., 0. ]; 
+model.model.model.force.type = "LoadScale";
+model.model.model.force.scaleFunc = "t*50 - if (t<=1, 0, (t-1)*100) + if (t<=2, 0, (t-2)*50)";
+model.model.model.force.model.type = "Neumann";
+model.model.model.force.model.nodeGroups =  [ "elbow" ] ;
+model.model.model.force.model.factors = [ 1. ];
+model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
 
 Output.modules = [ "loadextent", "disp", "paraview" ];
 Output.disp.dataSets += "t";
-Output.disp.sampleWhen = "t % 0.01 < $(Solver.integrator.deltaTime)";
+Output.disp.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
