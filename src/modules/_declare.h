@@ -24,6 +24,7 @@
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
 #include "modules/EulerForwardModule.h"
+#include "modules/StateOutputModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules
@@ -42,4 +43,5 @@ void declareModules ()
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
   EulerForwardModule::declare    ();
+  StateOutputModule::declare     ();
 }

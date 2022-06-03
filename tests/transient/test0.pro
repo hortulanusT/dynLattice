@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 1e-2";
+control.runWhile = "t < 1e-2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -29,17 +29,11 @@ model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
 
-Output.modules = [ "loadextent", "disp", "paraview" ];
+Output.modules = [ "loadextent", "disp", "stateout" ];
 
 Output.disp.dataSets += "t";
 
-Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
-Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
-Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
-Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
-Output.paraview.beams.node_data = ["fint", "fext", "fres"];
-Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
+Output.stateout.type = "StateOutput";
+Output.stateout.dofs = "dz";
 
 log.file = "$(CASE_NAME)/run.log";
