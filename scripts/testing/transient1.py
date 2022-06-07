@@ -32,18 +32,17 @@ try:
       add += 2
   sim_psi[-1] += add*np.pi
 
-  sim_u1 = np.sqrt( px**2 + py**2 );
+  shadow_px = 10*np.cos(psi)
+  shadow_py = 10*np.sin(psi)
 
-  shadow_px = 10*np.cos(rz)
-  shadow_py = 10*np.sin(rz)
-
-  delta_vect = np.stack([shadow_px-px, shadow_py-py], -1)
-  out_vect = np.stack([np.cos(rz), np.sin(rz)], -1)
+  delta_vect = np.stack([px-shadow_px, py-shadow_py], -1)
+  out_vect = np.stack([np.cos(psi), np.sin(psi)], -1)
+  tan_vect = np.stack([-1*np.sin(psi), np.cos(psi)], -1)
 
   dev_rz = np.rad2deg(psi - rz)
   dev_psi = np.rad2deg(psi - sim_psi)
-  dev_u1 = sim_u1 - 10
-  dev_u2 = np.cross(out_vect, delta_vect)
+  dev_u1 = (delta_vect*out_vect).sum(axis=1)
+  dev_u2 = (delta_vect*tan_vect).sum(axis=1)
 except IOError:
   pass
 else:
