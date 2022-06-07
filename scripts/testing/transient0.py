@@ -79,7 +79,7 @@ if test_passed:
         modes[i].append(spectrum[ipeaks[i]])
       
       axs[0].plot(frequencies, np.abs(spectrum), c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[0].vlines(eigenfreqs, 0, 100, "b", "--", alpha=0.5, lw=0.5)
+      axs[0].vlines(eigenfreqs, 0, 100, "k", alpha=0.5, lw=0.5)
       axs[0].set_ylabel("Amplitude [m]")
       axs[0].set_xlim(0, 20)
       axs[0].set_ylim(0, 2e-2)

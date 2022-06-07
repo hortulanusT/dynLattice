@@ -17,6 +17,7 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 beam_cases = 0 1 2 3 4 5
 transient_cases = 0 1 #2 3
 
+
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro
 	@$^
@@ -48,6 +49,8 @@ tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%
 			-p Output.load.file=\"tests/element/runs/$*-load.csv\"\
 			> tests/element/runs/$*.log
 
+tests/element/test.pro: tests/element/input.pro tests/element/output.pro tests/element/model.pro
+
 # BEAM TEST RESULTS
 .PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv
 
@@ -71,6 +74,8 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
 
+tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/model.pro
+
 # TRANSIENT TEST RESULTS
 .PRECIOUS: tests/transient/test%/disp.csv
 
@@ -84,6 +89,8 @@ tests/transient/test%/disp.csv: $(program) tests/transient/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/transient/test$*/run.log
+
+tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro
 
 # CLEAN UP THE TESTS
 clean-tests :
