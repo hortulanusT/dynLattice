@@ -76,20 +76,19 @@ if test_passed:
     for node in data:
       spectrum = np.fft.rfft(data[node]) / data[node].size
       for i in range(len(modes)):
-        modes[i].append(spectrum[ipeaks[i]])
-      
+        modes[i].append(spectrum[ipeaks[i]])      
       axs[0].plot(frequencies, np.abs(spectrum), c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[0].vlines(eigenfreqs, 0, 100, "k", alpha=0.5, lw=0.5)
-      axs[0].set_ylabel("Amplitude [m]")
-      axs[0].set_xlim(0, 20)
-      axs[0].set_ylim(0, 2e-2)
-      # axs[0].legend(ncol=3, loc="upper right")
-
       axs[1].plot(frequencies, np.angle(spectrum, deg=True), c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[1].hlines([-90,0,90], 0, 100e3, alpha=0.5, lw=0.5)
-      axs[1].set_xlabel("Frequency [kHz]")
-      axs[1].set_ylabel("Phase Angle [deg]")
-      axs[1].set_ylim(-180, 180)
+
+    axs[0].set_ylabel("Amplitude [m]")
+    axs[0].set_xlim(0, 20)
+    axs[0].set_ylim(0, 2e-2)
+    axs[0].vlines(eigenfreqs, 0, 2e-2, alpha=0.5, lw=0.5)
+
+    axs[1].set_xlabel("Frequency [kHz]")
+    axs[1].set_ylabel("Phase Angle [deg]")
+    axs[1].set_ylim(-180, 180)
+    axs[1].hlines([-90,0,90], 0, 20, alpha=0.5, lw=0.5)
 
     fig.suptitle(f"Bode Plot of Node Spectra")
     fig.tight_layout(rect=[0,0,1,0.95])
@@ -101,7 +100,6 @@ if test_passed:
       axs[0].plot(np.linspace(0,1,nnodes), np.abs(modes[i]), label=f"Mode {i} at {frequencies[ipeaks[i]]:.2f} kHz")
       axs[1].plot(np.linspace(0,1,nnodes), np.angle(modes[i], deg=True), label=f"Mode {i} at {frequencies[ipeaks[i]]:.2f} kHz")
     
-    axs[0].hlines(0, 0, 1, alpha=0.5, lw=0.5)
     axs[1].hlines([-90,0,90], 0, 1, alpha=0.5, lw=0.5)
     
     axs[0].set_xlim(0,1)
