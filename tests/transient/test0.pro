@@ -28,12 +28,3 @@ model.model.model.force.model.factors = [ 1. ];
 model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
-
-Output.modules = [ "loadextent", "disp", "stateout" ];
-
-Output.disp.dataSets += "t";
-
-Output.stateout.type = "StateOutput";
-Output.stateout.dofs = "dz";
-
-log.file = "$(CASE_NAME)/run.log";

@@ -53,7 +53,7 @@ if test_passed:
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
     plt.plot( BC_ref[:,0], BC_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, psi, "--", label="Simulation" )
-    plt.legend()
+    plt.legend(loc="upper left")
     plt.xlabel("time [s]")
     plt.ylabel("rotation [rad]")
     plt.xlim([min(t), max(t)])
@@ -64,7 +64,7 @@ if test_passed:
     
     plt.plot( angle_ref[:,0], angle_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, dev_rz, "--", label="orientation of the tip" )
-    plt.legend()
+    plt.legend(loc="upper right")
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
     plt.xlim([min(t), max(t)])
@@ -75,7 +75,7 @@ if test_passed:
 
     plt.plot( u1_ref[:,0], u1_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, dev_u1, "--", label="Simulation")
-    plt.legend()
+    plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u1 deviation [m]")
     plt.xlim([min(t), max(t)])
@@ -86,7 +86,7 @@ if test_passed:
 
     plt.plot( u2_ref[:,0], u2_ref[:,1], label="Simo et al. 1988")
     plt.plot( t, dev_u2 , "--", label="Simulation" )
-    plt.legend()
+    plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u2 deviation [m]")
     plt.xlim([min(t), max(t)])
@@ -97,4 +97,4 @@ if test_passed:
 
   print(colored("TRANSIENT TEST 1 RUN THROUGH", "green"))
 else:
-  print(colored("TRANSIENT TEST 0 FAILED", "red", attrs=["bold"]))
+  print(colored("TRANSIENT TEST 1 FAILED", "red", attrs=["bold"]))
