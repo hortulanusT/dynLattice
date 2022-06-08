@@ -106,7 +106,7 @@ namespace jive_helpers
 
   /**
    * It computes inverse tangent operator for an exponential mapping
-   * (see DOI: 10.1007/s11044-021-09778-w)
+   * (see DOI: 10.1007/bf00370057 formula A.21)
    * 
    * @brief compute the inverste tangent operator
    * 

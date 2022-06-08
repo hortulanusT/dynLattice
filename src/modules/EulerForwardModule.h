@@ -129,6 +129,7 @@ class EulerForwardModule : public Module
   MassMode      mode_;
   Ref<Function> updCond_;
   IdxVector     SO3_dofs_;
+  IdxMatrix     rdofs_;
 
   Ref<Model>    model_;
   Ref<DofSpace> dofs_;

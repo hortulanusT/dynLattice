@@ -142,20 +142,20 @@ Module::Status EulerForwardModule::run
 {
   using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
+  const idx_t rotCount = SO3_dofs_.size();
 
   Properties            params;
   Ref<Constraints>      cons = Constraints::find ( dofs_, globdat );
-  IdxMatrix   rdofs    ( SO3_dofs_.size(), dofs_->getItems()->size() );
-  IdxVector   iitems   ( dofs_->getItems()->size() );
-  idx_t       nnodes   = 0;
-  Matrix      inv_tang ( SO3_dofs_.size(), SO3_dofs_.size() );
   Vector      fint     ( dofCount );
   Vector      fext     ( dofCount );
   Vector      fres     ( dofCount );
   Vector      u_new    ( dofCount );
   Vector      du       ( dofCount );
   Vector      v_new    ( dofCount );
+  Vector      dv       ( dofCount );
   Vector      a_new    ( dofCount );
+  IdxVector   rdof     ( rotCount );
+  Matrix      invTang  ( rotCount, rotCount );
   Vector      u_old, v_old, a_old;
 
   // skip if no model exists
@@ -204,20 +204,19 @@ Module::Status EulerForwardModule::run
   }
 
   params.clear();
-
-  v_new = v_old + a_new * dtime_;
-
-  du = v_new;
-  for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
-    nnodes = dofs_->getDofsForType( rdofs( idof, ALL ), iitems, SO3_dofs_[idof] );
   
-  for ( idx_t inode = 0; inode < nnodes; inode++)
-  {
-    inverseTangentOp( inv_tang, (Vector)u_old[rdofs[inode]] );
-    du[rdofs[inode]] = matmul ( inv_tang, (Vector)v_new[rdofs[inode]] );
-  }
+  dv    = a_new * dtime_;
+  v_new = v_old + dv;
 
-  u_new = u_old + du * dtime_; 
+  du    = v_new * dtime_;  
+  for ( idx_t inode = 0; inode < rdofs_.size(1); inode++ )
+  {
+    rdof = rdofs_[inode];
+    inverseTangentOp( invTang, (Vector)u_old[rdof] );
+    
+    du[rdof] = matmul(invTang, (Vector)v_new[rdof]) * dtime_;
+  }
+  u_new = u_old + du; 
 
   // commit everything
   Globdat::commitStep( globdat );
@@ -292,10 +291,16 @@ void EulerForwardModule::getConfig
 
 void EulerForwardModule::restart_ ( const Properties& globdat )
 {
-  Properties              params;
+  Properties    params;
+  IdxVector     iitems   ( dofs_->getItems()->size() );
+
 
   jem::System::info( myName_ ) << " ...Updating mass information for explicit solver\n";
   model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
+
+  rdofs_.resize ( SO3_dofs_.size(), dofs_->getItems()->size() );
+  for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
+    dofs_->getDofsForType( rdofs_( idof, ALL ), iitems, SO3_dofs_[idof] );
 
   if ( mode_ == LUMPED )
   {

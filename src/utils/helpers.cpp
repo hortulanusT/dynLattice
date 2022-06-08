@@ -115,26 +115,22 @@ namespace jive_helpers
   }
 
   void inverseTangentOp
-    ( const Matrix& T_1,
+    ( const Matrix& T,
       const Vector& psi )
   {
-    T_1 = eye();
+    T = eye();
     const double theta    = norm2(psi);
 
     if (theta < TINY) return;
 
-    const Vector k        ( psi.size() );
     const Matrix K        ( psi.size(), psi.size() );
-    const Matrix T        ( T_1.shape() );
+    K       = skew ( psi );
 
-    k       = psi / theta;
-    K       = skew ( k );
+    double a = sin(theta) / theta;
+    double b = (1 - a) / pow(theta, 2);
 
-    T       = (sin(theta) / theta) * eye();
-    T      += (1.0 - sin(theta)/theta) * matmul(k, k);
-    T      += (1.0 - cos(theta)) * K;
-
-    T_1     = jem::numeric::inverse( T );
+    T      -= 0.5 * K;
+    T      += (1 - a / 2 / b) / pow(theta, 2) * matmul(K, K);
   }
 
   void rotMat2Quat 
