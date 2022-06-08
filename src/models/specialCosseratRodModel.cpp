@@ -149,9 +149,8 @@ specialCosseratRodModel::specialCosseratRodModel
     myProps.get ( areaMoment_, AREA_MOMENT);
     polarMoment_= 2. * areaMoment_;
     myProps.find( polarMoment_, POLAR_MOMENT);
-    shearParam_ = 5./6.; // for rectangular cross section, for circle 9/10
+    shearParam_ = 5./6.; // assume standard square cross-section
     myProps.find( shearParam_, SHEAR_FACTOR);
-    density_ = 0.;
   } 
   else if (cross_section_ == "square")
   {
@@ -172,6 +171,9 @@ specialCosseratRodModel::specialCosseratRodModel
   else
     throw jem::IllegalInputException( getContext(), "unknown cross section, only 'square' and 'circle' are supported");
 
+  myProps.find( shearParam_, SHEAR_FACTOR);
+  
+  density_ = 0.;
   myProps.find( density_, DENSITY);
 
   // Report the used material parameters.
@@ -223,8 +225,8 @@ specialCosseratRodModel::specialCosseratRodModel
   materialM_.resize( 3, 3 ); 
   materialM_ = eye() * density_ * area_; 
 
-  // TEST_CONTEXT ( materialC_ )
-  // TEST_CONTEXT ( materialM_ )
+  jem::System::info( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
+  jem::System::info( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -333,10 +335,11 @@ bool specialCosseratRodModel::takeAction
 
     // // DEBUGGING
     // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofs_->dofCount(), dofs_->dofCount() );
+    // Matrix      M ( dofList.size(), dofList.size() );
     // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( M, dofList, dofList );
+    // mbld->getBlock(M, dofList, dofList );
     // REPORT( action )
+    // TEST_CONTEXT ( mbld->toString() )
     // TEST_CONTEXT ( M )
   }
   
@@ -998,17 +1001,16 @@ void          specialCosseratRodModel::assembleM_
         {
           spatialM += weights[ip] * shapes( Inode, ip ) * shapes ( Jnode, ip) 
               * mc3.matmul( ipLambda[ip], materialM_, ipLambda[ip].transpose() );   
-
-          mbld.addBlock( idofs[TRANS_PART], jdofs[TRANS_PART], spatialM );
-        }        
-
+        }
+        mbld.addBlock( idofs[TRANS_PART], jdofs[TRANS_PART], spatialM );
+       
         materialJ = 0.0;
         node_len = 0.0;
-        if (Inode == Jnode) // TODO find some nicer expression for this
+        if (Inode == Jnode) // HACK consistent rotational inertia matrix?
         {
           if (Inode == 0)                 node_len = norm2(coords[1] - coords[0])/2.;
           else if (Inode == nodeCount-1)  node_len = norm2(coords[nodeCount-1] - coords[nodeCount-2])/2.;
-          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/2.;         
+          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/4.;         
           
           if (cross_section_ == "circle")
           {

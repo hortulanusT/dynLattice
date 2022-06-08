@@ -8,6 +8,7 @@
  * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  * 
  */
+#pragma once
 
 #include "GroupOutputModule.h"
 #include "PBCGroupInputModule.h"

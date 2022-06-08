@@ -54,7 +54,7 @@ class DirichletModel : public Model
   typedef DirichletModel    Self;
   typedef Model             Super;
 
-  enum    Method   { RATE, INCREMENT };   
+  enum    Method   { RATE, INCREMENT, LOADSCALE };   
 
   static const char*        TYPE_NAME;
 
@@ -144,7 +144,7 @@ class DirichletModel : public Model
   double                    dispScale0_;
   double                    dispScale_;
 
-  // input either increment size or rate
+  // input either increment size or rate or externally
 
   double                    dispIncr_;
   double                    dispRate_;

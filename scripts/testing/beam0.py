@@ -28,9 +28,9 @@ except:
   pass
 
 if test_passed:
-  print(colored("TEST 0 PASSED", "green"))
+  print(colored("STATIC TEST 0 PASSED", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/beam/test0/result.pdf")
 else:
-  print(colored("TEST 0 FAILED", "red", attrs=["bold"]))
+  print(colored("STATIC TEST 0 FAILED", "red", attrs=["bold"]))

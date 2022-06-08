@@ -1,6 +1,6 @@
-.PHONY: tests element-tests beam-tests clean-tests manual-test
+.PHONY: tests element-tests beam-tests transient-tests clean-tests manual-test
 
-tests: element-tests beam-tests
+tests: element-tests beam-tests transient-tests
 
 clean-all: clean-tests
 
@@ -15,6 +15,8 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
+transient_cases = 0 1 #2 3
+
 
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro
@@ -47,6 +49,8 @@ tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%
 			-p Output.load.file=\"tests/element/runs/$*-load.csv\"\
 			> tests/element/runs/$*.log
 
+tests/element/test.pro: tests/element/input.pro tests/element/output.pro tests/element/model.pro
+
 # BEAM TEST RESULTS
 .PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv
 
@@ -70,11 +74,33 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
 
+tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/model.pro
+
+# TRANSIENT TEST RESULTS
+.PRECIOUS: tests/transient/test%/disp.csv
+
+transient-tests : $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
+
+tests/transient/test%/result.pdf: scripts/testing/transient%.py\
+ 														  		tests/transient/test%/disp.csv
+	@$<
+
+tests/transient/test%/disp.csv: $(program) tests/transient/test%.pro
+	@$(RM_R) $(dir $@)
+	@$(MKDIR) $(dir $@)
+	@$^ > tests/transient/test$*/run.log
+
+tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro
+
 # CLEAN UP THE TESTS
 clean-tests :
 	@$(RM_R) tets/manual/testing
 	@$(RM) tets/manual/*.csv
 	@$(RM) tets/manual/*.log
+
 	@$(RM_R) tests/element/runs
 	@$(RM) tests/element/result_*.txt
+
 	@$(RM_R) tests/beam/test*/
+	
+	@$(RM_R) tests/transient/test*/

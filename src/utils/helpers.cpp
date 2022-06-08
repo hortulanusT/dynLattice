@@ -34,7 +34,7 @@ namespace jive_helpers
     // TEST_NO_CONTEXT(R)
     // TEST_NO_CONTEXT(theta)
     // TEST_NO_CONTEXT(rv)
-}
+  }
 
   void vec2mat
     ( const Matrix& mat,
@@ -112,6 +112,29 @@ namespace jive_helpers
     ExpP  += (1-cos(theta)) * matmul ( K, KP );
     ExpP  += (1-cos(theta)) * matmul ( KP, K );
     // TEST_NO_CONTEXT(ExpP)
+  }
+
+  void inverseTangentOp
+    ( const Matrix& T_1,
+      const Vector& psi )
+  {
+    T_1 = eye();
+    const double theta    = norm2(psi);
+
+    if (theta < TINY) return;
+
+    const Vector k        ( psi.size() );
+    const Matrix K        ( psi.size(), psi.size() );
+    const Matrix T        ( T_1.shape() );
+
+    k       = psi / theta;
+    K       = skew ( k );
+
+    T       = (sin(theta) / theta) * eye();
+    T      += (1.0 - sin(theta)/theta) * matmul(k, k);
+    T      += (1.0 - cos(theta)) * K;
+
+    T_1     = jem::numeric::inverse( T );
   }
 
   void rotMat2Quat 

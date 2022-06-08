@@ -53,7 +53,7 @@ Module::Status GroupOutputModule::run
   ( const Properties&   globdat )
 {    
   Properties myVars   = Globdat::getVariables( globdat );
-  Properties currentVars, loadVars, respVars, dispVars, extentVars;
+  Properties currentVars, loadVars, respVars, dispVars, veloVars, acceVars, extentVars;
   NodeSet    nodes    = NodeSet::get( globdat, getContext() );
   ElementSet elems    = ElementSet::get ( globdat, getContext() );
 
@@ -64,10 +64,13 @@ Module::Status GroupOutputModule::run
   Vector     allLoad  ( dofs->dofCount() );
   Vector     allResp  ( dofs->dofCount() );
   Vector     allDisp  ( dofs->dofCount() );
-  Vector     oldDisp  ( dofs->dofCount() );
+  Vector     allVelo  ( dofs->dofCount() );
+  Vector     allAcce  ( dofs->dofCount() );
   Matrix     coords   ( nodes.size(), nodes.rank() );
 
   StateVector::get    ( allDisp, dofs, globdat );
+  bool doVelo = StateVector::find ( allVelo, jive::model::STATE1, dofs, globdat );
+  bool doAcce = StateVector::find ( allAcce, jive::model::STATE2, dofs, globdat );
 
   Ref<Model> model    = Model::get( globdat, getContext() );
   Properties params   ( "actionParams" );
@@ -81,7 +84,7 @@ Module::Status GroupOutputModule::run
   model->takeAction   ( Actions::GET_INT_VECTOR, params, globdat );
   params.erase        ( ActionParams::INT_VECTOR );
 
-  Vector     load, disp, resp;
+  Vector     load, disp, velo, acce, resp;
 
   // iterate through the node groups
   for (idx_t iNodeGroup = 0; iNodeGroup < nodeGroups_.size(); iNodeGroup++)
@@ -91,12 +94,18 @@ Module::Status GroupOutputModule::run
     loadVars            = currentVars.makeProps( "load" );
     respVars            = currentVars.makeProps( "resp" );
     dispVars            = currentVars.makeProps( "disp" );
+    if ( doVelo )
+      veloVars          = currentVars.makeProps( "velo" );
+    if ( doAcce )
+      acceVars          = currentVars.makeProps( "acce" );
     NodeGroup nodeGroup = NodeGroup::get ( nodeGroups_[iNodeGroup], nodes, globdat, getContext() );
     nodeIndices.resize  ( nodeGroup.size() );
     dofIndices.resize   ( nodeGroup.size() );
     load.resize         ( nodeGroup.size() );
     resp.resize         ( nodeGroup.size() );
     disp.resize         ( nodeGroup.size() );
+    velo.resize         ( nodeGroup.size() );
+    acce.resize         ( nodeGroup.size() );
     nodeIndices         = nodeGroup.getIndices();
 
     // iterate through all the dofs to report
@@ -107,6 +116,11 @@ Module::Status GroupOutputModule::run
 
       // get the displacements and loads for those dofs
       disp      = allDisp[dofIndices];
+      if ( doVelo )
+        velo    = allVelo[dofIndices];
+      if ( doAcce )
+        acce    = allAcce[dofIndices];
+      
       load      = allLoad[dofIndices];
       resp      = allResp[dofIndices];
 
@@ -114,6 +128,10 @@ Module::Status GroupOutputModule::run
       loadVars.set    ( nodeDofNames_[iDof], sum( load ));
       respVars.set    ( nodeDofNames_[iDof], sum( resp ));
       dispVars.set    ( nodeDofNames_[iDof], sum( disp ) / disp.size() );
+      if ( doVelo )
+        veloVars.set  ( nodeDofNames_[iDof], sum( velo ) / velo.size() );
+      if ( doAcce )
+        acceVars.set  ( nodeDofNames_[iDof], sum( acce ) / acce.size() );
     }
   }
 
