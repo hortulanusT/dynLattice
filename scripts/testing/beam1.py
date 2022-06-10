@@ -2,7 +2,6 @@
 
 # TEST 1 from Simo/Vu-Quoc
 import numpy as np
-from cmath import pi
 from termcolor import colored
 from matplotlib import pyplot as plt
 
@@ -14,14 +13,14 @@ try:
 
   sim_log = open("tests/beam/test1/run.log").readlines()
   sim_conv = [];
-  sim_conv.append(8*pi)
+  sim_conv.append(8*np.pi)
   res_scale = 1.
   for line in sim_log:
     if "module `Solver.solver' : residual scale factor =" in line:
       res_scale = float(line.split('=')[1])
     if f"module `Solver.solver' : iter = {len(sim_conv)}, scaled residual =" in line:
       sim_conv.append(float(line.split('=')[2]) * res_scale)
-  ref_conv = [8*pi, .425e2, .441e-13]
+  ref_conv = [8*np.pi, .425e2, .441e-13]
 
   plt.figure(figsize=(16/3, 6))
   plt.semilogy(sim_conv, 'x', label="custom_implementation")

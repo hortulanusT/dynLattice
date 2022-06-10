@@ -20,6 +20,7 @@ transient_cases = 0 1 #2 3
 
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro
+	$(RM_R) tests/manual/testing/
 	@$^
 
 # ELEMENT TEST RESULTS
