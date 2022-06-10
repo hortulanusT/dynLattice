@@ -4,7 +4,7 @@ control.runWhile = "t <= 30";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 1e-5;
+Solver.integrator.deltaTime = 1e-4;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
@@ -39,9 +39,11 @@ model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
 
-Output.modules = [ "loadextent", "disp", "paraview" ];
-Output.disp.dataSets += "t";
-Output.disp.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
+Output.modules += "paraview";
+
+Output.disp.dofs = model.model.model.rodMesh.child.dofNamesTrans;
+Output.disp.dofs += model.model.model.rodMesh.child.dofNamesRot;
+Output.disp.sampleWhen = "t % 0.01 < $(Solver.integrator.deltaTime)";
 
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
