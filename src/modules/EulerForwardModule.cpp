@@ -21,6 +21,8 @@ EulerForwardModule::EulerForwardModule
 {
   dtime_  = 1.0;
   valid_  = false;
+  SO3_dofs_.resize( 0 );
+  rdofs_.resize( 0, 0 );
 }
 
 
@@ -134,7 +136,6 @@ Module::Status EulerForwardModule::init
 //   run
 //-----------------------------------------------------------------------
 
-
 Module::Status EulerForwardModule::run 
 
   ( const Properties& globdat )
@@ -149,14 +150,15 @@ Module::Status EulerForwardModule::run
   Vector      fint     ( dofCount );
   Vector      fext     ( dofCount );
   Vector      fres     ( dofCount );
-  Vector      u_new    ( dofCount );
-  Vector      du       ( dofCount );
-  Vector      v_new    ( dofCount );
-  Vector      dv       ( dofCount );
-  Vector      a_new    ( dofCount );
-  IdxVector   rdof     ( rotCount );
-  Matrix      invTang  ( rotCount, rotCount );
   Vector      u_old, v_old, a_old;
+  Vector      u_new    ( dofCount );
+  Vector      v_new    ( dofCount );
+  Vector      a_new    ( dofCount );
+
+  IdxVector   dofs     ( rotCount );
+  Matrix      R_old    ( rotCount, rotCount );
+  Matrix      R_new    ( rotCount, rotCount );
+  Matrix      V_upd    ( rotCount, rotCount );
 
   // skip if no model exists
   if ( !(model_) )
@@ -205,18 +207,22 @@ Module::Status EulerForwardModule::run
 
   params.clear();
   
-  dv    = a_new * dtime_;
-  v_new = v_old + dv;
+  v_new = v_old + a_new * dtime_;
+  u_new = u_old + v_new * dtime_; 
 
-  du    = v_new * dtime_;  
+  // do different update for rotational dofs
+  TEST_CONTEXT(u_new)
   for ( idx_t inode = 0; inode < rdofs_.size(1); inode++ )
   {
-    rdof = rdofs_[inode];
-    inverseTangentOp( invTang, (Vector)u_old[rdof] );
+    dofs    = rdofs_[inode];
     
-    du[rdof] = matmul(invTang, (Vector)v_new[rdof]) * dtime_;
+    expVec  ( R_old, (Vector)u_old[dofs] );
+    expVec  ( V_upd, (Vector)(dtime_ * v_new[dofs]) );
+    matmul  ( R_new, V_upd, R_old );
+
+    logMat  ( (Vector)u_new[dofs], R_new );
   }
-  u_new = u_old + du; 
+  TEST_CONTEXT(u_new)
 
   // commit everything
   Globdat::commitStep( globdat );
@@ -298,9 +304,13 @@ void EulerForwardModule::restart_ ( const Properties& globdat )
   jem::System::info( myName_ ) << " ...Updating mass information for explicit solver\n";
   model_->takeAction ( Actions::UPD_MATRIX2, params, globdat );
 
-  rdofs_.resize ( SO3_dofs_.size(), dofs_->getItems()->size() );
-  for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
-    dofs_->getDofsForType( rdofs_( idof, ALL ), iitems, SO3_dofs_[idof] );
+  if (SO3_dofs_.size())
+  {
+    jem::System::info( myName_ ) << " ...Updating SO(3) dof inormation for explicit solver\n";
+    rdofs_.resize ( SO3_dofs_.size(), dofs_->getItems()->size() );
+    for ( idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
+      dofs_->getDofsForType( rdofs_( idof, ALL ), iitems, SO3_dofs_[idof] );
+  }
 
   if ( mode_ == LUMPED )
   {

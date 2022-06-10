@@ -52,7 +52,8 @@ using jive::model::ActionParams;
 using jive::model::StateVector;
 using jive::implict::newSolverParams;
 
-using jive_helpers::inverseTangentOp;
+using jive_helpers::expVec;
+using jive_helpers::logMat;
 
 //-----------------------------------------------------------------------
 //   class EulerForwardModule

@@ -114,24 +114,28 @@ namespace jive_helpers
     // TEST_NO_CONTEXT(ExpP)
   }
 
-  void inverseTangentOp
-    ( const Matrix& T,
-      const Vector& psi )
-  {
-    T = eye();
-    const double theta    = norm2(psi);
+  // void getTangentOp
+  //   ( const Matrix& T,
+  //     const Vector& psi )
+  // {
+  //   const double theta    = norm2(psi);
+  //   const Matrix K        = skew (psi);
 
-    if (theta < TINY) return;
+  //   T = eye() + 0.5*K;
 
-    const Matrix K        ( psi.size(), psi.size() );
-    K       = skew ( psi );
+  //   if (theta < TINY) return;
 
-    double a = sin(theta) / theta;
-    double b = (1 - a) / pow(theta, 2);
+  //   T += (1. - theta*sin(theta)/2/(1-cos(theta))) / pow(theta, 2) * matmul(K, K);
 
-    T      -= 0.5 * K;
-    T      += (1 - a / 2 / b) / pow(theta, 2) * matmul(K, K);
-  }
+  //   // const Matrix K        ( psi.size(), psi.size() );
+  //   // K       = skew ( psi );
+
+  //   // double a = sin(theta) / theta;
+  //   // double b = (1 - a) / pow(theta, 2);
+
+  //   // T      -= 0.5 * K;
+  //   // T      += (1 - a / 2 / b) / pow(theta, 2) * matmul(K, K);
+  // }
 
   void rotMat2Quat 
     ( const Vector& q,

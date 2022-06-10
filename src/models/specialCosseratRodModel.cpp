@@ -382,7 +382,7 @@ bool specialCosseratRodModel::takeAction
     StateVector::get( disp, dofs_, globdat );
     StateVector::get( velo, jive::model::STATE[1], dofs_, globdat );
 
-    mbld = newInstance<FlexMBuilder>("inertia");
+    mbld = newInstance<FlexMBuilder>("inertia"); //HACK get M matrix from global model
 
     // assemble mass matrix
     assembleM_( *mbld, disp );
@@ -1010,25 +1010,26 @@ void          specialCosseratRodModel::assembleM_
         {
           if (Inode == 0)                 node_len = norm2(coords[1] - coords[0])/2.;
           else if (Inode == nodeCount-1)  node_len = norm2(coords[nodeCount-1] - coords[nodeCount-2])/2.;
-          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/4.;         
+          else                            node_len = norm2(coords[Inode+1] - coords[Inode-1])/2.;         
           
           if (cross_section_ == "circle")
           {
-            materialJ( 0,0 ) = materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(radius_,2)*3 + pow(node_len, 2));
+            materialJ( 0,0 ) = density_*area_*node_len / 12. * ( pow(radius_,2)*3 + pow(node_len, 2));
+            materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(radius_,2)*3 + pow(node_len, 2));
             materialJ( 2,2 ) = density_*area_*node_len / 2. * pow(radius_,2); 
           }
           if (cross_section_ == "square")
           {
-            materialJ( 0,0 ) = materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
+            materialJ( 0,0 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
+            materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
             materialJ( 2,2 ) = density_*area_*node_len / 6. * pow(side_length_, 2);
           }
 
-          if ( Inode == 0 || Inode == nodeCount-1 )
+          if (Inode == 0 || Inode == nodeCount-1) // steiner parts
           {
             materialJ( 0,0 ) += density_*area_*node_len * pow(node_len/2., 2);
             materialJ( 1,1 ) += density_*area_*node_len * pow(node_len/2., 2);
           }
-
           spatialJ = mc3.matmul( nodeLambda[Inode], materialJ, nodeLambda[Inode].transpose() );
 
           mbld.addBlock( idofs[ROT_PART], jdofs[ROT_PART], spatialJ );
