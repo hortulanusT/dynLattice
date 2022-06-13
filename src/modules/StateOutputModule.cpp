@@ -113,6 +113,9 @@ Module::Status StateOutputModule::init
   fileWriter = newInstance<FileWriter> ( outFile, jem::io::FileFlags::WRITE );
   // set the writer opject
   output_   = newInstance<PrintWriter> ( fileWriter );
+  output_->nformat.setFractionDigits(8);
+  output_->nformat.setShowSign();
+  output_->nformat.setScientific();
 
   return OK;
 }
@@ -166,8 +169,8 @@ void StateOutputModule::writeHeader_
 
   ( const bool          time )
 {
-  print( *output_, "step", ',' );
   if (time) print( *output_, "time", ',' );
+  else print( *output_, "step", ',' );
   print( *output_, "state" );
   
   for (idx_t idof : dofsOut_) 
@@ -190,8 +193,8 @@ void StateOutputModule::writeLine_
     const StateTag        state,
     const double          time ) const
 {
-  print( *output_, step, ',' );
   if (time >= 0) print( *output_, time, ',' );
+  else print( *output_, step, ',' );
   print( *output_, state );
   
   for (double datum : data) print( *output_, ',', datum );

@@ -20,6 +20,9 @@ include "model.pro";
 include "output.pro";
 
 // more settings
+Output.disp.file = "$(CASE_NAME)/disp.csv";
+Output.disp.dofs = "dz";
+
 model.model.model.force.type = "LoadScale";
 model.model.model.force.scaleFunc = "if (i-100<=0, 1e10, 0) - if (i-99<=0, 1e10, 0)";
 model.model.model.force.model.type = "Neumann";
