@@ -155,7 +155,8 @@ Module::Status EulerForwardModule::run
   Vector      v_new    ( dofCount );
   Vector      a_new    ( dofCount );
 
-  IdxVector   dofs     ( rotCount );
+  Vector      r_node   ( rotCount );
+  Vector      d_r      ( rotCount );
   Matrix      R_old    ( rotCount, rotCount );
   Matrix      R_new    ( rotCount, rotCount );
   Matrix      V_upd    ( rotCount, rotCount );
@@ -211,19 +212,20 @@ Module::Status EulerForwardModule::run
   u_new = u_old + v_new * dtime_; 
 
   // do different update for rotational dofs
-  TEST_CONTEXT(u_new)
   for ( idx_t inode = 0; inode < rdofs_.size(1); inode++ )
   {
-    dofs    = rdofs_[inode];
+    r_node  = u_old[rdofs_[inode]];
+    d_r     = dtime_ * v_new[rdofs_[inode]];
     
-    expVec  ( R_old, (Vector)u_old[dofs] );
-    expVec  ( V_upd, (Vector)(dtime_ * v_new[dofs]) );
+    expVec  ( R_old, r_node );
+    expVec  ( V_upd, d_r );
     matmul  ( R_new, V_upd, R_old );
 
-    logMat  ( (Vector)u_new[dofs], R_new );
-  }
-  TEST_CONTEXT(u_new)
+    logMat  ( r_node, R_new );
 
+    u_new[rdofs_[inode]]  = r_node;
+  }
+  
   // commit everything
   Globdat::commitStep( globdat );
   Globdat::commitTime( globdat );  
