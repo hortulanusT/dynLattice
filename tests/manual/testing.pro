@@ -4,7 +4,7 @@ control.runWhile = "t <= 10";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 5e-5;
+Solver.integrator.deltaTime = 1e-6;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = true;
 
@@ -37,6 +37,13 @@ model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.writeState1 = true;
 Output.disp.writeState2 = true;
+Output.disp.sampleWhen = "i % 100 < 1";
+
+Output.modules += "force";
+Output.force.type = "ForceOutput";
+Output.force.writeExtForce = false;
+Output.force.writeGyroForce = true;
+Output.force.sampleWhen = "i % 100 < 1";
 // Output.disp.type = "Sample";
 // Output.disp.file = "$(CASE_NAME)/disp.csv";
 // Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
