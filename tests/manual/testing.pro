@@ -32,7 +32,7 @@ model.model.model.disp.type = "LoadScale";
 model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ "1/sqrt(2)", "1/sqrt(2)" ];
+model.model.model.disp.model.factors = [ "1", "0 * 1/sqrt(2)" ];
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.type = "Sample";
