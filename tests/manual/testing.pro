@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 10";
+control.runWhile = "t <= 5";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -37,13 +37,12 @@ model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.writeState1 = true;
 Output.disp.writeState2 = true;
-Output.disp.sampleWhen = "i % 100 < 1";
 
 Output.modules += "force";
 Output.force.type = "ForceOutput";
 Output.force.writeExtForce = false;
 Output.force.writeGyroForce = true;
-Output.force.sampleWhen = "i % 100 < 1";
+
 // Output.disp.type = "Sample";
 // Output.disp.file = "$(CASE_NAME)/disp.csv";
 // Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
@@ -62,5 +61,5 @@ Output.force.sampleWhen = "i % 100 < 1";
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "*";
+log.pattern = "*.info";
 log.file = "$(CASE_NAME).log";

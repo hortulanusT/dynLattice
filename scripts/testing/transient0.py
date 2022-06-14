@@ -99,6 +99,7 @@ if test_passed:
     axs[1].set_xlabel("Frequency [kHz]")
     axs[1].set_ylabel("Phase Angle [deg]")
     axs[1].set_ylim(-180, 180)
+    axs[1].vlines(eigenfreqs, -180, 180, alpha=0.5, lw=0.5)
     axs[1].hlines([-90,0,90], 0, 20, alpha=0.5, lw=0.5)
 
     fig.suptitle(f"Bode Plot of Node Spectra")
