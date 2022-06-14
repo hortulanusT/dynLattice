@@ -13,25 +13,35 @@ from scipy import signal
 test_passed = False
 
 try:
-  data = pd.read_csv("tests/transient/test0/disp.csv", index_col="time")
+  data = pd.read_csv("tests/transient/test0/disp.csv", index_col=["time", "state"])
   data[f"dz[{data.shape[1]}]"] = data["dz[1]"]
-  data.drop(columns=["step", "state", "dz[1]"], inplace=True)
+  data.drop(columns="dz[1]", inplace=True)
   data.columns = np.arange(data.shape[1])
+
+  disp = data.xs(0, level="state")
+  velo = data.xs(1, level="state")
 except IOError:
   pass
 else:
   test_passed = True
 
-times = data.index.to_numpy()
+times = disp.index.to_numpy()
 time_step = np.diff(times).mean()
 nnodes = data.shape[1]
 wave_pos = []
 wave_time = []
 
+energy_in = disp.iloc[100, -1] * 1e10
+
+energy = pd.DataFrame()
+energy["potential"] = 0.5 * 205e9*np.pi*0.05**2/ (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns') 
+energy["kinetic"] = 0.5 * 7850*np.pi*0.05**2*(1/(nnodes-1)) * (velo**2).sum(axis='columns') # first and last only half length missing!
+energy["sum"] = energy.sum(axis='columns')
+
 for node in data:
-  test = data[node]>1e-3
+  test = disp[node]>1e-3
   if any(test):
-    wave_time.append(data[node][test].index[0])
+    wave_time.append(disp[node][test].index[0])
     wave_pos.append(node/(nnodes-1))
 
 wave_pos = np.array(wave_pos)
@@ -40,11 +50,11 @@ wave_times_cal = np.array(wave_time)
 wave_speed_cal = np.gradient(wave_pos, wave_times_cal) * -1
 wave_speed_ana = np.sqrt(205e9/7850)
 
-wave_times_ana = (1-wave_pos)/wave_speed_ana + 100*time_step
+wave_times_ana = (1-wave_pos)/wave_speed_ana + nnodes*time_step
 
 eigenfreqs = wave_speed_ana * (2*np.arange(10) + 1) / 4 / 1e3
-end_spec = np.fft.rfft(data[data.shape[1]-1])
-frequencies = np.fft.rfftfreq(data.shape[0], time_step) / 1e3
+end_spec = np.fft.rfft(disp[data.shape[1]-1]) / disp[data.shape[1]-1].size
+frequencies = np.fft.rfftfreq(disp.shape[0], time_step) / 1e3
 ipeaks, _ = signal.find_peaks(np.abs(end_spec))
 
 for i in range(len(eigenfreqs)):
@@ -53,8 +63,8 @@ for i in range(len(eigenfreqs)):
 if test_passed:
   with PdfPages("tests/transient/test0/result.pdf") as pdf:
     fig, ax = plt.subplots(1,1, sharex=True, figsize=(10,10))
-    for node in data:
-      ax.plot(data[node].values + node/(nnodes-1), times)
+    for node in disp:
+      ax.plot(disp[node].values + node/(nnodes-1), times)
     ax.plot(wave_pos, wave_times_cal, "k:", label="resulting wave")
     ax.plot(wave_pos, wave_times_ana, "k", lw=3, alpha=0.2, label="analytical wave")
     ax.set_xlabel("Position [m]")
@@ -74,8 +84,8 @@ if test_passed:
 
     fig, axs = plt.subplots(2,1, sharex=True, figsize=(10,8))
 
-    for node in data:
-      spectrum = np.fft.rfft(data[node]) / data[node].size
+    for node in disp:
+      spectrum = np.fft.rfft(disp[node]) / disp[node].size
       for i in range(len(modes)):
         modes[i].append(spectrum[ipeaks[i]])      
       axs[0].plot(frequencies, np.abs(spectrum), c=coloring(node/(nnodes-1)), label=f"Node #{node}")
@@ -115,6 +125,12 @@ if test_passed:
 
     fig.suptitle(f"Amplitude/Phase of Eigenmodes")
     fig.tight_layout(rect=[0,0,1,0.95])
+    pdf.savefig(fig)
+
+    fig, ax = plt.subplots(1,1, figsize=(10,6))
+    ax.hlines( energy_in, 0, 1, alpha=0.5, lw=0.5, label="insert energy")
+    energy.plot.line(ax=ax)
+    ax.set_xlim([min(times), max(times)])
     pdf.savefig(fig)
 
   print(colored("TRANSIENT TEST 0 PASSED", "green"))

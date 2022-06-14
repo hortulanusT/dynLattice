@@ -22,6 +22,7 @@ include "output.pro";
 // more settings
 Output.disp.file = "$(CASE_NAME)/disp.csv";
 Output.disp.dofs = "dz";
+Output.disp.writeState1 = true;
 
 model.model.model.force.type = "LoadScale";
 model.model.model.force.scaleFunc = "if (i-100<=0, 1e10, 0) - if (i-99<=0, 1e10, 0)";
