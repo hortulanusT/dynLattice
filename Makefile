@@ -34,7 +34,7 @@ include ${shell find $(SRCDIR) -name *.mk}
 ##   add opemMPI libraries                                           ##
 #######################################################################
 
-export LD_RUN_PATH := $(MPIDIR):$(LD_RUN_PATH)
+export LD_RUN_PATH := $(MPIDIR)/lib:$(LD_RUN_PATH)
 
 #######################################################################
 ##   Include Jive package and create executable                      ##
