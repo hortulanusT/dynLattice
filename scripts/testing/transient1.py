@@ -23,15 +23,6 @@ try:
   py = sim_disp[:, 1]
   rz = sim_disp[:, 5]
 
-  sim_psi = np.arctan2( py, px )
-  grad_sim = np.diff(sim_psi)
-  add = 0
-  for i in range(len(grad_sim)):
-    sim_psi[i] += add*np.pi
-    if grad_sim[i] < -0.5*np.pi:
-      add += 2
-  sim_psi[-1] += add*np.pi
-
   shadow_px = 10*np.cos(psi)
   shadow_py = 10*np.sin(psi)
 
@@ -40,7 +31,6 @@ try:
   tan_vect = np.stack([-1*np.sin(psi), np.cos(psi)], -1)
 
   dev_rz = np.rad2deg(psi - rz)
-  dev_psi = np.rad2deg(psi - sim_psi)
   dev_u1 = (delta_vect*out_vect).sum(axis=1)
   dev_u2 = (delta_vect*tan_vect).sum(axis=1)
 except IOError:
