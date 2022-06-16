@@ -1,11 +1,11 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 5";
+control.runWhile = "t <= 1";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 1e-6;
-Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+Solver.integrator.deltaTime = 1e-7;
+// Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = true;
 
 // settings
@@ -32,7 +32,7 @@ model.model.model.disp.type = "LoadScale";
 model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ "1/sqrt(2)", "1/sqrt(2)" ];
+model.model.model.disp.model.factors = [ 0., 1. ]; //[ "1/sqrt(2)", "1/sqrt(2)" ]; //
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.writeState1 = true;
@@ -40,7 +40,6 @@ Output.disp.writeState2 = true;
 
 Output.modules += "force";
 Output.force.type = "ForceOutput";
-Output.force.writeExtForce = false;
 Output.force.writeGyroForce = true;
 
 // Output.disp.type = "Sample";
@@ -61,5 +60,4 @@ Output.force.writeGyroForce = true;
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "*.info";
 log.file = "$(CASE_NAME).log";

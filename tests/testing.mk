@@ -20,8 +20,7 @@ transient_cases = 0 1 #2 3
 
 # Manual testing
 manual-test: $(program) tests/manual/testing.pro
-	$(RM_R) tests/manual/testing/
-	@$^
+	$^
 
 # ELEMENT TEST RESULTS
 .PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
@@ -58,19 +57,19 @@ tests/element/test.pro: tests/element/input.pro tests/element/output.pro tests/e
 beam-tests : $(addprefix tests/beam/test, $(addsuffix /result.pdf, $(beam_cases)))
 
 tests/beam/test0/result.pdf : scripts/testing/beam0.py\
- 														  tests/beam/test0/disp.csv\
- 														  tests/beam/test0/resp.csv\
- 														  tests/beam/test0_ref/disp.csv\
- 														  tests/beam/test0_ref/resp.csv
+															 tests/beam/test0/disp.csv\
+															 tests/beam/test0/resp.csv\
+															 tests/beam/test0_ref/disp.csv\
+															 tests/beam/test0_ref/resp.csv
 	@$<
 
 tests/beam/test%/result.pdf : scripts/testing/beam%.py\
- 														  tests/beam/test%/disp.csv\
- 														  tests/beam/test%/resp.csv
+															 tests/beam/test%/disp.csv\
+															 tests/beam/test%/resp.csv
 	@$<
 
 tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
-														  $(program) tests/beam/test%.pro
+															$(program) tests/beam/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
@@ -83,7 +82,7 @@ tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/mode
 transient-tests : $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
 
 tests/transient/test%/result.pdf: scripts/testing/transient%.py\
- 														  		tests/transient/test%/disp.csv
+																	 tests/transient/test%/disp.csv
 	@$<
 
 tests/transient/test%/disp.csv: $(program) tests/transient/test%.pro

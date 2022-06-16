@@ -1,34 +1,36 @@
 #!/usr/bin/python3
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-states = pd.read_csv("tests/manual/testing/stateVectors.csv", index_col=["time", "state"])
-states.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in states.columns], names=["dof", "node"])
+statename = {0:"pos", 1:"velo", 2:"acc"}
 
-pos0 = states.xs(0, level="state").xs(0, axis="columns", level="node")
-vel0 = states.xs(1, level="state").xs(0, axis="columns", level="node")
-acc0 = states.xs(2, level="state").xs(0, axis="columns", level="node")
-pos1 = states.xs(0, level="state").xs(1, axis="columns", level="node")
-vel1 = states.xs(1, level="state").xs(1, axis="columns", level="node")
-acc1 = states.xs(2, level="state").xs(1, axis="columns", level="node")
-del states
+for entry in os.scandir("tests/manual"):
+  if entry.is_dir() and entry.name == "testing":
+    study_type = entry.name[8:].upper()
+    print( study_type )
 
-forces = pd.read_csv("tests/manual/testing/forceVectors.csv", index_col=["time", "force"])
-forces.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in forces.columns], names=["dof", "node"])
+    states = pd.read_csv(os.path.join(entry, "stateVectors.csv"), index_col=["time", "state"])
+    states.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in states.columns], names=["dof", "node"])
+    states = states.loc[:5]
 
-int0 = forces.xs("intVector", level="force").xs(0, axis="columns", level="node")
-gyro0 = forces.xs("gyroVector", level="force").xs(0, axis="columns", level="node")
-int1 = forces.xs("intVector", level="force").xs(1, axis="columns", level="node")
-gyro1 = forces.xs("gyroVector", level="force").xs(1, axis="columns", level="node")
-del forces
+    forces = pd.read_csv(os.path.join(entry, "forceVectors.csv"), index_col=["time", "force"])
+    forces.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in forces.columns], names=["dof", "node"])
+    forces = forces.loc[:5]
 
-acc0.plot.line( y=["ry","rz"], subplots=True, title="acc0" )
-acc1.plot.line( y=["ry","rz"], subplots=True, title="acc1", ylim=[-10,10] )
-int0.plot.line( y=["ry","rz"], subplots=True, title="int0" )
-int1.plot.line( y=["ry","rz"], subplots=True, title="int1" )
-
-with PdfPages("tests/manual/testing/plots.pdf") as file:
-  for n in plt.get_fignums():
-    file.savefig(plt.figure(n))
+    with PdfPages(os.path.join(entry, "plots.pdf")) as file:
+      for node in range(2):
+        for state in range(3):
+          states.xs(state, level="state").xs(node, axis="columns", level="node").plot.line( subplots=True, layout=[2,3], figsize=(10,6), title=f"{study_type} -- {statename[state]} node{node}" )
+          print(f"\tnode{node}\t{statename[state]}")
+          plt.tight_layout(rect=[0,0,1,0.95])
+          file.savefig(plt.gcf())
+          plt.close()
+        for force in ["int", "ext", "gyro"]:
+          forces.xs(f"{force}Vector", level="force").xs(node, axis="columns", level="node").plot.line( subplots=True, layout=[2,3], figsize=(10,6), title=f"{study_type} -- {force}Force node{node}" )
+          print(f"\tnode{node}\t{force}Force")
+          plt.tight_layout(rect=[0,0,1,0.95])
+          file.savefig(plt.gcf())
+          plt.close()
