@@ -56,25 +56,26 @@ using jive_helpers::expVec;
 using jive_helpers::logMat;
 
 //-----------------------------------------------------------------------
-//   class EulerForwardModule
+//   class ExplicitModule
 //-----------------------------------------------------------------------
 
 
-class EulerForwardModule : public Module
+class ExplicitModule : public Module
 {
  public:
 
   enum MassMode { LUMPED, CONSISTENT };
 
   typedef Module            Super;
-  typedef EulerForwardModule    Self;
+  typedef ExplicitModule    Self;
 
   static const char*        TYPE_NAME;
+  static const char*        STEP_COUNT;
   static const char*        SO3_DOFS;
 
-  explicit                  EulerForwardModule
+  explicit                  ExplicitModule
 
-    ( const String&           name = "EulerForward" );
+    ( const String&           name = "Explicit" );
 
   virtual Status            init
 
@@ -111,7 +112,7 @@ class EulerForwardModule : public Module
 
  protected:
 
-  virtual                  ~EulerForwardModule  ();
+  virtual                  ~ExplicitModule  ();
 
 
  private:
@@ -122,12 +123,13 @@ class EulerForwardModule : public Module
 
   void                      invalidate_     ();
 
-
  private:
 
   bool          valid_;
   double        dtime_;
+  idx_t         stepCount_;
   MassMode      mode_;
+
   Ref<Function> updCond_;
   IdxVector     SO3_dofs_;
   IdxMatrix     rdofs_;

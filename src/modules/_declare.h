@@ -23,7 +23,7 @@
 #include "modules/GroupOutputModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
-#include "modules/EulerForwardModule.h"
+#include "modules/ExplicitModule.h"
 #include "modules/StateOutputModule.h"
 #include "modules/ForceOutputModule.h"
 
@@ -43,7 +43,7 @@ void declareModules ()
   PBCGroupOutputModule::declare  ();
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
-  EulerForwardModule::declare    ();
+  ExplicitModule::declare    ();
   StateOutputModule::declare     ();
   ForceOutputModule::declare     ();
 }

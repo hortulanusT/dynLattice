@@ -3,7 +3,7 @@ control.runWhile = "t <= 1";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "EulerForward";
+Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 1e-7;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = true;

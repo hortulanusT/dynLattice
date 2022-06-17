@@ -1,18 +1,19 @@
 
-#include "modules/EulerForwardModule.h"
+#include "modules/ExplicitModule.h"
 
 //=======================================================================
-//   class EulerForwardModule
+//   class ExplicitModule
 //=======================================================================
 
-const char* EulerForwardModule::TYPE_NAME = "EulerForward";
-const char* EulerForwardModule::SO3_DOFS  = "dofs_SO3";
+const char* ExplicitModule::TYPE_NAME   = "Explicit";
+const char* ExplicitModule::STEP_COUNT  = "steps";
+const char* ExplicitModule::SO3_DOFS    = "dofs_SO3";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-EulerForwardModule::EulerForwardModule 
+ExplicitModule::ExplicitModule 
 
   ( const String&      name ) :
 
@@ -21,12 +22,13 @@ EulerForwardModule::EulerForwardModule
 {
   dtime_  = 1.0;
   valid_  = false;
+  stepCount_  = 1;
   SO3_dofs_.resize( 0 );
   rdofs_.resize( 0, 0 );
 }
 
 
-EulerForwardModule::~EulerForwardModule ()
+ExplicitModule::~ExplicitModule ()
 {}
 
 
@@ -35,7 +37,7 @@ EulerForwardModule::~EulerForwardModule ()
 //-----------------------------------------------------------------------
 
 
-Module::Status EulerForwardModule::init
+Module::Status ExplicitModule::init
 
   ( const Properties&  conf,
     const Properties&  props,
@@ -52,6 +54,11 @@ Module::Status EulerForwardModule::init
   Properties            sparams;
   Ref<AbstractMatrix>   inertia;
   Ref<DiagMatrixObject> diagInertia;
+
+  // get the step count
+
+  myProps.find( stepCount_, STEP_COUNT, 1, 2 );
+  myConf .set ( STEP_COUNT, stepCount_ );
 
   // returning an address of an object pointing to the Model
 
@@ -136,7 +143,7 @@ Module::Status EulerForwardModule::init
 //   run
 //-----------------------------------------------------------------------
 
-Module::Status EulerForwardModule::run 
+Module::Status ExplicitModule::run 
 
   ( const Properties& globdat )
 
@@ -151,6 +158,8 @@ Module::Status EulerForwardModule::run
   Vector      fext     ( dofCount );
   Vector      fres     ( dofCount );
   Vector      u_old, v_old, a_old;
+  Vector      dv       ( dofCount );
+  Vector      du       ( dofCount );
   Vector      u_new    ( dofCount );
   Vector      v_new    ( dofCount );
   Vector      a_new    ( dofCount );
@@ -208,14 +217,43 @@ Module::Status EulerForwardModule::run
 
   params.clear();
   
-  v_new = v_old + a_new * dtime_;
-  u_new = u_old + v_new * dtime_; 
+  // update velocity
+  switch (stepCount_)
+  {
+  case 2:
+    dv = dtime_/2 * (3*a_new - 1*a_old);
+    break;
 
+  case 1:
+    dv = dtime_ * a_new;
+    break;
+  
+  default:
+    throw jem::Exception( "This shoudl not happen!\nIllegal 'stepCount_' !");
+  }
+  v_new = v_old + dv;
+
+  // update position
+  switch (stepCount_)
+  {
+  case 2:
+    du = dtime_/2 * (3*v_new - 1*v_old);
+    break;
+
+  case 1:
+    du = dtime_ * v_new;
+    break;
+  
+  default:
+    throw jem::Exception( "This shoudl not happen!\nIllegal 'stepCount_' !");
+  }
+
+  u_new = u_old + du;
   // do different update for rotational dofs
   for ( idx_t inode = 0; inode < rdofs_.size(1); inode++ )
   {
     r_node  = u_old[rdofs_[inode]];
-    d_r     = dtime_ * v_new[rdofs_[inode]];
+    d_r     = du[rdofs_[inode]];
     
     expVec  ( R_old, r_node );
     expVec  ( V_upd, d_r );
@@ -229,10 +267,9 @@ Module::Status EulerForwardModule::run
   // commit everything
   Globdat::commitStep( globdat );
   Globdat::commitTime( globdat );  
-  StateVector::updateOld( dofs_, globdat );
-
   model_->takeAction ( Actions::COMMIT, params, globdat );
 
+  StateVector::updateOld( dofs_, globdat );
   StateVector::store( a_new, STATE[2], dofs_, globdat );
   StateVector::store( v_new, STATE[1], dofs_, globdat );
   StateVector::store( u_new, STATE[0], dofs_, globdat );
@@ -249,7 +286,7 @@ Module::Status EulerForwardModule::run
 //-----------------------------------------------------------------------
 
 
-void EulerForwardModule::shutdown ( const Properties& globdat )
+void ExplicitModule::shutdown ( const Properties& globdat )
 {
   model_  = nullptr;
   solver_ = nullptr;
@@ -263,7 +300,7 @@ void EulerForwardModule::shutdown ( const Properties& globdat )
 //-----------------------------------------------------------------------
 
 
-void EulerForwardModule::configure
+void ExplicitModule::configure
 
   ( const Properties&  props,
     const Properties&  globdat )
@@ -280,7 +317,7 @@ void EulerForwardModule::configure
 //-----------------------------------------------------------------------
 
 
-void EulerForwardModule::getConfig
+void ExplicitModule::getConfig
 
   ( const Properties&  conf,
     const Properties&  globdat ) const
@@ -297,7 +334,7 @@ void EulerForwardModule::getConfig
 //-----------------------------------------------------------------------
 
 
-void EulerForwardModule::restart_ ( const Properties& globdat )
+void ExplicitModule::restart_ ( const Properties& globdat )
 {
   Properties    params;
   IdxVector     iitems   ( dofs_->getItems()->size() );
@@ -334,7 +371,7 @@ void EulerForwardModule::restart_ ( const Properties& globdat )
 //-----------------------------------------------------------------------
 
 
-void EulerForwardModule::invalidate_ ()
+void ExplicitModule::invalidate_ ()
 {
   valid_ = false;
 }
@@ -343,7 +380,7 @@ void EulerForwardModule::invalidate_ ()
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Module>  EulerForwardModule::makeNew
+Ref<Module>  ExplicitModule::makeNew
 
   ( const String&      name,
     const Properties&  conf,
@@ -358,10 +395,10 @@ Ref<Module>  EulerForwardModule::makeNew
 //   declare
 //-----------------------------------------------------------------------
 
-void EulerForwardModule::declare ()
+void ExplicitModule::declare ()
 {
   using jive::app::ModuleFactory;
 
-  ModuleFactory::declare ( TYPE_NAME, &EulerForwardModule::makeNew );
+  ModuleFactory::declare ( TYPE_NAME, &ExplicitModule::makeNew );
 }
 

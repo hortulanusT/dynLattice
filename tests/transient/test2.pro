@@ -5,7 +5,7 @@ control.runWhile = "t <= 1";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "EulerForward";
+Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 1e-4;
 
 // settings
