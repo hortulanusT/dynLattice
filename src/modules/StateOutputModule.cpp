@@ -110,7 +110,10 @@ Module::Status StateOutputModule::init
   std::filesystem::create_directories( folder );
   // construct the PrintWriter
   Ref<Writer> fileWriter;
-  fileWriter = newInstance<FileWriter> ( outFile, jem::io::FileFlags::WRITE );
+  if (jive::util::isGzipFile(outFile))
+    fileWriter = newInstance<GzipFileWriter> ( outFile );
+  else
+    fileWriter = newInstance<FileWriter> ( outFile, jem::io::FileFlags::WRITE );
   // set the writer opject
   output_   = newInstance<PrintWriter> ( fileWriter );
   output_->nformat.setFractionDigits(8);

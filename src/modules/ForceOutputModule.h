@@ -14,9 +14,11 @@
 #include <jem/base/CString.h>
 #include <jem/base/Array.h>
 #include <jem/io/FileWriter.h>
+#include <jem/io/GzipFileWriter.h>
 #include <jem/io/PrintWriter.h>
 #include <jem/util/Properties.h>
 
+#include <jive/util/utilities.h>
 #include <jive/util/Assignable.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
@@ -33,6 +35,7 @@
 using jem::newInstance;
 using jem::io::Writer;
 using jem::io::FileWriter;
+using jem::io::GzipFileWriter;
 using jem::io::PrintWriter;
 using jem::numeric::Function;
 
