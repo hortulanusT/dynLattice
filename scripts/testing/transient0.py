@@ -13,7 +13,7 @@ from scipy import signal
 test_passed = False
 
 try:
-  data = pd.read_csv("tests/transient/test0/disp.csv", index_col=["time", "state"])
+  data = pd.read_csv("tests/transient/test0/disp.gz", index_col=["time", "state"])
   data[f"dz[{data.shape[1]}]"] = data["dz[1]"]
   data.drop(columns="dz[1]", inplace=True)
   data.columns = np.arange(data.shape[1])
@@ -63,7 +63,7 @@ try:
 except:
   test_passed = False
 
-if test_passed:
+if True:
   with PdfPages("tests/transient/test0/result.pdf") as pdf:
     fig, ax = plt.subplots(1,1, sharex=True, figsize=(10,10))
     for node in disp:

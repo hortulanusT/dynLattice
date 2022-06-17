@@ -104,6 +104,7 @@ Module::Status StateOutputModule::init
   outFile = outFile + "/stateVectors.csv";
 
   myProps.find( outFile, jive::app::PropNames::FILE );
+  myConf .set ( jive::app::PropNames::FILE, outFile );
   // construct the file folder
   std::filesystem::path folder = makeCString(outFile).addr();
   folder.remove_filename();

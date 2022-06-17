@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 5";
+control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -33,13 +33,15 @@ model.model.model.disp.type = "LoadScale";
 model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ "1/sqrt(2)", "1/sqrt(2)" ]; //[ 0., 1. ]; //
+model.model.model.disp.model.factors = [ 0., 1. ]; //[ "1/sqrt(2)", "1/sqrt(2)" ]; // 
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
+Output.disp.file = "$(CASE_NAME)/stateVectors.gz";
 Output.disp.writeState1 = true;
 Output.disp.writeState2 = true;
 
 Output.modules += "force";
+Output.force.file = "$(CASE_NAME)/forceVectors.gz";
 Output.force.type = "ForceOutput";
 Output.force.writeGyroForce = true;
 

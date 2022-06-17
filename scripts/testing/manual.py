@@ -12,11 +12,11 @@ for entry in os.scandir("tests/manual"):
     study_type = entry.name[8:].upper()
     print( study_type )
 
-    states = pd.read_csv(os.path.join(entry, "stateVectors.csv"), index_col=["time", "state"])
+    states = pd.read_csv(os.path.join(entry, "stateVectors.gz"), index_col=["time", "state"])
     states.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in states.columns], names=["dof", "node"])
     # states = states.loc[:5]
 
-    forces = pd.read_csv(os.path.join(entry, "forceVectors.csv"), index_col=["time", "force"])
+    forces = pd.read_csv(os.path.join(entry, "forceVectors.gz"), index_col=["time", "force"])
     forces.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in forces.columns], names=["dof", "node"])
     # forces = forces.loc[:5]
 
