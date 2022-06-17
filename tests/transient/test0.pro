@@ -4,8 +4,8 @@ control.runWhile = "t < 1e-2";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-6;
-// Solver.integrator.stepCount = 2;
+Solver.integrator.deltaTime = 1e-7;
+Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "circle";
@@ -21,12 +21,11 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Output.disp.file = "$(CASE_NAME)/disp.gz";
 Output.disp.dofs = "dz";
 Output.disp.writeState1 = true;
 
 model.model.model.force.type = "LoadScale";
-model.model.model.force.scaleFunc = "if (i-100<=0, 1e10, 0) - if (i-99<=0, 1e10, 0)";
+model.model.model.force.scaleFunc = "if (i-100<=0, 1e4/$(Solver.integrator.deltaTime), 0) - if (i-99<=0, 1e4/$(Solver.integrator.deltaTime), 0)";
 model.model.model.force.model.type = "Neumann";
 model.model.model.force.model.nodeGroups =  [ "free" ] ;
 model.model.model.force.model.factors = [ 1. ];

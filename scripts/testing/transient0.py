@@ -63,7 +63,7 @@ try:
 except:
   test_passed = False
 
-if True:
+if test_passed:
   with PdfPages("tests/transient/test0/result.pdf") as pdf:
     fig, ax = plt.subplots(1,1, sharex=True, figsize=(10,10))
     for node in disp:
@@ -73,7 +73,7 @@ if True:
     ax.set_xlabel("Position [m]")
     ax.set_ylabel("Time [s]")
     ax.set_xlim([0, 1.05])
-    ax.set_ylim([0.5e-4, 8e-4])
+    ax.set_ylim([time_step*50, time_step*50 + 5e-4])
     ax.tick_params(bottom=True, top=True, left=True, right=True)
     ax.legend(loc="upper left")
     ax.set_title(f"Wave speed approx. {wave_speed_cal.mean():.0f} m/s\nShould be {wave_speed_ana:.0f} m/s")
@@ -96,8 +96,8 @@ if True:
 
     axs[0].set_ylabel("Amplitude [m]")
     axs[0].set_xlim(0, 20)
-    axs[0].set_ylim(0, 2e-2)
-    axs[0].vlines(eigenfreqs, 0, 2e-2, alpha=0.5, lw=0.5)
+    axs[0].set_ylim(0, max(np.abs(end_spec)) * 1.2)
+    axs[0].vlines(eigenfreqs, 0, 1, alpha=0.5, lw=0.5)
 
     axs[1].set_xlabel("Frequency [kHz]")
     axs[1].set_ylabel("Phase Angle [deg]")
@@ -118,7 +118,7 @@ if True:
     axs[1].hlines([-90,0,90], 0, 1, alpha=0.5, lw=0.5)
     
     axs[0].set_xlim(0,1)
-    axs[0].set_ylim(0, 2e-2)
+    axs[0].set_ylim(0, max(np.abs(end_spec)) * 1.2)
     axs[1].set_ylim(-180, 180)
 
     axs[0].set_ylabel("Amplitude [m]")
