@@ -5,6 +5,7 @@ control.runWhile = "t < 1e-2";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 1e-6;
+Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "circle";

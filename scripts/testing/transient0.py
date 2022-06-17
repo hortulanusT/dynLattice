@@ -57,8 +57,11 @@ end_spec = np.fft.rfft(disp[data.shape[1]-1]) / disp[data.shape[1]-1].size
 frequencies = np.fft.rfftfreq(disp.shape[0], time_step) / 1e3
 ipeaks, _ = signal.find_peaks(np.abs(end_spec))
 
-for i in range(len(eigenfreqs)):
-  test_passed &= np.abs(eigenfreqs[i]-frequencies[ipeaks[i]])/eigenfreqs[i] < 0.025
+try:
+  for i in range(len(eigenfreqs)):
+    test_passed &= np.abs(eigenfreqs[i]-frequencies[ipeaks[i]])/eigenfreqs[i] < 0.025
+except:
+  test_passed = False
 
 if test_passed:
   with PdfPages("tests/transient/test0/result.pdf") as pdf:

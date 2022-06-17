@@ -6,7 +6,7 @@
 //=======================================================================
 
 const char* ExplicitModule::TYPE_NAME   = "Explicit";
-const char* ExplicitModule::STEP_COUNT  = "steps";
+const char* ExplicitModule::STEP_COUNT  = "stepCount";
 const char* ExplicitModule::SO3_DOFS    = "dofs_SO3";
 
 //-----------------------------------------------------------------------

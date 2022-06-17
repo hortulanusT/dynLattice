@@ -1,12 +1,13 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 1";
+control.runWhile = "t <= 5";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-7;
-// Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+Solver.integrator.deltaTime = 1e-5;
+Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
+Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
 params.rod_details.cross_section = "square";
@@ -32,7 +33,7 @@ model.model.model.disp.type = "LoadScale";
 model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ 0., 1. ]; //[ "1/sqrt(2)", "1/sqrt(2)" ]; //
+model.model.model.disp.model.factors = [ "1/sqrt(2)", "1/sqrt(2)" ]; //[ 0., 1. ]; //
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.writeState1 = true;
