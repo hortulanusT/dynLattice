@@ -14,11 +14,12 @@ for entry in os.scandir("tests/manual"):
 
     states = pd.read_csv(os.path.join(entry, "stateVectors.gz"), index_col=["time", "state"])
     states.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in states.columns], names=["dof", "node"])
-    # states = states.loc[:5]
+    states = states.loc[:5]
 
     forces = pd.read_csv(os.path.join(entry, "forceVectors.gz"), index_col=["time", "force"])
     forces.columns = pd.MultiIndex.from_tuples([tuple([name[:2], int(name[3])]) for name in forces.columns], names=["dof", "node"])
-    # forces = forces.loc[:5]
+    print(forces.index.get_level_values("time").max())
+    forces = forces.loc[:5]
 
     with PdfPages(os.path.join(entry, "plots.pdf")) as file:
       for node in range(2):

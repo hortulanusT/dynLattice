@@ -106,7 +106,7 @@ namespace jive_helpers
 
   // /**
   //  * It computes inverse tangent operator for an exponential mapping
-  //  * (see DOI: 10.1007/bf00370057 formula A.21) //TODO direkt update as in Holzinger/Gerstenmeyer
+  //  * (see DOI: 10.1007/bf00370057 formula A.21) //LATER direkt update as in Holzinger/Gerstenmeyer
   //  * 
   //  * @brief compute the inverste tangent operator
   //  * 
