@@ -136,7 +136,7 @@ Module::Status     ParaViewModule::run
 
     // report file to pvd
     if (! globdat.find ( currentTime, Globdat::TIME )) currentTime = currentStep;
-    folder_sep    = currentFile.rfind( "/" ) + 1; // TODO make compatible with other OS's?
+    folder_sep    = currentFile.rfind( "/" ) + 1; // LATER make compatible with other OS's?
 
     if (pvd_printer_)
     {
