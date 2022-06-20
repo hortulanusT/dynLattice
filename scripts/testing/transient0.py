@@ -39,7 +39,7 @@ energy["kinetic"] = 0.5 * 7850*np.pi*0.05**2*(1/(nnodes-1)) * (velo**2).sum(axis
 energy["sum"] = energy.sum(axis='columns')
 
 for node in data:
-  test = disp[node]>1e-3
+  test = disp[node]>2e-3
   if any(test):
     wave_time.append(disp[node][test].index[0])
     wave_pos.append(node/(nnodes-1))
