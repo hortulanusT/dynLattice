@@ -1,10 +1,10 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 30";
+control.runWhile = "t <= 2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-5;
+Solver.integrator.deltaTime = 1e-6;
 Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
@@ -63,4 +63,5 @@ Output.force.writeGyroForce = true;
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
+log.pattern = "*";
 log.file = "$(CASE_NAME).log";

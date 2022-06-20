@@ -131,9 +131,10 @@ Module::Status ExplicitModule::init
 
   valid_ = false;
 
-  // Initialize the global simulation time and the time step number.
+  // Initialize the global simulation time and the time step number as well as the constraints
   Globdat::initTime( globdat );
   Globdat::initStep( globdat );
+  model_->takeAction ( Actions::GET_CONSTRAINTS, params, globdat );
 
   return OK;
 }
@@ -152,6 +153,7 @@ Module::Status ExplicitModule::run
   const idx_t dofCount = dofs_->dofCount();
   const idx_t rotCount = SO3_dofs_.size();
 
+  idx_t                 step;
   Properties            params;
   Ref<Constraints>      cons = Constraints::find ( dofs_, globdat );
   Vector      fint     ( dofCount );
@@ -216,39 +218,24 @@ Module::Status ExplicitModule::run
   }
 
   params.clear();
+  globdat.get( step, Globdat::TIME_STEP );
   
   // update velocity
-  switch (stepCount_)
-  {
-  case 2:
+  if (stepCount_ >= 2 && step >= 2)
     dv = dtime_/2 * (3*a_new - 1*a_old);
-    break;
-
-  case 1:
+  else
     dv = dtime_ * a_new;
-    break;
-  
-  default:
-    throw jem::Exception( "This shoudl not happen!\nIllegal 'stepCount_' !");
-  }
+
   v_new = v_old + dv;
 
   // update position
-  switch (stepCount_)
-  {
-  case 2:
+  if (stepCount_ >= 2 && step >= 2)
     du = dtime_/2 * (3*v_new - 1*v_old);
-    break;
-
-  case 1:
+  else
     du = dtime_ * v_new;
-    break;
-  
-  default:
-    throw jem::Exception( "This shoudl not happen!\nIllegal 'stepCount_' !");
-  }
 
   u_new = u_old + du;
+
   // do different update for rotational dofs
   for ( idx_t inode = 0; inode < rdofs_.size(1); inode++ )
   {
