@@ -11,6 +11,7 @@
  */
 
 #include "specialCosseratRodModel.h"
+#include <math.h>
 
 //=======================================================================
 //    class specialCosseratRodModel -- implementation
@@ -163,8 +164,8 @@ specialCosseratRodModel::specialCosseratRodModel
   else if (cross_section_ == "circle")
   {
     myProps.get( radius_, RADIUS );
-    area_ = PI * pow(radius_, 2);
-    areaMoment_ = PI * pow(side_length_, 4) / 4.;
+    area_ = M_PI * pow(radius_, 2);
+    areaMoment_ = M_PI * pow(side_length_, 4) / 4.;
     polarMoment_ = 2 * areaMoment_;
     shearParam_ = 9./10.;
   }
