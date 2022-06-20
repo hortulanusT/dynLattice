@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 2";
+control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -63,5 +63,5 @@ Output.force.writeGyroForce = true;
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "*";
-log.file = "$(CASE_NAME).log";
+log.pattern = "";
+log.file = "-";
