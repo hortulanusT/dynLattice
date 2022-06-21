@@ -24,14 +24,10 @@ namespace jive_helpers
     theta       = acos ( ( tr_R - 1. ) / 2. );
     rv          = unskew ( (Matrix)(R - R.transpose()) );
 
-    if (jem::isTiny(theta)) 
+    if (abs(theta)<TINY) 
       rv       *= 1.; // infinitesimal rotation 
     else
-      rv       *= theta / (2.*sin(theta));    
-
-    TEST_NO_CONTEXT(R)
-    TEST_NO_CONTEXT(theta)
-    TEST_NO_CONTEXT(rv)
+      rv       *= theta / (2.*sin(theta));
   }
 
   void vec2mat
@@ -55,7 +51,7 @@ namespace jive_helpers
     Exp                   = eye();
     const double theta    = norm2(psi);
 
-    if (jem::isTiny(theta)) 
+    if (abs(theta)<TINY) 
       Exp    += skew(psi); // infinitesimal rotation
     else
     {
