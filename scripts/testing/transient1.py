@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 test_passed = False
 
 try:
-  sim_disp = np.loadtxt("tests/transient/test1/disp.csv", delimiter=",")
+  sim_disp = np.loadtxt("tests/transient/test1/disp.gz", delimiter=",")
   BC_ref = np.loadtxt("tests/transient/ref_data/test1_ref_BC.csv", delimiter=",")
   angle_ref = pd.read_csv("tests/transient/ref_data/test1_ref_angle.csv", delimiter=";", decimal=",").values
   u1_ref = pd.read_csv("tests/transient/ref_data/test1_ref_u1.csv", delimiter=";", decimal=",").values
