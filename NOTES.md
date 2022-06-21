@@ -14,12 +14,8 @@
 2. Modules
     - PBC Output extent other side
       - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
-    - Custom Sample Module
-      - non-float output
-      - HDF5 output `pandas`-format
 3. Environment
     - move studies to makefile targets
-    - investigate options for parallel computing
     - add .cpp for all headers...
  
 # :heavy_check_mark: Information
