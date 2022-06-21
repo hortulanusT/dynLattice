@@ -1,13 +1,13 @@
 // PROGRAM_CONTROL
-control.runWhile = "t <= 30";
+control.runWhile = "t < 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-6;
-Solver.integrator.stepCount = 2;
+Solver.integrator.deltaTime = 5e-5;
+// Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
-Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+// Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
 params.rod_details.cross_section = "square";
@@ -15,7 +15,7 @@ params.rod_details.side_length = "sqrt(12/2e3)";
 params.rod_details.young = "5.6e10/12";
 params.rod_details.shear_modulus = 2e9;
 params.rod_details.density = 200.;
-params.rod_details.shape.numPoints = 2;
+params.rod_details.shape.numPoints = 3;
 
 // include model and i/o files
 include "../transient/input.pro";
@@ -23,7 +23,7 @@ include "../transient/model.pro";
 include "../transient/output.pro";
 
 // more settings
-Input.input.order = 1;
+Input.input.order = 2;
 
 model.model.matrix2.type = "FEM";
 
@@ -33,7 +33,7 @@ model.model.model.disp.type = "LoadScale";
 model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ "1/sqrt(2)", "1/sqrt(2)" ]; // [ 0., 1. ]; //
+model.model.model.disp.model.factors = [ 0., 1. ]; // [ "1/sqrt(2)", "1/sqrt(2)" ]; //
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.file = "$(CASE_NAME)/stateVectors.gz";
