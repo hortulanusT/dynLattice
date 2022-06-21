@@ -31,7 +31,7 @@ nnodes = data.shape[1]
 wave_pos = []
 wave_time = []
 
-energy_in = disp.iloc[100, -1] * 1e10
+energy_in = disp.iloc[100, -1] * 2e3/time_step
 
 energy = pd.DataFrame()
 energy["potential"] = 0.5 * 205e9*np.pi*0.05**2/ (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns') 
@@ -50,7 +50,7 @@ wave_times_cal = np.array(wave_time)
 wave_speed_cal = np.gradient(wave_pos, wave_times_cal) * -1
 wave_speed_ana = np.sqrt(205e9/7850)
 
-wave_times_ana = (1-wave_pos)/wave_speed_ana + nnodes*time_step
+wave_times_ana = (1-wave_pos)/wave_speed_ana + 100*time_step
 
 eigenfreqs = wave_speed_ana * (2*np.arange(10) + 1) / 4 / 1e3
 end_spec = np.fft.rfft(disp[data.shape[1]-1]) / disp[data.shape[1]-1].size
