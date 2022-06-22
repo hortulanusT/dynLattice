@@ -1,4 +1,4 @@
-.PHONY: tests element-tests beam-tests transient-tests clean-tests manual-test
+.PHONY: tests element-tests beam-tests transient-tests clean-tests
 
 tests: element-tests beam-tests transient-tests
 
@@ -15,12 +15,7 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
-transient_cases = 0 1 2 3
-
-
-# Manual testing
-manual-test: $(program) tests/manual/testing.pro
-	$^
+transient_cases = 0 1 #2 3
 
 # ELEMENT TEST RESULTS
 .PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
@@ -38,7 +33,7 @@ tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%
 	$(eval elemD := $(word 2, $(options)))
 	$(eval loadT := $(word 3, $(options)))
 	$(eval loadD := $(word 4, $(options)))
-	-@$^ -p Input.input.order=$(order)\
+	@$^ -p Input.input.order=$(order)\
 			-p Input.input.onelab.$(elemD)=1.\
 			-p model.model.model.rodMesh.child.shape.numPoints=$(nodes)\
 			-p model.model.model.$(loadT).nodeGroups=[\"free\"]\
@@ -72,7 +67,7 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 															$(program) tests/beam/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
-	-@$^ > tests/beam/test$*/run.log
+	@$^ > tests/beam/test$*/run.log
 
 tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/model.pro
 
@@ -88,7 +83,7 @@ tests/transient/test%/result.pdf: scripts/testing/transient%.py\
 tests/transient/test%/disp.gz: $(program) tests/transient/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
-	-@$^ > tests/transient/test$*/run.log
+	@$^ > tests/transient/test$*/run.log
 
 tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro
 
