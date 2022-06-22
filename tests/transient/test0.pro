@@ -21,9 +21,6 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Output.disp.dofs = "dz";
-Output.disp.writeState1 = true;
-
 model.model.model.force.type = "LoadScale";
 model.model.model.force.scaleFunc = "if (i-100<=0, 2e3/$(Solver.integrator.deltaTime), 0) - if (i-99<=0, 2e3/$(Solver.integrator.deltaTime), 0)";
 model.model.model.force.model.type = "Neumann";
@@ -32,3 +29,5 @@ model.model.model.force.model.factors = [ 1. ];
 model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
+
+Output.disp.vectors += "state1 = velo"; 

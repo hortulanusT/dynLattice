@@ -1,0 +1,110 @@
+/**
+ * @file CSVDataPrinter.h
+ * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @brief Expands the standard Data Printer with the capabiltiy to write CSV data
+ * @version 0.1
+ * @date 2022-06-22
+ * 
+ * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
+ * 
+ */
+#pragma once
+
+#include <jem/base/System.h>
+#include <jem/base/Array.h>
+#include <jem/mp/GatherPrinter.h>
+#include <jem/util/ArrayBuffer.h>
+#include <jive/app/DataPrinter.h>
+#include <jive/util/Table.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/ItemSet.h>
+#include <jive/util/ItemMap.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/TableException.h>
+
+using jive::idx_t;
+using jive::String;
+using jive::Properties;
+using jive::Vector;
+using jive::IdxVector;
+using jive::StringVector;
+using jive::util::Table;
+using jive::util::DofSpace;
+using jive::util::Globdat;
+using jive::app::DataPrinter;
+
+class CSVDataPrinter : public DataPrinter
+{
+ public:
+
+  enum mode { EMPTY, TABLES, VECTORS, SPARSEVECTORS };
+
+  JEM_DECLARE_CLASS       ( CSVDataPrinter, DataPrinter );
+
+  explicit                  CSVDataPrinter
+
+    ( const String&           name = "CSVDataPrinter" );
+
+  virtual void              printTable
+
+    ( Output&                 out,
+      const String&           label,
+      const Table&            table,
+      const Properties&       globdat ) override;
+
+  virtual void              printVector
+
+    ( Output&                 out,
+      const String&           label,
+      const Vector&           vec,
+      const DofSpace&         dofs,
+      const Properties&       globdat ) override;
+
+  virtual void              printSparseVector
+
+    ( Output&                 out,
+      const String&           label,
+      const Vector&           vec,
+      const IdxVector&        idofs,
+      const DofSpace&         dofs,
+      const Properties&       globdat ) override;
+
+
+ protected:
+
+  virtual                  ~CSVDataPrinter ();
+
+ private:  
+
+  void                     startTables_
+
+    ( Output&                 out,
+      const String&           label,
+      const Table&            table,
+      const Properties&       globdat );
+
+  void                      startVectors_
+
+    ( Output&                 out,
+      const String&           label,
+      const Vector&           vec,
+      const DofSpace&         dofs,
+      const Properties&       globdat,      
+      const IdxVector&        idofs = {} ); 
+
+  void                       writePrefix_
+
+    ( Output&                 out,
+      const Properties&       globdat,
+      const String&           label = "" );     
+
+  void                       writeVector_
+
+    ( Output&                 out,
+      const Vector&           vec );               
+
+ private:
+
+  mode                     mode_;
+
+};

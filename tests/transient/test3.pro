@@ -40,12 +40,9 @@ model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
 
-Output.modules += "paraview";
-
-Output.disp.dofs = model.model.model.rodMesh.child.dofNamesTrans;
-Output.disp.dofs += model.model.model.rodMesh.child.dofNamesRot;
 Output.disp.sampleWhen = "t % 0.01 < $(Solver.integrator.deltaTime)";
 
+Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
 Output.paraview.groups = [ "beams" ];

@@ -24,8 +24,8 @@
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
 #include "modules/ExplicitModule.h"
-#include "modules/StateOutputModule.h"
 #include "modules/ForceOutputModule.h"
+#include "modules/CSVOutputModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules
@@ -44,6 +44,6 @@ void declareModules ()
   GroupInputModule::declare      ();
   PBCGroupInputModule::declare   ();
   ExplicitModule::declare    ();
-  StateOutputModule::declare     ();
   ForceOutputModule::declare     ();
+  CSVOutputModule::declare       ();
 }

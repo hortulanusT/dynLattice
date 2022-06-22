@@ -40,7 +40,6 @@ model.model.model.fixed.factors = [ 0., 0., 0. ];
 model.model.model.disp.type = "None";
 
 Output.modules += "paraview";
-
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
 Output.paraview.groups = [ "beams" ];

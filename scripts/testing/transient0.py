@@ -13,13 +13,18 @@ from scipy import signal
 test_passed = False
 
 try:
-  data = pd.read_csv("tests/transient/test0/disp.gz", index_col=["time", "state"])
-  data[f"dz[{data.shape[1]}]"] = data["dz[1]"]
-  data.drop(columns="dz[1]", inplace=True)
+  data = pd.read_csv("tests/transient/test0/disp.gz", index_col=["time", "label"])
+  data.columns = pd.MultiIndex.from_tuples([tuple([name[:name.find("[")], 
+      int(name[name.find("[")+1:name.find("]")])])\
+        for name in data.columns], names=["dof", "node"])
+  data.drop(["dx", "dy", "rx", "ry", "rz"], axis=1, level="dof", inplace=True)
+  data = data.droplevel( "dof", axis=1 )  
+  data[data.shape[1]] = data[1]
+  data.drop(1, axis=1, inplace=True)
   data.columns = np.arange(data.shape[1])
 
-  disp = data.xs(0, level="state")
-  velo = data.xs(1, level="state")
+  disp = data.xs("disp", level="label")
+  velo = data.xs("velo", level="label")
 except IOError:
   pass
 else:

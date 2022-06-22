@@ -1,12 +1,12 @@
 // PROGRAM_CONTROL
-control.runWhile = "t < 30";
+control.runWhile = "t < 10";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 5e-5;
-// Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
+Solver.integrator.stepCount = 2;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
@@ -23,6 +23,8 @@ include "../transient/model.pro";
 include "../transient/output.pro";
 
 // more settings
+// CASE_NAME = "$(CASE_NAME)_3D_exponential_2step";
+
 Input.input.order = 2;
 
 model.model.matrix2.type = "FEM";
@@ -37,13 +39,17 @@ model.model.model.disp.model.factors = [ 0., 1. ]; // [ "1/sqrt(2)", "1/sqrt(2)"
 model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
 Output.disp.file = "$(CASE_NAME)/stateVectors.gz";
-Output.disp.writeState1 = true;
-Output.disp.writeState2 = true;
+Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 
 Output.modules += "force";
-Output.force.file = "$(CASE_NAME)/forceVectors.gz";
 Output.force.type = "ForceOutput";
+Output.force.file = "$(CASE_NAME)/forceVectors.gz";
 Output.force.writeGyroForce = true;
+
+// Output.modules += "strain";
+// Output.strain.type = "CSVOutput";
+// Output.strain.file = "$(CASE_NAME)/test.csv";
+// Output.strain.tables = "elements/strain";
 
 // Output.disp.type = "Sample";
 // Output.disp.file = "$(CASE_NAME)/disp.csv";
