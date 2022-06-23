@@ -5,7 +5,7 @@ control.runWhile = "t < 5";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 1e-5;
-Solver.integrator.updateWhen = true;
+// Solver.integrator.updateWhen = true;
 Solver.integrator.stepCount = 2;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
