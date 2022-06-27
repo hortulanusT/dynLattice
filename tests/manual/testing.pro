@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t < 5";
+control.runWhile = "t < 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -8,6 +8,7 @@ Solver.integrator.deltaTime = 1e-5;
 // Solver.integrator.updateWhen = true;
 Solver.integrator.stepCount = 2;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+MODIFIER = "_2D_additive_2step_0deg";
 
 // settings
 params.rod_details.cross_section = "square";
