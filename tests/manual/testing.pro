@@ -8,7 +8,6 @@ Solver.integrator.deltaTime = 1e-5;
 // Solver.integrator.updateWhen = true;
 Solver.integrator.stepCount = 2;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
-MODIFIER = "_2D_additive_2step_0deg";
 
 // settings
 params.rod_details.cross_section = "square";
@@ -70,5 +69,5 @@ Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "";
+log.pattern = "*.info";
 log.file = "-";
