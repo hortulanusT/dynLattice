@@ -94,7 +94,7 @@ bool ImpactModel::takeAction
         dofs_->getDofIndices( idofs, inodes, itype );
 
         for (idx_t idof : idofs )
-          cons_->addConstraint ( idof, force/weights_[i] );
+          cons_->addConstraint ( idof, -1. * force/weights_[i] );
       }
       else
         jem::System::warn() << "No Force data for " << nodeGroups_[i] << " in global Database!\n";
