@@ -93,6 +93,8 @@ bool ImpactModel::takeAction
         idofs.resize( group.size() );
         dofs_->getDofIndices( idofs, inodes, itype );
 
+        jem::System::info() << " ...Applying acceleration of " << -1. * force/weights_[i] << " to " << nodeGroups_[i] << jem::io::endl;
+        
         for (idx_t idof : idofs )
           cons_->addConstraint ( idof, -1. * force/weights_[i] );
       }
