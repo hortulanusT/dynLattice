@@ -69,5 +69,5 @@ Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "*.info";
+log.pattern = "";
 log.file = "-";

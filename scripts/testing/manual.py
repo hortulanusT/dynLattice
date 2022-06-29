@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 for entry in os.scandir("tests/manual"):
-  if entry.is_dir() and "_0deg" in entry.name:
+  if entry.is_dir():
     study_type = entry.name[8:].upper()
     print( "\n", study_type )
 
@@ -17,7 +17,7 @@ for entry in os.scandir("tests/manual"):
       int(name[name.find("[")+1:name.find("]")])])\
           for name in states.columns], names=["dof", "node"])
     print( "\t", states.index.unique("time").max(), " sec")
-    states = states.loc[0.045:0.2]
+    states = states.loc[:0.1]
     states.loc[slice(None), ["rx", "ry", "rz"]] *= 180/np.pi
 
     # rz1_pos = states.xs("disp", level="label").xs(1, axis="columns", level="node")["rz"]
@@ -27,7 +27,7 @@ for entry in os.scandir("tests/manual"):
     for state in states.index.unique("label"):
       fig, axs = plt.subplots( 2, 3, figsize=(10,6) )
       with PdfPages(os.path.join(entry, 
-          f"{state}_start.pdf")) as file:
+          f"{state}_0.1sec.pdf")) as file:
         for node in states.columns.unique("node"):
           print(f"\t{state}\tnode{node}")
           axs = states.xs(
