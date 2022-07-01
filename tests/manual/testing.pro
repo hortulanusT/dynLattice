@@ -3,10 +3,14 @@ control.runWhile = "t < 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "Explicit";
+Solver.integrator.type = "Newmark";
+Solver.integrator.solver.type = "Nonlin";
+Solver.integrator.solver.precision = 1e-6;
+// Solver.integrator.solver.lineSearch = true;
 Solver.integrator.deltaTime = 1e-5;
+// Solver.integrator.type = "Explicit";
 // Solver.integrator.updateWhen = true;
-Solver.integrator.stepCount = 2;
+// Solver.integrator.stepCount = 2;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
@@ -23,6 +27,7 @@ include "../transient/model.pro";
 include "../transient/output.pro";
 
 // more settings
+MODIFIER = "_2D_implict_0deg";
 CASE_NAME = "$(CASE_NAME)$(MODIFIER)";
 
 Input.input.order = 2;
@@ -32,7 +37,10 @@ model.model.matrix2.type = "FEM";
 model.model.model.force.type = "None";
 
 model.model.model.disp.type = "LoadScale";
-model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
+// acceleration for explicit solver
+// model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
+// displacement for implicit solver
+model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (t^2/2 + (15/2/PI)^2 * (cos(2*PI/15 * t) - 1)), (6*t-45))";
 model.model.model.disp.model.type = "Dirichlet";
 model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
 model.model.model.disp.model.factors = [ 0., 1. ]; // [ "1/sqrt(2)", "1/sqrt(2)" ]; //
@@ -69,5 +77,5 @@ Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "";
-log.file = "-";
+log.pattern = "*.info";
+log.file = "$(CASE_NAME)/run.log";
