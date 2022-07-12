@@ -88,11 +88,10 @@ Module::Status    ParaViewModule::init
   std::filesystem::create_directories( paraFolder );
 
   // write the pvd file
-  String            pvdName   = String::format ( makeCString(nameFormat_).addr(), 0) + ".pvd";
-  idx_t             format_pos= pvdName.rfind( "0" );
+  idx_t             format_pos= nameFormat_.rfind( "%i" );
   if (format_pos > 0)
   {
-                pvdName       = pvdName[SliceTo(format_pos)] + pvdName[SliceFrom(format_pos+1)];
+    String      pvdName       = nameFormat_[SliceTo(format_pos)] + nameFormat_[SliceFrom(format_pos+1)];
     Ref<Writer> pvd_raw       = newInstance<FileWriter>  ( pvdName );
                 pvd_printer_  = newInstance<PrintWriter> ( pvd_raw );
 
