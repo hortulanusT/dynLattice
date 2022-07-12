@@ -33,9 +33,8 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
     ├── configs         <- folder containing some standard settings
     ├── geometries      <- folder containing the different geometries
     ├── programs        <- folder containing different studies to conducts
-    └── <class>         <- folder for geometry classes (re-entrant, doubleArrowhead3D, ...)
-        ├── output      <- raw data output
-        └── results     <- processed results
+    ├── output          <- raw data output
+    └── results         <- processed results
 ```
 
 
