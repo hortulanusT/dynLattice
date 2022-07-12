@@ -140,7 +140,7 @@ Module::Status GroupOutputModule::run
   {
     // get the nodes associated with this element group
     currentVars         = myVars.makeProps( elemGroups_[iElemGroup] );
-    extentVars          = currentVars.makeProps( "extent" );
+    extentVars          = currentVars.makeProps( "extent" ); //TODO move to PBC module and use the group positions!
     ElementGroup elemGroup = ElementGroup::get ( elemGroups_[iElemGroup], elems, globdat, getContext() );
     nodeIndices.resize  ( elemGroup.getNodeIndices().size() );
     dofIndices.resize   ( nodeIndices.size() );
