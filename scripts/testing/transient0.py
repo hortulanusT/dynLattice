@@ -9,6 +9,7 @@ from termcolor import colored
 from matplotlib.cm import get_cmap
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import signal
+np.seterr(invalid='ignore')
 
 test_passed = False
 
