@@ -91,7 +91,7 @@ Module::Status    ParaViewModule::init
   idx_t             format_pos= nameFormat_.rfind( "%i" );
   if (format_pos > 0)
   {
-    String      pvdName       = nameFormat_[SliceTo(format_pos)] + nameFormat_[SliceFrom(format_pos+1)];
+    String      pvdName       = nameFormat_[SliceTo(format_pos)] + nameFormat_[SliceFrom(format_pos+2)] + ".pvd";
     Ref<Writer> pvd_raw       = newInstance<FileWriter>  ( pvdName );
                 pvd_printer_  = newInstance<PrintWriter> ( pvd_raw );
 
