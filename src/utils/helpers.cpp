@@ -24,16 +24,10 @@ namespace jive_helpers
     theta       = acos ( ( tr_R - 1. ) / 2. );
     rv          = unskew ( (Matrix)(R - R.transpose()) );
 
-    if (!jem::isTiny(theta)) 
-      rv       /= 2.*sin(theta);
+    if (jem::isTiny(theta)) 
+      rv       *= 1.; // infinitesimal rotation 
     else
-      rv       *= 0.;
-
-    rv         *= theta;
-    
-    // TEST_NO_CONTEXT(R)
-    // TEST_NO_CONTEXT(theta)
-    // TEST_NO_CONTEXT(rv)
+      rv       *= theta / (2.*sin(theta));
   }
 
   void vec2mat
@@ -54,21 +48,22 @@ namespace jive_helpers
     ( const Matrix& Exp,
       const Vector& psi )
   {
-    // TEST_NO_CONTEXT(Exp)
     Exp                   = eye();
     const double theta    = norm2(psi);
 
-    if (theta < TINY) return;
+    if (jem::isTiny(theta))
+      Exp    += skew(psi); // infinitesimal rotation
+    else
+    {
+      const Vector k        ( psi.size() );
+      const Matrix K        ( psi.size(), psi.size() );    
+      
+      k       = psi / theta;
+      K       = skew ( k );
 
-    const Vector k        ( psi.size() );
-    const Matrix K        ( psi.size(), psi.size() );    
-    
-    k       = psi / theta;
-    K       = skew ( k );
-
-    Exp    += sin(theta) * K;
-    Exp    += (1-cos(theta)) * matmul ( K, K );
-    // TEST_NO_CONTEXT(Exp)
+      Exp    += sin(theta) * K;
+      Exp    += (1-cos(theta)) * matmul ( K, K );
+    }
   }
 
   void expVecP
@@ -114,28 +109,28 @@ namespace jive_helpers
     // TEST_NO_CONTEXT(ExpP)
   }
 
-  void inverseTangentOp
-    ( const Matrix& T_1,
-      const Vector& psi )
-  {
-    T_1 = eye();
-    const double theta    = norm2(psi);
+  // void getTangentOp
+  //   ( const Matrix& T,
+  //     const Vector& psi )
+  // {
+  //   const double theta    = norm2(psi);
+  //   const Matrix K        = skew (psi);
 
-    if (theta < TINY) return;
+  //   T = eye() + 0.5*K;
 
-    const Vector k        ( psi.size() );
-    const Matrix K        ( psi.size(), psi.size() );
-    const Matrix T        ( T_1.shape() );
+  //   if (theta < TINY) return;
 
-    k       = psi / theta;
-    K       = skew ( k );
+  //   T += (1. - theta*sin(theta)/2/(1-cos(theta))) / pow(theta, 2) * matmul(K, K);
 
-    T       = (sin(theta) / theta) * eye();
-    T      += (1.0 - sin(theta)/theta) * matmul(k, k);
-    T      += (1.0 - cos(theta)) * K;
+  //   // const Matrix K        ( psi.size(), psi.size() );
+  //   // K       = skew ( psi );
 
-    T_1     = jem::numeric::inverse( T );
-  }
+  //   // double a = sin(theta) / theta;
+  //   // double b = (1 - a) / pow(theta, 2);
+
+  //   // T      -= 0.5 * K;
+  //   // T      += (1 - a / 2 / b) / pow(theta, 2) * matmul(K, K);
+  // }
 
   void rotMat2Quat 
     ( const Vector& q,

@@ -135,8 +135,9 @@ Module::Status PBCGroupInputModule::init
 
     if ( inodes0.size() != inodes1.size() )
     {
-      throw Error ( JEM_FUNC, String(i) + 
-          "opposite edges do not have the same number of nodes" );
+      jem::System::warn() << EDGES[i*2  ] << " and " << EDGES[i*2+1] <<
+          " opposite edges do not have the same number of nodes\n";
+      continue;
     }
 
     sortBoundaryNodes_ ( inodes1, inodes0, nodes, globdat, i );  

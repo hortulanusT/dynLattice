@@ -1,11 +1,11 @@
 #include <filesystem>
 #include <jem/base/ClassTemplate.h>
-#include "modules/StateOutputModule.h"
+#include "modules/ForceOutputModule.h"
 
-JEM_DEFINE_CLASS( StateOutputModule );
+JEM_DEFINE_CLASS( ForceOutputModule );
 
 //=======================================================================
-//   class StateOutputModule
+//   class ForceOutputModule
 //=======================================================================
 
 //-----------------------------------------------------------------------
@@ -13,10 +13,11 @@ JEM_DEFINE_CLASS( StateOutputModule );
 //-----------------------------------------------------------------------
 
 
-const char*  StateOutputModule::TYPE_NAME = "StateOutput";
-const char*  StateOutputModule::STATE_PROP[3] =
-              { "writeState0", "writeState1", "writeState2" };
-const char*  StateOutputModule::NODE_PROP = "nodeSet";
+const char*  ForceOutputModule::TYPE_NAME = "ForceOutput";
+const char*  ForceOutputModule::INT_PROP  = "writeIntForce";
+const char*  ForceOutputModule::EXT_PROP  = "writeExtForce";
+const char*  ForceOutputModule::GYRO_PROP = "writeGyroForce";
+const char*  ForceOutputModule::NODE_PROP = "nodeSet";
 
 
 //-----------------------------------------------------------------------
@@ -24,14 +25,15 @@ const char*  StateOutputModule::NODE_PROP = "nodeSet";
 //-----------------------------------------------------------------------
 
 
-StateOutputModule::StateOutputModule ( const String& name ) :
+ForceOutputModule::ForceOutputModule ( const String& name ) :
 
   Super ( name )
 
 {
   dofsOut_.resize( 0 );
-  stateOut_.resize( 3 );
-  stateOut_ = { true, false, false };  
+  intOut_ = true;
+  extOut_ = true;  
+  gyroOut_ = false;  
   
   started_    = false;
   sampleCond_ = FuncUtils::newCond ();
@@ -39,7 +41,7 @@ StateOutputModule::StateOutputModule ( const String& name ) :
 }
 
 
-StateOutputModule::~StateOutputModule ()
+ForceOutputModule::~ForceOutputModule ()
 {}
 
 
@@ -48,7 +50,7 @@ StateOutputModule::~StateOutputModule ()
 //-----------------------------------------------------------------------
 
 
-Module::Status StateOutputModule::init
+Module::Status ForceOutputModule::init
 
   ( const Properties&  conf,
     const Properties&  props,
@@ -57,12 +59,16 @@ Module::Status StateOutputModule::init
   Properties myProps  = props.findProps( myName_ );
   Properties myConf   = conf .makeProps( myName_ );
 
-  // StateVector Outputs
-  for (idx_t i = 0; i < 3; i++)
-  {
-    myProps.find( stateOut_[i], STATE_PROP[i] );
-    myConf .set ( STATE_PROP[i], stateOut_[i] );
-  }
+  // ForceVector Outputs
+  myProps.find( intOut_, INT_PROP );
+  myConf .set ( INT_PROP, intOut_ );
+  myProps.find( extOut_, EXT_PROP );
+  myConf .set ( EXT_PROP, extOut_ );
+  myProps.find( gyroOut_, GYRO_PROP );
+  myConf .set ( GYRO_PROP, gyroOut_ );
+
+  // get the model
+  model_ = Model::get( globdat, getContext() );
 
   // DOF Outputs
   dofs_ = DofSpace::get( globdat, getContext() );
@@ -101,18 +107,25 @@ Module::Status StateOutputModule::init
   // Output File
   String    outFile;
   props.get( outFile, CASE_NAME );
-  outFile = outFile + "/stateVectors.csv";
+  outFile = outFile + "/forceVectors.csv";
 
   myProps.find( outFile, jive::app::PropNames::FILE );
+  myConf .set ( jive::app::PropNames::FILE, outFile );
   // construct the file folder
   std::filesystem::path folder = makeCString(outFile).addr();
   folder.remove_filename();
   std::filesystem::create_directories( folder );
   // construct the PrintWriter
   Ref<Writer> fileWriter;
-  fileWriter = newInstance<FileWriter> ( outFile, jem::io::FileFlags::WRITE );
+  if (jive::util::isGzipFile(outFile))
+    fileWriter = newInstance<GzipFileWriter> ( outFile );
+  else
+    fileWriter = newInstance<FileWriter> ( outFile, jem::io::FileFlags::WRITE );
   // set the writer opject
   output_   = newInstance<PrintWriter> ( fileWriter );
+  output_->nformat.setFractionDigits(8);
+  output_->nformat.setShowSign();
+  output_->nformat.setScientific();
 
   return OK;
 }
@@ -123,11 +136,11 @@ Module::Status StateOutputModule::init
 //-----------------------------------------------------------------------
 
 
-Module::Status StateOutputModule::run ( const Properties& globdat )
+Module::Status ForceOutputModule::run ( const Properties& globdat )
 {
   if (FuncUtils::evalCond ( *sampleCond_, globdat ) )
   {
-    Vector  state ( dofsOut_.size() );
+    Vector  force ( dofsOut_.size() );
     idx_t   step;
     double  time = -1;
 
@@ -136,12 +149,34 @@ Module::Status StateOutputModule::run ( const Properties& globdat )
 
     if (!started_) writeHeader_( time >= 0 );
 
-    for (idx_t i = 0; i < 3; i++)
-      if ( stateOut_[i] )
-      {
-        jive::model::StateVector::get ( state, jive::model::STATE[i], dofs_, globdat );
-        writeLine_( (Vector)state[dofsOut_], step, jive::model::STATE[i], time );
-      }   
+    Properties params;
+    
+    if (intOut_)
+    {
+      force = 0.;
+      params.set( ActionParams::INT_VECTOR, force );
+      model_->takeAction( Actions::GET_INT_VECTOR, params, globdat );
+      writeLine_( force, step, ActionParams::INT_VECTOR, time );
+      params.clear();
+    }
+
+    if (extOut_)
+    {
+      force = 0.;
+      params.set( ActionParams::EXT_VECTOR, force );
+      model_->takeAction( Actions::GET_EXT_VECTOR, params, globdat );
+      writeLine_( force, step, ActionParams::EXT_VECTOR, time );
+      params.clear();
+    }
+
+    if (gyroOut_)
+    {
+      force = 0.;
+      params.set( ActionParams::INT_VECTOR, force );
+      model_->takeAction( "GET_GYRO_VECTOR", params, globdat );
+      writeLine_( force, step, "gyroVector", time );
+      params.clear();
+    }
   }
 
   return OK;
@@ -153,7 +188,7 @@ Module::Status StateOutputModule::run ( const Properties& globdat )
 //-----------------------------------------------------------------------
 
 
-void StateOutputModule::shutdown ( const Properties& globdat )
+void ForceOutputModule::shutdown ( const Properties& globdat )
 {
   output_->close();
   output_ = nullptr;
@@ -162,13 +197,13 @@ void StateOutputModule::shutdown ( const Properties& globdat )
 //   writeHeader_
 //-----------------------------------------------------------------------
 
-void StateOutputModule::writeHeader_ 
+void ForceOutputModule::writeHeader_ 
 
   ( const bool          time )
 {
-  print( *output_, "step", ',' );
   if (time) print( *output_, "time", ',' );
-  print( *output_, "state" );
+  else print( *output_, "step", ',' );
+  print( *output_, "force" );
   
   for (idx_t idof : dofsOut_) 
     print( *output_, ',', dofs_->getDofName(idof) );
@@ -183,16 +218,16 @@ void StateOutputModule::writeHeader_
 //   writeLine_
 //-----------------------------------------------------------------------
 
-void StateOutputModule::writeLine_
+void ForceOutputModule::writeLine_
 
   ( const Vector&         data,
     const idx_t           step,
-    const StateTag        state,
+    const String          type,
     const double          time ) const
 {
-  print( *output_, step, ',' );
   if (time >= 0) print( *output_, time, ',' );
-  print( *output_, state );
+  else print( *output_, step, ',' );
+  print( *output_, type );
   
   for (double datum : data) print( *output_, ',', datum );
 
@@ -205,7 +240,7 @@ void StateOutputModule::writeLine_
 //-----------------------------------------------------------------------
 
 
-Ref<Module> StateOutputModule::makeNew
+Ref<Module> ForceOutputModule::makeNew
 
   ( const String&      name,
     const Properties&  conf,
@@ -222,7 +257,7 @@ Ref<Module> StateOutputModule::makeNew
 //-----------------------------------------------------------------------
 
 
-void StateOutputModule::declare ()
+void ForceOutputModule::declare ()
 {
   using jive::app::ModuleFactory;
 

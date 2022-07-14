@@ -44,9 +44,7 @@ namespace jive_helpers
   const Vector e2   = { 0., 1., 0. };
   const Vector e3   = { 0., 0., 1. };
   const Vector vec0 = { 0., 0., 0. };
-  const double PI   = 3.1415926535897932384626433;
-  const double PI_2 = PI/2.;
-  const double TINY = __DBL_EPSILON__ * 1e9;
+  const double TINY = __DBL_EPSILON__ * 1e6;
 
   /**
    * @brief generates an identity matrix of the given dimension
@@ -104,18 +102,18 @@ namespace jive_helpers
     const Vector& v,
     const Vector& vP ); 
 
-  /**
-   * It computes inverse tangent operator for an exponential mapping
-   * (see DOI: 10.1007/s11044-021-09778-w)
-   * 
-   * @brief compute the inverste tangent operator
-   * 
-   * @param[out] T_1 inverse tangent operator
-   * @param[in] v axial rotation vector
-   */
-  void inverseTangentOp
-  ( const Matrix& T_1,
-    const Vector& v );
+  // /**
+  //  * It computes inverse tangent operator for an exponential mapping
+  //  * (see DOI: 10.1007/bf00370057 formula A.21) //LATER direkt update as in Holzinger/Gerstenmeyer
+  //  * 
+  //  * @brief compute the inverste tangent operator
+  //  * 
+  //  * @param[out] T_1 inverse tangent operator
+  //  * @param[in] v axial rotation vector
+  //  */
+  // void getTangentOp
+  // ( const Matrix& T_1,
+  //   const Vector& v );
       
   /**
    * @brief turn a rotation matrix into a quaterion

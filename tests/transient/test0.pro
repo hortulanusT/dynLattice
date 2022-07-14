@@ -1,12 +1,17 @@
 // PROGRAM_CONTROL
-control.runWhile = "t < 1e-2";
+control.runWhile = "t < 1.5e-2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "EulerForward";
-Solver.integrator.deltaTime = 1e-6;
+Solver.integrator.type = "Explicit";
+Solver.integrator.deltaTime = 1e-7;
+Solver.integrator.stepCount = 2;
 
 // settings
+params.X = 0.;
+params.Y = "1/sqrt(2)";
+params.Z = "1/sqrt(2)";
+
 params.rod_details.cross_section = "circle";
 params.rod_details.radius = 0.05;
 params.rod_details.young = 205e9;
@@ -20,11 +25,18 @@ include "model.pro";
 include "output.pro";
 
 // more settings
+Input.input.onelab.X = params.X;
+Input.input.onelab.Y = params.Y;
+Input.input.onelab.Z = params.Z;
+
 model.model.model.force.type = "LoadScale";
-model.model.model.force.scaleFunc = "if (i-100<=0, 1e10, 0) - if (i-99<=0, 1e10, 0)";
+model.model.model.force.scaleFunc = "if (i-100<=0, 2e9, 0) - if (i-99<=0, 2e9, 0)";
 model.model.model.force.model.type = "Neumann";
-model.model.model.force.model.nodeGroups =  [ "free" ] ;
-model.model.model.force.model.factors = [ 1. ];
-model.model.model.force.model.dofs = [ "dz" ];
+model.model.model.force.model.nodeGroups =  [ "free", "free", "free" ] ;
+model.model.model.force.model.factors = [ "$(params.X)", "$(params.Y)", "$(params.Z)" ];
+model.model.model.force.model.dofs = [ "dx", "dy", "dz" ];
 
 model.model.model.disp.type = "None";
+
+Output.disp.vectors += "state1 = velo"; 
+Output.disp.vectors += "state2 = acce"; 

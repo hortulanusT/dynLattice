@@ -1,7 +1,7 @@
 /**
- * @file StateOutputModule.h
+ * @file ForceOutputModule.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Simple Module to write the state vectors to some Output file
+ * @brief Simple Module to write the force vectors to some Output file
  * @version 0.1
  * @date 2022-06-03
  * 
@@ -14,9 +14,11 @@
 #include <jem/base/CString.h>
 #include <jem/base/Array.h>
 #include <jem/io/FileWriter.h>
+#include <jem/io/GzipFileWriter.h>
 #include <jem/io/PrintWriter.h>
 #include <jem/util/Properties.h>
 
+#include <jive/util/utilities.h>
 #include <jive/util/Assignable.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
@@ -27,10 +29,13 @@
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
+#include <jive/model/Model.h>
+#include <jive/model/Actions.h>
 
 using jem::newInstance;
 using jem::io::Writer;
 using jem::io::FileWriter;
+using jem::io::GzipFileWriter;
 using jem::io::PrintWriter;
 using jem::numeric::Function;
 
@@ -48,23 +53,27 @@ using jive::app::Module;
 using jive::fem::NodeSet;
 using jive::util::DofSpace;
 using jive::util::FuncUtils;
-using jive::model::StateTag;
+using jive::model::Model;
+using jive::model::Actions;
+using jive::model::ActionParams;
 
 
-class StateOutputModule : public Module
+class ForceOutputModule : public Module
 {
  public:
 
-  JEM_DECLARE_CLASS       ( StateOutputModule, Module );
+  JEM_DECLARE_CLASS       ( ForceOutputModule, Module );
 
   static const char*        TYPE_NAME;
-  static const char*        STATE_PROP[3];
+  static const char*        INT_PROP;
+  static const char*        EXT_PROP;
+  static const char*        GYRO_PROP;
   static const char*        NODE_PROP;
 
 
-  explicit                  StateOutputModule
+  explicit                  ForceOutputModule
 
-    ( const String&           name = "stateOutput" );
+    ( const String&           name = "ForceOutput" );
 
   virtual Status            init
 
@@ -93,7 +102,7 @@ class StateOutputModule : public Module
 
  protected:
 
-  virtual                  ~StateOutputModule   ();
+  virtual                  ~ForceOutputModule   ();
 
  private:
 
@@ -105,14 +114,17 @@ class StateOutputModule : public Module
 
     ( const Vector&         data,
       const idx_t           step,
-      const StateTag        state,
+      const String          type,
       const double          time = -1. ) const;
 
 
  private:  
   Ref<DofSpace>           dofs_;
+  Ref<Model>              model_;
   IdxVector               dofsOut_;
-  BoolVector              stateOut_;
+  bool                    intOut_;
+  bool                    extOut_;
+  bool                    gyroOut_;
 
   bool                    started_;
   Ref<PrintWriter>        output_;

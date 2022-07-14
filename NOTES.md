@@ -1,11 +1,8 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Sort out time plan for the future
 - Implement Dynamics
-  - Rotational Inertia
-    - no reduced integration for mass matrices
-  - Adaptive Time-Stepping
-- Find Test-Cases for Dynamic Beams
+  - Verify 3D implementation
+- Think of plan for further studies
 ## Code
 1. Models
     - Rod Model
@@ -15,18 +12,10 @@
       - proper adressing of H in the boundary conditions (allow for mixed loadings)
       - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
 2. Modules
-    - ParaviewOutputModule
-      - write wrapper file for exported files ~ `.pvd`
     - PBC Output extent other side
       - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
-    - Custom Sample Module
-      - append without extra header
-      - non-float output
-      - HDF5 output `pandas`-format
-      - write variables to the `.res` files
-4. Environment
+3. Environment
     - move studies to makefile targets
-    - investigate options for parallel computing
     - add .cpp for all headers...
  
 # :heavy_check_mark: Information

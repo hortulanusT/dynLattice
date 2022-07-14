@@ -3,8 +3,9 @@ control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "EulerForward";
+Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 5e-5;
+// Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "square";
@@ -32,7 +33,7 @@ model.model.model.disp.model.factors = [ 1. ];
 model.model.model.disp.model.dofs = [ "rz" ];
 
 Output.disp.type = "Sample";
-Output.disp.file = "$(CASE_NAME)/disp.csv";
+Output.disp.file = "$(CASE_NAME)/disp.gz";
 Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
 Output.disp.dataSets += "fixed.disp.rz";
 Output.disp.dataSets += "t";

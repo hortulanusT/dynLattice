@@ -31,11 +31,10 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 └── studies
     ├── running.mk      <- makefile for running studies
     ├── configs         <- folder containing some standard settings
-    └── <class>         <- folder for geometry classes (re-entrant, arrow3D, ...)
-        ├── geom.geo    <- GMSH .geo file describing the geometry
-        ├── <case>.pro  <- cases to run with this geometry
-        ├── output      <- raw data output
-        └── results     <- processed results
+    ├── geometries      <- folder containing the different geometries
+    ├── programs        <- folder containing different studies to conducts
+    ├── output          <- raw data output
+    └── results         <- processed results
 ```
 
 

@@ -12,6 +12,7 @@
 #include "models/FollowerLoadModel.h"
 #include "models/LatticeModel.h"
 #include "models/InitLoadModel.h"
+#include "models/ImpactModel.h"
 
 //-----------------------------------------------------------------------
 //   declareModels
@@ -31,4 +32,5 @@ void declareModels ()
   NeumannModel::declare           ();
   LatticeModel::declare           ();
   InitLoadModel::declare          ();
+  ImpactModel::declare            ();
 }

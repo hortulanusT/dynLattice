@@ -1,4 +1,4 @@
-.PHONY: tests element-tests beam-tests transient-tests clean-tests manual-test
+.PHONY: tests element-tests beam-tests transient-tests clean-tests
 
 tests: element-tests beam-tests transient-tests
 
@@ -16,11 +16,6 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 
 beam_cases = 0 1 2 3 4 5
 transient_cases = 0 1 #2 3
-
-
-# Manual testing
-manual-test: $(program) tests/manual/testing.pro
-	@$^
 
 # ELEMENT TEST RESULTS
 .PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
@@ -57,19 +52,19 @@ tests/element/test.pro: tests/element/input.pro tests/element/output.pro tests/e
 beam-tests : $(addprefix tests/beam/test, $(addsuffix /result.pdf, $(beam_cases)))
 
 tests/beam/test0/result.pdf : scripts/testing/beam0.py\
- 														  tests/beam/test0/disp.csv\
- 														  tests/beam/test0/resp.csv\
- 														  tests/beam/test0_ref/disp.csv\
- 														  tests/beam/test0_ref/resp.csv
+															 tests/beam/test0/disp.csv\
+															 tests/beam/test0/resp.csv\
+															 tests/beam/test0_ref/disp.csv\
+															 tests/beam/test0_ref/resp.csv
 	@$<
 
 tests/beam/test%/result.pdf : scripts/testing/beam%.py\
- 														  tests/beam/test%/disp.csv\
- 														  tests/beam/test%/resp.csv
+															 tests/beam/test%/disp.csv\
+															 tests/beam/test%/resp.csv
 	@$<
 
 tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
-														  $(program) tests/beam/test%.pro
+															$(program) tests/beam/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
@@ -77,15 +72,15 @@ tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/model.pro
 
 # TRANSIENT TEST RESULTS
-.PRECIOUS: tests/transient/test%/disp.csv
+.PRECIOUS: tests/transient/test%/disp.gz
 
 transient-tests : $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
 
 tests/transient/test%/result.pdf: scripts/testing/transient%.py\
- 														  		tests/transient/test%/disp.csv
+																	 tests/transient/test%/disp.gz
 	@$<
 
-tests/transient/test%/disp.csv: $(program) tests/transient/test%.pro
+tests/transient/test%/disp.gz: $(program) tests/transient/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
 	@$^ > tests/transient/test$*/run.log
@@ -94,10 +89,6 @@ tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro 
 
 # CLEAN UP THE TESTS
 clean-tests :
-	@$(RM_R) tets/manual/testing
-	@$(RM) tets/manual/*.csv
-	@$(RM) tets/manual/*.log
-
 	@$(RM_R) tests/element/runs
 	@$(RM) tests/element/result_*.txt
 

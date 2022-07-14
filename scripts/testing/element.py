@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import sys, math, sys
+import sys, math
 import numpy as np
 from termcolor import colored
 

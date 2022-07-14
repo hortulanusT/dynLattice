@@ -1,101 +1,81 @@
-// LOGGING
-log.pattern = "*";
-log.file = "$(CASE_NAME).log";
-
-// PROGRAM CONTROL
-control.runWhile = "t < 0.1";
-control.fgMode = true;
-
-// SETUP
-params.dofNames = ["dx", "dy", "dz"];
-params.rotNames = ["rx", "ry", "rz"];
-
-// INPUT
-Input.modules = [ "input", "nodeInput" ];
-
-Input.input.type = "GMSHInput";
-Input.input.file = "$(CASE_NAME).geo";
-Input.input.verbose = true;
-Input.input.store_tangents = true;
-Input.input.order = 2;
-Input.input.onelab.RepX = 1.;
-Input.input.onelab.RepY = 1.;
-Input.input.onelab.TopBar = 1.;
-Input.input.onelab.Angle = 120.;
-
-Input.nodeInput.type = "PBCGroupInput";
-Input.nodeInput.groupSettings.restrictToGroup = "points";
-Input.nodeInput.corners = false;
-// Input.nodeInput.nodeGroups = [ "impact" ];
-// Input.nodeInput.impact.restrictToGroup = "beams";
-// Input.nodeInput.impact.ytype = "max";
-// Input.nodeInput.impact.xbounds = [ "ORIGIN.X + SIZE.X/3*1", "ORIGIN.X + SIZE.X/3*2" ];
+// PROGRAM_CONTROL
+control.runWhile = "t < 30";
 
 // SOLVER
-Solver.modules = [ "solver" ];
-Solver.solver.deltaTime = 5e-6;
-// Solver.solver.type = "Newmark";
-// Solver.solver.solver.type = "Nonlin";
-Solver.solver.type = "EulerForward";
+Solver.modules = [ "integrator" ];
+Solver.integrator.type = "Newmark";
+Solver.integrator.solver.type = "Nonlin";
+Solver.integrator.solver.precision = 1e-6;
+// Solver.integrator.solver.lineSearch = true;
+Solver.integrator.deltaTime = 1e-5;
+// Solver.integrator.type = "Explicit";
+// Solver.integrator.updateWhen = true;
+// Solver.integrator.stepCount = 2;
+// Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
-// ACTUAL MODEL
-model.type = "Matrix";
-// model.matrix2.type = "Lumped";
-model.model.type = "Multi";
-model.model.models = [ "lattice", "load" ];
+// settings
+params.rod_details.cross_section = "square";
+params.rod_details.side_length = "sqrt(12/2e3)";
+params.rod_details.young = "5.6e10/12";
+params.rod_details.shear_modulus = 2e9;
+params.rod_details.density = 200.;
+params.rod_details.shape.numPoints = 3;
 
-model.model.lattice.type = "Lattice";
-model.model.lattice.type = "Lattice";
-model.model.lattice.prefix = "beam_";
-model.model.lattice.child.type = "specialCosseratRod";
-model.model.lattice.child.dofNamesTrans = ["dx", "dy", "dz"];
-model.model.lattice.child.dofNamesRot = ["rx", "ry", "rz"];
-model.model.lattice.child.shape.numPoints = 3;
-model.model.lattice.child.young = 210e9;
-model.model.lattice.child.poission_ratio = 0.3;
-model.model.lattice.child.cross_section = "square";
-model.model.lattice.child.side_length = 0.01;
-model.model.lattice.child.density = 1000.;
-model.model.lattice.child.dofNamesTrans = params.dofNames;
-model.model.lattice.child.dofNamesRot = params.rotNames;
+// include model and i/o files
+include "../transient/input.pro";
+include "../transient/model.pro";
+include "../transient/output.pro";
 
-model.model.load.type = "Multi";
-model.model.load.models = [ "fixed", "impact", "initial" ];
-model.model.load.fixed.type = "Dirichlet";
-model.model.load.fixed.dispIncr = 0.;
-model.model.load.fixed.nodeGroups = [ "all", "zmin", "zmin", "zmin", "all", "all" ];
-model.model.load.fixed.dofs = [ "dx", "dy", "dz", "rx", "ry", "rz" ];
-model.model.load.fixed.factors = [ 0., 0., 0., 0., 0., 0. ]; 
-model.model.load.impact.type = "LoadScale";
-model.model.load.impact.scaleFunc = "-0.1 * (80*PI)^2 * sin(80*PI * t)";
-model.model.load.impact.model.type = "Dirichlet";
-model.model.load.impact.model.nodeGroups = [ "zmax" ];
-model.model.load.impact.model.dofs = [ "dy" ];
-model.model.load.impact.model.factors = [ 0. ]; 
-model.model.load.initial.type = "InitLoad";
-model.model.load.initial.veloGroups = "zmax";
-model.model.load.initial.veloDofs = "dy";
-model.model.load.initial.veloVals = "0.1 * (80*PI)";
+// more settings
+MODIFIER = "_2D_implict_0deg";
+CASE_NAME = "$(CASE_NAME)$(MODIFIER)";
 
+Input.input.order = 2;
 
-// OUTPUTS
-Output.modules = [ "pbcOut", "paraview", "view" ];
+model.model.matrix2.type = "FEM";
 
-Output.pbcOut.type = "GroupOutput";
-Output.pbcOut.nodeGroups = "zmax";
-Output.pbcOut.dofs = "dy";
+model.model.model.force.type = "None";
 
-Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/step%d_$(Solver.solver.type)";
-Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.disps = params.dofNames;
-Output.paraview.beams.otherDofs = params.rotNames;
-Output.paraview.beams.el_data = [ "strain", "stress", "mat_strain", "mat_stress" ];
-Output.paraview.beams.node_data = ["fint", "fext", "fres"];
-Output.paraview.beams.shape = "Line2";
-Output.paraview.sampleWhen = "i % 100 < 1";
+model.model.model.disp.type = "LoadScale";
+// acceleration for explicit solver
+// model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
+// displacement for implicit solver
+model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (t^2/2 + (15/2/PI)^2 * (cos(2*PI/15 * t) - 1)), (6*t-45))";
+model.model.model.disp.model.type = "Dirichlet";
+model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
+model.model.model.disp.model.factors = [ 0., 1. ]; // [ "1/sqrt(2)", "1/sqrt(2)" ]; //
+model.model.model.disp.model.dofs = [ "ry", "rz" ];
 
-Output.view.type = "Graph";
-Output.view.dataSets = "disp_tip";
-Output.view.disp_tip.yData = "zmax.disp.dy";
-Output.view.disp_tip.xData = "t";
+Output.disp.file = "$(CASE_NAME)/stateVectors.gz";
+Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
+
+// Output.modules += "force";
+// Output.force.type = "ForceOutput";
+// Output.force.file = "$(CASE_NAME)/forceVectors.gz";
+// Output.force.writeGyroForce = true;
+
+// Output.modules += "strain";
+// Output.strain.type = "CSVOutput";
+// Output.strain.file = "$(CASE_NAME)/test.csv";
+// Output.strain.tables = "elements/strain";
+
+// Output.disp.type = "Sample";
+// Output.disp.file = "$(CASE_NAME)/disp.csv";
+// Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
+// Output.disp.dataSets += "sqrt(fixed.disp.ry^2 + fixed.disp.rz^2)";
+// Output.disp.dataSets += "t";
+// Output.disp.separator	= ",";
+
+// Output.modules += "paraview";
+// Output.paraview.type = "ParaView";
+// Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
+// Output.paraview.groups = [ "beams" ];
+// Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+// Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
+// Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
+// Output.paraview.beams.node_data = ["fint", "fext", "fres"];
+// Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
+// Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
+
+log.pattern = "*.info";
+log.file = "$(CASE_NAME)/run.log";

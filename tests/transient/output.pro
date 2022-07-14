@@ -7,9 +7,9 @@ Output.loadextent.dofs = model.model.model.rodMesh.child.dofNamesTrans;
 Output.loadextent.dofs += model.model.model.rodMesh.child.dofNamesRot;
 Output.loadextent.dimensions = model.model.model.rodMesh.child.dofNamesTrans;
 
-Output.disp.type = "StateOutput";
-Output.disp.file = "$(CASE_NAME)/disp.csv";
-Output.disp.dofs = "dz";
+Output.disp.type = "CSVOutput";
+Output.disp.file = "$(CASE_NAME)/disp.gz";
+Output.disp.vectors = [ "state = disp" ];
 
 // LOGGING
 log.pattern = "*.info";
