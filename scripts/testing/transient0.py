@@ -18,6 +18,7 @@ try:
   data.columns = pd.MultiIndex.from_tuples([tuple([name[:name.find("[")], 
       int(name[name.find("[")+1:name.find("]")])])\
         for name in data.columns], names=["dof", "node"])
+  data = data.loc[:1e-2]
   dx = data["dx"]
   dy = data["dy"]
   dz = data["dz"]

@@ -1,13 +1,14 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Implement Dynamics
-  - Verify 3D implementation
-- Think of plan for further studies
+- Find defined re-entrant unit cell
+- Equivalent (linear static) unit cells in other structures
+- Do finite strain comparision
+- Do dynamic comparison
+- Fix 3D dynamics
 ## Code
 1. Models
     - Rod Model
-      - Better way of giving geometry
-      - Mixed collocation?
+      - Joint stiffening by increase of geometry
     - PBC Model
       - proper adressing of H in the boundary conditions (allow for mixed loadings)
       - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
@@ -33,6 +34,7 @@
 - use the `*.tiny` setting of the solver module to enable convergence for smaller load steps
 
 # :hourglass_flowing_sand: Ideas for the future
+- Modal Reduction for Homogenization
 - Custom Application
   - add shortcuts for `$(CASE_NAME)` without folder
   - enable multiple `.pro` files in command line
