@@ -46,8 +46,9 @@ wave_time = []
 energy_in = disp.iloc[100, -1] * 2e9
 
 energy = pd.DataFrame()
-energy["potential"] = 0.5 * 205e9 / (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns') 
-energy["kinetic"] = 0.5 * 7850 *(1/(nnodes-1)) * (velo**2).sum(axis='columns') # first and last only half length missing!
+energy["potential"] = 0.5 * 205e9 * 0.05**2*np.pi / (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
+lenghts = np.array([.5] + (nnodes-2)*[1] + [.5]) * (1/(nnodes-1))
+energy["kinetic"] = 0.5 * 7850 * 0.05**2*np.pi * (velo**2).dot(lenghts) # first and last only half length
 energy["sum"] = energy.sum(axis='columns')
 
 for node in data:
@@ -90,7 +91,7 @@ if test_passed:
     ax.set_xlabel("Position [m]")
     ax.set_ylabel("Time [s]")
     ax.set_xlim([0, 1.05])
-    ax.set_ylim([0, max(times)])
+    ax.set_ylim([0, 1.05*max(wave_times_ana)])
     ax.tick_params(bottom=True, top=True, left=True, right=True)
     ax.legend(loc="upper left")
     ax.set_title(f"Wave speed approx. {wave_speed_cal:.0f} m/s\nShould be {wave_speed_ana:.0f} m/s")
@@ -159,11 +160,13 @@ if test_passed:
     pdf.savefig(fig)
 
     # energy
-    fig, ax = plt.subplots(1,1, figsize=(10,6))
-    ax.axhline( energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(ax=ax)
-    ax.set_xlim([min(times), max(times)])
-    ax.set_ylim([0, energy_in*1.2])
+    fig, axs = plt.subplots(2,1, figsize=(10,10))
+    axs[0].axhline( energy_in, alpha=0.5, lw=0.5, label="energy input")
+    energy.plot.line(ax=axs[0], logy=True)
+    axs[0].set_xlim([min(times), 0.0001])
+    energy.plot.line(ax=axs[1])
+    axs[1].set_xlim([min(times), max(times)])
+    axs[1].set_ylim([0, energy["sum"][0.001]])
     pdf.savefig(fig)
 
     # raw spectra
