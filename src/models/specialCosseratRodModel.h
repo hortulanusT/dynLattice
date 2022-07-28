@@ -103,6 +103,7 @@ class specialCosseratRodModel : public Model
   static const char*      CROSS_SECTION;
   static const char*      RADIUS;
   static const char*      SIDE_LENGTH;
+  static const char*      THICKENING_FACTOR;
   static const idx_t      TRANS_DOF_COUNT;
   static const idx_t      ROT_DOF_COUNT;
   static const Slice      TRANS_PART;
@@ -266,12 +267,13 @@ class specialCosseratRodModel : public Model
   double                  density_;
   double                  area_;
   double                  shearMod_;
-  double                  areaMoment_;
+  Vector                  areaMoment_;
   double                  polarMoment_;
   String                  cross_section_;
   double                  radius_;
-  double                  side_length_;
+  Vector                  side_length_;
   double                  shearParam_;
+  double                  thickFact_;
 
   Vector                  material_ey_;
   Matrix                  materialC_;

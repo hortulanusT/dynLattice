@@ -42,6 +42,7 @@ const char*   specialCosseratRodModel::GIVEN_DIRS         = "given_dir_dirs";
 const char*   specialCosseratRodModel::CROSS_SECTION      = "cross_section";
 const char*   specialCosseratRodModel::RADIUS             = "radius";
 const char*   specialCosseratRodModel::SIDE_LENGTH        = "side_length";
+const char*   specialCosseratRodModel::THICKENING_FACTOR  = "thickening";
 const idx_t   specialCosseratRodModel::TRANS_DOF_COUNT    = 3;
 const idx_t   specialCosseratRodModel::ROT_DOF_COUNT      = 3;
 const Slice   specialCosseratRodModel::TRANS_PART         = jem::SliceFromTo ( 0, TRANS_DOF_COUNT );
@@ -144,35 +145,52 @@ specialCosseratRodModel::specialCosseratRodModel
     shearMod_ = young_ / 2. / ( nu + 1.);
   }
 
+  areaMoment_.resize( 2 );
+  
   if (!myProps.find( cross_section_, CROSS_SECTION ))
   {
     myProps.get ( area_,  AREA );
     myProps.get ( areaMoment_, AREA_MOMENT);
-    polarMoment_= 2. * areaMoment_;
-    myProps.find( polarMoment_, POLAR_MOMENT);
+    if (areaMoment_.size() == 1 )
+    {
+      areaMoment_.reshape( 2 );
+      areaMoment_[1] = areaMoment_[0];
+    }
     shearParam_ = 5./6.; // assume standard square cross-section
-    myProps.find( shearParam_, SHEAR_FACTOR);
   } 
   else if (cross_section_ == "square")
   {
     myProps.get( side_length_, SIDE_LENGTH );
-    area_ = pow(side_length_, 2);
-    areaMoment_ = pow(side_length_, 4) / 12.;
-    polarMoment_ = 2 * areaMoment_;
+    JEM_ASSERT2( side_length_.size() == 1, "A square has only one side!" );
+    side_length_.reshape(2);
+    side_length_[1] = side_length_[0];
+    area_ = pow(side_length_[0], 2);
+    areaMoment_[0] = areaMoment_[1] = pow(side_length_[0], 4) / 12.;
     shearParam_ = 5./6.;
+    cross_section_ = "rectangle";
   }
   else if (cross_section_ == "circle")
   {
     myProps.get( radius_, RADIUS );
     area_ = M_PI * pow(radius_, 2);
-    areaMoment_ = M_PI * pow(side_length_, 4) / 4.;
-    polarMoment_ = 2 * areaMoment_;
+    areaMoment_ = M_PI * pow(radius_, 4) / 4.;
     shearParam_ = 9./10.;
+  }
+  else if (cross_section_ == "rectangle")
+  {
+    myProps.get( side_length_, SIDE_LENGTH );
+    JEM_ASSERT2( side_length_.size() == 2, "A rectangle has only two sides!" );
+    area_ = jem::product(side_length_);
+    areaMoment_[0] = pow(side_length_[1], 3) * side_length_[0] / 12.; 
+    areaMoment_[1] = pow(side_length_[0], 3) * side_length_[1] / 12.; 
+    shearParam_ = 5./6.;
   }
   else
     throw jem::IllegalInputException( getContext(), "unknown cross section, only 'square' and 'circle' are supported");
 
+  polarMoment_ = jem::sum(areaMoment_);
   myProps.find( shearParam_, SHEAR_FACTOR);
+  myProps.find( polarMoment_, POLAR_MOMENT);
   
   density_ = 0.;
   myProps.find( density_, DENSITY);
@@ -219,15 +237,19 @@ specialCosseratRodModel::specialCosseratRodModel
   materialC_ ( 0, 0 ) = shearMod_ * shearParam_ * area_;
   materialC_ ( 1, 1 ) = shearMod_ * shearParam_ * area_;
   materialC_ ( 2, 2 ) = young_ * area_;
-  materialC_ ( 3, 3 ) = young_ * areaMoment_;
-  materialC_ ( 4, 4 ) = young_ * areaMoment_;
+  materialC_ ( 3, 3 ) = young_ * areaMoment_[0];
+  materialC_ ( 4, 4 ) = young_ * areaMoment_[1];
   materialC_ ( 5, 5 ) = shearMod_ * polarMoment_;
 
   materialM_.resize( 3, 3 ); 
   materialM_ = eye() * density_ * area_; 
 
-  jem::System::debug( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
-  jem::System::debug( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
+  thickFact_ = 1.;
+  myProps.find( thickFact_, THICKENING_FACTOR );
+  myConf .set ( THICKENING_FACTOR, thickFact_ );
+
+  // jem::System::debug( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
+  // jem::System::debug( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -722,6 +744,7 @@ void specialCosseratRodModel::get_stresses_
   const idx_t   ipCount   = shapeK_->ipointCount ();
   const idx_t   dofCount  = dofs_->typeCount();
   const Matrix  strains   ( stresses.shape() );
+  const Matrix  elemC     ( materialC_.shape() );
   const Cubix   stiffness ( dofCount, dofCount, ipCount );
   const Cubix   PI        ( dofCount, dofCount, ipCount );
   MatmulChain<double, 3>      mc3;
@@ -730,16 +753,23 @@ void specialCosseratRodModel::get_stresses_
   get_strains_( strains, w, nodePhi_0, nodeU, nodeLambda, ie, spatial );
   // TEST_CONTEXT( strains )
 
+  elemC = materialC_;
+  if ( thickFact_ != 1. && (ie == 0 || ie == rodElems_.size()-1) )
+  {
+    elemC( TRANS_PART, TRANS_PART ) *= pow(thickFact_, 2);
+    elemC( ROT_PART, ROT_PART )     *= pow(thickFact_, 4); 
+  }
+
   // get the stresses (material + spatial );
   if (spatial)
   {
     shapeK_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++) 
-      stiffness[ip]   = mc3.matmul(PI[ip], materialC_, PI[ip].transpose());
+      stiffness[ip]   = mc3.matmul(PI[ip], elemC, PI[ip].transpose());
   }
   else // material stiffness
     for (idx_t ip = 0; ip < ipCount; ip++) 
-      stiffness[ip]   = materialC_;
+      stiffness[ip]   = elemC;
   
   for (idx_t ip = 0; ip < ipCount; ip++)
     stresses[ip]  = matmul( stiffness[ip], strains[ip] );
@@ -947,7 +977,7 @@ void          specialCosseratRodModel::assembleM_
   ( MatrixBuilder&        mbld,
     Vector&               disp ) const
 {
-  JEM_ASSERT2( cross_section_ == "square" || cross_section_ == "circle", "Mass Matrix cannot be constructed without knowing the type of crossection");
+  JEM_ASSERT2( cross_section_ == "rectangle" || cross_section_ == "circle", "Mass Matrix cannot be constructed without knowing the type of crossection");
   WARN_ASSERT2( density_ > 0, "Mass Matrix will have no effect without density!");
   MatmulChain<double, 3>      mc3;
   
@@ -1019,11 +1049,11 @@ void          specialCosseratRodModel::assembleM_
             materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(radius_,2)*3 + pow(node_len, 2));
             materialJ( 2,2 ) = density_*area_*node_len / 2. * pow(radius_,2); 
           }
-          if (cross_section_ == "square")
-          {
-            materialJ( 0,0 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
-            materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(side_length_,2) + pow(node_len, 2));
-            materialJ( 2,2 ) = density_*area_*node_len / 6. * pow(side_length_, 2);
+          if (cross_section_ == "rectangle")
+          { 
+            materialJ( 0,0 ) = density_*area_*node_len / 12. * ( pow(side_length_[1], 2) + pow(node_len, 2));
+            materialJ( 1,1 ) = density_*area_*node_len / 12. * ( pow(side_length_[0], 2) + pow(node_len, 2));
+            materialJ( 2,2 ) = density_*area_*node_len / 12. * ( pow(side_length_[0], 2) + pow(side_length_[1], 2));         
           }
 
           if (Inode == 0 || Inode == nodeCount-1) // steiner parts
