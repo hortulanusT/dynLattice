@@ -247,9 +247,9 @@ specialCosseratRodModel::specialCosseratRodModel
   thickFact_ = 1.;
   myProps.find( thickFact_, THICKENING_FACTOR );
   myConf .set ( THICKENING_FACTOR, thickFact_ );
-
-  // jem::System::debug( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
-  // jem::System::debug( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
+  
+  jem::System::debug( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
+  jem::System::debug( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
 }
 
 //-----------------------------------------------------------------------
