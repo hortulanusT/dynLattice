@@ -273,7 +273,7 @@ class specialCosseratRodModel : public Model
   double                  radius_;
   Vector                  side_length_;
   double                  shearParam_;
-  double                  thickFact_;
+  Vector                  thickFact_;
 
   Vector                  material_ey_;
   Matrix                  materialC_;

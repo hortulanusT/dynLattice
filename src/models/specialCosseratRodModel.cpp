@@ -244,9 +244,15 @@ specialCosseratRodModel::specialCosseratRodModel
   materialM_.resize( 3, 3 ); 
   materialM_ = eye() * density_ * area_; 
 
-  thickFact_ = 1.;
-  myProps.find( thickFact_, THICKENING_FACTOR );
+  if (myProps.find( thickFact_, THICKENING_FACTOR ))
+  {
+    if (thickFact_.size() == 1)
+    {
+      thickFact_.reshape( 2 );
+      thickFact_[1] = thickFact_[0];
+    }
   myConf .set ( THICKENING_FACTOR, thickFact_ );
+  }
   
   jem::System::debug( myName_ ) << " ...Stiffness matrix of the rod '" << myName_ << "':\n" << materialC_ << "\n";
   jem::System::debug( myName_ ) << " ...Area density of the rod '" << myName_ << "':\n" << density_*area_ << "\n";
@@ -754,10 +760,14 @@ void specialCosseratRodModel::get_stresses_
   // TEST_CONTEXT( strains )
 
   elemC = materialC_;
-  if ( thickFact_ != 1. && (ie == 0 || ie == rodElems_.size()-1) )
+  if ( thickFact_.size() && (ie == 0 || ie == rodElems_.size()-1) )
   {
-    elemC( TRANS_PART, TRANS_PART ) *= pow(thickFact_, 2);
-    elemC( ROT_PART, ROT_PART )     *= pow(thickFact_, 4); 
+    elemC( TRANS_PART, TRANS_PART ) *= thickFact_[0] * thickFact_[1];
+    elemC( 3, 3 ) *= pow(thickFact_[1], 3) * thickFact_[0]; 
+    elemC( 4, 4 ) *= pow(thickFact_[0], 3) * thickFact_[1]; 
+    elemC( 5, 5 ) *= shearMod_ * (
+      areaMoment_[0] * pow(thickFact_[1], 3) * thickFact_[0] +
+      areaMoment_[1] * pow(thickFact_[0], 3) * thickFact_[1]); 
   }
 
   // get the stresses (material + spatial );
