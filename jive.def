@@ -55,24 +55,24 @@ From: ubuntu
   cd /home/user/
   
   tar xfz openmpi-4.1.1.tar.gz
-  (cd openmpi-4.1.1 && ./configure --prefix=$MPIDIR --disable-wrapper-rpath --disable-wrapper-runpath && make -j -l8 all && make install)
+  (cd openmpi-4.1.1 && ./configure --prefix=$MPIDIR --disable-wrapper-rpath --disable-wrapper-runpath && make -j -l4 all && make install)
   rm -rf openmpi-4.1.1/
 
   export LD_LIBRARY_PATH=$MPIDIR:$LD_LIBRARY_PATH
   
   tar xfz hdf5-1.12.2.tar.gz
-  (cd hdf5-1.12.2 && ./configure --prefix=$HDF5DIR --with-default-api-version=v110 && make -j -l8 && make -j -l8 check && make install)
+  (cd hdf5-1.12.2 && ./configure --prefix=$HDF5DIR --with-default-api-version=v110 && make -j -l4 && make -j -l4 check && make install)
   rm -rf hdf5-1.12.2/
   
   export LD_LIBRARY_PATH=$HDF5DIR:$LD_LIBRARY_PATH
 
   unzip -qq jem-3.0.zip
   mv jem-3.0 jem
-  (cd jem && ./configure --cxx=mpic++ --hdf5-libdirs=$HDF5DIR/lib --hdf5-incdirs=$HDF5DIR/include && make -j -l8 && make -j -l8 clean)
+  (cd jem && ./configure --cxx=mpic++ --hdf5-libdirs=$HDF5DIR/lib --hdf5-incdirs=$HDF5DIR/include && make -j -l4 && make -j -l4 clean)
 
   unzip -qq jive-3.0.zip
   mv jive-3.0 jive
-  (cd jive && ./configure --cxx=mpic++ && make -j -l8 && make -j -l8 clean)
+  (cd jive && ./configure --cxx=mpic++ && make -j -l4 && make -j -l4 clean)
 
   tar xfz gmsh-4.9.5-Linux64-sdk.tgz
   mv gmsh-4.9.5-Linux64-sdk gmsh
