@@ -8,7 +8,8 @@
 ## Code
 1. Models
     - Rod Model
-      - Joint stiffening by increase of geometry
+      - Extract material for the stress -> strain relationship
+      - Create MaterialFactory
     - PBC Model
       - proper adressing of H in the boundary conditions (allow for mixed loadings)
       - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
