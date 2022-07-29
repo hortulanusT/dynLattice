@@ -1,6 +1,5 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Find defined re-entrant unit cell
 - Equivalent (linear static) unit cells in other structures
 - Do finite strain comparision
 - Do dynamic comparison
@@ -17,7 +16,6 @@
     - PBC Output extent other side
       - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
 3. Environment
-    - move studies to makefile targets
     - add .cpp for all headers...
  
 # :heavy_check_mark: Information
