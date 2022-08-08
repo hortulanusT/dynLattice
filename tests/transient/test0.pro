@@ -1,5 +1,5 @@
 // PROGRAM_CONTROL
-control.runWhile = "t < 1.5e-2";
+control.runWhile = "t < 2e-2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
@@ -8,9 +8,9 @@ Solver.integrator.deltaTime = 1e-7;
 Solver.integrator.stepCount = 2;
 
 // settings
-params.X = 0.;
-params.Y = "1/sqrt(2)";
-params.Z = "1/sqrt(2)";
+params.X = "sin(PI/180) * sin(PI/4)";
+params.Y = "sin(PI/180) * cos(PI/4)";
+params.Z = "cos(PI/180)";
 
 params.rod_details.cross_section = "circle";
 params.rod_details.radius = 0.05;
@@ -40,3 +40,14 @@ model.model.model.disp.type = "None";
 
 Output.disp.vectors += "state1 = velo"; 
 Output.disp.vectors += "state2 = acce"; 
+
+Output.modules += "paraview";
+Output.paraview.type = "ParaView";
+Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
+Output.paraview.groups = [ "beams" ];
+Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
+Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
+Output.paraview.beams.node_data = ["fint", "fext", "fres"];
+Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
+Output.paraview.sampleWhen = "t % 2.5e-5 < $(Solver.integrator.deltaTime)";

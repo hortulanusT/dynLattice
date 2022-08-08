@@ -14,8 +14,8 @@ Solver.integrator.deltaTime = 1e-5;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
-params.rod_details.cross_section = "square";
-params.rod_details.side_length = "sqrt(12/2e3)";
+params.rod_details.cross_section = "rectangle";
+params.rod_details.side_length = [0.75e-3, 25e-3];
 params.rod_details.young = "5.6e10/12";
 params.rod_details.shear_modulus = 2e9;
 params.rod_details.density = 200.;
@@ -27,7 +27,7 @@ include "../transient/model.pro";
 include "../transient/output.pro";
 
 // more settings
-MODIFIER = "_2D_implict_0deg";
+MODIFIER = "";
 CASE_NAME = "$(CASE_NAME)$(MODIFIER)";
 
 Input.input.order = 2;
@@ -77,5 +77,5 @@ Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 // Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 // Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
 
-log.pattern = "*.info";
+log.pattern = "*";
 log.file = "$(CASE_NAME)/run.log";

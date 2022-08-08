@@ -25,14 +25,22 @@ Module::Status PBCGroupOutputModule::init
     const Properties&   props,
     const Properties&   globdat )
 {
-  StringVector  groups (6);
-  for (idx_t i = 0; i < 6; i++)
-    groups[i] = PBCGroupInputModule::EDGES[i];
 
   // fill the properties with the default node and element Groups
   Properties myProps = props.getProps ( myName_ );
+
+  StringVector  groups;
+  myProps.find( groups, "nodeGroups" );
+  groups.reshape( groups.size() + 6 );
+  for (idx_t i = 1; i <= 6; i++)
+    groups[groups.size() - i] = PBCGroupInputModule::EDGES[i - 1];
   myProps.set ( "nodeGroups", groups );
-  myProps.set ( "elemGroups", "all" );
+
+  StringVector  elements;
+  myProps.find( elements, "elementGroups" );
+  elements.reshape( elements.size() + 1 );
+  elements[elements.size() - 1] = "all";
+  myProps.set ( "elemGroups", elements);
 
   JEM_PRECHECK2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
 

@@ -1,9 +1,12 @@
 # vs code settings
-.vscode*
+.vscode
 
 # binary files
 OBJ*
 nonlinRod*
+
+# reference data
+ref_data
 
 # scribbling script
 scripts/scribbling.py

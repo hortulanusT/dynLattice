@@ -4,7 +4,7 @@ control.runWhile = "t <= 30";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-4;
+Solver.integrator.deltaTime = 1e-6;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.stepCount = 2;
 
@@ -54,4 +54,4 @@ Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"]
 Output.paraview.sampleWhen = Output.disp.sampleWhen;
 
 log.pattern = "*";
-log.file = "$(CASE_NAME)/run.log";
+log.file = "-";

@@ -64,8 +64,8 @@ InitLoadModel::InitLoadModel
     JEM_PRECHECK2( vgroups_.size() == vvals_.size(), "groups and vals need to have the same size!"); 
 
     myConf.set( VELO_GROUPS, vgroups_ );
-    myConf.set( VELO_DOFS, ddofs_ );
-    myConf.set( VELO_VALS, dvals_ );
+    myConf.set( VELO_DOFS, vdofs_ );
+    myConf.set( VELO_VALS, vvals_ );
   }
 }
 
