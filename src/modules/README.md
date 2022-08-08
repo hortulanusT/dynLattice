@@ -2,9 +2,6 @@
 | TAKE CARE, THIS IS LARGELY UNTESTED AND MIGHT CONTAIN SOME BUGS  |
 | --- |
 
-| This module is but a demonstration, it is far from perfect, especially it still has some dependencies |
-| --- |
-
 # ParaViewModule 
 
 This Repository contains a JEM/JIVE Module, that enables outputting the results of a calculation to ParaView in XML-Format
@@ -18,7 +15,3 @@ whereas the desired folder needs to be empty. After this make sure, the Module i
 subdirs     += <desired folder>
 MY_INCDIRS  := $(subdirs)
 ```
-
-## Requirements
-- `utils/testing.h`
-- `utils/helpers.h`

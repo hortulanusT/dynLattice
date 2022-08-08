@@ -2,6 +2,20 @@
 
 //BUG FORCES are not associated with the correct node
 
+void vec2mat
+  ( const Matrix& mat,
+    const Vector& vec )
+{
+  const idx_t  rows = mat.size(0);
+  const idx_t  cols = mat.size(1);
+  JEM_ASSERT2( rows*cols == vec.size(), "Vector and Matrix not of the same size!" );
+
+  for (idx_t irow = 0; irow < rows; irow++)
+  {
+    mat ( irow, ALL ) = vec [ SliceFromTo (irow*cols, (irow+1)*cols) ];
+  }
+}
+
 //=======================================================================
 //   class ParaViewModule
 //=======================================================================
@@ -409,7 +423,7 @@ void       ParaViewModule::writePiece_
       model->takeAction (Actions::GET_EXT_VECTOR, params, globdat );
       params.erase ( ActionParams::EXT_VECTOR );
       
-      jive_helpers::vec2mat ( fext_mat, fext );
+      vec2mat ( fext_mat, fext );
       writeDataArray_( file, fext_mat(ALL, SliceTo(3)), "Float32", "External Forces" );
       writeDataArray_( file, fext_mat(ALL, SliceFrom(3)), "Float32", "External Torques" );
     }
@@ -423,7 +437,7 @@ void       ParaViewModule::writePiece_
       model->takeAction (Actions::GET_INT_VECTOR, params, globdat );
       params.erase ( ActionParams::INT_VECTOR );
 
-      jive_helpers::vec2mat ( fint_mat, fint );
+      vec2mat ( fint_mat, fint );
       writeDataArray_( file, fint_mat(ALL, SliceTo(3)), "Float32", "Internal Forces" );
       writeDataArray_( file, fint_mat(ALL, SliceFrom(3)), "Float32", "Internal Torques" );
     }
@@ -447,7 +461,7 @@ void       ParaViewModule::writePiece_
 
       fres = fext - fint;
 
-      jive_helpers::vec2mat ( fres_mat, fres );
+      vec2mat ( fres_mat, fres );
       writeDataArray_( file, fres_mat(ALL, SliceTo(3)), "Float32", "Resulting Forces" );
       writeDataArray_( file, fres_mat(ALL, SliceFrom(3)), "Float32", "Resulting Torques" );
     }

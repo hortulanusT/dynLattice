@@ -42,12 +42,14 @@
 
 #include <filesystem>
 
-#include "utils/testing.h"
-#include "utils/helpers.h"
-
 using jem::Ref;
 using jem::newInstance;
 using jem::where;
+using jem::idx_t;
+using jem::Array;
+using jem::sum;
+using jem::SliceFromTo;
+using jem::ALL;
 using jem::Limits;
 using jem::String;
 using jem::SliceTo;
@@ -61,6 +63,9 @@ using jem::io::PrintWriter;
 using jem::io::FileName;
 using jem::io::FileOpenException;
 
+using jive::IdxVector;
+using jive::Vector;
+using jive::Matrix;
 using jive::StringVector;
 using jive::app::Module;
 using jive::util::Assignable;
