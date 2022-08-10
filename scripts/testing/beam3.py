@@ -12,12 +12,12 @@ try:
   sim_resp = np.loadtxt("tests/beam/test3/resp.csv", delimiter=',')
 
   plt.figure(figsize=(16/3, 6))
-  plt.plot(-1*sim_disp[:,0], -1*sim_resp[:,1], label="horizontal")
-  plt.plot(-1*sim_disp[:,1], -1*sim_resp[:,1], label="vertical")
+  plt.plot(-1*sim_disp[:, 0], -1*sim_resp[:, 1], label="horizontal")
+  plt.plot(-1*sim_disp[:, 1], -1*sim_resp[:, 1], label="vertical")
   plt.legend()
-  plt.xlabel( "displacment [N]" )
-  plt.ylabel( "load [N]" )
-  plt.xlim( left=0 )
+  plt.xlabel("displacment [N]")
+  plt.ylabel("load [N]")
+  plt.xlim(left=0)
 except Exception as e:
   print(e)
 else:

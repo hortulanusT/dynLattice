@@ -4,9 +4,9 @@
  * @brief Module to enable the Standard Output Module to Output CSV Files
  * @version 0.1
  * @date 2022-06-22
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 #pragma once
 
@@ -16,37 +16,34 @@
 
 using jem::newInstance;
 
+using jive::Properties;
 using jive::Ref;
 using jive::String;
-using jive::Properties;
+using jive::app::DataPrinter;
 using jive::app::Module;
 using jive::app::OutputModule;
-using jive::app::DataPrinter;
 
 class CSVOutputModule : public OutputModule
 {
- public:
+public:
+  JEM_DECLARE_CLASS(CSVOutputModule, OutputModule);
 
-  JEM_DECLARE_CLASS       ( CSVOutputModule, OutputModule );
+  static const char *TYPE_NAME;
 
-  static const char*        TYPE_NAME;
+  explicit CSVOutputModule
 
-  explicit                  CSVOutputModule
+      (const String &name = "csvOutput",
+       const Ref<DataPrinter> printer = nullptr);
 
-    ( const String&               name = "csvOutput",
-      const Ref<DataPrinter>      printer = nullptr  );
+  static Ref<Module> makeNew
 
-  static Ref<Module>        makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void               declare       ();
-
-
- protected:
-
-  virtual                  ~CSVOutputModule   ();
+protected:
+  virtual ~CSVOutputModule();
 };

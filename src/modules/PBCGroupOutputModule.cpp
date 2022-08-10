@@ -4,176 +4,163 @@
  * @brief Wrapper Class for some default PBC Outputs
  * @version 0.1
  * @date 2021-12-06
- * 
+ *
  * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
- * 
+ *
  */
 
 #include "PBCGroupOutputModule.h"
 
-const char*  PBCGroupOutputModule::TYPE_NAME = "PBCGroupOutput";
-const char*  PBCGroupOutputModule::CHILD_NAME = "sampling";
+const char *PBCGroupOutputModule::TYPE_NAME = "PBCGroupOutput";
+const char *PBCGroupOutputModule::CHILD_NAME = "sampling";
 
-PBCGroupOutputModule::PBCGroupOutputModule
-  ( const String&       name) : Super ( name )
+PBCGroupOutputModule::PBCGroupOutputModule(const String &name) : Super(name)
 {
-  child_ = newInstance<SampleModule>( myName_ + "." + CHILD_NAME );
+  child_ = newInstance<SampleModule>(myName_ + "." + CHILD_NAME);
 }
 
-Module::Status PBCGroupOutputModule::init
-  ( const Properties&   conf,
-    const Properties&   props,
-    const Properties&   globdat )
+Module::Status PBCGroupOutputModule::init(const Properties &conf,
+                                          const Properties &props,
+                                          const Properties &globdat)
 {
 
   // fill the properties with the default node and element Groups
-  Properties myProps = props.getProps ( myName_ );
+  Properties myProps = props.getProps(myName_);
 
-  StringVector  groups;
-  myProps.find( groups, "nodeGroups" );
-  groups.reshape( groups.size() + 6 );
+  StringVector groups;
+  myProps.find(groups, "nodeGroups");
+  groups.reshape(groups.size() + 6);
   for (idx_t i = 1; i <= 6; i++)
     groups[groups.size() - i] = PBCGroupInputModule::EDGES[i - 1];
-  myProps.set ( "nodeGroups", groups );
+  myProps.set("nodeGroups", groups);
 
-  StringVector  elements;
-  myProps.find( elements, "elementGroups" );
-  elements.reshape( elements.size() + 1 );
+  StringVector elements;
+  myProps.find(elements, "elementGroups");
+  elements.reshape(elements.size() + 1);
   elements[elements.size() - 1] = "all";
-  myProps.set ( "elemGroups", elements);
+  myProps.set("elemGroups", elements);
 
-  JEM_PRECHECK2( Super::init( conf, props, globdat ) == Status::OK, "Error setting up the GroupOutputModule!" );
+  JEM_PRECHECK2(Super::init(conf, props, globdat) == Status::OK, "Error setting up the GroupOutputModule!");
 
   // configure the output module
   // LATER get multiple Children for different kinds of outputs
-  Properties childProps = props.makeProps (  myName_ + "." + CHILD_NAME );
+  Properties childProps = props.makeProps(myName_ + "." + CHILD_NAME);
   bool append = false;
-  if (!childProps.find( append, PropNames::APPEND ) || !append)
+  if (!childProps.find(append, PropNames::APPEND) || !append)
   {
     String header = "";
-    childProps.find( header, PropNames::HEADER);
-    childProps.set( PropNames::HEADER, getHeader_( header ) );
+    childProps.find(header, PropNames::HEADER);
+    childProps.set(PropNames::HEADER, getHeader_(header));
   }
   StringVector data_sets;
-  childProps.find( data_sets, PropNames::DATA_SETS);
-  childProps.set( PropNames::DATA_SETS, getDataSets_( data_sets ) );
+  childProps.find(data_sets, PropNames::DATA_SETS);
+  childProps.set(PropNames::DATA_SETS, getDataSets_(data_sets));
 
-  childProps.set( PropNames::SEPARATOR,  "," );
-  
-  child_->configure( props, globdat );
-  child_->getConfig( conf, globdat );
-  JEM_PRECHECK2( child_->init( conf, props, globdat) == Status::OK, "Error setting up the SampleModule!" );
+  childProps.set(PropNames::SEPARATOR, ",");
+
+  child_->configure(props, globdat);
+  child_->getConfig(conf, globdat);
+  JEM_PRECHECK2(child_->init(conf, props, globdat) == Status::OK, "Error setting up the SampleModule!");
 
   return Status::OK;
 }
 
-Module::Status PBCGroupOutputModule::run
-  (const Properties&    globdat)
+Module::Status PBCGroupOutputModule::run(const Properties &globdat)
 {
   Super::run(globdat);
   child_->run(globdat);
-  
+
   return Status::OK;
 }
 
-void PBCGroupOutputModule::shutdown
-  (const Properties&    globdat)
+void PBCGroupOutputModule::shutdown(const Properties &globdat)
 {
   Super::shutdown(globdat);
   child_->shutdown(globdat);
 }
 
-String PBCGroupOutputModule::getHeader_ ( String head ) const
+String PBCGroupOutputModule::getHeader_(String head) const
 {
   const idx_t dim = elemDofs_.size();
 
-  // step  
+  // step
   if (head.size() < 1)
     head = "step,";
-  
+
   if (head.back() != ',')
     head = head + ",";
 
   // displacement gradient
   for (idx_t i = 1; i <= dim; i++)
     for (idx_t j = 1; j <= dim; j++)
-      head = head + String::format( "H%d%d,", i, j );  
+      head = head + String::format("H%d%d,", i, j);
 
   // 1st PK Tensor
   for (idx_t i = 1; i <= dim; i++)
-    for (idx_t j = 1; j <= dim; j++)      
-      head = head + String::format( "P%d%d,", i, j );  
+    for (idx_t j = 1; j <= dim; j++)
+      head = head + String::format("P%d%d,", i, j);
 
-  return head[SliceTo(head.size()-1)];
+  return head[SliceTo(head.size() - 1)];
 }
 
-StringVector PBCGroupOutputModule::getDataSets_ ( StringVector existingDataSets ) const
-{  
+StringVector PBCGroupOutputModule::getDataSets_(StringVector existingDataSets) const
+{
   const idx_t dim = elemDofs_.size();
 
   ArrayBuffer<String> dataSets;
 
   // step
   if (existingDataSets.size() > 0)
-    dataSets.pushBack( existingDataSets.begin(), existingDataSets.end() );
+    dataSets.pushBack(existingDataSets.begin(), existingDataSets.end());
   else
-    dataSets.pushBack( "i" );
+    dataSets.pushBack("i");
 
   // displacement gradient
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
     {
-      dataSets.pushBack( String::format( "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s"
-        , elemDofNames_[j].back()
-        , nodeDofNames_[i]
-        , elemDofNames_[j].back()
-        , nodeDofNames_[i]
-        , elemDofNames_[j] ) );
-    }  
+      dataSets.pushBack(String::format("(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s", elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j]));
+    }
 
   // Prepare areas
-  StringVector areas (dim);
-  if (dim==3)
+  StringVector areas(dim);
+  if (dim == 3)
   {
-    areas[0] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[2] );
-    areas[1] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[0], elemDofNames_[2] );
-    areas[2] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[0] );
+    areas[0] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[2]);
+    areas[1] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[0], elemDofNames_[2]);
+    areas[2] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[0]);
   }
-  else if (dim==2)
+  else if (dim == 2)
   {
     areas[0] = "all.extent." + elemDofNames_[1];
     areas[1] = "all.extent." + elemDofNames_[0];
   }
-  else if (dim==1)
+  else if (dim == 1)
   {
     areas[0] = "1";
   }
   else
     throw jem::Exception(JEM_FUNC, String::format("unkown dimension number %d", dim));
-  
+
   // 1st PK Tensor
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
-        dataSets.pushBack( String::format( "%cmax.resp.%s / %s"
-          , elemDofNames_[j].back()
-          , nodeDofNames_[i] 
-          , areas[j] ) );  
+      dataSets.pushBack(String::format("%cmax.resp.%s / %s", elemDofNames_[j].back(), nodeDofNames_[i], areas[j]));
 
   return dataSets.toArray();
 }
 
-Ref<Module> PBCGroupOutputModule::makeNew
-  ( const String&       name,
-    const Properties&   conf,
-    const Properties&   props,
-    const Properties&   globdat )
+Ref<Module> PBCGroupOutputModule::makeNew(const String &name,
+                                          const Properties &conf,
+                                          const Properties &props,
+                                          const Properties &globdat)
 {
-  return newInstance<PBCGroupOutputModule> ( name );
+  return newInstance<PBCGroupOutputModule>(name);
 }
-  
-void PBCGroupOutputModule::declare ()
+
+void PBCGroupOutputModule::declare()
 {
   using jive::app::ModuleFactory;
 
-  ModuleFactory::declare ( TYPE_NAME, &makeNew);
+  ModuleFactory::declare(TYPE_NAME, &makeNew);
 }

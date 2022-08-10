@@ -27,30 +27,30 @@
 #include <jive/solver/SolverParams.h>
 #include "utils/helpers.h"
 
-using jem::newInstance;
 using jem::idx_t;
+using jem::newInstance;
 using jem::numeric::Function;
 
-using jive::Vector;
-using jive::StringVector;
-using jive::Ref;
-using jive::Properties;
-using jive::String;
 using jive::IdxMatrix;
+using jive::Properties;
+using jive::Ref;
+using jive::String;
+using jive::StringVector;
+using jive::Vector;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::DiagMatrixObject;
 using jive::app::Module;
-using jive::model::Model;
-using jive::util::DofSpace;
-using jive::solver::Solver;
-using jive::solver::newSolver;
-using jive::util::Constraints;
-using jive::util::Globdat;
-using jive::util::FuncUtils;
-using jive::model::Actions;
-using jive::model::ActionParams;
-using jive::model::StateVector;
 using jive::implict::newSolverParams;
+using jive::model::ActionParams;
+using jive::model::Actions;
+using jive::model::Model;
+using jive::model::StateVector;
+using jive::solver::newSolver;
+using jive::solver::Solver;
+using jive::util::Constraints;
+using jive::util::DofSpace;
+using jive::util::FuncUtils;
+using jive::util::Globdat;
 
 using jive_helpers::expVec;
 using jive_helpers::logMat;
@@ -59,84 +59,82 @@ using jive_helpers::logMat;
 //   class ExplicitModule
 //-----------------------------------------------------------------------
 
-
 class ExplicitModule : public Module
 {
- public:
+public:
+  enum MassMode
+  {
+    LUMPED,
+    CONSISTENT
+  };
 
-  enum MassMode { LUMPED, CONSISTENT };
+  typedef Module Super;
+  typedef ExplicitModule Self;
 
-  typedef Module            Super;
-  typedef ExplicitModule    Self;
+  static const char *TYPE_NAME;
+  static const char *STEP_COUNT;
+  static const char *SO3_DOFS;
 
-  static const char*        TYPE_NAME;
-  static const char*        STEP_COUNT;
-  static const char*        SO3_DOFS;
+  explicit ExplicitModule
 
-  explicit                  ExplicitModule
+      (const String &name = "Explicit");
 
-    ( const String&           name = "Explicit" );
+  virtual Status init
 
-  virtual Status            init
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  virtual Status run
 
-  virtual Status            run
+      (const Properties &globdat);
 
-    ( const Properties&       globdat );
+  virtual void shutdown
 
-  virtual void              shutdown
+      (const Properties &globdat);
 
-    ( const Properties&       globdat );
+  virtual void configure
 
-  virtual void              configure
+      (const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       props,
-      const Properties&       globdat );
+  virtual void getConfig
 
-  virtual void              getConfig
+      (const Properties &props,
+       const Properties &globdat) const;
 
-    ( const Properties&       props,
-      const Properties&       globdat )        const;
+  static Ref<Module> makeNew
 
-  static Ref<Module>        makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void               declare ();
+protected:
+  virtual ~ExplicitModule();
 
- protected:
+private:
+  void restart_
 
-  virtual                  ~ExplicitModule  ();
+      (const Properties &globdat);
 
+  void invalidate_();
 
- private:
-
-  void                      restart_
-
-    ( const Properties&       globdat );
-
-  void                      invalidate_     ();
-
- private:
-
-  bool          valid_;
-  double        dtime_;
-  idx_t         stepCount_;
-  MassMode      mode_;
+private:
+  bool valid_;
+  double dtime_;
+  idx_t stepCount_;
+  MassMode mode_;
 
   Ref<Function> updCond_;
-  IdxVector     SO3_dofs_;
-  IdxMatrix     rdofs_;
+  IdxVector SO3_dofs_;
+  IdxMatrix rdofs_;
 
-  Ref<Model>    model_;
+  Ref<Model> model_;
   Ref<DofSpace> dofs_;
 
-  Vector        massInv_;
-  Ref<Solver>   solver_;
+  Vector massInv_;
+  Ref<Solver> solver_;
 };

@@ -1,7 +1,7 @@
 /*
- * 
+ *
  *  Copyright (C) 2010 TU Delft. All rights reserved.
- *  
+ *
  *  This class implements a model for neumann boundary conditions.
  *  As opposed to the PointLoadModel, this can apply loads on changing
  *  NodeGroups
@@ -34,11 +34,10 @@
 using jem::io::endl;
 using jem::util::StringUtils;
 using jive::IdxVector;
-using jive::model::Actions;
-using jive::model::ActionParams;
-using jive::model::StateVector;
 using jive::implict::SolverInfo;
-
+using jive::model::ActionParams;
+using jive::model::Actions;
+using jive::model::StateVector;
 
 //=======================================================================
 //   class NeumannModel
@@ -48,70 +47,66 @@ using jive::implict::SolverInfo;
 //   static data
 //-----------------------------------------------------------------------
 
+const char *NeumannModel::TYPE_NAME = "Neumann";
 
-const char*  NeumannModel::TYPE_NAME       = "Neumann";
-
-const char*  NeumannModel::LOAD_INCR_PROP  = "loadIncr";
-const char*  NeumannModel::INIT_LOAD_PROP  = "initLoad";
-const char*  NeumannModel::MIN_LOAD_PROP   = "minLoadIncr";
-const char*  NeumannModel::MAX_LOAD_PROP   = "maxLoad";
-const char*  NeumannModel::REDUCTION_PROP  = "reduction";
-const char*  NeumannModel::NODES_PROP      = "nodeGroups";
-const char*  NeumannModel::DOF_PROP        = "dofs";
-const char*  NeumannModel::FACTORS_PROP    = "factors";
+const char *NeumannModel::LOAD_INCR_PROP = "loadIncr";
+const char *NeumannModel::INIT_LOAD_PROP = "initLoad";
+const char *NeumannModel::MIN_LOAD_PROP = "minLoadIncr";
+const char *NeumannModel::MAX_LOAD_PROP = "maxLoad";
+const char *NeumannModel::REDUCTION_PROP = "reduction";
+const char *NeumannModel::NODES_PROP = "nodeGroups";
+const char *NeumannModel::DOF_PROP = "dofs";
+const char *NeumannModel::FACTORS_PROP = "factors";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-
 NeumannModel::NeumannModel
 
-  ( const String&      name ) :
+    (const String &name) :
 
-    Super  ( name  )
+                           Super(name)
 
 {
-  loadScale0_  = 0.;
-  loadIncr0_   = 1.0;
-  initLoad_    = 0.0;
-  reduction_   = .55;
+  loadScale0_ = 0.;
+  loadIncr0_ = 1.0;
+  initLoad_ = 0.0;
+  reduction_ = .55;
   minLoadIncr_ = 0.0;
-  maxLoadVal_  = Float::MAX_VALUE;
-  varName_     = myName_;
-  extScale_    = false;
+  maxLoadVal_ = Float::MAX_VALUE;
+  varName_ = myName_;
+  extScale_ = false;
 
-  idx_t  i     = myName_.find('.');
-  while (i>0)
+  idx_t i = myName_.find('.');
+  while (i > 0)
   {
-    varName_   = varName_[SliceFrom(i + 1)];
-    i          = varName_.find('.');
+    varName_ = varName_[SliceFrom(i + 1)];
+    i = varName_.find('.');
   }
-  varName_     = "var." + varName_ + ".factor";
+  varName_ = "var." + varName_ + ".factor";
 }
 
-
-NeumannModel::~NeumannModel ()
-{}
-
+NeumannModel::~NeumannModel()
+{
+}
 
 //-----------------------------------------------------------------------
 //   takeAction
 //-----------------------------------------------------------------------
 
-
 bool NeumannModel::takeAction
 
-  ( const String&      action,
-    const Properties&  params,
-    const Properties&  globdat )
+    (const String &action,
+     const Properties &params,
+     const Properties &globdat)
 
 {
   // initialization
 
-  if ( action == Actions::INIT )
+  if (action == Actions::INIT)
   {
-    init_ ( globdat );
+    init_(globdat);
 
     return true;
   }
@@ -119,41 +114,41 @@ bool NeumannModel::takeAction
   // compute the external force vector
   // (only necessary with load control)
 
-  if ( action == Actions::GET_EXT_VECTOR  )
+  if (action == Actions::GET_EXT_VECTOR)
   {
     Vector f;
     double scale;
 
-    params.get ( f, ActionParams::EXT_VECTOR );
+    params.get(f, ActionParams::EXT_VECTOR);
 
-    if ( extScale_ )
+    if (extScale_)
     {
-      params.get ( scale, ActionParams::SCALE_FACTOR );
-      System::info( myName_ ) << " ...Applying load with factor " << scale << endl;
-      getExtVector_ ( f, globdat, scale );
+      params.get(scale, ActionParams::SCALE_FACTOR);
+      System::info(myName_) << " ...Applying load with factor " << scale << endl;
+      getExtVector_(f, globdat, scale);
     }
     else
-      getExtVector_ ( f, globdat );
+      getExtVector_(f, globdat);
 
     return true;
   }
 
   // proceed to next time step
 
-  if ( action == Actions::COMMIT && !extScale_)
+  if (action == Actions::COMMIT && !extScale_)
   {
-    commit_ ( params, globdat );
+    commit_(params, globdat);
 
     return true;
   }
 
   // advance to next time step
 
-  if ( action == Actions::ADVANCE && !extScale_ )
+  if (action == Actions::ADVANCE && !extScale_)
   {
-    globdat.set ( "var.accepted", true );
+    globdat.set("var.accepted", true);
 
-    advance_ ( globdat );
+    advance_(globdat);
 
     return true;
   }
@@ -167,168 +162,160 @@ bool NeumannModel::takeAction
 //   configure
 //-----------------------------------------------------------------------
 
-
 void NeumannModel::configure
 
-  ( const Properties&  props,
-    const Properties&  globdat )
+    (const Properties &props,
+     const Properties &globdat)
 
 {
-  Properties  myProps = props.findProps ( myName_ );
+  Properties myProps = props.findProps(myName_);
 
   double maxD = Float::MAX_VALUE;
 
-  myProps.find ( reduction_, REDUCTION_PROP,   0.0, 1.0 );
+  myProps.find(reduction_, REDUCTION_PROP, 0.0, 1.0);
 
-  if (!myProps.find ( loadIncr0_, LOAD_INCR_PROP ))
+  if (!myProps.find(loadIncr0_, LOAD_INCR_PROP))
     extScale_ = true;
-  myProps.find ( initLoad_,  INIT_LOAD_PROP );
+  myProps.find(initLoad_, INIT_LOAD_PROP);
 
-  loadIncr_  = loadIncr0_;
+  loadIncr_ = loadIncr0_;
   loadScale0_ = loadScale_ = initLoad_;
 
-  minLoadIncr_ = jem::numeric::abs ( loadIncr0_ );
+  minLoadIncr_ = jem::numeric::abs(loadIncr0_);
 
-  myProps.find ( minLoadIncr_, MIN_LOAD_PROP, 0.0, minLoadIncr_    );
-  myProps.find ( maxLoadVal_,  MAX_LOAD_PROP, 0.0, maxD            );
+  myProps.find(minLoadIncr_, MIN_LOAD_PROP, 0.0, minLoadIncr_);
+  myProps.find(maxLoadVal_, MAX_LOAD_PROP, 0.0, maxD);
 
-  myProps.get( nodeGroups_, NODES_PROP );
-  ngroups_ = nodeGroups_.size ( );
+  myProps.get(nodeGroups_, NODES_PROP);
+  ngroups_ = nodeGroups_.size();
 
-  myProps.get( dofTypes_, DOF_PROP );
+  myProps.get(dofTypes_, DOF_PROP);
 
-  if ( dofTypes_.size() != ngroups_ )
+  if (dofTypes_.size() != ngroups_)
   {
-    throw IllegalInputException ( JEM_FUNC,
-          "dofTypes must have the same length as nodeGroups" );
+    throw IllegalInputException(JEM_FUNC,
+                                "dofTypes must have the same length as nodeGroups");
   }
 
-  myProps.get ( factors_, FACTORS_PROP );
+  myProps.get(factors_, FACTORS_PROP);
 
-  if ( factors_.size() != ngroups_ )
+  if (factors_.size() != ngroups_)
   {
-    throw IllegalInputException ( JEM_FUNC,
-          "dofTypes must have the same length as nodeGroups" );
+    throw IllegalInputException(JEM_FUNC,
+                                "dofTypes must have the same length as nodeGroups");
   }
 }
-
 
 //-----------------------------------------------------------------------
 //   getConfig
 //-----------------------------------------------------------------------
 
-
 void NeumannModel::getConfig
 
-  ( const Properties&  conf,
-    const Properties&  globdat ) const
+    (const Properties &conf,
+     const Properties &globdat) const
 
 {
-  Properties  myConf = conf.makeProps ( myName_ );
+  Properties myConf = conf.makeProps(myName_);
 
-  myConf.set ( REDUCTION_PROP, reduction_    );
-  myConf.set ( LOAD_INCR_PROP, loadIncr0_    );
-  myConf.set ( INIT_LOAD_PROP, initLoad_     );
-  myConf.set ( MIN_LOAD_PROP,  minLoadIncr_  );
-  myConf.set ( MAX_LOAD_PROP,  maxLoadVal_   );
+  myConf.set(REDUCTION_PROP, reduction_);
+  myConf.set(LOAD_INCR_PROP, loadIncr0_);
+  myConf.set(INIT_LOAD_PROP, initLoad_);
+  myConf.set(MIN_LOAD_PROP, minLoadIncr_);
+  myConf.set(MAX_LOAD_PROP, maxLoadVal_);
 
-  myConf.set ( NODES_PROP,    nodeGroups_ );
-  myConf.set ( DOF_PROP,      dofTypes_   );
-  myConf.set ( FACTORS_PROP,  factors_    );
+  myConf.set(NODES_PROP, nodeGroups_);
+  myConf.set(DOF_PROP, dofTypes_);
+  myConf.set(FACTORS_PROP, factors_);
 }
-
-
 
 //-----------------------------------------------------------------------
 //   makeNew
 //-----------------------------------------------------------------------
 
-
 Ref<Model> NeumannModel::makeNew
 
-  ( const String&      name,
-    const Properties&  conf,
-    const Properties&  props,
-    const Properties&  globdat )
+    (const String &name,
+     const Properties &conf,
+     const Properties &props,
+     const Properties &globdat)
 
 {
-  return newInstance<Self> ( name );
+  return newInstance<Self>(name);
 }
 
 //-----------------------------------------------------------------------
 //   init_
 //-----------------------------------------------------------------------
 
-
-void NeumannModel::init_ ( const Properties& globdat )
+void NeumannModel::init_(const Properties &globdat)
 {
   // Get nodes, then dofs of nodes, and constraints of dofs
 
-  nodes_ = NodeSet::find    ( globdat );
-  dofs_  = XDofSpace::get   ( nodes_.getData(), globdat );
+  nodes_ = NodeSet::find(globdat);
+  dofs_ = XDofSpace::get(nodes_.getData(), globdat);
 }
 
 //-----------------------------------------------------------------------
 //   init_
 //-----------------------------------------------------------------------
 
+void NeumannModel::getExtVector_
 
-void NeumannModel::getExtVector_ 
-
-  ( const Vector&     fext,
-    const Properties& globdat ) const
+    (const Vector &fext,
+     const Properties &globdat) const
 {
-  idx_t                 nn;
-  IdxVector             itype ( 1 );
+  idx_t nn;
+  IdxVector itype(1);
   Assignable<NodeGroup> group;
-  IdxVector             inodes;
-  IdxVector             idofs;
-  String                context = getContext();
+  IdxVector inodes;
+  IdxVector idofs;
+  String context = getContext();
 
-  for ( idx_t ig = 0; ig < ngroups_; ++ig )
+  for (idx_t ig = 0; ig < ngroups_; ++ig)
   {
-    group  = NodeGroup::get ( nodeGroups_[ig], nodes_, globdat, context );
-    nn     = group.size();
+    group = NodeGroup::get(nodeGroups_[ig], nodes_, globdat, context);
+    nn = group.size();
 
-    inodes . resize ( nn );
-    idofs  . resize ( nn );
-    inodes = group.getIndices ();
+    inodes.resize(nn);
+    idofs.resize(nn);
+    inodes = group.getIndices();
 
-    itype[0] = dofs_->findType ( dofTypes_[ig] );
+    itype[0] = dofs_->findType(dofTypes_[ig]);
 
-    dofs_->findDofIndices ( idofs, inodes, itype );
+    dofs_->findDofIndices(idofs, inodes, itype);
 
-    select ( fext, idofs ) += loadScale_ * factors_[ig];
+    select(fext, idofs) += loadScale_ * factors_[ig];
   }
 }
 
-void NeumannModel::getExtVector_ 
+void NeumannModel::getExtVector_
 
-  ( const Vector&     fext,
-    const Properties& globdat,
-    const double      scale ) const
+    (const Vector &fext,
+     const Properties &globdat,
+     const double scale) const
 {
-  idx_t                 nn;
-  IdxVector             itype ( 1 );
+  idx_t nn;
+  IdxVector itype(1);
   Assignable<NodeGroup> group;
-  IdxVector             inodes;
-  IdxVector             idofs;
-  String                context = getContext();
+  IdxVector inodes;
+  IdxVector idofs;
+  String context = getContext();
 
-  for ( idx_t ig = 0; ig < ngroups_; ++ig )
+  for (idx_t ig = 0; ig < ngroups_; ++ig)
   {
-    group  = NodeGroup::get ( nodeGroups_[ig], nodes_, globdat, context );
-    nn     = group.size();
+    group = NodeGroup::get(nodeGroups_[ig], nodes_, globdat, context);
+    nn = group.size();
 
-    inodes . resize ( nn );
-    idofs  . resize ( nn );
-    inodes = group.getIndices ();
+    inodes.resize(nn);
+    idofs.resize(nn);
+    inodes = group.getIndices();
 
-    itype[0] = dofs_->findType ( dofTypes_[ig] );
+    itype[0] = dofs_->findType(dofTypes_[ig]);
 
-    dofs_->findDofIndices ( idofs, inodes, itype );
+    dofs_->findDofIndices(idofs, inodes, itype);
 
-    select ( fext, idofs ) += scale * factors_[ig];
+    select(fext, idofs) += scale * factors_[ig];
   }
 }
 
@@ -338,18 +325,18 @@ void NeumannModel::getExtVector_
 
 void NeumannModel::advance_
 
-  ( const Properties&  globdat )
+    (const Properties &globdat)
 
 {
   bool accepted;
 
-  globdat.get ( accepted, "var.accepted" );
+  globdat.get(accepted, "var.accepted");
 
-  if ( accepted )
+  if (accepted)
   {
     loadScale_ = loadScale0_ + loadIncr_;
     System::info() << " ...New load factor " << loadScale_ << endl;
-    globdat.set ( varName_, loadScale_ );
+    globdat.set(varName_, loadScale_);
   }
 }
 
@@ -357,16 +344,15 @@ void NeumannModel::advance_
 //   commit_
 //-----------------------------------------------------------------------
 
-
 void NeumannModel::commit_
 
-  ( const Properties&  params,
-    const Properties&  globdat )
+    (const Properties &params,
+     const Properties &globdat)
 
 {
   // store converged boundary quantities
 
-  loadScale0_  = loadScale_;
+  loadScale0_ = loadScale_;
 }
 
 //-----------------------------------------------------------------------
@@ -375,8 +361,8 @@ void NeumannModel::commit_
 
 void NeumannModel::reduceStep_
 
-  ( const Properties&  params,
-    const Properties&  globdat )
+    (const Properties &params,
+     const Properties &globdat)
 
 {
   // reduce the load increment and use the new increment
@@ -393,8 +379,8 @@ void NeumannModel::reduceStep_
 
 void NeumannModel::increaseStep_
 
-  ( const Properties&  params,
-    const Properties&  globdat )
+    (const Properties &params,
+     const Properties &globdat)
 
 {
 }
@@ -403,11 +389,10 @@ void NeumannModel::increaseStep_
 //   declare
 //-----------------------------------------------------------------------
 
-
-void NeumannModel::declare ()
+void NeumannModel::declare()
 {
   using jive::model::ModelFactory;
 
-  ModelFactory::declare ( NeumannModel::TYPE_NAME,
-                          & NeumannModel::makeNew );
+  ModelFactory::declare(NeumannModel::TYPE_NAME,
+                        &NeumannModel::makeNew);
 }

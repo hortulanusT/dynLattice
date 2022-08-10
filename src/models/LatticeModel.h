@@ -4,9 +4,9 @@
  * @brief LatticeModel for collection of rods
  * @version 0.1
  * @date 2022-04-26
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 
 #pragma once
@@ -25,49 +25,48 @@
 #include <jive/util/utilities.h>
 #include <jive/util/ObjectConverter.h>
 
-using jem::newInstance;
-using jem::Ref;
 using jem::Array;
 using jem::idx_t;
+using jem::newInstance;
+using jem::Ref;
 using jem::util::ArrayBuffer;
-using jive::String;
 using jive::Properties;
-using jive::model::Model;
-using jive::model::ModelFactory;
+using jive::String;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
+using jive::model::Model;
+using jive::model::ModelFactory;
 using jive::util::Assignable;
 
 class LatticeModel : public Model
 {
- public:
-  static const char*      TYPE_NAME;
-  static const char*      CHILD_PROPS;
-  static const char*      NAME_PREFIX;
+public:
+  static const char *TYPE_NAME;
+  static const char *CHILD_PROPS;
+  static const char *NAME_PREFIX;
 
-  explicit                LatticeModel
+  explicit LatticeModel
 
-    ( const String&         name,
-      const Properties&     conf,
-      const Properties&     props,
-      const Properties&     globdat );
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-  virtual bool            takeAction
+  virtual bool takeAction
 
-    ( const String&         action,
-      const Properties&     params,
-      const Properties&     globdat );
-      
+      (const String &action,
+       const Properties &params,
+       const Properties &globdat);
 
-  static Ref<Model>       makeNew
+  static Ref<Model> makeNew
 
-    ( const String&      name,
-      const Properties&  conf,
-      const Properties&  props,
-      const Properties&  globdat );
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-  static void             declare ();
+  static void declare();
 
- private:
-  Array<Ref<Model>>            children_;
+private:
+  Array<Ref<Model>> children_;
 };

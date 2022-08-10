@@ -14,16 +14,17 @@ try:
   ref_resp = np.loadtxt("tests/beam/test0_ref/resp.csv", delimiter=',')
 
   plt.figure(figsize=(16/3, 3))
-  plt.plot(-1*ref_disp[:,1]-0.2, ref_resp[:,1], label="displacment")
-  plt.plot(-1*sim_disp[:,1]-0.2, sim_resp[:,1], "--", label="arc-length")
+  plt.plot(-1*ref_disp[:, 1]-0.2, ref_resp[:, 1], label="displacment")
+  plt.plot(-1*sim_disp[:, 1]-0.2, sim_resp[:, 1], "--", label="arc-length")
   plt.legend()
-  plt.xlabel( "displacment [m]" )
-  plt.ylabel( "load [N]" )
+  plt.xlabel("displacment [m]")
+  plt.ylabel("load [N]")
 
-  idx_max = sim_resp[:,1].argmax()
-  idx_min = sim_resp[:,1].argmin()
+  idx_max = sim_resp[:, 1].argmax()
+  idx_min = sim_resp[:, 1].argmin()
 
-  test_passed = idx_min < len(sim_disp[:,1])/2 < idx_max and np.abs(np.interp( 0.2, -1*sim_disp[:,1], sim_resp[:,1])) < 1
+  test_passed = idx_min < len(sim_disp[:, 1])/2 < idx_max and np.abs(
+      np.interp(0.2, -1*sim_disp[:, 1], sim_resp[:, 1])) < 1
 except:
   pass
 

@@ -1,8 +1,8 @@
 /*
  *  Copyright (C) 2014 TU Delft. All rights reserved.
- *  
+ *
  *  Frans van der Meer, September 2014
- *  
+ *
  *  Module to generate NodeGroups and ElementGroups from input file
  *
  */
@@ -18,87 +18,83 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/Globdat.h>
 
-using jem::String;
-using jem::Ref;
-using jem::newInstance;
+using jem::ALL;
+using jem::Array;
 using jem::Error;
 using jem::idx_t;
-using jem::Array;
-using jem::Tuple;
-using jem::maxOf;
 using jem::max;
+using jem::maxOf;
 using jem::min;
-using jem::ALL;
+using jem::newInstance;
+using jem::Ref;
+using jem::String;
 using jem::System;
+using jem::Tuple;
 using jem::util::Properties;
 
+using jive::IdxVector;
+using jive::Matrix;
 using jive::StringVector;
+using jive::Vector;
 using jive::app::Module;
 using jive::fem::ElementGroup;
-using jive::fem::NodeSet;
 using jive::fem::ElementSet;
-using jive::util::Constraints;
-using jive::util::XDofSpace;
+using jive::fem::NodeSet;
 using jive::util::Assignable;
+using jive::util::Constraints;
 using jive::util::Globdat;
-using jive::Vector;
-using jive::Matrix;
-using jive::IdxVector;
+using jive::util::XDofSpace;
 
 //-----------------------------------------------------------------------
 //   class GroupInputModule
 //-----------------------------------------------------------------------
 
-
 class GroupInputModule : public Module
 {
- public:
+public:
+  typedef GroupInputModule Self;
+  typedef Module Super;
 
-  typedef GroupInputModule   Self;
-  typedef Module             Super;
+  static const char *TYPE_NAME;
+  static const char *NODE_GROUPS;
+  static const char *ELEM_GROUPS;
 
-  static const char*        TYPE_NAME;
-  static const char*        NODE_GROUPS;
-  static const char*        ELEM_GROUPS;
+  explicit GroupInputModule
 
-  explicit                  GroupInputModule
+      (const String &name = "groupInput");
 
-    ( const String&           name   = "groupInput" );
+  virtual Status init
 
-  virtual Status            init
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static Ref<Module> makeNew
 
-  static Ref<Module>        makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void         declare ();
+protected:
+  virtual ~GroupInputModule();
 
- protected:
-
-  virtual                  ~GroupInputModule  ();
-
- private:
-
-  idx_t                    numNodes_;
+private:
+  idx_t numNodes_;
 
   // functions
 
-  void                     configure_ 
+  void configure_
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-  void                     makeNodeGroups_
+  void makeNodeGroups_
 
-    ( const Properties&   globdat );
+      (const Properties &globdat);
 
   //=======================================================================
   //   class NGroup_
@@ -110,7 +106,7 @@ class GroupInputModule : public Module
    *  Use xtype/ytype/ztype = "min"/"max",
    *   or xval/yval/zval = value,
    *   to specify NodeGroup location
-   *  Specify 1, 2 or 3 coordinates for plane, line or point. 
+   *  Specify 1, 2 or 3 coordinates for plane, line or point.
    *  Use restrictToGroups to use only nodes from specific ElemGroups
    *      specify restrictToPartial to use only some nodes from those
    *      elements (e.g. top layer of interface elements)
@@ -118,66 +114,69 @@ class GroupInputModule : public Module
 
   class NGroup_ : public Object
   {
-   public:
+  public:
+    explicit NGroup_();
 
-    explicit                NGroup_  ();
+    ~NGroup_();
 
-    ~NGroup_ ();
+    void configure
 
-    void                    configure
+        (const Properties &conf,
+         const Properties &props,
+         const String &name);
 
-      ( const Properties&     conf,
-        const Properties&     props,
-        const String&         name );
+    void makeGroup
 
-    void                    makeGroup
+        (const Properties &globdat);
 
-      ( const Properties&     globdat );
+    static const char *X_NAMES[3];
+    static const double PI;
 
-    static const char*      X_NAMES[3];
-    static const double     PI;
+    StringVector knownTypes;
 
-    StringVector            knownTypes;
+    enum Check
+    {
+      NONE,
+      VALUE,
+      BOUNDS
+    };
 
-    enum    Check   { NONE, VALUE, BOUNDS };   
+  private:
+    void findCandidates_
 
-   private:
+        (const ElementSet &elems,
+         const Properties &globdat);
 
-    void                    findCandidates_
+    void findNodes_
 
-      ( const ElementSet&     elems,
-        const Properties&     globdat );
+        (const NodeSet &nodes);
 
-    void                    findNodes_
+    void store_
 
-      ( const NodeSet&        nodes );
+        (const NodeSet &nodes,
+         const Properties &globdat);
 
-    void                    store_
+    idx_t rank_;
 
-      ( const NodeSet&        nodes,
-        const Properties&     globdat );
+    bool all_;
+    double eps_;
+    double angle_;
+    double radius_;
 
-    idx_t            rank_;
-
-    bool             all_;
-    double           eps_;
-    double           angle_;
-    double           radius_;
-
-    // every entry of doX_ is a switch that determines how a 
+    // every entry of doX_ is a switch that determines how a
     // node is checked in that dimension (x,y,z)
     // if ( all(doX_==0) ) a line is specified
 
-    Array<Check>     doX_;  
+    Array<Check> doX_;
 
-    Tuple<Vector,3>  xvals_;
-    Tuple<String,3>  xtype_;
-    Matrix           xbounds_;
+    Tuple<Vector, 3> xvals_;
+    Tuple<String, 3> xtype_;
+    Matrix xbounds_;
 
-    IdxVector        inodes_;
-    String           myName_;
-    StringVector     restrictTo_;
-    IdxVector        restrictPartial_;
+    IdxVector inodes_;
+    String myName_;
+    StringVector restrictTo_;
+    IdxVector restrictPartial_;
   };
 
   //=======================================================================
@@ -190,64 +189,66 @@ class GroupInputModule : public Module
    *  Use xtype/ytype/ztype = "min"/"max",
    *   or xval/yval/zval = value,
    *   to specify ElementGroup location
-   *  Specify 1, 2 or 3 coordinates for plane, line or point. 
+   *  Specify 1, 2 or 3 coordinates for plane, line or point.
    */
 
   class EGroup_ : public Object
   {
-   public:
+  public:
+    explicit EGroup_();
 
-    explicit                EGroup_  ();
+    ~EGroup_();
 
-    ~EGroup_ ();
+    void configure
 
-    void                    configure
+        (const Properties &conf,
+         const Properties &props,
+         const String &name);
 
-      ( const Properties&     conf,
-        const Properties&     props,
-        const String&         name );
+    void makeGroup
 
-    void                    makeGroup
+        (const Properties &globdat);
 
-      ( const Properties&     globdat );
+    static const char *X_NAMES[3];
+    static const double PI;
 
-    static const char*      X_NAMES[3];
-    static const double     PI;
+    StringVector knownTypes;
 
-    StringVector            knownTypes;
+    enum Check
+    {
+      NONE,
+      VALUE,
+      BOUNDS
+    };
 
-    enum    Check   { NONE, VALUE, BOUNDS };   
+  private:
+    void findElems_
 
-   private:
+        (const ElementSet &nodes,
+         const Properties &globdat);
 
-    void                    findElems_
+    void store_
 
-      ( const ElementSet&     nodes,
-        const Properties&     globdat );
+        (const ElementSet &nodes,
+         const Properties &globdat);
 
-    void                    store_
+    idx_t rank_;
 
-      ( const ElementSet&     nodes,
-        const Properties&     globdat );
+    bool all_;
+    double eps_;
 
-    idx_t            rank_;
-
-    bool             all_;
-    double           eps_;
-
-    // every entry of doX_ is a switch that determines how an 
+    // every entry of doX_ is a switch that determines how an
     // element is checked in that dimension (x,y,z)
 
-    Array<Check>     doX_;  
+    Array<Check> doX_;
 
-    Tuple<Vector,3>  xvals_;
-    Tuple<String,3>  xtype_;
-    Tuple<bool,3>    completely_;
-    Matrix           xbounds_;
+    Tuple<Vector, 3> xvals_;
+    Tuple<String, 3> xtype_;
+    Tuple<bool, 3> completely_;
+    Matrix xbounds_;
 
-    IdxVector        ielems_;
-    String           myName_;
-    String           parent_;
+    IdxVector ielems_;
+    String myName_;
+    String parent_;
   };
-
 };

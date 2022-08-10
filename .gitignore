@@ -5,7 +5,6 @@
 OBJ*
 nonlinRod*
 __pycache__/
- *.pyc
 
 # reference data
 ref_data

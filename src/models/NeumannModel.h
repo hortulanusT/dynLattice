@@ -1,7 +1,7 @@
 /*
- * 
+ *
  *  Copyright (C) 2010 TU Delft. All rights reserved.
- *  
+ *
  *  This class implements a model for neumann boundary conditions.
  *  As opposed to the PointLoadModel, this can apply loads on changing
  *  NodeGroups
@@ -10,7 +10,6 @@
  *  Date:    April 2011
  *
  */
-
 
 #pragma once
 
@@ -22,150 +21,142 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/XDofSpace.h>
 
-using jem::String;
-using jem::idx_t;
-using jem::Ref;
-using jem::newInstance;
-using jem::System;
 using jem::Float;
-using jem::SliceFrom;
+using jem::idx_t;
 using jem::IllegalInputException;
-using jem::util::Properties;
+using jem::newInstance;
+using jem::Ref;
+using jem::SliceFrom;
+using jem::String;
+using jem::System;
 using jem::io::Writer;
-using jive::Vector;
+using jem::util::Properties;
 using jive::IntVector;
-using jive::model::Model;
 using jive::StringVector;
+using jive::Vector;
 using jive::fem::NodeGroup;
 using jive::fem::NodeSet;
 using jive::model::Model;
 using jive::util::Assignable;
-using jive::util::XDofSpace;
-using jive::util::DofSpace;
 using jive::util::Constraints;
+using jive::util::DofSpace;
+using jive::util::XDofSpace;
 
 //-----------------------------------------------------------------------
 //   class NeumannModel
 //-----------------------------------------------------------------------
 
-
 class NeumannModel : public Model
 {
- public:
+public:
+  typedef NeumannModel Self;
+  typedef Model Super;
 
-  typedef NeumannModel    Self;
-  typedef Model             Super;
+  static const char *TYPE_NAME;
 
-  static const char*        TYPE_NAME;
+  static const char *LOAD_INCR_PROP;
+  static const char *INIT_LOAD_PROP;
+  static const char *MIN_LOAD_PROP;
+  static const char *MAX_LOAD_PROP;
+  static const char *REDUCTION_PROP;
+  static const char *NODES_PROP;
+  static const char *DOF_PROP;
+  static const char *FACTORS_PROP;
 
-  static const char*        LOAD_INCR_PROP;
-  static const char*        INIT_LOAD_PROP;
-  static const char*        MIN_LOAD_PROP;
-  static const char*        MAX_LOAD_PROP;
-  static const char*        REDUCTION_PROP;
-  static const char*        NODES_PROP;
-  static const char*        DOF_PROP;
-  static const char*        FACTORS_PROP;
+  explicit NeumannModel
 
-  explicit                  NeumannModel
+      (const String &name);
 
-    ( const String&           name );
+  virtual void configure
 
-  virtual void              configure
+      (const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       props,
-      const Properties&       globdat );
+  virtual void getConfig
 
-  virtual void              getConfig
+      (const Properties &conf,
+       const Properties &globdat) const;
 
-    ( const Properties&       conf,
-      const Properties&       globdat )      const;
+  virtual bool takeAction
 
-  virtual bool              takeAction
+      (const String &action,
+       const Properties &params,
+       const Properties &globdat);
 
-    ( const String&           action,
-      const Properties&       params,
-      const Properties&       globdat );
+  void setLoadIncr
 
-  void                      setLoadIncr
+      (double incr);
 
-    ( double                  incr );
+  inline double getLoadIncr() const;
 
-  inline double             getLoadIncr     () const;
+  static Ref<Model> makeNew
 
-  static Ref<Model>         makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void               declare();
+protected:
+  virtual ~NeumannModel();
 
+private:
+  void init_
 
- protected:
+      (const Properties &globdat);
 
-  virtual                  ~NeumannModel  ();
+  void getExtVector_
 
+      (const Vector &fext,
+       const Properties &globdat) const;
 
- private:
+  void getExtVector_
 
-  void                      init_
+      (const Vector &fext,
+       const Properties &globdat,
+       const double scale) const;
 
-    ( const Properties&       globdat );
+  void advance_
 
-  void                      getExtVector_
+      (const Properties &globdat);
 
-    ( const Vector&           fext,
-      const Properties&       globdat ) const;
+  void commit_
 
-  void                      getExtVector_
+      (const Properties &params,
+       const Properties &globdat);
 
-    ( const Vector&           fext,
-      const Properties&       globdat,
-      const double            scale ) const;
+  void reduceStep_
 
-  void                      advance_
+      (const Properties &params,
+       const Properties &globdat);
 
-    ( const Properties&       globdat );
+  void increaseStep_
 
-  void                      commit_
+      (const Properties &params,
+       const Properties &globdat);
 
-    ( const Properties&       params,
-      const Properties&       globdat );
+private:
+  Ref<DofSpace> dofs_;
+  Assignable<NodeSet> nodes_;
 
-  void                      reduceStep_
+  idx_t ngroups_;
+  IntVector idofs_;
 
-    ( const Properties&       params,
-      const Properties&       globdat );
-
-  void                      increaseStep_
-
-    ( const Properties&       params,
-      const Properties&       globdat );
-
- private:
-
-  Ref<DofSpace>             dofs_;
-  Assignable<NodeSet>       nodes_;
-
-  idx_t                     ngroups_;
-  IntVector                 idofs_;
-
-  double                    loadScale0_;
-  double                    loadScale_;
-  double                    loadIncr_;
+  double loadScale0_;
+  double loadScale_;
+  double loadIncr_;
 
   /*
    * the following members are input for specifying boundary conditions
    *
    */
 
-  StringVector              nodeGroups_;
-  StringVector              dofTypes_;
-  Vector                    factors_;
+  StringVector nodeGroups_;
+  StringVector dofTypes_;
+  Vector factors_;
 
-  /* the following members are constant input variables 
+  /* the following members are constant input variables
    *
    * reduction:   factor for reduction of increments
    * loadIncr:    initial load increment
@@ -174,13 +165,12 @@ class NeumannModel : public Model
    *
    */
 
-  double                    reduction_;
-  double                    loadIncr0_; 
-  double                    minLoadIncr_; 
-  double                    maxLoadVal_;
-  double                    initLoad_; 
+  double reduction_;
+  double loadIncr0_;
+  double minLoadIncr_;
+  double maxLoadVal_;
+  double initLoad_;
 
-  
-  String                    varName_;
-  bool                      extScale_;
+  String varName_;
+  bool extScale_;
 };

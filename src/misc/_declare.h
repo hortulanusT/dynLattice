@@ -4,6 +4,6 @@
 //   declareTimeSteppers
 //-----------------------------------------------------------------------
 
-void declareTimeSteppers ()
+void declareTimeSteppers()
 {
 }
