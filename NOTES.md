@@ -4,6 +4,7 @@
 - Do finite strain comparision
 - Do dynamic comparison
 - Fix 3D dynamics
+- Refactor Makefiles into Python scripts
 ## Code
 1. Models
     - Rod Model
