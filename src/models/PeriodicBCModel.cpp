@@ -246,7 +246,7 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       if (std::isnan(grad_(iDof, iDir)))
         continue; // if the dispGrad for this is not configured, skip it
 
-      if (scale == 0.)
+      if (scale != 0.)
         Globdat::getVariables("all.extent", globdat)
             .get(extent, dofNames_[iDir]);
       // TEST_CONTEXT( extent )

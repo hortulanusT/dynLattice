@@ -15,20 +15,20 @@
 #include <jem/util/PropertyException.h>
 
 #include <jive/Array.h>
+#include <jive/fem/NodeGroup.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/implict/ArclenActions.h>
+#include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
-#include <jive/model/Actions.h>
-#include <jive/util/DofSpace.h>
-#include <jive/util/Constraints.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/Constraints.h>
+#include <jive/util/DofSpace.h>
 #include <jive/util/Globdat.h>
-#include <jive/fem/NodeSet.h>
-#include <jive/fem/NodeGroup.h>
-#include <jive/implict/ArclenActions.h>
 
-#include "utils/testing.h"
-#include "utils/helpers.h"
 #include "modules/PBCGroupInputModule.h"
+#include "utils/helpers.h"
+#include "utils/testing.h"
 
 using jem::util::Properties;
 using jive::BoolMatrix;
@@ -44,8 +44,7 @@ using jive::util::Globdat;
 
 using namespace jive_helpers;
 
-class periodicBCModel : public Model
-{
+class periodicBCModel : public Model {
 public:
   static const char *TYPE_NAME;
   static const char *MODE_PROP;
@@ -53,31 +52,22 @@ public:
   static const char *DOF_NAMES_PROP;
   static const char *ROT_NAMES_PROP;
 
-  enum Mode
-  {
-    LOAD,
-    DISP
-  };
+  enum Mode { LOAD, DISP };
 
   explicit periodicBCModel
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   virtual bool takeAction
 
-      (const String &action,
-       const Properties &params,
+      (const String &action, const Properties &params,
        const Properties &globdat);
 
   static Ref<Model> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -88,13 +78,11 @@ private:
 
   void setConstraints_
 
-      (const Properties &globdat,
-       const double scale);
+      (const Properties &globdat, const double scale = 0.);
 
   void getExtVec_
 
-      (const Vector &f,
-       const Properties &globdat,
+      (const Vector &f, const Properties &globdat,
        const double scale = 1.);
 
 private:
