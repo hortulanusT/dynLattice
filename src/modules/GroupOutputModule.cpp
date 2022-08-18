@@ -2,8 +2,7 @@
 
 const char *GroupOutputModule::TYPE_NAME = "GroupOutput";
 
-GroupOutputModule::GroupOutputModule(const String &name) : Module(name)
-{
+GroupOutputModule::GroupOutputModule(const String &name) : Module(name) {
   // per default extract composite values for all elements
   elemGroups_.resize(1);
   elemGroups_[0] = "all";
@@ -11,8 +10,7 @@ GroupOutputModule::GroupOutputModule(const String &name) : Module(name)
 
 Module::Status GroupOutputModule::init(const Properties &conf,
                                        const Properties &props,
-                                       const Properties &globdat)
-{
+                                       const Properties &globdat) {
   // retrieve and create subpropertysets
   Properties myProps = props.getProps(myName_);
   Properties myConf = conf.makeProps(myName_);
@@ -44,13 +42,14 @@ Module::Status GroupOutputModule::init(const Properties &conf,
   for (idx_t idof = 0; idof < nodeDofNames_.size(); idof++)
     nodeDofs_[idof] = dofs->getTypeIndex(nodeDofNames_[idof]);
 
-  return elemDofs_.size() + nodeDofs_.size() > 0 ? run(globdat) : Status::DONE;
+  return elemDofs_.size() + nodeDofs_.size() > 0 ? run(globdat)
+                                                 : Status::DONE;
 }
 
-Module::Status GroupOutputModule::run(const Properties &globdat)
-{
+Module::Status GroupOutputModule::run(const Properties &globdat) {
   Properties myVars = Globdat::getVariables(globdat);
-  Properties currentVars, loadVars, respVars, dispVars, veloVars, acceVars, extentVars;
+  Properties currentVars, loadVars, respVars, dispVars, veloVars,
+      acceVars, extentVars;
   NodeSet nodes = NodeSet::get(globdat, getContext());
   ElementSet elems = ElementSet::get(globdat, getContext());
 
@@ -66,8 +65,10 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
   Matrix coords(nodes.size(), nodes.rank());
 
   StateVector::get(allDisp, dofs, globdat);
-  bool doVelo = StateVector::find(allVelo, jive::model::STATE1, dofs, globdat);
-  bool doAcce = StateVector::find(allAcce, jive::model::STATE2, dofs, globdat);
+  bool doVelo =
+      StateVector::find(allVelo, jive::model::STATE1, dofs, globdat);
+  bool doAcce =
+      StateVector::find(allAcce, jive::model::STATE2, dofs, globdat);
 
   Ref<Model> model = Model::get(globdat, getContext());
   Properties params("actionParams");
@@ -84,8 +85,8 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
   Vector load, disp, velo, acce, resp;
 
   // iterate through the node groups
-  for (idx_t iNodeGroup = 0; iNodeGroup < nodeGroups_.size(); iNodeGroup++)
-  {
+  for (idx_t iNodeGroup = 0; iNodeGroup < nodeGroups_.size();
+       iNodeGroup++) {
     // get the nodes associated with this node group
     currentVars = myVars.makeProps(nodeGroups_[iNodeGroup]);
     loadVars = currentVars.makeProps("load");
@@ -95,7 +96,8 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
       veloVars = currentVars.makeProps("velo");
     if (doAcce)
       acceVars = currentVars.makeProps("acce");
-    NodeGroup nodeGroup = NodeGroup::get(nodeGroups_[iNodeGroup], nodes, globdat, getContext());
+    NodeGroup nodeGroup = NodeGroup::get(nodeGroups_[iNodeGroup], nodes,
+                                         globdat, getContext());
     nodeIndices.resize(nodeGroup.size());
     dofIndices.resize(nodeGroup.size());
     load.resize(nodeGroup.size());
@@ -106,8 +108,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     nodeIndices = nodeGroup.getIndices();
 
     // iterate through all the dofs to report
-    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
-    {
+    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++) {
       // get the indices of the dofs at those nodes
       dofs->getDofIndices(dofIndices, nodeIndices, nodeDofs_[iDof]);
 
@@ -133,12 +134,14 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
   }
 
   // iterate through the element groups
-  for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size(); iElemGroup++)
-  {
+  for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size();
+       iElemGroup++) {
     // get the nodes associated with this element group
     currentVars = myVars.makeProps(elemGroups_[iElemGroup]);
-    extentVars = currentVars.makeProps("extent"); // TODO move to PBC module and use the group positions!
-    ElementGroup elemGroup = ElementGroup::get(elemGroups_[iElemGroup], elems, globdat, getContext());
+    extentVars = currentVars.makeProps(
+        "extent"); // TODO move to PBC module and use the group positions!
+    ElementGroup elemGroup = ElementGroup::get(
+        elemGroups_[iElemGroup], elems, globdat, getContext());
     nodeIndices.resize(elemGroup.getNodeIndices().size());
     dofIndices.resize(nodeIndices.size());
     load.resize(nodeIndices.size());
@@ -148,8 +151,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     nodes.getCoords(coords.transpose());
 
     // iterate through the dimensions
-    for (idx_t iDof = 0; iDof < elemDofs_.size(); iDof++)
-    {
+    for (idx_t iDof = 0; iDof < elemDofs_.size(); iDof++) {
       // get the indices of the dofs at those nodes
       dofs->getDofIndices(dofIndices, nodeIndices, elemDofs_[iDof]);
 
@@ -158,7 +160,8 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
       load = allLoad[dofIndices];
 
       // report back the extent
-      extentVars.set(elemDofNames_[iDof], max(coords[iDof]) - min(coords[iDof]));
+      extentVars.set(elemDofNames_[iDof],
+                     max(coords[iDof]) - min(coords[iDof]));
     }
   }
   return Status::OK;
@@ -167,13 +170,11 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
 Ref<Module> GroupOutputModule::makeNew(const String &name,
                                        const Properties &conf,
                                        const Properties &props,
-                                       const Properties &globdat)
-{
+                                       const Properties &globdat) {
   return newInstance<GroupOutputModule>(name);
 }
 
-void GroupOutputModule::declare()
-{
+void GroupOutputModule::declare() {
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare(TYPE_NAME, &makeNew);

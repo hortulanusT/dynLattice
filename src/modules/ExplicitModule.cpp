@@ -15,9 +15,10 @@ const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 
 ExplicitModule::ExplicitModule
 
-    (const String &name) :
+    (const String &name)
+    :
 
-                           Super(name)
+      Super(name)
 
 {
   dtime_ = 1.0;
@@ -27,9 +28,7 @@ ExplicitModule::ExplicitModule
   rdofs_.resize(0, 0);
 }
 
-ExplicitModule::~ExplicitModule()
-{
-}
+ExplicitModule::~ExplicitModule() {}
 
 //-----------------------------------------------------------------------
 //   init
@@ -37,8 +36,7 @@ ExplicitModule::~ExplicitModule()
 
 Module::Status ExplicitModule::init
 
-    (const Properties &conf,
-     const Properties &props,
+    (const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
@@ -73,8 +71,7 @@ Module::Status ExplicitModule::init
 
   // get the SO3 dof names
 
-  if (myProps.find(SO3_dof_names, SO3_DOFS))
-  {
+  if (myProps.find(SO3_dof_names, SO3_DOFS)) {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
     SO3_dofs_.resize(SO3_dof_names.size());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
@@ -85,7 +82,8 @@ Module::Status ExplicitModule::init
   // Initialize update condition
 
   if (myProps.contains(PropNames::UPDATE_COND))
-    FuncUtils::configCond(updCond_, PropNames::UPDATE_COND, myProps, globdat);
+    FuncUtils::configCond(updCond_, PropNames::UPDATE_COND, myProps,
+                          globdat);
   else
     updCond_ = FuncUtils::newCond(false);
   FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
@@ -108,16 +106,14 @@ Module::Status ExplicitModule::init
     mode_ = CONSISTENT;
 
   // prepare solver for modes
-  if (mode_ == LUMPED)
-  {
+  if (mode_ == LUMPED) {
     massInv_.resize(dofs_->dofCount());
     Globdat::storeFor("LumpedMass", diagInertia, this, globdat);
 
     myConf.set("mode", "lumped");
   }
 
-  if (mode_ == CONSISTENT)
-  {
+  if (mode_ == CONSISTENT) {
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("solver", myConf, myProps, sparams, globdat);
@@ -129,10 +125,10 @@ Module::Status ExplicitModule::init
 
   valid_ = false;
 
-  // Initialize the global simulation time and the time step number as well as the constraints
+  // Initialize the global simulation time and the time step number as
+  // well as the constraints
   Globdat::initTime(globdat);
   Globdat::initStep(globdat);
-  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
 
   return OK;
 }
@@ -207,8 +203,7 @@ Module::Status ExplicitModule::run
   if (mode_ == CONSISTENT)
     solver_->solve(a_new, fres);
 
-  if (mode_ == LUMPED)
-  {
+  if (mode_ == LUMPED) {
     a_new = massInv_ * fres;
     params.get(cons, ActionParams::CONSTRAINTS);
     jive::util::setSlaveDofs(a_new, *cons);
@@ -234,8 +229,7 @@ Module::Status ExplicitModule::run
   u_new = u_old + du;
 
   // do different update for rotational dofs
-  for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
-  {
+  for (idx_t inode = 0; inode < rdofs_.size(1); inode++) {
     r_node = u_old[rdofs_[inode]];
     d_r = du[rdofs_[inode]];
 
@@ -269,8 +263,7 @@ Module::Status ExplicitModule::run
 //   shutdown
 //-----------------------------------------------------------------------
 
-void ExplicitModule::shutdown(const Properties &globdat)
-{
+void ExplicitModule::shutdown(const Properties &globdat) {
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -283,13 +276,13 @@ void ExplicitModule::shutdown(const Properties &globdat)
 
 void ExplicitModule::configure
 
-    (const Properties &props,
-     const Properties &globdat)
+    (const Properties &props, const Properties &globdat)
 
 {
   Properties myProps = props.findProps(myName_);
 
-  myProps.find(dtime_, jive::implict::PropNames::DELTA_TIME, 1.0e-20, 1.0e20);
+  myProps.find(dtime_, jive::implict::PropNames::DELTA_TIME, 1.0e-20,
+               1.0e20);
 }
 
 //-----------------------------------------------------------------------
@@ -298,8 +291,7 @@ void ExplicitModule::configure
 
 void ExplicitModule::getConfig
 
-    (const Properties &conf,
-     const Properties &globdat) const
+    (const Properties &conf, const Properties &globdat) const
 
 {
   Properties myConf = conf.makeProps(myName_);
@@ -311,30 +303,30 @@ void ExplicitModule::getConfig
 //   restart_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::restart_(const Properties &globdat)
-{
+void ExplicitModule::restart_(const Properties &globdat) {
   Properties params;
   IdxVector iitems(dofs_->getItems()->size());
 
-  jem::System::info(myName_) << " ...Updating mass information for explicit solver\n";
+  jem::System::info(myName_)
+      << " ...Updating mass information for explicit solver\n";
   model_->takeAction(Actions::UPD_MATRIX2, params, globdat);
 
-  if (SO3_dofs_.size())
-  {
-    jem::System::info(myName_) << " ...Updating SO(3) dof inormation for explicit solver\n";
+  if (SO3_dofs_.size()) {
+    jem::System::info(myName_)
+        << " ...Updating SO(3) dof inormation for explicit solver\n";
     rdofs_.resize(SO3_dofs_.size(), dofs_->getItems()->size());
     for (idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, SO3_dofs_[idof]);
   }
 
-  if (mode_ == LUMPED)
-  {
+  if (mode_ == LUMPED) {
     Ref<DiagMatrixObject> inertia;
     Globdat::findFor(inertia, "LumpedMass", this, globdat);
 
     massInv_ = inertia->getValues();
     if (jem::testany(massInv_ <= jem::Limits<double>::TINY_VALUE))
-      throw jem::ArithmeticException("Zero (or negative) masses cannot be inversed!");
+      throw jem::ArithmeticException(
+          "Zero (or negative) masses cannot be inversed!");
     massInv_ = 1 / massInv_;
   }
 
@@ -345,10 +337,7 @@ void ExplicitModule::restart_(const Properties &globdat)
 //   invalidate_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::invalidate_()
-{
-  valid_ = false;
-}
+void ExplicitModule::invalidate_() { valid_ = false; }
 
 //-----------------------------------------------------------------------
 //   makeNew
@@ -356,9 +345,7 @@ void ExplicitModule::invalidate_()
 
 Ref<Module> ExplicitModule::makeNew
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
+    (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
@@ -369,8 +356,7 @@ Ref<Module> ExplicitModule::makeNew
 //   declare
 //-----------------------------------------------------------------------
 
-void ExplicitModule::declare()
-{
+void ExplicitModule::declare() {
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare(TYPE_NAME, &ExplicitModule::makeNew);
