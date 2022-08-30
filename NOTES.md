@@ -20,6 +20,12 @@
     - add .cpp for all headers...
  
 # :heavy_check_mark: Information
+## cluster syncing
+```
+rsync -vax studies/programs/cluster/ cluster:$HOME/eqv-design-scripts
+
+rsync -vax cluster:$HOME/cosseratrod/studies/output/eqv-design/*.csv studies/output/eqv-design
+```
 ## debugging
 - call (dbg) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`

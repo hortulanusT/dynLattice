@@ -21,8 +21,8 @@ scripts/scribbling.py
 *.pvsm
 *.tar
 
-studies/**/output/*
-studies/**/results/*
+studies/output/*
+studies/results/*
 
 tests/element/runs/
 tests/element/*.txt
