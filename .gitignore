@@ -23,7 +23,6 @@ scripts/scribbling.py
 
 studies/output/*
 studies/results/*
-studies/programs/cluster/*
 
 tests/element/runs/
 tests/element/*.txt
