@@ -1,14 +1,13 @@
 /*
- * 
+ *
  *  Copyright (C) 2010 TU Delft. All rights reserved.
- *  
+ *
  *  This class implements a model for dirichlet boundary conditions.
  *
  *  Author:  F.P. van der Meer, F.P.vanderMeer@tudelft.nl
  *  Date:    May 2010
  *
  */
-
 
 #pragma once
 
@@ -21,155 +20,152 @@
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
 
-using jem::String;
-using jem::Ref;
-using jem::newInstance;
-using jem::idx_t;
 using jem::Float;
-using jem::NIL;
-using jem::SliceFrom;
+using jem::idx_t;
 using jem::IllegalInputException;
+using jem::newInstance;
+using jem::NIL;
+using jem::Ref;
+using jem::SliceFrom;
+using jem::String;
 using jem::System;
-using jem::util::Properties;
 using jem::io::Writer;
-using jive::Vector;
+using jem::util::Properties;
 using jive::IdxVector;
-using jive::model::Model;
 using jive::StringVector;
+using jive::Vector;
 using jive::fem::NodeSet;
 using jive::model::Model;
 using jive::util::Assignable;
-using jive::util::DofSpace;
 using jive::util::Constraints;
+using jive::util::DofSpace;
 
 //-----------------------------------------------------------------------
 //   class DirichletModel
 //-----------------------------------------------------------------------
 
-
 class DirichletModel : public Model
 {
- public:
+public:
+  typedef DirichletModel Self;
+  typedef Model Super;
 
-  typedef DirichletModel    Self;
-  typedef Model             Super;
+  enum Method
+  {
+    RATE,
+    INCREMENT,
+    LOADSCALE
+  };
 
-  enum    Method   { RATE, INCREMENT, LOADSCALE };   
+  static const char *TYPE_NAME;
 
-  static const char*        TYPE_NAME;
+  static const char *MAX_DISP_PROP;
+  static const char *DISP_INCR_PROP;
+  static const char *DISP_RATE_PROP;
+  static const char *INIT_DISP_PROP;
+  static const char *NODES_PROP;
+  static const char *DOF_PROP;
+  static const char *FACTORS_PROP;
+  static const char *LOADED_PROP;
 
-  static const char*        MAX_DISP_PROP;
-  static const char*        DISP_INCR_PROP;
-  static const char*        DISP_RATE_PROP;
-  static const char*        INIT_DISP_PROP;
-  static const char*        NODES_PROP;
-  static const char*        DOF_PROP;
-  static const char*        FACTORS_PROP;
-  static const char*        LOADED_PROP;
+  explicit DirichletModel
 
-  explicit                  DirichletModel
+      (const String &name = "arclen",
+       const Ref<Model> &child = NIL);
 
-    ( const String&           name  = "arclen",
-      const Ref<Model>&       child = NIL );
+  virtual void configure
 
-  virtual void              configure
+      (const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       props,
-      const Properties&       globdat );
+  virtual void getConfig
 
-  virtual void              getConfig
+      (const Properties &conf,
+       const Properties &globdat) const;
 
-    ( const Properties&       conf,
-      const Properties&       globdat )      const;
+  virtual bool takeAction
 
-  virtual bool              takeAction
+      (const String &action,
+       const Properties &params,
+       const Properties &globdat);
 
-    ( const String&           action,
-      const Properties&       params,
-      const Properties&       globdat );
+  static Ref<Model> makeNew
 
-  static Ref<Model>         makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
-    
-  static void               declare ();
+  static void declare();
 
+protected:
+  virtual ~DirichletModel();
 
- protected:
+protected:
+  void init_
 
-  virtual                  ~DirichletModel  ();
+      (const Properties &globdat);
 
+  void advance_
 
- protected:
+      (const Properties &globdat);
 
-  void                      init_
+  void applyConstraints_
 
-    ( const Properties&       globdat );
+      (const Properties &params,
+       const Properties &globdat);
 
-  void                      advance_
+  void checkCommit_
 
-    ( const Properties&       globdat );
+      (const Properties &params,
+       const Properties &globdat);
 
-  void                      applyConstraints_
+  void commit_
 
-    ( const Properties&       params,
-      const Properties&       globdat );
+      (const Properties &params,
+       const Properties &globdat);
 
-  void                      checkCommit_
+  void setDT_
 
-    ( const Properties&       params,
-      const Properties&       globdat );
+      (const Properties &params);
 
-  void                      commit_
+private:
+  Ref<DofSpace> dofs_;
+  Ref<Constraints> cons_;
+  Assignable<NodeSet> nodes_;
 
-    ( const Properties&       params,
-      const Properties&       globdat );
+  idx_t ngroups_;
+  IdxVector idofs_;
 
-  void                      setDT_
-
-    ( const Properties&       params );
-
- private:
-
-  Ref<DofSpace>             dofs_;
-  Ref<Constraints>          cons_;
-  Assignable<NodeSet>       nodes_;
-
-  idx_t                     ngroups_;
-  IdxVector                 idofs_;
-
-  double                    dispScale0_;
-  double                    dispScale_;
+  double dispScale0_;
+  double dispScale_;
 
   // input either increment size or rate or externally
 
-  double                    dispIncr_;
-  double                    dispRate_;
-  Method                    method_;
+  double dispIncr_;
+  double dispRate_;
+  Method method_;
 
   /*
    * the following members are input for specifying boundary conditions
    *
    */
 
-  StringVector              nodeGroups_;
-  StringVector              dofTypes_;
-  Vector                    factors_;
+  StringVector nodeGroups_;
+  StringVector dofTypes_;
+  Vector factors_;
 
-  /* the following members are constant input variables 
+  /* the following members are constant input variables
    *
    * dispIncr:    initial displacement increment
    * maxDispVal:  maximum (absolute) displacement value (in disp.control)
    *
    */
 
-  double                    dispIncr0_; 
-  double                    maxDispVal_;
-  double                    initDisp_; 
+  double dispIncr0_;
+  double maxDispVal_;
+  double initDisp_;
 
-  Properties                lbcProps_;
-  String                    varName_;
+  Properties lbcProps_;
+  String varName_;
 };

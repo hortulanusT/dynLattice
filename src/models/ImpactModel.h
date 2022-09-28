@@ -1,12 +1,12 @@
 /**
- * @file ImpactModel.h  
+ * @file ImpactModel.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
  * @brief Model that updates accelleration based on response forces and impactor weights
  * @version 0.1
  * @date 2022-06-28
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 #pragma once
 
@@ -25,60 +25,59 @@
 
 using jem::idx_t;
 using jem::newInstance;
+using jive::IdxVector;
+using jive::Properties;
 using jive::Ref;
 using jive::String;
-using jive::Vector;
-using jive::IdxVector;
 using jive::StringVector;
-using jive::Properties;
-using jive::model::Model;
-using jive::model::Actions;
-using jive::fem::NodeSet;
+using jive::Vector;
 using jive::fem::NodeGroup;
-using jive::util::Globdat;
+using jive::fem::NodeSet;
+using jive::model::Actions;
+using jive::model::Model;
 using jive::util::Assignable;
-using jive::util::DofSpace;
 using jive::util::Constraints;
+using jive::util::DofSpace;
+using jive::util::Globdat;
 
 class ImpactModel : public Model
 {
- public:
-  JEM_DECLARE_CLASS     ( ImpactModel, Model );
+public:
+  JEM_DECLARE_CLASS(ImpactModel, Model);
 
-  static const char*    TYPE_NAME;
-  static const char*    NODES_PROP;
-  static const char*    DOF_PROP;
-  static const char*    WEIGHTS_PROP;
+  static const char *TYPE_NAME;
+  static const char *NODES_PROP;
+  static const char *DOF_PROP;
+  static const char *WEIGHTS_PROP;
 
-  explicit              ImpactModel
+  explicit ImpactModel
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-  virtual bool          takeAction
+  virtual bool takeAction
 
-    ( const String&           action,
-      const Properties&       params,
-      const Properties&       globdat )  override;
+      (const String &action,
+       const Properties &params,
+       const Properties &globdat) override;
 
-  static Ref<Model>         makeNew
+  static Ref<Model> makeNew
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-  static void               declare         ();
+  static void declare();
 
- private:
+private:
+  Ref<DofSpace> dofs_;
+  Ref<Constraints> cons_;
+  Assignable<NodeSet> nodes_;
 
-  Ref<DofSpace>             dofs_;
-  Ref<Constraints>          cons_;
-  Assignable<NodeSet>       nodes_;
-  
-  StringVector              nodeGroups_;
-  StringVector              dofNames_;
-  Vector                    weights_;
+  StringVector nodeGroups_;
+  StringVector dofNames_;
+  Vector weights_;
 };

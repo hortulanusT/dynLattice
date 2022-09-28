@@ -4,6 +4,7 @@
 # binary files
 OBJ*
 nonlinRod*
+__pycache__/
 
 # reference data
 ref_data
@@ -20,8 +21,8 @@ scripts/scribbling.py
 *.pvsm
 *.tar
 
-studies/**/output/*
-studies/**/results/*
+studies/output/*
+studies/results/*
 
 tests/element/runs/
 tests/element/*.txt

@@ -4,9 +4,9 @@
  * @brief Expands the standard Data Printer with the capabiltiy to write CSV data
  * @version 0.1
  * @date 2022-06-22
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 #pragma once
 
@@ -23,88 +23,88 @@
 #include <jive/util/TableException.h>
 
 using jive::idx_t;
-using jive::String;
-using jive::Properties;
-using jive::Vector;
 using jive::IdxVector;
+using jive::Properties;
+using jive::String;
 using jive::StringVector;
-using jive::util::Table;
+using jive::Vector;
+using jive::app::DataPrinter;
 using jive::util::DofSpace;
 using jive::util::Globdat;
-using jive::app::DataPrinter;
+using jive::util::Table;
 
 class CSVDataPrinter : public DataPrinter
 {
- public:
+public:
+  enum mode
+  {
+    EMPTY,
+    TABLES,
+    VECTORS,
+    SPARSEVECTORS
+  };
 
-  enum mode { EMPTY, TABLES, VECTORS, SPARSEVECTORS };
+  JEM_DECLARE_CLASS(CSVDataPrinter, DataPrinter);
 
-  JEM_DECLARE_CLASS       ( CSVDataPrinter, DataPrinter );
+  explicit CSVDataPrinter
 
-  explicit                  CSVDataPrinter
+      (const String &name = "CSVDataPrinter");
 
-    ( const String&           name = "CSVDataPrinter" );
+  virtual void printTable
 
-  virtual void              printTable
+      (Output &out,
+       const String &label,
+       const Table &table,
+       const Properties &globdat) override;
 
-    ( Output&                 out,
-      const String&           label,
-      const Table&            table,
-      const Properties&       globdat ) override;
+  virtual void printVector
 
-  virtual void              printVector
+      (Output &out,
+       const String &label,
+       const Vector &vec,
+       const DofSpace &dofs,
+       const Properties &globdat) override;
 
-    ( Output&                 out,
-      const String&           label,
-      const Vector&           vec,
-      const DofSpace&         dofs,
-      const Properties&       globdat ) override;
+  virtual void printSparseVector
 
-  virtual void              printSparseVector
+      (Output &out,
+       const String &label,
+       const Vector &vec,
+       const IdxVector &idofs,
+       const DofSpace &dofs,
+       const Properties &globdat) override;
 
-    ( Output&                 out,
-      const String&           label,
-      const Vector&           vec,
-      const IdxVector&        idofs,
-      const DofSpace&         dofs,
-      const Properties&       globdat ) override;
+protected:
+  virtual ~CSVDataPrinter();
 
+private:
+  void startTables_
 
- protected:
+      (Output &out,
+       const String &label,
+       const Table &table,
+       const Properties &globdat);
 
-  virtual                  ~CSVDataPrinter ();
+  void startVectors_
 
- private:  
+      (Output &out,
+       const String &label,
+       const Vector &vec,
+       const DofSpace &dofs,
+       const Properties &globdat,
+       const IdxVector &idofs = {});
 
-  void                     startTables_
+  void writePrefix_
 
-    ( Output&                 out,
-      const String&           label,
-      const Table&            table,
-      const Properties&       globdat );
+      (Output &out,
+       const Properties &globdat,
+       const String &label = "");
 
-  void                      startVectors_
+  void writeVector_
 
-    ( Output&                 out,
-      const String&           label,
-      const Vector&           vec,
-      const DofSpace&         dofs,
-      const Properties&       globdat,      
-      const IdxVector&        idofs = {} ); 
+      (Output &out,
+       const Vector &vec);
 
-  void                       writePrefix_
-
-    ( Output&                 out,
-      const Properties&       globdat,
-      const String&           label = "" );     
-
-  void                       writeVector_
-
-    ( Output&                 out,
-      const Vector&           vec );               
-
- private:
-
-  mode                     mode_;
-
+private:
+  mode mode_;
 };

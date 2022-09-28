@@ -4,9 +4,9 @@
  * @brief Simple Module to write the force vectors to some Output file
  * @version 0.1
  * @date 2022-06-03
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 
 #pragma once
@@ -33,100 +33,92 @@
 #include <jive/model/Actions.h>
 
 using jem::newInstance;
-using jem::io::Writer;
 using jem::io::FileWriter;
 using jem::io::GzipFileWriter;
 using jem::io::PrintWriter;
+using jem::io::Writer;
 using jem::numeric::Function;
 
+using jive::BoolVector;
 using jive::idx_t;
+using jive::IdxVector;
+using jive::Properties;
 using jive::Ref;
 using jive::String;
-using jive::Properties;
-using jive::Vector;
-using jive::IdxVector;
-using jive::BoolVector;
 using jive::StringVector;
+using jive::Vector;
 
-using jive::util::Assignable;
 using jive::app::Module;
 using jive::fem::NodeSet;
+using jive::model::ActionParams;
+using jive::model::Actions;
+using jive::model::Model;
+using jive::util::Assignable;
 using jive::util::DofSpace;
 using jive::util::FuncUtils;
-using jive::model::Model;
-using jive::model::Actions;
-using jive::model::ActionParams;
-
 
 class ForceOutputModule : public Module
 {
- public:
+public:
+  JEM_DECLARE_CLASS(ForceOutputModule, Module);
 
-  JEM_DECLARE_CLASS       ( ForceOutputModule, Module );
+  static const char *TYPE_NAME;
+  static const char *INT_PROP;
+  static const char *EXT_PROP;
+  static const char *GYRO_PROP;
+  static const char *NODE_PROP;
 
-  static const char*        TYPE_NAME;
-  static const char*        INT_PROP;
-  static const char*        EXT_PROP;
-  static const char*        GYRO_PROP;
-  static const char*        NODE_PROP;
+  explicit ForceOutputModule
 
+      (const String &name = "ForceOutput");
 
-  explicit                  ForceOutputModule
+  virtual Status init
 
-    ( const String&           name = "ForceOutput" );
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat) override;
 
-  virtual Status            init
+  virtual Status run
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat )      override;
+      (const Properties &globdat) override;
 
-  virtual Status            run
+  virtual void shutdown
 
-    ( const Properties&       globdat )      override;
+      (const Properties &globdat) override;
 
-  virtual void              shutdown
+  static Ref<Module> makeNew
 
-    ( const Properties&       globdat )      override;
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
+  static void declare();
 
-  static Ref<Module>        makeNew
+protected:
+  virtual ~ForceOutputModule();
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+private:
+  void writeHeader_
 
-  static void               declare       ();
+      (const bool time = false);
 
+  void writeLine_
 
- protected:
+      (const Vector &data,
+       const idx_t step,
+       const String type,
+       const double time = -1.) const;
 
-  virtual                  ~ForceOutputModule   ();
+private:
+  Ref<DofSpace> dofs_;
+  Ref<Model> model_;
+  IdxVector dofsOut_;
+  bool intOut_;
+  bool extOut_;
+  bool gyroOut_;
 
- private:
-
-  void                     writeHeader_ 
-  
-    ( const bool            time = false );
-
-  void                     writeLine_
-
-    ( const Vector&         data,
-      const idx_t           step,
-      const String          type,
-      const double          time = -1. ) const;
-
-
- private:  
-  Ref<DofSpace>           dofs_;
-  Ref<Model>              model_;
-  IdxVector               dofsOut_;
-  bool                    intOut_;
-  bool                    extOut_;
-  bool                    gyroOut_;
-
-  bool                    started_;
-  Ref<PrintWriter>        output_;
-  Ref<Function>           sampleCond_; 
+  bool started_;
+  Ref<PrintWriter> output_;
+  Ref<Function> sampleCond_;
 };

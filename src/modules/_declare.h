@@ -31,19 +31,19 @@
 //   declareModules
 //-----------------------------------------------------------------------
 
-void declareModules ()
+void declareModules()
 {
-  jive::app     ::declareModules ();
-  jive::implict ::declareModules ();
-  jive::gl      ::declareModules ();
-  jive::fem     ::declareModules ();
-  GMSHInputModule::declare       ();
-  ParaViewModule::declare        ();
-  GroupOutputModule::declare     ();
-  PBCGroupOutputModule::declare  ();
-  GroupInputModule::declare      ();
-  PBCGroupInputModule::declare   ();
-  ExplicitModule::declare    ();
-  ForceOutputModule::declare     ();
-  CSVOutputModule::declare       ();
+  jive::app ::declareModules();
+  jive::implict ::declareModules();
+  jive::gl ::declareModules();
+  jive::fem ::declareModules();
+  GMSHInputModule::declare();
+  ParaViewModule::declare();
+  GroupOutputModule::declare();
+  PBCGroupOutputModule::declare();
+  GroupInputModule::declare();
+  PBCGroupInputModule::declare();
+  ExplicitModule::declare();
+  ForceOutputModule::declare();
+  CSVOutputModule::declare();
 }

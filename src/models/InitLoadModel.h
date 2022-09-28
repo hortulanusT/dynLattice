@@ -4,9 +4,9 @@
  * @brief InitLoadModel for initial loads
  * @version 0.1
  * @date 2022-04-26
- * 
+ *
  * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- * 
+ *
  */
 
 #pragma once
@@ -21,65 +21,64 @@
 #include <jive/util/Assignable.h>
 #include <jive/fem/NodeGroup.h>
 
-using jem::newInstance;
 using jem::idx_t;
+using jem::newInstance;
+using jive::IdxVector;
+using jive::Properties;
 using jive::Ref;
 using jive::String;
 using jive::StringVector;
 using jive::Vector;
-using jive::IdxVector;
-using jive::Properties;
+using jive::fem::NodeGroup;
+using jive::fem::NodeSet;
+using jive::model::Actions;
 using jive::model::Model;
 using jive::model::StateVector;
-using jive::model::Actions;
-using jive::util::DofSpace;
 using jive::util::Assignable;
-using jive::fem::NodeSet;
-using jive::fem::NodeGroup;
+using jive::util::DofSpace;
 
 class InitLoadModel : public Model
 {
- public:
-  static const char*      TYPE_NAME;
-  static const char*      DISP_GROUPS;
-  static const char*      DISP_DOFS;
-  static const char*      DISP_VALS;
-  static const char*      VELO_GROUPS;
-  static const char*      VELO_DOFS;
-  static const char*      VELO_VALS;
+public:
+  static const char *TYPE_NAME;
+  static const char *DISP_GROUPS;
+  static const char *DISP_DOFS;
+  static const char *DISP_VALS;
+  static const char *VELO_GROUPS;
+  static const char *VELO_DOFS;
+  static const char *VELO_VALS;
 
-  explicit                InitLoadModel
+  explicit InitLoadModel
 
-    ( const String&         name,
-      const Properties&     conf,
-      const Properties&     props,
-      const Properties&     globdat );    
-  
-  virtual bool            takeAction
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&         action,
-      const Properties&     params,
-      const Properties&     globdat );
+  virtual bool takeAction
 
-  static Ref<Model>       makeNew
+      (const String &action,
+       const Properties &params,
+       const Properties &globdat);
 
-    ( const String&      name,
-      const Properties&  conf,
-      const Properties&  props,
-      const Properties&  globdat );
+  static Ref<Model> makeNew
 
-  static void             declare ();
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
- private:
+  static void declare();
 
-  void                  init_ 
-  
-    ( const Properties& globdat );
- 
-  StringVector          dgroups_;
-  StringVector          ddofs_;
-  Vector                dvals_;
-  StringVector          vgroups_;
-  StringVector          vdofs_;
-  Vector                vvals_;
+private:
+  void init_
+
+      (const Properties &globdat);
+
+  StringVector dgroups_;
+  StringVector ddofs_;
+  Vector dvals_;
+  StringVector vgroups_;
+  StringVector vdofs_;
+  Vector vvals_;
 };

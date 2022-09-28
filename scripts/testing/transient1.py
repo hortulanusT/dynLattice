@@ -11,10 +11,14 @@ test_passed = False
 
 try:
   sim_disp = np.loadtxt("tests/transient/test1/disp.gz", delimiter=",")
-  BC_ref = np.loadtxt("tests/transient/ref_data/test1_ref_BC.csv", delimiter=",")
-  angle_ref = pd.read_csv("tests/transient/ref_data/test1_ref_angle.csv", delimiter=";", decimal=",").values
-  u1_ref = pd.read_csv("tests/transient/ref_data/test1_ref_u1.csv", delimiter=";", decimal=",").values
-  u2_ref = pd.read_csv("tests/transient/ref_data/test1_ref_u2.csv", delimiter=";", decimal=",").values
+  BC_ref = np.loadtxt(
+      "tests/transient/ref_data/test1_ref_BC.csv", delimiter=",")
+  angle_ref = pd.read_csv(
+      "tests/transient/ref_data/test1_ref_angle.csv", delimiter=";", decimal=",").values
+  u1_ref = pd.read_csv(
+      "tests/transient/ref_data/test1_ref_u1.csv", delimiter=";", decimal=",").values
+  u2_ref = pd.read_csv(
+      "tests/transient/ref_data/test1_ref_u2.csv", delimiter=";", decimal=",").values
 
   t = sim_disp[:, -1]
   psi = sim_disp[:, -2]
@@ -40,8 +44,8 @@ else:
 
 if test_passed:
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
-    plt.plot( BC_ref[:,0], BC_ref[:,1], label="Simo et al. 1988")
-    plt.plot( t, psi, "--", label="Simulation" )
+    plt.plot(BC_ref[:, 0], BC_ref[:, 1], label="Simo et al. 1988")
+    plt.plot(t, psi, "--", label="Simulation")
     plt.legend(loc="upper left")
     plt.xlabel("time [s]")
     plt.ylabel("rotation [rad]")
@@ -50,9 +54,9 @@ if test_passed:
     plt.tight_layout()
     pdf.savefig()
     plt.close()
-    
-    plt.plot( angle_ref[:,0], angle_ref[:,1], label="Simo et al. 1988")
-    plt.plot( t, dev_rz, "--", label="orientation of the tip" )
+
+    plt.plot(angle_ref[:, 0], angle_ref[:, 1], label="Simo et al. 1988")
+    plt.plot(t, dev_rz, "--", label="orientation of the tip")
     plt.legend(loc="upper right")
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
@@ -62,8 +66,8 @@ if test_passed:
     pdf.savefig()
     plt.close()
 
-    plt.plot( u1_ref[:,0], u1_ref[:,1], label="Simo et al. 1988")
-    plt.plot( t, dev_u1, "--", label="Simulation")
+    plt.plot(u1_ref[:, 0], u1_ref[:, 1], label="Simo et al. 1988")
+    plt.plot(t, dev_u1, "--", label="Simulation")
     plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u1 deviation [m]")
@@ -73,8 +77,8 @@ if test_passed:
     pdf.savefig()
     plt.close()
 
-    plt.plot( u2_ref[:,0], u2_ref[:,1], label="Simo et al. 1988")
-    plt.plot( t, dev_u2 , "--", label="Simulation" )
+    plt.plot(u2_ref[:, 0], u2_ref[:, 1], label="Simo et al. 1988")
+    plt.plot(t, dev_u2, "--", label="Simulation")
     plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u2 deviation [m]")

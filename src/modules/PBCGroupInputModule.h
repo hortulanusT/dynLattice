@@ -1,8 +1,8 @@
 /*
  *  Copyright (C) 2015 TU Delft. All rights reserved.
- *  
+ *
  *  Frans van der Meer, January 2015
- *  
+ *
  *  Module to generate default NodeGroups for periodic boundary conditions
  *
  */
@@ -25,70 +25,67 @@
 
 class PBCGroupInputModule : public GroupInputModule
 {
- public:
+public:
+  typedef PBCGroupInputModule Self;
+  typedef GroupInputModule Super;
 
-  typedef PBCGroupInputModule   Self;
-  typedef GroupInputModule      Super;
+  static const char *XMIN;
+  static const char *XMAX;
+  static const char *YMIN;
+  static const char *YMAX;
+  static const char *ZMIN;
+  static const char *ZMAX;
+  static const char *CORNER0;
+  static const char *CORNERX;
+  static const char *CORNERY;
+  static const char *CORNERZ;
+  static const char *TYPE_NAME;
+  static const char *EDGES[6];
+  static const char *CORNERS[4];
+  static const char *DUPEDNODES_PROP;
+  static const char *NGROUPS_PROP;
 
-  static const char*            XMIN;
-  static const char*            XMAX;
-  static const char*            YMIN;
-  static const char*            YMAX;
-  static const char*            ZMIN;
-  static const char*            ZMAX;
-  static const char*            CORNER0;
-  static const char*            CORNERX;
-  static const char*            CORNERY;
-  static const char*            CORNERZ;
-  static const char*            TYPE_NAME;
-  static const char*            EDGES[6];
-  static const char*            CORNERS[4];
-  static const char*            DUPEDNODES_PROP;
-  static const char*            NGROUPS_PROP;
+  explicit PBCGroupInputModule
 
-  explicit                  PBCGroupInputModule
+      (const String &name = "pbcGroupInput");
 
-    ( const String&           name   = "pbcGroupInput" );
+  virtual Status init
 
-  virtual Status            init
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static Ref<Module> makeNew
 
-  static Ref<Module>        makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void         declare ();
+protected:
+  virtual ~PBCGroupInputModule();
 
- protected:
+  void prepareProps_
 
-  virtual                  ~PBCGroupInputModule  ();
+      (const Properties &myProps) const;
 
-  void                      prepareProps_
+  void sortBoundaryNodes_
 
-    ( const Properties&       myProps ) const;
+      (const IdxVector &islaves,
+       const IdxVector &imasters,
+       const NodeSet &nodes,
+       const Properties &globdat,
+       const idx_t ix) const;
 
-  void                      sortBoundaryNodes_
-    
-    ( const IdxVector&        islaves,
-      const IdxVector&        imasters,
-      const NodeSet&          nodes,
-      const Properties&       globdat,
-      const idx_t             ix ) const;
+protected:
+  idx_t rank_;
+  double small_;
 
- protected:
+  bool edges_;
+  bool corners_;
+  Properties groupSettings_;
 
-  idx_t                     rank_;
-  double                    small_;
-
-  bool                      edges_;
-  bool                      corners_;
-  Properties                groupSettings_;
-
-  String                    dupedNodeGroup_;
+  String dupedNodeGroup_;
 };

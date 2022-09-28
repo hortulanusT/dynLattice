@@ -4,9 +4,9 @@
  * @brief Wrapper Class for some default PBC Outputs
  * @version 0.1
  * @date 2021-12-06
- * 
+ *
  * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
- * 
+ *
  */
 #pragma once
 
@@ -20,49 +20,46 @@
 
 using jem::SliceTo;
 using jem::util::ArrayBuffer;
-using jive::app::SampleModule;
 using jive::app::PropNames;
+using jive::app::SampleModule;
 
 class PBCGroupOutputModule : public GroupOutputModule
 {
- public:
+public:
+  typedef PBCGroupOutputModule Self;
+  typedef GroupOutputModule Super;
 
-  typedef PBCGroupOutputModule   Self;
-  typedef GroupOutputModule      Super;
+  static const char *TYPE_NAME;
+  static const char *CHILD_NAME;
 
-  static const char*             TYPE_NAME;
-  static const char*             CHILD_NAME;
+  explicit PBCGroupOutputModule
 
-  explicit                  PBCGroupOutputModule
+      (const String &name = "pbcGroupOutput");
 
-    ( const String&           name   = "pbcGroupOutput" );
+  virtual Status init
 
-  virtual Status            init
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  virtual Status run(const Properties &globdat);
 
-  virtual Status            run 
-    ( const Properties&       globdat );
+  virtual void shutdown(const Properties &globdat);
 
-  virtual void              shutdown 
-    ( const Properties&       globdat );
+  static Ref<Module> makeNew
 
-  static Ref<Module>        makeNew
+      (const String &name,
+       const Properties &conf,
+       const Properties &props,
+       const Properties &globdat);
 
-    ( const String&           name,
-      const Properties&       conf,
-      const Properties&       props,
-      const Properties&       globdat );
+  static void declare();
 
-  static void         declare ();  
- 
- protected:
-  String              getHeader_ ( String existing ) const;
+protected:
+  String getHeader_(String existing) const;
 
-  StringVector        getDataSets_ ( StringVector existing ) const;
+  StringVector getDataSets_(StringVector existing) const;
 
- protected:
-  Ref<SampleModule>   child_;
+protected:
+  Ref<SampleModule> child_;
 };

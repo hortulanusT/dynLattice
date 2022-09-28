@@ -12,7 +12,7 @@ try:
   sim_resp = np.loadtxt("tests/beam/test1/resp.csv", delimiter=",")
 
   sim_log = open("tests/beam/test1/run.log").readlines()
-  sim_conv = [];
+  sim_conv = []
   sim_conv.append(8*np.pi)
   res_scale = 1.
   for line in sim_log:
@@ -26,14 +26,15 @@ try:
   plt.semilogy(sim_conv, 'x', label="custom_implementation")
   plt.semilogy(ref_conv, '+', label="Simo/Vu-Quoc")
   plt.legend()
-  plt.xlabel( "iteration" )
-  plt.ylabel( "normed residual" )
-  plt.xticks( range(len(sim_conv)) )
+  plt.xlabel("iteration")
+  plt.ylabel("normed residual")
+  plt.xticks(range(len(sim_conv)))
 
   ideal_disp = np.array([0, -1, 0, 0, 0, 4*np.pi])
   ideal_resp = np.array([0,  0, 0, 0, 0, 8*np.pi])
 
-  test_passed = np.allclose(sim_disp, ideal_disp) and np.allclose(sim_resp, ideal_resp)
+  test_passed = np.allclose(
+      sim_disp, ideal_disp) and np.allclose(sim_resp, ideal_resp)
 except:
   pass
 

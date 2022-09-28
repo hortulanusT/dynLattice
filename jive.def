@@ -7,8 +7,9 @@ From: ubuntu
   export MPIDIR='/home/user/openmpi'
   export GMSHDIR='/home/user/gmsh'
   export HDF5DIR='/home/user/hdf5'
-  export PATH=$MPIDIR/bin:$PATH
-  export LD_RUN_PATH=$MPIDIR/lib:$HDF5DIR/lib:$LD_RUN_PATH
+  export PATH=$PATH:$MPIDIR/bin
+  export PYTHONPATH=$PYTHONPATH:$GMSHDIR/lib
+  export LD_RUN_PATH=$LD_RUN_PATH:$MPIDIR/lib:$HDF5DIR/lib
 
 
 %files
