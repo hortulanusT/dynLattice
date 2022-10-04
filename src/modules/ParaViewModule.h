@@ -12,33 +12,33 @@
 #pragma once
 
 #include <jem/base/Array.h>
-#include <jem/base/System.h>
-#include <jem/base/Slice.h>
-#include <jem/base/IllegalArgumentException.h>
 #include <jem/base/CString.h>
-#include <jem/util/Properties.h>
-#include <jem/io/FileWriter.h>
-#include <jem/io/PrintWriter.h>
+#include <jem/base/IllegalArgumentException.h>
+#include <jem/base/Slice.h>
+#include <jem/base/System.h>
 #include <jem/io/FileName.h>
 #include <jem/io/FileOpenException.h>
+#include <jem/io/FileWriter.h>
+#include <jem/io/PrintWriter.h>
+#include <jem/util/Properties.h>
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/app/Names.h>
-#include <jive/util/XTable.h>
-#include <jive/util/SparseTable.h>
-#include <jive/util/Assignable.h>
-#include <jive/util/DofSpace.h>
-#include <jive/util/ItemSet.h>
-#include <jive/util/ItemGroup.h>
-#include <jive/util/Globdat.h>
-#include <jive/util/FuncUtils.h>
-#include <jive/fem/NodeSet.h>
-#include <jive/fem/ElementSet.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/ElementSet.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/StateVector.h>
-#include <jive/model/Actions.h>
+#include <jive/util/Assignable.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/ItemGroup.h>
+#include <jive/util/ItemSet.h>
+#include <jive/util/SparseTable.h>
+#include <jive/util/XTable.h>
 
 #include <filesystem>
 
@@ -56,6 +56,7 @@ using jem::String;
 using jem::sum;
 using jem::where;
 using jem::io::endl;
+using jem::io::FileFlags;
 using jem::io::FileName;
 using jem::io::FileOpenException;
 using jem::io::FileWriter;
@@ -83,11 +84,9 @@ using jive::util::ItemSet;
 using jive::util::SparseTable;
 using jive::util::XTable;
 
-class ParaViewModule : public Module
-{
+class ParaViewModule : public Module {
 protected:
-  struct elInfo
-  {
+  struct elInfo {
     String name;
     String shape;
     StringVector elemData;
@@ -109,8 +108,7 @@ public:
 
   virtual Status init
 
-      (const Properties &conf,
-       const Properties &props,
+      (const Properties &conf, const Properties &props,
        const Properties &globdat) override;
 
   virtual Status run
@@ -123,10 +121,8 @@ public:
 
   static Ref<Module> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -149,8 +145,7 @@ public:
    */
   static IdxVector gmsh2ParaNodeOrder
 
-      (const IdxVector elNodes,
-       const String &name);
+      (const IdxVector elNodes, const String &name);
 
 private:
   /**
@@ -161,16 +156,17 @@ private:
    */
   void writeFile_
 
-      (const String &fileName,
-       const Properties &globdat);
+      (const String &fileName, const Properties &globdat);
 
   /**
    * @brief writes mesh info to file
    *
    * @param file PrintWriter for the correspoding file
    * @param points NodeSet with all the information regarding the points
-   * @param cells ElemenSet with all the information regarding the elements
-   * @param group ElemenGroup from which the information should be extracted
+   * @param cells ElemenSet with all the information regarding the
+   * elements
+   * @param group ElemenGroup from which the information should be
+   * extracted
    * @param disp StateVector 0
    * @param velo StateVector 1
    * @param acce StateVector 2
@@ -181,16 +177,11 @@ private:
    */
   void writePiece_
 
-      (const Ref<PrintWriter> &file,
-       const Assignable<NodeSet> &points,
+      (const Ref<PrintWriter> &file, const Assignable<NodeSet> &points,
        const Assignable<ElementSet> &cells,
-       const Assignable<ElementGroup> &group,
-       const Vector &disp,
-       const Vector &velo,
-       const Vector &acce,
-       const Ref<DofSpace> &dofs,
-       const Ref<Model> &model,
-       const Properties &globdat,
+       const Assignable<ElementGroup> &group, const Vector &disp,
+       const Vector &velo, const Vector &acce, const Ref<DofSpace> &dofs,
+       const Ref<Model> &model, const Properties &globdat,
        const elInfo &info);
 
   /**
@@ -202,25 +193,18 @@ private:
    */
   void writeDataArray_
 
-      (const Ref<PrintWriter> &file,
-       const Matrix &data,
-       const String &type,
-       const String &name);
+      (const Ref<PrintWriter> &file, const Matrix &data,
+       const String &type, const String &name);
 
   void writeDataArray_
 
-      (const Ref<PrintWriter> &file,
-       const Ref<XTable> &data,
-       const IdxVector &rows,
-       const String &type,
-       const String &name);
+      (const Ref<PrintWriter> &file, const Ref<XTable> &data,
+       const IdxVector &rows, const String &type, const String &name);
 
   void writeDataArray_
 
-      (const Ref<PrintWriter> &file,
-       const Vector &data,
-       const String &type,
-       const String &name);
+      (const Ref<PrintWriter> &file, const Vector &data,
+       const String &type, const String &name);
 
 private:
   String nameFormat_;

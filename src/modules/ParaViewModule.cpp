@@ -1,8 +1,5 @@
 #include "ParaViewModule.h"
 
-// BUG FORCES are not associated with the correct node
-// BUG weird error when output file is not specified...
-
 void vec2mat(const Matrix &mat, const Vector &vec) {
   const idx_t rows = mat.size(0);
   const idx_t cols = mat.size(1);
@@ -399,6 +396,13 @@ void ParaViewModule::writePiece_
     using jive::model::ActionParams;
     Properties params("actionParams");
 
+    StringVector dofNames = dofs->getTypeNames();
+    iDofs.resize(dofNames.size());
+    iDisps.resize(dofNames.size());
+    for (idx_t idof = 0; idof < dofNames.size(); idof++) {
+      iDofs[idof] = dofs->findType(dofNames[idof]);
+    }
+
     if (info.nodeData[iPtDatum] == "fext") {
       Vector fext(dofs->dofCount());
       Matrix fext_mat(points.size(), dofs->typeCount());
@@ -408,7 +412,10 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
       params.erase(ActionParams::EXT_VECTOR);
 
-      vec2mat(fext_mat, fext);
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+        dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
+        fext_mat(ipoint, ALL) = fext[iDisps];
+      }
       writeDataArray_(file, fext_mat(ALL, SliceTo(3)), "Float32",
                       "External Forces");
       writeDataArray_(file, fext_mat(ALL, SliceFrom(3)), "Float32",
@@ -422,7 +429,10 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
       params.erase(ActionParams::INT_VECTOR);
 
-      vec2mat(fint_mat, fint);
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+        dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
+        fint_mat(ipoint, ALL) = fint[iDisps];
+      }
       writeDataArray_(file, fint_mat(ALL, SliceTo(3)), "Float32",
                       "Internal Forces");
       writeDataArray_(file, fint_mat(ALL, SliceFrom(3)), "Float32",
@@ -446,7 +456,10 @@ void ParaViewModule::writePiece_
 
       fres = fext - fint;
 
-      vec2mat(fres_mat, fres);
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+        dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
+        fres_mat(ipoint, ALL) = fres[iDisps];
+      }
       writeDataArray_(file, fres_mat(ALL, SliceTo(3)), "Float32",
                       "Resulting Forces");
       writeDataArray_(file, fres_mat(ALL, SliceFrom(3)), "Float32",
