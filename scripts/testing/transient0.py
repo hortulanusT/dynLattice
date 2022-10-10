@@ -9,6 +9,7 @@ from termcolor import colored
 from matplotlib.cm import get_cmap
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import signal
+
 np.seterr(invalid='ignore')
 
 test_passed = False
@@ -16,14 +17,19 @@ test_passed = False
 try:
   data = pd.read_csv("tests/transient/test0/disp.gz",
                      index_col=["time", "label"])
-  data.columns = pd.MultiIndex.from_tuples([tuple([name[:name.find("[")],
-                                                   int(name[name.find("[")+1:name.find("]")])])
-                                            for name in data.columns], names=["dof", "node"])
+  data.columns = pd.MultiIndex.from_tuples([
+      tuple([
+          name[:name.find("[")],
+          int(name[name.find("[") + 1:name.find("]")])
+      ]) for name in data.columns
+  ],
+                                           names=["dof", "node"])
   data = data.loc[:1e-2]
   dx = data["dx"]
   dy = data["dy"]
   dz = data["dz"]
-  d_2 = np.sign(dx)*dx**2 + np.sign(dy)*dy**2 + np.sign(dz)*dz**2
+  d_2 = np.sign(dx) * dx**2 + np.sign(dy) * dy**2 + np.sign(
+      dz) * dz**2
   data = np.sign(d_2) * np.sqrt(np.abs(d_2))
 
   data[data.shape[1]] = data[1]
@@ -49,7 +55,8 @@ energy_in = disp.iloc[100, -1] * 2e9
 energy = pd.DataFrame()
 energy["potential"] = 0.5 * 205e9 * 0.05**2*np.pi / \
     (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
-lenghts = np.array([.5] + (nnodes-2)*[1] + [.5]) * (1/(nnodes-1))
+lenghts = np.array([.5] + (nnodes - 2) * [1] + [.5]) * (1 /
+                                                        (nnodes - 1))
 energy["kinetic"] = 0.5 * 7850 * 0.05**2*np.pi * \
     (velo**2).dot(lenghts)  # first and last only half length
 energy["sum"] = energy.sum(axis='columns')
@@ -58,18 +65,19 @@ for node in data:
   test = disp[node] > .5e-3
   if any(test):
     wave_time.append(disp[node][test].index[0])
-    wave_pos.append(node/(nnodes-1))
+    wave_pos.append(node / (nnodes - 1))
 
 wave_pos = np.array(wave_pos)
 wave_times_cal = np.array(wave_time)
 
-wave_speed_cal = -1/(nnodes-1) / np.diff(wave_times_cal).mean()
-wave_speed_ana = np.sqrt(205e9/7850)
+wave_speed_cal = -1 / (nnodes - 1) / np.diff(wave_times_cal).mean()
+wave_speed_ana = np.sqrt(205e9 / 7850)
 
-wave_times_ana = (1-wave_pos)/wave_speed_ana + 100*time_step
+wave_times_ana = (1 - wave_pos) / wave_speed_ana + 100 * time_step
 
-eigenfreqs = wave_speed_ana * (2*np.arange(5) + 1) / 4 / 1e3
-end_spec = np.fft.rfft(disp[data.shape[1]-1]) / disp[data.shape[1]-1].size
+eigenfreqs = wave_speed_ana * (2 * np.arange(5) + 1) / 4 / 1e3
+end_spec = np.fft.rfft(
+    disp[data.shape[1] - 1]) / disp[data.shape[1] - 1].size
 frequencies = np.fft.rfftfreq(disp.shape[0], time_step) / 1e3
 ipeaks, _ = signal.find_peaks(np.abs(end_spec))
 
@@ -77,7 +85,8 @@ diff_freq = np.zeros_like(eigenfreqs)
 
 try:
   for i in range(len(eigenfreqs)):
-    diff_freq[i] = (eigenfreqs[i]-frequencies[ipeaks[i]])/eigenfreqs[i]
+    diff_freq[i] = (eigenfreqs[i] -
+                    frequencies[ipeaks[i]]) / eigenfreqs[i]
     # test_passed &= np.abs(diff_freq[i]) < 0.025
 except:
   test_passed = False
@@ -88,18 +97,23 @@ if test_passed:
     # wave progression
     fig, ax = plt.subplots(1, 1, sharex=True, figsize=(10, 10))
     for node in disp:
-      ax.plot(disp[node].values + node/(nnodes-1), times)
+      ax.plot(disp[node].values + node / (nnodes - 1), times)
     ax.plot(wave_pos, wave_times_cal, "k:", label="resulting wave")
-    ax.plot(wave_pos, wave_times_ana, "k", lw=3,
-            alpha=0.2, label="analytical wave")
+    ax.plot(wave_pos,
+            wave_times_ana,
+            "k",
+            lw=3,
+            alpha=0.2,
+            label="analytical wave")
     ax.set_xlabel("Position [m]")
     ax.set_ylabel("Time [s]")
     ax.set_xlim([0, 1.05])
-    ax.set_ylim([0, 1.05*max(wave_times_ana)])
+    ax.set_ylim([0, 1.05 * max(wave_times_ana)])
     ax.tick_params(bottom=True, top=True, left=True, right=True)
     ax.legend(loc="upper left")
     ax.set_title(
-        f"Wave speed approx. {wave_speed_cal:.0f} m/s\nShould be {wave_speed_ana:.0f} m/s")
+        f"Wave speed approx. {wave_speed_cal:.0f} m/s\nShould be {wave_speed_ana:.0f} m/s"
+    )
     ax.invert_yaxis()
     fig.tight_layout()
     pdf.savefig(fig)
@@ -115,10 +129,14 @@ if test_passed:
       spectrum = np.fft.rfft(disp[node]) / disp[node].size
       for i in range(len(modes)):
         modes[i].append(spectrum[ipeaks[i]])
-      axs[0].loglog(frequencies, np.abs(spectrum), c=coloring(
-          node/(nnodes-1)), label=f"Node #{node}")
-      axs[1].semilogx(frequencies, np.angle(spectrum, deg=True),
-                      c=coloring(node/(nnodes-1)), label=f"Node #{node}")
+      axs[0].loglog(frequencies,
+                    np.abs(spectrum),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
+      axs[1].semilogx(frequencies,
+                      np.angle(spectrum, deg=True),
+                      c=coloring(node / (nnodes - 1)),
+                      label=f"Node #{node}")
 
     axs[0].set_ylabel("Amplitude [m]")
     axs[0].set_xlim(right=eigenfreqs[-1])
@@ -143,14 +161,20 @@ if test_passed:
 
     loc = np.linspace(0, 1, nnodes)
     for i in range(len(modes)):
-      axs[0].plot(loc, np.abs(modes[i]),
-                  label=f"Mode {i} res at {frequencies[ipeaks[i]]:.2f} kHz")
-      axs[1].plot(loc, np.angle(modes[i], deg=True),
+      axs[0].plot(
+          loc,
+          np.abs(modes[i]),
+          label=f"Mode {i} res at {frequencies[ipeaks[i]]:.2f} kHz")
+      axs[1].plot(loc,
+                  np.angle(modes[i], deg=True),
                   label=f"{frequencies[ipeaks[i]]:.2f} kHz")
 
     for i in range(len(modes)):
-      axs[0].plot(loc, np.abs(np.sin(loc * (2*i+1)/2 * np.pi)) * np.abs(modes[i])
-                  [-1], "k:", label=f"vs ana at  {eigenfreqs[i]:.2f} kHz")
+      axs[0].plot(loc,
+                  np.abs(np.sin(loc * (2 * i + 1) / 2 * np.pi)) *
+                  np.abs(modes[i])[-1],
+                  "k:",
+                  label=f"vs ana at  {eigenfreqs[i]:.2f} kHz")
 
     for ang in [-90, 0, 90]:
       axs[1].axhline(ang, alpha=0.5, lw=0.5)
@@ -172,11 +196,11 @@ if test_passed:
     # energy
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
     axs[0].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(ax=axs[0], logy=True)
-    axs[0].set_xlim([min(times), 0.0001])
+    energy.plot.line(style=["-", "o", "x"], ax=axs[0], logy=True)
+    axs[0].set_xlim([1e-5, 2e-5])
     energy.plot.line(ax=axs[1])
     axs[1].set_xlim([min(times), max(times)])
-    axs[1].set_ylim([0, energy["sum"][0.001]])
+    axs[1].set_ylim([0, energy["sum"][0.00005]])
     pdf.savefig(fig)
 
     # raw spectra
@@ -186,20 +210,37 @@ if test_passed:
       spectrum_velo = np.fft.rfft(velo[node]) / velo[node].size
       spectrum_acce = np.fft.rfft(acce[node]) / acce[node].size
 
-      axs[0].loglog(frequencies, np.abs(spectrum_disp),
-                    c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[1].loglog(frequencies, np.abs(spectrum_velo),
-                    c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[2].loglog(frequencies, np.abs(spectrum_acce),
-                    c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[3].loglog(frequencies, np.abs(spectrum_velo)/np.abs(spectrum_disp),
-                    c=coloring(node/(nnodes-1)), label=f"Node #{node}")
-      axs[4].loglog(frequencies, np.abs(spectrum_acce)/np.abs(spectrum_disp),
-                    c=coloring(node/(nnodes-1)), label=f"Node #{node}")
+      axs[0].loglog(frequencies,
+                    np.abs(spectrum_disp),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
+      axs[1].loglog(frequencies,
+                    np.abs(spectrum_velo),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
+      axs[2].loglog(frequencies,
+                    np.abs(spectrum_acce),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
+      axs[3].loglog(frequencies,
+                    np.abs(spectrum_velo) / np.abs(spectrum_disp),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
+      axs[4].loglog(frequencies,
+                    np.abs(spectrum_acce) / np.abs(spectrum_disp),
+                    c=coloring(node / (nnodes - 1)),
+                    label=f"Node #{node}")
 
-    axs[3].loglog(frequencies, frequencies*np.pi*2e3, "k:", lw=.5, alpha=.5)
-    axs[4].loglog(frequencies, frequencies**2*np.pi **
-                  2*4e6, "k:", lw=.5, alpha=.5)
+    axs[3].loglog(frequencies,
+                  frequencies * np.pi * 2e3,
+                  "k:",
+                  lw=.5,
+                  alpha=.5)
+    axs[4].loglog(frequencies,
+                  frequencies**2 * np.pi**2 * 4e6,
+                  "k:",
+                  lw=.5,
+                  alpha=.5)
 
     axs[0].set_ylabel("Displacements [m]")
     axs[1].set_ylabel("Velocity direct [m/s]")
