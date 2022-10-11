@@ -16,8 +16,8 @@ From: ubuntu
   ./zips/jem-3.0.zip /home/user/
   ./zips/jive-3.0.zip /home/user/
   ./zips/openmpi-4.1.1.tar.gz /home/user/
-  ./zips/gmsh-4.9.5-Linux64-sdk.tgz /home/user
-  ./zips/hdf5-1.12.2.tar.gz /home/user
+  ./zips/gmsh-4.9.5-Linux64-sdk.tgz /home/user/
+  ./zips/hdf5-1.12.2.tar.gz /home/user/
 
 %post
   export JEMDIR='/home/user/jem'
@@ -40,7 +40,8 @@ From: ubuntu
     libxft-dev \
     libxinerama-dev \
     python3-pip \
-    python-is-python3
+    python-is-python3 \
+    git
   pip install \
     numpy \
     pandas \
@@ -51,7 +52,8 @@ From: ubuntu
     pathlib \
     cycler \
     opencv-python \
-    meshio
+    meshio \
+    svgpathtools
   
   cd /home/user/
   
