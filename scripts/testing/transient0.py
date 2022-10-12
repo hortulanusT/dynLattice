@@ -196,7 +196,7 @@ if test_passed:
     # energy
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
     axs[0].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(style=["-", "o", "x"], ax=axs[0], logy=True)
+    energy.plot.line(style=["o", "x", "-"], ax=axs[0], logy=True)
     axs[0].set_xlim([1e-5, 2e-5])
     energy.plot.line(ax=axs[1])
     axs[1].set_xlim([min(times), max(times)])
