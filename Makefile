@@ -63,3 +63,11 @@ include tests/testing.mk
 ##   Include the Study Cases  									                     ##
 #######################################################################
 include studies/running.mk
+
+
+#######################################################################
+##   make git hash stay always current                               ##
+#######################################################################
+GitReportObj = $(OBJDIR)/GitReportModule.o $(OBJDIR_OPT)/GitReportModule.o $(OBJDIR_DBG)/GitReportModule.o
+
+src/modules/GitReportModule.cpp: $(filter-out $(GitReportObj), $(objects))

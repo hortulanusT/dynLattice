@@ -8,6 +8,7 @@
 #include <jem/base/array/operators.h>
 #include <jem/util/Event.h>
 #include <jem/util/Properties.h>
+#include <jem/util/PropertyException.h>
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/DiagMatrixObject.h>
 #include <jive/algebra/FlexMatrixBuilder.h>
@@ -118,8 +119,8 @@ private:
 
   void invalidate_();
 
-  void store_energy_(const Vector &disp, const Vector &velo,
-                     const Properties &globdat);
+  void store_energy_(const Vector &fint, const Vector &velo,
+                     const Properties &variables);
 
 private:
   bool valid_;

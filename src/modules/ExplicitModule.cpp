@@ -272,7 +272,7 @@ Module::Status ExplicitModule::run
 
   // if the engergy needs to be reported, do so
   if (report_energy_)
-    store_energy_(u_new, v_new, globdat);
+    store_energy_(fint, v_new, Globdat::getVariables(globdat));
 
   return OK;
 }
@@ -322,27 +322,26 @@ void ExplicitModule::getConfig
 //   store_energy_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::store_energy_(const Vector &disp, const Vector &velo,
-                                   const Properties &globdat)
+void ExplicitModule::store_energy_(const Vector &fint, const Vector &velo,
+                                   const Properties &variables)
 {
-  Properties variables = Globdat::getVariables(globdat);
-  double E_pot;
-  double E_kin;
-  Vector temp(disp.size());
-  Properties params;
+  double E_pot, delta_E_pot, E_kin;
+  Vector temp(velo.size());
 
-  Ref<AbstractMatrix> stiff;
-  Ref<AbstractMatrix> mass;
+  delta_E_pot = dotProduct(Vector(velo * dtime_), fint);
 
-  mass = solver_->getMatrix();
-
-  Vector intVect(dofs_->dofCount());
-  params.set(ActionParams::INT_VECTOR, intVect);
-  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-
-  E_pot = 0.5 * dotProduct(intVect, disp);
-  mass->matmul(temp, velo);
+  solver_->getMatrix()->matmul(temp, velo);
   E_kin = 0.5 * dotProduct(temp, velo);
+
+  try
+  {
+    variables.find(E_pot, "PotentialEnergy");
+    E_pot += delta_E_pot;
+  }
+  catch (const jem::util::PropertyException &e)
+  {
+    E_pot = delta_E_pot;
+  }
 
   variables.set("PotentialEnergy", E_pot);
   variables.set("KineticEnergy", E_kin);
