@@ -11,6 +11,7 @@
  */
 
 #include "specialCosseratRodModel.h"
+
 #include <math.h>
 
 //=======================================================================
@@ -35,7 +36,8 @@ const char *specialCosseratRodModel::POLAR_MOMENT = "polar_moment";
 const char *specialCosseratRodModel::SHEAR_FACTOR = "shear_correction";
 const char *specialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
 const char *specialCosseratRodModel::ROT_DOF_NAMES = "dofNamesRot";
-const char *specialCosseratRodModel::SYMMETRIC_ONLY = "symmetric_tanget_stiffness";
+const char *specialCosseratRodModel::SYMMETRIC_ONLY =
+    "symmetric_tanget_stiffness";
 const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
@@ -45,8 +47,10 @@ const char *specialCosseratRodModel::SIDE_LENGTH = "side_length";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
-const Slice specialCosseratRodModel::TRANS_PART = jem::SliceFromTo(0, TRANS_DOF_COUNT);
-const Slice specialCosseratRodModel::ROT_PART = jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
+const Slice specialCosseratRodModel::TRANS_PART =
+    jem::SliceFromTo(0, TRANS_DOF_COUNT);
+const Slice specialCosseratRodModel::ROT_PART =
+    jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
 
 //-----------------------------------------------------------------------
 //   constructor
@@ -54,12 +58,11 @@ const Slice specialCosseratRodModel::ROT_PART = jem::SliceFromTo(TRANS_DOF_COUNT
 
 specialCosseratRodModel::specialCosseratRodModel
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
-     const Properties &globdat) :
+    (const String &name, const Properties &conf, const Properties &props,
+     const Properties &globdat)
+    :
 
-                                  Model(name)
+      Model(name)
 
 {
   // Get the Properties associated with this model
@@ -69,20 +72,26 @@ specialCosseratRodModel::specialCosseratRodModel
   // Get the elements and nodes from the global database
   String elementsName;
   myProps.find(elementsName, "elements");
-  rodElems_ = ElementGroup::get(myConf, myProps, globdat, getContext()); // only the desired group
-  allElems_ = rodElems_.getElements();                                   // all the elements
-  allNodes_ = allElems_.getNodes();                                      // all the inodes
+  rodElems_ = ElementGroup::get(myConf, myProps, globdat,
+                                getContext()); // only the desired group
+  allElems_ = rodElems_.getElements();         // all the elements
+  allNodes_ = allElems_.getNodes();            // all the inodes
 
-  // store the inverse relation from the global node ids to the local indizes on this rod
+  // store the inverse relation from the global node ids to the local
+  // indizes on this rod
   rodNodes_.resize(allNodes_.size());
   rodNodes_ = -1;
-  rodNodes_[rodElems_.getNodeIndices()] = jem::iarray(rodElems_.getNodeIndices().size());
+  rodNodes_[rodElems_.getNodeIndices()] =
+      jem::iarray(rodElems_.getNodeIndices().size());
 
   // Initialize the internal shape.
   shapeK_ = newInstance<Line3D>(SHAPE_IDENTIFIER, myConf, myProps);
-  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M").set("intScheme", String(shapeK_->nodeCount()));
-  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M").set("numPoints", shapeK_->nodeCount());
-  shapeM_ = newInstance<Line3D>(String(SHAPE_IDENTIFIER) + "M", myConf, myProps);
+  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M")
+      .set("intScheme", String(shapeK_->nodeCount()));
+  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M")
+      .set("numPoints", shapeK_->nodeCount());
+  shapeM_ = newInstance<Line3D>(String(SHAPE_IDENTIFIER) + "M", myConf,
+                                myProps);
 
   // Check whether the mesh is valid.
   rodElems_.checkElements(getContext(), shapeK_->nodeCount());
@@ -185,14 +194,17 @@ specialCosseratRodModel::specialCosseratRodModel
   else if (cross_section_ == "rectangle")
   {
     myProps.get(side_length_, SIDE_LENGTH);
-    JEM_ASSERT2(side_length_.size() == 2, "A rectangle has only two sides!");
+    JEM_ASSERT2(side_length_.size() == 2,
+                "A rectangle has only two sides!");
     area_ = jem::product(side_length_);
     areaMoment_[0] = pow(side_length_[1], 3) * side_length_[0] / 12.;
     areaMoment_[1] = pow(side_length_[0], 3) * side_length_[1] / 12.;
     shearParam_ = 5. / 6.;
   }
   else
-    throw jem::IllegalInputException(getContext(), "unknown cross section, only 'square' and 'circle' are supported");
+    throw jem::IllegalInputException(
+        getContext(), "unknown cross section, only 'square' and 'circle' "
+                      "are supported");
 
   polarMoment_ = jem::sum(areaMoment_);
   myProps.find(shearParam_, SHEAR_FACTOR);
@@ -209,6 +221,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set(POLAR_MOMENT, polarMoment_);
   myConf.set(SHEAR_FACTOR, shearParam_);
   myConf.set(DENSITY, density_);
+  myConf.set(CROSS_SECTION, cross_section_);
 
   // get given node dirs
   if (myProps.find(givenNodes_, GIVEN_NODES))
@@ -222,9 +235,11 @@ specialCosseratRodModel::specialCosseratRodModel
 
     vec2mat(givenDirs_.transpose(), givenDirs);
   }
-  else if (Globdat::hasVariable(joinNames("tangents", elementsName), globdat))
+  else if (Globdat::hasVariable(joinNames("tangents", elementsName),
+                                globdat))
   {
-    Properties tangentVars = Globdat::getVariables(joinNames("tangents", elementsName), globdat);
+    Properties tangentVars = Globdat::getVariables(
+        joinNames("tangents", elementsName), globdat);
     tangentVars.get(givenNodes_, GIVEN_NODES);
 
     Vector givenDirs(givenNodes_.size() * TRANS_DOF_COUNT);
@@ -260,10 +275,12 @@ specialCosseratRodModel::specialCosseratRodModel
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
 
-  jem::System::debug(myName_) << " ...Stiffness matrix of the rod '" << myName_ << "':\n"
-                              << materialC_ << "\n";
-  jem::System::debug(myName_) << " ...Area density of the rod '" << myName_ << "':\n"
-                              << density_ * area_ << "\n";
+  jem::System::debug(myName_)
+      << " ...Stiffness matrix of the rod '" << myName_ << "':\n"
+      << materialC_ << "\n";
+  jem::System::debug(myName_)
+      << " ...Area density of the rod '" << myName_ << "':\n"
+      << density_ * area_ << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -274,8 +291,7 @@ specialCosseratRodModel::specialCosseratRodModel
 
 bool specialCosseratRodModel::takeAction
 
-    (const String &action,
-     const Properties &params,
+    (const String &action, const Properties &params,
      const Properties &globdat)
 
 {
@@ -424,7 +440,8 @@ bool specialCosseratRodModel::takeAction
     StateVector::get(disp, dofs_, globdat);
     StateVector::get(velo, jive::model::STATE[1], dofs_, globdat);
 
-    mbld = newInstance<FlexMBuilder>("inertia"); // HACK get M matrix from global model
+    mbld = newInstance<FlexMBuilder>(
+        "inertia"); // HACK get M matrix from global model
 
     // assemble mass matrix
     assembleM_(*mbld, disp);
@@ -439,9 +456,7 @@ bool specialCosseratRodModel::takeAction
 //-----------------------------------------------------------------------
 void specialCosseratRodModel::get_strain_table_
 
-    (XTable &strain_table,
-     const Vector &weights,
-     const Vector &disp,
+    (XTable &strain_table, const Vector &weights, const Vector &disp,
      const bool mat_vals)
 {
   const idx_t elemCount = rodElems_.size();
@@ -465,9 +480,11 @@ void specialCosseratRodModel::get_strain_table_
   {
     dofName = dofs_->getTypeName(idof);
     if (idof < TRANS_DOF_COUNT)
-      icols[idof] = strain_table.addColumn("gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
+      icols[idof] = strain_table.addColumn(
+          "gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
     else
-      icols[idof] = strain_table.addColumn("kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
+      icols[idof] = strain_table.addColumn(
+          "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
   // iterate through the elements
@@ -477,7 +494,8 @@ void specialCosseratRodModel::get_strain_table_
     allElems_.getElemNodes(inodes, ielem);
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
-    get_strains_(strain, ipWeights, nodePhi_0, nodeU, nodeLambda, ie, !mat_vals);
+    get_strains_(strain, ipWeights, nodePhi_0, nodeU, nodeLambda, ie,
+                 !mat_vals);
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -492,9 +510,7 @@ void specialCosseratRodModel::get_strain_table_
 //-----------------------------------------------------------------------
 void specialCosseratRodModel::get_stress_table_
 
-    (XTable &stress_table,
-     const Vector &weights,
-     const Vector &disp,
+    (XTable &stress_table, const Vector &weights, const Vector &disp,
      const bool mat_vals)
 {
   const idx_t elemCount = rodElems_.size();
@@ -518,9 +534,11 @@ void specialCosseratRodModel::get_stress_table_
   {
     dofName = dofs_->getTypeName(idof);
     if (idof < TRANS_DOF_COUNT)
-      icols[idof] = stress_table.addColumn("n_" + dofName[SliceFrom(dofName.size() - 1)]);
+      icols[idof] = stress_table.addColumn(
+          "n_" + dofName[SliceFrom(dofName.size() - 1)]);
     else
-      icols[idof] = stress_table.addColumn("m_" + dofName[SliceFrom(dofName.size() - 1)]);
+      icols[idof] = stress_table.addColumn(
+          "m_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
   // iterate through the elements
@@ -530,7 +548,8 @@ void specialCosseratRodModel::get_stress_table_
     allElems_.getElemNodes(inodes, ielem);
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
-    get_stresses_(stress, ipWeights, nodePhi_0, nodeU, nodeLambda, ie, !mat_vals);
+    get_stresses_(stress, ipWeights, nodePhi_0, nodeU, nodeLambda, ie,
+                  !mat_vals);
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -572,7 +591,8 @@ void specialCosseratRodModel::init_strain_()
     // TEST_CONTEXT(coords)
     inodes = rodNodes_[ins];
     // TEST_CONTEXT((Cubix(LambdaN_[inodes])))
-    get_strains_(strains, weights, coords, null_mat, (Cubix)LambdaN_[inodes], ie, false);
+    get_strains_(strains, weights, coords, null_mat,
+                 (Cubix)LambdaN_[inodes], ie, false);
     mat_strain0_[ie] = strains;
   }
 }
@@ -610,7 +630,8 @@ void specialCosseratRodModel::init_rot_() // LATER non-straight rods?
 
   allNodes_.getCoords(coords);
 
-  // get the direction for each element //ONLY APPROXIMATION FOR NON-STRAIGHT ELEMENTS
+  // get the direction for each element //ONLY APPROXIMATION FOR
+  // NON-STRAIGHT ELEMENTS
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     // REPORT(ie)
@@ -620,10 +641,13 @@ void specialCosseratRodModel::init_rot_() // LATER non-straight rods?
     inodes = rodNodes_[ins];
 
     // TEST_CONTEXT(inodes)
-    node_dirs(ALL, inodes[0]) += coords(ALL, ins[1]) - coords(ALL, ins[0]);
+    node_dirs(ALL, inodes[0]) +=
+        coords(ALL, ins[1]) - coords(ALL, ins[0]);
     for (idx_t in = 1; in < elemNodes - 1; in++)
-      node_dirs(ALL, inodes[in]) += coords(ALL, ins[in + 1]) - coords(ALL, ins[in - 1]);
-    node_dirs(ALL, inodes[elemNodes - 1]) += coords(ALL, ins[elemNodes - 1]) - coords(ALL, ins[elemNodes - 2]);
+      node_dirs(ALL, inodes[in]) +=
+          coords(ALL, ins[in + 1]) - coords(ALL, ins[in - 1]);
+    node_dirs(ALL, inodes[elemNodes - 1]) +=
+        coords(ALL, ins[elemNodes - 1]) - coords(ALL, ins[elemNodes - 2]);
   }
 
   for (idx_t igiven = 0; igiven < givenNodes_.size(); igiven++)
@@ -636,7 +660,8 @@ void specialCosseratRodModel::init_rot_() // LATER non-straight rods?
 
   for (idx_t in = 0; in < nodeCount; in++)
   {
-    if (material_ey_.size()) // if the y-direction is given, construct the z direction and then the x-direction
+    if (material_ey_.size()) // if the y-direction is given, construct
+                             // the z direction and then the x-direction
     {
       e_y = material_ey_;
       e_z = node_dirs[in];
@@ -683,21 +708,22 @@ void specialCosseratRodModel::get_geomStiff_(const Cubix &B,
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     B[ip] = 0.;
-    B[ip](TRANS_PART, SliceFrom(dofCount)) -= skew(stresses[ip][TRANS_PART]);
+    B[ip](TRANS_PART, SliceFrom(dofCount)) -=
+        skew(stresses[ip][TRANS_PART]);
     B[ip](ROT_PART, SliceFrom(dofCount)) -= skew(stresses[ip][ROT_PART]);
-    B[ip](SliceFrom(dofCount), TRANS_PART) += skew(stresses[ip][TRANS_PART]);
-    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) += matmul(stresses[ip][TRANS_PART], phiP[ip]);
-    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) -= dot(stresses[ip][TRANS_PART], phiP[ip]) * eye();
+    B[ip](SliceFrom(dofCount), TRANS_PART) +=
+        skew(stresses[ip][TRANS_PART]);
+    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) +=
+        matmul(stresses[ip][TRANS_PART], phiP[ip]);
+    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) -=
+        dot(stresses[ip][TRANS_PART], phiP[ip]) * eye();
   }
 }
 
-void specialCosseratRodModel::get_strains_(const Matrix &strains,
-                                           const Vector &w,
-                                           const Matrix &nodePhi_0,
-                                           const Matrix &nodeU,
-                                           const Cubix &nodeLambda,
-                                           const idx_t ie,
-                                           const bool spatial) const
+void specialCosseratRodModel::get_strains_(
+    const Matrix &strains, const Vector &w, const Matrix &nodePhi_0,
+    const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
+    const bool spatial) const
 {
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
@@ -730,8 +756,10 @@ void specialCosseratRodModel::get_strains_(const Matrix &strains,
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
-    strains[ip][TRANS_PART] = matmul(ipLambda[ip].transpose(), ipPhiP[ip]);
-    strains[ip][ROT_PART] = unskew(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]));
+    strains[ip][TRANS_PART] =
+        matmul(ipLambda[ip].transpose(), ipPhiP[ip]);
+    strains[ip][ROT_PART] =
+        unskew(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]));
   }
 
   // TEST_CONTEXT(strains)
@@ -750,13 +778,10 @@ void specialCosseratRodModel::get_strains_(const Matrix &strains,
   // TEST_CONTEXT(strains)
 }
 
-void specialCosseratRodModel::get_stresses_(const Matrix &stresses,
-                                            const Vector &w,
-                                            const Matrix &nodePhi_0,
-                                            const Matrix &nodeU,
-                                            const Cubix &nodeLambda,
-                                            const idx_t ie,
-                                            const bool spatial) const
+void specialCosseratRodModel::get_stresses_(
+    const Matrix &stresses, const Vector &w, const Matrix &nodePhi_0,
+    const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
+    const bool spatial) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
@@ -776,8 +801,10 @@ void specialCosseratRodModel::get_stresses_(const Matrix &stresses,
     elemC(TRANS_PART, TRANS_PART) *= thickFact_[0] * thickFact_[1];
     elemC(3, 3) *= pow(thickFact_[1], 3) * thickFact_[0];
     elemC(4, 4) *= pow(thickFact_[0], 3) * thickFact_[1];
-    elemC(5, 5) *= shearMod_ * (areaMoment_[0] * pow(thickFact_[1], 3) * thickFact_[0] +
-                                areaMoment_[1] * pow(thickFact_[0], 3) * thickFact_[1]);
+    elemC(5, 5) *=
+        shearMod_ *
+        (areaMoment_[0] * pow(thickFact_[1], 3) * thickFact_[0] +
+         areaMoment_[1] * pow(thickFact_[0], 3) * thickFact_[1]);
   }
 
   // get the stresses (material + spatial );
@@ -817,7 +844,8 @@ void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
 
     nodeU[inode] = disp[idofs_trans];
     expVec(nodeLambda[inode], (Vector)disp[idofs_rot]);
-    nodeLambda[inode] = matmul(nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
+    nodeLambda[inode] =
+        matmul(nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
   }
 }
 
@@ -843,7 +871,8 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
   Cubix PI(dofCount, dofCount, ipCount);
   Matrix spatialC(dofCount, dofCount);
-  Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT, ipCount);
+  Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
+                  ipCount);
 
   // DOF INDICES
   IdxVector inodes(nodeCount);
@@ -900,12 +929,15 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
           dofs_->getDofIndices(Jdofs, inodes[Jnode], jtypes_);
 
           // Stiffness contribution S ( element stiffness matrix )
-          addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC, XI[ip][Jnode].transpose());
+          addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
+                                          XI[ip][Jnode].transpose());
           // TEST_CONTEXT(addS)
           mbld.addBlock(Idofs, Jdofs, addS);
 
-          // Stiffness contribution T ( element geometric stiffness matrix)
-          addT = weights[ip] * mc3.matmul(PSI[ip][Inode], geomStiff[ip], PSI[ip][Jnode].transpose());
+          // Stiffness contribution T ( element geometric
+          // stiffness matrix)
+          addT = weights[ip] * mc3.matmul(PSI[ip][Inode], geomStiff[ip],
+                                          PSI[ip][Jnode].transpose());
           // TEST_CONTEXT(addT)
           if (!symmetric_only_)
             mbld.addBlock(Idofs, Jdofs, addT);
@@ -989,8 +1021,11 @@ void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
                                          Vector &disp) const
 {
-  JEM_ASSERT2(cross_section_ == "rectangle" || cross_section_ == "circle", "Mass Matrix cannot be constructed without knowing the type of crossection");
-  WARN_ASSERT2(density_ > 0, "Mass Matrix will have no effect without density!");
+  JEM_ASSERT2(cross_section_ == "rectangle" || cross_section_ == "circle",
+              "Mass Matrix cannot be constructed without knowing the "
+              "type of crossection");
+  WARN_ASSERT2(density_ > 0,
+               "Mass Matrix will have no effect without density!");
   MatmulChain<double, 3> mc3;
 
   const idx_t ipCount = shapeM_->ipointCount();
@@ -1042,7 +1077,10 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
         spatialM = 0.0;
         for (idx_t ip = 0; ip < ipCount; ip++)
         {
-          spatialM += weights[ip] * shapes(Inode, ip) * shapes(Jnode, ip) * mc3.matmul(ipLambda[ip], materialM_, ipLambda[ip].transpose());
+          spatialM += weights[ip] * shapes(Inode, ip) *
+                      shapes(Jnode, ip) *
+                      mc3.matmul(ipLambda[ip], materialM_,
+                                 ipLambda[ip].transpose());
         }
         mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
 
@@ -1053,29 +1091,42 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
           if (Inode == 0)
             node_len = norm2(coords[1] - coords[0]) / 2.;
           else if (Inode == nodeCount - 1)
-            node_len = norm2(coords[nodeCount - 1] - coords[nodeCount - 2]) / 2.;
+            node_len =
+                norm2(coords[nodeCount - 1] - coords[nodeCount - 2]) / 2.;
           else
             node_len = norm2(coords[Inode + 1] - coords[Inode - 1]) / 2.;
 
           if (cross_section_ == "circle")
           {
-            materialJ(0, 0) = density_ * area_ * node_len / 12. * (pow(radius_, 2) * 3 + pow(node_len, 2));
-            materialJ(1, 1) = density_ * area_ * node_len / 12. * (pow(radius_, 2) * 3 + pow(node_len, 2));
-            materialJ(2, 2) = density_ * area_ * node_len / 2. * pow(radius_, 2);
+            materialJ(0, 0) = density_ * area_ * node_len / 12. *
+                              (pow(radius_, 2) * 3 + pow(node_len, 2));
+            materialJ(1, 1) = density_ * area_ * node_len / 12. *
+                              (pow(radius_, 2) * 3 + pow(node_len, 2));
+            materialJ(2, 2) =
+                density_ * area_ * node_len / 2. * pow(radius_, 2);
           }
           if (cross_section_ == "rectangle")
           {
-            materialJ(0, 0) = density_ * area_ * node_len / 12. * (pow(side_length_[1], 2) + pow(node_len, 2));
-            materialJ(1, 1) = density_ * area_ * node_len / 12. * (pow(side_length_[0], 2) + pow(node_len, 2));
-            materialJ(2, 2) = density_ * area_ * node_len / 12. * (pow(side_length_[0], 2) + pow(side_length_[1], 2));
+            materialJ(0, 0) =
+                density_ * area_ * node_len / 12. *
+                (pow(side_length_[1], 2) + pow(node_len, 2));
+            materialJ(1, 1) =
+                density_ * area_ * node_len / 12. *
+                (pow(side_length_[0], 2) + pow(node_len, 2));
+            materialJ(2, 2) =
+                density_ * area_ * node_len / 12. *
+                (pow(side_length_[0], 2) + pow(side_length_[1], 2));
           }
 
           if (Inode == 0 || Inode == nodeCount - 1) // steiner parts
           {
-            materialJ(0, 0) += density_ * area_ * node_len * pow(node_len / 2., 2);
-            materialJ(1, 1) += density_ * area_ * node_len * pow(node_len / 2., 2);
+            materialJ(0, 0) +=
+                density_ * area_ * node_len * pow(node_len / 2., 2);
+            materialJ(1, 1) +=
+                density_ * area_ * node_len * pow(node_len / 2., 2);
           }
-          spatialJ = mc3.matmul(nodeLambda[Inode], materialJ, nodeLambda[Inode].transpose());
+          spatialJ = mc3.matmul(nodeLambda[Inode], materialJ,
+                                nodeLambda[Inode].transpose());
 
           mbld.addBlock(idofs[ROT_PART], jdofs[ROT_PART], spatialJ);
         }
@@ -1090,9 +1141,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
 
 Ref<Model> specialCosseratRodModel::makeNew
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
+    (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {

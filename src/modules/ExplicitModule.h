@@ -1,31 +1,33 @@
 #pragma once
 
-#include <jem/base/ClassTemplate.h>
+#include "utils/helpers.h"
+#include <jem/base/ArithmeticException.h>
 #include <jem/base/Array.h>
+#include <jem/base/ClassTemplate.h>
+#include <jem/base/System.h>
 #include <jem/base/array/operators.h>
 #include <jem/util/Event.h>
 #include <jem/util/Properties.h>
-#include <jem/base/System.h>
-#include <jem/base/ArithmeticException.h>
+#include <jem/util/PropertyException.h>
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/DiagMatrixObject.h>
+#include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/app/Module.h>
-#include <jive/solver/Solver.h>
-#include <jive/implict/Names.h>
-#include <jive/util/Globdat.h>
-#include <jive/util/ItemSet.h>
-#include <jive/util/DofSpace.h>
-#include <jive/util/Constraints.h>
-#include <jive/util/FuncUtils.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/implict/Names.h>
 #include <jive/implict/utilities.h>
-#include <jive/model/Model.h>
 #include <jive/model/Actions.h>
+#include <jive/model/Model.h>
 #include <jive/model/StateVector.h>
+#include <jive/solver/Solver.h>
+#include <jive/solver/SolverParams.h>
 #include <jive/solver/declare.h>
 #include <jive/solver/utilities.h>
-#include <jive/solver/SolverParams.h>
-#include "utils/helpers.h"
+#include <jive/util/Constraints.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/ItemSet.h>
 
 using jem::idx_t;
 using jem::newInstance;
@@ -39,6 +41,7 @@ using jive::StringVector;
 using jive::Vector;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::DiagMatrixObject;
+using jive::algebra::FlexMatrixBuilder;
 using jive::app::Module;
 using jive::implict::newSolverParams;
 using jive::model::ActionParams;
@@ -74,6 +77,7 @@ public:
   static const char *TYPE_NAME;
   static const char *STEP_COUNT;
   static const char *SO3_DOFS;
+  static const char *REPORT_ENERGY;
 
   explicit ExplicitModule
 
@@ -81,8 +85,7 @@ public:
 
   virtual Status init
 
-      (const Properties &conf,
-       const Properties &props,
+      (const Properties &conf, const Properties &props,
        const Properties &globdat);
 
   virtual Status run
@@ -95,20 +98,16 @@ public:
 
   virtual void configure
 
-      (const Properties &props,
-       const Properties &globdat);
+      (const Properties &props, const Properties &globdat);
 
   virtual void getConfig
 
-      (const Properties &props,
-       const Properties &globdat) const;
+      (const Properties &props, const Properties &globdat) const;
 
   static Ref<Module> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -116,14 +115,16 @@ protected:
   virtual ~ExplicitModule();
 
 private:
-  void restart_
-
-      (const Properties &globdat);
+  void restart_(const Properties &globdat);
 
   void invalidate_();
 
+  void store_energy_(const Vector &fint, const Vector &velo,
+                     const Properties &variables);
+
 private:
   bool valid_;
+  bool report_energy_;
   double dtime_;
   idx_t stepCount_;
   MassMode mode_;

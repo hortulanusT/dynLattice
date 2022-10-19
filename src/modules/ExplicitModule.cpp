@@ -1,5 +1,6 @@
 
 #include "modules/ExplicitModule.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class ExplicitModule
@@ -8,6 +9,7 @@
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
+const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -23,12 +25,15 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
+  report_energy_ = false;
   stepCount_ = 1;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
 }
 
-ExplicitModule::~ExplicitModule() {}
+ExplicitModule::~ExplicitModule()
+{
+}
 
 //-----------------------------------------------------------------------
 //   init
@@ -51,6 +56,10 @@ Module::Status ExplicitModule::init
   Ref<AbstractMatrix> inertia;
   Ref<DiagMatrixObject> diagInertia;
 
+  // whether to report the energy
+  myProps.find(report_energy_, REPORT_ENERGY);
+  myConf.set(REPORT_ENERGY, report_energy_);
+
   // get the step count
 
   myProps.find(stepCount_, STEP_COUNT, 1, 2);
@@ -71,7 +80,8 @@ Module::Status ExplicitModule::init
 
   // get the SO3 dof names
 
-  if (myProps.find(SO3_dof_names, SO3_DOFS)) {
+  if (myProps.find(SO3_dof_names, SO3_DOFS))
+  {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
     SO3_dofs_.resize(SO3_dof_names.size());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
@@ -106,14 +116,16 @@ Module::Status ExplicitModule::init
     mode_ = CONSISTENT;
 
   // prepare solver for modes
-  if (mode_ == LUMPED) {
+  if (mode_ == LUMPED)
+  {
     massInv_.resize(dofs_->dofCount());
     Globdat::storeFor("LumpedMass", diagInertia, this, globdat);
 
     myConf.set("mode", "lumped");
   }
 
-  if (mode_ == CONSISTENT) {
+  if (mode_ == CONSISTENT)
+  {
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("solver", myConf, myProps, sparams, globdat);
@@ -203,7 +215,8 @@ Module::Status ExplicitModule::run
   if (mode_ == CONSISTENT)
     solver_->solve(a_new, fres);
 
-  if (mode_ == LUMPED) {
+  if (mode_ == LUMPED)
+  {
     a_new = massInv_ * fres;
     params.get(cons, ActionParams::CONSTRAINTS);
     jive::util::setSlaveDofs(a_new, *cons);
@@ -229,7 +242,8 @@ Module::Status ExplicitModule::run
   u_new = u_old + du;
 
   // do different update for rotational dofs
-  for (idx_t inode = 0; inode < rdofs_.size(1); inode++) {
+  for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+  {
     r_node = u_old[rdofs_[inode]];
     d_r = du[rdofs_[inode]];
 
@@ -256,6 +270,10 @@ Module::Status ExplicitModule::run
   if (FuncUtils::evalCond(*updCond_, globdat))
     invalidate_();
 
+  // if the engergy needs to be reported, do so
+  if (report_energy_)
+    store_energy_(fint, v_new, Globdat::getVariables(globdat));
+
   return OK;
 }
 
@@ -263,7 +281,8 @@ Module::Status ExplicitModule::run
 //   shutdown
 //-----------------------------------------------------------------------
 
-void ExplicitModule::shutdown(const Properties &globdat) {
+void ExplicitModule::shutdown(const Properties &globdat)
+{
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -300,10 +319,41 @@ void ExplicitModule::getConfig
 }
 
 //-----------------------------------------------------------------------
+//   store_energy_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::store_energy_(const Vector &fint, const Vector &velo,
+                                   const Properties &variables)
+{
+  double E_pot, delta_E_pot, E_kin;
+  Vector temp(velo.size());
+
+  delta_E_pot = dotProduct(Vector(velo * dtime_), fint);
+
+  solver_->getMatrix()->matmul(temp, velo);
+  E_kin = 0.5 * dotProduct(temp, velo);
+
+  try
+  {
+    variables.find(E_pot, "PotentialEnergy");
+    E_pot += delta_E_pot;
+  }
+  catch (const jem::util::PropertyException &e)
+  {
+    E_pot = delta_E_pot;
+  }
+
+  variables.set("PotentialEnergy", E_pot);
+  variables.set("KineticEnergy", E_kin);
+  variables.set("TotalEnergy", E_pot + E_kin);
+}
+
+//-----------------------------------------------------------------------
 //   restart_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::restart_(const Properties &globdat) {
+void ExplicitModule::restart_(const Properties &globdat)
+{
   Properties params;
   IdxVector iitems(dofs_->getItems()->size());
 
@@ -311,7 +361,8 @@ void ExplicitModule::restart_(const Properties &globdat) {
       << " ...Updating mass information for explicit solver\n";
   model_->takeAction(Actions::UPD_MATRIX2, params, globdat);
 
-  if (SO3_dofs_.size()) {
+  if (SO3_dofs_.size())
+  {
     jem::System::info(myName_)
         << " ...Updating SO(3) dof inormation for explicit solver\n";
     rdofs_.resize(SO3_dofs_.size(), dofs_->getItems()->size());
@@ -319,7 +370,8 @@ void ExplicitModule::restart_(const Properties &globdat) {
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, SO3_dofs_[idof]);
   }
 
-  if (mode_ == LUMPED) {
+  if (mode_ == LUMPED)
+  {
     Ref<DiagMatrixObject> inertia;
     Globdat::findFor(inertia, "LumpedMass", this, globdat);
 
@@ -337,7 +389,10 @@ void ExplicitModule::restart_(const Properties &globdat) {
 //   invalidate_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::invalidate_() { valid_ = false; }
+void ExplicitModule::invalidate_()
+{
+  valid_ = false;
+}
 
 //-----------------------------------------------------------------------
 //   makeNew
@@ -356,7 +411,8 @@ Ref<Module> ExplicitModule::makeNew
 //   declare
 //-----------------------------------------------------------------------
 
-void ExplicitModule::declare() {
+void ExplicitModule::declare()
+{
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare(TYPE_NAME, &ExplicitModule::makeNew);

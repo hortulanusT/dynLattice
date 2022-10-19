@@ -1,8 +1,8 @@
 #include <jive/app/Application.h>
 
+#include "misc/_declare.h"
 #include "models/_declare.h"
 #include "modules/_declare.h"
-#include "misc/_declare.h"
 
 //-----------------------------------------------------------------------
 //   mainModule
@@ -35,6 +35,9 @@ Ref<Module> mainModule()
   // Set up the module chain. These modules will be called by Jive in
   // the order that they have been added to the chain.
   Ref<ChainModule> chain = newInstance<ChainModule>();
+
+  // Git Report Module: Report the current status of the git repo
+  chain->pushBack(newInstance<GitReportModule>());
 
   // UserConf: reads user input
   chain->pushBack(newInstance<UserconfModule>("Input"));

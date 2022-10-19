@@ -21,10 +21,8 @@
  
 # :heavy_check_mark: Information
 ## cluster syncing
-```
-rsync -vax studies/programs/cluster/ cluster:$HOME/eqv-design-scripts
-
-rsync -vax cluster:$HOME/cosseratrod/studies/output/eqv-design/*.csv studies/output/eqv-design
+``` bash
+rsync -vax $TARGET $DESTINATION
 ```
 ## debugging
 - call (dbg) call dprint(&...) to get any matrix/vector/... printed live
