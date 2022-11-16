@@ -14,7 +14,8 @@
 const char *PBCGroupOutputModule::TYPE_NAME = "PBCGroupOutput";
 const char *PBCGroupOutputModule::CHILD_NAME = "sampling";
 
-PBCGroupOutputModule::PBCGroupOutputModule(const String &name) : Super(name)
+PBCGroupOutputModule::PBCGroupOutputModule(const String &name)
+    : Super(name)
 {
   child_ = newInstance<SampleModule>(myName_ + "." + CHILD_NAME);
 }
@@ -40,7 +41,8 @@ Module::Status PBCGroupOutputModule::init(const Properties &conf,
   elements[elements.size() - 1] = "all";
   myProps.set("elemGroups", elements);
 
-  JEM_PRECHECK2(Super::init(conf, props, globdat) == Status::OK, "Error setting up the GroupOutputModule!");
+  JEM_PRECHECK2(Super::init(conf, props, globdat) == Status::OK,
+                "Error setting up the GroupOutputModule!");
 
   // configure the output module
   // LATER get multiple Children for different kinds of outputs
@@ -60,7 +62,8 @@ Module::Status PBCGroupOutputModule::init(const Properties &conf,
 
   child_->configure(props, globdat);
   child_->getConfig(conf, globdat);
-  JEM_PRECHECK2(child_->init(conf, props, globdat) == Status::OK, "Error setting up the SampleModule!");
+  JEM_PRECHECK2(child_->init(conf, props, globdat) == Status::OK,
+                "Error setting up the SampleModule!");
 
   return Status::OK;
 }
@@ -68,6 +71,41 @@ Module::Status PBCGroupOutputModule::init(const Properties &conf,
 Module::Status PBCGroupOutputModule::run(const Properties &globdat)
 {
   Super::run(globdat);
+
+  Properties myVars = Globdat::getVariables(globdat);
+  Properties currentVars, extentVars;
+
+  NodeSet nodes = NodeSet::get(globdat, getContext());
+  Matrix coords(nodes.size(), nodes.rank());
+  nodes.getCoords(coords.transpose());
+
+  for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size();
+       iElemGroup++)
+  {
+    currentVars = myVars.makeProps(elemGroups_[iElemGroup]);
+    extentVars = currentVars.makeProps("extent");
+
+    // report back the extent
+    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
+    {
+      IdxVector n_min =
+          NodeGroup::get(
+              String::format("%cmin", nodeDofNames_[iDof].back()), nodes,
+              globdat, getContext())
+              .getIndices();
+      IdxVector n_max =
+          NodeGroup::get(
+              String::format("%cmax", nodeDofNames_[iDof].back()), nodes,
+              globdat, getContext())
+              .getIndices();
+
+      double c_min = min(coords(n_min, iDof));
+      double c_max = max(coords(n_max, iDof));
+
+      extentVars.set(elemDofNames_[iDof], c_max - c_min);
+    }
+  }
+
   child_->run(globdat);
 
   return Status::OK;
@@ -103,7 +141,8 @@ String PBCGroupOutputModule::getHeader_(String head) const
   return head[SliceTo(head.size() - 1)];
 }
 
-StringVector PBCGroupOutputModule::getDataSets_(StringVector existingDataSets) const
+StringVector PBCGroupOutputModule::getDataSets_(
+    StringVector existingDataSets) const
 {
   const idx_t dim = elemDofs_.size();
 
@@ -119,16 +158,22 @@ StringVector PBCGroupOutputModule::getDataSets_(StringVector existingDataSets) c
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
     {
-      dataSets.pushBack(String::format("(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s", elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j]));
+      dataSets.pushBack(String::format(
+          "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s",
+          elemDofNames_[j].back(), nodeDofNames_[i],
+          elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j]));
     }
 
   // Prepare areas
   StringVector areas(dim);
   if (dim == 3)
   {
-    areas[0] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[2]);
-    areas[1] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[0], elemDofNames_[2]);
-    areas[2] = String::format("( all.extent.%s * all.extent.%s )", elemDofNames_[1], elemDofNames_[0]);
+    areas[0] = String::format("( all.extent.%s * all.extent.%s )",
+                              elemDofNames_[1], elemDofNames_[2]);
+    areas[1] = String::format("( all.extent.%s * all.extent.%s )",
+                              elemDofNames_[0], elemDofNames_[2]);
+    areas[2] = String::format("( all.extent.%s * all.extent.%s )",
+                              elemDofNames_[1], elemDofNames_[0]);
   }
   else if (dim == 2)
   {
@@ -140,12 +185,15 @@ StringVector PBCGroupOutputModule::getDataSets_(StringVector existingDataSets) c
     areas[0] = "1";
   }
   else
-    throw jem::Exception(JEM_FUNC, String::format("unkown dimension number %d", dim));
+    throw jem::Exception(
+        JEM_FUNC, String::format("unkown dimension number %d", dim));
 
   // 1st PK Tensor
   for (idx_t i = 0; i < dim; i++)
     for (idx_t j = 0; j < dim; j++)
-      dataSets.pushBack(String::format("%cmax.resp.%s / %s", elemDofNames_[j].back(), nodeDofNames_[i], areas[j]));
+      dataSets.pushBack(String::format("%cmax.resp.%s / %s",
+                                       elemDofNames_[j].back(),
+                                       nodeDofNames_[i], areas[j]));
 
   return dataSets.toArray();
 }
