@@ -11,6 +11,7 @@
 
 #include <cmath>
 
+#include <jem/base/Float.h>
 #include <jem/util/Properties.h>
 #include <jem/util/PropertyException.h>
 
@@ -44,7 +45,8 @@ using jive::util::Globdat;
 
 using namespace jive_helpers;
 
-class periodicBCModel : public Model {
+class periodicBCModel : public Model
+{
 public:
   static const char *TYPE_NAME;
   static const char *MODE_PROP;
@@ -52,7 +54,11 @@ public:
   static const char *DOF_NAMES_PROP;
   static const char *ROT_NAMES_PROP;
 
-  enum Mode { LOAD, DISP };
+  enum Mode
+  {
+    LOAD,
+    DISP
+  };
 
   explicit periodicBCModel
 
