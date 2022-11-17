@@ -28,7 +28,6 @@ MY_CXX_STD_FLAGS := '-std=c++17'
 #######################################################################
 ##   report git hash                                                 ##
 #######################################################################
-$(shell touch $(SRCDIR)/modules/GitReportModule.cpp)
 GIT_COMMIT := $(shell git rev-parse HEAD)
 GIT_DIRTY := $(shell git status --porcelain | wc -l)
 ifeq ($(GIT_DIRTY), 0)
