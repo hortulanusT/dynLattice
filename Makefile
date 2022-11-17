@@ -28,7 +28,7 @@ MY_CXX_STD_FLAGS := '-std=c++17'
 #######################################################################
 ##   report git hash                                                 ##
 #######################################################################
-touch $(SRCDIR)/modules/GitReportModule.cpp
+$(shell touch $(SRCDIR)/modules/GitReportModule.cpp)
 
 #######################################################################
 ##   Include submodules specifics                                    ##
