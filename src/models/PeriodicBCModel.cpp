@@ -62,12 +62,21 @@ periodicBCModel::periodicBCModel
   // get the Gradient
   // H_ij = du_i/dX_j
   grad_.resize(pbcRank_, pbcRank_);
-  grad_ = 0.;
+  grad_ = 0;
+  Ref<Object> dummy;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
-      myProps.find(grad_(iDof, iEdge),
-                   gradName_ + String(iDof + 1) + String(iEdge + 1));
+    {
+      if (myProps.find(dummy,
+                       gradName_ + String(iDof + 1) + String(iEdge + 1)))
+        if (!(dummy->toString().toUpper().equals("NAN")))
+          grad_(iDof, iEdge) = jem::Float::dynamicCast(*dummy)->toFloat();
+        else
+          grad_(iDof, iEdge) = NAN;
+      else
+        grad_(iDof, iEdge) = 0.;
+    }
 
   JEM_ASSERT2(jem::sum(grad_) != 0, "no displacement gradient given!");
 
@@ -188,13 +197,15 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
   // TEST_PRINTER((*cons_))
 
   Matrix corner_deform(pbcRank_, pbcRank_);
-  Matrix size(pbcRank_, pbcRank_);
-  size = 0;
+  double size;
 
   for (idx_t i = 0; i < pbcRank_; i++)
-    Globdat::getVariables("all.extent", globdat)
-        .get(size(i, i), dofNames_[i]);
-  corner_deform = scale * matmul(grad_, size);
+  {
+    Globdat::getVariables("all.extent", globdat).get(size, dofNames_[i]);
+    corner_deform[i] = scale * size * grad_[i];
+  }
+
+  TEST_CONTEXT(corner_deform)
 
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -205,9 +216,10 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       // iterate over the nodes
       for (idx_t iNode = 0; iNode < slaveDofs_(iDof, iEdge).size();
            iNode++)
-        cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
-                             corner_deform(iDof, iEdge),
-                             masterDofs_(iDof, iEdge)[iNode], 1.);
+        if (!std::isnan(corner_deform(iDof, iEdge)))
+          cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
+                               corner_deform(iDof, iEdge),
+                               masterDofs_(iDof, iEdge)[iNode], 1.);
     }
   }
 
