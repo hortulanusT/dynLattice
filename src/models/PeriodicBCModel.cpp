@@ -6,10 +6,11 @@
  * Author: T. Gaertner (t.gartner@tudelft.nl)
  * Date: September 21
  *
+ * ONLY WORKS FOR RECTANGULAR UNIT CELLS
+ *
  */
 #include "PeriodicBCModel.h"
 #include <jive/util/Printer.h>
-// TODO remove load mode
 
 const char *periodicBCModel::TYPE_NAME = "PeriodicBC";
 const char *periodicBCModel::MODE_PROP = "mode";
@@ -61,30 +62,14 @@ periodicBCModel::periodicBCModel
   // get the Gradient
   // H_ij = du_i/dX_j
   grad_.resize(pbcRank_, pbcRank_);
-  BoolMatrix given(grad_.shape());
   grad_ = 0.;
-  for (idx_t i = 0; i < pbcRank_; i++)
-    grad_(i, i) = NAN;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
-      given(iDof, iEdge) =
-          myProps.find(grad_(iDof, iEdge),
-                       gradName_ + String(iDof + 1) + String(iEdge + 1));
+      myProps.find(grad_(iDof, iEdge),
+                   gradName_ + String(iDof + 1) + String(iEdge + 1));
 
-  // ensure non given dofs on constrained edges stay zero
-  for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
-    if (testany(given[iEdge]))
-      for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-        if (!given(iDof, iEdge))
-          grad_(iDof, iEdge) = 0;
-
-  // ensure non given Edges for given dofs stay zero
-  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    if (testany(given(iDof, ALL)))
-      for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
-        if (!given(iDof, iEdge))
-          grad_(iDof, iEdge) = 0;
+  JEM_ASSERT2(jem::sum(grad_) != 0, "no displacement gradient given!");
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -190,27 +175,26 @@ void periodicBCModel::init_(const Properties &globdat)
     }
   }
 
-  // fix the first node of the bottom Edge
+  // fix the first node of the left edge
   for (idx_t i = 0; i < pbcRank_; i++)
     cons_->addConstraint(masterDofs_(i, 0)[0]);
 
-  // cons_->printTo(jive::util::Printer::get());
-  // jive::util::Printer::flush();
+  // TEST_PRINTER((*cons_))
 }
 
 void periodicBCModel::setConstraints_(const Properties &globdat,
                                       const double scale)
 {
-  // cons_->printTo(jive::util::Printer::get());
-  // jive::util::Printer::flush();
+  // TEST_PRINTER((*cons_))
+
   Matrix corner_deform(pbcRank_, pbcRank_);
-  Vector size(pbcRank_);
+  Matrix size(pbcRank_, pbcRank_);
+  size = 0;
 
   for (idx_t i = 0; i < pbcRank_; i++)
     Globdat::getVariables("all.extent", globdat)
-        .get(size[i], dofNames_[i]);
-  for (idx_t i = 0; i < pbcRank_; i++)
-    corner_deform[i] = grad_[i] * size[i] * scale;
+        .get(size(i, i), dofNames_[i]);
+  corner_deform = scale * matmul(grad_, size);
 
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -221,21 +205,21 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       // iterate over the nodes
       for (idx_t iNode = 0; iNode < slaveDofs_(iDof, iEdge).size();
            iNode++)
-        if (!jem::Float::isNaN(corner_deform(iDof, iEdge)))
-          cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
-                               corner_deform(iDof, iEdge),
-                               masterDofs_(iDof, iEdge)[iNode], 1.);
+        cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
+                             corner_deform(iDof, iEdge),
+                             masterDofs_(iDof, iEdge)[iNode], 1.);
     }
   }
 
-  cons_->printTo(jive::util::Printer::get());
-  jive::util::Printer::flush();
+  TEST_PRINTER((*cons_))
 }
 
 void periodicBCModel::getExtVec_(const Vector &f,
                                  const Properties &globdat,
                                  const double scale)
 {
+  NOT_IMPLEMENTED
+
   double extent = 1.;
   double area = 1.;
   idx_t nNodes = 0.;
