@@ -80,6 +80,7 @@ Module::Status TangentOutputModule::init(const Properties &conf,
       pbcProp = myProps.makeProps(modelName);
       pbcProp.set(jive::model::ModelFactory::TYPE_PROP,
                   periodicBCModel::TYPE_NAME);
+      pbcProp.set(periodicBCModel::MODE_PROP, "upd");
       pbcProp.set(periodicBCModel::DOF_NAMES_PROP, dof_names);
       pbcProp.set(periodicBCModel::ROT_NAMES_PROP, rdof_names);
       pbcProp.set(String::format("H%i%i", i + 1, j + 1), -1.);
@@ -161,6 +162,8 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
   if (!FuncUtils::evalCond(*sampleCond_, globdat))
     return OK;
 
+  jem::System::info(myName_) << " ...Calculating tangent properties\n";
+
   using jive::model::ActionParams;
   using jive::model::Actions;
 
@@ -205,17 +208,23 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   masterModel_->takeAction(Actions::GET_INT_VECTOR, params, locdat);
   params.clear();
 
+  groupUpdate_->run(locdat);
   for (idx_t iComp = 0; iComp < trials; iComp++)
   {
     strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], locdat);
     stresses0[iComp] = FuncUtils::evalExpr(stresses_[iComp], locdat);
   }
 
+  // TEST_CONTEXT(strains0)
+  // TEST_CONTEXT(stresses0)
+  // TEST_PRINTER((*cons_))
+
   for (idx_t iPBC = 0; iPBC < trials; iPBC++)
   {
     cons_->clear();
 
     params.set(ActionParams::SCALE_FACTOR, perturb_);
+    params.set(periodicBCModel::CURRENTGRAD_PARAM, strains0);
     pbcModels_[iPBC]->takeAction(Actions::INIT, params, locdat);
     pbcModels_[iPBC]->takeAction(Actions::GET_CONSTRAINTS, params,
                                  locdat);
@@ -238,6 +247,9 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
     strains[iPBC] -= strains0;
     stresses[iPBC] -= stresses0;
   }
+
+  // TEST_CONTEXT(strains)
+  // TEST_CONTEXT(stresses)
 }
 
 void TangentOutputModule::storeTangentProps_(const Matrix &strains,

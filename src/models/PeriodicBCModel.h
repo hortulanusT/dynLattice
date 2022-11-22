@@ -22,6 +22,7 @@
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
@@ -38,6 +39,7 @@ using jive::fem::NodeSet;
 using jive::implict::ArclenActions;
 using jive::implict::ArclenParams;
 using jive::model::Model;
+using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
@@ -53,10 +55,12 @@ public:
   static const char *GRAD_PROP;
   static const char *DOF_NAMES_PROP;
   static const char *ROT_NAMES_PROP;
+  static const char *CURRENTGRAD_PARAM;
 
   enum Mode
   {
     LOAD,
+    UPD,
     DISP
   };
 
@@ -84,7 +88,8 @@ private:
 
   void setConstraints_
 
-      (const Properties &globdat, const double scale = 0.);
+      (const Properties &globdat, const Matrix &currentGrad,
+       const double scale = 0.);
 
   void getExtVec_
 
