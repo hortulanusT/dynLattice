@@ -72,40 +72,6 @@ Module::Status PBCGroupOutputModule::run(const Properties &globdat)
 {
   Super::run(globdat);
 
-  Properties myVars = Globdat::getVariables(globdat);
-  Properties currentVars, extentVars;
-
-  NodeSet nodes = NodeSet::get(globdat, getContext());
-  Matrix coords(nodes.size(), nodes.rank());
-  nodes.getCoords(coords.transpose());
-
-  for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size();
-       iElemGroup++)
-  {
-    currentVars = myVars.makeProps(elemGroups_[iElemGroup]);
-    extentVars = currentVars.makeProps("extent");
-
-    // report back the extent
-    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
-    {
-      IdxVector n_min =
-          NodeGroup::get(
-              String::format("%cmin", nodeDofNames_[iDof].back()), nodes,
-              globdat, getContext())
-              .getIndices();
-      IdxVector n_max =
-          NodeGroup::get(
-              String::format("%cmax", nodeDofNames_[iDof].back()), nodes,
-              globdat, getContext())
-              .getIndices();
-
-      double c_min = min(coords(n_min, iDof));
-      double c_max = max(coords(n_max, iDof));
-
-      extentVars.set(elemDofNames_[iDof], c_max - c_min);
-    }
-  }
-
   child_->run(globdat);
 
   return Status::OK;
@@ -155,45 +121,69 @@ StringVector PBCGroupOutputModule::getDataSets_(
     dataSets.pushBack("i");
 
   // displacement gradient
-  for (idx_t i = 0; i < dim; i++)
-    for (idx_t j = 0; j < dim; j++)
-    {
-      dataSets.pushBack(String::format(
-          "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s",
-          elemDofNames_[j].back(), nodeDofNames_[i],
-          elemDofNames_[j].back(), nodeDofNames_[i], elemDofNames_[j]));
-    }
-
-  // Prepare areas
-  StringVector areas(dim);
-  if (dim == 3)
-  {
-    areas[0] = String::format("( all.extent.%s * all.extent.%s )",
-                              elemDofNames_[1], elemDofNames_[2]);
-    areas[1] = String::format("( all.extent.%s * all.extent.%s )",
-                              elemDofNames_[0], elemDofNames_[2]);
-    areas[2] = String::format("( all.extent.%s * all.extent.%s )",
-                              elemDofNames_[1], elemDofNames_[0]);
-  }
-  else if (dim == 2)
-  {
-    areas[0] = "all.extent." + elemDofNames_[1];
-    areas[1] = "all.extent." + elemDofNames_[0];
-  }
-  else if (dim == 1)
-  {
-    areas[0] = "1";
-  }
-  else
-    throw jem::Exception(
-        JEM_FUNC, String::format("unkown dimension number %d", dim));
+  for (String dispGrad : getDataSets(dim, true, false))
+    dataSets.pushBack(dispGrad);
 
   // 1st PK Tensor
-  for (idx_t i = 0; i < dim; i++)
-    for (idx_t j = 0; j < dim; j++)
-      dataSets.pushBack(String::format("%cmax.resp.%s / %s",
-                                       elemDofNames_[j].back(),
-                                       nodeDofNames_[i], areas[j]));
+  for (String stressPK : getDataSets(dim, false, true))
+    dataSets.pushBack(stressPK);
+
+  return dataSets.toArray();
+}
+
+StringVector PBCGroupOutputModule::getDataSets(
+    const idx_t dim, const bool strains, const bool stresses,
+    const StringVector dofNames)
+{
+  JEM_ASSERT2(dofNames.size() >= dim, "Not enough dofnames given!");
+  ArrayBuffer<String> dataSets;
+
+  if (strains)
+  {
+    // displacement gradient
+    for (idx_t i = 0; i < dim; i++)
+      for (idx_t j = 0; j < dim; j++)
+      {
+        dataSets.pushBack(String::format(
+            "(%cmax.disp.%s - %cmin.disp.%s) / all.extent.%s",
+            dofNames[j].back(), dofNames[i], dofNames[j].back(),
+            dofNames[i], dofNames[j]));
+      }
+  }
+
+  if (stresses)
+  {
+    // Prepare areas
+    StringVector areas(dim);
+    if (dim == 3)
+    {
+      areas[0] = String::format("( all.extent.%s * all.extent.%s )",
+                                dofNames[1], dofNames[2]);
+      areas[1] = String::format("( all.extent.%s * all.extent.%s )",
+                                dofNames[0], dofNames[2]);
+      areas[2] = String::format("( all.extent.%s * all.extent.%s )",
+                                dofNames[1], dofNames[0]);
+    }
+    else if (dim == 2)
+    {
+      areas[0] = "all.extent." + dofNames[1];
+      areas[1] = "all.extent." + dofNames[0];
+    }
+    else if (dim == 1)
+    {
+      areas[0] = "1";
+    }
+    else
+      throw jem::Exception(
+          JEM_FUNC, String::format("unkown dimension number %d", dim));
+
+    // 1st PK Tensor
+    for (idx_t i = 0; i < dim; i++)
+      for (idx_t j = 0; j < dim; j++)
+        dataSets.pushBack(String::format("%cmax.resp.%s / %s",
+                                         dofNames[j].back(), dofNames[i],
+                                         areas[j]));
+  }
 
   return dataSets.toArray();
 }

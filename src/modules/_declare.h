@@ -25,6 +25,7 @@
 #include "modules/GroupOutputModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
+#include "modules/TangentOutputModule.h"
 #include "modules/gmshInput/GMSHInputModule.h"
 #include "modules/paraview/ParaViewModule.h"
 
@@ -48,4 +49,5 @@ void declareModules()
   ForceOutputModule::declare();
   CSVOutputModule::declare();
   GitReportModule::declare();
+  TangentOutputModule::declare();
 }

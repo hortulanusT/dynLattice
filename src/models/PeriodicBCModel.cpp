@@ -184,10 +184,6 @@ void periodicBCModel::init_(const Properties &globdat)
     }
   }
 
-  // fix the first node of the left edge
-  for (idx_t i = 0; i < pbcRank_; i++)
-    cons_->addConstraint(masterDofs_(i, 0)[0]);
-
   // TEST_PRINTER((*cons_))
 }
 
@@ -205,7 +201,7 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
     corner_deform[i] = scale * size * grad_[i];
   }
 
-  TEST_CONTEXT(corner_deform)
+  // TEST_CONTEXT(corner_deform)
 
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -223,7 +219,11 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
     }
   }
 
-  TEST_PRINTER((*cons_))
+  // fix the first node of the left edge
+  for (idx_t i = 0; i < pbcRank_; i++)
+    cons_->addConstraint(masterDofs_(i, 0)[0]);
+
+  // TEST_PRINTER((*cons_))
 }
 
 void periodicBCModel::getExtVec_(const Vector &f,
