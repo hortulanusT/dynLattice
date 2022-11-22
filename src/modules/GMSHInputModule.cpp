@@ -17,7 +17,8 @@ const char *GMSHInputModule::ORDER = "order";
 const char *GMSHInputModule::MESH_DIM = "mesh_dim";
 const char *GMSHInputModule::SAVE_MSH = "mesh_file";
 const char *GMSHInputModule::STORE_TANGENTS = "store_tangents";
-const char *GMSHInputModule::ENTITY_NAMES[4] = {"point", "beam", "shell", "body"};
+const char *GMSHInputModule::ENTITY_NAMES[4] = {"point", "beam", "shell",
+                                                "body"};
 const char *GMSHInputModule::ONELAB_PROPS = "onelab";
 const char *GMSHInputModule::VERBOSE = "verbose";
 
@@ -25,9 +26,10 @@ const char *GMSHInputModule::VERBOSE = "verbose";
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-GMSHInputModule::GMSHInputModule(const String &name) :
+GMSHInputModule::GMSHInputModule(const String &name)
+    :
 
-                                                       Super(name)
+      Super(name)
 
 {
   verbose_ = true;
@@ -43,8 +45,7 @@ GMSHInputModule::~GMSHInputModule()
 
 Module::Status GMSHInputModule::init
 
-    (const Properties &conf,
-     const Properties &props,
+    (const Properties &conf, const Properties &props,
      const Properties &globdat)
 {
   String geoFile = "";
@@ -93,7 +94,8 @@ Module::Status GMSHInputModule::init
 
   // HANDLE GMSH
   gmsh::initialize();
-  gmsh::option::setNumber("General.Verbosity", 2); // 2 corresponds to warning level
+  gmsh::option::setNumber("General.Verbosity",
+                          2); // 2 corresponds to warning level
 
   if (geoFile.size())
   {
@@ -102,7 +104,7 @@ Module::Status GMSHInputModule::init
   }
   else
   {
-    // TODO Leon's function
+    // LATER Leon's function
   }
 
   if (myProps.find(saveMsh, SAVE_MSH))
@@ -147,8 +149,7 @@ void GMSHInputModule::shutdown(const Properties &globdat)
 
 void GMSHInputModule::openMesh_
 
-    (const String &geoFile,
-     const idx_t order)
+    (const String &geoFile, const idx_t order)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -191,7 +192,9 @@ void GMSHInputModule::prepareOnelab_
     gmsh::onelab::setNumber(makeCString(onelabKey).addr(), onelabVal);
 
     if (verbose_)
-      jem::System::info(myName_) << " ...Set GMSH variable '" << onelabKey << "' to a value of " << onelabVal[0] << "\n";
+      jem::System::info(myName_)
+          << " ...Set GMSH variable '" << onelabKey << "' to a value of "
+          << onelabVal[0] << "\n";
 
     onelabEnumerator->toNext();
   }
@@ -224,7 +227,9 @@ void GMSHInputModule::createNodes_
       coords[icoord] = gmsh_coords[inode * dim + icoord];
 
     if (verbose_)
-      jem::System::info(myName_) << " ...Created node " << nodes_.addNode(coords) << " at coordinates " << coords << "\n";
+      jem::System::info(myName_)
+          << " ...Created node " << nodes_.addNode(coords)
+          << " at coordinates " << coords << "\n";
     else
       nodes_.addNode(coords);
   }
@@ -238,8 +243,7 @@ void GMSHInputModule::createNodes_
 
 void GMSHInputModule::createElems_
 
-    (const Properties &globdat,
-     const idx_t offset)
+    (const Properties &globdat, const idx_t offset)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -269,14 +273,20 @@ void GMSHInputModule::createElems_
 
   for (idx_t ientity = 0; ientity < entities_.size(); ientity++)
   {
-    gmsh::model::mesh::getElements(types, elemTags, nodeTags, entities_[ientity][0], entities_[ientity][1]);
+    gmsh::model::mesh::getElements(types, elemTags, nodeTags,
+                                   entities_[ientity][0],
+                                   entities_[ientity][1]);
 
-    groupName = String(ENTITY_NAMES[entities_[ientity][0]]) + String('_') + String(++entityNumbering[entities_[ientity][0]]);
+    groupName = String(ENTITY_NAMES[entities_[ientity][0]]) +
+                String('_') +
+                String(++entityNumbering[entities_[ientity][0]]);
     groupElems.clear();
 
     for (size_t itype = 0; itype < types.size(); itype++)
     {
-      gmsh::model::mesh::getElementProperties(types[itype], elemName, dim, order, numNodes, localCoords, numPrimaryNodes);
+      gmsh::model::mesh::getElementProperties(
+          types[itype], elemName, dim, order, numNodes, localCoords,
+          numPrimaryNodes);
 
       for (size_t ielem = 0; ielem < elemTags[itype].size(); ielem++)
       {
@@ -284,27 +294,36 @@ void GMSHInputModule::createElems_
 
         for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
         {
-          elemNodes[inode * order] = nodeTags[itype][ielem * numNodes + inode] - offset;
+          elemNodes[inode * order] =
+              nodeTags[itype][ielem * numNodes + inode] - offset;
 
           if (inode * order + 1 == numNodes)
             break;
           for (idx_t jnode = 1; jnode < order; jnode++)
-            elemNodes[inode * order + jnode] = nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1] - offset;
+            elemNodes[inode * order + jnode] =
+                nodeTags[itype][ielem * numNodes + numPrimaryNodes +
+                                inode * (order - 1) + jnode - 1] -
+                offset;
         }
 
         addedElem = elements_.addElement(elemNodes);
         if (verbose_)
-          jem::System::info(myName_) << " ...Created element " << addedElem << " with nodes " << elemNodes << "\n";
+          jem::System::info(myName_)
+              << " ...Created element " << addedElem << " with nodes "
+              << elemNodes << "\n";
 
         groupElems.pushBack(addedElem);
         entityBuffer[entities_[ientity][0]].pushBack(addedElem);
       }
     }
 
-    elementGroup = jive::fem::newElementGroup(groupElems.toArray().clone(), elements_);
+    elementGroup = jive::fem::newElementGroup(
+        groupElems.toArray().clone(), elements_);
     elementGroup.store(groupName, globdat);
     if (verbose_)
-      jem::System::info(myName_) << " ...Created element group for geometry entity '" << groupName << "'\n";
+      jem::System::info(myName_)
+          << " ...Created element group for geometry entity '"
+          << groupName << "'\n";
   }
   if (verbose_)
     jem::System::info(myName_) << "\n";
@@ -312,13 +331,16 @@ void GMSHInputModule::createElems_
   // store all the super element groups
   for (idx_t i = 0; i < 4; i++)
   {
-    elementGroup = jive::fem::newElementGroup(entityBuffer[i].toArray(), elements_);
+    elementGroup =
+        jive::fem::newElementGroup(entityBuffer[i].toArray(), elements_);
     if (elementGroup.size() > 0)
     {
       elementGroup.store(String(ENTITY_NAMES[i]) + String('s'), globdat);
 
       if (verbose_)
-        jem::System::info(myName_) << " ...Created element group for geometry entities of type '" << String(ENTITY_NAMES[i]) + String('s') << "'\n";
+        jem::System::info(myName_)
+            << " ...Created element group for geometry entities of type '"
+            << String(ENTITY_NAMES[i]) + String('s') << "'\n";
     }
   }
   if (verbose_)
@@ -331,8 +353,7 @@ void GMSHInputModule::createElems_
 
 void GMSHInputModule::storeTangents_
 
-    (const Properties &globdat,
-     const idx_t offset)
+    (const Properties &globdat, const idx_t offset)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -344,7 +365,8 @@ void GMSHInputModule::storeTangents_
   std::vector<double> gmsh_derivatives;
   idx_t ibeam = 0;
 
-  Properties tangentVars = jive::util::Globdat::getVariables("tangents", globdat);
+  Properties tangentVars =
+      jive::util::Globdat::getVariables("tangents", globdat);
   Properties entityVars;
 
   IdxVector jive_tags;
@@ -355,11 +377,18 @@ void GMSHInputModule::storeTangents_
     if (entities_[ientity][0] != 1)
       continue;
 
-    entityVars = tangentVars.makeProps(String(ENTITY_NAMES[1]) + String("_") + String(++ibeam));
+    entityVars = tangentVars.makeProps(String(ENTITY_NAMES[1]) +
+                                       String("_") + String(++ibeam));
 
-    gmsh::model::mesh::getNodes(gmsh_tags, gmsh_coords, gmsh_localCoords, entities_[ientity][0], entities_[ientity][1], true);
-    gmsh::model::getParametrization(entities_[ientity][0], entities_[ientity][1], gmsh_coords, gmsh_paras);
-    gmsh::model::getDerivative(entities_[ientity][0], entities_[ientity][1], gmsh_paras, gmsh_derivatives);
+    gmsh::model::mesh::getNodes(gmsh_tags, gmsh_coords, gmsh_localCoords,
+                                entities_[ientity][0],
+                                entities_[ientity][1], true);
+    gmsh::model::getParametrization(entities_[ientity][0],
+                                    entities_[ientity][1], gmsh_coords,
+                                    gmsh_paras);
+    gmsh::model::getDerivative(entities_[ientity][0],
+                               entities_[ientity][1], gmsh_paras,
+                               gmsh_derivatives);
 
     jive_tags.resize(gmsh_tags.size());
     jive_derivatives.resize(3 * gmsh_tags.size());
@@ -368,14 +397,16 @@ void GMSHInputModule::storeTangents_
     {
       jive_tags[inode] = gmsh_tags[inode] - offset;
       for (idx_t icoord = 0; icoord < 3; icoord++)
-        jive_derivatives[inode * 3 + icoord] = gmsh_derivatives[inode * 3 + icoord];
+        jive_derivatives[inode * 3 + icoord] =
+            gmsh_derivatives[inode * 3 + icoord];
     }
 
     entityVars.set("given_dir_nodes", jive_tags.clone());
     entityVars.set("given_dir_dirs", jive_derivatives.clone());
 
     if (verbose_)
-      jem::System::info(myName_) << " ...Stored derivatives in '" << entityVars.getName() << "'\n";
+      jem::System::info(myName_) << " ...Stored derivatives in '"
+                                 << entityVars.getName() << "'\n";
   }
 }
 
@@ -385,9 +416,7 @@ void GMSHInputModule::storeTangents_
 
 Ref<Module> GMSHInputModule::makeNew
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
+    (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
