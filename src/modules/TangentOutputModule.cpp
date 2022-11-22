@@ -22,6 +22,7 @@ TangentOutputModule::TangentOutputModule(const String &name) : Super(name)
 {
   sampleCond_ = FuncUtils::newCond();
   thickness_ = 1.;
+  perturb_ = 1e-5;
 }
 
 TangentOutputModule::~TangentOutputModule()
@@ -144,7 +145,11 @@ Module::Status TangentOutputModule::init(const Properties &conf,
     myConf.set("thickness", thickness_);
   }
 
-  return Module::Status::OK;
+  // get the perturbatio amount
+  myProps.find(perturb_, "perturbation");
+  myConf.set("perturb", perturb_);
+
+  return OK;
 }
 
 void TangentOutputModule::shutdown(const Properties &globdat)
@@ -169,6 +174,7 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
 
   globalConstraints = cons_->toMatrix();
   StateVector::get(globalU, cons_->getDofSpace(), globdat);
+  // TODO proper deep copy of globdat
   locdat = globdat;
 
   getStrainStress_(strains, stresses, locdat);
@@ -209,7 +215,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   {
     cons_->clear();
 
-    params.set(ActionParams::SCALE_FACTOR, .2e-5);
+    params.set(ActionParams::SCALE_FACTOR, perturb_);
     pbcModels_[iPBC]->takeAction(Actions::INIT, params, locdat);
     pbcModels_[iPBC]->takeAction(Actions::GET_CONSTRAINTS, params,
                                  locdat);

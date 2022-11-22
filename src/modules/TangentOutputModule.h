@@ -91,4 +91,5 @@ private:
   StringVector stresses_;
 
   double thickness_;
+  double perturb_;
 };

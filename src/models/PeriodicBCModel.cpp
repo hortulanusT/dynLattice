@@ -78,7 +78,7 @@ periodicBCModel::periodicBCModel
         grad_(iDof, iEdge) = 0.;
     }
 
-  JEM_ASSERT2(jem::sum(grad_) != 0, "no displacement gradient given!");
+  WARN_ASSERT2(jem::sum(grad_) != 0, "no displacement gradient given!");
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
