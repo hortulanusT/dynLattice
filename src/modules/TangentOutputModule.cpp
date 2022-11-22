@@ -20,6 +20,8 @@ const char *TangentOutputModule::TYPE_NAME = "TangentOutput";
 
 TangentOutputModule::TangentOutputModule(const String &name) : Super(name)
 {
+  sampleCond_ = FuncUtils::newCond();
+  thickness_ = 1.;
 }
 
 TangentOutputModule::~TangentOutputModule()
@@ -40,8 +42,11 @@ Module::Status TangentOutputModule::init(const Properties &conf,
   cons_ = Constraints::get(dofs, globdat);
   masterModel_ = Model::get(globdat, getContext());
 
-  // TODO get report interval condition
-  // TODO parametrize all dofs and locking
+  // Output Condition
+  FuncUtils::configCond(sampleCond_, jive::app::PropNames::SAMPLE_COND,
+                        myProps, globdat);
+  FuncUtils::getConfig(myConf, sampleCond_,
+                       jive::app::PropNames::SAMPLE_COND);
 
   // setup Solver
   jive::solver::declareSolvers();
@@ -84,29 +89,36 @@ Module::Status TangentOutputModule::init(const Properties &conf,
                                                      myProps, globdat));
     }
 
-  lockProp = myProps.makeProps("lockModel");
-  lockProp.set(jive::model::ModelFactory::TYPE_PROP,
-               DirichletModel::TYPE_NAME);
-  lockProp.set(DirichletModel::DISP_INCR_PROP, 0.);
-  lockProp.set(DirichletModel::FACTORS_PROP, Vector({0., 0., 0.}));
-  lockProp.set(DirichletModel::NODES_PROP,
-               StringVector({"all", "all", "all"}));
-  lockProp.set(DirichletModel::DOF_PROP,
-               StringVector({"dz", "rx", "ry"}));
-  lockModel_ = jem::staticCast<DirichletModel>(
-      jive::model::ModelFactory::newInstance("lockModel", myConf, myProps,
-                                             globdat));
-  lockModel_->configure(myProps, globdat);
-  lockModel_->getConfig(myConf, globdat);
-  lockModel_->takeAction(jive::model::Actions::INIT, params, globdat);
+  StringVector lockDofs;
+  if (myProps.find(lockDofs, "lockModel.dofs"))
+  {
+    StringVector groups(lockDofs.size());
+    Vector factors(lockDofs.size());
+    groups = "all";
+    factors = 0;
+    lockProp = myProps.makeProps("lockModel");
+    lockProp.set(jive::model::ModelFactory::TYPE_PROP,
+                 DirichletModel::TYPE_NAME);
+    lockProp.set(DirichletModel::DISP_INCR_PROP, 0.);
+    lockProp.set(DirichletModel::FACTORS_PROP, factors);
+    lockProp.set(DirichletModel::NODES_PROP, groups);
+    lockModel_ = jem::staticCast<DirichletModel>(
+        jive::model::ModelFactory::newInstance("lockModel", myConf,
+                                               myProps, globdat));
+    lockModel_->configure(myProps, globdat);
+    lockModel_->getConfig(myConf, globdat);
+    lockModel_->takeAction(jive::model::Actions::INIT, params, globdat);
+  }
 
   // setup group output model
   Properties groupOutProp = myProps.makeProps("groupUpdate");
   groupOutProp.set(jive::model::ModelFactory::TYPE_PROP,
                    GroupOutputModule::TYPE_NAME);
   groupOutProp.set("elementGroups", "all");
-  groupOutProp.set("nodeGroups", StringVector({"xmin", "xmax", "ymin",
-                                               "ymax", "zmin", "zmax"}));
+  StringVector edges(6);
+  for (idx_t i = 0; i < 6; i++)
+    edges[i] = PBCGroupInputModule::EDGES[i];
+  groupOutProp.set("nodeGroups", edges);
   groupOutProp.set("dofs", dof_names);
   groupUpdate_ = jem::staticCast<GroupOutputModule>(
       jive::app::ModuleFactory::newInstance("groupUpdate", myConf,
@@ -125,6 +137,13 @@ Module::Status TangentOutputModule::init(const Properties &conf,
   myConf.set("strainMeasures", strains_);
   myConf.set("stressMeasures", stresses_);
 
+  // get the thickness of the material (if less than 3 dofs)
+  if (dof_names.size() < 3)
+  {
+    myProps.find(thickness_, "thickness");
+    myConf.set("thickness", thickness_);
+  }
+
   return Module::Status::OK;
 }
 
@@ -134,6 +153,9 @@ void TangentOutputModule::shutdown(const Properties &globdat)
 
 Module::Status TangentOutputModule::run(const Properties &globdat)
 {
+  if (!FuncUtils::evalCond(*sampleCond_, globdat))
+    return OK;
+
   using jive::model::ActionParams;
   using jive::model::Actions;
 
@@ -154,7 +176,8 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
 
   cons_->setConstraints(globalConstraints);
   StateVector::store(globalU, cons_->getDofSpace(), globdat);
-  return Module::Status::OK;
+
+  return OK;
 }
 
 void TangentOutputModule::getStrainStress_(const Matrix &strains,
@@ -220,18 +243,18 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
   switch (strains.size(0))
   {
   case 4:
-    myVars.set("G_xy", stresses(1, 1) / strains(1, 1));
-    myVars.set("G_yx", stresses(2, 2) / strains(2, 2));
+    myVars.set("G_xy", stresses(1, 1) / strains(1, 1) / thickness_);
+    myVars.set("G_yx", stresses(2, 2) / strains(2, 2) / thickness_);
 
     myVars.set("nu_xy", stresses(3, 0) / stresses(3, 3));
     myVars.set("nu_yx", stresses(0, 3) / stresses(0, 0));
 
     myVars.set("E_x", (stresses(0, 0) -
                        stresses(0, 3) * stresses(3, 0) / stresses(3, 3)) /
-                          strains(0, 0));
+                          strains(0, 0) / thickness_);
     myVars.set("E_y", (stresses(3, 3) -
                        stresses(3, 0) * stresses(0, 3) / stresses(0, 0)) /
-                          strains(3, 3));
+                          strains(3, 3) / thickness_);
     break;
 
   case 1:
@@ -242,8 +265,6 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
     NOT_IMPLEMENTED
     break;
   }
-
-  TEST_CONTEXT(myVars)
 }
 
 Ref<Module> TangentOutputModule::makeNew

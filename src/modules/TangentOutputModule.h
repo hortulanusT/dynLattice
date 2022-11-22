@@ -27,6 +27,7 @@
 #include "modules/PBCGroupOutputModule.h"
 
 using jem::Ref;
+using jem::numeric::Function;
 using jive::Properties;
 using jive::String;
 using jive::algebra::AbstractMatrix;
@@ -77,11 +78,17 @@ protected:
 private:
   Ref<Constraints> cons_;
   Ref<Model> masterModel_;
+
   Array<Ref<periodicBCModel>> pbcModels_;
   Ref<DirichletModel> lockModel_;
+
   Ref<Solver> solver_;
   Ref<GroupOutputModule> groupUpdate_;
 
+  Ref<Function> sampleCond_;
+
   StringVector strains_;
   StringVector stresses_;
+
+  double thickness_;
 };
