@@ -204,10 +204,7 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
                                       const double scale)
 {
   System::debug(myName_) << " ...Applying strain matrix \n"
-                         << scale * grad_ << "\n";
-  if (mode_ == UPD)
-    System::debug(myName_) << " ...with existing strain matrix \n"
-                           << currentGrad << "\n";
+                         << scale * grad_ + currentGrad << "\n";
   // TEST_PRINTER((*cons_))
   Matrix corner_deform(pbcRank_, pbcRank_);
   double size;
@@ -229,9 +226,10 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       // iterate over the nodes
       for (idx_t iNode = 0; iNode < slaveDofs_(iDof, iEdge).size();
            iNode++)
-        cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
-                             corner_deform(iDof, iEdge),
-                             masterDofs_(iDof, iEdge)[iNode], 1.);
+        if (!std::isnan(corner_deform(iDof, iEdge)))
+          cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
+                               corner_deform(iDof, iEdge),
+                               masterDofs_(iDof, iEdge)[iNode], 1.);
     }
   }
 

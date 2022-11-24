@@ -68,7 +68,7 @@ public:
 
 private:
   void getStrainStress_(const Matrix &strains, const Matrix &stresses,
-                        const Properties &locdat);
+                        const Properties &globdat);
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,
                           const Properties &globdat);
 
@@ -90,6 +90,7 @@ private:
   StringVector strains_;
   StringVector stresses_;
 
+  double rank_;
   double thickness_;
   double perturb_;
 };
