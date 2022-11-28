@@ -16,6 +16,7 @@
 #include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/implict/SolverModule.h>
 #include <jive/implict/utilities.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/solver/Solver.h>
@@ -33,10 +34,8 @@ using jive::String;
 using jive::algebra::AbstractMatrix;
 using jive::app::Module;
 using jive::app::ModuleFactory;
-using jive::implict::newSolverParams;
+using jive::implict::SolverModule;
 using jive::model::Model;
-using jive::solver::newSolver;
-using jive::solver::Solver;
 using jive::util::FuncUtils;
 
 class TangentOutputModule : public Module
@@ -76,13 +75,9 @@ protected:
   virtual ~TangentOutputModule();
 
 private:
-  Ref<Constraints> cons_;
   Ref<Model> masterModel_;
 
-  Array<Ref<periodicBCModel>> pbcModels_;
-  Ref<DirichletModel> lockModel_;
-
-  Ref<Solver> solver_;
+  Ref<SolverModule> solver_;
   Ref<GroupOutputModule> groupUpdate_;
 
   Ref<Function> sampleCond_;
@@ -90,7 +85,7 @@ private:
   StringVector strains_;
   StringVector stresses_;
 
-  double rank_;
+  idx_t rank_;
   double thickness_;
   double perturb_;
 };

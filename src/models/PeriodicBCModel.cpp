@@ -16,7 +16,7 @@ const char *periodicBCModel::TYPE_NAME = "PeriodicBC";
 const char *periodicBCModel::MODE_PROP = "mode";
 const char *periodicBCModel::DOF_NAMES_PROP = "dofs";
 const char *periodicBCModel::ROT_NAMES_PROP = "rotDofs";
-const char *periodicBCModel::CURRENTGRAD_PARAM = "currentGrad";
+const char *periodicBCModel::FIXEDGRAD_PARAM = "fixedGrad";
 
 periodicBCModel::periodicBCModel
 
@@ -111,14 +111,18 @@ bool periodicBCModel::takeAction
     double scale;
     Vector currVec;
     Matrix currentGrad(grad_.shape());
-    currentGrad = 0.;
+
+    scale = NAN;
+    currentGrad = NAN;
 
     // get the scale factor
-    params.get(scale, ActionParams::SCALE_FACTOR);
-    if (params.find(currVec, CURRENTGRAD_PARAM))
+    if (!globdat.find(currVec, FIXEDGRAD_PARAM))
+      params.get(scale, ActionParams::SCALE_FACTOR);
+    else
       vec2mat(currentGrad, currVec);
 
     setConstraints_(globdat, currentGrad, scale);
+
     return true;
   }
 
@@ -203,8 +207,12 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
                                       const Matrix &currentGrad,
                                       const double scale)
 {
+  Matrix applyGrad(grad_.shape());
+
+  applyGrad = std::isnan(scale) ? currentGrad : Matrix(scale * grad_);
+
   System::debug(myName_) << " ...Applying strain matrix \n"
-                         << scale * grad_ + currentGrad << "\n";
+                         << applyGrad << "\n";
   // TEST_PRINTER((*cons_))
   Matrix corner_deform(pbcRank_, pbcRank_);
   double size;
@@ -212,7 +220,7 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
   for (idx_t i = 0; i < pbcRank_; i++)
   {
     Globdat::getVariables("all.extent", globdat).get(size, dofNames_[i]);
-    corner_deform[i] = scale * size * grad_[i] + size * currentGrad[i];
+    corner_deform[i] = size * applyGrad[i];
   }
 
   // TEST_CONTEXT(corner_deform)
@@ -226,7 +234,9 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       // iterate over the nodes
       for (idx_t iNode = 0; iNode < slaveDofs_(iDof, iEdge).size();
            iNode++)
-        if (!std::isnan(corner_deform(iDof, iEdge)))
+        if (std::isnan(corner_deform(iDof, iEdge)))
+          cons_->eraseConstraint(slaveDofs_(iDof, iEdge)[iNode]);
+        else
           cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
                                corner_deform(iDof, iEdge),
                                masterDofs_(iDof, iEdge)[iNode], 1.);
@@ -237,6 +247,7 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
   for (idx_t i = 0; i < pbcRank_; i++)
     cons_->addConstraint(masterDofs_(i, 0)[0]);
 
+  // TEST_CONTEXT(cons_->isSlaveDof(slaveDofs_(0, 0)[0]))
   // TEST_PRINTER((*cons_))
 }
 

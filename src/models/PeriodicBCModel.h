@@ -55,7 +55,7 @@ public:
   static const char *GRAD_PROP;
   static const char *DOF_NAMES_PROP;
   static const char *ROT_NAMES_PROP;
-  static const char *CURRENTGRAD_PARAM;
+  static const char *FIXEDGRAD_PARAM;
 
   enum Mode
   {
@@ -89,7 +89,7 @@ private:
   void setConstraints_
 
       (const Properties &globdat, const Matrix &currentGrad,
-       const double scale = 0.);
+       const double scale = NAN);
 
   void getExtVec_
 
