@@ -34,7 +34,7 @@ Module::Status GitReportModule::init
     (const Properties &conf, const Properties &props,
      const Properties &globdat)
 {
-  jem::System::info() << "Build with git hash " << GIT_HASH << "\n\n";
+  jem::System::info() << "Built with git hash " << GIT_HASH << "\n\n";
   return DONE;
 }
 
