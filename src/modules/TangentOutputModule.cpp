@@ -102,8 +102,10 @@ void TangentOutputModule::shutdown(const Properties &globdat)
 Module::Status TangentOutputModule::run(const Properties &globdat)
 {
   if (!FuncUtils::evalCond(*sampleCond_, globdat))
+  {
+    Globdat::getVariables(globdat).erase("tangentModuli");
     return OK;
-
+  }
   jem::System::info(myName_)
       << " ...Start calculating tangent properties\n";
 
