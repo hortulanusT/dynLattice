@@ -1,8 +1,5 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Equivalent (linear static) unit cells in other structures
-- Do finite strain comparision
-- Do dynamic comparison
 - Fix 3D dynamics
 - Refactor Makefiles into Python scripts
 ## Code
@@ -10,13 +7,7 @@
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
-    - PBC Model
-      - proper adressing of H in the boundary conditions (allow for mixed loadings)
-      - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
-2. Modules
-    - PBC Output extent other side
-      - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
-3. Environment
+1. Environment
     - add .cpp for all headers...
  
 # :heavy_check_mark: Information
