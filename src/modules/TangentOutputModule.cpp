@@ -22,7 +22,7 @@ TangentOutputModule::TangentOutputModule(const String &name) : Super(name)
 {
   sampleCond_ = FuncUtils::newCond();
   thickness_ = 1.;
-  perturb_ = 2e-8;
+  perturb_ = 1e-9;
   rank_ = -1;
 }
 
