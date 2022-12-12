@@ -133,7 +133,7 @@ StringVector PBCGroupOutputModule::getDataSets_(
 
 StringVector PBCGroupOutputModule::getDataSets(
     const idx_t dim, const bool strains, const bool stresses,
-    const StringVector dofNames)
+    const StringVector &dofNames)
 {
   JEM_ASSERT2(dofNames.size() >= dim, "Not enough dofnames given!");
   ArrayBuffer<String> dataSets;

@@ -52,7 +52,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
 {
   Properties myVars = Globdat::getVariables(globdat);
   Properties currentVars, loadVars, respVars, dispVars, veloVars,
-      acceVars, extentVars;
+      acceVars;
   NodeSet nodes = NodeSet::get(globdat, getContext());
   ElementSet elems = ElementSet::get(globdat, getContext());
 

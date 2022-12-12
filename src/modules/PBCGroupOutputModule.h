@@ -52,10 +52,20 @@ public:
 
   static void declare();
 
+  /**
+   * @brief get the strings describing different strain and stress
+   * measures
+   *
+   * @param dim dimension for which to get the strain and stress measures
+   * @param strains whether to return strain measures
+   * @param stresses whether to return stress measures
+   * @param dofNames names of the dofs to use
+   * @return Vector with strings for the expressions
+   */
   static StringVector getDataSets(const idx_t dim,
                                   const bool strains = false,
                                   const bool stresses = false,
-                                  const StringVector dofNames = {
+                                  const StringVector &dofNames = {
                                       "dx", "dy", "dz"});
 
 protected:

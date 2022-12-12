@@ -31,6 +31,7 @@ rsync -vax $TARGET $DESTINATION
 # :hourglass_flowing_sand: Ideas for the future
 - Modal Reduction for Homogenization
   - dynamic homogenization for micromorphic continuum
+- Nonlocal Homogenization for dynamics
 - Custom Application
   - add shortcuts for `$(CASE_NAME)` without folder
   - enable multiple `.pro` files in command line

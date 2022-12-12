@@ -52,6 +52,13 @@ Module::Status TangentOutputModule::init(const Properties &conf,
                        jive::app::PropNames::SAMPLE_COND);
 
   // setup Solver
+  TEST_CONTEXT(myProps)
+  if (!myProps.contains("solver") ||
+      !myProps.getProps("solver").contains(
+          jive::app::ModuleFactory::TYPE_PROP))
+    myProps.makeProps("solver").set(
+        jive::app::ModuleFactory::TYPE_PROP,
+        jive::implict::NonlinModule::TYPE_NAME);
   solver_ =
       jem::staticCast<SolverModule>(jive::app::ModuleFactory::newInstance(
           myName_ + ".solver", conf, props, globdat));
@@ -61,7 +68,7 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   // setup group output model
   Properties groupOutProp = myProps.makeProps("groupUpdate");
-  groupOutProp.set(jive::model::ModelFactory::TYPE_PROP,
+  groupOutProp.set(jive::app::ModuleFactory::TYPE_PROP,
                    GroupOutputModule::TYPE_NAME);
   groupOutProp.set("elementGroups", "all");
   StringVector edges(6);
@@ -132,6 +139,9 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   Properties info;
   Vector strains0(rank_ * rank_);
   Vector applStrains(rank_ * rank_);
+  Matrix deformTens(rank_, rank_);
+  Matrix engStress(rank_, rank_);
+  double J;
 
   strains = 0.;
   stresses = 0.;
@@ -140,9 +150,15 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
 
+  vec2mat(deformTens, strains0);
+  deformTens += eye(rank_);
+  J = deformTens(0, 0) * deformTens(1, 1) -
+      deformTens(0, 1) * deformTens(1, 0);
+
   // TEST_CONTEXT(strains0)
 
   for (idx_t iPBC = 0; iPBC < rank_ * rank_; iPBC++)
+  {
     for (double dir : Vector({-1., 1.}))
     {
       applStrains = strains0;
@@ -173,6 +189,11 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       StateVector::restoreNew(DofSpace::get(globdat, getContext()),
                               globdat);
     }
+
+    vec2mat(engStress, stresses[iPBC]);
+    engStress = matmul(engStress, deformTens.transpose()) / J;
+    mat2vec(stresses[iPBC], engStress);
+  }
 
   groupUpdate_->run(globdat);
 }

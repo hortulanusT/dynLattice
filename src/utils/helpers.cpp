@@ -40,6 +40,19 @@ void vec2mat(const Matrix &mat, const Vector &vec)
   }
 }
 
+void mat2vec(const Vector &vec, const Matrix &mat)
+{
+  const idx_t rows = mat.size(0);
+  const idx_t cols = mat.size(1);
+  JEM_ASSERT2(rows * cols == vec.size(),
+              "Vector and Matrix not of the same size!");
+
+  for (idx_t irow = 0; irow < rows; irow++)
+  {
+    vec[SliceFromTo(irow * cols, (irow + 1) * cols)] = mat(irow, ALL);
+  }
+}
+
 void expVec(const Matrix &Exp, const Vector &psi)
 {
   Exp = eye();
