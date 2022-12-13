@@ -58,14 +58,11 @@ Module::Status TangentOutputModule::init(const Properties &conf,
     myProps.makeProps("solver").set(
         jive::app::ModuleFactory::TYPE_PROP,
         jive::implict::NonlinModule::TYPE_NAME);
-    myProps.getProps("solver").set(jive::implict::PropNames::MAX_ITER, 2);
-    myProps.getProps("solver").set(jive::implict::PropNames::PRECISION,
-                                   1e-9);
+    myProps.getProps("solver").set(jive::implict::PropNames::MAX_ITER, 5);
   }
 
-  solver_ =
-      jem::staticCast<SolverModule>(jive::app::ModuleFactory::newInstance(
-          myName_ + ".solver", conf, props, globdat));
+  solver_ = jive::implict::newSolverModule(myName_ + ".solver", conf,
+                                           props, globdat);
   solver_->configure(props, globdat);
   solver_->getConfig(conf, globdat);
   solver_->init(conf, props, globdat);

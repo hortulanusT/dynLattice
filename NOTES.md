@@ -1,7 +1,9 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
 - Fix 3D dynamics
-- Refactor Makefiles into Python scripts
+- Include Contact
+- Include Plasticity
+- Think of Elastic, Dynamic Homogenization
 ## Code
 1. Models
     - Rod Model
@@ -9,6 +11,7 @@
       - Create MaterialFactory
 1. Environment
     - add .cpp for all headers...
+    - make all plot outputs A4
  
 # :heavy_check_mark: Information
 ## cluster syncing
@@ -26,7 +29,6 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
-- use the `*.tiny` setting of the solver module to enable convergence for smaller load steps
 
 # :hourglass_flowing_sand: Ideas for the future
 - Modal Reduction for Homogenization
