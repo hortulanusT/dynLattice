@@ -16,6 +16,7 @@
 #include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/implict/Names.h>
 #include <jive/implict/NonlinModule.h>
 #include <jive/implict/SolverModule.h>
 #include <jive/implict/utilities.h>

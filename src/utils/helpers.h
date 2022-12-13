@@ -18,7 +18,7 @@
 
 #include "utils/testing.h"
 
-#define WARN(key) jem::System::warn(getContext()) << key << "\n";
+#define WARN(key) jem::System::warn() << key << "\n";
 
 using jem::ALL;
 using jem::Array;

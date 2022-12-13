@@ -22,7 +22,7 @@ TangentOutputModule::TangentOutputModule(const String &name) : Super(name)
 {
   sampleCond_ = FuncUtils::newCond();
   thickness_ = 1.;
-  perturb_ = 2e-9;
+  perturb_ = 1e-9;
   rank_ = -1;
 }
 
@@ -53,12 +53,16 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   // setup Solver
   TEST_CONTEXT(myProps)
-  if (!myProps.contains("solver") ||
-      !myProps.getProps("solver").contains(
-          jive::app::ModuleFactory::TYPE_PROP))
+  if (!myProps.contains("solver"))
+  {
     myProps.makeProps("solver").set(
         jive::app::ModuleFactory::TYPE_PROP,
         jive::implict::NonlinModule::TYPE_NAME);
+    myProps.getProps("solver").set(jive::implict::PropNames::MAX_ITER, 2);
+    myProps.getProps("solver").set(jive::implict::PropNames::PRECISION,
+                                   1e-9);
+  }
+
   solver_ =
       jem::staticCast<SolverModule>(jive::app::ModuleFactory::newInstance(
           myName_ + ".solver", conf, props, globdat));
@@ -71,8 +75,8 @@ Module::Status TangentOutputModule::init(const Properties &conf,
   groupOutProp.set(jive::app::ModuleFactory::TYPE_PROP,
                    GroupOutputModule::TYPE_NAME);
   groupOutProp.set("elementGroups", "all");
-  StringVector edges(6);
-  for (idx_t i = 0; i < 6; i++)
+  StringVector edges(rank_ * 2);
+  for (idx_t i = 0; i < edges.size(); i++)
     edges[i] = PBCGroupInputModule::EDGES[i];
   groupOutProp.set("nodeGroups", edges);
   groupOutProp.set("dofs", dofs);
@@ -141,6 +145,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   Vector applStrains(rank_ * rank_);
   Matrix deformTens(rank_, rank_);
   Matrix engStress(rank_, rank_);
+  Matrix engStrain(rank_, rank_);
   double J;
 
   strains = 0.;
@@ -152,8 +157,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
 
   vec2mat(deformTens, strains0);
   deformTens += eye(rank_);
-  J = deformTens(0, 0) * deformTens(1, 1) -
-      deformTens(0, 1) * deformTens(1, 0);
+  J = jem::numeric::det(deformTens);
 
   // TEST_CONTEXT(strains0)
 
@@ -190,9 +194,21 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
                               globdat);
     }
 
+    // TEST_CONTEXT(stresses[iPBC])
+
+    vec2mat(engStrain, strains[iPBC]);
+    engStrain = matmul(engStrain,
+                       jem::numeric::inverse(
+                           deformTens)); // spatial displacement gradient
+    mat2vec(strains[iPBC], engStrain);
+
     vec2mat(engStress, stresses[iPBC]);
-    engStress = matmul(engStress, deformTens.transpose()) / J;
+    engStress =
+        matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
     mat2vec(stresses[iPBC], engStress);
+
+    // TEST_CONTEXT(engStrain)
+    // TEST_CONTEXT(engStress)
   }
 
   groupUpdate_->run(globdat);
