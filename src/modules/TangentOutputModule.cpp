@@ -145,6 +145,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
 {
   Properties info;
   Vector strains0(rank_ * rank_);
+  Vector stresses0(rank_ * rank_);
   Vector applStrains(rank_ * rank_);
   Matrix deformTens(rank_, rank_);
   Matrix engStress(rank_, rank_);
@@ -155,17 +156,37 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   strains = 0.;
   stresses = 0.;
 
-  groupUpdate_->run(globdat);
-  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
-    strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
-
   size = 1;
   for (String sizeMeas : sizes_)
     size *= FuncUtils::evalExpr(sizeMeas, globdat);
 
+  groupUpdate_->run(globdat);
+  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
+    strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
+
+  stresses0 = 0.;
+  for (String stress : stresses_)
+  {
+    Vector edge_stress;
+    Globdat::getVariables(globdat).get(edge_stress, stress);
+    stresses0 += edge_stress / size;
+  }
+
   vec2mat(deformTens, strains0);
   deformTens += eye(rank_);
   J = jem::numeric::det(deformTens);
+
+  vec2mat(engStrain, strains0);
+  engStrain = matmul(
+      engStrain,
+      jem::numeric::inverse(deformTens)); // spatial displacement gradient
+  vec2mat(engStress, stresses0);
+  engStress =
+      matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
+
+  System::info() << "### Zero spatial displacement gradient\n"
+                 << engStrain << "\n";
+  System::info() << "### Zero cauchy stress\n" << engStress << "\n";
 
   // TEST_CONTEXT(strains0)
 
@@ -182,13 +203,15 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
         solver_->solve(info, globdat);
         groupUpdate_->run(globdat);
 
-        for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
+        for (idx_t iComp = 0; iComp < rank_ * rank_;
+             iComp++) // iterate over components
         {
           strains[iPBC][iComp] +=
               dir * FuncUtils::evalExpr(strains_[iComp], globdat);
         }
 
-        for (String stress : stresses_)
+        for (String stress :
+             stresses_) // iterate over edges for surface integral
         {
           Vector edge_stress;
           Globdat::getVariables(globdat).get(edge_stress, stress);
@@ -220,11 +243,9 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
         matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
     mat2vec(stresses[iPBC], engStress);
 
-    System::out() << "### spatial displacement gradient\n"
-                  << engStrain << "\n";
-    System::out() << "### chauchy stress\n" << engStress << "\n";
-    // TEST_CONTEXT(engStrain)
-    // TEST_CONTEXT(engStress)
+    System::info() << "### Delta spatial displacement gradient\n"
+                   << engStrain << "\n";
+    System::info() << "### Delta cauchy stress\n" << engStress << "\n";
   }
 
   groupUpdate_->run(globdat);
