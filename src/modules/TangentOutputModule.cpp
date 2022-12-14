@@ -77,20 +77,26 @@ Module::Status TangentOutputModule::init(const Properties &conf,
     edges[i] = PBCGroupInputModule::EDGES[i];
   groupOutProp.set("nodeGroups", edges);
   groupOutProp.set("dofs", dofs);
+  groupOutProp.set("calc_stress", true);
   groupUpdate_ = jem::staticCast<GroupOutputModule>(
       jive::app::ModuleFactory::newInstance("groupUpdate", myConf,
                                             myProps, globdat));
   groupUpdate_->init(myConf, myProps, globdat);
 
-  // get strain vectors
+  // get strain/stress vectors
   strains_.resize(rank_ * rank_);
-  stresses_.resize(rank_ * rank_);
+  stresses_.resize(rank_ * 2);
+  sizes_.resize(rank_);
 
   strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
-  stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
+  for (idx_t i = 0; i < edges.size(); i++)
+    stresses_[i] = String(PBCGroupInputModule::EDGES[i]) + ".stress";
+  for (idx_t i = 0; i < dofs.size(); i++)
+    sizes_[i] = "all.extent." + dofs[i];
 
   myConf.set("strainMeasures", strains_);
   myConf.set("stressMeasures", stresses_);
+  myConf.set("sizeMeasures", sizes_);
 
   // get the thickness of the material (for 2D calculations)
   myProps.find(thickness_, "thickness", 0., Float::MAX_VALUE);
@@ -144,6 +150,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   Matrix engStress(rank_, rank_);
   Matrix engStrain(rank_, rank_);
   double J;
+  double size;
 
   strains = 0.;
   stresses = 0.;
@@ -151,6 +158,10 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   groupUpdate_->run(globdat);
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
+
+  size = 1;
+  for (String sizeMeas : sizes_)
+    size *= FuncUtils::evalExpr(sizeMeas, globdat);
 
   vec2mat(deformTens, strains0);
   deformTens += eye(rank_);
@@ -175,8 +186,13 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
         {
           strains[iPBC][iComp] +=
               dir * FuncUtils::evalExpr(strains_[iComp], globdat);
-          stresses[iPBC][iComp] +=
-              dir * FuncUtils::evalExpr(stresses_[iComp], globdat);
+        }
+
+        for (String stress : stresses_)
+        {
+          Vector edge_stress;
+          Globdat::getVariables(globdat).get(edge_stress, stress);
+          stresses[iPBC] += dir * edge_stress / size;
         }
       }
       catch (const jem::Exception &e)
@@ -204,6 +220,9 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
         matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
     mat2vec(stresses[iPBC], engStress);
 
+    System::out() << "### spatial displacement gradient\n"
+                  << engStrain << "\n";
+    System::out() << "### chauchy stress\n" << engStress << "\n";
     // TEST_CONTEXT(engStrain)
     // TEST_CONTEXT(engStress)
   }

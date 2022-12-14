@@ -86,6 +86,7 @@ private:
 
   StringVector strains_;
   StringVector stresses_;
+  StringVector sizes_;
 
   idx_t rank_;
   double thickness_;
