@@ -77,7 +77,6 @@ Module::Status TangentOutputModule::init(const Properties &conf,
     edges[i] = PBCGroupInputModule::EDGES[i];
   groupOutProp.set("nodeGroups", edges);
   groupOutProp.set("dofs", dofs);
-  groupOutProp.set("calc_stress", true);
   groupUpdate_ = jem::staticCast<GroupOutputModule>(
       jive::app::ModuleFactory::newInstance("groupUpdate", myConf,
                                             myProps, globdat));
@@ -85,12 +84,11 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   // get strain/stress vectors
   strains_.resize(rank_ * rank_);
-  stresses_.resize(rank_ * 2);
+  stresses_.resize(rank_ * rank_);
   sizes_.resize(rank_);
 
   strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
-  for (idx_t i = 0; i < edges.size(); i++)
-    stresses_[i] = String(PBCGroupInputModule::EDGES[i]) + ".stress";
+  stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
   for (idx_t i = 0; i < dofs.size(); i++)
     sizes_[i] = "all.extent." + dofs[i];
 
@@ -139,6 +137,48 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
   return OK;
 }
 
+void TangentOutputModule::readStrainStress_(const Vector &strains,
+                                            const Vector &stresses,
+                                            const Properties &globdat)
+{
+  double size = 1;
+  strains = 0.;
+  stresses = 0.;
+
+  groupUpdate_->run(globdat);
+  for (String sizeMeas : sizes_)
+    size *= FuncUtils::evalExpr(sizeMeas, globdat);
+  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
+    strains[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
+  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
+    stresses[iComp] = FuncUtils::evalExpr(stresses_[iComp], globdat);
+}
+
+void TangentOutputModule::reportStrainStress_(const Vector &H,
+                                              const Vector &P)
+{
+  Matrix deformTens(rank_, rank_);
+  Matrix engStress(rank_, rank_);
+  Matrix engStrain(rank_, rank_);
+  double J;
+
+  vec2mat(deformTens, H);
+  deformTens += eye(rank_);
+  J = jem::numeric::det(deformTens);
+
+  vec2mat(engStrain, H);
+  engStrain = matmul(
+      engStrain,
+      jem::numeric::inverse(deformTens)); // spatial displacement gradient
+  vec2mat(engStress, P);
+  engStress =
+      matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
+
+  System::info() << "### Zero spatial displacement gradient\n"
+                 << engStrain << "\n";
+  System::info() << "### Zero cauchy stress\n" << engStress << "\n";
+}
+
 void TangentOutputModule::getStrainStress_(const Matrix &strains,
                                            const Matrix &stresses,
                                            const Properties &globdat)
@@ -146,47 +186,15 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
   Properties info;
   Vector strains0(rank_ * rank_);
   Vector stresses0(rank_ * rank_);
+  Vector pertubStrains(rank_ * rank_);
+  Vector pertubStresses(rank_ * rank_);
   Vector applStrains(rank_ * rank_);
-  Matrix deformTens(rank_, rank_);
-  Matrix engStress(rank_, rank_);
-  Matrix engStrain(rank_, rank_);
-  double J;
-  double size;
 
   strains = 0.;
   stresses = 0.;
 
-  size = 1;
-  for (String sizeMeas : sizes_)
-    size *= FuncUtils::evalExpr(sizeMeas, globdat);
-
-  groupUpdate_->run(globdat);
-  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
-    strains0[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
-
-  stresses0 = 0.;
-  for (String stress : stresses_)
-  {
-    Vector edge_stress;
-    Globdat::getVariables(globdat).get(edge_stress, stress);
-    stresses0 += edge_stress / size;
-  }
-
-  vec2mat(deformTens, strains0);
-  deformTens += eye(rank_);
-  J = jem::numeric::det(deformTens);
-
-  vec2mat(engStrain, strains0);
-  engStrain = matmul(
-      engStrain,
-      jem::numeric::inverse(deformTens)); // spatial displacement gradient
-  vec2mat(engStress, stresses0);
-  engStress =
-      matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
-
-  System::info() << "### Zero spatial displacement gradient\n"
-                 << engStrain << "\n";
-  System::info() << "### Zero cauchy stress\n" << engStress << "\n";
+  readStrainStress_(strains0, stresses0, globdat);
+  reportStrainStress_(strains0, stresses0);
 
   // TEST_CONTEXT(strains0)
 
@@ -201,22 +209,10 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       try
       {
         solver_->solve(info, globdat);
-        groupUpdate_->run(globdat);
+        readStrainStress_(pertubStrains, pertubStresses, globdat);
 
-        for (idx_t iComp = 0; iComp < rank_ * rank_;
-             iComp++) // iterate over components
-        {
-          strains[iPBC][iComp] +=
-              dir * FuncUtils::evalExpr(strains_[iComp], globdat);
-        }
-
-        for (String stress :
-             stresses_) // iterate over edges for surface integral
-        {
-          Vector edge_stress;
-          Globdat::getVariables(globdat).get(edge_stress, stress);
-          stresses[iPBC] += dir * edge_stress / size;
-        }
+        strains[iPBC] += dir * pertubStrains;
+        stresses[iPBC] += dir * pertubStresses;
       }
       catch (const jem::Exception &e)
       {
@@ -229,23 +225,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       StateVector::restoreNew(DofSpace::get(globdat, getContext()),
                               globdat);
     }
-
-    // TEST_CONTEXT(stresses[iPBC])
-
-    vec2mat(engStrain, strains[iPBC]);
-    engStrain = matmul(engStrain,
-                       jem::numeric::inverse(
-                           deformTens)); // spatial displacement gradient
-    mat2vec(strains[iPBC], engStrain);
-
-    vec2mat(engStress, stresses[iPBC]);
-    engStress =
-        matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
-    mat2vec(stresses[iPBC], engStress);
-
-    System::info() << "### Delta spatial displacement gradient\n"
-                   << engStrain << "\n";
-    System::info() << "### Delta cauchy stress\n" << engStress << "\n";
+    reportStrainStress_(strains[iPBC], stresses[iPBC]);
   }
 
   groupUpdate_->run(globdat);

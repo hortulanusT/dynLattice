@@ -68,6 +68,9 @@ public:
   static void declare();
 
 private:
+  void readStrainStress_(const Vector &strains, const Vector &stresses,
+                         const Properties &globdat);
+  void reportStrainStress_(const Vector &H, const Vector &P);
   void getStrainStress_(const Matrix &strains, const Matrix &stresses,
                         const Properties &globdat);
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,

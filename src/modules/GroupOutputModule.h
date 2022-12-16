@@ -91,8 +91,6 @@ public:
   static void declare();
 
 protected:
-  bool PKstress_; ///< indicating wether the PKstress contributions for
-                  ///< the nodeGroups should be evaluated
   StringVector nodeGroups_; ///< groups of nodes used to calculate the
                             ///< singular element forces/displacements
   StringVector elemGroups_; ///< groups of elements used to calculate the

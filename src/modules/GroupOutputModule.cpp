@@ -7,7 +7,6 @@ GroupOutputModule::GroupOutputModule(const String &name) : Module(name)
   // per default extract composite values for all elements
   elemGroups_.resize(1);
   elemGroups_[0] = "all";
-  PKstress_ = false;
 }
 
 Module::Status GroupOutputModule::init(const Properties &conf,
@@ -29,10 +28,6 @@ Module::Status GroupOutputModule::init(const Properties &conf,
   // get the dofs for the node groups
   myProps.find(nodeDofNames_, "dofs");
   myConf.set("dofs", nodeDofNames_);
-
-  // determine whether to do the stresses
-  myProps.find(PKstress_, "calc_stress");
-  myConf.set("calc_stress", PKstress_);
 
   // get the dofs for the element group
   if (!myProps.find(elemDofNames_, "dimensions"))
@@ -139,33 +134,6 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
         veloVars.set(nodeDofNames_[iDof], sum(velo) / velo.size());
       if (doAcce)
         acceVars.set(nodeDofNames_[iDof], sum(acce) / acce.size());
-    }
-
-    if (PKstress_)
-    {
-      Matrix stress(nodeDofs_.size(), nodeDofs_.size());
-      Matrix coords(nodeIndices.size(), nodes.rank());
-      dofIndices.resize(nodeIndices.size() * nodeDofs_.size());
-      Matrix forces(nodeIndices.size(), nodeDofs_.size());
-
-      nodes.getSomeCoords(coords.transpose(), nodeIndices);
-      dofs->getDofIndices(dofIndices, nodeIndices, nodeDofs_);
-      vec2mat(forces,
-              (Vector)allResp[dofIndices]); // not transposed due to
-                                            // ordering of dofIndices!!
-
-      for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
-      {
-        for (idx_t jDof = 0; jDof < nodeDofs_.size(); jDof++)
-        {
-          stress(iDof, jDof) =
-              jem::numeric::dotProduct(forces[iDof], coords[jDof]);
-        }
-      }
-
-      Vector stress_vec(nodeDofs_.size() * nodeDofs_.size());
-      mat2vec(stress_vec, stress);
-      currentVars.set("stress", stress_vec);
     }
   }
   // iterate through the element groups

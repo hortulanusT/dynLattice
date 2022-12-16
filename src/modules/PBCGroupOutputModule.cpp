@@ -180,9 +180,12 @@ StringVector PBCGroupOutputModule::getDataSets(
     // 1st PK Tensor
     for (idx_t i = 0; i < dim; i++)
       for (idx_t j = 0; j < dim; j++)
-        dataSets.pushBack(String::format("%cmax.resp.%s / %s",
-                                         dofNames[j].back(), dofNames[i],
-                                         areas[j]));
+        dataSets.pushBack(
+            String::format("0.5 * %cmax.resp.%s / %s", dofNames[j].back(),
+                           dofNames[i], areas[j]) +
+            String(" - ") +
+            String::format("0.5 * %cmin.resp.%s / %s", dofNames[j].back(),
+                           dofNames[i], areas[j]));
   }
 
   return dataSets.toArray();
