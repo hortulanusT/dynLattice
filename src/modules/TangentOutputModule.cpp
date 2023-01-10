@@ -174,9 +174,9 @@ void TangentOutputModule::reportStrainStress_(const Vector &H,
   engStress =
       matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
 
-  System::info() << "### Zero spatial displacement gradient\n"
+  System::info() << "### Spatial displacement gradient\n"
                  << engStrain << "\n";
-  System::info() << "### Zero cauchy stress\n" << engStress << "\n";
+  System::info() << "### Cauchy stress\n" << engStress << "\n";
 }
 
 void TangentOutputModule::getStrainStress_(const Matrix &strains,

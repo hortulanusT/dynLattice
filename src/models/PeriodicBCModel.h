@@ -34,6 +34,7 @@
 
 using jem::util::Properties;
 using jive::BoolMatrix;
+using jive::IdxMatrix;
 using jive::fem::NodeGroup;
 using jive::fem::NodeSet;
 using jive::implict::ArclenActions;
@@ -105,8 +106,9 @@ private:
   StringVector dofNames_;
   StringVector rotNames_;
   IdxVector jdofs_;
-  IdxVectorMatrix masterDofs_;
-  IdxVectorMatrix slaveDofs_;
+  IdxVectorMatrix masterEdgeDofs_;
+  IdxVectorMatrix slaveEdgeDofs_;
+  IdxMatrix cornerDofs_;
   idx_t pbcRank_;
   Mode mode_;
 };

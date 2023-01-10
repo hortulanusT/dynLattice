@@ -18,6 +18,7 @@
 #include <jem/util/Properties.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/fem/NodeGroup.h>
+#include <jive/fem/XNodeSet.h>
 
 #include "PBCGroupInputModule.h"
 #include "utils/testing.h"
@@ -28,6 +29,7 @@ using jem::numeric::norm2;
 using jem::util::ArrayBuffer;
 using jive::fem::NodeGroup;
 using jive::fem::NodeSet;
+using jive::fem::XNodeSet;
 
 //=======================================================================
 //   class PBCGroupInputModule
@@ -98,14 +100,12 @@ Module::Status PBCGroupInputModule::init
   small_ = max(dx, dy, dz) / 1.e6;
 
   // get duplicated nodes, if they exist
-
   props.findProps(myName_).find(dupedNodeGroup_, DUPEDNODES_PROP);
 
   // get the restriction Group
   props.findProps(myName_).find(groupSettings_, NGROUPS_PROP);
 
   // make default Properties object for Super
-
   Properties myProps = props.makeProps(myName_);
 
   prepareProps_(myProps);
@@ -117,11 +117,30 @@ Module::Status PBCGroupInputModule::init
     groupSettings_.find(dummyObj, groupSettings_.listProps()[i]);
 
   // make NodeGroups
-
   Super::init(conf, props, globdat);
 
-  // sort NodeGroups such that ordering of opposite faces is matching
+  // report back the extent
+  Properties myVars = Globdat::getVariables(globdat);
+  Properties extentVars;
 
+  extentVars = myVars.makeProps("all").makeProps("extent");
+  for (idx_t iDof = 0; iDof < 3; iDof++)
+  {
+    IdxVector n_min =
+        NodeGroup::get(EDGES[iDof * 2], nodes, globdat, getContext())
+            .getIndices();
+    IdxVector n_max =
+        NodeGroup::get(EDGES[iDof * 2 + 1], nodes, globdat, getContext())
+            .getIndices();
+
+    double c_min = min(coords(iDof, n_min));
+    double c_max = max(coords(iDof, n_max));
+
+    extentVars.set(String::format("d%c", EDGES[iDof * 2][0]),
+                   c_max - c_min);
+  }
+
+  // sort NodeGroups such that ordering of opposite faces is matching
   for (idx_t i = 0; i < rank_; ++i)
   {
     NodeGroup edge0 = NodeGroup::find(EDGES[i * 2], nodes, globdat);
@@ -148,26 +167,34 @@ Module::Status PBCGroupInputModule::init
                           << "' wrt `" << EDGES[i * 2] << "'\n";
   }
 
-  Properties myVars = Globdat::getVariables(globdat);
-  Properties extentVars;
-
-  extentVars = myVars.makeProps("all").makeProps("extent");
-
-  // report back the extent
-  for (idx_t iDof = 0; iDof < 3; iDof++)
+  // create corners if they do not exist
+  if (corners_)
   {
-    IdxVector n_min =
-        NodeGroup::get(EDGES[iDof * 2], nodes, globdat, getContext())
-            .getIndices();
-    IdxVector n_max =
-        NodeGroup::get(EDGES[iDof * 2 + 1], nodes, globdat, getContext())
-            .getIndices();
+    XNodeSet xnodes = XNodeSet::get(globdat, getContext());
+    for (idx_t i = 0; i <= rank_; i++)
+    {
+      Assignable<NodeGroup> corner_nodes =
+          NodeGroup::find(CORNERS[i], xnodes, globdat);
+      if (corner_nodes.size() < 1)
+      {
+        Vector coords(rank_);
+        coords = 0.;
+        if (i != 0)
+        {
+          extentVars.get(coords[i - 1],
+                         String::format("d%c", EDGES[(i - 1) * 2][0]));
+          if (jem::isTiny(jem::sum(coords)))
+            continue;
+        }
+        idx_t cornerID = xnodes.addNode(coords);
 
-    double c_min = min(coords(iDof, n_min));
-    double c_max = max(coords(iDof, n_max));
-
-    extentVars.set(String::format("d%c", EDGES[iDof * 2][0]),
-                   c_max - c_min);
+        corner_nodes = jive::fem::newNodeGroup({cornerID}, nodes);
+        corner_nodes.store(CORNERS[i], globdat);
+        System::info(myName_)
+            << " ...Created corner NodeGroup '" << CORNERS[i] << "'\n";
+        // TEST_CONTEXT(corner_nodes.getIndices())
+      }
+    }
   }
 
   return DONE;

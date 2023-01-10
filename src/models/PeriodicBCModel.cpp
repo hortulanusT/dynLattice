@@ -155,48 +155,73 @@ void periodicBCModel::init_(const Properties &globdat)
   for (idx_t iDof = 0; iDof < jdofs_.size(); iDof++)
     jdofs_[iDof] = dofs_->getTypeIndex(dofNames_[iDof]);
 
-  masterDofs_.resize(pbcRank_, pbcRank_);
-  slaveDofs_.resize(pbcRank_, pbcRank_);
+  masterEdgeDofs_.resize(pbcRank_, pbcRank_);
+  slaveEdgeDofs_.resize(pbcRank_, pbcRank_);
+  cornerDofs_.resize(pbcRank_, pbcRank_);
 
   IdxVector masterRots;
   IdxVector slaveRots;
+  idx_t corner0Dof;
+  idx_t cornerRot;
 
-  Assignable<NodeGroup> masters;
-  Assignable<NodeGroup> slaves;
+  Assignable<NodeGroup> masterEdge;
+  Assignable<NodeGroup> slaveEdge;
+  Assignable<NodeGroup> corner;
 
+  // fix 0 corner
+  corner = NodeGroup::get(PBCGroupInputModule::CORNERS[0], nodes_,
+                          globdat, getContext());
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+  {
+    corner0Dof = dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
+    cons_->addConstraint(corner0Dof);
+  }
+  for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++)
+  {
+    cornerRot = dofs_->getDofIndex(corner.getIndex(0), rdofs[iDof]);
+    cons_->addConstraint(cornerRot);
+  }
+
+  // moving corners
   for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
   {
     idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
 
-    masters = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge],
-                             nodes_, globdat, getContext());
-    slaves = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge + 1],
+    masterEdge = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge],
+                                nodes_, globdat, getContext());
+    slaveEdge = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge + 1],
+                               nodes_, globdat, getContext());
+    corner = NodeGroup::get(PBCGroupInputModule::CORNERS[iEdge + 1],
                             nodes_, globdat, getContext());
 
     // save the translational DOFs for the
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     {
-      masterDofs_(iDof, iDir).resize(masters.size());
-      slaveDofs_(iDof, iDir).resize(slaves.size());
-      dofs_->getDofIndices(masterDofs_(iDof, iDir), masters.getIndices(),
-                           jdofs_[iDof]);
-      dofs_->getDofIndices(slaveDofs_(iDof, iDir), slaves.getIndices(),
-                           jdofs_[iDof]);
+      masterEdgeDofs_(iDof, iDir).resize(masterEdge.size());
+      slaveEdgeDofs_(iDof, iDir).resize(slaveEdge.size());
+      dofs_->getDofIndices(masterEdgeDofs_(iDof, iDir),
+                           masterEdge.getIndices(), jdofs_[iDof]);
+      dofs_->getDofIndices(slaveEdgeDofs_(iDof, iDir),
+                           slaveEdge.getIndices(), jdofs_[iDof]);
+      cornerDofs_(iDof, iDir) =
+          dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
     }
 
     // lock the rotational DOFs for the edges
     for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++)
     {
-      masterRots.resize(masters.size());
-      slaveRots.resize(slaves.size());
+      masterRots.resize(masterEdge.size());
+      slaveRots.resize(slaveEdge.size());
 
-      dofs_->getDofIndices(masterRots, masters.getIndices(), rdofs[iDof]);
-      dofs_->getDofIndices(slaveRots, slaves.getIndices(), rdofs[iDof]);
+      dofs_->getDofIndices(masterRots, masterEdge.getIndices(),
+                           rdofs[iDof]);
+      dofs_->getDofIndices(slaveRots, slaveEdge.getIndices(),
+                           rdofs[iDof]);
+      cornerRot = dofs_->getDofIndex(corner.getIndex(0), rdofs[iDof]);
 
       for (idx_t iN = 0; iN < masterRots.size(); iN++)
-      {
         cons_->addConstraint(slaveRots[iN], masterRots[iN], 1.0);
-      }
+      cons_->addConstraint(cornerRot);
     }
   }
 
@@ -222,8 +247,16 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
     Globdat::getVariables("all.extent", globdat).get(size, dofNames_[i]);
     corner_deform[i] = size * applyGrad[i];
   }
-
   // TEST_CONTEXT(corner_deform)
+
+  // set the positive dofs
+  for (idx_t iCorner = 0; iCorner < pbcRank_; iCorner++)
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+      if (std::isnan(corner_deform(iDof, iCorner)))
+        cons_->eraseConstraint(cornerDofs_(iDof, iCorner));
+      else
+        cons_->addConstraint(cornerDofs_(iDof, iCorner),
+                             corner_deform(iDof, iCorner));
 
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -232,22 +265,16 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     {
       // iterate over the nodes
-      for (idx_t iNode = 0; iNode < slaveDofs_(iDof, iEdge).size();
+      for (idx_t iNode = 0; iNode < slaveEdgeDofs_(iDof, iEdge).size();
            iNode++)
-        if (std::isnan(corner_deform(iDof, iEdge)))
-          cons_->eraseConstraint(slaveDofs_(iDof, iEdge)[iNode]);
-        else
-          cons_->addConstraint(slaveDofs_(iDof, iEdge)[iNode],
-                               corner_deform(iDof, iEdge),
-                               masterDofs_(iDof, iEdge)[iNode], 1.);
+        cons_->addConstraint(slaveEdgeDofs_(iDof, iEdge)[iNode],
+                             {masterEdgeDofs_(iDof, iEdge)[iNode],
+                              cornerDofs_(iDof, iEdge)},
+                             {1., 1.});
     }
   }
 
-  // fix the first node of the left edge
-  for (idx_t i = 0; i < pbcRank_; i++)
-    cons_->addConstraint(masterDofs_(i, 0)[0]);
-
-  // TEST_CONTEXT(cons_->isSlaveDof(slaveDofs_(0, 0)[0]))
+  // TEST_CONTEXT(cons_->isSlaveDof(slaveEdgeDofs_(0, 0)[0]))
   // TEST_PRINTER((*cons_))
 }
 
@@ -265,7 +292,7 @@ void periodicBCModel::getExtVec_(const Vector &f,
     for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
     {
       idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
-      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+      // TEST_CONTEXT(f[slaveEdgeDofs_(iDof, iDir)])
       if (std::isnan(grad_(iDof, iDir)))
         continue; // if the dispGrad for this is not configured, skip
                   // it
@@ -288,7 +315,7 @@ void periodicBCModel::getExtVec_(const Vector &f,
 
           area *= extent;
         }
-      nNodes = masterDofs_(iDof, iDir).size();
+      nNodes = masterEdgeDofs_(iDof, iDir).size();
       // TEST_CONTEXT(area)
 
       System::info(myName_) << " ...Applying stress in direction of "
@@ -299,15 +326,15 @@ void periodicBCModel::getExtVec_(const Vector &f,
           << "      at " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
           << " \n";
 
-      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
+      for (idx_t iNode = 0; iNode < masterEdgeDofs_(iDof, iDir).size();
            iNode++)
       {
         // set the unit load at the slave nodes
-        f[slaveDofs_(iDof, iDir)[iNode]] +=
+        f[slaveEdgeDofs_(iDof, iDir)[iNode]] +=
             scale * grad_(iDof, iDir) * area / nNodes;
       }
 
-      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+      // TEST_CONTEXT(f[slaveEdgeDofs_(iDof, iDir)])
     }
 }
 
