@@ -1,12 +1,14 @@
 #include "ParaViewModule.h"
 
-void vec2mat(const Matrix &mat, const Vector &vec) {
+void vec2mat(const Matrix &mat, const Vector &vec)
+{
   const idx_t rows = mat.size(0);
   const idx_t cols = mat.size(1);
   JEM_ASSERT2(rows * cols == vec.size(),
               "Vector and Matrix not of the same size!");
 
-  for (idx_t irow = 0; irow < rows; irow++) {
+  for (idx_t irow = 0; irow < rows; irow++)
+  {
     mat(irow, ALL) = vec[SliceFromTo(irow * cols, (irow + 1) * cols)];
   }
 }
@@ -69,7 +71,8 @@ Module::Status ParaViewModule::init
 
   setInfo_.resize(elemSets_.size());
 
-  for (idx_t igroup = 0; igroup < elemSets_.size(); igroup++) {
+  for (idx_t igroup = 0; igroup < elemSets_.size(); igroup++)
+  {
     Properties groupProps = myProps.getProps(elemSets_[igroup]);
     Properties groupConf = myConf.makeProps(elemSets_[igroup]);
 
@@ -99,7 +102,8 @@ Module::Status ParaViewModule::init
 
   // write the pvd file
   idx_t format_pos = nameFormat_.rfind("%i");
-  if (format_pos > 0) {
+  if (format_pos > 0)
+  {
     String pvdName = nameFormat_[SliceTo(format_pos)] +
                      nameFormat_[SliceFrom(format_pos + 2)] + ".pvd";
     Ref<Writer> pvd_raw = newInstance<FileWriter>(pvdName);
@@ -112,7 +116,8 @@ Module::Status ParaViewModule::init
     pvd_printer_->incrIndentLevel();
     *pvd_printer_ << "<Collection>" << endl;
     pvd_printer_->incrIndentLevel();
-  } else
+  }
+  else
     pvd_printer_ = nullptr;
 
   return OK;
@@ -141,7 +146,8 @@ Module::Status ParaViewModule::run
   // write everything to file
   bool cond = jive::util::FuncUtils::evalCond(*sampleCond_, globdat);
 
-  if (cond) {
+  if (cond)
+  {
     writeFile_(currentFile, globdat);
 
     // report file to pvd
@@ -150,7 +156,8 @@ Module::Status ParaViewModule::run
     folder_sep = currentFile.rfind("/") +
                  1; // LATER make compatible with other OS's?
 
-    if (pvd_printer_) {
+    if (pvd_printer_)
+    {
       *pvd_printer_ << "<DataSet ";
       *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
       *pvd_printer_ << "group=\"\" part=\"0\" ";
@@ -169,8 +176,10 @@ Module::Status ParaViewModule::run
 
 void ParaViewModule::shutdown
 
-    (const Properties &globdat) {
-  if (pvd_printer_) {
+    (const Properties &globdat)
+{
+  if (pvd_printer_)
+  {
     pvd_printer_->decrIndentLevel();
     *pvd_printer_ << "</Collection>" << endl;
     pvd_printer_->decrIndentLevel();
@@ -208,7 +217,8 @@ void ParaViewModule::writeFile_
   file_frmt->incrIndentLevel();
 
   // iterate over all the groups
-  for (idx_t igroup = 0; igroup < elemSets_.size(); igroup++) {
+  for (idx_t igroup = 0; igroup < elemSets_.size(); igroup++)
+  {
     // get the current standings elements and corresponding nodes
     Assignable<ElementSet> elems = ElementSet::get(globdat, getContext());
     Assignable<ElementGroup> egroup = ElementGroup::get(
@@ -219,11 +229,13 @@ void ParaViewModule::writeFile_
     Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
     Vector disp, velo, acce;
     StateVector::get(disp, jive::model::STATE0, dofs, globdat);
-    if (!StateVector::find(velo, jive::model::STATE1, dofs, globdat)) {
+    if (!StateVector::find(velo, jive::model::STATE1, dofs, globdat))
+    {
       velo.resize(disp.shape());
       velo = 0.0;
     }
-    if (!StateVector::find(acce, jive::model::STATE2, dofs, globdat)) {
+    if (!StateVector::find(acce, jive::model::STATE2, dofs, globdat))
+    {
       acce.resize(disp.shape());
       acce = 0.0;
     }
@@ -269,7 +281,7 @@ void ParaViewModule::writePiece_
   // TEST_CONTEXT(groupElems)
 
   *file << "<Piece "
-        << "NumberOfPoints=\"" << points.size() << "\" "
+        << "NumberOfPoints=\"" << groupNodes.size() << "\" "
         << "NumberOfCells=\"" << group.size() << "\""
         << ">" << endl;
   file->incrIndentLevel();
@@ -280,7 +292,8 @@ void ParaViewModule::writePiece_
   *file << "<DataArray type=\"Float32\" NumberOfComponents=\"" << 3
         << "\">" << endl;
   file->incrIndentLevel();
-  for (idx_t inode = 0; inode < groupNodes.size(); inode++) {
+  for (idx_t inode = 0; inode < groupNodes.size(); inode++)
+  {
     Vector coords(points.rank());
     nodeNums[groupNodes[inode]] = inode;
     points.getNodeCoords(coords, groupNodes[inode]);
@@ -302,7 +315,8 @@ void ParaViewModule::writePiece_
   *file << "<DataArray type=\"Int32\" Name=\"connectivity\">" << endl;
   file->incrIndentLevel();
   // iterate through the elements
-  for (idx_t ie = 0; ie < group.size(); ie++) {
+  for (idx_t ie = 0; ie < group.size(); ie++)
+  {
     idx_t ielem = group.getIndex(ie);
 
     IdxVector elNodes(cells.getElemNodeCount(ielem));
@@ -313,7 +327,8 @@ void ParaViewModule::writePiece_
     offsets[ie] = elNodes.size();
     types[ie] = nameToVTKNum(info.shape);
 
-    for (idx_t inode = 0; inode < elNodes.size(); inode++) {
+    for (idx_t inode = 0; inode < elNodes.size(); inode++)
+    {
       *file << nodeNums[paraNodes[inode]] << SPACING;
     }
     *file << endl;
@@ -323,7 +338,8 @@ void ParaViewModule::writePiece_
 
   *file << "<DataArray type=\"Int32\" Name=\"offsets\">" << endl;
   file->incrIndentLevel();
-  for (idx_t ielem = 0; ielem < group.size(); ielem++) {
+  for (idx_t ielem = 0; ielem < group.size(); ielem++)
+  {
     *file << sum(offsets[SliceFromTo(0, ielem + 1)]) << endl;
   }
   file->decrIndentLevel();
@@ -331,7 +347,8 @@ void ParaViewModule::writePiece_
 
   *file << "<DataArray type=\"UInt8\" Name=\"types\">" << endl;
   file->incrIndentLevel();
-  for (idx_t ielem = 0; ielem < group.size(); ielem++) {
+  for (idx_t ielem = 0; ielem < group.size(); ielem++)
+  {
     *file << types[ielem] << endl;
   }
   file->decrIndentLevel();
@@ -354,7 +371,8 @@ void ParaViewModule::writePiece_
   for (idx_t idof = 0; idof < iDisps.size(); idof++)
     iDofs[idof] = dofs->findType(info.dispData[idof]);
 
-  for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+  for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
+  {
     dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
     disp_mat(ipoint, ALL) = disp[iDisps];
     velo_mat(ipoint, ALL) = velo[iDisps];
@@ -366,18 +384,21 @@ void ParaViewModule::writePiece_
   writeDataArray_(file, acce_mat, "Float32", "Acceleration");
 
   // Next write other Dofs
-  if (info.dofData.size() > 0) {
+  if (info.dofData.size() > 0)
+  {
     iDofs.resize(info.dofData.size());
     iDisps.resize(info.dofData.size());
     disp_mat.resize(groupNodes.size(), info.dofData.size());
     velo_mat.resize(groupNodes.size(), info.dofData.size());
     acce_mat.resize(groupNodes.size(), info.dofData.size());
 
-    for (idx_t idof = 0; idof < iDisps.size(); idof++) {
+    for (idx_t idof = 0; idof < iDisps.size(); idof++)
+    {
       iDofs[idof] = dofs->findType(info.dofData[idof]);
     }
 
-    for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+    for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
+    {
       dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
       disp_mat(ipoint, ALL) = disp[iDisps];
       velo_mat(ipoint, ALL) = velo[iDisps];
@@ -392,18 +413,21 @@ void ParaViewModule::writePiece_
   // iterate through all other data ( see OutputModule for more advanced
   // features )
 
-  for (idx_t iPtDatum = 0; iPtDatum < info.nodeData.size(); iPtDatum++) {
+  for (idx_t iPtDatum = 0; iPtDatum < info.nodeData.size(); iPtDatum++)
+  {
     using jive::model::ActionParams;
     Properties params("actionParams");
 
     StringVector dofNames = dofs->getTypeNames();
     iDofs.resize(dofNames.size());
     iDisps.resize(dofNames.size());
-    for (idx_t idof = 0; idof < dofNames.size(); idof++) {
+    for (idx_t idof = 0; idof < dofNames.size(); idof++)
+    {
       iDofs[idof] = dofs->findType(dofNames[idof]);
     }
 
-    if (info.nodeData[iPtDatum] == "fext") {
+    if (info.nodeData[iPtDatum] == "fext")
+    {
       Vector fext(dofs->dofCount());
       Matrix fext_mat(points.size(), dofs->typeCount());
       fext = 0.;
@@ -412,7 +436,8 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
       params.erase(ActionParams::EXT_VECTOR);
 
-      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
+      {
         dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
         fext_mat(ipoint, ALL) = fext[iDisps];
       }
@@ -420,7 +445,9 @@ void ParaViewModule::writePiece_
                       "External Forces");
       writeDataArray_(file, fext_mat(ALL, SliceFrom(3)), "Float32",
                       "External Torques");
-    } else if (info.nodeData[iPtDatum] == "fint") {
+    }
+    else if (info.nodeData[iPtDatum] == "fint")
+    {
       Vector fint(dofs->dofCount());
       Matrix fint_mat(points.size(), dofs->typeCount());
       fint = 0.;
@@ -429,7 +456,8 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
       params.erase(ActionParams::INT_VECTOR);
 
-      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
+      {
         dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
         fint_mat(ipoint, ALL) = fint[iDisps];
       }
@@ -437,7 +465,9 @@ void ParaViewModule::writePiece_
                       "Internal Forces");
       writeDataArray_(file, fint_mat(ALL, SliceFrom(3)), "Float32",
                       "Internal Torques");
-    } else if (info.nodeData[iPtDatum] == "fres") {
+    }
+    else if (info.nodeData[iPtDatum] == "fres")
+    {
       Vector fext(dofs->dofCount());
       Vector fint(dofs->dofCount());
       Vector fres(dofs->dofCount());
@@ -456,7 +486,8 @@ void ParaViewModule::writePiece_
 
       fres = fext - fint;
 
-      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++) {
+      for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
+      {
         dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
         fres_mat(ipoint, ALL) = fres[iDisps];
       }
@@ -464,7 +495,9 @@ void ParaViewModule::writePiece_
                       "Resulting Forces");
       writeDataArray_(file, fres_mat(ALL, SliceFrom(3)), "Float32",
                       "Resulting Torques");
-    } else {
+    }
+    else
+    {
       Ref<ItemSet> pointSet =
           ItemSet::get("nodes", globdat, getContext());
 
@@ -503,7 +536,8 @@ void ParaViewModule::writePiece_
   // iterate through all desired cell (element) data ( see OutputModule
   // for more advanced features )
 
-  for (idx_t iElDatum = 0; iElDatum < info.elemData.size(); iElDatum++) {
+  for (idx_t iElDatum = 0; iElDatum < info.elemData.size(); iElDatum++)
+  {
     using jive::model::ActionParams;
 
     Ref<ItemSet> cellSet =
@@ -550,13 +584,16 @@ void ParaViewModule::writePiece_
 void ParaViewModule::writeDataArray_
 
     (const Ref<PrintWriter> &file, const Matrix &data, const String &type,
-     const String &name) {
+     const String &name)
+{
   *file << "<DataArray type=\"" << type << "\" Name=\"" << name
         << "\" NumberOfComponents=\"" << data.shape()[1] << "\">" << endl;
   file->incrIndentLevel();
 
-  for (idx_t iRow = 0; iRow < data.shape()[0]; iRow++) {
-    for (idx_t iColumn = 0; iColumn < data.shape()[1]; iColumn++) {
+  for (idx_t iRow = 0; iRow < data.shape()[0]; iRow++)
+  {
+    for (idx_t iColumn = 0; iColumn < data.shape()[1]; iColumn++)
+    {
       *file << (float)data(iRow, iColumn)
             << SPACING; // float since ParaView can only read single
                         // precision floats
@@ -571,7 +608,8 @@ void ParaViewModule::writeDataArray_
 void ParaViewModule::writeDataArray_
 
     (const Ref<PrintWriter> &file, const Ref<XTable> &data,
-     const IdxVector &rows, const String &type, const String &name) {
+     const IdxVector &rows, const String &type, const String &name)
+{
   const idx_t icolumns = data->columnCount();
   const idx_t irows = data->rowCount();
   Matrix mat(irows, icolumns);
@@ -585,7 +623,8 @@ void ParaViewModule::writeDataArray_
 void ParaViewModule::writeDataArray_
 
     (const Ref<PrintWriter> &file, const Vector &data, const String &type,
-     const String &name) {
+     const String &name)
+{
   Matrix mat(data.size(), 1);
 
   mat(ALL, 0) = data;
@@ -610,7 +649,8 @@ Ref<Module> ParaViewModule::makeNew
 //   declare
 //-----------------------------------------------------------------------
 
-void ParaViewModule::declare() {
+void ParaViewModule::declare()
+{
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare(TYPE_NAME, &makeNew);
@@ -622,38 +662,60 @@ void ParaViewModule::declare() {
 
 idx_t ParaViewModule::nameToVTKNum
 
-    (const String &name) {
+    (const String &name)
+{
   // https://vtk.org/doc/nightly/html/vtkCellType_8h_source.html
   idx_t cellType = 0;
 
   // 1D elements
-  if (name == "Line2") {
+  if (name == "Line2")
+  {
     cellType = 3;
-  } else if (name == "Line3") {
+  }
+  else if (name == "Line3")
+  {
     cellType = 21;
-  } else if (name == "Line4") {
+  }
+  else if (name == "Line4")
+  {
     cellType = 35;
   }
   // 2D elements
-  else if (name == "Quad4") {
+  else if (name == "Quad4")
+  {
     cellType = 9;
-  } else if (name == "Quad8") {
+  }
+  else if (name == "Quad8")
+  {
     cellType = 23;
-  } else if (name == "Triangle3") {
+  }
+  else if (name == "Triangle3")
+  {
     cellType = 5;
-  } else if (name == "Triangle6") {
+  }
+  else if (name == "Triangle6")
+  {
     cellType = 22;
   }
   // 3D elements
-  else if (name == "Hex8") {
+  else if (name == "Hex8")
+  {
     cellType = 12;
-  } else if (name == "Hex20") {
+  }
+  else if (name == "Hex20")
+  {
     cellType = 25;
-  } else if (name == "Tet4") {
+  }
+  else if (name == "Tet4")
+  {
     cellType = 10;
-  } else if (name == "Tet10") {
+  }
+  else if (name == "Tet10")
+  {
     cellType = 24;
-  } else {
+  }
+  else
+  {
     throw IllegalArgumentException("ParaViewModule",
                                    "Model type " + name + " unkown");
   }
@@ -667,7 +729,8 @@ idx_t ParaViewModule::nameToVTKNum
 
 IdxVector ParaViewModule::gmsh2ParaNodeOrder
 
-    (const IdxVector elNodes, const String &name) {
+    (const IdxVector elNodes, const String &name)
+{
   IdxVector paraViewNodes(elNodes.size());
 
   // paraview :
@@ -689,14 +752,19 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
 
   */
 
-  if (name == "Line2") {
+  if (name == "Line2")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
-  } else if (name == "Line3") {
+  }
+  else if (name == "Line3")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[2];
     paraViewNodes[2] = elNodes[1];
-  } else if (name == "Line4") {
+  }
+  else if (name == "Line4")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[3];
     paraViewNodes[2] = elNodes[1];
@@ -732,12 +800,15 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
   |           |          |           |           |           |
   0-----------1          0-----1-----2           0-----1-----2
   */
-  else if (name == "Quad4") {
+  else if (name == "Quad4")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
     paraViewNodes[2] = elNodes[2];
     paraViewNodes[3] = elNodes[3];
-  } else if (name == "Quad8") {
+  }
+  else if (name == "Quad8")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[2];
     paraViewNodes[2] = elNodes[4];
@@ -746,7 +817,9 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
     paraViewNodes[5] = elNodes[3];
     paraViewNodes[6] = elNodes[5];
     paraViewNodes[7] = elNodes[7];
-  } else if (name == "Quad9") {
+  }
+  else if (name == "Quad9")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[2];
     paraViewNodes[2] = elNodes[4];
@@ -794,11 +867,14 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
   0---1---2---3---4
 
   */
-  else if (name == "Triangle3") {
+  else if (name == "Triangle3")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
     paraViewNodes[2] = elNodes[2];
-  } else if (name == "Triangle6") {
+  }
+  else if (name == "Triangle6")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[2];
     paraViewNodes[2] = elNodes[4];
@@ -832,7 +908,8 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
 
   */
 
-  else if (name == "Hex8") {
+  else if (name == "Hex8")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
     paraViewNodes[2] = elNodes[3];
@@ -841,7 +918,9 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
     paraViewNodes[5] = elNodes[5];
     paraViewNodes[6] = elNodes[7];
     paraViewNodes[7] = elNodes[6];
-  } else if (name == "Hex20") {
+  }
+  else if (name == "Hex20")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[2];
     paraViewNodes[2] = elNodes[4];
@@ -892,12 +971,15 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
 
   */
 
-  else if (name == "Tet4") {
+  else if (name == "Tet4")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
     paraViewNodes[2] = elNodes[2];
     paraViewNodes[3] = elNodes[3];
-  } else if (name == "Tet10") {
+  }
+  else if (name == "Tet10")
+  {
     paraViewNodes[0] = elNodes[0];
     paraViewNodes[1] = elNodes[1];
     paraViewNodes[2] = elNodes[2];
@@ -907,7 +989,9 @@ IdxVector ParaViewModule::gmsh2ParaNodeOrder
     paraViewNodes[6] = elNodes[6];
     paraViewNodes[7] = elNodes[8]; // here
     paraViewNodes[8] = elNodes[7]; // here
-  } else {
+  }
+  else
+  {
     throw IllegalArgumentException("Model type " + name + " unkown");
   }
 
