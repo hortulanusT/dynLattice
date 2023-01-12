@@ -12,10 +12,14 @@
 
 #pragma once
 
+#include <jem/base/Error.h>
+#include <jem/numeric/Sparse.h>
+#include <jem/numeric/sparse/select.h>
 #include <jive/algebra/AbstractMatrix.h>
-#include <jive/algebra/FlexMatrixBuilder.h>
+#include <jive/algebra/SparseMatrixObject.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/fem/FEMatrixBuilder.h>
 #include <jive/implict/Names.h>
 #include <jive/implict/NonlinModule.h>
 #include <jive/implict/SolverModule.h>
@@ -32,10 +36,13 @@
 using jem::Ref;
 using jem::numeric::Function;
 using jive::Properties;
+using jive::SparseMatrix;
 using jive::String;
 using jive::algebra::AbstractMatrix;
+using jive::algebra::ConstrainedMatrix;
 using jive::app::Module;
 using jive::app::ModuleFactory;
+using jive::fem::FEMatrixBuilder;
 using jive::implict::SolverModule;
 using jive::model::Model;
 using jive::util::FuncUtils;
@@ -76,22 +83,31 @@ private:
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,
                           const Properties &globdat);
 
+  void condenseMatrix_(const Matrix &resStiff, const Properties &globdat);
+  void storeTangentProps_(const Matrix &resStiff,
+                          const Properties &globdat);
+
 protected:
   virtual ~TangentOutputModule();
 
 private:
-  Ref<Model> masterModel_;
+  String mode_;
 
+  // general
+  Ref<Model> masterModel_;
+  Ref<Function> sampleCond_;
+  idx_t rank_;
+
+  // matrix condensation
+  Ref<Constraints> cons_;
+  IdxMatrix cornerDofs_;
+
+  // finite differences
   Ref<SolverModule> solver_;
   Ref<GroupOutputModule> groupUpdate_;
-
-  Ref<Function> sampleCond_;
-
+  double thickness_;
+  double perturb_;
   StringVector strains_;
   StringVector stresses_;
   StringVector sizes_;
-
-  idx_t rank_;
-  double thickness_;
-  double perturb_;
 };

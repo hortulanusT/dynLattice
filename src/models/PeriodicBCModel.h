@@ -109,6 +109,7 @@ private:
   IdxVectorMatrix masterEdgeDofs_;
   IdxVectorMatrix slaveEdgeDofs_;
   IdxMatrix cornerDofs_;
+  IdxVector corner0Dofs_;
   idx_t pbcRank_;
   Mode mode_;
 };

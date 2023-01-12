@@ -158,10 +158,10 @@ void periodicBCModel::init_(const Properties &globdat)
   masterEdgeDofs_.resize(pbcRank_, pbcRank_);
   slaveEdgeDofs_.resize(pbcRank_, pbcRank_);
   cornerDofs_.resize(pbcRank_, pbcRank_);
+  corner0Dofs_.resize(pbcRank_);
 
   IdxVector masterRots;
   IdxVector slaveRots;
-  idx_t corner0Dof;
   idx_t cornerRot;
 
   Assignable<NodeGroup> masterEdge;
@@ -173,8 +173,8 @@ void periodicBCModel::init_(const Properties &globdat)
                           globdat, getContext());
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
   {
-    corner0Dof = dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
-    cons_->addConstraint(corner0Dof);
+    corner0Dofs_[iDof] =
+        dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
   }
   for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++)
   {
@@ -249,6 +249,10 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
   }
   // TEST_CONTEXT(corner_deform)
 
+  // fix zero corner
+  for (idx_t corner0Dof : corner0Dofs_)
+    cons_->addConstraint(corner0Dof);
+
   // set the positive dofs
   for (idx_t iCorner = 0; iCorner < pbcRank_; iCorner++)
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
@@ -269,8 +273,9 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
            iNode++)
         cons_->addConstraint(slaveEdgeDofs_(iDof, iEdge)[iNode],
                              {masterEdgeDofs_(iDof, iEdge)[iNode],
-                              cornerDofs_(iDof, iEdge)},
-                             {1., 1.});
+                              cornerDofs_(iDof, iEdge),
+                              corner0Dofs_[iDof]},
+                             {1., 1., -1.});
     }
   }
 
