@@ -16,6 +16,7 @@
 #include <jem/numeric/Sparse.h>
 #include <jem/numeric/sparse/select.h>
 #include <jive/algebra/AbstractMatrix.h>
+#include <jive/algebra/ConstrainedMatrix.h>
 #include <jive/algebra/SparseMatrixObject.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
@@ -78,14 +79,16 @@ private:
   void readStrainStress_(const Vector &strains, const Vector &stresses,
                          const Properties &globdat);
   void reportStrainStress_(const Vector &H, const Vector &P);
+
   void getStrainStress_(const Matrix &strains, const Matrix &stresses,
                         const Properties &globdat);
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,
                           const Properties &globdat);
 
-  void condenseMatrix_(const Matrix &resStiff, const Properties &globdat);
-  void storeTangentProps_(const Matrix &resStiff,
-                          const Properties &globdat);
+  void readStresses_(const Vector &stresses, const Vector &fint,
+                     const Properties &globdat);
+  void condenseMatrix_(const Matrix &strains, const Matrix &stresses,
+                       const Properties &globdat);
 
 protected:
   virtual ~TangentOutputModule();
@@ -97,17 +100,17 @@ private:
   Ref<Model> masterModel_;
   Ref<Function> sampleCond_;
   idx_t rank_;
-
-  // matrix condensation
-  Ref<Constraints> cons_;
-  IdxMatrix cornerDofs_;
-
-  // finite differences
-  Ref<SolverModule> solver_;
   Ref<GroupOutputModule> groupUpdate_;
-  double thickness_;
-  double perturb_;
   StringVector strains_;
   StringVector stresses_;
   StringVector sizes_;
+
+  // matrix condensation
+  Ref<Constraints> cons_;
+  IdxMatrix strainDofs_;
+
+  // finite differences
+  Ref<SolverModule> solver_;
+  double thickness_;
+  double perturb_;
 };

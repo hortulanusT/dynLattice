@@ -54,6 +54,35 @@ Module::Status TangentOutputModule::init(const Properties &conf,
   myProps.find(thickness_, "thickness", 0., Float::MAX_VALUE);
   myConf.set("thickness", thickness_);
 
+  // setup group output model
+  Properties groupOutProp = myProps.makeProps("groupUpdate");
+  groupOutProp.set(jive::app::ModuleFactory::TYPE_PROP,
+                   GroupOutputModule::TYPE_NAME);
+  groupOutProp.set("elementGroups", "all");
+  StringVector edges(rank_ * 2);
+  for (idx_t i = 0; i < edges.size(); i++)
+    edges[i] = PBCGroupInputModule::EDGES[i];
+  groupOutProp.set("nodeGroups", edges);
+  groupOutProp.set("dofs", dofs);
+  groupUpdate_ = jem::staticCast<GroupOutputModule>(
+      jive::app::ModuleFactory::newInstance("groupUpdate", myConf,
+                                            myProps, globdat));
+  groupUpdate_->init(myConf, myProps, globdat);
+
+  // get strain/stress vectors
+  strains_.resize(rank_ * rank_);
+  stresses_.resize(rank_ * rank_);
+  sizes_.resize(rank_);
+
+  strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
+  stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
+  for (idx_t i = 0; i < dofs.size(); i++)
+    sizes_[i] = "all.extent." + dofs[i];
+
+  myConf.set("strainMeasures", strains_);
+  myConf.set("stressMeasures", stresses_);
+  myConf.set("sizeMeasures", sizes_);
+
   // select the mode for determination of the properties
   // 'finDiff' or 'matCond'
   mode_ = "finDiff";
@@ -79,37 +108,6 @@ Module::Status TangentOutputModule::init(const Properties &conf,
     solver_->getConfig(conf, globdat);
     solver_->init(conf, props, globdat);
 
-    // setup group output model
-    Properties groupOutProp = myProps.makeProps("groupUpdate");
-    groupOutProp.set(jive::app::ModuleFactory::TYPE_PROP,
-                     GroupOutputModule::TYPE_NAME);
-    groupOutProp.set("elementGroups", "all");
-    StringVector edges(rank_ * 2);
-    for (idx_t i = 0; i < edges.size(); i++)
-      edges[i] = PBCGroupInputModule::EDGES[i];
-    groupOutProp.set("nodeGroups", edges);
-    groupOutProp.set("dofs", dofs);
-    groupUpdate_ = jem::staticCast<GroupOutputModule>(
-        jive::app::ModuleFactory::newInstance("groupUpdate", myConf,
-                                              myProps, globdat));
-    groupUpdate_->init(myConf, myProps, globdat);
-
-    // get strain/stress vectors
-    strains_.resize(rank_ * rank_);
-    stresses_.resize(rank_ * rank_);
-    sizes_.resize(rank_);
-
-    strains_ =
-        PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
-    stresses_ =
-        PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
-    for (idx_t i = 0; i < dofs.size(); i++)
-      sizes_[i] = "all.extent." + dofs[i];
-
-    myConf.set("strainMeasures", strains_);
-    myConf.set("stressMeasures", stresses_);
-    myConf.set("sizeMeasures", sizes_);
-
     // get the perturbation amount
     perturb_ = 1e-9;
     myProps.find(perturb_, "perturb", 0., 1e-2);
@@ -121,15 +119,16 @@ Module::Status TangentOutputModule::init(const Properties &conf,
         Constraints::get(DofSpace::get(globdat, getContext()), globdat);
     Ref<DofSpace> dofSpace = cons_->getDofSpace();
 
-    cornerDofs_.resize(rank_ + 1, rank_);
-    for (idx_t iCorner = 0; iCorner <= rank_; iCorner++)
+    strainDofs_.resize(rank_, rank_);
+    for (idx_t iCorner = 0; iCorner < rank_; iCorner++)
     {
-      idx_t iNode = NodeGroup::get(PBCGroupInputModule::CORNERS[iCorner],
-                                   NodeSet::get(globdat, getContext()),
-                                   globdat, getContext())
-                        .getIndex(0);
+      idx_t iNode =
+          NodeGroup::get(PBCGroupInputModule::CORNERS[iCorner + 1],
+                         NodeSet::get(globdat, getContext()), globdat,
+                         getContext())
+              .getIndex(0);
       for (idx_t iDof = 0; iDof < rank_; iDof++)
-        cornerDofs_(iCorner, iDof) = dofSpace->getDofIndex(
+        strainDofs_(iDof, iCorner) = dofSpace->getDofIndex(
             iNode, dofSpace->getTypeIndex(dofs[iDof]));
     }
   }
@@ -151,23 +150,17 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
   jem::System::info(myName_)
       << " ...Start calculating tangent properties\n";
 
+  Matrix stresses(rank_ * rank_, rank_ * rank_);
+  Matrix strains(rank_ * rank_, rank_ * rank_);
+
   if (mode_ == "finDiff")
-  {
-    Matrix stresses(rank_ * rank_, rank_ * rank_);
-    Matrix strains(rank_ * rank_, rank_ * rank_);
-
     getStrainStress_(strains, stresses, globdat);
-    storeTangentProps_(strains, stresses, globdat);
-  }
   else if (mode_ == "matCond")
-  {
-    Matrix resStiff(rank_, rank_);
-
-    condenseMatrix_(resStiff, globdat);
-    storeTangentProps_(resStiff, globdat);
-  }
+    condenseMatrix_(strains, stresses, globdat);
   else
     throw jem::Error("unknown mode!");
+
+  storeTangentProps_(strains, stresses, globdat);
 
   jem::System::info(myName_)
       << " ...Done calculating tangent properties\n";
@@ -188,6 +181,19 @@ void TangentOutputModule::readStrainStress_(const Vector &strains,
     size *= FuncUtils::evalExpr(sizeMeas, globdat);
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     strains[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
+  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
+    stresses[iComp] = FuncUtils::evalExpr(stresses_[iComp], globdat);
+}
+
+void TangentOutputModule::readStresses_(const Vector &stresses,
+                                        const Vector &fint,
+                                        const Properties &globdat)
+{
+  stresses = 0.;
+
+  globdat.set(ActionParams::INT_VECTOR, fint);
+  groupUpdate_->run(globdat);
+
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     stresses[iComp] = FuncUtils::evalExpr(stresses_[iComp], globdat);
 }
@@ -306,51 +312,51 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
   // TEST_CONTEXT(myVars)
 }
 
-void TangentOutputModule::condenseMatrix_(const Matrix &resStiff,
+void TangentOutputModule::condenseMatrix_(const Matrix &strains,
+                                          const Matrix &stresses,
                                           const Properties &globdat)
 {
   Vector fint(cons_->dofCount());
   Ref<FEMatrixBuilder> mB = newInstance<FEMatrixBuilder>(
       "tangentBuilder", ElementSet::get(globdat, "tangentBuild"),
       cons_->getDofSpace());
-  SparseMatrix K, C;
+  Ref<AbstractMatrix> K;
   Properties params;
 
   mB->setToZero();
   params.set(ActionParams::INT_VECTOR, fint);
   params.set(ActionParams::MATRIX0, mB);
+  params.set(ActionParams::LOAD_CASE, "condenseMatrix");
   masterModel_->takeAction(Actions::GET_MATRIX0, params, globdat);
   masterModel_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   params.clear();
   mB->updateMatrix();
-  K = mB->getSparseMatrix()->toSparseMatrix();
-  C = cons_->toMatrix();
+  K = mB->getMatrix();
 
   // reduce the stiffness matrix
-  SparseMatrix C_i, C_d, C_di, T;
+  K = newInstance<ConstrainedMatrix>(K, cons_);
 
-  ArrayBuffer<idx_t> independentDofs;
-  for (idx_t iDof = 0; iDof < cons_->dofCount(); iDof++)
-    if (!cons_->isSlaveDof(iDof))
-      independentDofs.pushBack(iDof);
+  // iterate over the unit strains
+  Vector u(cons_->dofCount());
+  strains = 0.;
+  for (idx_t i = 0; i < rank_; i++)
+    for (idx_t j = 0; j < rank_; j++)
+    {
+      strains(i * rank_ + j, i * rank_ + j) = 1.;
 
-  IdxVector slaveDofs = cons_->getSlaveDofs();
-  IdxVector masterDofs = independentDofs.toArray();
+      u = 0.;
+      fint = 0.;
 
-  C_i = select(C, ALL, masterDofs);
-  C_d = select(C, ALL, slaveDofs);
-  // TODO get inverse of C_d (and dont prescribe 0 at 0node?)
-  C_di = matmul(C_d, C_i);
-  C_di *= -1.;
-  TEST_CONTEXT(C_di.shape())
+      u[strainDofs_(i, j)] = 1.;
 
-  // distribute the stiffness matrix
-  SparseMatrix K_pp, K_fp, K_pf, Kff;
+      K->matmul(fint, u);
+
+      readStresses_(stresses[i * rank_ + j], fint, globdat);
+
+      TEST_CONTEXT(strains[i * rank_ + j])
+      TEST_CONTEXT(stresses[i * rank_ + j])
+    }
 }
-
-void TangentOutputModule::storeTangentProps_(const Matrix &resStiff,
-                                             const Properties &globdat){
-    NOT_IMPLEMENTED}
 
 Ref<Module> TangentOutputModule::makeNew
 

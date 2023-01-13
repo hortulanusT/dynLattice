@@ -108,20 +108,26 @@ bool periodicBCModel::takeAction
   if (action == Actions::GET_CONSTRAINTS &&
       (mode_ == DISP || mode_ == UPD))
   {
-    double scale;
-    Vector currVec;
-    Matrix currentGrad(grad_.shape());
+    String loadCase = "reg";
+    params.find(loadCase, ActionParams::LOAD_CASE);
+    if (loadCase != "condenseMatrix")
+    {
+      double scale;
+      Vector currVec;
+      Matrix currentGrad(grad_.shape());
 
-    scale = NAN;
-    currentGrad = NAN;
+      scale = NAN;
+      currentGrad = NAN;
 
-    // get the scale factor
-    if (!globdat.find(currVec, FIXEDGRAD_PARAM))
-      params.get(scale, ActionParams::SCALE_FACTOR);
-    else
-      vec2mat(currentGrad, currVec);
+      // get the scale factor
+      if (!globdat.find(currVec, FIXEDGRAD_PARAM))
+        params.get(scale, ActionParams::SCALE_FACTOR);
+      else
+        vec2mat(currentGrad, currVec);
 
-    setConstraints_(globdat, currentGrad, scale);
+      fixCorners_(globdat, currentGrad, scale);
+    }
+    setConstraints_();
 
     return true;
   }
@@ -228,9 +234,9 @@ void periodicBCModel::init_(const Properties &globdat)
   // TEST_PRINTER((*cons_))
 }
 
-void periodicBCModel::setConstraints_(const Properties &globdat,
-                                      const Matrix &currentGrad,
-                                      const double scale)
+void periodicBCModel::fixCorners_(const Properties &globdat,
+                                  const Matrix &currentGrad,
+                                  const double scale)
 {
   Matrix applyGrad(grad_.shape());
 
@@ -261,7 +267,10 @@ void periodicBCModel::setConstraints_(const Properties &globdat,
       else
         cons_->addConstraint(cornerDofs_(iDof, iCorner),
                              corner_deform(iDof, iCorner));
+}
 
+void periodicBCModel::setConstraints_()
+{
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
   {

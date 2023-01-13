@@ -87,10 +87,12 @@ private:
 
       (const Properties &globdat);
 
-  void setConstraints_
+  void fixCorners_
 
       (const Properties &globdat, const Matrix &currentGrad,
        const double scale = NAN);
+
+  void setConstraints_();
 
   void getExtVec_
 
