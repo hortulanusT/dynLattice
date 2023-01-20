@@ -129,6 +129,7 @@ Module::Status ExplicitModule::init
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("solver", myConf, myProps, sparams, globdat);
+    solver_->setMode(Solver::LENIENT_MODE);
     solver_->configure(myProps);
     solver_->getConfig(myConf);
 
