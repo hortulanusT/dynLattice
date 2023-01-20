@@ -116,6 +116,7 @@ Module::Status ParaViewModule::init
     pvd_printer_->incrIndentLevel();
     *pvd_printer_ << "<Collection>" << endl;
     pvd_printer_->incrIndentLevel();
+    pvd_printer_->flush();
   }
   else
     pvd_printer_ = nullptr;
@@ -164,6 +165,7 @@ Module::Status ParaViewModule::run
       *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)]
                     << "\" ";
       *pvd_printer_ << "/>" << endl;
+      pvd_printer_->flush();
     }
   }
 
