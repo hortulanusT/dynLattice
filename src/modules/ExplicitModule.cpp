@@ -157,7 +157,6 @@ Module::Status ExplicitModule::run
 {
   using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
-  const idx_t rotCount = SO3_dofs_.size();
 
   idx_t step;
   Properties params;
@@ -172,12 +171,6 @@ Module::Status ExplicitModule::run
   Vector v_new(dofCount);
   Vector a_new(dofCount);
 
-  Vector r_node(rotCount);
-  Vector d_r(rotCount);
-  Matrix R_old(rotCount, rotCount);
-  Matrix R_new(rotCount, rotCount);
-  Matrix V_upd(rotCount, rotCount);
-
   // skip if no model exists
   if (!(model_))
     return DONE;
@@ -191,71 +184,35 @@ Module::Status ExplicitModule::run
   StateVector::get(v_old, STATE[1], dofs_, globdat);
   StateVector::get(a_old, STATE[2], dofs_, globdat);
 
-  // Get the internal and external force vectors last time step
-  fext = 0.0;
-  fint = 0.0;
-
-  params.set(ActionParams::EXT_VECTOR, fext);
-  params.set(ActionParams::INT_VECTOR, fint);
-
-  model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
-  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-  model_->takeAction("GET_GYRO_VECTOR", params, globdat);
-
-  fres = fext - fint;
-  params.clear();
-
   // update time in models and boundary conditions
   params.set(ActionParams::CONSTRAINTS, cons);
   Globdat::advanceTime(dtime_, globdat);
   Globdat::advanceStep(globdat);
   model_->takeAction(Actions::ADVANCE, params, globdat);
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
+  params.clear();
 
   // Compute new displacement values
-  if (mode_ == CONSISTENT)
-    solver_->solve(a_new, fres);
+  fres = getForce_(fint, fext, globdat);
+  getAcce_(a_new, cons, fres, globdat);
 
-  if (mode_ == LUMPED)
-  {
-    a_new = massInv_ * fres;
-    params.get(cons, ActionParams::CONSTRAINTS);
-    jive::util::setSlaveDofs(a_new, *cons);
-  }
-
-  params.clear();
   globdat.get(step, Globdat::TIME_STEP);
 
   // update velocity
   if (stepCount_ >= 2 && step >= 2)
-    dv = dtime_ / 2 * (3 * a_new - 1 * a_old);
+    ABupdate_(dv, a_new, a_old);
   else
-    dv = dtime_ * a_new;
+    ABupdate_(dv, a_new);
 
-  v_new = v_old + dv;
+  updateVec_(v_new, v_old, dv);
 
   // update position
   if (stepCount_ >= 2 && step >= 2)
-    du = dtime_ / 2 * (3 * v_new - 1 * v_old);
+    ABupdate_(du, v_new, v_old);
   else
-    du = dtime_ * v_new;
+    ABupdate_(du, v_new);
 
-  u_new = u_old + du;
-
-  // do different update for rotational dofs
-  for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
-  {
-    r_node = u_old[rdofs_[inode]];
-    d_r = du[rdofs_[inode]];
-
-    expVec(R_old, r_node);
-    expVec(V_upd, d_r);
-    matmul(R_new, V_upd, R_old);
-
-    logMat(r_node, R_new);
-
-    u_new[rdofs_[inode]] = r_node;
-  }
+  updateVec_(u_new, u_old, du, true);
 
   // commit everything
   Globdat::commitStep(globdat);
@@ -319,6 +276,77 @@ void ExplicitModule::getConfig
   myConf.set(jive::implict::PropNames::DELTA_TIME, dtime_);
 }
 
+void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
+                                const Vector &delta_y, const bool rot)
+{
+  y_new = y_old + delta_y;
+
+  if (rot)
+  {
+    const idx_t rotCount = SO3_dofs_.size();
+    Vector r_node(rotCount);
+    Vector d_r(rotCount);
+    Matrix R_old(rotCount, rotCount);
+    Matrix R_new(rotCount, rotCount);
+    Matrix V_upd(rotCount, rotCount);
+
+    for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+    {
+      r_node = y_old[rdofs_[inode]];
+      d_r = delta_y[rdofs_[inode]];
+
+      expVec(R_old, r_node);
+      expVec(V_upd, d_r);
+      matmul(R_new, V_upd, R_old);
+
+      logMat(r_node, R_new);
+
+      y_new[rdofs_[inode]] = r_node;
+    }
+  }
+}
+
+void ExplicitModule::getAcce_(const Vector &a,
+                              const Ref<Constraints> &cons,
+                              const Vector &fres,
+                              const Properties &globdat)
+{
+  using jive::model::STATE;
+
+  Properties params;
+
+  // Compute acceleration
+  if (mode_ == CONSISTENT)
+  {
+    solver_->solve(a, fres);
+  }
+
+  if (mode_ == LUMPED)
+  {
+    a = massInv_ * fres;
+    jive::util::setSlaveDofs(a, *cons);
+  }
+}
+
+Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
+                                 const Properties &globdat)
+{
+  Properties params;
+
+  // Get the internal and external force vectors last time step
+  fext = 0.0;
+  fint = 0.0;
+
+  params.set(ActionParams::EXT_VECTOR, fext);
+  params.set(ActionParams::INT_VECTOR, fint);
+
+  model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+  model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+
+  return Vector(fext - fint);
+}
+
 //-----------------------------------------------------------------------
 //   store_energy_
 //-----------------------------------------------------------------------
@@ -329,7 +357,7 @@ void ExplicitModule::store_energy_(const Vector &fint, const Vector &velo,
   double E_pot, delta_E_pot, E_kin;
   Vector temp(velo.size());
 
-  delta_E_pot = dotProduct(Vector(velo * dtime_), fint);
+  delta_E_pot = dtime_ * dotProduct(velo, fint);
 
   solver_->getMatrix()->matmul(temp, velo);
   E_kin = 0.5 * dotProduct(temp, velo);

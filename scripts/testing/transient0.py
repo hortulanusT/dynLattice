@@ -2,6 +2,7 @@
 
 # TEST 0 (Wave propagation after Dirac Pulse)
 
+import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -54,6 +55,8 @@ energy_in = disp.iloc[100, -1] * 2e9
 
 energy = pd.read_csv("tests/transient/test0/energy.csv",
                      index_col="time")
+for time in energy.index[energy["E_tot"].diff() > 0]:
+  print(f"energy rising at t={time:g}")
 lenghts = np.array([.5] + (nnodes - 2) * [1] + [.5]) * (1 /
                                                         (nnodes - 1))
 energy["E_kin_post"] = 0.5 * 7850 * 0.05**2*np.pi * \
@@ -203,7 +206,7 @@ if test_passed:
     axs[1].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
     energy.plot.line(style=["-"] * 3 + [":"] * 3, ax=axs[1])
     axs[1].set_xlim([min(times), max(times)])
-    axs[1].set_ylim([-1e3, 1e4])
+    axs[1].set_ylim([0, 1e5])
     pdf.savefig(fig)
 
     # raw spectra

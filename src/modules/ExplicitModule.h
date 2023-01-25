@@ -122,6 +122,31 @@ private:
   void store_energy_(const Vector &fint, const Vector &velo,
                      const Properties &variables);
 
+  /// @brief Adams Bashforth 2 step update
+  inline void ABupdate_(const Vector &delta_y, const Vector &f_cur,
+                        const Vector &f_old) const;
+  /// @brief Adams Bashforth 1 step update (Euler Explicit)
+  inline void ABupdate_(const Vector &delta_y, const Vector &f_cur) const;
+
+  /// @brief Adams Moulton 2 step update
+  inline void AMupdate_(const Vector &delta_y, const Vector &f_cur,
+                        const Vector &f_old) const;
+  /// @brief Adams Moulton 1 step update (Euler Explicit)
+  inline void AMupdate_(const Vector &delta_y, const Vector &f_cur) const;
+
+  /// @brief update of the displacement vectors optionally taking SO(3)
+  /// into account
+  void updateVec_(const Vector &y_new, const Vector &y_old,
+                  const Vector &delta_y, const bool rot = false);
+  /// @brief get the accelration (and return the internal force Vector)
+  void getAcce_(const Vector &a, const Ref<Constraints> &cons,
+                const Vector &fres, const Properties &globdat);
+
+  /// @brief get the forces
+  /// @return resulting forces = external - internal
+  Vector getForce_(const Vector &fint, const Vector &fext,
+                   const Properties &globdat);
+
 private:
   bool valid_;
   bool report_energy_;
@@ -139,3 +164,29 @@ private:
   Vector massInv_;
   Ref<Solver> solver_;
 };
+
+inline void ExplicitModule::ABupdate_(const Vector &delta_y,
+                                      const Vector &f_cur,
+                                      const Vector &f_old) const
+{
+  delta_y = dtime_ / 2. * (3. * f_cur - 1. * f_old);
+}
+
+inline void ExplicitModule::ABupdate_(const Vector &delta_y,
+                                      const Vector &f_cur) const
+{
+  delta_y = dtime_ * f_cur;
+}
+
+inline void ExplicitModule::AMupdate_(const Vector &delta_y,
+                                      const Vector &f_cur,
+                                      const Vector &f_old) const
+{
+  delta_y = dtime_ / 2. * (1. * f_cur + 1. * f_old);
+}
+
+inline void ExplicitModule::AMupdate_(const Vector &delta_y,
+                                      const Vector &f_cur) const
+{
+  delta_y = dtime_ * f_cur;
+}
