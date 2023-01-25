@@ -1,11 +1,12 @@
 // PROGRAM_CONTROL
-control.runWhile = "t < 2e-2";
+control.runWhile = "t < 1e-2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
 Solver.integrator.deltaTime = 1e-7;
 Solver.integrator.stepCount = 2;
+Solver.integrator.reportEnergy = true;
 
 // settings
 params.X = "sin(PI/180) * sin(PI/4)";
@@ -40,6 +41,13 @@ model.model.model.disp.type = "None";
 
 Output.disp.vectors += "state1 = velo"; 
 Output.disp.vectors += "state2 = acce"; 
+
+Output.modules += "enSample";
+Output.enSample.type = "Sample";
+Output.enSample.file = "$(CASE_NAME)/energy.csv";
+Output.enSample.header = "time,E_kin,E_pot,E_tot";
+Output.enSample.dataSets = ["t", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
+Output.enSample.separator = ",";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";

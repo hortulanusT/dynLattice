@@ -12,5 +12,5 @@ Output.disp.file = "$(CASE_NAME)/disp.gz";
 Output.disp.vectors = [ "state = disp" ];
 
 // LOGGING
-log.pattern = "*.info";
+log.pattern = "*";
 log.file = "-";

@@ -6,8 +6,9 @@ control.runWhile = "t <= 1";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "Explicit";
-Solver.integrator.deltaTime = 1e-4;
+Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.stepCount = 2;
+Solver.integrator.updateWhen = true;
 
 // settings
 params.rod_details.cross_section = "circle";
@@ -24,7 +25,7 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Input.input.onelab.size = 0.1;
+Input.input.onelab.size = 0.05;
 
 model.model.model.force.type = "Neumann";
 model.model.model.force.loadIncr = 0.;
@@ -41,7 +42,7 @@ model.model.model.disp.type = "None";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
+Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
 Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
@@ -51,4 +52,4 @@ Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"]
 Output.paraview.sampleWhen = "t % 0.02 < $(Solver.integrator.deltaTime)";
 
 log.pattern = "*";
-log.file = "$(CASE_NAME)/run.log";
+log.file = "-";

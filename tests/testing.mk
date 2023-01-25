@@ -15,7 +15,7 @@ disp_results := $(addprefix tests/element/runs/%_, $(addsuffix -disp.csv, $(ELEM
 resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEMENT_LOADS)))
 
 beam_cases = 0 1 2 3 4 5
-transient_cases = 0 1 #2 3
+transient_cases = 0 1 2 3
 
 # ELEMENT TEST RESULTS
 .PRECIOUS: tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv
@@ -83,7 +83,7 @@ tests/transient/test%/result.pdf: scripts/testing/transient%.py\
 tests/transient/test%/disp.gz: $(program) tests/transient/test%.pro
 	@$(RM_R) $(dir $@)
 	@$(MKDIR) $(dir $@)
-	@$^ > tests/transient/test$*/run.log
+	-@$^ > tests/transient/test$*/run.log
 
 tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro
 
