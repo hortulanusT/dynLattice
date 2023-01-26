@@ -425,7 +425,6 @@ void ExplicitModule::store_energy_(const Properties &globdat)
 void ExplicitModule::restart_(const Properties &globdat)
 {
   Properties params;
-  IdxVector iitems(dofs_->getItems()->size());
 
   jem::System::info(myName_)
       << " ...Updating mass information for explicit solver\n";
@@ -433,8 +432,12 @@ void ExplicitModule::restart_(const Properties &globdat)
 
   if (SO3_dofs_.size())
   {
+    IdxVector iitems(dofs_->getItems()->size());
+    iitems = jem::iarray(dofs_->getItems()->size());
+
     jem::System::info(myName_)
         << " ...Updating SO(3) dof inormation for explicit solver\n";
+
     rdofs_.resize(SO3_dofs_.size(), dofs_->getItems()->size());
     for (idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, SO3_dofs_[idof]);
