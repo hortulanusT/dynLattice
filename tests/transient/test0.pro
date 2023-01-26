@@ -30,7 +30,7 @@ Input.input.onelab.X = params.X;
 Input.input.onelab.Y = params.Y;
 Input.input.onelab.Z = params.Z;
 
-model.model.matrix2.type = "Lumped";
+// model.model.matrix2.type = "Lumped";
 
 model.model.model.force.type = "LoadScale";
 model.model.model.force.scaleFunc = "if (i-100<=0, 2e9, 0) - if (i-99<=0, 2e9, 0)";

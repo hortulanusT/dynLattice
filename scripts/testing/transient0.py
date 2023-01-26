@@ -63,17 +63,20 @@ energy["E_pot_post"] = 0.5 * 205e9 * 0.05**2*np.pi / \
     (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
 energy["E_tot_post"] = energy["E_pot_post"] + energy["E_kin_post"]
 
-print(
-    f"simulation energy rising at {sum(energy['E_tot'].diff() > 0):d} occourences"
-)
-print(
-    f"post-proc  energy rising at {sum(energy['E_tot_post'].diff() > 0):d} occourences"
-)
+rising_sim = energy['E_tot'].diff() > 0
+rising_post = energy['E_tot_post'].diff() > 0
 
-print("Kinetic Energy closeness :",
-      np.allclose(energy["E_kin"], energy["E_kin_post"]))
-print("Potential Energy closeness :",
-      np.allclose(energy["E_pot"], energy["E_pot_post"]))
+# print(
+#     f"simulation energy rising at {sum(rising_sim):d} occourences"
+# )
+# print(
+#     f"post-proc  energy rising at {sum(rising_post):d} occourences"
+# )
+
+# print("Kinetic Energy closeness :",
+#       np.allclose(energy["E_kin"], energy["E_kin_post"]))
+# print("Potential Energy closeness :",
+#       np.allclose(energy["E_pot"], energy["E_pot_post"]))
 
 for node in data:
   test = disp[node] > .5e-3
@@ -210,14 +213,43 @@ if test_passed:
     # energy
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
     axs[0].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(style=["x"] * 3 + ["+"] * 3,
+    energy.plot.line(style=["kx", "k+", "k-", "b1", "b2", "b--"],
                      ax=axs[0],
                      logy=True)
-    axs[0].set_xlim(.95e-5, 2e-5)
+    for time in energy.index[rising_sim]:
+      axs[0].axvspan(time - .5 * time_step,
+                     time + .5 * time_step,
+                     facecolor="r",
+                     alpha=.5,
+                     linewidth=0.,
+                     label="sim rising")
+    for time in energy.index[rising_post]:
+      axs[0].axvspan(time - .5 * time_step,
+                     time + .5 * time_step,
+                     facecolor=None,
+                     edgecolor="y",
+                     fill=False,
+                     hatch="xx",
+                     linewidth=0.,
+                     label="post rising")
+    axs[0].set_xlim(.95e-5, 1.45e-5)
 
     axs[1].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
     axs[1].axhline(0., alpha=0.5, lw=0.5)
-    energy.plot.line(style=["--"] * 3 + [":"] * 3, ax=axs[1])
+    energy.plot.line(style=["r", "b", "k", "b:", "r:", "y--"],
+                     ax=axs[1])
+    for time in energy.index[rising_post]:
+      axs[1].axvspan(time - .5 * time_step,
+                     time + .5 * time_step,
+                     fc="b",
+                     ec=None,
+                     label="post rising")
+    for time in energy.index[rising_sim]:
+      axs[1].axvspan(time - .5 * time_step,
+                     time + .5 * time_step,
+                     fc="r",
+                     ec=None,
+                     label="sim rising")
     axs[1].set_xlim(min(times), max(times))
     axs[1].set_ylim(-1e3, 1e4)
     pdf.savefig(fig)
