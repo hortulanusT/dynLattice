@@ -519,8 +519,6 @@ void ParaViewModule::writePiece_
       params.erase(ActionParams::TABLE);
       params.erase(ActionParams::TABLE_WEIGHTS);
 
-      weights = where(abs(weights) < Limits<double>::TINY_VALUE, 1.0,
-                      1.0 / weights);
       datumTable->scaleRows(weights);
 
       writeDataArray_(file, datumTable, groupNodes, "Float32",
@@ -564,8 +562,6 @@ void ParaViewModule::writePiece_
     params.erase(ActionParams::TABLE);
     params.erase(ActionParams::TABLE_WEIGHTS);
 
-    weights = where(abs(weights) < Limits<double>::TINY_VALUE, 1.0,
-                    1.0 / weights);
     datumTable->scaleRows(weights);
 
     writeDataArray_(file, datumTable, groupElems, "Float32",
@@ -617,7 +613,6 @@ void ParaViewModule::writeDataArray_
   Matrix mat(irows, icolumns);
 
   data->findAllValues(mat);
-  ;
   writeDataArray_(file, Matrix(mat.transpose()[rows]).transpose(), type,
                   name);
 }
