@@ -500,7 +500,7 @@ void specialCosseratRodModel::get_strain_table_
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       strain_table.addRowValues(ielem, icols, strain(ALL, ip));
-      weights[ielem] += ipWeights[ip];
+      weights[ielem] += 1.;
     }
   }
 }
@@ -554,7 +554,7 @@ void specialCosseratRodModel::get_stress_table_
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       stress_table.addRowValues(ielem, icols, stress(ALL, ip));
-      weights[ielem] += ipWeights[ip];
+      weights[ielem] += 1.;
     }
   }
 }
