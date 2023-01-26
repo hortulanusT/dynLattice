@@ -4,7 +4,7 @@ DefineConstant [
   z = {0, Name "Z"}
 ];
 
-Point(1) = {0,0,0, 1/99};
-Point(2) = {x,y,z, 1/99};
+Point(1) = {0,0,0, 0.01};
+Point(2) = {x,y,z, 0.01};
 
 Line(1) = { 1,2 };

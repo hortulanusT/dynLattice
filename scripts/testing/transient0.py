@@ -55,8 +55,6 @@ energy_in = disp.iloc[100, -1] * 2e9
 
 energy = pd.read_csv("tests/transient/test0/energy.csv",
                      index_col="time")
-for time in energy.index[energy["E_tot"].diff() > 0]:
-  print(f"energy rising at t={time:g}")
 lenghts = np.array([.5] + (nnodes - 2) * [1] + [.5]) * (1 /
                                                         (nnodes - 1))
 energy["E_kin_post"] = 0.5 * 7850 * 0.05**2*np.pi * \
@@ -64,6 +62,18 @@ energy["E_kin_post"] = 0.5 * 7850 * 0.05**2*np.pi * \
 energy["E_pot_post"] = 0.5 * 205e9 * 0.05**2*np.pi / \
     (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
 energy["E_tot_post"] = energy["E_pot_post"] + energy["E_kin_post"]
+
+print(
+    f"simulation energy rising at {sum(energy['E_tot'].diff() > 0):d} occourences"
+)
+print(
+    f"post-proc  energy rising at {sum(energy['E_tot_post'].diff() > 0):d} occourences"
+)
+
+print("Kinetic Energy closeness :",
+      np.allclose(energy["E_kin"], energy["E_kin_post"]))
+print("Potential Energy closeness :",
+      np.allclose(energy["E_pot"], energy["E_pot_post"]))
 
 for node in data:
   test = disp[node] > .5e-3
@@ -200,13 +210,16 @@ if test_passed:
     # energy
     fig, axs = plt.subplots(2, 1, figsize=(10, 10))
     axs[0].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(style=["o", "x", "-"] * 2, ax=axs[0], logy=True)
-    axs[0].set_xlim([.9e-5, 1.5e-5])
+    energy.plot.line(style=["x"] * 3 + ["+"] * 3,
+                     ax=axs[0],
+                     logy=True)
+    axs[0].set_xlim(.95e-5, 2e-5)
 
     axs[1].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
-    energy.plot.line(style=["-"] * 3 + [":"] * 3, ax=axs[1])
-    axs[1].set_xlim([min(times), max(times)])
-    axs[1].set_ylim([0, 1e5])
+    axs[1].axhline(0., alpha=0.5, lw=0.5)
+    energy.plot.line(style=["--"] * 3 + [":"] * 3, ax=axs[1])
+    axs[1].set_xlim(min(times), max(times))
+    axs[1].set_ylim(-1e3, 1e4)
     pdf.savefig(fig)
 
     # raw spectra

@@ -14,6 +14,8 @@
 #include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/fem/ElementGroup.h>
+#include <jive/fem/ElementSet.h>
 #include <jive/implict/Names.h>
 #include <jive/implict/utilities.h>
 #include <jive/model/Actions.h>
@@ -24,10 +26,12 @@
 #include <jive/solver/declare.h>
 #include <jive/solver/utilities.h>
 #include <jive/util/Constraints.h>
+#include <jive/util/DenseTable.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
 #include <jive/util/ItemSet.h>
+#include <jive/util/XTable.h>
 
 using jem::idx_t;
 using jem::newInstance;
@@ -43,6 +47,8 @@ using jive::algebra::AbstractMatrix;
 using jive::algebra::DiagMatrixObject;
 using jive::algebra::FlexMatrixBuilder;
 using jive::app::Module;
+using jive::fem::ElementGroup;
+using jive::fem::ElementSet;
 using jive::implict::newSolverParams;
 using jive::model::ActionParams;
 using jive::model::Actions;
@@ -51,9 +57,12 @@ using jive::model::StateVector;
 using jive::solver::newSolver;
 using jive::solver::Solver;
 using jive::util::Constraints;
+using jive::util::DenseTable;
 using jive::util::DofSpace;
 using jive::util::FuncUtils;
 using jive::util::Globdat;
+using jive::util::ItemSet;
+using jive::util::XTable;
 
 using jive_helpers::expVec;
 using jive_helpers::logMat;
@@ -119,8 +128,7 @@ private:
 
   void invalidate_();
 
-  void store_energy_(const Vector &fint, const Vector &velo,
-                     const Properties &variables);
+  void store_energy_(const Properties &globdat);
 
   /// @brief Adams Bashforth 2 step update
   inline void ABupdate_(const Vector &delta_y, const Vector &f_cur,
@@ -129,10 +137,11 @@ private:
   inline void ABupdate_(const Vector &delta_y, const Vector &f_cur) const;
 
   /// @brief Adams Moulton 2 step update
-  inline void AMupdate_(const Vector &delta_y, const Vector &f_cur,
-                        const Vector &f_old) const;
-  /// @brief Adams Moulton 1 step update (Euler Explicit)
-  inline void AMupdate_(const Vector &delta_y, const Vector &f_cur) const;
+  inline void AMupdate_(const Vector &delta_y, const Vector &f_new,
+                        const Vector &f_cur, const Vector &f_old) const;
+  /// @brief Adams Moulton 1 step update (trapezoidal rule)
+  inline void AMupdate_(const Vector &delta_y, const Vector &f_new,
+                        const Vector &f_cur) const;
 
   /// @brief update of the displacement vectors optionally taking SO(3)
   /// into account
@@ -179,14 +188,15 @@ inline void ExplicitModule::ABupdate_(const Vector &delta_y,
 }
 
 inline void ExplicitModule::AMupdate_(const Vector &delta_y,
+                                      const Vector &f_new,
                                       const Vector &f_cur,
                                       const Vector &f_old) const
 {
-  delta_y = dtime_ / 2. * (1. * f_cur + 1. * f_old);
+  delta_y = dtime_ / 12. * (5. * f_new + 8. * f_cur - 1. * f_old);
 }
-
 inline void ExplicitModule::AMupdate_(const Vector &delta_y,
+                                      const Vector &f_new,
                                       const Vector &f_cur) const
 {
-  delta_y = dtime_ * f_cur;
+  delta_y = dtime_ / 2. * (1. * f_new + 1. * f_cur);
 }

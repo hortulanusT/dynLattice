@@ -230,7 +230,7 @@ Module::Status ExplicitModule::run
 
   // if the engergy needs to be reported, do so
   if (report_energy_)
-    store_energy_(fint, v_new, Globdat::getVariables(globdat));
+    store_energy_(globdat);
 
   return OK;
 }
@@ -351,27 +351,68 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
 //   store_energy_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::store_energy_(const Vector &fint, const Vector &velo,
-                                   const Properties &variables)
+void ExplicitModule::store_energy_(const Properties &globdat)
 {
-  double E_pot, delta_E_pot, E_kin;
+  double E_pot, E_kin, ell;
+  Vector velo;
+  StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
   Vector temp(velo.size());
 
-  delta_E_pot = dtime_ * dotProduct(velo, fint);
+  ElementSet allElemes = ElementSet::get(globdat, getContext());
+  ElementGroup beamElemes =
+      ElementGroup::get("beams", allElemes, globdat, getContext());
+  IdxVector inodes(allElemes.maxElemNodeCount());
+  Matrix coords(allElemes.maxElemNodeCount(),
+                allElemes.getNodes().rank());
 
-  solver_->getMatrix()->matmul(temp, velo);
+  Properties params;
+  Ref<ItemSet> pointSet = allElemes.getData();
+  Ref<XTable> strainTable = newInstance<DenseTable>("strain", pointSet);
+  Ref<XTable> stressTable = newInstance<DenseTable>("stress", pointSet);
+  Vector strainWeights(pointSet->size());
+  Vector stressWeights(pointSet->size());
+
+  strainWeights = 0.;
+  stressWeights = 0.;
+
+  params.set(ActionParams::TABLE_NAME, "mat_stress");
+  params.set(ActionParams::TABLE_WEIGHTS, stressWeights);
+  params.set(ActionParams::TABLE, stressTable);
+  model_->takeAction(Actions::GET_TABLE, params, globdat);
+  params.set(ActionParams::TABLE_NAME, "mat_strain");
+  params.set(ActionParams::TABLE_WEIGHTS, strainWeights);
+  params.set(ActionParams::TABLE, strainTable);
+  model_->takeAction(Actions::GET_TABLE, params, globdat);
+  params.clear();
+
+  IdxVector elemIDs = beamElemes.getIDs();
+
+  stressTable->scaleRows(stressWeights);
+  strainTable->scaleRows(strainWeights);
+
+  E_pot = 0.;
+  for (idx_t i : elemIDs)
+  {
+    allElemes.getElemNodes(inodes, i);
+    allElemes.getNodes().getSomeCoords(coords.transpose(), inodes);
+    ell = 0.;
+    for (idx_t k = 0; k < coords.size(1); k++)
+      ell += pow(coords(0, k) - coords(coords.size(0) - 1, k),
+                 2.); // HACK assumes straight beam!
+    ell = sqrt(ell);
+
+    for (idx_t j = 0; j < stressTable->columnCount(); j++)
+      E_pot += 0.5 * stressTable->getValue(i, j) *
+               strainTable->getValue(i, j) * ell;
+  }
+
+  if (mode_ == CONSISTENT)
+    solver_->getMatrix()->matmul(temp, velo);
+  if (mode_ == LUMPED)
+    temp = velo / massInv_;
   E_kin = 0.5 * dotProduct(temp, velo);
 
-  try
-  {
-    variables.find(E_pot, "PotentialEnergy");
-    E_pot += delta_E_pot;
-  }
-  catch (const jem::util::PropertyException &e)
-  {
-    E_pot = delta_E_pot;
-  }
-
+  Properties variables = Globdat::getVariables(globdat);
   variables.set("PotentialEnergy", E_pot);
   variables.set("KineticEnergy", E_kin);
   variables.set("TotalEnergy", E_pot + E_kin);
