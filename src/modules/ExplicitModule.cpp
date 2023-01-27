@@ -72,6 +72,7 @@ Module::Status ExplicitModule::init
   // returning an address of an object pointing to class DofSpace
 
   dofs_ = DofSpace::get(globdat, getContext());
+  cons_ = Constraints::find(dofs_, globdat);
 
   // Invalidate the state of this module when the DofSpace changes.
 
@@ -102,8 +103,7 @@ Module::Status ExplicitModule::init
 
   jive::solver::declareSolvers();
 
-  Ref<Constraints> cons = Constraints::find(dofs_, globdat);
-  params.set(ActionParams::CONSTRAINTS, cons);
+  params.set(ActionParams::CONSTRAINTS, cons_);
   model_->takeAction(Actions::NEW_MATRIX2, params, globdat);
   params.get(inertia, ActionParams::MATRIX2);
   params.clear();
@@ -155,84 +155,7 @@ Module::Status ExplicitModule::run
     (const Properties &globdat)
 
 {
-  using jive::model::STATE;
-  const idx_t dofCount = dofs_->dofCount();
-
-  idx_t step;
-  Properties params;
-  Ref<Constraints> cons = Constraints::find(dofs_, globdat);
-  Vector fint(dofCount);
-  Vector fext(dofCount);
-  Vector fres(dofCount);
-  Vector u_old, v_old, a_old;
-  Vector dv(dofCount);
-  Vector du(dofCount);
-  Vector u_new(dofCount);
-  Vector v_new(dofCount);
-  Vector a_new(dofCount);
-
-  // skip if no model exists
-  if (!(model_))
-    return DONE;
-
-  // update mass matrix if necessary
-  if (!valid_)
-    restart_(globdat);
-
-  // Get the state vectors from the last time step
-  StateVector::get(u_old, STATE[0], dofs_, globdat);
-  StateVector::get(v_old, STATE[1], dofs_, globdat);
-  StateVector::get(a_old, STATE[2], dofs_, globdat);
-
-  // update time in models and boundary conditions
-  params.set(ActionParams::CONSTRAINTS, cons);
-  Globdat::advanceTime(dtime_, globdat);
-  Globdat::advanceStep(globdat);
-  model_->takeAction(Actions::ADVANCE, params, globdat);
-  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
-  params.clear();
-
-  // Compute new displacement values
-  fres = getForce_(fint, fext, globdat);
-  getAcce_(a_new, cons, fres, globdat);
-
-  globdat.get(step, Globdat::TIME_STEP);
-
-  // update velocity
-  if (stepCount_ >= 2 && step >= 2)
-    ABupdate_(dv, a_new, a_old);
-  else
-    ABupdate_(dv, a_new);
-
-  updateVec_(v_new, v_old, dv);
-
-  // update position
-  if (stepCount_ >= 2 && step >= 2)
-    ABupdate_(du, v_new, v_old);
-  else
-    ABupdate_(du, v_new);
-
-  updateVec_(u_new, u_old, du, true);
-
-  // commit everything
-  Globdat::commitStep(globdat);
-  Globdat::commitTime(globdat);
-  model_->takeAction(Actions::COMMIT, params, globdat);
-
-  StateVector::updateOld(dofs_, globdat);
-  StateVector::store(a_new, STATE[2], dofs_, globdat);
-  StateVector::store(v_new, STATE[1], dofs_, globdat);
-  StateVector::store(u_new, STATE[0], dofs_, globdat);
-
-  // check if the mass matrix is still valid
-  if (FuncUtils::evalCond(*updCond_, globdat))
-    invalidate_();
-
-  // if the engergy needs to be reported, do so
-  if (report_energy_)
-    store_energy_(globdat);
-
-  return OK;
+  return Status::DONE;
 }
 
 //-----------------------------------------------------------------------
@@ -306,13 +229,28 @@ void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
   }
 }
 
+idx_t ExplicitModule::advance_(const Properties &globdat)
+{
+  Properties params;
+  idx_t step;
+
+  // update time in models and boundary conditions
+  params.set(ActionParams::CONSTRAINTS, cons_);
+  Globdat::advanceTime(dtime_, globdat);
+  Globdat::advanceStep(globdat);
+  model_->takeAction(Actions::ADVANCE, params, globdat);
+  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
+
+  // return the current step
+  globdat.get(step, Globdat::TIME_STEP);
+  return step;
+}
+
 void ExplicitModule::getAcce_(const Vector &a,
                               const Ref<Constraints> &cons,
                               const Vector &fres,
                               const Properties &globdat)
 {
-  using jive::model::STATE;
-
   Properties params;
 
   // Compute acceleration

@@ -123,7 +123,9 @@ public:
 protected:
   virtual ~ExplicitModule();
 
-private:
+protected:
+  idx_t advance_(const Properties &globdat);
+
   void restart_(const Properties &globdat);
 
   void invalidate_();
@@ -156,7 +158,7 @@ private:
   Vector getForce_(const Vector &fint, const Vector &fext,
                    const Properties &globdat);
 
-private:
+protected:
   bool valid_;
   bool report_energy_;
   double dtime_;
@@ -169,6 +171,7 @@ private:
 
   Ref<Model> model_;
   Ref<DofSpace> dofs_;
+  Ref<Constraints> cons_;
 
   Vector massInv_;
   Ref<Solver> solver_;

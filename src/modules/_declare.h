@@ -23,6 +23,7 @@
 #include "modules/GitReportModule.h"
 #include "modules/GroupInputModule.h"
 #include "modules/GroupOutputModule.h"
+#include "modules/LeapFrogModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
 #include "modules/TangentOutputModule.h"
@@ -46,6 +47,7 @@ void declareModules()
   GroupInputModule::declare();
   PBCGroupInputModule::declare();
   ExplicitModule::declare();
+  LeapFrogModule::declare();
   ForceOutputModule::declare();
   CSVOutputModule::declare();
   GitReportModule::declare();

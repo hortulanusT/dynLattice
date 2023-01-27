@@ -5,7 +5,7 @@ control.runWhile = "t <= 1";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "Explicit";
+Solver.integrator.type = "LeapFrog";
 Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
