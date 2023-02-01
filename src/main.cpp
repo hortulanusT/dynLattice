@@ -1,8 +1,15 @@
 #include <jive/app/Application.h>
+#include <jive/app/ChainModule.h>
+#include <jive/app/ControlModule.h>
+#include <jive/app/InfoModule.h>
+#include <jive/app/ReportModule.h>
+#include <jive/app/UserconfModule.h>
+#include <jive/fem/InitModule.h>
+#include <jive/fem/InputModule.h>
+#include <jive/fem/ShapeModule.h>
 
-#include "misc/_declare.h"
-#include "models/_declare.h"
-#include "modules/_declare.h"
+#include "models/_declareModels.h"
+#include "modules/_declareModules.h"
 
 //-----------------------------------------------------------------------
 //   mainModule
@@ -28,9 +35,6 @@ Ref<Module> mainModule()
 
   // Declare everything, that is needed for the modules
   declareModules();
-
-  // Declare everything, that is needed for the timesteppers
-  declareTimeSteppers();
 
   // Set up the module chain. These modules will be called by Jive in
   // the order that they have been added to the chain.

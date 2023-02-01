@@ -4,16 +4,8 @@
 //    include Statements
 //-----------------------------------------------------------------------
 
-#include <jive/app/ChainModule.h>
-#include <jive/app/ControlModule.h>
-#include <jive/app/InfoModule.h>
-#include <jive/app/OutputModule.h>
-#include <jive/app/ReportModule.h>
-#include <jive/app/UserconfModule.h>
 #include <jive/app/declare.h>
-#include <jive/fem/InitModule.h>
-#include <jive/fem/InputModule.h>
-#include <jive/fem/ShapeModule.h>
+#include <jive/fem/declare.h>
 #include <jive/gl/declare.h>
 #include <jive/implict/declare.h>
 
@@ -34,22 +26,4 @@
 //   declareModules
 //-----------------------------------------------------------------------
 
-void declareModules()
-{
-  jive::app ::declareModules();
-  jive::implict ::declareModules();
-  jive::gl ::declareModules();
-  jive::fem ::declareModules();
-  GMSHInputModule::declare();
-  ParaViewModule::declare();
-  GroupOutputModule::declare();
-  PBCGroupOutputModule::declare();
-  GroupInputModule::declare();
-  PBCGroupInputModule::declare();
-  ExplicitModule::declare();
-  LeapFrogModule::declare();
-  ForceOutputModule::declare();
-  CSVOutputModule::declare();
-  GitReportModule::declare();
-  TangentOutputModule::declare();
-}
+void declareModules();
