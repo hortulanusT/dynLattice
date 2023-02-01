@@ -22,4 +22,5 @@ void declareModules()
   CSVOutputModule::declare();
   GitReportModule::declare();
   TangentOutputModule::declare();
+  CorrectorAdaptModule::declare();
 }

@@ -138,13 +138,6 @@ protected:
   /// @brief Adams Bashforth 1 step update (Euler Explicit)
   inline void ABupdate_(const Vector &delta_y, const Vector &f_cur) const;
 
-  /// @brief Adams Moulton 2 step update
-  inline void AMupdate_(const Vector &delta_y, const Vector &f_new,
-                        const Vector &f_cur, const Vector &f_old) const;
-  /// @brief Adams Moulton 1 step update (trapezoidal rule)
-  inline void AMupdate_(const Vector &delta_y, const Vector &f_new,
-                        const Vector &f_cur) const;
-
   /// @brief update of the displacement vectors optionally taking SO(3)
   /// into account
   void updateVec_(const Vector &y_new, const Vector &y_old,
@@ -162,6 +155,9 @@ protected:
   bool valid_;
   bool report_energy_;
   double dtime_;
+  double prec_;
+  double minDtime_;
+  double maxDtime_;
   idx_t stepCount_;
   MassMode mode_;
 
@@ -188,18 +184,4 @@ inline void ExplicitModule::ABupdate_(const Vector &delta_y,
                                       const Vector &f_cur) const
 {
   delta_y = dtime_ * f_cur;
-}
-
-inline void ExplicitModule::AMupdate_(const Vector &delta_y,
-                                      const Vector &f_new,
-                                      const Vector &f_cur,
-                                      const Vector &f_old) const
-{
-  delta_y = dtime_ / 12. * (5. * f_new + 8. * f_cur - 1. * f_old);
-}
-inline void ExplicitModule::AMupdate_(const Vector &delta_y,
-                                      const Vector &f_new,
-                                      const Vector &f_cur) const
-{
-  delta_y = dtime_ / 2. * (1. * f_new + 1. * f_cur);
 }

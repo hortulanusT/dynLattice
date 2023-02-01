@@ -3,9 +3,11 @@ control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "LeapFrog";
+Solver.integrator.type = "CorrectorAdapt";
 Solver.integrator.deltaTime = 5e-5;
-// Solver.integrator.stepCount = 2;
+Solver.integrator.minDTime = 1e-6;
+Solver.integrator.maxDTime = 1e-3;
+Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "square";

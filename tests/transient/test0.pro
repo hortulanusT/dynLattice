@@ -3,8 +3,10 @@ control.runWhile = "t < 1e-2";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "LeapFrog";
+Solver.integrator.type = "CorrectorAdapt";
 Solver.integrator.deltaTime = 1e-7;
+Solver.integrator.minDTime = Solver.integrator.deltaTime;
+Solver.integrator.maxDTime = Solver.integrator.deltaTime;
 Solver.integrator.stepCount = 2;
 Solver.integrator.reportEnergy = true;
 
@@ -33,7 +35,7 @@ Input.input.onelab.Z = params.Z;
 // model.model.matrix2.type = "Lumped";
 
 model.model.model.force.type = "LoadScale";
-model.model.model.force.scaleFunc = "if (i-100<=0, 2e9, 0) - if (i-99<=0, 2e9, 0)";
+model.model.model.force.scaleFunc = "if(t-1e-5<=0, if(t-.5e-5<=0, t, 1e-5 - t), 0) * 5e14";
 model.model.model.force.model.type = "Neumann";
 model.model.model.force.model.nodeGroups =  [ "free", "free", "free" ] ;
 model.model.model.force.model.factors = [ "$(params.X)", "$(params.Y)", "$(params.Z)" ];
@@ -47,8 +49,8 @@ Output.disp.vectors += "state2 = acce";
 Output.modules += "enSample";
 Output.enSample.type = "Sample";
 Output.enSample.file = "$(CASE_NAME)/energy.csv";
-Output.enSample.header = "time,E_kin,E_pot,E_tot";
-Output.enSample.dataSets = ["t", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
+Output.enSample.header = "time,time_step,load,E_kin,E_pot,E_tot";
+Output.enSample.dataSets = ["t", "deltaTime", "$(model.model.model.force.scaleFunc)", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
 Output.enSample.separator = ",";
 
 Output.modules += "paraview";

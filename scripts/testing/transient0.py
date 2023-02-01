@@ -63,12 +63,23 @@ energy["E_pot_post"] = 0.5 * 205e9 * 0.05**2*np.pi / \
     (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
 energy["E_tot_post"] = energy["E_pot_post"] + energy["E_kin_post"]
 
-rising_sim = energy['E_tot'].diff() > 0
-rising_post = energy['E_tot_post'].diff() > 0
+rising_sim = (energy['E_tot'].diff() > 0) & (energy.index > 1e-5)
+rising_post = (energy['E_tot_post'].diff() > 0) & (energy.index >
+                                                   1e-5)
 
-# print(
-#     f"simulation energy rising at {sum(rising_sim):d} occourences"
-# )
+steps = pd.DataFrame()
+steps["time_step"] = energy["time_step"]
+del energy["time_step"]
+steps["load"] = energy["load"]
+del energy["load"]
+
+print(
+    f"simulation energy rising at {sum(rising_sim):d} occurences"
+    "\n\t"
+    f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim])}"
+    "\n\t"
+    f"vs energy in the system {max(energy['E_tot'])} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
+)
 # print(
 #     f"post-proc  energy rising at {sum(rising_post):d} occourences"
 # )
@@ -90,7 +101,7 @@ wave_times_cal = np.array(wave_time)
 wave_speed_cal = -1 / (nnodes - 1) / np.diff(wave_times_cal).mean()
 wave_speed_ana = np.sqrt(205e9 / 7850)
 
-wave_times_ana = (1 - wave_pos) / wave_speed_ana + 100 * time_step
+wave_times_ana = (1 - wave_pos) / wave_speed_ana + wave_times_cal[0]
 
 eigenfreqs = wave_speed_ana * (2 * np.arange(5) + 1) / 4 / 1e3
 end_spec = np.fft.rfft(
@@ -232,7 +243,7 @@ if test_passed:
                      hatch="xx",
                      linewidth=0.,
                      label="post rising")
-    axs[0].set_xlim(.95e-5, 1.45e-5)
+    axs[0].set_xlim(0, 2e-5)
 
     axs[1].axhline(energy_in, alpha=0.5, lw=0.5, label="energy input")
     axs[1].axhline(0., alpha=0.5, lw=0.5)
@@ -251,7 +262,6 @@ if test_passed:
                      ec=None,
                      label="sim rising")
     axs[1].set_xlim(min(times), max(times))
-    axs[1].set_ylim(-1e3, 1e4)
     pdf.savefig(fig)
 
     # raw spectra

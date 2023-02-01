@@ -29,6 +29,7 @@ ExplicitModule::ExplicitModule
   stepCount_ = 1;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
+  prec_ = 1e-4;
 }
 
 ExplicitModule::~ExplicitModule()
@@ -136,6 +137,21 @@ Module::Status ExplicitModule::init
     myConf.set("mode", "consistent");
   }
 
+  // time stepping setttings
+  myProps.find(prec_, PropNames::PRECISION);
+  myConf.set(PropNames::PRECISION, prec_);
+  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
+  myConf.set(PropNames::DELTA_TIME, dtime_);
+
+  Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
+
+  minDtime_ = dtime_ / 1000.;
+  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
+  myConf.set(PropNames::MIN_DTIME, minDtime_);
+  maxDtime_ = dtime_ * 1000.;
+  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
+  myConf.set(PropNames::MAX_DTIME, maxDtime_);
+
   valid_ = false;
 
   // Initialize the global simulation time and the time step number as
@@ -179,10 +195,17 @@ void ExplicitModule::configure
     (const Properties &props, const Properties &globdat)
 
 {
+  using jive::implict::PropNames;
   Properties myProps = props.findProps(myName_);
 
-  myProps.find(dtime_, jive::implict::PropNames::DELTA_TIME, 1.0e-20,
-               1.0e20);
+  myProps.find(prec_, PropNames::PRECISION);
+  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
+
+  minDtime_ = dtime_ / 1000.;
+  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
+
+  maxDtime_ = dtime_ * 1000.;
+  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
 }
 
 //-----------------------------------------------------------------------
@@ -194,9 +217,13 @@ void ExplicitModule::getConfig
     (const Properties &conf, const Properties &globdat) const
 
 {
+  using jive::implict::PropNames;
   Properties myConf = conf.makeProps(myName_);
 
-  myConf.set(jive::implict::PropNames::DELTA_TIME, dtime_);
+  myConf.set(PropNames::PRECISION, prec_);
+  myConf.set(PropNames::DELTA_TIME, dtime_);
+  myConf.set(PropNames::MIN_DTIME, minDtime_);
+  myConf.set(PropNames::MAX_DTIME, maxDtime_);
 }
 
 void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
