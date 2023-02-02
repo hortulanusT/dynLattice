@@ -1,13 +1,18 @@
+// SIMO et al Example 5.2
+
 // PROGRAM_CONTROL
 control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "CorrectorAdapt";
+Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
+Solver.integrator.maxDTime = 1e-6;
+Solver.integrator.precision = 1e-15;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
+Solver.integrator.reportEnergy = true;
 
 // settings
 params.rod_details.cross_section = "square";
@@ -42,6 +47,13 @@ model.model.model.force.model.dofs = [ "dz" ];
 model.model.model.disp.type = "None";
 
 Output.disp.sampleWhen = "t % 0.01 < $(Solver.integrator.deltaTime)";
+
+Output.modules += "enSample";
+Output.enSample.type = "Sample";
+Output.enSample.file = "$(CASE_NAME)/energy.csv";
+Output.enSample.header = "time,time_step,load,E_kin,E_pot,E_tot";
+Output.enSample.dataSets = ["t", "deltaTime", "$(model.model.model.force.scaleFunc)", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
+Output.enSample.separator = ",";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";

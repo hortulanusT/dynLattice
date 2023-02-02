@@ -10,7 +10,7 @@
 #include <jive/implict/declare.h>
 
 #include "modules/CSVOutputModule.h"
-#include "modules/CorrectorAdaptModule.h"
+#include "modules/MilneDeviceModule.h"
 #include "modules/ExplicitModule.h"
 #include "modules/ForceOutputModule.h"
 #include "modules/GitReportModule.h"

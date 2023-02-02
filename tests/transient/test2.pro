@@ -5,7 +5,7 @@ control.runWhile = "t <= 1";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "CorrectorAdapt";
+Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.minDTime = 1e-7;
 Solver.integrator.maxDTime = 1e-3;

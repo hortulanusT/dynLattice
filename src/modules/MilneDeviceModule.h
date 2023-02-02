@@ -1,5 +1,5 @@
 /**
- * @file CorrectorAdaptModule.h
+ * @file MilneDeviceModule.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
  * @brief class that implements a leap frog algorithm for the explicit
  * solver
@@ -13,16 +13,16 @@
 
 #include "modules/ExplicitModule.h"
 
-class CorrectorAdaptModule : public ExplicitModule
+class MilneDeviceModule : public ExplicitModule
 {
 public:
-  JEM_DECLARE_CLASS(CorrectorAdaptModule, ExplicitModule);
+  JEM_DECLARE_CLASS(MilneDeviceModule, ExplicitModule);
 
   static const char *TYPE_NAME;
 
-  explicit CorrectorAdaptModule
+  explicit MilneDeviceModule
 
-      (const String &name = "CorrectorAdapt");
+      (const String &name = "MilneDevice");
 
   virtual Status run
 
@@ -35,7 +35,7 @@ public:
 
   static void declare();
 
-  virtual ~CorrectorAdaptModule();
+  virtual ~MilneDeviceModule();
 
 private:
   inline double getQuality_(const Vector &y_pre, const Vector &y_cor);
@@ -49,19 +49,19 @@ private:
 private:
 };
 
-inline double CorrectorAdaptModule::getQuality_(const Vector &y_pre,
+inline double MilneDeviceModule::getQuality_(const Vector &y_pre,
                                                 const Vector &y_cor)
 {
   return norm2(Vector(y_pre - y_cor));
 }
 
-inline void CorrectorAdaptModule::AMupdate_(const Vector &delta_y,
+inline void MilneDeviceModule::AMupdate_(const Vector &delta_y,
                                             const Vector &f_pre,
                                             const Vector &f_cur) const
 {
   delta_y = dtime_ / 2. * (1. * f_pre + 1. * f_cur);
 }
-inline void CorrectorAdaptModule::AMupdate_(const Vector &delta_y,
+inline void MilneDeviceModule::AMupdate_(const Vector &delta_y,
                                             const Vector &f_pre) const
 {
   delta_y = dtime_ * f_pre;

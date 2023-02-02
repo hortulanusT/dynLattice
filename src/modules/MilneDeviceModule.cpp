@@ -1,9 +1,9 @@
-#include "modules/CorrectorAdaptModule.h"
+#include "modules/MilneDeviceModule.h"
 #include "utils/testing.h"
 
 #include <jem/base/ClassTemplate.h>
 
-JEM_DEFINE_CLASS(CorrectorAdaptModule);
+JEM_DEFINE_CLASS(MilneDeviceModule);
 
 //=======================================================================
 //   class CSVOutputModule
@@ -13,12 +13,12 @@ JEM_DEFINE_CLASS(CorrectorAdaptModule);
 //   static data
 //-----------------------------------------------------------------------
 
-const char *CorrectorAdaptModule::TYPE_NAME = "CorrectorAdapt";
+const char *MilneDeviceModule::TYPE_NAME = "MilneDevice";
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-CorrectorAdaptModule::CorrectorAdaptModule
+MilneDeviceModule::MilneDeviceModule
 
     (const String &name)
     :
@@ -28,7 +28,7 @@ CorrectorAdaptModule::CorrectorAdaptModule
 {
 }
 
-CorrectorAdaptModule::~CorrectorAdaptModule()
+MilneDeviceModule::~MilneDeviceModule()
 {
 }
 
@@ -36,7 +36,7 @@ CorrectorAdaptModule::~CorrectorAdaptModule()
 //   run
 //-----------------------------------------------------------------------
 
-Module::Status CorrectorAdaptModule::run
+Module::Status MilneDeviceModule::run
 
     (const Properties &globdat)
 
@@ -167,10 +167,10 @@ Module::Status CorrectorAdaptModule::run
         store_energy_(globdat);
 
       // check if the correction was low enought to increase the step
-      if (correction < prec_ / 3. && dtime_ < maxDtime_)
+      if (correction < prec_ / 10. && dtime_ < maxDtime_)
       {
         jem::System::info(myName_) << " ...increasing time step size\n";
-        dtime_ *= 1.5;
+        dtime_ /= .8;
         dtime_ = jem::min(dtime_, maxDtime_);
         Globdat::getVariables(globdat).set(
             jive::implict::PropNames::DELTA_TIME, dtime_);
@@ -194,7 +194,7 @@ Module::Status CorrectorAdaptModule::run
       Globdat::restoreTime(globdat);
       StateVector::store(u_cur, jive::model::STATE0, dofs_, globdat);
       StateVector::store(v_cur, jive::model::STATE1, dofs_, globdat);
-      dtime_ /= 2.;
+      dtime_ *= .8;
       dtime_ = jem::max(dtime_, minDtime_);
       Globdat::getVariables(globdat).set(
           jive::implict::PropNames::DELTA_TIME, dtime_);
@@ -208,7 +208,7 @@ Module::Status CorrectorAdaptModule::run
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Module> CorrectorAdaptModule::makeNew
+Ref<Module> MilneDeviceModule::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
@@ -221,9 +221,9 @@ Ref<Module> CorrectorAdaptModule::makeNew
 //   declare
 //-----------------------------------------------------------------------
 
-void CorrectorAdaptModule::declare()
+void MilneDeviceModule::declare()
 {
   using jive::app::ModuleFactory;
 
-  ModuleFactory::declare(TYPE_NAME, &CorrectorAdaptModule::makeNew);
+  ModuleFactory::declare(TYPE_NAME, &MilneDeviceModule::makeNew);
 }
