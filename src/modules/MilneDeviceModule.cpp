@@ -138,14 +138,15 @@ Module::Status MilneDeviceModule::run
     getAcce_(a_new, cons_, fres, globdat);
 
     /////////////////////////////////////////////////
-    ////////  continuation
+    ////////  step size adaption
     /////////////////////////////////////////////////
-    // assess the quality of the step
     correction = 0.;
     correction += getQuality_(u_pre, u_new);
     correction += getQuality_(v_pre, v_new) * dtime_;
     correction += getQuality_(a_pre, a_new) * dtime_ * dtime_;
-    if (correction < prec_)
+
+    // compute the optimal step size and decide wether to accept this step
+    if (updStep_(correction, globdat))
     {
       // commit everything
       Properties params;
@@ -166,40 +167,16 @@ Module::Status MilneDeviceModule::run
       if (report_energy_)
         store_energy_(globdat);
 
-      // check if the correction was low enought to increase the step
-      if (correction < prec_ / 10. && dtime_ < maxDtime_)
-      {
-        jem::System::info(myName_) << " ...increasing time step size\n";
-        dtime_ /= .8;
-        dtime_ = jem::min(dtime_, maxDtime_);
-        Globdat::getVariables(globdat).set(
-            jive::implict::PropNames::DELTA_TIME, dtime_);
-        jem::System::info(myName_)
-            << " ...new time step: " << dtime_ << "\n";
-      }
-
-      return Status::OK;
-    }
-    else if (dtime_ <= minDtime_)
-    {
-      jem::System::warn()
-          << "timestep already at smallest and error still bad!";
       return Status::OK;
     }
     else
     {
-      jem::System::info(myName_)
-          << " ...restarting timestep with reduced time step size\n";
       Globdat::restoreStep(globdat);
       Globdat::restoreTime(globdat);
       StateVector::store(u_cur, jive::model::STATE0, dofs_, globdat);
       StateVector::store(v_cur, jive::model::STATE1, dofs_, globdat);
-      dtime_ *= .8;
-      dtime_ = jem::max(dtime_, minDtime_);
-      Globdat::getVariables(globdat).set(
-          jive::implict::PropNames::DELTA_TIME, dtime_);
-      jem::System::info(myName_)
-          << " ...new time step: " << dtime_ << "\n";
+
+      jem::System::info(myName_) << " ...restarting time step\n";
     }
   }
 }

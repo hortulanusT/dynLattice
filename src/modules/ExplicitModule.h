@@ -146,6 +146,10 @@ protected:
   void getAcce_(const Vector &a, const Ref<Constraints> &cons,
                 const Vector &fres, const Properties &globdat);
 
+  /// @brief comupte the next step size
+  /// @return whether this step can be accepted
+  bool updStep_(const double &error, const Properties &globdat);
+
   /// @brief get the forces
   /// @return resulting forces = external - internal
   Vector getForce_(const Vector &fint, const Vector &fext,
@@ -154,10 +158,15 @@ protected:
 protected:
   bool valid_;
   bool report_energy_;
+
   double dtime_;
   double prec_;
   double minDtime_;
   double maxDtime_;
+  double saftey_;
+  double incrFact_;
+  double decrFact_;
+
   idx_t stepCount_;
   MassMode mode_;
 

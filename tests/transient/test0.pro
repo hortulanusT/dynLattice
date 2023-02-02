@@ -5,10 +5,6 @@ control.runWhile = "t < 1e-2";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
-Solver.integrator.minDTime = 1e-8;
-Solver.integrator.maxDTime = 1e-6;
-Solver.integratoer.precision = 1e-5;
-Solver.integrator.stepCount = 2;
 Solver.integrator.reportEnergy = true;
 
 // settings
@@ -63,4 +59,4 @@ Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
-Output.paraview.sampleWhen = "t % 2.5e-5 < $(Solver.integrator.deltaTime)";
+Output.paraview.sampleWhen = "t % 2.5e-5 < deltaTime";

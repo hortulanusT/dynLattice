@@ -73,13 +73,16 @@ del energy["time_step"]
 steps["load"] = energy["load"]
 del energy["load"]
 
-print(
-    f"simulation energy rising at {sum(rising_sim):d} occurences"
-    "\n\t"
-    f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim])}"
-    "\n\t"
-    f"vs energy in the system {max(energy['E_tot'])} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
-)
+if any(rising_sim):
+  print(
+      f"simulation energy rising at {sum(rising_sim):d} occurences"
+      "\n\t"
+      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim])}"
+      "\n\t"
+      f"vs energy in the system {max(energy['E_tot'])} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
+  )
+else:
+  print("Energy not rising!")
 # print(
 #     f"post-proc  energy rising at {sum(rising_post):d} occourences"
 # )
@@ -101,7 +104,7 @@ wave_times_cal = np.array(wave_time)
 wave_speed_cal = -1 / (nnodes - 1) / np.diff(wave_times_cal).mean()
 wave_speed_ana = np.sqrt(205e9 / 7850)
 
-wave_times_ana = (1 - wave_pos) / wave_speed_ana + wave_times_cal[0]
+wave_times_ana = (1 - wave_pos) / wave_speed_ana + wave_times_cal[-1]
 
 eigenfreqs = wave_speed_ana * (2 * np.arange(5) + 1) / 4 / 1e3
 end_spec = np.fft.rfft(

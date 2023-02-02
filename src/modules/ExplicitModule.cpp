@@ -29,7 +29,10 @@ ExplicitModule::ExplicitModule
   stepCount_ = 1;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
-  prec_ = 1e-4;
+  prec_ = jive::solver::Solver::PRECISION;
+  saftey_ = 0.95;
+  decrFact_ = 0.8;
+  incrFact_ = 1.2;
 }
 
 ExplicitModule::~ExplicitModule()
@@ -145,12 +148,19 @@ Module::Status ExplicitModule::init
 
   Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
 
-  minDtime_ = dtime_ / 1000.;
+  minDtime_ = dtime_ / 100.;
   myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
   myConf.set(PropNames::MIN_DTIME, minDtime_);
-  maxDtime_ = dtime_ * 1000.;
+  maxDtime_ = dtime_ * 100.;
   myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
   myConf.set(PropNames::MAX_DTIME, maxDtime_);
+
+  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
+  myConf.set("stepSaftey", saftey_);
+  myProps.find(incrFact_, "increaseFactor", 1., 2.);
+  myConf.set("increaseFactor", incrFact_);
+  myProps.find(decrFact_, "decreaseFactor", 1., 2.);
+  myConf.set("decreaseFactor", decrFact_);
 
   valid_ = false;
 
@@ -310,6 +320,40 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
   model_->takeAction("GET_GYRO_VECTOR", params, globdat);
 
   return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
+//   updStep_
+//-----------------------------------------------------------------------
+// TODO find source other than Schweizer Skript... (and make sure for
+// multistep things differen step sizes are taken into account)
+// asses the quality of the step
+bool ExplicitModule::updStep_(const double &error,
+                              const Properties &globdat)
+{
+  const double dtime_opt =
+      dtime_ * pow(prec_ / error, 1. / (stepCount_ + 1));
+  const bool accept = error <= prec_ || dtime_ == minDtime_;
+
+  jem::System::info(myName_) << " ...Adapting time step size to ";
+  if (accept)
+  {
+    dtime_ = jem::max(
+        jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
+        decrFact_ * dtime_, minDtime_);
+  }
+  else
+  {
+    dtime_ = jem::max(decrFact_ * jem::min(saftey_ * dtime_opt, dtime_),
+                      minDtime_);
+  }
+  Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
+                                     dtime_);
+  jem::System::info(myName_) << dtime_ << "\n";
+  if (dtime_ == minDtime_)
+    jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
+
+  return accept;
 }
 
 //-----------------------------------------------------------------------

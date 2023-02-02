@@ -7,10 +7,8 @@ control.runWhile = "t <= 30";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
-Solver.integrator.maxDTime = 1e-6;
 Solver.integrator.precision = 1e-15;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
-Solver.integrator.stepCount = 2;
 Solver.integrator.updateWhen = true;
 Solver.integrator.reportEnergy = true;
 

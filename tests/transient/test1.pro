@@ -5,9 +5,6 @@ control.runWhile = "t <= 30";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 5e-5;
-Solver.integrator.minDTime = 1e-6;
-Solver.integrator.maxDTime = 1e-3;
-Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "square";
