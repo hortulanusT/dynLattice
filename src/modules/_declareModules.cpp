@@ -23,4 +23,5 @@ void declareModules()
   GitReportModule::declare();
   TangentOutputModule::declare();
   MilneDeviceModule::declare();
+  EmbeddedRKModule::declare();
 }

@@ -276,7 +276,6 @@ idx_t ExplicitModule::advance_(const Properties &globdat)
   Globdat::advanceTime(dtime_, globdat);
   Globdat::advanceStep(globdat);
   model_->takeAction(Actions::ADVANCE, params, globdat);
-  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
 
   // return the current step
   globdat.get(step, Globdat::TIME_STEP);
@@ -315,6 +314,7 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
   params.set(ActionParams::EXT_VECTOR, fext);
   params.set(ActionParams::INT_VECTOR, fint);
 
+  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
   model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
   model_->takeAction("GET_GYRO_VECTOR", params, globdat);
