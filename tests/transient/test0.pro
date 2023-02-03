@@ -7,6 +7,7 @@ Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.reportEnergy = true;
+Solver.integrator.updateWhen = true;
 
 // settings
 params.X = "sin(PI/180) * sin(PI/4)";
@@ -42,7 +43,6 @@ model.model.model.force.model.dofs = [ "dx", "dy", "dz" ];
 model.model.model.disp.type = "None";
 
 Output.disp.vectors += "state1 = velo"; 
-Output.disp.vectors += "state2 = acce"; 
 
 Output.modules += "enSample";
 Output.enSample.type = "Sample";

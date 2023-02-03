@@ -6,6 +6,7 @@ control.runWhile = "t <= 1";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
+Solver.integrator.maxDTime = 1e-5;
 Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = true;
@@ -49,7 +50,7 @@ Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
-Output.paraview.sampleWhen = "t % 0.02 < $(Solver.integrator.deltaTime)";
+Output.paraview.sampleWhen = "t % 0.02 < deltaTime";
 
 log.pattern = "*";
 log.file = "-";

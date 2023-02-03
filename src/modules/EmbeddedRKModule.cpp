@@ -151,7 +151,9 @@ Module::Status EmbeddedRKModule::run
   const idx_t dofCount = dofs_->dofCount();
   double error;
   double t_cur;
-  Vector u_cur, v_cur, a_cur;
+  Vector u_cur(dofCount);
+  Vector v_cur(dofCount);
+  Vector a_cur(dofCount);
   Vector du(dofCount);
   Vector dv(dofCount);
   double t_step;
@@ -178,7 +180,8 @@ Module::Status EmbeddedRKModule::run
   // get the current vectors
   StateVector::get(u_cur, jive::model::STATE0, dofs_, globdat);
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
-  StateVector::get(a_cur, jive::model::STATE2, dofs_, globdat);
+  fres = getForce_(fint, fext, globdat);
+  getAcce_(a_cur, cons_, fres, globdat);
   globdat.get(t_cur, Globdat::TIME);
 
   /////////////////////////////////////////////////
@@ -187,7 +190,7 @@ Module::Status EmbeddedRKModule::run
   for (idx_t i = 0; i < butchSize_; i++)
   {
     jem::System::info(myName_)
-        << "\n ...Runge Kutta Level " << i + 1 << "\n\n";
+        << "\n ...Runge Kutta Level " << i + 1 << "\n";
 
     // get the updates (U_j in RKMK reference)
     dv = dtime_ * a_cur;
@@ -216,7 +219,7 @@ Module::Status EmbeddedRKModule::run
     correctDisp_(ku_tab[i], du);
   }
 
-  jem::System::info(myName_) << "\n ...Runge Kutta Advancement\n\n";
+  jem::System::info(myName_) << "\n ...Runge Kutta Advancement\n";
 
   /////////////////////////////////////////////////
   ////////  high order solution
@@ -225,7 +228,6 @@ Module::Status EmbeddedRKModule::run
   {
     u_new = u_step;
     v_new = v_step;
-    a_new = a_step;
   }
   else
     NOT_IMPLEMENTED
@@ -266,7 +268,6 @@ Module::Status EmbeddedRKModule::run
     StateVector::updateOld(dofs_, globdat);
     StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
     StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);
-    StateVector::store(a_new, jive::model::STATE2, dofs_, globdat);
 
     // advance to the next step
     advance_(globdat);
@@ -295,7 +296,7 @@ Module::Status EmbeddedRKModule::run
 void EmbeddedRKModule::correctDisp_(const Vector &uncorrected,
                                     const Vector &delta)
 {
-  const idx_t rotCount = rdofs_.size(1);
+  const idx_t rotCount = rdofs_.size(0);
   const idx_t nodeCount = rdofs_.size(1);
 
   Vector localu(rotCount);
@@ -307,8 +308,10 @@ void EmbeddedRKModule::correctDisp_(const Vector &uncorrected,
 
   for (idx_t inode = 0; inode < nodeCount; inode++)
   {
-    localu = delta[rdofs_[inode]];
     localf = uncorrected[rdofs_[inode]];
+    if (jem::isTiny(norm2(localf)))
+      continue; // prevent numerical issues with small numbers
+    localu = delta[rdofs_[inode]];
 
     localU = jive_helpers::skew(localu);
     localF = jive_helpers::skew(localf);

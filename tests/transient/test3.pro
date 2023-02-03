@@ -6,8 +6,7 @@ control.runWhile = "t <= 30";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
-Solver.integrator.deltaTime = 1e-7;
-Solver.integrator.precision = 1e-15;
+Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = true;
 Solver.integrator.reportEnergy = true;
@@ -19,7 +18,7 @@ params.rod_details.young = "1e9/12";
 params.rod_details.shear_modulus = "1e9/24";
 params.rod_details.shear_correction	= 2.;
 params.rod_details.density = "1e3/12";
-params.rod_details.shape.numPoints = 3;
+params.rod_details.shape.numPoints = 2;
 
 // include model and i/o files
 include "input.pro";
@@ -27,7 +26,7 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Input.input.order = 2;
+// Input.input.order = 2;
 
 Input.groupInput.fixed.ytype = "max";
 Input.groupInput.free.ytype = "min";
@@ -44,7 +43,7 @@ model.model.model.force.model.dofs = [ "dz" ];
 
 model.model.model.disp.type = "None";
 
-Output.disp.sampleWhen = "t % 0.01 < $(Solver.integrator.deltaTime)";
+Output.disp.sampleWhen = "t % 0.05 < deltaTime";
 
 Output.modules += "enSample";
 Output.enSample.type = "Sample";

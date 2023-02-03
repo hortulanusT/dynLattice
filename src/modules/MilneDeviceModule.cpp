@@ -47,7 +47,8 @@ Module::Status MilneDeviceModule::run
   Vector u_pre(dofCount);
   Vector v_pre(dofCount);
   Vector a_pre(dofCount);
-  Vector u_cur, v_cur, a_cur;
+  Vector u_cur, v_cur;
+  Vector a_cur(dofCount);
   Vector u_old, v_old, a_old;
   Vector u_new(dofCount);
   Vector v_new(dofCount);
@@ -58,6 +59,14 @@ Module::Status MilneDeviceModule::run
   Vector fint(dofCount);
   Vector fext(dofCount);
 
+  // skip if no model exists
+  if (!(model_))
+    return DONE;
+
+  // update mass matrix if necessary
+  if (!valid_)
+    restart_(globdat);
+
   // set the predictions to zero
   u_pre = 0.;
   v_pre = 0.;
@@ -66,19 +75,12 @@ Module::Status MilneDeviceModule::run
   // get the current vectors
   StateVector::get(u_cur, jive::model::STATE0, dofs_, globdat);
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
-  StateVector::get(a_cur, jive::model::STATE2, dofs_, globdat);
+  fres = getForce_(fint, fext, globdat);
+  getAcce_(a_cur, cons_, fres, globdat);
   // get the old vectors
+  // TODO store in class
   StateVector::getOld(u_old, jive::model::STATE0, dofs_, globdat);
   StateVector::getOld(v_old, jive::model::STATE1, dofs_, globdat);
-  StateVector::getOld(a_old, jive::model::STATE2, dofs_, globdat);
-
-  // skip if no model exists
-  if (!(model_))
-    return DONE;
-
-  // update mass matrix if necessary
-  if (!valid_)
-    restart_(globdat);
 
   globdat.get(step, Globdat::TIME_STEP);
 
@@ -130,10 +132,6 @@ Module::Status MilneDeviceModule::run
   StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
   StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);
 
-  // correct accelerations
-  fres = getForce_(fint, fext, globdat);
-  getAcce_(a_new, cons_, fres, globdat);
-
   /////////////////////////////////////////////////
   ////////  step size adaption
   /////////////////////////////////////////////////
@@ -153,7 +151,6 @@ Module::Status MilneDeviceModule::run
     StateVector::updateOld(dofs_, globdat);
     StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
     StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);
-    StateVector::store(a_new, jive::model::STATE2, dofs_, globdat);
 
     // advance to the next step
     advance_(globdat);

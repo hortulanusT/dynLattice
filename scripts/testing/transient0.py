@@ -38,7 +38,6 @@ try:
 
   disp = data.xs("disp", level="label")
   velo = data.xs("velo", level="label")
-  acce = data.xs("acce", level="label")
 except IOError:
   pass
 else:
@@ -62,9 +61,9 @@ energy["E_pot_post"] = 0.5 * 205e9 * 0.05**2*np.pi / \
     (1/(nnodes-1)) * (disp.diff(axis='columns')**2).sum(axis='columns')
 energy["E_tot_post"] = energy["E_pot_post"] + energy["E_kin_post"]
 
-rising_sim = (energy['E_tot'].diff() > 0) & (energy.index > 1e-5)
-rising_post = (energy['E_tot_post'].diff() > 0) & (energy.index >
-                                                   1e-5)
+rising_sim = (energy['E_tot'].diff() > 0) & (energy["load"] == 0)
+rising_post = (energy['E_tot_post'].diff() > 0) & (energy["load"]
+                                                   == 0)
 
 steps = pd.DataFrame()
 steps["time_step"] = energy["time_step"]
@@ -76,7 +75,7 @@ if any(rising_sim):
   print(
       f"simulation energy rising at {sum(rising_sim):d} occurences"
       "\n\t"
-      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim]):.3g}"
+      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim]):.3g} at {energy['E_tot'].diff()[rising_sim].idxmax():.3g}"
       "\n\t"
       f"vs energy in the system {max(energy['E_tot']):.3g} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
   )
@@ -268,11 +267,10 @@ if test_passed:
     pdf.savefig(fig)
 
     # raw spectra
-    fig, axs = plt.subplots(5, 1, sharex=True, figsize=(10, 20))
+    fig, axs = plt.subplots(3, 1, sharex=True, figsize=(10, 15))
     for node in disp.columns[1:]:
       spectrum_disp = np.fft.rfft(disp[node]) / disp[node].size
       spectrum_velo = np.fft.rfft(velo[node]) / velo[node].size
-      spectrum_acce = np.fft.rfft(acce[node]) / acce[node].size
 
       axs[0].loglog(frequencies,
                     np.abs(spectrum_disp),
@@ -283,34 +281,19 @@ if test_passed:
                     c=coloring(node / (nnodes - 1)),
                     label=f"Node #{node}")
       axs[2].loglog(frequencies,
-                    np.abs(spectrum_acce),
-                    c=coloring(node / (nnodes - 1)),
-                    label=f"Node #{node}")
-      axs[3].loglog(frequencies,
                     np.abs(spectrum_velo) / np.abs(spectrum_disp),
                     c=coloring(node / (nnodes - 1)),
                     label=f"Node #{node}")
-      axs[4].loglog(frequencies,
-                    np.abs(spectrum_acce) / np.abs(spectrum_disp),
-                    c=coloring(node / (nnodes - 1)),
-                    label=f"Node #{node}")
 
-    axs[3].loglog(frequencies,
+    axs[2].loglog(frequencies,
                   frequencies * np.pi * 2e3,
-                  "k:",
-                  lw=.5,
-                  alpha=.5)
-    axs[4].loglog(frequencies,
-                  frequencies**2 * np.pi**2 * 4e6,
                   "k:",
                   lw=.5,
                   alpha=.5)
 
     axs[0].set_ylabel("Displacements [m]")
     axs[1].set_ylabel("Velocity direct [m/s]")
-    axs[2].set_ylabel("Accelaration direct [m/s^2]")
-    axs[3].set_ylabel("Velo/Disp factors [1/s]")
-    axs[4].set_ylabel("Acce/Disp factors [1/s^2]")
+    axs[2].set_ylabel("Velo/Disp factors [1/s]")
     axs[-1].set_xlabel("Frequency [kHz]")
 
     fig.suptitle(f"Amplitudes of Node Spectra")
