@@ -30,7 +30,7 @@ ExplicitModule::ExplicitModule
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
-  saftey_ = 0.95;
+  saftey_ = 0.9;
   decrFact_ = 0.8;
   incrFact_ = 1.2;
 }
@@ -266,20 +266,14 @@ void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
   }
 }
 
-idx_t ExplicitModule::advance_(const Properties &globdat)
+void ExplicitModule::advance_(const Properties &globdat)
 {
   Properties params;
-  idx_t step;
 
   // update time in models and boundary conditions
-  params.set(ActionParams::CONSTRAINTS, cons_);
   Globdat::advanceTime(dtime_, globdat);
   Globdat::advanceStep(globdat);
   model_->takeAction(Actions::ADVANCE, params, globdat);
-
-  // return the current step
-  globdat.get(step, Globdat::TIME_STEP);
-  return step;
 }
 
 void ExplicitModule::getAcce_(const Vector &a,
@@ -313,6 +307,7 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
 
   params.set(ActionParams::EXT_VECTOR, fext);
   params.set(ActionParams::INT_VECTOR, fint);
+  params.set(ActionParams::CONSTRAINTS, cons_);
 
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
@@ -327,7 +322,6 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
 //-----------------------------------------------------------------------
 // TODO find source other than Schweizer Skript... (and make sure for
 // multistep things differen step sizes are taken into account)
-// asses the quality of the step
 bool ExplicitModule::updStep_(const double &error,
                               const Properties &globdat)
 {
@@ -341,11 +335,14 @@ bool ExplicitModule::updStep_(const double &error,
     dtime_ = jem::max(
         jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
         decrFact_ * dtime_, minDtime_);
+
+    if (dtime_ == maxDtime_)
+      jem::System::info(myName_)
+          << " !!! Largest allowed time step !!!\n";
   }
   else
   {
-    dtime_ = jem::max(decrFact_ * jem::min(saftey_ * dtime_opt, dtime_),
-                      minDtime_);
+    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
   }
   Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
                                      dtime_);

@@ -149,7 +149,6 @@ Module::Status EmbeddedRKModule::run
 
 {
   const idx_t dofCount = dofs_->dofCount();
-  idx_t step;
   double error;
   double t_cur;
   Vector u_cur, v_cur, a_cur;
@@ -270,7 +269,7 @@ Module::Status EmbeddedRKModule::run
     StateVector::store(a_new, jive::model::STATE2, dofs_, globdat);
 
     // advance to the next step
-    step = advance_(globdat);
+    advance_(globdat);
 
     // check if the mass matrix is still valid
     if (FuncUtils::evalCond(*updCond_, globdat))
@@ -284,12 +283,8 @@ Module::Status EmbeddedRKModule::run
   }
   else
   {
-    Globdat::restoreStep(globdat);
-    Globdat::restoreTime(globdat);
     StateVector::restoreNew(dofs_, globdat);
-
     jem::System::info(myName_) << " ...restarting time step\n";
-
     return run(globdat);
   }
 }
@@ -315,12 +310,12 @@ void EmbeddedRKModule::correctDisp_(const Vector &uncorrected,
     localu = delta[rdofs_[inode]];
     localf = uncorrected[rdofs_[inode]];
 
-    expVec(localU, localu);
-    expVec(localF, localf);
+    localU = jive_helpers::skew(localu);
+    localF = jive_helpers::skew(localf);
 
     invDerivExpMap_(localK, localF, localU);
 
-    logMat(localk, localK);
+    localk = jive_helpers::unskew(localK);
 
     uncorrected[rdofs_[inode]] = localk;
   }

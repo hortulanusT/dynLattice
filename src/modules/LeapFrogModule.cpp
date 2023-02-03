@@ -64,6 +64,8 @@ Module::Status LeapFrogModule::run
   if (!valid_)
     restart_(globdat);
 
+  globdat.get(step, Globdat::TIME_STEP);
+
   // Get the state vectors from the last time step (velocities actually at
   // half steps!)
   StateVector::get(u_old, STATE[0], dofs_, globdat);
@@ -75,10 +77,8 @@ Module::Status LeapFrogModule::run
   fres = getForce_(fint, fext, globdat);
   getAcce_(a_new, cons_, fres, globdat);
 
-  step = advance_(globdat);
-
   // update velocity
-  if (stepCount_ >= 2 && step >= 2)
+  if (stepCount_ == 2 && step > 0)
     ABupdate_(dv, a_new, a_old);
   else
     ABupdate_(dv, a_new);
@@ -86,7 +86,7 @@ Module::Status LeapFrogModule::run
   updateVec_(v_new, v_old, dv);
 
   // update position
-  if (stepCount_ >= 2 && step >= 2)
+  if (stepCount_ >= 2 && step > 2)
     ABupdate_(du, v_new, v_old);
   else
     ABupdate_(du, v_new);
@@ -102,6 +102,8 @@ Module::Status LeapFrogModule::run
   StateVector::store(a_new, STATE[2], dofs_, globdat);
   StateVector::store(v_new, STATE[1], dofs_, globdat);
   StateVector::store(u_new, STATE[0], dofs_, globdat);
+
+  advance_(globdat);
 
   // check if the mass matrix is still valid
   if (FuncUtils::evalCond(*updCond_, globdat))

@@ -124,7 +124,7 @@ protected:
   virtual ~ExplicitModule();
 
 protected:
-  idx_t advance_(const Properties &globdat);
+  void advance_(const Properties &globdat);
 
   void restart_(const Properties &globdat);
 

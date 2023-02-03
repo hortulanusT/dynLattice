@@ -25,7 +25,6 @@ try:
       ]) for name in data.columns
   ],
                                            names=["dof", "node"])
-  data = data.loc[:1e-2]
   dx = data["dx"]
   dy = data["dy"]
   dz = data["dz"]
@@ -77,9 +76,9 @@ if any(rising_sim):
   print(
       f"simulation energy rising at {sum(rising_sim):d} occurences"
       "\n\t"
-      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim])}"
+      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim]):.3g}"
       "\n\t"
-      f"vs energy in the system {max(energy['E_tot'])} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
+      f"vs energy in the system {max(energy['E_tot']):.3g} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
   )
 else:
   print("Energy not rising!")
@@ -265,6 +264,7 @@ if test_passed:
                      ec=None,
                      label="sim rising")
     axs[1].set_xlim(min(times), max(times))
+    axs[1].set_ylim(0, energy["E_tot"].iloc[-1] * 10)
     pdf.savefig(fig)
 
     # raw spectra

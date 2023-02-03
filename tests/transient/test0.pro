@@ -5,6 +5,7 @@ control.runWhile = "t < 1e-2";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
+Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.reportEnergy = true;
 
 // settings
