@@ -31,16 +31,16 @@ Input.input.onelab.X = params.X;
 Input.input.onelab.Y = params.Y;
 Input.input.onelab.Z = params.Z;
 
-// model.model.matrix2.type = "Lumped";
+// model.matrix2.type = "Lumped";
 
-model.model.model.force.type = "LoadScale";
-model.model.model.force.scaleFunc = "if(t-1e-5<=0, if(t-.5e-5<=0, t, 1e-5 - t), 0) * 5e14";
-model.model.model.force.model.type = "Neumann";
-model.model.model.force.model.nodeGroups =  [ "free", "free", "free" ] ;
-model.model.model.force.model.factors = [ "$(params.X)", "$(params.Y)", "$(params.Z)" ];
-model.model.model.force.model.dofs = [ "dx", "dy", "dz" ];
+model.model.force.type = "LoadScale";
+model.model.force.scaleFunc = "if(t-1e-5<=0, if(t-.5e-5<=0, t, 1e-5 - t), 0) * 5e14";
+model.model.force.model.type = "Neumann";
+model.model.force.model.nodeGroups =  [ "free", "free", "free" ] ;
+model.model.force.model.factors = [ "$(params.X)", "$(params.Y)", "$(params.Z)" ];
+model.model.force.model.dofs = [ "dx", "dy", "dz" ];
 
-model.model.model.disp.type = "None";
+model.model.disp.type = "None";
 
 Output.disp.vectors += "state1 = velo"; 
 
@@ -48,7 +48,7 @@ Output.modules += "enSample";
 Output.enSample.type = "Sample";
 Output.enSample.file = "$(CASE_NAME)/energy.csv";
 Output.enSample.header = "time,time_step,load,E_kin,E_pot,E_tot";
-Output.enSample.dataSets = ["t", "deltaTime", "$(model.model.model.force.scaleFunc)", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
+Output.enSample.dataSets = ["t", "deltaTime", "$(model.model.force.scaleFunc)", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
 Output.enSample.separator = ",";
 
 Output.modules += "paraview";
@@ -56,8 +56,8 @@ Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
-Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
-Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
+Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
+Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 Output.paraview.sampleWhen = "t % 2.5e-5 < deltaTime";

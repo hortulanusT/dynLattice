@@ -1,17 +1,28 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Fix 3D dynamics
 - Include Contact
 - Include Plasticity
-- Think of Elastic, Dynamic Homogenization
+- Elastic, Dynamic Homogenization
 ## Code
 1. Models
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
+1. Modules
+    - Explicit Module
+      - Clean up Explicit Module and children
+      - Extract them to seperate Repo
+      - set the mass matrix when computing the Gyro Force
+    - Tangent Output Module
+      - Get Matrix Condenstation to work
+    - ParaView Module
+      - write PVD in every step
+      - nicer numbering for the output files
 1. Environment
-    - add .cpp for all headers...
     - make all plot outputs A4
+    - cleanup `.pro` file composition
+1. Tests
+    - include check with reference data
  
 # :heavy_check_mark: Information
 ## cluster syncing
@@ -34,6 +45,3 @@ rsync -vax $TARGET $DESTINATION
 - Modal Reduction for Homogenization
   - dynamic homogenization for micromorphic continuum
 - Nonlocal Homogenization for dynamics
-- Custom Application
-  - add shortcuts for `$(CASE_NAME)` without folder
-  - enable multiple `.pro` files in command line

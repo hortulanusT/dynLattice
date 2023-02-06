@@ -13,36 +13,36 @@
 #pragma once
 
 #include <jem/base/Array.h>
-#include <jem/base/System.h>
-#include <jem/util/Properties.h>
-#include <jem/numeric/algebra/matmul.h>
-#include <jem/numeric/algebra.h>
-#include <jem/numeric/Quaternion.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/base/System.h>
+#include <jem/numeric/Quaternion.h>
+#include <jem/numeric/algebra.h>
+#include <jem/numeric/algebra/matmul.h>
+#include <jem/util/Properties.h>
 
 #include <jive/Array.h>
-#include <jive/algebra/MatrixBuilder.h>
 #include <jive/algebra/FlexMatrixBuilder.h>
-#include <jive/model/ModelFactory.h>
-#include <jive/model/Model.h>
-#include <jive/model/Actions.h>
-#include <jive/model/StateVector.h>
-#include <jive/util/XTable.h>
-#include <jive/util/Assignable.h>
-#include <jive/util/XDofSpace.h>
-#include <jive/util/Printer.h>
-#include <jive/util/Globdat.h>
-#include <jive/util/utilities.h>
-#include <jive/fem/NodeSet.h>
-#include <jive/fem/ElementSet.h>
+#include <jive/algebra/MatrixBuilder.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeGroup.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
+#include <jive/util/Assignable.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/Printer.h>
+#include <jive/util/XDofSpace.h>
+#include <jive/util/XTable.h>
+#include <jive/util/utilities.h>
 
 #include <math.h>
 
 #include "misc/Line3D.h"
-#include "utils/testing.h"
 #include "utils/helpers.h"
+#include "utils/testing.h"
 
 using jem::Slice;
 using jem::SliceFrom;
@@ -110,23 +110,18 @@ public:
 
   explicit specialCosseratRodModel
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   virtual bool takeAction
 
-      (const String &action,
-       const Properties &params,
+      (const String &action, const Properties &params,
        const Properties &globdat);
 
   static Ref<Model> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -138,10 +133,8 @@ private:
    * @param[in]  disp current values for the DOFs
    * @param[in]  dispOld last values for the DOFs
    */
-  void assemble_(MatrixBuilder &mbld,
-                 const Vector &fint,
-                 const Vector &disp,
-                 const Vector &dispOld) const;
+  void assemble_(MatrixBuilder &mbld, const Vector &fint,
+                 const Vector &disp, const Vector &dispOld) const;
 
   /**
    * @brief construct the internal force vector
@@ -149,8 +142,7 @@ private:
    * @param[in]  disp current values for the DOFs
    * @param[in]  dispOld last values for the DOFs
    */
-  void assemble_(const Vector &fint,
-                 const Vector &disp,
+  void assemble_(const Vector &fint, const Vector &disp,
                  const Vector &dispOld) const;
 
   /**
@@ -159,8 +151,7 @@ private:
    * @param[in]  velo current values for the DOF - velocities
    * @param[in]  mbld current mass matrix
    */
-  void assembleGyro_(const Vector &fint,
-                     const Vector &velo,
+  void assembleGyro_(const Vector &fint, const Vector &velo,
                      MatrixBuilder &mbld) const;
 
   /**
@@ -168,17 +159,14 @@ private:
    * @param[out] mbld mass matrix
    * @param[in]  disp current values for the DOFs
    */
-  void assembleM_(MatrixBuilder &mbld,
-                  Vector &disp) const;
+  void assembleM_(MatrixBuilder &mbld, Vector &disp) const;
 
   /**
    * @brief fill the table with the strain values per element
    */
   void get_strain_table_
 
-      (XTable &strain_table,
-       const Vector &weights,
-       const Vector &disp,
+      (XTable &strain_table, const Vector &weights, const Vector &disp,
        const bool mat_vals = false);
 
   /**
@@ -186,9 +174,7 @@ private:
    */
   void get_stress_table_
 
-      (XTable &stress_table,
-       const Vector &weights,
-       const Vector &disp,
+      (XTable &stress_table, const Vector &weights, const Vector &disp,
        const bool mat_vals = false);
 
   /**
@@ -204,40 +190,52 @@ private:
   /**
    * @brief Get the geometric stiffness matrix
    */
-  void get_geomStiff_(const Cubix &B,             ///< B(.,.,i), where it refers to the B-matrix at the i-th integration point
-                      const Matrix &stresses,     ///< spatial stress(i,j), stress component i at the j-th integration points
-                      const Matrix &nodePhi_0,    ///< location of the nodes
-                      const Matrix &nodeU) const; ///< nodeU(.,j), translational displacement j-th node
+  void get_geomStiff_(
+      const Cubix &B, ///< B(.,.,i), where it refers to the B-matrix at
+                      ///< the i-th integration point
+      const Matrix &stresses, ///< spatial stress(i,j), stress component i
+                              ///< at the j-th integration points
+      const Matrix &nodePhi_0, ///< location of the nodes
+      const Matrix &nodeU)
+      const; ///< nodeU(.,j), translational displacement j-th node
 
   /**
    * @brief Get the strains in the integration points of an element
    */
-  void get_strains_(const Matrix &strains,   ///< strains(i,j), stress component i at the j-th integration points
-                    const Vector &w,         ///< integration point weights
-                    const Matrix &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-                    const Matrix &nodeU,     ///< nodeU(.,j), translational displacement j-th node
-                    const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational orientation j-th node
-                    const idx_t ie,
-                    const bool spatial = true) const; ///< rotational displacements
+  void get_strains_(
+      const Matrix &strains, ///< strains(i,j), stress component i at the
+                             ///< j-th integration points
+      const Vector &w,       ///< integration point weights
+      const Matrix
+          &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix
+          &nodeU, ///< nodeU(.,j), translational displacement j-th node
+      const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
+                               ///< orientation j-th node
+      const idx_t ie,
+      const bool spatial = true) const; ///< rotational displacements
 
   /**
    * @brief Get the stresses in the integration points of an element
    */
-  void get_stresses_(const Matrix &stresses,  ///< stress(i,j), stress component i at the j-th integration points
-                     const Vector &w,         ///< integration point weights
-                     const Matrix &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-                     const Matrix &nodeU,     ///< nodeU(.,j), translational displacement j-th node
-                     const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational orientation j-th node
-                     const idx_t ie,
-                     const bool spatial = true) const; ///< rotational displacements
+  void get_stresses_(
+      const Matrix &stresses, ///< stress(i,j), stress component i at the
+                              ///< j-th integration points
+      const Vector &w,        ///< integration point weights
+      const Matrix
+          &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
+      const Matrix
+          &nodeU, ///< nodeU(.,j), translational displacement j-th node
+      const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
+                               ///< orientation j-th node
+      const idx_t ie,
+      const bool spatial = true) const; ///< rotational displacements
 
   /**
    * @brief format the displacements nicely
    */
-  void get_disps_(const Matrix &nodePhi_0,
-                  const Matrix &nodeU,
-                  const Cubix &nodeLambda,
-                  const Vector &disp,
+  void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
+                  const Cubix &nodeLambda, const Vector &disp,
                   const IdxVector &inodes) const;
 
 private:
@@ -268,10 +266,17 @@ private:
   Vector material_ey_;
   Matrix materialC_;
   Matrix materialM_;
+  Vector inertiaCorrect_;
 
-  IdxVector givenNodes_; ///< given directions for nodes (especially end-nodes)
-  Matrix givenDirs_;     ///< given directions for nodes (especially end-nodes)
+  IdxVector
+      givenNodes_; ///< given directions for nodes (especially end-nodes)
+  Matrix
+      givenDirs_; ///< given directions for nodes (especially end-nodes)
 
-  Cubix LambdaN_;     ///< reference rotations per node; LambdaN_(.,.,j) is for the j-th node
-  Cubix mat_strain0_; ///< strains for the undeformed configuration; mat_strain0_(i,j,k) refers to the i-th strain in the k-th element on the j-th integration point
+  Cubix LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is
+                  ///< for the j-th node
+  Cubix
+      mat_strain0_; ///< strains for the undeformed configuration;
+                    ///< mat_strain0_(i,j,k) refers to the i-th strain in
+                    ///< the k-th element on the j-th integration point
 };

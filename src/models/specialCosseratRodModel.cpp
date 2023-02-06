@@ -265,6 +265,11 @@ specialCosseratRodModel::specialCosseratRodModel
   materialM_.resize(3, 3);
   materialM_ = eye() * density_ * area_;
 
+  inertiaCorrect_.resize(3);
+  inertiaCorrect_ = 1;
+  if (myProps.find(inertiaCorrect_, "inertia_correct"))
+    myConf.set("intertia_corret", inertiaCorrect_);
+
   if (myProps.find(thickFact_, THICKENING_FACTOR))
   {
     if (thickFact_.size() == 1)
@@ -392,13 +397,16 @@ bool specialCosseratRodModel::takeAction
     assembleM_(*mbld, disp);
 
     // // DEBUGGING
-    // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofList.size(), dofList.size() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock(M, dofList, dofList );
-    // REPORT( action )
-    // TEST_CONTEXT ( mbld->toString() )
-    // TEST_CONTEXT ( M )
+    // IdxVector dofList(dofs_->dofCount());
+    // Matrix M(dofList.size(), dofList.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(M, dofList, dofList);
+    // REPORT(action)
+    // TEST_CONTEXT(mbld->toString())
+    // TEST_CONTEXT(M)
+
+    return true;
   }
 
   if (action == Actions::GET_INT_VECTOR)
@@ -1125,6 +1133,9 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
             materialJ(1, 1) +=
                 density_ * area_ * node_len * pow(node_len / 2., 2);
           }
+          for (idx_t i = 0; i < inertiaCorrect_.size(); i++)
+            materialJ(i, i) *= inertiaCorrect_[i];
+
           spatialJ = mc3.matmul(nodeLambda[Inode], materialJ,
                                 nodeLambda[Inode].transpose());
 

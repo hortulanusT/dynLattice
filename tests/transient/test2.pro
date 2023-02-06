@@ -28,26 +28,26 @@ include "output.pro";
 // more settings
 Input.input.onelab.size = 0.05;
 
-model.model.model.force.type = "Neumann";
-model.model.model.force.loadIncr = 0.;
-model.model.model.force.initLoad = "PI * (5e-3)^2 * $(Input.input.onelab.size) * 1.1e3 * 9.81";
-model.model.model.force.nodeGroups =  [ "all", "free", "fixed" ] ;
-model.model.model.force.factors = [ -1., 0.5, 0.5 ];
-model.model.model.force.dofs = [ "dz", "dz", "dz" ];
+model.model.force.type = "Neumann";
+model.model.force.loadIncr = 0.;
+model.model.force.initLoad = "PI * (5e-3)^2 * $(Input.input.onelab.size) * 1.1e3 * 9.81";
+model.model.force.nodeGroups =  [ "all", "free", "fixed" ] ;
+model.model.force.factors = [ -1., 0.5, 0.5 ];
+model.model.force.dofs = [ "dz", "dz", "dz" ];
 
-model.model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
-model.model.model.fixed.dofs = model.model.model.rodMesh.child.dofNamesTrans;
-model.model.model.fixed.factors = [ 0., 0., 0. ]; 
+model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
+model.model.fixed.dofs = model.model.rodMesh.child.dofNamesTrans;
+model.model.fixed.factors = [ 0., 0., 0. ]; 
 
-model.model.model.disp.type = "None";
+model.model.disp.type = "None";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
-Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
-Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
+Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
+Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 Output.paraview.sampleWhen = "t % 0.02 < deltaTime";
