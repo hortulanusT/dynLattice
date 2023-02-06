@@ -110,6 +110,13 @@ Module::Status MilneDeviceModule::run
   fres = getForce_(fint, fext, globdat);
   getAcce_(a_pre, cons_, fres, globdat);
 
+  // check if the mass matrix is still valid
+  if (FuncUtils::evalCond(*updCond_, globdat))
+    invalidate_();
+  // update mass matrix if necessary
+  if (!valid_)
+    restart_(globdat);
+
   /////////////////////////////////////////////////
   ////////  corrector step
   /////////////////////////////////////////////////

@@ -454,6 +454,8 @@ bool specialCosseratRodModel::takeAction
     // assemble mass matrix
     assembleM_(*mbld, disp);
     assembleGyro_(fgyro, velo, *mbld);
+
+    return true;
   }
 
   return false;
