@@ -24,6 +24,16 @@
 1. Tests
     - include check with reference data
  
+# :arrows_counterclockwise: Workflow for eqv-design
+1. `jive ./scripts/running/eqv-design.py lin_init prep_runs`
+1. `jive ./scripts/running/eqv-design.py lin_change lin_comp_plot show_designs print_designs`
+1. make sure repo on cluster(s) is updated
+1. `./scripts/cluster/masterDesignBlue.sh`
+1. `./scripts/cluster/syncBack.sh`
+1. make sure all runs went by nicely
+1. `jive ./scripts/running/eqv-design.py work_density_plot`
+1. ...
+
 # :heavy_check_mark: Information
 ## cluster syncing
 ``` bash
