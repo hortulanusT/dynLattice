@@ -7,7 +7,7 @@ nonlinRod*
 __pycache__/
 
 # reference data
-ref_data
+/ref_data
 
 # archiving script on the local machine
 scripts/archive.sh
