@@ -35,8 +35,6 @@ Input.groupInput.nodeGroups += "elbow";
 Input.groupInput.elbow.xtype = "max";
 Input.groupInput.elbow.ytype = "max";
 
-model.matrix2.type = "FEM"; // HACK automatically assume its not constant if DOF3 are set...
-model.matrix2.constant = false;
 model.model.force.type = "LoadScale";
 model.model.force.scaleFunc = "if (t<=2, if (t<=1, t*50, (2-t)*50), 0)";
 model.model.force.model.type = "Neumann";

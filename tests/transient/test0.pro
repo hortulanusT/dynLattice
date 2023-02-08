@@ -7,9 +7,7 @@ Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-7;
 Solver.integrator.maxDTime = 1e-7;
 Solver.integrator.minDTime = 1e-7;
-Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.reportEnergy = true;
-Solver.integrator.updateWhen = true;
 
 // settings
 params.X = "sin(PI/180) * sin(PI/4)";
@@ -32,8 +30,6 @@ include "output.pro";
 Input.input.onelab.X = params.X;
 Input.input.onelab.Y = params.Y;
 Input.input.onelab.Z = params.Z;
-
-// model.matrix2.type = "Lumped";
 
 model.model.force.type = "LoadScale";
 model.model.force.scaleFunc = "if(t-1e-5<=0, if(t-.5e-5<=0, t, 1e-5 - t), 0) * 5e14";

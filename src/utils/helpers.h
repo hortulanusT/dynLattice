@@ -19,6 +19,7 @@
 #include "utils/testing.h"
 
 #define WARN(key) jem::System::warn() << key << "\n";
+#define ERR(key) jem::System::err() << key << "\n";
 
 using jem::ALL;
 using jem::Array;

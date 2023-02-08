@@ -92,6 +92,14 @@ Module::Status ExplicitModule::init
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
       SO3_dofs_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
     myConf.set(SO3_DOFS, SO3_dof_names);
+
+    String modelType;
+    props.get(modelType, "model.type");
+    if (modelType == "Matrix") {
+      props.set("model.matrix2.type", FlexMatrixBuilder::getType()->getName());
+      props.set("model.matrix2.constant", false);
+    } else
+      ERR("Couldn't find matrix model, matrix2 will not be updated!")
   }
 
   // Initialize update condition

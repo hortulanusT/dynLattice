@@ -6,10 +6,7 @@ control.runWhile = "t <= 1";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
-Solver.integrator.maxDTime = 1e-5;
 Solver.integrator.deltaTime = 1e-5;
-Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
-Solver.integrator.updateWhen = true;
 
 // settings
 params.rod_details.cross_section = "circle";
