@@ -71,24 +71,16 @@ del energy["time_step"]
 steps["load"] = energy["load"]
 del energy["load"]
 
-if any(rising_sim):
-  print(
-      f"simulation energy rising at {sum(rising_sim):d} occurences"
-      "\n\t"
-      f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim]):.3g} at {energy['E_tot'].diff()[rising_sim].idxmax():.3g}"
-      "\n\t"
-      f"vs energy in the system {max(energy['E_tot']):.3g} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
-  )
-else:
-  print("Energy not rising!")
-# print(
-#     f"post-proc  energy rising at {sum(rising_post):d} occourences"
-# )
-
-# print("Kinetic Energy closeness :",
-#       np.allclose(energy["E_kin"], energy["E_kin_post"]))
-# print("Potential Energy closeness :",
-#       np.allclose(energy["E_pot"], energy["E_pot_post"]))
+# if any(rising_sim):
+#   print(
+#       f"simulation energy rising at {sum(rising_sim):d} occurences"
+#       "\n\t"
+#       f"with a maximum increase of {max(energy['E_tot'].diff()[rising_sim]):.3g} at {energy['E_tot'].diff()[rising_sim].idxmax():.3g}"
+#       "\n\t"
+#       f"vs energy in the system {max(energy['E_tot']):.3g} ({max(energy['E_tot'].diff()[rising_sim])/max(energy['E_tot'])*100:.3g} %)"
+#   )
+# else:
+#   print("Energy not rising!")
 
 for node in data:
   test = disp[node] > .5e-3
@@ -116,7 +108,7 @@ try:
   for i in range(len(eigenfreqs)):
     diff_freq[i] = (eigenfreqs[i] -
                     frequencies[ipeaks[i]]) / eigenfreqs[i]
-    # test_passed &= np.abs(diff_freq[i]) < 0.025
+    test_passed &= np.abs(diff_freq[i]) < 0.05
 except:
   test_passed = False
 
