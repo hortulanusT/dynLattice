@@ -15,14 +15,11 @@
       - set the mass matrix when computing the Gyro Force
     - Tangent Output Module
       - Get Matrix Condenstation to work
-    - ParaView Module
-      - write PVD in every step
-      - nicer numbering for the output files
 1. Environment
     - make all plot outputs A4
     - cleanup `.pro` file composition
 1. Tests
-    - include check with reference data
+    - include more reference data
  
 # :arrows_counterclockwise: Workflow for eqv-design
 1. `jive ./scripts/running/eqv-design.py lin_init prep_runs`
