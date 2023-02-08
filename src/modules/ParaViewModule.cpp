@@ -1,4 +1,5 @@
 #include "ParaViewModule.h"
+#include "utils/testing.h"
 
 void vec2mat(const Matrix &mat, const Vector &vec)
 {
@@ -102,24 +103,14 @@ Module::Status ParaViewModule::init
 
   // write the pvd file
   idx_t format_pos = nameFormat_.rfind("%i");
-  if (format_pos > 0)
-  {
-    String pvdName = nameFormat_[SliceTo(format_pos)] +
-                     nameFormat_[SliceFrom(format_pos + 2)] + ".pvd";
-    Ref<Writer> pvd_raw = newInstance<FileWriter>(pvdName);
-    pvd_printer_ = newInstance<PrintWriter>(pvd_raw);
+  pvd_print_ = format_pos > 0;
+  pvd_time_buffer_.resize(0);
+  pvd_name_buffer_.resize(0);
+  if (pvd_print_)
+    pvd_name_ = nameFormat_[SliceTo(format_pos)] +
+                nameFormat_[SliceFrom(format_pos + 2)] + ".pvd";
 
-    *pvd_printer_ << "<?xml version=\"1.0\"?>" << endl;
-    *pvd_printer_ << "<VTKFile type=\"Collection\" version=\"0.1\" "
-                     "byte_order=\"LittleEndian\">"
-                  << endl;
-    pvd_printer_->incrIndentLevel();
-    *pvd_printer_ << "<Collection>" << endl;
-    pvd_printer_->incrIndentLevel();
-    pvd_printer_->flush();
-  }
-  else
-    pvd_printer_ = nullptr;
+  out_num_ = 0;
 
   return OK;
 }
@@ -138,34 +129,54 @@ Module::Status ParaViewModule::run
   String currentFile;
   idx_t folder_sep;
 
-  // get the current timeStep and format the given format accordingly
-  globdat.get(currentStep, Globdat::TIME_STEP);
-  currentFile =
-      String::format(makeCString(nameFormat_).addr(), currentStep);
-  currentFile = currentFile + "." + fileType_;
-
   // write everything to file
   bool cond = jive::util::FuncUtils::evalCond(*sampleCond_, globdat);
 
   if (cond)
   {
+    // get the current timeStep and format the given format accordingly
+    currentFile = String::format(makeCString(nameFormat_).addr(), out_num_++);
+    currentFile = currentFile + "." + fileType_;
     writeFile_(currentFile, globdat);
 
     // report file to pvd
+    globdat.get(currentStep, Globdat::TIME_STEP);
     if (!globdat.find(currentTime, Globdat::TIME))
       currentTime = currentStep;
-    folder_sep = currentFile.rfind("/") +
-                 1; // LATER make compatible with other OS's?
+    folder_sep =
+      currentFile.rfind("/") + 1; // LATER make compatible with other OS's?
 
-    if (pvd_printer_)
-    {
-      *pvd_printer_ << "<DataSet ";
-      *pvd_printer_ << "timestep=\"" << currentTime << "\" ";
-      *pvd_printer_ << "group=\"\" part=\"0\" ";
-      *pvd_printer_ << "file=\"" << currentFile[SliceFrom(folder_sep)]
-                    << "\" ";
-      *pvd_printer_ << "/>" << endl;
-      pvd_printer_->flush();
+    if (pvd_print_) {
+      pvd_time_buffer_.pushBack(currentTime);
+      pvd_name_buffer_.pushBack(currentFile[SliceFrom(folder_sep)]);
+
+      Ref<Writer> pvd_raw = newInstance<FileWriter>(pvd_name_);
+      Ref<PrintWriter> pvd_printer = newInstance<PrintWriter>(pvd_raw);
+
+      *pvd_printer << "<?xml version=\"1.0\"?>" << endl;
+      *pvd_printer << "<VTKFile type=\"Collection\" version=\"0.1\" "
+                      "byte_order=\"LittleEndian\">"
+                   << endl;
+      pvd_printer->incrIndentLevel();
+      *pvd_printer << "<Collection>" << endl;
+      pvd_printer->incrIndentLevel();
+      pvd_printer->flush();
+
+      for (idx_t i_out = 0; i_out < out_num_; i_out++) {
+        *pvd_printer << "<DataSet ";
+        *pvd_printer << "timestep=\"" << pvd_time_buffer_[i_out] << "\" ";
+        *pvd_printer << "group=\"\" part=\"0\" ";
+        *pvd_printer << "file=\"" << pvd_name_buffer_[i_out] << "\" ";
+        *pvd_printer << "/>" << endl;
+        pvd_printer->flush();
+      }
+
+      pvd_printer->decrIndentLevel();
+      *pvd_printer << "</Collection>" << endl;
+      pvd_printer->decrIndentLevel();
+      *pvd_printer << "</VTKFile>" << endl;
+
+      pvd_printer->close();
     }
   }
 
@@ -176,19 +187,11 @@ Module::Status ParaViewModule::run
 //   shutdown
 //-----------------------------------------------------------------------
 
-void ParaViewModule::shutdown
+void
+ParaViewModule::shutdown
 
-    (const Properties &globdat)
+  (const Properties& globdat)
 {
-  if (pvd_printer_)
-  {
-    pvd_printer_->decrIndentLevel();
-    *pvd_printer_ << "</Collection>" << endl;
-    pvd_printer_->decrIndentLevel();
-    *pvd_printer_ << "</VTKFile>" << endl;
-
-    pvd_printer_->close();
-  }
 }
 
 //-----------------------------------------------------------------------

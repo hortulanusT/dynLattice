@@ -20,6 +20,7 @@
 #include <jem/io/FileOpenException.h>
 #include <jem/io/FileWriter.h>
 #include <jem/io/PrintWriter.h>
+#include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
 
 #include <jive/app/Module.h>
@@ -62,6 +63,7 @@ using jem::io::FileOpenException;
 using jem::io::FileWriter;
 using jem::io::PrintWriter;
 using jem::io::Writer;
+using jem::util::ArrayBuffer;
 using jem::util::Properties;
 
 using jive::IdxVector;
@@ -212,5 +214,9 @@ private:
   StringVector elemSets_;
   Array<elInfo> setInfo_;
   Ref<Function> sampleCond_;
-  Ref<PrintWriter> pvd_printer_;
+  idx_t out_num_;
+  bool pvd_print_;
+  String pvd_name_;
+  ArrayBuffer<double> pvd_time_buffer_;
+  ArrayBuffer<String> pvd_name_buffer_;
 };
