@@ -24,9 +24,9 @@ public:
 
       (const String &name = "MilneDevice");
 
-  virtual Status run
+  virtual void solve
 
-      (const Properties &globdat);
+    (const Properties& info, const Properties& globdat);
 
   static Ref<Module> makeNew
 
@@ -38,8 +38,6 @@ public:
   virtual ~MilneDeviceModule();
 
 private:
-  inline double getQuality_(const Vector &y_pre, const Vector &y_cor);
-
   /// @brief Adams Moulton 2 step corrector (Trapezoidal rule)
   inline void AMupdate_(const Vector &delta_y, const Vector &f_pre,
                         const Vector &f_cur) const;
@@ -48,12 +46,6 @@ private:
 
 private:
 };
-
-inline double MilneDeviceModule::getQuality_(const Vector &y_pre,
-                                                const Vector &y_cor)
-{
-  return norm2(Vector(y_pre - y_cor));
-}
 
 inline void MilneDeviceModule::AMupdate_(const Vector &delta_y,
                                             const Vector &f_pre,

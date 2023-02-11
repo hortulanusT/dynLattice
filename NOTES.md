@@ -10,8 +10,6 @@
       - Create MaterialFactory
 1. Modules
     - Explicit Module
-      - Clean up Explicit Module and children
-      - Extract them to seperate Repo
       - set the mass matrix when computing the Gyro Force
     - Tangent Output Module
       - Get Matrix Condenstation to work
@@ -23,7 +21,7 @@
  
 # :arrows_counterclockwise: Workflow for eqv-design
 1. `jive ./scripts/running/eqv-design.py lin_init prep_runs`
-1. `jive ./scripts/running/eqv-design.py lin_change lin_comp_plot show_designs print_designs`
+1. `jive ./scripts/running/eqv-design.py lin_change lin_comp_plot prep_latex_data`
 1. make sure repo on cluster(s) is updated
 1. `./scripts/cluster/masterDesignBlue.sh`
 1. `./scripts/cluster/syncBack.sh`

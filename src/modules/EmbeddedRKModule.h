@@ -29,9 +29,9 @@ public:
       (const Properties &conf, const Properties &props,
        const Properties &globdat);
 
-  virtual Status run
+  virtual void solve
 
-      (const Properties &globdat);
+    (const Properties& info, const Properties& globdat) override;
 
   static Ref<Module> makeNew
 
@@ -56,15 +56,12 @@ private:
   /// https://link.springer.com/referenceworkentry/10.1007/978-3-540-70529-1_122#Sec1139
   void correctDisp_(const Vector &uncorrected, const Vector &delta);
 
-  // TODO move somewhere more general...
   double bernoulliCoeff_(const idx_t i);
   Matrix adjoint_(const Matrix &point, const Matrix &about,
                   const idx_t iterate);
 
   void invDerivExpMap_(const Matrix &res, const Matrix &point,
                        const Matrix &about);
-
-  inline double getQuality_(const Vector &y_pre, const Vector &y_cor);
 
 private:
   String kind_;
@@ -76,9 +73,3 @@ private:
   bool fsal_;
   Vector c_;
 };
-
-inline double EmbeddedRKModule::getQuality_(const Vector &y_pre,
-                                            const Vector &y_cor)
-{
-  return norm2(Vector(y_pre - y_cor));
-}

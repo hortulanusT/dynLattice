@@ -140,12 +140,13 @@ void EmbeddedRKModule::initODE23_()
 }
 
 //-----------------------------------------------------------------------
-//   run
+//   solve
 //-----------------------------------------------------------------------
 
-Module::Status EmbeddedRKModule::run
+void
+EmbeddedRKModule::solve
 
-    (const Properties &globdat)
+  (const Properties& info, const Properties& globdat)
 
 {
   const idx_t dofCount = dofs_->dofCount();
@@ -169,19 +170,11 @@ Module::Status EmbeddedRKModule::run
   Vector v_new(dofCount);
   Vector a_new(dofCount);
 
-  // skip if no model exists
-  if (!(model_))
-    return DONE;
-
-  // update mass matrix if necessary
-  if (!valid_)
-    restart_(globdat);
-
   // get the current vectors
   StateVector::get(u_cur, jive::model::STATE0, dofs_, globdat);
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
-  fres = getForce_(fint, fext, globdat);
-  getAcce_(a_cur, cons_, fres, globdat);
+  fres = getForce(fint, fext, globdat);
+  getAcce(a_cur, cons_, fres, globdat);
   globdat.get(t_cur, Globdat::TIME);
 
   /////////////////////////////////////////////////
@@ -201,16 +194,16 @@ Module::Status EmbeddedRKModule::run
       du += a_(i, j) * ku_tab[j];
 
     // use the updates to compute new functions
-    updateVec_(v_step, v_cur, dv);
-    updateVec_(u_step, u_cur, du, true);
+    updateVec(v_step, v_cur, dv);
+    updateVec(u_step, u_cur, du, true);
     t_step = t_cur + c_[i] * dtime_;
 
     StateVector::store(u_step, jive::model::STATE0, dofs_, globdat);
     StateVector::store(v_step, jive::model::STATE1, dofs_, globdat);
     globdat.set(Globdat::TIME, t_step);
 
-    fres = getForce_(fint, fext, globdat);
-    getAcce_(a_step, cons_, fres, globdat);
+    fres = getForce(fint, fext, globdat);
+    getAcce(a_step, cons_, fres, globdat);
 
     // compute the k - values (F_j in the reference)
     kv_tab[i] = dtime_ * a_step;
@@ -246,48 +239,20 @@ Module::Status EmbeddedRKModule::run
     du += b_[j] * ku_tab[j];
 
   // use the updates to compute new functions
-  updateVec_(v_step, v_cur, dv);
-  updateVec_(u_step, u_cur, du, true);
+  updateVec(v_step, v_cur, dv);
+  updateVec(u_step, u_cur, du, true);
 
   /////////////////////////////////////////////////
   ////////  step size adaption
   /////////////////////////////////////////////////
   error = 0.;
-  error += getQuality_(u_step, u_new);
-  error += getQuality_(v_step, v_new) * dtime_;
+  error += getQuality(u_step, u_new);
+  error += getQuality(v_step, v_new) * dtime_;
 
-  // compute the optimal step size and decide wether to accept this step
-  if (updStep_(error, globdat))
-  {
-    // commit everything
-    Properties params;
-    Globdat::commitStep(globdat);
-    Globdat::commitTime(globdat);
-    model_->takeAction(Actions::COMMIT, params, globdat);
+  info.set(SolverInfo::RESIDUAL, error);
 
-    StateVector::updateOld(dofs_, globdat);
-    StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
-    StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);
-
-    // advance to the next step
-    advance_(globdat);
-
-    // check if the mass matrix is still valid
-    if (FuncUtils::evalCond(*updCond_, globdat))
-      invalidate_();
-
-    // if the engergy needs to be reported, do so
-    if (report_energy_)
-      store_energy_(globdat);
-
-    return Status::OK;
-  }
-  else
-  {
-    StateVector::restoreNew(dofs_, globdat);
-    jem::System::info(myName_) << " ...restarting time step\n";
-    return run(globdat);
-  }
+  StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
+  StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);
 }
 
 // correct the caluclated function results

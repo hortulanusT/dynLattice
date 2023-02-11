@@ -16,7 +16,6 @@ void declareModules()
   PBCGroupOutputModule::declare();
   GroupInputModule::declare();
   PBCGroupInputModule::declare();
-  ExplicitModule::declare();
   LeapFrogModule::declare();
   ForceOutputModule::declare();
   CSVOutputModule::declare();

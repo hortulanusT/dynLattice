@@ -36,9 +36,10 @@ LeapFrogModule::~LeapFrogModule()
 //   run
 //-----------------------------------------------------------------------
 
-Module::Status LeapFrogModule::run
+void
+LeapFrogModule::solve
 
-    (const Properties &globdat)
+  (const Properties& info, const Properties& globdat)
 
 {
   using jive::model::STATE;
@@ -56,14 +57,6 @@ Module::Status LeapFrogModule::run
   Vector v_new(dofCount);
   Vector a_new(dofCount);
 
-  // skip if no model exists
-  if (!(model_))
-    return DONE;
-
-  // update mass matrix if necessary
-  if (!valid_)
-    restart_(globdat);
-
   globdat.get(step, Globdat::TIME_STEP);
 
   // Get the state vectors from the last time step (velocities actually at
@@ -74,46 +67,18 @@ Module::Status LeapFrogModule::run
   params.clear();
 
   // Compute new accelerations
-  fres = getForce_(fint, fext, globdat);
-  getAcce_(a_new, cons_, fres, globdat);
+  fres = getForce(fint, fext, globdat);
+  getAcce(a_new, cons_, fres, globdat);
 
   // update velocity
-  if (stepCount_ == 2 && step > 0)
-    ABupdate_(dv, a_new, a_old);
-  else
-    ABupdate_(dv, a_new);
-
-  updateVec_(v_new, v_old, dv);
+  ABupdate(dv, a_new);
+  updateVec(v_new, v_old, dv);
 
   // update position
-  if (stepCount_ >= 2 && step > 2)
-    ABupdate_(du, v_new, v_old);
-  else
-    ABupdate_(du, v_new);
+  ABupdate(du, v_new);
+  updateVec(u_new, u_old, du, true);
 
-  updateVec_(u_new, u_old, du, true);
-
-  // commit everything
-  Globdat::commitStep(globdat);
-  Globdat::commitTime(globdat);
-  model_->takeAction(Actions::COMMIT, params, globdat);
-
-  StateVector::updateOld(dofs_, globdat);
-  StateVector::store(a_new, STATE[2], dofs_, globdat);
-  StateVector::store(v_new, STATE[1], dofs_, globdat);
-  StateVector::store(u_new, STATE[0], dofs_, globdat);
-
-  advance_(globdat);
-
-  // check if the mass matrix is still valid
-  if (FuncUtils::evalCond(*updCond_, globdat))
-    invalidate_();
-
-  // if the engergy needs to be reported, do so
-  if (report_energy_)
-    store_energy_(globdat);
-
-  return OK;
+  info.set(SolverInfo::RESIDUAL, 0.);
 }
 
 //-----------------------------------------------------------------------

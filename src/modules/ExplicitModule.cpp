@@ -6,6 +6,8 @@
 //   class ExplicitModule
 //=======================================================================
 
+JEM_DEFINE_CLASS(ExplicitModule);
+
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
@@ -17,16 +19,13 @@ const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
 
 ExplicitModule::ExplicitModule
 
-    (const String &name)
-    :
-
-      Super(name)
+  (const String& name)
+  : Super(name)
 
 {
   dtime_ = 1.0;
   valid_ = false;
   report_energy_ = false;
-  stepCount_ = 1;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
@@ -64,11 +63,6 @@ Module::Status ExplicitModule::init
   myProps.find(report_energy_, REPORT_ENERGY);
   myConf.set(REPORT_ENERGY, report_energy_);
 
-  // get the step count
-
-  myProps.find(stepCount_, STEP_COUNT, 1, 2);
-  myConf.set(STEP_COUNT, stepCount_);
-
   // returning an address of an object pointing to the Model
 
   model_ = Model::get(globdat, getContext());
@@ -80,8 +74,8 @@ Module::Status ExplicitModule::init
 
   // Invalidate the state of this module when the DofSpace changes.
 
-  connect(dofs_->newSizeEvent, this, &Self::invalidate_);
-  connect(dofs_->newOrderEvent, this, &Self::invalidate_);
+  connect(dofs_->newSizeEvent, this, &Self::invalidate);
+  connect(dofs_->newOrderEvent, this, &Self::invalidate);
 
   // get the SO3 dof names
 
@@ -170,26 +164,15 @@ Module::Status ExplicitModule::init
   myProps.find(decrFact_, "decreaseFactor", 1., 2.);
   myConf.set("decreaseFactor", decrFact_);
 
-  valid_ = false;
-
   // Initialize the global simulation time and the time step number as
   // well as the constraints
+  params.clear();
   Globdat::initTime(globdat);
   Globdat::initStep(globdat);
+  model_->takeAction(Actions::INIT, params, globdat);
+  updMass(globdat);
 
   return OK;
-}
-
-//-----------------------------------------------------------------------
-//   run
-//-----------------------------------------------------------------------
-
-Module::Status ExplicitModule::run
-
-    (const Properties &globdat)
-
-{
-  return Status::DONE;
 }
 
 //-----------------------------------------------------------------------
@@ -215,6 +198,7 @@ void ExplicitModule::configure
 {
   using jive::implict::PropNames;
   Properties myProps = props.findProps(myName_);
+  TEST_CONTEXT(myProps)
 
   myProps.find(prec_, PropNames::PRECISION);
   myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
@@ -244,8 +228,117 @@ void ExplicitModule::getConfig
   myConf.set(PropNames::MAX_DTIME, maxDtime_);
 }
 
-void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
-                                const Vector &delta_y, const bool rot)
+//-----------------------------------------------------------------------
+//   advance
+//-----------------------------------------------------------------------
+void
+ExplicitModule::advance(const Properties& globdat)
+{
+  Properties params;
+
+  // check if mass needs to be updated
+  valid_ &= !FuncUtils::evalCond(*updCond_, globdat);
+  if (!valid_)
+    updMass(globdat);
+
+  // update time in models and boundary conditions
+  Globdat::advanceTime(dtime_, globdat);
+  Globdat::advanceStep(globdat);
+  StateVector::updateOld(dofs_, globdat);
+  model_->takeAction(Actions::ADVANCE, params, globdat);
+}
+
+//-----------------------------------------------------------------------
+//   cancel
+//-----------------------------------------------------------------------
+void
+ExplicitModule::cancel(const Properties& globdat)
+{
+  Properties params;
+
+  // update time in models and boundary conditions
+  Globdat::restoreTime(globdat);
+  Globdat::restoreStep(globdat);
+  StateVector::restoreNew(dofs_, globdat);
+  model_->takeAction(Actions::CANCEL, params, globdat);
+}
+
+//-----------------------------------------------------------------------
+//   commit
+//-----------------------------------------------------------------------
+// TODO find source other than Schweizer Skript... (and make sure for
+// multistep things differen step sizes are taken into account)
+bool
+ExplicitModule::commit(const Properties& globdat)
+{
+  double error;
+  SolverInfo::get(globdat).get(error, SolverInfo::RESIDUAL);
+
+  const double dtime_opt = dtime_ * pow(prec_ / error, 0.5);
+  const bool accept = error <= prec_ || dtime_ == minDtime_;
+
+  jem::System::info(myName_) << " ...Adapting time step size to ";
+  if (accept) {
+    dtime_ =
+      jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
+               decrFact_ * dtime_,
+               minDtime_);
+
+    if (dtime_ == maxDtime_)
+      jem::System::info(myName_) << " !!! Largest allowed time step !!!\n";
+
+  } else {
+    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
+    if (dtime_ == minDtime_)
+      jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
+  }
+  jem::System::info(myName_) << dtime_ << "\n";
+  Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
+                                     dtime_);
+
+  if (accept) {
+    Properties params;
+    Globdat::commitStep(globdat);
+    Globdat::commitTime(globdat);
+    model_->takeAction(Actions::COMMIT, params, globdat);
+  }
+
+  if (accept && report_energy_)
+    store_energy(globdat);
+
+  return accept;
+}
+
+//-----------------------------------------------------------------------
+//   getAcce
+//-----------------------------------------------------------------------
+void
+ExplicitModule::getAcce(const Vector& a,
+                        const Ref<Constraints>& cons,
+                        const Vector& fres,
+                        const Properties& globdat)
+{
+  Properties params;
+
+  // Compute acceleration
+  if (mode_ == CONSISTENT) {
+    solver_->solve(a, fres);
+  }
+
+  if (mode_ == LUMPED) {
+    a = massInv_ * fres;
+    jive::util::setSlaveDofs(a, *cons);
+  }
+}
+
+//-----------------------------------------------------------------------
+//   updateVec
+//-----------------------------------------------------------------------
+void
+ExplicitModule::updateVec(const Vector& y_new,
+                          const Vector& y_old,
+                          const Vector& delta_y,
+                          const bool rot)
 {
   y_new = y_old + delta_y;
 
@@ -274,38 +367,13 @@ void ExplicitModule::updateVec_(const Vector &y_new, const Vector &y_old,
   }
 }
 
-void ExplicitModule::advance_(const Properties &globdat)
-{
-  Properties params;
-
-  // update time in models and boundary conditions
-  Globdat::advanceTime(dtime_, globdat);
-  Globdat::advanceStep(globdat);
-  model_->takeAction(Actions::ADVANCE, params, globdat);
-}
-
-void ExplicitModule::getAcce_(const Vector &a,
-                              const Ref<Constraints> &cons,
-                              const Vector &fres,
-                              const Properties &globdat)
-{
-  Properties params;
-
-  // Compute acceleration
-  if (mode_ == CONSISTENT)
-  {
-    solver_->solve(a, fres);
-  }
-
-  if (mode_ == LUMPED)
-  {
-    a = massInv_ * fres;
-    jive::util::setSlaveDofs(a, *cons);
-  }
-}
-
-Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
-                                 const Properties &globdat)
+//-----------------------------------------------------------------------
+//   getForce
+//-----------------------------------------------------------------------
+Vector
+ExplicitModule::getForce(const Vector& fint,
+                         const Vector& fext,
+                         const Properties& globdat)
 {
   Properties params;
 
@@ -326,46 +394,11 @@ Vector ExplicitModule::getForce_(const Vector &fint, const Vector &fext,
 }
 
 //-----------------------------------------------------------------------
-//   updStep_
-//-----------------------------------------------------------------------
-// TODO find source other than Schweizer Skript... (and make sure for
-// multistep things differen step sizes are taken into account)
-bool ExplicitModule::updStep_(const double &error,
-                              const Properties &globdat)
-{
-  const double dtime_opt =
-      dtime_ * pow(prec_ / error, 1. / (stepCount_ + 1));
-  const bool accept = error <= prec_ || dtime_ == minDtime_;
-
-  jem::System::info(myName_) << " ...Adapting time step size to ";
-  if (accept)
-  {
-    dtime_ = jem::max(
-        jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
-        decrFact_ * dtime_, minDtime_);
-
-    if (dtime_ == maxDtime_)
-      jem::System::info(myName_)
-          << " !!! Largest allowed time step !!!\n";
-  }
-  else
-  {
-    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
-  }
-  Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
-                                     dtime_);
-  jem::System::info(myName_) << dtime_ << "\n";
-  if (dtime_ == minDtime_)
-    jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
-
-  return accept;
-}
-
-//-----------------------------------------------------------------------
-//   store_energy_
+//   store_energy
 //-----------------------------------------------------------------------
 
-void ExplicitModule::store_energy_(const Properties &globdat)
+void
+ExplicitModule::store_energy(const Properties& globdat)
 {
   double E_pot, E_kin, ell;
   Vector velo;
@@ -412,7 +445,7 @@ void ExplicitModule::store_energy_(const Properties &globdat)
     ell = 0.;
     for (idx_t k = 0; k < coords.size(1); k++)
       ell += pow(coords(0, k) - coords(coords.size(0) - 1, k),
-                 2.); // HACK assumes straight beam!
+                 2.); // LATER assumes straight beam!
     ell = sqrt(ell);
 
     for (idx_t j = 0; j < stressTable->columnCount(); j++)
@@ -433,10 +466,11 @@ void ExplicitModule::store_energy_(const Properties &globdat)
 }
 
 //-----------------------------------------------------------------------
-//   restart_
+//   updMass
 //-----------------------------------------------------------------------
 
-void ExplicitModule::restart_(const Properties &globdat)
+void
+ExplicitModule::updMass(const Properties& globdat)
 {
   Properties params;
 
@@ -473,34 +507,55 @@ void ExplicitModule::restart_(const Properties &globdat)
 }
 
 //-----------------------------------------------------------------------
-//   invalidate_
+//   invalidate
 //-----------------------------------------------------------------------
 
-void ExplicitModule::invalidate_()
+void
+ExplicitModule::invalidate()
 {
   valid_ = false;
 }
 
 //-----------------------------------------------------------------------
-//   makeNew
+//   setPrecision
 //-----------------------------------------------------------------------
 
-Ref<Module> ExplicitModule::makeNew
-
-    (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat)
-
+void
+ExplicitModule::setPrecision(double eps)
 {
-  return newInstance<Self>(name);
+  prec_ = eps;
 }
 
 //-----------------------------------------------------------------------
-//   declare
+//   getPrecision
 //-----------------------------------------------------------------------
 
-void ExplicitModule::declare()
+double
+ExplicitModule::getPrecision() const
 {
-  using jive::app::ModuleFactory;
-
-  ModuleFactory::declare(TYPE_NAME, &ExplicitModule::makeNew);
+  return prec_;
 }
+
+// //-----------------------------------------------------------------------
+// //   makeNew
+// //-----------------------------------------------------------------------
+
+// Ref<Module> ExplicitModule::makeNew
+
+//     (const String &name, const Properties &conf, const Properties &props,
+//      const Properties &globdat)
+
+// {
+//   return newInstance<Self>(name);
+// }
+
+// //-----------------------------------------------------------------------
+// //   declare
+// //-----------------------------------------------------------------------
+
+// void ExplicitModule::declare()
+// {
+//   using jive::app::ModuleFactory;
+
+//   ModuleFactory::declare(TYPE_NAME, &ExplicitModule::makeNew);
+// }

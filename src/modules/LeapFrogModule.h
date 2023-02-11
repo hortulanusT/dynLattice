@@ -24,9 +24,9 @@ public:
 
       (const String &name = "leapFrog");
 
-  virtual Status run
+  virtual void solve
 
-      (const Properties &globdat);
+    (const Properties& info, const Properties& globdat) override;
 
   static Ref<Module> makeNew
 

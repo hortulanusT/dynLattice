@@ -17,6 +17,8 @@
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/implict/Names.h>
+#include <jive/implict/SolverInfo.h>
+#include <jive/implict/SolverModule.h>
 #include <jive/implict/utilities.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
@@ -50,6 +52,8 @@ using jive::app::Module;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
 using jive::implict::newSolverParams;
+using jive::implict::SolverInfo;
+using jive::implict::SolverModule;
 using jive::model::ActionParams;
 using jive::model::Actions;
 using jive::model::Model;
@@ -71,7 +75,7 @@ using jive_helpers::logMat;
 //   class ExplicitModule
 //-----------------------------------------------------------------------
 
-class ExplicitModule : public Module
+class ExplicitModule : public SolverModule
 {
 public:
   enum MassMode
@@ -80,26 +84,18 @@ public:
     CONSISTENT
   };
 
-  typedef Module Super;
-  typedef ExplicitModule Self;
+  JEM_DECLARE_CLASS(ExplicitModule, SolverModule);
 
   static const char *TYPE_NAME;
   static const char *STEP_COUNT;
   static const char *SO3_DOFS;
   static const char *REPORT_ENERGY;
 
-  explicit ExplicitModule
-
-      (const String &name = "Explicit");
-
   virtual Status init
 
-      (const Properties &conf, const Properties &props,
-       const Properties &globdat);
-
-  virtual Status run
-
-      (const Properties &globdat);
+    (const Properties& conf,
+     const Properties& props,
+     const Properties& globdat) override;
 
   virtual void shutdown
 
@@ -107,53 +103,81 @@ public:
 
   virtual void configure
 
-      (const Properties &props, const Properties &globdat);
+    (const Properties& props, const Properties& globdat) override;
 
   virtual void getConfig
 
-      (const Properties &props, const Properties &globdat) const;
+    (const Properties& props, const Properties& globdat) const override;
 
-  static Ref<Module> makeNew
+  virtual void advance
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
+    (const Properties& globdat) override;
 
-  static void declare();
+  virtual void solve
 
-protected:
-  virtual ~ExplicitModule();
+    (const Properties& info, const Properties& globdat) = 0;
 
-protected:
-  void advance_(const Properties &globdat);
+  virtual void cancel
 
-  void restart_(const Properties &globdat);
-
-  void invalidate_();
-
-  void store_energy_(const Properties &globdat);
-
-  /// @brief Adams Bashforth 2 step update
-  inline void ABupdate_(const Vector &delta_y, const Vector &f_cur,
-                        const Vector &f_old) const;
-  /// @brief Adams Bashforth 1 step update (Euler Explicit)
-  inline void ABupdate_(const Vector &delta_y, const Vector &f_cur) const;
-
-  /// @brief update of the displacement vectors optionally taking SO(3)
-  /// into account
-  void updateVec_(const Vector &y_new, const Vector &y_old,
-                  const Vector &delta_y, const bool rot = false);
-  /// @brief get the accelration (and return the internal force Vector)
-  void getAcce_(const Vector &a, const Ref<Constraints> &cons,
-                const Vector &fres, const Properties &globdat);
+    (const Properties& globdat) override;
 
   /// @brief comupte the next step size
   /// @return whether this step can be accepted
-  bool updStep_(const double &error, const Properties &globdat);
+  virtual bool commit
+
+    (const Properties& globdat) override;
+
+  virtual void setPrecision
+
+    (double eps) override;
+
+  virtual double getPrecision() const override;
+
+  // static Ref<Module> makeNew
+
+  //     (const String &name, const Properties &conf,
+  //      const Properties &props, const Properties &globdat);
+
+  // static void declare();
+
+protected:
+  explicit ExplicitModule(const String& name = "");
+
+  virtual ~ExplicitModule();
+
+  void updMass(const Properties& globdat);
+
+  void invalidate();
+
+  void store_energy(const Properties& globdat);
+
+  /// @brief Adams Bashforth 2 step update
+  inline void ABupdate(const Vector& delta_y,
+                       const Vector& f_cur,
+                       const Vector& f_old) const;
+  /// @brief Adams Bashforth 1 step update (Euler Explicit)
+  inline void ABupdate(const Vector& delta_y, const Vector& f_cur) const;
+
+  /// @brief update of the displacement vectors optionally taking SO(3)
+  /// into account
+  void updateVec(const Vector& y_new,
+                 const Vector& y_old,
+                 const Vector& delta_y,
+                 const bool rot = false);
+
+  /// @brief get the accelration (and return the resulting force Vector)
+  void getAcce(const Vector& a,
+               const Ref<Constraints>& cons,
+               const Vector& fres,
+               const Properties& globdat);
 
   /// @brief get the forces
   /// @return resulting forces = external - internal
-  Vector getForce_(const Vector &fint, const Vector &fext,
-                   const Properties &globdat);
+  Vector getForce(const Vector& fint,
+                  const Vector& fext,
+                  const Properties& globdat);
+
+  inline double getQuality(const Vector& y_pre, const Vector& y_cor);
 
 protected:
   bool valid_;
@@ -167,30 +191,35 @@ protected:
   double incrFact_;
   double decrFact_;
 
-  idx_t stepCount_;
   MassMode mode_;
 
   Ref<Function> updCond_;
+  Vector massInv_;
   IdxVector SO3_dofs_;
   IdxMatrix rdofs_;
 
   Ref<Model> model_;
   Ref<DofSpace> dofs_;
   Ref<Constraints> cons_;
-
-  Vector massInv_;
   Ref<Solver> solver_;
 };
 
-inline void ExplicitModule::ABupdate_(const Vector &delta_y,
-                                      const Vector &f_cur,
-                                      const Vector &f_old) const
+inline void
+ExplicitModule::ABupdate(const Vector& delta_y,
+                         const Vector& f_cur,
+                         const Vector& f_old) const
 {
   delta_y = dtime_ / 2. * (3. * f_cur - 1. * f_old);
 }
 
-inline void ExplicitModule::ABupdate_(const Vector &delta_y,
-                                      const Vector &f_cur) const
+inline void
+ExplicitModule::ABupdate(const Vector& delta_y, const Vector& f_cur) const
 {
   delta_y = dtime_ * f_cur;
+}
+
+inline double
+ExplicitModule::getQuality(const Vector& y_pre, const Vector& y_cor)
+{
+  return norm2(Vector(y_pre - y_cor));
 }
