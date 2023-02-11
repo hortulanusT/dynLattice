@@ -384,11 +384,12 @@ ExplicitModule::getForce(const Vector& fint,
   params.set(ActionParams::EXT_VECTOR, fext);
   params.set(ActionParams::INT_VECTOR, fint);
   params.set(ActionParams::CONSTRAINTS, cons_);
+  if (mode_ == CONSISTENT)
+    params.set(ActionParams::MATRIX2, solver_->getMatrix());
 
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
   model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-  model_->takeAction("GET_GYRO_VECTOR", params, globdat);
 
   return Vector(fext - fint);
 }

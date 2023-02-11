@@ -8,9 +8,8 @@
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
+      - Get Proper Consistent Rotational Mass Matrix
 1. Modules
-    - Explicit Module
-      - set the mass matrix when computing the Gyro Force
     - Tangent Output Module
       - Get Matrix Condenstation to work
 1. Environment

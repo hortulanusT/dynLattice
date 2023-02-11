@@ -21,6 +21,7 @@
 #include <jem/util/Properties.h>
 
 #include <jive/Array.h>
+#include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/algebra/MatrixBuilder.h>
 #include <jive/fem/ElementGroup.h>
@@ -52,6 +53,7 @@ using jem::numeric::norm2;
 using jem::numeric::Quaternion;
 using jem::util::Properties;
 
+using jive::algebra::AbstractMatrix;
 using jive::algebra::FlexMBuilder;
 using jive::algebra::MatrixBuilder;
 using jive::fem::ElementGroup;
@@ -149,10 +151,11 @@ private:
    * @brief construct the gyroscopic forces (omega x Theta*omega)
    * @param[out] fgyro gyroscopic force Vector
    * @param[in]  velo current values for the DOF - velocities
-   * @param[in]  mbld current mass matrix
+   * @param[in]  mass current mass matrix
    */
-  void assembleGyro_(const Vector &fint, const Vector &velo,
-                     MatrixBuilder &mbld) const;
+  void assembleGyro_(const Vector& fint,
+                     const Vector& velo,
+                     const Ref<AbstractMatrix> mass) const;
 
   /**
    * @brief assemble the mass matrix

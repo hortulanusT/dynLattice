@@ -413,7 +413,9 @@ bool specialCosseratRodModel::takeAction
   {
     Vector fint;
     Vector disp;
+    Vector velo;
     Vector dispOld;
+    Ref<AbstractMatrix> mass;
 
     // Get the action-specific parameters.
     params.get(fint, ActionParams::INT_VECTOR);
@@ -426,34 +428,15 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(fint, disp, dispOld);
 
+    if (params.find(mass, ActionParams::MATRIX2)) {
+      StateVector::get(velo, jive::model::STATE[1], dofs_, globdat);
+      assembleGyro_(fint, velo, mass);
+    }
+
     // //DEBUGGING
     // Matrix      F ( dofs_->typeCount(), nodes_.size() );
     // vec2mat( F.transpose(), fint );
     // TEST_CONTEXT ( F )
-
-    return true;
-  }
-
-  if (action == "GET_GYRO_VECTOR")
-  {
-    Ref<FlexMBuilder> mbld;
-    Vector fgyro;
-    Vector disp;
-    Vector velo;
-
-    // Get the action-specific parameters.
-    params.get(fgyro, ActionParams::INT_VECTOR);
-
-    // Get the current velocities.
-    StateVector::get(disp, dofs_, globdat);
-    StateVector::get(velo, jive::model::STATE[1], dofs_, globdat);
-
-    mbld = newInstance<FlexMBuilder>(
-        "inertia"); // HACK get M matrix from global model
-
-    // assemble mass matrix
-    assembleM_(*mbld, disp);
-    assembleGyro_(fgyro, velo, *mbld);
 
     return true;
   }
@@ -1010,21 +993,22 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
   }
 }
 
-void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
-                                            const Vector &velo,
-                                            MatrixBuilder &mbld) const
+void
+specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
+                                       const Vector& velo,
+                                       const Ref<AbstractMatrix> mass) const
 {
   IdxVector idofs(ROT_DOF_COUNT);
   Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
-  Vector omega(ROT_DOF_COUNT);
+  Vector temp(velo.size());
+
+  mass->matmul(temp, velo);
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
     dofs_->getDofIndices(idofs, inode, rot_types_);
-    mbld.getBlock(Theta, idofs, idofs);
-    omega = velo[idofs];
 
-    fgyro[idofs] += matmul(skew(omega), matmul(Theta, omega));
+    fgyro[idofs] += matmul(skew((Vector)velo[idofs]), (Vector)temp[idofs]);
   }
 }
 
