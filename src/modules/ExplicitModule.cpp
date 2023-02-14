@@ -198,7 +198,6 @@ void ExplicitModule::configure
 {
   using jive::implict::PropNames;
   Properties myProps = props.findProps(myName_);
-  TEST_CONTEXT(myProps)
 
   myProps.find(prec_, PropNames::PRECISION);
   myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
@@ -377,7 +376,7 @@ ExplicitModule::getForce(const Vector& fint,
 {
   Properties params;
 
-  // Get the internal and external force vectors last time step
+  // Get the internal and external force vectors for this configuration
   fext = 0.0;
   fint = 0.0;
 

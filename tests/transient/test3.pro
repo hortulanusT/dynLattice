@@ -18,7 +18,7 @@ params.rod_details.young = "1e9/12";
 params.rod_details.shear_modulus = "5e8/12";
 params.rod_details.shear_correction	= 2.;
 params.rod_details.density = "1e3/12";
-params.rod_details.inertia_correct = ["118.56", "118.56", "10000."];
+params.rod_details.inertia_correct = 1e4;
 params.rod_details.shape.numPoints = 2;
 
 // include model and i/o files

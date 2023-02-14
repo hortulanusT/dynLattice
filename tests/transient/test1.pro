@@ -4,7 +4,6 @@ control.runWhile = "t <= 30";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
-Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.deltaTime = 5e-5;
 
 // settings
@@ -41,7 +40,7 @@ Output.disp.separator	= ",";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
+Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
 Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;

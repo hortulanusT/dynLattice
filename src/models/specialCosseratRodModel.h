@@ -133,19 +133,16 @@ private:
    * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
    * @param[out] fint internal force Vector
    * @param[in]  disp current values for the DOFs
-   * @param[in]  dispOld last values for the DOFs
    */
   void assemble_(MatrixBuilder &mbld, const Vector &fint,
-                 const Vector &disp, const Vector &dispOld) const;
+                 const Vector &disp) const;
 
   /**
    * @brief construct the internal force vector
    * @param[out] fint internal force Vector
    * @param[in]  disp current values for the DOFs
-   * @param[in]  dispOld last values for the DOFs
    */
-  void assemble_(const Vector &fint, const Vector &disp,
-                 const Vector &dispOld) const;
+  void assemble_(const Vector &fint, const Vector &disp) const;
 
   /**
    * @brief construct the gyroscopic forces (omega x Theta*omega)
@@ -269,7 +266,6 @@ private:
   Vector material_ey_;
   Matrix materialC_;
   Matrix materialM_;
-  Vector inertiaCorrect_;
 
   IdxVector
       givenNodes_; ///< given directions for nodes (especially end-nodes)

@@ -8,11 +8,12 @@
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
-      - Get Proper Consistent Rotational Mass Matrix
+      - Why are dynamics only working with linear elements?
 1. Modules
     - Tangent Output Module
       - Get Matrix Condenstation to work
 1. Environment
+    - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4
     - cleanup `.pro` file composition
 1. Tests

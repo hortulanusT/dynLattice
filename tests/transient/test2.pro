@@ -7,6 +7,7 @@ control.runWhile = "t <= 1";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-5;
+Solver.integrator.precision = 1e-6;
 
 // settings
 params.rod_details.cross_section = "circle";
@@ -47,7 +48,7 @@ Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
-Output.paraview.sampleWhen = "t % 0.02 < deltaTime";
+Output.paraview.sampleWhen = "t % 0.01 < deltaTime";
 
 log.pattern = "*";
 log.file = "-";
