@@ -725,6 +725,7 @@ void specialCosseratRodModel::get_strains_(
   const idx_t dofCount = dofs_->typeCount();
 
   const Cubix ipLambda(globRank, globRank, ipCount);
+  const Cubix ipPI(dofCount, dofCount, ipCount);
   const Cubix ipLambdaP(globRank, globRank, ipCount);
   const Matrix ipPhi(globRank, ipCount);
   const Matrix ipPhiP(globRank, ipCount);
@@ -740,10 +741,8 @@ void specialCosseratRodModel::get_strains_(
 
   ipPhi = matmul((Matrix)(nodePhi_0 + nodeU), shapes);
   ipPhiP = matmul((Matrix)(nodePhi_0 + nodeU), grads);
-  shapeK_->getRotations(ipLambda, nodeLambda);
-  // TEST_CONTEXT(ipLambda)
+  shapeK_->getPi(ipPI, ipLambda, nodeLambda);
   shapeK_->getRotationGradients(ipLambdaP, w, nodePhi_0, nodeLambda);
-  // TEST_CONTEXT(ipLambdaP)
 
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -759,14 +758,8 @@ void specialCosseratRodModel::get_strains_(
   // TEST_CONTEXT(strains)
 
   if (spatial)
-  {
-    Cubix PI(dofCount, dofCount, ipCount);
-    shapeK_->getPi(PI, nodeLambda);
-    // TEST_CONTEXT(PI)
-
     for (idx_t ip = 0; ip < ipCount; ip++)
-      strains[ip] = matmul(PI[ip], strains[ip]);
-  }
+      strains[ip] = matmul(ipPI[ip], strains[ip]);
   // TEST_CONTEXT(strains)
 }
 

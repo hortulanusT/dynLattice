@@ -141,8 +141,19 @@ public:
   /**
    * @brief Get the Pi at the integration points
    *
-   * @param[out] Pi Pi(.,.,i) where j are the nodes and i are the integration points
-   * @param[in] Rn rotations at the integration points. Rn(.,.,i) rotation at the integration points
+   * @param[out] Pi Pi(.,.,i) where i are the integration points
+   * @param[out] Ri Ri(.,.,i) rotation at the integration points
+   * @param[in] Rn rotations at the nodes.
+   */
+  void getPi(const Cubix &Pi,
+             const Cubix &Ri,
+             const Cubix &Rn) const;
+
+  /**
+   * @brief Get the Pi at the integration points
+   *
+   * @param[out] Pi Pi(.,.,i) where i are the integration points
+   * @param[in] Rn rotations at the nodes.
    */
   void getPi(const Cubix &Pi,
              const Cubix &Rn) const;
