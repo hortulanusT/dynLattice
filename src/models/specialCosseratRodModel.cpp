@@ -1057,13 +1057,18 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) cons
                       mc3.matmul(ipLambda[ip], materialM_(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
         mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
 
-        if (Inode == Jnode) // BUG make this work with higher order elements
+        if (Inode == Jnode) // HACK get proper consistency (and fix for higher order elements)
         {
-          double length = sum(weights) / 2;
-          spatialJ = materialM_(ROT_PART, ROT_PART) * length;
-          spatialJ(0, 0) += area_ * density_ * pow(length, 3) / 12.;
-          spatialJ(1, 1) += area_ * density_ * pow(length, 3) / 12.;
-          TEST_CONTEXT(spatialJ)
+          double length = sum(weights) / (nodeCount - 1);
+          spatialJ = 0.;
+          if (Inode == 0 || Inode == nodeCount - 1)
+          {
+            length /= 2.;
+            spatialJ(0, 0) = area_ * density_ * pow(length, 3) / 12.;
+            spatialJ(1, 1) = area_ * density_ * pow(length, 3) / 12.;
+          }
+          spatialJ += materialM_(ROT_PART, ROT_PART) * length;
+
           spatialJ = mc3.matmul(nodeLambda[Inode], spatialJ, nodeLambda[Inode].transpose());
           mbld.addBlock(idofs[ROT_PART], jdofs[ROT_PART], spatialJ);
         }

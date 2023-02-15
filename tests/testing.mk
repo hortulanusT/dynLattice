@@ -68,8 +68,7 @@ tests/beam/test%/result.pdf : scripts/testing/beam%.py\
 
 tests/beam/test%/disp.csv tests/beam/test%/resp.csv :\
 															$(program) tests/beam/test%.pro
-	@$(RM_R) $(dir $@)
-	@$(MKDIR) $(dir $@)
+	@$(MKDIR_P) $(dir $@)
 	@$^ > tests/beam/test$*/run.log
 
 tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/model.pro
@@ -84,8 +83,7 @@ tests/transient/test%/result.pdf: scripts/testing/transient%.py\
 	@$<
 
 tests/transient/test%/disp.gz: $(program) tests/transient/test%.pro
-	@$(RM_R) $(dir $@)
-	@$(MKDIR) $(dir $@)
+	@$(MKDIR_P) $(dir $@)
 	-@$^ > tests/transient/test$*/run.log
 
 tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro

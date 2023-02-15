@@ -83,7 +83,7 @@ del energy["load"]
 #   print("Energy not rising!")
 
 for node in data:
-  test = disp[node] > .5e-3
+  test = disp[node] > 1e-3
   if any(test):
     wave_time.append(disp[node][test].index[0])
     wave_pos.append(node / (nnodes - 1))
