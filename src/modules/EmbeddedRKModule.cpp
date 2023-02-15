@@ -42,7 +42,7 @@ Module::Status EmbeddedRKModule::init
      const Properties &globdat)
 {
   Status superStatus = Super::init(conf, props, globdat);
-  JEM_ASSERT(superStatus == Status::OK);
+  JEM_PRECHECK(superStatus == Status::OK);
 
   Properties myConf = conf.makeProps(myName_);
   Properties myProps = props.findProps(myName_);
