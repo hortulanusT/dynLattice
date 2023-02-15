@@ -51,8 +51,6 @@ for time in ref_data.columns.unique(0):
     dz.loc[t_val] = np.nan
     dz = dz.sort_index().interpolate()
 
-  print(dx.loc[t_val])
-
   plt.plot(t_ref["X"], t_ref["Y"], label=time + " ref")
   plt.plot(dx.loc[t_val] + 1 /
            (len(dx.columns) - 1) * dx.columns.unique(),
@@ -62,7 +60,6 @@ for time in ref_data.columns.unique(0):
 
 plt.legend()
 plt.savefig("tests/transient/test2/result.pdf")
-
 
 if max(data.index) > 0.9:
   print(colored("TRANSIENT TEST 2 RUN THROUGH", "green"))
