@@ -105,8 +105,29 @@ Module::Status ExplicitModule::init
     updCond_ = FuncUtils::newCond(false);
   FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
 
-  // Initialize solver
+  // time stepping setttings
+  myProps.find(prec_, PropNames::PRECISION);
+  myConf.set(PropNames::PRECISION, prec_);
+  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
+  myConf.set(PropNames::DELTA_TIME, dtime_);
 
+  Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
+
+  minDtime_ = dtime_ / 100.;
+  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
+  myConf.set(PropNames::MIN_DTIME, minDtime_);
+  maxDtime_ = dtime_ * 100.;
+  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
+  myConf.set(PropNames::MAX_DTIME, maxDtime_);
+
+  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
+  myConf.set("stepSaftey", saftey_);
+  myProps.find(incrFact_, "increaseFactor", 1., 2.);
+  myConf.set("increaseFactor", incrFact_);
+  myProps.find(decrFact_, "decreaseFactor", 1., 2.);
+  myConf.set("decreaseFactor", decrFact_);
+
+  // Initialize solver
   jive::solver::declareSolvers();
 
   params.set(ActionParams::CONSTRAINTS, cons_);
@@ -136,33 +157,12 @@ Module::Status ExplicitModule::init
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("solver", myConf, myProps, sparams, globdat);
     solver_->setMode(Solver::LENIENT_MODE);
+    solver_->setPrecision(prec_ / 2);
     solver_->configure(myProps);
     solver_->getConfig(myConf);
 
     myConf.set("mode", "consistent");
   }
-
-  // time stepping setttings
-  myProps.find(prec_, PropNames::PRECISION);
-  myConf.set(PropNames::PRECISION, prec_);
-  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
-  myConf.set(PropNames::DELTA_TIME, dtime_);
-
-  Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
-
-  minDtime_ = dtime_ / 100.;
-  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
-  myConf.set(PropNames::MIN_DTIME, minDtime_);
-  maxDtime_ = dtime_ * 100.;
-  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
-  myConf.set(PropNames::MAX_DTIME, maxDtime_);
-
-  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
-  myConf.set("stepSaftey", saftey_);
-  myProps.find(incrFact_, "increaseFactor", 1., 2.);
-  myConf.set("increaseFactor", incrFact_);
-  myProps.find(decrFact_, "decreaseFactor", 1., 2.);
-  myConf.set("decreaseFactor", decrFact_);
 
   // Initialize the global simulation time and the time step number as
   // well as the constraints

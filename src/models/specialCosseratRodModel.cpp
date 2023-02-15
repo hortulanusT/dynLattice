@@ -370,19 +370,20 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(*mbld, fint, disp);
 
-    // //DEBUGGING
-    // IdxVector   dofList ( fint.size() );
-    // Matrix      K ( fint.size(), fint.size() );
-    // Matrix      D ( dofs_->typeCount(), allNodes_.size() );
-    // Matrix      F ( dofs_->typeCount(), allNodes_.size() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( K, dofList, dofList );
-    // vec2mat( D.transpose(), disp );
-    // vec2mat( F.transpose(), fint );
-    // REPORT( action )
-    // TEST_CONTEXT ( D )
-    // TEST_CONTEXT ( K )
-    // TEST_CONTEXT ( F )
+    // // DEBUGGING
+    // IdxVector dofList(fint.size());
+    // Matrix K(fint.size(), fint.size());
+    // Matrix D(dofs_->typeCount(), allNodes_.size());
+    // Matrix F(dofs_->typeCount(), allNodes_.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(K, dofList, dofList);
+    // vec2mat(D.transpose(), disp);
+    // vec2mat(F.transpose(), fint);
+    // REPORT(action)
+    // TEST_CONTEXT(D)
+    // TEST_CONTEXT(K)
+    // TEST_CONTEXT(F)
 
     return true;
   }
@@ -1002,7 +1003,6 @@ specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
   }
 }
 
-// BUG why doesnt this work with higher order elements?
 void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) const
 {
   WARN_ASSERT2(density_ > 0,
@@ -1025,9 +1025,10 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) cons
 
   Matrix coords(rank, nodeCount);
   Vector weights(ipCount);
-  Cubix ipPi(rank * 2, rank * 2, ipCount);
+  Cubix ipLambda(rank, rank, ipCount);
   Matrix shapes(nodeCount, ipCount);
-  Matrix spatialM(rank * 2, rank * 2);
+  Matrix spatialM(rank, rank);
+  Matrix spatialJ(rank, rank);
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
@@ -1041,7 +1042,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) cons
     // TEST_CONTEXT(weights)
 
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-    shapeM_->getPi(ipPi, nodeLambda);
+    shapeM_->getRotations(ipLambda, nodeLambda);
 
     for (idx_t Inode = 0; Inode < nodeCount; Inode++)
     {
@@ -1053,9 +1054,19 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) cons
         spatialM = 0.0;
         for (idx_t ip = 0; ip < ipCount; ip++)
           spatialM += weights[ip] * shapes(Inode, ip) * shapes(Jnode, ip) *
-                      mc3.matmul(ipPi[ip], materialM_, ipPi[ip].transpose());
+                      mc3.matmul(ipLambda[ip], materialM_(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+        mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
 
-        mbld.addBlock(idofs, jdofs, spatialM);
+        if (Inode == Jnode) // BUG make this work with higher order elements
+        {
+          double length = sum(weights) / 2;
+          spatialJ = materialM_(ROT_PART, ROT_PART) * length;
+          spatialJ(0, 0) += area_ * density_ * pow(length, 3) / 12.;
+          spatialJ(1, 1) += area_ * density_ * pow(length, 3) / 12.;
+          TEST_CONTEXT(spatialJ)
+          spatialJ = mc3.matmul(nodeLambda[Inode], spatialJ, nodeLambda[Inode].transpose());
+          mbld.addBlock(idofs[ROT_PART], jdofs[ROT_PART], spatialJ);
+        }
       }
     }
   }

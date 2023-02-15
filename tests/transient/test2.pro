@@ -7,7 +7,7 @@ control.runWhile = "t <= 1";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-5;
-Solver.integrator.precision = 1e-6;
+Solver.integrator.precision = 1e-7;
 
 // settings
 params.rod_details.cross_section = "circle";
@@ -24,7 +24,7 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-Input.input.onelab.size = 0.05;
+Input.input.onelab.size = 0.1;
 
 model.model.force.type = "Neumann";
 model.model.force.loadIncr = 0.;

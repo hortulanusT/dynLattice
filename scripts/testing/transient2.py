@@ -33,6 +33,8 @@ dz[i + 1] = end_dz
 ref_data = pd.read_csv("tests/transient/ref_data/test2_ref.csv",
                        header=[0, 1])
 
+plt.figure(figsize=(10, 8))
+
 for time in ref_data.columns.unique(0):
   t_ref = ref_data.loc[:, time]
   t_ref['dist'] = t_ref[['X', 'Y']].apply(lambda row: np.linalg.norm(
@@ -56,9 +58,10 @@ for time in ref_data.columns.unique(0):
            (len(dx.columns) - 1) * dx.columns.unique(),
            dz.loc[t_val],
            "--",
-           label=time + "sim")
+           label=time + " sim")
 
 plt.legend()
+plt.tight_layout()
 plt.savefig("tests/transient/test2/result.pdf")
 
 if max(data.index) > 0.9:
