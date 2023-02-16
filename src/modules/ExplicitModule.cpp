@@ -291,13 +291,12 @@ ExplicitModule::commit(const Properties& globdat)
   else
   {
     dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
-    jem::System::info(myName_) << "Time step will be repeated!\n";
   }
 
   jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
-  if (dtime_ == maxDtime_)
+  if (dtime_ == maxDtime_ && dtime_ > minDtime_)
     jem::System::info(myName_) << " !!! Largest allowed time step !!!\n";
-  if (dtime_ == minDtime_)
+  if (dtime_ == minDtime_ && dtime_ < maxDtime_)
     jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
   Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
                                      dtime_);

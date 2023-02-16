@@ -37,6 +37,13 @@ public:
 
   virtual ~MilneDeviceModule();
 
+protected:
+  /// @brief updated the forces (in the corrector step only the internal forces change)
+  /// @return resulting forces = external - internal
+  Vector updForce(const Vector &fint,
+                  const Vector &fext,
+                  const Properties &globdat);
+
 private:
   /// @brief Adams Moulton 2 step corrector (Trapezoidal rule)
   inline void AMupdate_(const Vector &delta_y, const Vector &f_pre,

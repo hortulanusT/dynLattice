@@ -40,6 +40,7 @@ Ref<Module> mainModule()
   // the order that they have been added to the chain.
   Ref<ChainModule> chain = newInstance<ChainModule>();
 
+  ///// INITIALIZATION /////
   // Git Report Module: Report the current status of the git repo
   chain->pushBack(newInstance<GitReportModule>());
 
@@ -52,14 +53,15 @@ Ref<Module> mainModule()
   // Init Module: creates the main model and initilazies it
   chain->pushBack(newInstance<InitModule>());
 
-  // Info Module: prints information about the current calculation
-  chain->pushBack(newInstance<InfoModule>());
-
+  ///// RUNNING /////
   // UserConf: Specify the solver by the user
   chain->pushBack(newInstance<UserconfModule>("Solver"));
 
   // UserConf: Specify the output
   chain->pushBack(newInstance<UserconfModule>("Output"));
+
+  // Info Module: prints information about the current calculation
+  chain->pushBack(newInstance<InfoModule>());
 
   // ControlModule: controll the iterations
   chain->pushBack(newInstance<ControlModule>());

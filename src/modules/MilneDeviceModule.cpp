@@ -89,12 +89,8 @@ MilneDeviceModule::solve
   StateVector::store(v_pre, jive::model::STATE1, dofs_, globdat);
 
   // predict accelerations
-  fres = getForce(fint, fext, globdat);
+  fres = updForce(fint, fext, globdat);
   getAcce(a_pre, cons_, fres, globdat);
-
-  // update mass matrix if necessary
-  if (FuncUtils::evalCond(*updCond_, globdat))
-    updMass(globdat);
 
   /////////////////////////////////////////////////
   ////////  corrector step
@@ -120,6 +116,28 @@ MilneDeviceModule::solve
   correction += getQuality(v_pre, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, correction);
+}
+
+//-----------------------------------------------------------------------
+//   updForce
+//-----------------------------------------------------------------------
+Vector
+MilneDeviceModule::updForce(const Vector &fint,
+                            const Vector &fext,
+                            const Properties &globdat)
+{
+  Properties params;
+
+  // update the internal force vector for this configuration
+  fint = 0.0;
+
+  params.set(ActionParams::INT_VECTOR, fint);
+  if (mode_ == CONSISTENT)
+    params.set(ActionParams::MATRIX2, solver_->getMatrix());
+
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+
+  return Vector(fext - fint);
 }
 
 //-----------------------------------------------------------------------
