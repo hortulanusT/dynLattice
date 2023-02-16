@@ -124,8 +124,11 @@ bool NeumannModel::takeAction
     if (extScale_)
     {
       params.get(scale, ActionParams::SCALE_FACTOR);
-      System::info(myName_) << " ...Applying load with factor " << scale << endl;
-      getExtVector_(f, globdat, scale);
+      if (scale != 0.)
+      {
+        System::info(myName_) << " ...Applying load with factor " << scale << endl;
+        getExtVector_(f, globdat, scale);
+      }
     }
     else
       getExtVector_(f, globdat);
@@ -335,7 +338,8 @@ void NeumannModel::advance_
   if (accepted)
   {
     loadScale_ = loadScale0_ + loadIncr_;
-    System::info() << " ...New load factor " << loadScale_ << endl;
+    if (loadIncr_ != 0.)
+      System::info() << " ...New load factor " << loadScale_ << endl;
     globdat.set(varName_, loadScale_);
   }
 }

@@ -95,6 +95,7 @@ bool DirichletModel::takeAction
   if (action == Actions::INIT)
   {
     init_(globdat);
+    applyConstraints_(params, globdat);
 
     return true;
   }
@@ -110,7 +111,8 @@ bool DirichletModel::takeAction
                      << endl;
     }
 
-    applyConstraints_(params, globdat);
+    if (dispScale0_ != dispScale_)
+      applyConstraints_(params, globdat);
 
     return true;
   }

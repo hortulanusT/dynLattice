@@ -155,7 +155,7 @@ Module::Status ExplicitModule::init
   {
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
-    solver_ = newSolver("solver", myConf, myProps, sparams, globdat);
+    solver_ = newSolver("explicitSolver", myConf, myProps, sparams, globdat);
     solver_->setMode(Solver::LENIENT_MODE);
     solver_->setPrecision(prec_ / 2);
     solver_->configure(myProps);
@@ -276,34 +276,31 @@ ExplicitModule::commit(const Properties& globdat)
   const double dtime_opt = dtime_ * pow(prec_ / error, 0.5);
   const bool accept = error <= prec_ || dtime_ == minDtime_;
 
-  jem::System::info(myName_) << " ...Adapting time step size to ";
   if (accept) {
     dtime_ =
       jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
                decrFact_ * dtime_,
                minDtime_);
-
-    if (dtime_ == maxDtime_)
-      jem::System::info(myName_) << " !!! Largest allowed time step !!!\n";
-
-  } else {
-    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
-    if (dtime_ == minDtime_)
-      jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
-  }
-  jem::System::info(myName_) << dtime_ << "\n";
-  Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
-                                     dtime_);
-
-  if (accept) {
     Properties params;
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     model_->takeAction(Actions::COMMIT, params, globdat);
+    if (report_energy_)
+      store_energy(globdat);
+  }
+  else
+  {
+    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
+    jem::System::info(myName_) << "Time step will be repeated!\n";
   }
 
-  if (accept && report_energy_)
-    store_energy(globdat);
+  jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
+  if (dtime_ == maxDtime_)
+    jem::System::info(myName_) << " !!! Largest allowed time step !!!\n";
+  if (dtime_ == minDtime_)
+    jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
+  Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
+                                     dtime_);
 
   return accept;
 }
