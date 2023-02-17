@@ -106,9 +106,11 @@ bool DirichletModel::takeAction
   {
     if (method_ == LOADSCALE)
     {
-      params.get(dispScale_, ActionParams::SCALE_FACTOR);
-      System::info() << " ...Applying displacment factor " << dispScale_
-                     << endl;
+      if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
+        System::info() << " ...Applying displacment factor " << dispScale_
+                       << endl;
+      else
+        throw jem::RuntimeException("No scale found for Dirichlet Model!");
     }
 
     if (dispScale0_ != dispScale_)

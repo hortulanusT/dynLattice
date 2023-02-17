@@ -45,4 +45,4 @@ model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 
 Output.resp.dataSets += "sqrt(free.resp.dx^2 + free.resp.dy^2 + free.resp.dz^2)";
 
-Output.paraview.reportIntervall = "1000/$(params.Steps)";
+Output.paraview.sampleWhen = "i%(1000/$(params.Steps))<1";

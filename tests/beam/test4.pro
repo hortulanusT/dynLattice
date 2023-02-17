@@ -51,4 +51,4 @@ Input.groupInput.free =
 model.model.model.lattice.child += params.rod_details;
 model.model.model.force = params.force_model;
 
-Output.paraview.reportIntervall = 10;
+Output.paraview.sampleWhen = "i%10<1";

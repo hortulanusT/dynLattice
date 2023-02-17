@@ -23,4 +23,5 @@ void declareModules()
   TangentOutputModule::declare();
   MilneDeviceModule::declare();
   EmbeddedRKModule::declare();
+  AdaptiveStepModule::declare();
 }

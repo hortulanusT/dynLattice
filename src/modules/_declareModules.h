@@ -9,6 +9,7 @@
 #include <jive/gl/declare.h>
 #include <jive/implict/declare.h>
 
+#include "modules/AdaptiveStepModule.h"
 #include "modules/CSVOutputModule.h"
 #include "modules/EmbeddedRKModule.h"
 #include "modules/ForceOutputModule.h"

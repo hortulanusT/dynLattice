@@ -52,17 +52,20 @@ LatticeModel::LatticeModel
 
   // Find the children
   elems = ElementSet::get(globdat, getContext());
+
+  jem::System::info(myName_) << " ...Creating Models for ElementGroups\n";
   while (true)
   {
     childName = prefix + String(++ichild);
     if (!ElementGroup::find(childName, elems, globdat))
       break;
 
-    jem::System::info(myName_) << " ...Creating Model for ElementGroup '" << childName << "'\n";
+    jem::System::debug(myName_) << " ...Creating Model for ElementGroup '" << childName << "'\n";
 
     childProps.set("elements", childName);
     childBuffer.pushBack(ModelFactory::newInstance(CHILD_PROPS, myConf, myProps, globdat));
   }
+  jem::System::info(myName_) << " ..." << ichild << " Models created\n";
   children_.resize(childBuffer.size());
   children_ = childBuffer.toArray();
 

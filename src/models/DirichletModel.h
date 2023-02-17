@@ -17,9 +17,11 @@
 #include <jive/fem/NodeSet.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
+#include <jive/model/Names.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 
 using jem::Float;
 using jem::idx_t;
@@ -40,6 +42,7 @@ using jive::model::Model;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
+using jive::util::Globdat;
 
 //-----------------------------------------------------------------------
 //   class DirichletModel
