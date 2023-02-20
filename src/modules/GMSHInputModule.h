@@ -24,10 +24,13 @@
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/app/Names.h>
-#include <jive/fem/XNodeSet.h>
-#include <jive/fem/XElementSet.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/XElementSet.h>
+#include <jive/fem/XNodeSet.h>
+#include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
 
 using jem::Array;
@@ -47,7 +50,11 @@ using jive::app::Module;
 using jive::fem::ElementGroup;
 using jive::fem::XElementSet;
 using jive::fem::XNodeSet;
+using jive::model::StateVector;
 using jive::util::Assignable;
+using jive::util::DofSpace;
+using jive::util::Function;
+using jive::util::Globdat;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
@@ -73,6 +80,7 @@ public:
   static const char *ENTITY_NAMES[4];
   static const char *ONELAB_PROPS;
   static const char *VERBOSE;
+  static const char *OUT_FILE;
 
   explicit GMSHInputModule
 
@@ -144,15 +152,38 @@ protected:
       (const Properties &globdat,
        const idx_t offset = 1);
 
+  /**
+   * @brief store tangents in the global database for later use
+   *
+   * @param globdat global database
+   * @param offset offset for the numbering, e.g. between the JIVE and the GMSH lists
+   */
   void storeTangents_
 
       (const Properties &globdat,
        const idx_t offset = 1);
+
+  /**
+   * @brief write the output file for GMSH to be read in for post processing
+   *
+   * @param globdat global database
+   */
+  void writeOutFile_
+
+      (const Properties &globdat) const;
 
 private:
   Assignable<XNodeSet> nodes_;
   IdxVector nodeIDs_;
   Assignable<XElementSet> elements_;
   IdxMatrix entities_;
+
+  std::vector<std::size_t> gmshNodeTags_;
+  IdxVector jiveNodes_;
+
   bool verbose_;
+  bool writeOutput_;
+  Ref<Function> sampleCond_;
+  String outFile_;
+  idx_t outView_;
 };
