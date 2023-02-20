@@ -18,12 +18,11 @@ AdaptiveStepModule::AdaptiveStepModule(const String &name,
 
 {
   oldLoadScale_ = loadScale_ = 0.;
-  incr_ = 0.;
-  minIncr_ = 0.;
-  maxIncr_ = 0.;
+  incr_ = minIncr_ = maxIncr_ = 0.;
   optIter_ = 4;
-  incrFact_ = 1.2;
+  incrFact_ = 1.5;
   decrFact_ = 0.5;
+  minTried_ = maxTried_ = false;
 }
 
 AdaptiveStepModule::~AdaptiveStepModule()
@@ -138,8 +137,9 @@ void AdaptiveStepModule::solve(const Properties &info,
   }
   catch (const jem::Exception &e)
   {
-    jem::System::info(myName_) << e.name() << " occured in the inner solver!\n"
+    jem::System::info(myName_) << e.name() << " occured in the inner solver!\n\t"
                                << e.what() << "\n";
+    info.set(SolverInfo::CONVERGED, false);
   }
 }
 
@@ -164,19 +164,38 @@ bool AdaptiveStepModule::commit
 
     (const Properties &globdat)
 {
-  bool accept;
-  idx_t currIter = 100.;
+  bool accept = false;
+  double optIncr = incr_ * decrFact_;
+  idx_t currIter;
 
   Properties solverInfo = SolverInfo::get(globdat);
-  accept = solver_->commit(globdat) && solverInfo.find(currIter, SolverInfo::ITER_COUNT);
+  solverInfo.find(accept, SolverInfo::CONVERGED);
+  accept &= solver_->commit(globdat);
 
   // adapt step size based on the iterations (compare Module of Frans)
-  double optIncr = incr_ * pow(0.5, (currIter - optIter_) / 4.);
+  if (accept && solverInfo.find(currIter, SolverInfo::ITER_COUNT))
+    optIncr = incr_ * pow(0.5, (currIter - optIter_) / 4.);
+
+  if (!accept && incr_ == minIncr_)
+    minTried_ = true;
+  if (!accept && incr_ == maxIncr_)
+    maxTried_ = true;
 
   if (accept && currIter < optIter_) // increase step size
     incr_ = jem::max(jem::min(optIncr, incrFact_ * incr_, maxIncr_), decrFact_ * incr_, minIncr_);
   if (!accept || currIter > optIter_) // decrease step size
     incr_ = jem::max(optIncr, decrFact_ * incr_, minIncr_);
+
+  if (accept)
+    minTried_ = maxTried_ = false;
+  else
+  {
+    if (minTried_ && maxTried_)
+      throw jive::solver::SolverException("AdaptiveStepModule", "Solver is out of inspiration, sorry!");
+
+    if (minTried_)
+      incr_ = maxIncr_;
+  }
 
   jem::System::info(myName_) << " ...Adapting load step size to " << incr_ << "\n";
   if (incr_ == maxIncr_ && incr_ > minIncr_)

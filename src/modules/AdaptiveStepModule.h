@@ -22,6 +22,7 @@
 #include <jive/implict/SolverInfo.h>
 #include <jive/implict/SolverModule.h>
 #include <jive/model/Names.h>
+#include <jive/solver/SolverException.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
 #include <jive/util/utilities.h>
@@ -115,6 +116,8 @@ private:
   idx_t optIter_;
   double incrFact_;
   double decrFact_;
+  bool minTried_;
+  bool maxTried_;
 };
 
 //-----------------------------------------------------------------------
