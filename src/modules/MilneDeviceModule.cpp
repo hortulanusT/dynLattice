@@ -26,6 +26,7 @@ MilneDeviceModule::MilneDeviceModule
       Super(name)
 
 {
+  order_ = 1;
 }
 
 MilneDeviceModule::~MilneDeviceModule()

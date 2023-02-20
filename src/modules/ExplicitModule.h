@@ -192,6 +192,7 @@ protected:
   double decrFact_;
 
   MassMode mode_;
+  idx_t order_;
 
   Ref<Function> updCond_;
   Vector massInv_;

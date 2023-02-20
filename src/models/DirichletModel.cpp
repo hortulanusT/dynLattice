@@ -109,8 +109,11 @@ bool DirichletModel::takeAction
       if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
         System::info() << " ...Applying displacment factor " << dispScale_
                        << endl;
-      else
-        throw jem::RuntimeException("No scale found for Dirichlet Model!");
+      else if (dispScale0_ != 1. && dispScale_ != 1.)
+      {
+        System::warn() << "no displacement factor given, applying unit displacement" << endl;
+        dispScale_ = 1.;
+      }
     }
 
     if (dispScale0_ != dispScale_)

@@ -32,6 +32,7 @@ ExplicitModule::ExplicitModule
   saftey_ = 0.9;
   decrFact_ = 0.8;
   incrFact_ = 1.2;
+  order_ = 0;
 }
 
 ExplicitModule::~ExplicitModule()
@@ -264,21 +265,23 @@ ExplicitModule::cancel(const Properties& globdat)
 //-----------------------------------------------------------------------
 //   commit
 //-----------------------------------------------------------------------
-// TODO find source other than Schweizer Skript... (and make sure for
-// multistep things differen step sizes are taken into account)
+// TODO find source other than Schweizer Skript...
 bool
 ExplicitModule::commit(const Properties& globdat)
 {
   double error;
   Properties params;
+  bool accept;
 
   SolverInfo::get(globdat).get(error, SolverInfo::RESIDUAL);
 
-  double dtime_opt = dtime_ * pow(prec_ / error, 0.5);
-  bool accept = error <= prec_ || dtime_ == minDtime_;
+  double dtime_opt = dtime_ * pow(prec_ / error, 1. / ((double)order_ + 1.));
 
-  model_->takeAction(Actions::CHECK_COMMIT, params, globdat);
-  params.find(accept, ActionParams::ACCEPT);
+  if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
+    params.get(accept, ActionParams::ACCEPT);
+  else // if the model doesnt care accept the solution
+    accept = true;
+  accept &= error <= prec_ || dtime_ == minDtime_;
 
   if (accept) {
     dtime_ =

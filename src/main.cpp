@@ -40,6 +40,9 @@ Ref<Module> mainModule()
   // the order that they have been added to the chain.
   Ref<ChainModule> chain = newInstance<ChainModule>();
 
+  // Info Module: prints information about the current calculation
+  chain->pushBack(newInstance<InfoModule>());
+
   ///// INITIALIZATION /////
   // Git Report Module: Report the current status of the git repo
   chain->pushBack(newInstance<GitReportModule>());
@@ -59,9 +62,6 @@ Ref<Module> mainModule()
 
   // UserConf: Specify the output
   chain->pushBack(newInstance<UserconfModule>("Output"));
-
-  // Info Module: prints information about the current calculation
-  chain->pushBack(newInstance<InfoModule>());
 
   // ControlModule: controll the iterations
   chain->pushBack(newInstance<ControlModule>());

@@ -10,6 +10,7 @@ Solver.integrator.deltaTime = 1e-5;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.updateWhen = "i%20 < 1";
 Solver.integrator.reportEnergy = true;
+Solver.integrator.precision = 1e-4;
 
 // settings
 params.rod_details.cross_section = "square";
