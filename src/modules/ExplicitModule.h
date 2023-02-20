@@ -221,5 +221,5 @@ ExplicitModule::ABupdate(const Vector& delta_y, const Vector& f_cur) const
 inline double
 ExplicitModule::getQuality(const Vector& y_pre, const Vector& y_cor)
 {
-  return norm2(Vector(y_pre - y_cor));
+  return sqrt(norm2(Vector(y_pre - y_cor)) / (double)y_pre.size());
 }

@@ -12,7 +12,11 @@ disp = pd.read_csv("tests/transient/test3/disp.gz", index_col="time")
 ref_disp = pd.read_csv("tests/transient/ref_data/test3_ref.csv",
                        header=[0, 1])
 
-if max(energy.index) > 0.9:
+en_rise = (energy["E_tot"].diff() > 0) & (energy["load"] == 0)
+max_rise = max(
+    (energy["E_tot"].diff().values / energy["E_tot"].values)[en_rise])
+
+if (max(energy.index) > 0.9) & (max_rise < 1e-5):
   ellbow = disp[["dx[1]", "dy[1]", "dz[1]"]]
   tip = disp[["dx[2]", "dy[2]", "dz[2]"]]
 

@@ -193,7 +193,7 @@ bool AdaptiveStepModule::commit
   else
   {
     if (minTried_ && maxTried_)
-      throw jive::solver::SolverException("AdaptiveStepModule", "Solver is out of inspiration, sorry!");
+      throw jive::solver::SolverException("step size adaptation", "Solver is out of inspiration, sorry!");
 
     if (minTried_)
       incr_ = maxIncr_;
