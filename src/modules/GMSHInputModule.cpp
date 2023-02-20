@@ -3,7 +3,6 @@
 //
 
 #include "GMSHInputModule.h"
-#include "utils/testing.h"
 
 //=======================================================================
 //   class GMSHInputModule
@@ -276,7 +275,7 @@ void GMSHInputModule::createNodes_
 
 void GMSHInputModule::createElems_
 
-    (const Properties &globdat, const idx_t offset)
+    (const Properties &globdat)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -290,6 +289,8 @@ void GMSHInputModule::createElems_
   std::vector<double> localCoords;
 
   idx_t addedElem;
+  std::vector<std::size_t>::iterator nodeIt;
+  idx_t nodeIndex;
 
   IdxBuffer groupElems;
   IdxVector elemNodes;
@@ -327,16 +328,22 @@ void GMSHInputModule::createElems_
 
         for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
         {
-          elemNodes[inode * order] =
-              nodeTags[itype][ielem * numNodes + inode] - offset;
+          nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), nodeTags[itype][ielem * numNodes + inode]);
+          JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
+          nodeIndex = nodeIt - gmshNodeTags_.begin();
+
+          elemNodes[inode * order] = jiveNodes_[nodeIndex];
 
           if (inode * order + 1 == numNodes)
             break;
           for (idx_t jnode = 1; jnode < order; jnode++)
-            elemNodes[inode * order + jnode] =
-                nodeTags[itype][ielem * numNodes + numPrimaryNodes +
-                                inode * (order - 1) + jnode - 1] -
-                offset;
+          {
+            nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1]);
+            JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
+            nodeIndex = nodeIt - gmshNodeTags_.begin();
+
+            elemNodes[inode * order + jnode] = jiveNodes_[nodeIndex];
+          }
         }
 
         addedElem = elements_.addElement(elemNodes);
@@ -386,7 +393,7 @@ void GMSHInputModule::createElems_
 
 void GMSHInputModule::storeTangents_
 
-    (const Properties &globdat, const idx_t offset)
+    (const Properties &globdat)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -397,6 +404,8 @@ void GMSHInputModule::storeTangents_
   std::vector<double> gmsh_paras;
   std::vector<double> gmsh_derivatives;
   idx_t ibeam = 0;
+  std::vector<std::size_t>::iterator nodeIt;
+  idx_t nodeIndex;
 
   Properties tangentVars =
       jive::util::Globdat::getVariables("tangents", globdat);
@@ -428,7 +437,11 @@ void GMSHInputModule::storeTangents_
 
     for (idx_t inode = 0; inode < (idx_t)gmsh_tags.size(); inode++)
     {
-      jive_tags[inode] = gmsh_tags[inode] - offset;
+      nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), gmsh_tags[inode]);
+      JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
+      nodeIndex = nodeIt - gmshNodeTags_.begin();
+      jive_tags[inode] = jiveNodes_[nodeIndex];
+
       for (idx_t icoord = 0; icoord < 3; icoord++)
         jive_derivatives[inode * 3 + icoord] =
             gmsh_derivatives[inode * 3 + icoord];

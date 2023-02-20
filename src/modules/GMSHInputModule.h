@@ -145,23 +145,19 @@ protected:
    * @brief populates the elements stored in the global database
    *
    * @param globdat global database
-   * @param offset offset for the numbering, e.g. between the JIVE and the GMSH lists
    */
   void createElems_
 
-      (const Properties &globdat,
-       const idx_t offset = 1);
+      (const Properties &globdat);
 
   /**
    * @brief store tangents in the global database for later use
    *
    * @param globdat global database
-   * @param offset offset for the numbering, e.g. between the JIVE and the GMSH lists
    */
   void storeTangents_
 
-      (const Properties &globdat,
-       const idx_t offset = 1);
+      (const Properties &globdat);
 
   /**
    * @brief write the output file for GMSH to be read in for post processing
@@ -174,12 +170,10 @@ protected:
 
 private:
   Assignable<XNodeSet> nodes_;
-  IdxVector nodeIDs_;
-  Assignable<XElementSet> elements_;
-  IdxMatrix entities_;
-
   std::vector<std::size_t> gmshNodeTags_;
   IdxVector jiveNodes_;
+  Assignable<XElementSet> elements_;
+  IdxMatrix entities_;
 
   bool verbose_;
   bool writeOutput_;
