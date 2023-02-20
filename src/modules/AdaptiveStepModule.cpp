@@ -165,16 +165,18 @@ bool AdaptiveStepModule::commit
     (const Properties &globdat)
 {
   bool accept = false;
-  double optIncr = incr_ * decrFact_;
+  double optIncr;
   idx_t currIter;
 
   Properties solverInfo = SolverInfo::get(globdat);
   solverInfo.find(accept, SolverInfo::CONVERGED);
-  accept &= solver_->commit(globdat);
+  accept = accept && solver_->commit(globdat);
 
   // adapt step size based on the iterations (compare Module of Frans)
   if (accept && solverInfo.find(currIter, SolverInfo::ITER_COUNT))
     optIncr = incr_ * pow(0.5, (currIter - optIter_) / 4.);
+  else
+    optIncr = incr_ * decrFact_;
 
   if (!accept && incr_ == minIncr_)
     minTried_ = true;
