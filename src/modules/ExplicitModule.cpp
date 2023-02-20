@@ -243,7 +243,6 @@ ExplicitModule::advance(const Properties& globdat)
   // update time in models and boundary conditions
   Globdat::advanceTime(dtime_, globdat);
   Globdat::advanceStep(globdat);
-  StateVector::updateOld(dofs_, globdat);
   model_->takeAction(Actions::ADVANCE, params, globdat);
 }
 
@@ -271,20 +270,26 @@ bool
 ExplicitModule::commit(const Properties& globdat)
 {
   double error;
+  Properties params;
+
   SolverInfo::get(globdat).get(error, SolverInfo::RESIDUAL);
 
-  const double dtime_opt = dtime_ * pow(prec_ / error, 0.5);
-  const bool accept = error <= prec_ || dtime_ == minDtime_;
+  double dtime_opt = dtime_ * pow(prec_ / error, 0.5);
+  bool accept = error <= prec_ || dtime_ == minDtime_;
+
+  model_->takeAction(Actions::CHECK_COMMIT, params, globdat);
+  params.find(accept, ActionParams::ACCEPT);
 
   if (accept) {
     dtime_ =
-      jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
-               decrFact_ * dtime_,
-               minDtime_);
-    Properties params;
+        jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
+                 decrFact_ * dtime_,
+                 minDtime_);
+    params.clear();
+    model_->takeAction(Actions::COMMIT, params, globdat);
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
-    model_->takeAction(Actions::COMMIT, params, globdat);
+    StateVector::updateOld(dofs_, globdat);
     if (report_energy_)
       store_energy(globdat);
   }
