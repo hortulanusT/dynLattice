@@ -137,6 +137,8 @@ Module::Status GMSHInputModule::init
   if (writeOutput_)
   {
     outView_ = gmsh::view::add("disp_out");
+    gmsh::option::setNumber("Mesh.Binary",
+                            1);
     return OK;
   }
   else
@@ -171,9 +173,12 @@ Module::Status GMSHInputModule::run(const Properties &globdat)
 
 void GMSHInputModule::shutdown(const Properties &globdat)
 {
-  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
   if (writeOutput_)
+  {
+    JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+    writeOutFile_(globdat);
     gmsh::finalize();
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -246,24 +251,24 @@ void GMSHInputModule::createNodes_
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
 
+  std::vector<std::size_t> gmshNodeTags;
   std::vector<double> gmsh_coords;
   std::vector<double> gmsh_paraCoords;
 
   Vector coords(dim);
 
-  gmsh::model::mesh::getNodes(gmshNodeTags_, gmsh_coords, gmsh_paraCoords);
-  jiveNodes_.resize(gmshNodeTags_.size());
+  gmsh::model::mesh::getNodes(gmshNodeTags, gmsh_coords, gmsh_paraCoords);
 
-  for (idx_t inode = 0; inode < (idx_t)gmshNodeTags_.size(); inode++)
+  for (idx_t inode = 0; inode < (idx_t)gmshNodeTags.size(); inode++)
   {
     for (idx_t icoord = 0; icoord < dim; icoord++)
       coords[icoord] = gmsh_coords[inode * dim + icoord];
 
-    jiveNodes_[inode] = nodes_.addNode(coords);
+    gmshToJiveNodeMap_[gmshNodeTags[inode]] = nodes_.addNode(coords);
 
     if (verbose_)
       jem::System::info(myName_)
-          << " ...Created node " << jiveNodes_[inode] << " at coordinates " << coords << "\n";
+          << " ...Created node " << gmshToJiveNodeMap_[gmshNodeTags[inode]] << " at coordinates " << coords << "\n";
   }
   if (verbose_)
     jem::System::info(myName_) << "\n";
@@ -289,8 +294,6 @@ void GMSHInputModule::createElems_
   std::vector<double> localCoords;
 
   idx_t addedElem;
-  std::vector<std::size_t>::iterator nodeIt;
-  idx_t nodeIndex;
 
   IdxBuffer groupElems;
   IdxVector elemNodes;
@@ -328,21 +331,13 @@ void GMSHInputModule::createElems_
 
         for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
         {
-          nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), nodeTags[itype][ielem * numNodes + inode]);
-          JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
-          nodeIndex = nodeIt - gmshNodeTags_.begin();
-
-          elemNodes[inode * order] = jiveNodes_[nodeIndex];
+          elemNodes[inode * order] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + inode]];
 
           if (inode * order + 1 == numNodes)
             break;
           for (idx_t jnode = 1; jnode < order; jnode++)
           {
-            nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1]);
-            JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
-            nodeIndex = nodeIt - gmshNodeTags_.begin();
-
-            elemNodes[inode * order + jnode] = jiveNodes_[nodeIndex];
+            elemNodes[inode * order + jnode] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1]];
           }
         }
 
@@ -404,8 +399,6 @@ void GMSHInputModule::storeTangents_
   std::vector<double> gmsh_paras;
   std::vector<double> gmsh_derivatives;
   idx_t ibeam = 0;
-  std::vector<std::size_t>::iterator nodeIt;
-  idx_t nodeIndex;
 
   Properties tangentVars =
       jive::util::Globdat::getVariables("tangents", globdat);
@@ -437,10 +430,7 @@ void GMSHInputModule::storeTangents_
 
     for (idx_t inode = 0; inode < (idx_t)gmsh_tags.size(); inode++)
     {
-      nodeIt = std::find(gmshNodeTags_.begin(), gmshNodeTags_.end(), gmsh_tags[inode]);
-      JEM_ASSERT(gmshNodeTags_.end() != nodeIt);
-      nodeIndex = nodeIt - gmshNodeTags_.begin();
-      jive_tags[inode] = jiveNodes_[nodeIndex];
+      jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[inode]];
 
       for (idx_t icoord = 0; icoord < 3; icoord++)
         jive_derivatives[inode * 3 + icoord] =
@@ -471,25 +461,26 @@ void GMSHInputModule::writeOutFile_
   IdxVector jtypes = {0, 1, 2};
   IdxVector idofs(3);
   idx_t step;
-  double time;
+  double time = 0.0;
   std::string modelName;
-  std::vector<std::vector<double>> data;
+  std::vector<std::size_t> gmshNodes;
+  std::vector<std::vector<double>> gmshData;
   Vector nodeData(3);
 
   StateVector::get(disp, dofs, globdat);
   globdat.get(step, Globdat::TIME_STEP);
-  time = step;
   globdat.find(time, Globdat::TIME);
   gmsh::model::getCurrent(modelName);
 
-  for (idx_t inode = 0; inode < (idx_t)gmshNodeTags_.size(); inode++)
+  for (const std::pair<const std::size_t, idx_t> &node : gmshToJiveNodeMap_)
   {
-    dofs->getDofIndices(idofs, jiveNodes_[inode], jtypes);
+    dofs->getDofIndices(idofs, node.second, jtypes);
     nodeData = disp[idofs];
-    data.push_back(std::vector<double>(nodeData.begin(), nodeData.end()));
+    gmshData.push_back(std::vector<double>(nodeData.begin(), nodeData.end()));
+    gmshNodes.push_back(node.first);
   }
 
-  gmsh::view::addModelData(outView_, step, modelName, "NodeData", gmshNodeTags_, data, time, 3);
+  gmsh::view::addModelData(outView_, step, modelName, "NodeData", gmshNodes, gmshData, time, 3);
   gmsh::view::write(outView_, outFile_.addr());
 }
 

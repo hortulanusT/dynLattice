@@ -170,8 +170,7 @@ protected:
 
 private:
   Assignable<XNodeSet> nodes_;
-  std::vector<std::size_t> gmshNodeTags_;
-  IdxVector jiveNodes_;
+  std::unordered_map<std::size_t, idx_t> gmshToJiveNodeMap_;
   Assignable<XElementSet> elements_;
   IdxMatrix entities_;
 
