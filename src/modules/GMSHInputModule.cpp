@@ -136,9 +136,7 @@ Module::Status GMSHInputModule::init
 
   if (writeOutput_)
   {
-    outView_ = gmsh::view::add("disp_out");
-    gmsh::option::setNumber("Mesh.Binary",
-                            1);
+    outView_ = gmsh::view::add("myView");
     return OK;
   }
   else
@@ -176,7 +174,8 @@ void GMSHInputModule::shutdown(const Properties &globdat)
   if (writeOutput_)
   {
     JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
-    writeOutFile_(globdat);
+    if (jive::util::FuncUtils::evalCond(*sampleCond_, globdat))
+      writeOutFile_(globdat);
     gmsh::finalize();
   }
 }
@@ -481,7 +480,7 @@ void GMSHInputModule::writeOutFile_
   }
 
   gmsh::view::addModelData(outView_, step, modelName, "NodeData", gmshNodes, gmshData, time, 3);
-  gmsh::view::write(outView_, outFile_.addr());
+  gmsh::view::write(outView_, makeCString(outFile_).addr());
 }
 
 //-----------------------------------------------------------------------
