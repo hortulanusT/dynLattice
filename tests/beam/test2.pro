@@ -19,7 +19,7 @@ Solver.solver.type = "Nonlin";
 // SETTINGS
 params.rod_details.shape.numPoints = "3";
 params.rod_details.young = 2.1e7;
-params.rod_details.poission_ratio = .3;
+params.rod_details.poisson_ratio = .3;
 params.rod_details.area = 20.;
 params.rod_details.area_moment = 1.666666666666667;
 params.rod_details.symmetric_tanget_stiffness =  true;

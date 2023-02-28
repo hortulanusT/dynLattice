@@ -28,7 +28,7 @@ const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
 const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
 const char *specialCosseratRodModel::YOUNGS_MODULUS = "young";
 const char *specialCosseratRodModel::SHEAR_MODULUS = "shear_modulus";
-const char *specialCosseratRodModel::POISSION_RATIO = "poission_ratio";
+const char *specialCosseratRodModel::POISSON_RATIO = "poisson_ratio";
 const char *specialCosseratRodModel::AREA = "area";
 const char *specialCosseratRodModel::DENSITY = "density";
 const char *specialCosseratRodModel::AREA_MOMENT = "area_moment";
@@ -156,7 +156,7 @@ specialCosseratRodModel::specialCosseratRodModel
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
   {
     double nu;
-    myProps.get(nu, POISSION_RATIO);
+    myProps.get(nu, POISSON_RATIO);
     shearMod_ = young_ / 2. / (nu + 1.);
   }
 

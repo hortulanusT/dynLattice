@@ -234,7 +234,7 @@ Vector unskew(const Matrix &mat)
   JEM_ASSERT2(fabs(mat(2, 1) + mat(1, 2) + mat(0, 2) + mat(2, 0) +
                    mat(1, 0) + mat(0, 1)) <= TINY * matrixNorm2(mat),
               "Matrix not skew-symmetric");
-  JEM_ASSERT2(fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) <= TINY,
+  JEM_ASSERT2(fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) <= TINY * matrixNorm2(mat),
               "Matrix trace not zero");
 
   Vector res(3);

@@ -89,7 +89,7 @@ public:
   static const char *ROT_DOF_DEFAULT;
   static const char *YOUNGS_MODULUS;
   static const char *SHEAR_MODULUS;
-  static const char *POISSION_RATIO;
+  static const char *POISSON_RATIO;
   static const char *AREA;
   static const char *DENSITY;
   static const char *AREA_MOMENT;

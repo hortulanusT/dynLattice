@@ -16,7 +16,7 @@ Solver.solver.type = "Arclen";
 // SETTINGS
 params.rod_details.shape.numPoints = "3";
 params.rod_details.young = 7.2e6;
-params.rod_details.poission_ratio = .3;
+params.rod_details.poisson_ratio = .3;
 params.rod_details.area = 2.;
 params.rod_details.area_moment = 2.;
 
