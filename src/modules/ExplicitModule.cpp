@@ -266,6 +266,7 @@ ExplicitModule::cancel(const Properties& globdat)
 //   commit
 //-----------------------------------------------------------------------
 // TODO find source other than Schweizer Skript...
+// TODO get proper error terms for the different methods... (Euler implicit/explicit?)
 bool
 ExplicitModule::commit(const Properties& globdat)
 {
