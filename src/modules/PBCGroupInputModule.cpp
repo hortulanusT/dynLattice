@@ -121,24 +121,6 @@ Module::Status PBCGroupInputModule::init
 
   // report back the extent
   Properties myVars = Globdat::getVariables(globdat);
-  Properties extentVars;
-
-  extentVars = myVars.makeProps("all").makeProps("extent");
-  for (idx_t iDof = 0; iDof < 3; iDof++)
-  {
-    IdxVector n_min =
-        NodeGroup::get(EDGES[iDof * 2], nodes, globdat, getContext())
-            .getIndices();
-    IdxVector n_max =
-        NodeGroup::get(EDGES[iDof * 2 + 1], nodes, globdat, getContext())
-            .getIndices();
-
-    double c_min = min(coords(iDof, n_min));
-    double c_max = max(coords(iDof, n_max));
-
-    extentVars.set(String::format("d%c", EDGES[iDof * 2][0]),
-                   c_max - c_min);
-  }
 
   // sort NodeGroups such that ordering of opposite faces is matching
   for (idx_t i = 0; i < rank_; ++i)
@@ -171,28 +153,43 @@ Module::Status PBCGroupInputModule::init
   if (corners_)
   {
     XNodeSet xnodes = XNodeSet::get(globdat, getContext());
+    Vector coords(rank_);
+    Vector extent(rank_);
+    myVars.getProps("ORIGIN").get(coords[0], "X");
+    myVars.getProps("ORIGIN").get(coords[1], "Y");
+    myVars.getProps("ORIGIN").get(coords[2], "Z");
+    myVars.getProps("SIZE").get(extent[0], "X");
+    myVars.getProps("SIZE").get(extent[1], "Y");
+    myVars.getProps("SIZE").get(extent[2], "Z");
+    myVars.makeProps("all.extent").set("dx", extent[0]);
+    myVars.makeProps("all.extent").set("dy", extent[1]);
+    myVars.makeProps("all.extent").set("dz", extent[2]);
+    Vector corner_coords(rank_);
+
     for (idx_t i = 0; i <= rank_; i++)
     {
       Assignable<NodeGroup> corner_nodes =
           NodeGroup::find(CORNERS[i], xnodes, globdat);
       if (corner_nodes.size() < 1)
       {
-        Vector coords(rank_);
-        coords = 0.;
+        corner_coords = coords;
         if (i != 0)
         {
-          extentVars.get(coords[i - 1],
-                         String::format("d%c", EDGES[(i - 1) * 2][0]));
-          if (jem::isTiny(jem::sum(coords)))
+          if (jem::isTiny(extent[i - 1]))
+          {
+            System::info(myName_)
+                << " ...Not creating corner node '" << CORNERS[i] << "\n";
             continue;
+          }
+          else
+            corner_coords[i - 1] += extent[i - 1];
         }
-        idx_t cornerID = xnodes.addNode(coords);
+        idx_t cornerID = xnodes.addNode(corner_coords);
 
         corner_nodes = jive::fem::newNodeGroup({cornerID}, nodes);
         corner_nodes.store(CORNERS[i], globdat);
         System::info(myName_)
-            << " ...Created corner NodeGroup '" << CORNERS[i] << "'\n";
-        // TEST_CONTEXT(corner_nodes.getIndices())
+            << " ...Created corner node '" << CORNERS[i] << "' at " << corner_coords << "\n";
       }
     }
   }

@@ -90,6 +90,10 @@ periodicBCModel::periodicBCModel
     for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
       myConf.set(gradName_ + String(iDof + 1) + String(iEdge + 1),
                  grad_(iDof, iEdge));
+
+  ghostCorners_ = false;
+  myProps.find(ghostCorners_, "ghostCorners");
+  myConf.set("ghostCorners", ghostCorners_);
 }
 
 bool periodicBCModel::takeAction
@@ -288,7 +292,10 @@ void periodicBCModel::setConstraints_()
     }
   }
 
-  // TEST_CONTEXT(cons_->isSlaveDof(slaveEdgeDofs_(0, 0)[0]))
+  // fix arbitrary node if ghost Corners are used to fix the system
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    cons_->addConstraint(masterEdgeDofs_(iDof, 0)[0]);
+
   // TEST_PRINTER((*cons_))
 }
 

@@ -114,4 +114,5 @@ private:
   IdxVector corner0Dofs_;
   idx_t pbcRank_;
   Mode mode_;
+  bool ghostCorners_;
 };
