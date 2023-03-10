@@ -120,13 +120,9 @@ StringVector PBCGroupOutputModule::getDataSets_(
   else
     dataSets.pushBack("i");
 
-  // displacement gradient
-  for (String dispGrad : getDataSets(dim, true, false))
-    dataSets.pushBack(dispGrad);
-
-  // 1st PK Tensor
-  for (String stressPK : getDataSets(dim, false, true))
-    dataSets.pushBack(stressPK);
+  // default datasets
+  for (String dataPoint : getDataSets(dim, true, true))
+    dataSets.pushBack(dataPoint);
 
   return dataSets.toArray();
 }

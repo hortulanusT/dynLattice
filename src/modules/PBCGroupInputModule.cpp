@@ -178,7 +178,7 @@ Module::Status PBCGroupInputModule::init
           if (jem::isTiny(extent[i - 1]))
           {
             System::info(myName_)
-                << " ...Not creating corner node '" << CORNERS[i] << "\n";
+                << " ...No need for corner node '" << CORNERS[i] << "'\n";
             continue;
           }
           else

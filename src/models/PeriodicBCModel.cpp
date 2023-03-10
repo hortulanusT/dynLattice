@@ -292,9 +292,11 @@ void periodicBCModel::setConstraints_()
     }
   }
 
-  // fix arbitrary node if ghost Corners are used to fix the system
+  // fix arbitrary (middle on the ymin side) node if ghost Corners are used to fix the system
+  idx_t midNode = (masterEdgeDofs_(0, 1).size() - 1) / 2;
+
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    cons_->addConstraint(masterEdgeDofs_(iDof, 0)[0]);
+    cons_->addConstraint(masterEdgeDofs_(iDof, 1)[midNode]);
 
   // TEST_PRINTER((*cons_))
 }

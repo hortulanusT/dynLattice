@@ -1003,7 +1003,7 @@ specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
   }
 }
 
-void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) const
+void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const // TODO fix for higher order elements
 {
   WARN_ASSERT2(density_ > 0,
                "Mass Matrix will have no effect without density!");
@@ -1057,7 +1057,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder& mbld, Vector& disp) cons
                       mc3.matmul(ipLambda[ip], materialM_(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
         mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
 
-        if (Inode == Jnode) // TODO get proper consistency (and fix for higher order elements)
+        if (Inode == Jnode)
         {
           double length = sum(weights) / (nodeCount - 1);
           spatialJ = 0.;
