@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <filesystem>
 #include <gmsh.h>
 
 #include <jem/base/CString.h>
@@ -27,14 +28,19 @@
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/XElementSet.h>
 #include <jive/fem/XNodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
 #include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/DenseTable.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
+#include <jive/util/XTable.h>
 
 using jem::Array;
 using jem::max;
+using jem::newInstance;
 
 using jive::ALL;
 using jive::idx_t;
@@ -50,6 +56,7 @@ using jive::app::Module;
 using jive::fem::ElementGroup;
 using jive::fem::XElementSet;
 using jive::fem::XNodeSet;
+using jive::model::Model;
 using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
@@ -172,11 +179,14 @@ private:
   Assignable<XNodeSet> nodes_;
   std::unordered_map<std::size_t, idx_t> gmshToJiveNodeMap_;
   Assignable<XElementSet> elements_;
+  std::unordered_map<std::size_t, idx_t> gmshToJiveElemMap_;
   IdxMatrix entities_;
 
   bool verbose_;
   bool writeOutput_;
   Ref<Function> sampleCond_;
   String outFile_;
-  idx_t outView_;
+  String outExt_;
+  idx_t nodeView_;
+  idx_t elemView_;
 };

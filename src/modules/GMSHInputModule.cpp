@@ -3,6 +3,7 @@
 //
 
 #include "GMSHInputModule.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class GMSHInputModule
@@ -82,7 +83,11 @@ Module::Status GMSHInputModule::init
   writeOutput_ = myProps.find(outFile_, OUT_FILE);
   if (writeOutput_)
   {
-    myConf.set(OUT_FILE, outFile_);
+    idx_t pos = outFile_.rfind('.');
+    outExt_ = outFile_[jem::SliceFrom(pos)];
+    outFile_ = outFile_[jem::SliceTo(pos)];
+
+    myConf.set(OUT_FILE, outFile_ + "<>" + outExt_);
     sampleCond_ = jive::util::FuncUtils::newCond();
     jive::util::FuncUtils::configCond(
         sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat);
@@ -136,7 +141,8 @@ Module::Status GMSHInputModule::init
 
   if (writeOutput_)
   {
-    outView_ = gmsh::view::add("myView");
+    nodeView_ = gmsh::view::add("nodeView");
+    elemView_ = gmsh::view::add("elemView");
     return OK;
   }
   else
@@ -292,8 +298,6 @@ void GMSHInputModule::createElems_
   int dim, order, numNodes, numPrimaryNodes;
   std::vector<double> localCoords;
 
-  idx_t addedElem;
-
   IdxBuffer groupElems;
   IdxVector elemNodes;
 
@@ -340,14 +344,14 @@ void GMSHInputModule::createElems_
           }
         }
 
-        addedElem = elements_.addElement(elemNodes);
+        gmshToJiveElemMap_[elemTags[itype][ielem]] = elements_.addElement(elemNodes);
         if (verbose_)
           jem::System::info(myName_)
-              << " ...Created element " << addedElem << " with nodes "
+              << " ...Created element " << gmshToJiveElemMap_[elemTags[itype][ielem]] << " with nodes "
               << elemNodes << "\n";
 
-        groupElems.pushBack(addedElem);
-        entityBuffer[entities_[ientity][0]].pushBack(addedElem);
+        groupElems.pushBack(gmshToJiveElemMap_[elemTags[itype][ielem]]);
+        entityBuffer[entities_[ientity][0]].pushBack(gmshToJiveElemMap_[elemTags[itype][ielem]]);
       }
     }
 
@@ -456,31 +460,56 @@ void GMSHInputModule::writeOutFile_
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
 
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
+  Properties params;
+  Ref<jive::util::XTable> stressTable =
+      newInstance<jive::util::DenseTable>("gmshOutput", elements_.getData());
+  Vector weights(stressTable->rowCount());
   Vector disp;
   IdxVector jtypes = {0, 1, 2};
+  IdxVector stypes = {0, 1, 2, 3, 4, 5};
   IdxVector idofs(3);
   idx_t step;
   double time = 0.0;
   std::string modelName;
   std::vector<std::size_t> gmshNodes;
-  std::vector<std::vector<double>> gmshData;
+  std::vector<std::size_t> gmshElements;
+  std::vector<std::vector<double>> gmshNodeData;
+  std::vector<std::vector<double>> gmshElementData;
   Vector nodeData(3);
-
-  StateVector::get(disp, dofs, globdat);
+  Vector elemData(6);
   globdat.get(step, Globdat::TIME_STEP);
   globdat.find(time, Globdat::TIME);
   gmsh::model::getCurrent(modelName);
 
+  // write displacements
+  StateVector::get(disp, dofs, globdat);
   for (const std::pair<const std::size_t, idx_t> &node : gmshToJiveNodeMap_)
   {
     dofs->getDofIndices(idofs, node.second, jtypes);
     nodeData = disp[idofs];
-    gmshData.push_back(std::vector<double>(nodeData.begin(), nodeData.end()));
+    gmshNodeData.push_back(std::vector<double>(nodeData.begin(), nodeData.end()));
     gmshNodes.push_back(node.first);
   }
+  gmsh::view::addModelData(nodeView_, step, modelName, "NodeData", gmshNodes, gmshNodeData, time, 3);
+  gmsh::view::write(nodeView_, makeCString(outFile_ + "Disp" + outExt_).addr());
 
-  gmsh::view::addModelData(outView_, step, modelName, "NodeData", gmshNodes, gmshData, time, 3);
-  gmsh::view::write(outView_, makeCString(outFile_).addr());
+  // write material stress data
+  params.set(jive::model::ActionParams::TABLE_NAME, "mat_stress");
+  params.set(jive::model::ActionParams::TABLE_WEIGHTS, weights);
+  params.set(jive::model::ActionParams::TABLE, stressTable);
+  Model::get(globdat, getContext())
+      ->takeAction(jive::model::Actions::GET_TABLE, params, globdat);
+  stressTable->scaleRows(weights);
+  for (const std::pair<const std::size_t, idx_t> &elem : gmshToJiveElemMap_)
+  {
+    if (stressTable->findRowValues(elemData, elem.second, stypes))
+    {
+      gmshElementData.push_back(std::vector<double>(elemData.begin(), elemData.end()));
+      gmshElements.push_back(elem.first);
+    }
+  }
+  gmsh::view::addModelData(elemView_, step, modelName, "ElementData", gmshElements, gmshElementData, time, 6);
+  gmsh::view::write(elemView_, makeCString(outFile_ + "Stress" + outExt_).addr());
 }
 
 //-----------------------------------------------------------------------
