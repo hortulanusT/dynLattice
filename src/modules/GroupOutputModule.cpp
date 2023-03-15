@@ -44,8 +44,6 @@ Module::Status GroupOutputModule::init(const Properties &conf,
   for (idx_t idof = 0; idof < nodeDofNames_.size(); idof++)
     nodeDofs_[idof] = dofs->getTypeIndex(nodeDofNames_[idof]);
 
-  TEST_CONTEXT(myProps)
-
   return elemDofs_.size() + nodeDofs_.size() > 0 ? run(globdat)
                                                  : Status::DONE;
 }

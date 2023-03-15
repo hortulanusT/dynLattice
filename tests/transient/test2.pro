@@ -6,8 +6,8 @@ control.runWhile = "t <= 1";
 // SOLVER
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
-Solver.integrator.deltaTime = 1e-5;
-Solver.integrator.precision = 1e-7;
+Solver.integrator.deltaTime = 1e-6;
+// Solver.integrator.precision = 1e-7;
 
 // settings
 params.rod_details.cross_section = "circle";
@@ -39,6 +39,7 @@ model.model.fixed.factors = [ 0., 0., 0. ];
 
 model.model.disp.type = "None";
 
+Output.disp.saveWhen = "t % 1e-4 < deltaTime";
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
