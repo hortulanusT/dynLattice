@@ -9,6 +9,9 @@
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
       - Why are dynamics only working with linear elements?
+    - Explicit Solver
+      - keep M constant
+      - implement 'lumped' algorithm with direct 3x3 inverts
 1. Modules
     - Tangent Output Module
       - Get Matrix Condenstation to work
