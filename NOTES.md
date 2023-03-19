@@ -26,7 +26,7 @@
 1. `jive scripts/running/eqv-design.py lin_init`
 2. make sure repo on cluster(s) is updated
 ## RUNS
-3. `jive scripts/running/eqv-design.py prep_runs`
+3. `jive scripts/running/eqv-design.py prep_runs <prep_higher_runs>`
 4. `./scripts/cluster/masterDesign.sh`
 5. make sure all runs went by nicely
 6. `./scripts/cluster/syncBack.sh`
