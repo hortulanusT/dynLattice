@@ -60,6 +60,7 @@ DirichletModel::DirichletModel
       Super(name)
 
 {
+  dispScale_ = 0.;
   dispScale0_ = 0.;
   dispIncr0_ = 0.0;
   initDisp_ = 0.0;
