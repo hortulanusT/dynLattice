@@ -90,6 +90,7 @@ public:
   static const char *STEP_COUNT;
   static const char *SO3_DOFS;
   static const char *REPORT_ENERGY;
+  static const char *LEN_SCALE;
 
   virtual Status init
 
@@ -177,7 +178,7 @@ protected:
                   const Vector& fext,
                   const Properties& globdat);
 
-  inline double getQuality(const Vector& y_pre, const Vector& y_cor);
+  double getQuality(const Vector& y_pre, const Vector& y_cor);
 
 protected:
   bool valid_;
@@ -193,6 +194,7 @@ protected:
 
   MassMode mode_;
   idx_t order_;
+  double lenScale_;
 
   Ref<Function> updCond_;
   Vector massInv_;
@@ -219,8 +221,3 @@ ExplicitModule::ABupdate(const Vector& delta_y, const Vector& f_cur) const
   delta_y = dtime_ * f_cur;
 }
 
-inline double
-ExplicitModule::getQuality(const Vector& y_pre, const Vector& y_cor)
-{
-  return sqrt(norm2(Vector(y_pre - y_cor)) / (double)y_pre.size());
-}

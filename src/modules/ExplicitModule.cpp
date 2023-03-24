@@ -12,6 +12,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
+const char *ExplicitModule::LEN_SCALE = "lenScale";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -26,6 +27,7 @@ ExplicitModule::ExplicitModule
   dtime_ = 1.0;
   valid_ = false;
   report_energy_ = false;
+  lenScale_ = 1e-3;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
@@ -64,6 +66,10 @@ Module::Status ExplicitModule::init
   myProps.find(report_energy_, REPORT_ENERGY);
   myConf.set(REPORT_ENERGY, report_energy_);
 
+  // get the length scale
+  myProps.find(lenScale_, LEN_SCALE);
+  myProps.set(LEN_SCALE, lenScale_);
+
   // returning an address of an object pointing to the Model
 
   model_ = Model::get(globdat, getContext());
@@ -84,8 +90,13 @@ Module::Status ExplicitModule::init
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
     SO3_dofs_.resize(SO3_dof_names.size());
+    rdofs_.resize(SO3_dof_names.size(), dofs_->dofCount() / dofs_->typeCount());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
+    {
+      IdxVector nodes;
       SO3_dofs_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
+      dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, SO3_dofs_[i]);
+    }
     myConf.set(SO3_DOFS, SO3_dof_names);
 
     String modelType;
@@ -265,7 +276,6 @@ ExplicitModule::cancel(const Properties& globdat)
 //-----------------------------------------------------------------------
 //   commit
 //-----------------------------------------------------------------------
-// TODO get proper error terms for the different methods... (Euler implicit/explicit?)
 bool
 ExplicitModule::commit(const Properties& globdat)
 {
@@ -538,6 +548,20 @@ double
 ExplicitModule::getPrecision() const
 {
   return prec_;
+}
+
+//-----------------------------------------------------------------------
+//   getQuality
+//-----------------------------------------------------------------------
+
+double
+ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
+{
+  Vector y_diff = Vector(y_pre - y_cor);
+  for (idx_t i = 0; i < rdofs_.size(1); i++)
+    y_diff[rdofs_[i]] *= lenScale_;
+  y_diff /= lenScale_;
+  return norm2(y_diff) / sqrt((double)y_diff.size());
 }
 
 // //-----------------------------------------------------------------------

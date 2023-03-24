@@ -116,7 +116,7 @@ MilneDeviceModule::solve
   correction += getQuality(u_pre, u_new);
   correction += getQuality(v_pre, v_new) * dtime_;
 
-  info.set(SolverInfo::RESIDUAL, correction);
+  info.set(SolverInfo::RESIDUAL, 0.5 * correction);
 }
 
 //-----------------------------------------------------------------------

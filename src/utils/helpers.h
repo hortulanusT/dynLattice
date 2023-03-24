@@ -25,6 +25,7 @@ using jem::ALL;
 using jem::Array;
 using jem::idx_t;
 using jem::SliceFromTo;
+using jem::String;
 using jem::numeric::dotProduct;
 using jem::numeric::matmul;
 using jem::numeric::MatmulChain;
