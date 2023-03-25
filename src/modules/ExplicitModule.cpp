@@ -12,7 +12,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
-const char *ExplicitModule::LEN_SCALE = "lenScale";
+const char *ExplicitModule::LEN_SCALE = "lengthScale";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -68,7 +68,7 @@ Module::Status ExplicitModule::init
 
   // get the length scale
   myProps.find(lenScale_, LEN_SCALE);
-  myProps.set(LEN_SCALE, lenScale_);
+  myConf.set(LEN_SCALE, lenScale_);
 
   // returning an address of an object pointing to the Model
 
