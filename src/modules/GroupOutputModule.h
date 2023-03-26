@@ -11,21 +11,24 @@
 
 #pragma once
 
-#include <jem/util/Properties.h>
 #include <jem/base/Array.h>
+#include <jem/util/Properties.h>
 
 #include <jive/Array.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
-#include <jive/util/Globdat.h>
-#include <jive/util/DofSpace.h>
-#include <jive/fem/NodeGroup.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/NodeGroup.h>
+#include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/StateVector.h>
-#include <jive/model/Actions.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 
+#include "utils/helpers.h"
 #include "utils/testing.h"
+
+using namespace jive_helpers;
 
 using jem::idx_t;
 using jem::newInstance;
@@ -76,24 +79,28 @@ public:
    * @param globdat global database
    * @return status code
    */
-  virtual Status init(const Properties &conf,
-                      const Properties &props,
+  virtual Status init(const Properties &conf, const Properties &props,
                       const Properties &globdat);
 
   virtual Status run(const Properties &globdat);
 
-  static Ref<Module> makeNew(const String &name,
-                             const Properties &conf,
+  static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props,
                              const Properties &globdat);
 
   static void declare();
 
 protected:
-  StringVector nodeGroups_;   ///< groups of nodes used to calculate the singular element forces/displacements
-  StringVector elemGroups_;   ///< groups of elements used to calculate the extent/strain/stress values
-  StringVector nodeDofNames_; ///< vector containing the names of the dofs used for singular calculations
-  IdxVector nodeDofs_;        ///< vector containing the ids of the dofs used for the singular caluclations
-  StringVector elemDofNames_; ///< vector containing the names of the dofs used for aggregate calculations
-  IdxVector elemDofs_;        ///< vector containing the ids of the dofs used for the aggregate calculations
+  StringVector nodeGroups_; ///< groups of nodes used to calculate the
+                            ///< singular element forces/displacements
+  StringVector elemGroups_; ///< groups of elements used to calculate the
+                            ///< extent/strain/stress values
+  StringVector nodeDofNames_; ///< vector containing the names of the dofs
+                              ///< used for singular calculations
+  IdxVector nodeDofs_; ///< vector containing the ids of the dofs used for
+                       ///< the singular caluclations
+  StringVector elemDofNames_; ///< vector containing the names of the dofs
+                              ///< used for aggregate calculations
+  IdxVector elemDofs_; ///< vector containing the ids of the dofs used for
+                       ///< the aggregate calculations
 };

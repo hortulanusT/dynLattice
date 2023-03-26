@@ -1,37 +1,35 @@
 // ACTUAL_MODEL
-model.type = "Debug";
-model.noiseLevel = 0;
-model.model.type = "Matrix";
-model.model.model.type = "Multi";
+model.type = "Matrix";
+model.model.type = "Multi";
 
-model.model.model.models = [ "rodMesh", "fixed", "force", "disp" ]; 
-model.model.model.rodMesh.type = "Lattice";
-model.model.model.rodMesh.prefix = "beam_";
-model.model.model.rodMesh.child.type = "specialCosseratRod";
-model.model.model.rodMesh.child.dofNamesTrans = ["dx", "dy", "dz"];
-model.model.model.rodMesh.child.dofNamesRot = ["rx", "ry", "rz"];
-model.model.model.rodMesh.child += params.rod_details;
+model.model.models = [ "rodMesh", "fixed", "force", "disp" ]; 
+model.model.rodMesh.type = "Lattice";
+model.model.rodMesh.prefix = "beam_";
+model.model.rodMesh.child.type = "specialCosseratRod";
+model.model.rodMesh.child.dofNamesTrans = ["dx", "dy", "dz"];
+model.model.rodMesh.child.dofNamesRot = ["rx", "ry", "rz"];
+model.model.rodMesh.child += params.rod_details;
 
-model.model.model.fixed.type = "Dirichlet";
-model.model.model.fixed.maxDisp = 0.;
-model.model.model.fixed.dispIncr =  0.;
-model.model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
-model.model.model.fixed.dofs = model.model.model.rodMesh.child.dofNamesTrans;
-model.model.model.fixed.factors = [ 0., 0., 0. ]; 
-model.model.model.fixed.nodeGroups += [ "fixed", "fixed", "fixed" ];
-model.model.model.fixed.dofs += model.model.model.rodMesh.child.dofNamesRot;
-model.model.model.fixed.factors += [ 0., 0., 0. ]; 
+model.model.fixed.type = "Dirichlet";
+model.model.fixed.maxDisp = 0.;
+model.model.fixed.dispIncr =  0.;
+model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];
+model.model.fixed.dofs = model.model.rodMesh.child.dofNamesTrans;
+model.model.fixed.factors = [ 0., 0., 0. ]; 
+model.model.fixed.nodeGroups += [ "fixed", "fixed", "fixed" ];
+model.model.fixed.dofs += model.model.rodMesh.child.dofNamesRot;
+model.model.fixed.factors += [ 0., 0., 0. ]; 
 
-model.model.model.force.type = "Neumann";
-model.model.model.force.initLoad = 0.;
-model.model.model.force.loadIncr = 0.;
-model.model.model.force.nodeGroups =  [ "fixed" ] ;
-model.model.model.force.factors = [ 0. ];
-model.model.model.force.dofs = [ "dx" ];
+model.model.force.type = "Neumann";
+model.model.force.initLoad = 0.;
+model.model.force.loadIncr = 0.;
+model.model.force.nodeGroups =  [ "fixed" ] ;
+model.model.force.factors = [ 0. ];
+model.model.force.dofs = [ "dx" ];
 
-model.model.model.disp.type = "Dirichlet";
-model.model.model.disp.initDisp = 0.;
-model.model.model.disp.dispIncr = 0.;
-model.model.model.disp.nodeGroups =  [ "fixed" ] ;
-model.model.model.disp.factors = [ 0. ];
-model.model.model.disp.dofs = [ "dx" ];
+model.model.disp.type = "Dirichlet";
+model.model.disp.initDisp = 0.;
+model.model.disp.dispIncr = 0.;
+model.model.disp.nodeGroups =  [ "fixed" ] ;
+model.model.disp.factors = [ 0. ];
+model.model.disp.dofs = [ "dx" ];

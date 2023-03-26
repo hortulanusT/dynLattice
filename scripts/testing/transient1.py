@@ -21,11 +21,11 @@ try:
       "tests/transient/ref_data/test1_ref_u2.csv", delimiter=";", decimal=",").values
 
   t = sim_disp[:, -1]
-  psi = sim_disp[:, -2]
+  psi = np.unwrap(sim_disp[:, -2])
 
   px = 10 + sim_disp[:, 0]
   py = sim_disp[:, 1]
-  rz = sim_disp[:, 5]
+  rz = np.unwrap(sim_disp[:, 5])
 
   shadow_px = 10*np.cos(psi)
   shadow_py = 10*np.sin(psi)

@@ -12,7 +12,7 @@ Solver.solver.type = "Nonlin";
 // SETTINGS
 params.rod_details.shape.numPoints = 2;
 params.rod_details.young = 200e6;
-params.rod_details.poission_ratio = .3;
+params.rod_details.poisson_ratio = .3;
 params.rod_details.area = 1e-4;
 params.rod_details.area_moment = 8.333333333333333333333333e-10;
 params.rod_details.material_ey = [0.,0.,1.];

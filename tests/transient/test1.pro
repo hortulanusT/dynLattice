@@ -3,9 +3,8 @@ control.runWhile = "t <= 30";
 
 // SOLVER
 Solver.modules = [ "integrator" ];
-Solver.integrator.type = "Explicit";
+Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 5e-5;
-// Solver.integrator.stepCount = 2;
 
 // settings
 params.rod_details.cross_section = "square";
@@ -23,14 +22,14 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
-model.model.model.force.type = "None";
+model.model.force.type = "None";
 
-model.model.model.disp.type = "LoadScale";
-model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
-model.model.model.disp.model.type = "Dirichlet";
-model.model.model.disp.model.nodeGroups =  [ "fixed" ] ;
-model.model.model.disp.model.factors = [ 1. ];
-model.model.model.disp.model.dofs = [ "rz" ];
+model.model.disp.type = "LoadScale";
+model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
+model.model.disp.model.type = "Dirichlet";
+model.model.disp.model.nodeGroups =  [ "fixed" ] ;
+model.model.disp.model.factors = [ 1. ];
+model.model.disp.model.dofs = [ "rz" ];
 
 Output.disp.type = "Sample";
 Output.disp.file = "$(CASE_NAME)/disp.gz";
@@ -41,11 +40,11 @@ Output.disp.separator	= ",";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";
-Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
+Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
-Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
-Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
+Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
+Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
-Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
+Output.paraview.sampleWhen = "t % 0.1 < deltaTime";

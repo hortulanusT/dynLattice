@@ -26,17 +26,6 @@ MY_INCDIRS 	:= $(SRCDIR)
 MY_CXX_STD_FLAGS := '-std=c++17'
 
 #######################################################################
-##   report git hash                                                 ##
-#######################################################################
-GIT_COMMIT := $(shell git rev-parse HEAD)
-GIT_DIRTY := $(shell git status --porcelain | wc -l)
-ifeq ($(GIT_DIRTY), 0)
-	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT)"'
-else
-	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT) !!! $(GIT_DIRTY) UNCOMITTED CHANGES !!!"'
-endif
-
-#######################################################################
 ##   Include submodules specifics                                    ##
 #######################################################################
 include ${shell find $(SRCDIR) -name *.mk}
@@ -64,10 +53,18 @@ include tests/testing.mk
 #######################################################################
 include studies/running.mk
 
-
 #######################################################################
-##   make git hash stay always current                               ##
+##   report git hash                                                 ##
 #######################################################################
-GitReportObj = $(OBJDIR)/GitReportModule.o $(OBJDIR_OPT)/GitReportModule.o $(OBJDIR_DBG)/GitReportModule.o
+GIT_COMMIT := $(shell git rev-parse HEAD)
+GIT_DIRTY := $(shell git status --porcelain | wc -l)
+ifeq ($(GIT_DIRTY), 0)
+	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT)"'
+else
+	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT) !!! $(GIT_DIRTY) UNCOMITTED CHANGES !!!"'
+endif
 
-src/modules/GitReportModule.cpp: $(filter-out $(GitReportObj), $(objects))
+srcfiles := $(shell find $(SRCDIR) -type f -name '*.cpp')
+$(OBJDIR)/GitReportModule.o: $(srcfiles)
+$(OBJDIR_OPT)/GitReportModule.o: $(srcfiles)
+$(OBJDIR_DBG)/GitReportModule.o: $(srcfiles)

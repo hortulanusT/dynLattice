@@ -11,11 +11,11 @@
 
 #include <jive/app/Module.h>
 #include <jive/fem/ElementGroup.h>
-#include <jive/fem/NodeSet.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/XDofSpace.h>
-#include <jive/util/Assignable.h>
 
 #include "GroupInputModule.h"
 
@@ -29,16 +29,6 @@ public:
   typedef PBCGroupInputModule Self;
   typedef GroupInputModule Super;
 
-  static const char *XMIN;
-  static const char *XMAX;
-  static const char *YMIN;
-  static const char *YMAX;
-  static const char *ZMIN;
-  static const char *ZMAX;
-  static const char *CORNER0;
-  static const char *CORNERX;
-  static const char *CORNERY;
-  static const char *CORNERZ;
   static const char *TYPE_NAME;
   static const char *EDGES[6];
   static const char *CORNERS[4];
@@ -51,16 +41,13 @@ public:
 
   virtual Status init
 
-      (const Properties &conf,
-       const Properties &props,
+      (const Properties &conf, const Properties &props,
        const Properties &globdat);
 
   static Ref<Module> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -73,10 +60,8 @@ protected:
 
   void sortBoundaryNodes_
 
-      (const IdxVector &islaves,
-       const IdxVector &imasters,
-       const NodeSet &nodes,
-       const Properties &globdat,
+      (const IdxVector &islaves, const IdxVector &imasters,
+       const NodeSet &nodes, const Properties &globdat,
        const idx_t ix) const;
 
 protected:

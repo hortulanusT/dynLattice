@@ -24,10 +24,12 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ├── scripts
 │   ├── testing         <- ptyhon scripts for some testing runs
 │   ├── running         <- ptyhon scripts for the real runs
+│   ├── cluster         <- bash scripts for running on the clusters
 ├── tests
 │   ├── testing.mk      <- makefile for testing setup
 │   ├── element         <- test setups for single elments
-│   └── beam            <- tests from the Simo/Vu-Quoc Paper
+│   └── beam            <- test setups for static beam (networks)
+│   └── transient       <- test setupt for dynamic computations
 └── studies
     ├── running.mk      <- makefile for running studies
     ├── configs         <- folder containing some standard settings

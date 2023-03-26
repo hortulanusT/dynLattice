@@ -6,6 +6,8 @@
  * Author: T. Gaertner (t.gartner@tudelft.nl)
  * Date: September 21
  *
+ * ONLY WORKS FOR RECTANGULAR UNIT CELLS
+ *
  */
 #include "PeriodicBCModel.h"
 #include <jive/util/Printer.h>
@@ -14,12 +16,14 @@ const char *periodicBCModel::TYPE_NAME = "PeriodicBC";
 const char *periodicBCModel::MODE_PROP = "mode";
 const char *periodicBCModel::DOF_NAMES_PROP = "dofs";
 const char *periodicBCModel::ROT_NAMES_PROP = "rotDofs";
+const char *periodicBCModel::FIXEDGRAD_PARAM = "fixedGrad";
 
 periodicBCModel::periodicBCModel
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
-    : Model(name) {
+    : Model(name)
+{
   // Get the Properties associated with this model
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
@@ -43,51 +47,97 @@ periodicBCModel::periodicBCModel
   String mode = "DISP";
   myProps.find(mode, MODE_PROP);
   myConf.set(MODE_PROP, mode.toLower());
-  if (mode.toUpper() == "DISP") {
+  if (mode.toUpper() == "DISP")
+  {
     gradName_ = "H";
     mode_ = DISP;
-  } else if (mode.toUpper() == "LOAD") {
+  }
+  else if (mode.toUpper() == "UPD")
+  {
+    gradName_ = "H";
+    mode_ = UPD;
+  }
+  else if (mode.toUpper() == "LOAD")
+  {
     gradName_ = "P";
     mode_ = LOAD;
-  } else
+  }
+  else
     throw jem::IllegalInputException("Unknown mode");
 
   // get the Gradient
   // H_ij = du_i/dX_j
   grad_.resize(pbcRank_, pbcRank_);
-  grad_ = NAN;
-  for (idx_t iDisp = 0; iDisp < pbcRank_; iDisp++) {
-    for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
-      myProps.find(grad_(iDisp, iDir),
-                   gradName_ + String(iDisp + 1) + String(iDir + 1));
-      myConf.set(gradName_ + String(iDisp + 1) + String(iDir + 1),
-                 grad_(iDisp, iDir));
+  grad_ = 0;
+  Ref<Object> dummy;
+
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
+    {
+      if (myProps.find(dummy,
+                       gradName_ + String(iDof + 1) + String(iEdge + 1)))
+        if (!(dummy->toString().toUpper().equals("NAN")))
+          grad_(iDof, iEdge) = jem::Float::dynamicCast(*dummy)->toFloat();
+        else
+          grad_(iDof, iEdge) = NAN;
+      else
+        grad_(iDof, iEdge) = 0.;
     }
-  }
+
+  WARN_ASSERT2(jem::sum(grad_) != 0, "no displacement gradient given!");
+
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
+      myConf.set(gradName_ + String(iDof + 1) + String(iEdge + 1),
+                 grad_(iDof, iEdge));
+
+  ghostCorners_ = false;
+  myProps.find(ghostCorners_, "ghostCorners");
+  myConf.set("ghostCorners", ghostCorners_);
 }
 
 bool periodicBCModel::takeAction
 
     (const String &action, const Properties &params,
-     const Properties &globdat) {
+     const Properties &globdat)
+{
   using jive::model::ActionParams;
   using jive::model::Actions;
 
-  if (action == Actions::INIT) {
+  if (action == Actions::INIT)
+  {
     init_(globdat);
   }
 
-  if (action == Actions::GET_CONSTRAINTS && mode_ == DISP) {
-    double scale;
+  if (action == Actions::GET_CONSTRAINTS &&
+      (mode_ == DISP || mode_ == UPD))
+  {
+    String loadCase = "reg";
+    params.find(loadCase, ActionParams::LOAD_CASE);
+    if (loadCase != "condenseMatrix")
+    {
+      double scale;
+      Vector currVec;
+      Matrix currentGrad(grad_.shape());
 
-    // get the scale factor
-    params.get(scale, ActionParams::SCALE_FACTOR);
+      scale = NAN;
+      currentGrad = NAN;
 
-    setConstraints_(globdat, scale);
+      // get the scale factor
+      if (!globdat.find(currVec, FIXEDGRAD_PARAM))
+        params.get(scale, ActionParams::SCALE_FACTOR);
+      else
+        vec2mat(currentGrad, currVec);
+
+      fixCorners_(globdat, currentGrad, scale);
+    }
+    setConstraints_();
+
     return true;
   }
 
-  if (action == Actions::GET_EXT_VECTOR && mode_ == LOAD) {
+  if (action == Actions::GET_EXT_VECTOR && mode_ == LOAD)
+  {
     double scale;
     Vector f;
 
@@ -105,7 +155,8 @@ bool periodicBCModel::takeAction
   return false;
 }
 
-void periodicBCModel::init_(const Properties &globdat) {
+void periodicBCModel::init_(const Properties &globdat)
+{
   IdxVector rdofs(rotNames_.size());
   for (idx_t iDof = 0; iDof < rdofs.size(); iDof++)
     rdofs[iDof] = dofs_->getTypeIndex(rotNames_[iDof]);
@@ -114,186 +165,172 @@ void periodicBCModel::init_(const Properties &globdat) {
   for (idx_t iDof = 0; iDof < jdofs_.size(); iDof++)
     jdofs_[iDof] = dofs_->getTypeIndex(dofNames_[iDof]);
 
-  masterDofs_.resize(pbcRank_, pbcRank_);
-  slaveDofs_.resize(pbcRank_, pbcRank_);
+  masterEdgeDofs_.resize(pbcRank_, pbcRank_);
+  slaveEdgeDofs_.resize(pbcRank_, pbcRank_);
+  cornerDofs_.resize(pbcRank_, pbcRank_);
+  corner0Dofs_.resize(pbcRank_);
 
   IdxVector masterRots;
   IdxVector slaveRots;
+  idx_t cornerRot;
 
-  Assignable<NodeGroup> masters;
-  Assignable<NodeGroup> slaves;
+  Assignable<NodeGroup> masterEdge;
+  Assignable<NodeGroup> slaveEdge;
+  Assignable<NodeGroup> corner;
 
-  for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
+  // fix 0 corner
+  corner = NodeGroup::get(PBCGroupInputModule::CORNERS[0], nodes_,
+                          globdat, getContext());
+  for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+  {
+    corner0Dofs_[iDof] =
+        dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
+  }
+  for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++)
+  {
+    cornerRot = dofs_->getDofIndex(corner.getIndex(0), rdofs[iDof]);
+    cons_->addConstraint(cornerRot);
+  }
+
+  // moving corners
+  for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
+  {
     idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
 
-    masters = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge],
-                             nodes_, globdat, getContext());
-    slaves = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge + 1],
+    masterEdge = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge],
+                                nodes_, globdat, getContext());
+    slaveEdge = NodeGroup::get(PBCGroupInputModule::EDGES[2 * iEdge + 1],
+                               nodes_, globdat, getContext());
+    corner = NodeGroup::get(PBCGroupInputModule::CORNERS[iEdge + 1],
                             nodes_, globdat, getContext());
 
     // save the translational DOFs for the
-    for (idx_t iDof = 0; iDof < pbcRank_; iDof++) {
-      masterDofs_(iDof, iDir).resize(masters.size());
-      slaveDofs_(iDof, iDir).resize(slaves.size());
-      dofs_->getDofIndices(masterDofs_(iDof, iDir), masters.getIndices(),
-                           jdofs_[iDof]);
-      dofs_->getDofIndices(slaveDofs_(iDof, iDir), slaves.getIndices(),
-                           jdofs_[iDof]);
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    {
+      masterEdgeDofs_(iDof, iDir).resize(masterEdge.size());
+      slaveEdgeDofs_(iDof, iDir).resize(slaveEdge.size());
+      dofs_->getDofIndices(masterEdgeDofs_(iDof, iDir),
+                           masterEdge.getIndices(), jdofs_[iDof]);
+      dofs_->getDofIndices(slaveEdgeDofs_(iDof, iDir),
+                           slaveEdge.getIndices(), jdofs_[iDof]);
+      cornerDofs_(iDof, iDir) =
+          dofs_->getDofIndex(corner.getIndex(0), jdofs_[iDof]);
     }
 
     // lock the rotational DOFs for the edges
-    for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++) {
-      masterRots.resize(masters.size());
-      slaveRots.resize(slaves.size());
+    for (idx_t iDof = 0; iDof < rotNames_.size(); iDof++)
+    {
+      masterRots.resize(masterEdge.size());
+      slaveRots.resize(slaveEdge.size());
 
-      dofs_->getDofIndices(masterRots, masters.getIndices(), rdofs[iDof]);
-      dofs_->getDofIndices(slaveRots, slaves.getIndices(), rdofs[iDof]);
+      dofs_->getDofIndices(masterRots, masterEdge.getIndices(),
+                           rdofs[iDof]);
+      dofs_->getDofIndices(slaveRots, slaveEdge.getIndices(),
+                           rdofs[iDof]);
+      cornerRot = dofs_->getDofIndex(corner.getIndex(0), rdofs[iDof]);
 
-      for (idx_t iN = 0; iN < masterRots.size(); iN++) {
+      for (idx_t iN = 0; iN < masterRots.size(); iN++)
         cons_->addConstraint(slaveRots[iN], masterRots[iN], 1.0);
-      }
+      cons_->addConstraint(cornerRot);
     }
   }
 
-  // set some ground rules depending on where the dispGrad is configured
-  BoolMatrix not_given(grad_.shape());
-  for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
-    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-      not_given(iDof, iDir) = std::isnan(grad_(iDof, iDir));
-
-  for (idx_t iDof = 0; iDof < pbcRank_; iDof++) {
-    if (testall(not_given(iDof, ALL)) ||
-        (!not_given(iDof, iDof) && sum(!not_given(iDof, ALL)) == 1)) {
-      // if no dispGrad for this DOF is not configured fix normal
-      // direction and apply PBC to the shear directions do the same if
-      // only the normal DOF for a direction is configured
-      System::info(myName_) << " ...Locking for no or normal grad w.r.t "
-                            << dofNames_[iDof] << "\n";
-      for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
-        idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
-
-        if (iDof == iDir) {
-          System::info(myName_)
-              << "       at " << PBCGroupInputModule::EDGES[2 * iEdge]
-              << " to 0\n";
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-               iNode++)
-            cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
-          System::info(myName_)
-              << "       at " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
-              << " to each other\n";
-          for (idx_t iNode = 1; iNode < slaveDofs_(iDof, iDir).size();
-               iNode++)
-            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],
-                                 slaveDofs_(iDof, iDir)[0], 1.0);
-        } else {
-          System::info(myName_)
-              << "       at " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
-              << " to " << PBCGroupInputModule::EDGES[2 * iDir] << "\n";
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-               iNode++)
-            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],
-                                 masterDofs_(iDof, iDir)[iNode], 1.0);
-        }
-      }
-    } else if (not_given(iDof, iDof) && sum(!not_given(iDof, ALL)) > 0) {
-      // if a dispGrad for this DOF is set for a shear term, fix the base
-      // for this shear term (and set other shear terms to PBC)
-      System::info(myName_) << " ...Locking for shear grad w.r.t "
-                            << dofNames_[iDof] << "\n";
-      for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
-        idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
-        if (!not_given(iDof, iDir)) {
-          System::info(myName_)
-              << "       at " << PBCGroupInputModule::EDGES[2 * iEdge]
-              << " to 0\n";
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-               iNode++)
-            cons_->addConstraint(masterDofs_(iDof, iDir)[iNode]);
-        } else {
-          System::info(myName_)
-              << "       at " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
-              << " to " << PBCGroupInputModule::EDGES[2 * iDir] << "\n";
-          for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-               iNode++)
-            cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],
-                                 masterDofs_(iDof, iDir)[iNode], 1.0);
-        }
-      }
-    } else {
-      throw jem::Exception(
-          getContext(),
-          "not supported comibnation of displacment gradients given!");
-    }
-  }
-  // cons_->printTo(jive::util::Printer::get());
-  // jive::util::Printer::flush();
+  // TEST_PRINTER((*cons_))
 }
 
-void periodicBCModel::setConstraints_(const Properties &globdat,
-                                      const double scale) {
-  // cons_->printTo(jive::util::Printer::get());
-  // jive::util::Printer::flush();
-  // REPORT( scale )
-  // TEST_CONTEXT(masterDofs_)
-  // TEST_CONTEXT(slaveDofs_)
-  // TEST_CONTEXT(cons_->getSlaveDofs())
-  double extent = 1.;
+void periodicBCModel::fixCorners_(const Properties &globdat,
+                                  const Matrix &currentGrad,
+                                  const double scale)
+{
+  Matrix applyGrad(grad_.shape());
+
+  applyGrad = std::isnan(scale) ? currentGrad : Matrix(scale * grad_);
+
+  System::debug(myName_) << " ...Applying strain matrix \n"
+                         << applyGrad << "\n";
+  // TEST_PRINTER((*cons_))
+  Matrix corner_deform(pbcRank_, pbcRank_);
+  double size;
+
+  for (idx_t i = 0; i < pbcRank_; i++)
+  {
+    Globdat::getVariables("all.extent", globdat).get(size, dofNames_[i]);
+    corner_deform[i] = size * applyGrad[i];
+  }
+  // TEST_CONTEXT(corner_deform)
+
+  // fix zero corner
+  for (idx_t corner0Dof : corner0Dofs_)
+    cons_->addConstraint(corner0Dof);
+
+  // set the positive dofs
+  for (idx_t iCorner = 0; iCorner < pbcRank_; iCorner++)
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+      if (std::isnan(corner_deform(iDof, iCorner)))
+        cons_->eraseConstraint(cornerDofs_(iDof, iCorner));
+      else
+        cons_->addConstraint(cornerDofs_(iDof, iCorner),
+                             corner_deform(iDof, iCorner));
+}
+
+void periodicBCModel::setConstraints_()
+{
+  // iterate over the far field edges (right, top, behind)
+  for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
+  {
+    // iterate over the deformation degrees
+    for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
+    {
+      // iterate over the nodes
+      for (idx_t iNode = 0; iNode < slaveEdgeDofs_(iDof, iEdge).size();
+           iNode++)
+        cons_->addConstraint(slaveEdgeDofs_(iDof, iEdge)[iNode],
+                             {masterEdgeDofs_(iDof, iEdge)[iNode],
+                              cornerDofs_(iDof, iEdge),
+                              corner0Dofs_[iDof]},
+                             {1., 1., -1.});
+    }
+  }
+
+  // fix arbitrary (middle on the xmin side) node if ghost Corners are used to fix the system
+  idx_t midNode = (masterEdgeDofs_(0, 0).size() - 1) / 2;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
-      idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
-      if (std::isnan(grad_(iDof, iDir)))
-        continue; // if the dispGrad for this is not configured, skip it
+    cons_->addConstraint(masterEdgeDofs_(iDof, 1)[midNode]);
 
-      if (scale != 0.)
-        Globdat::getVariables("all.extent", globdat)
-            .get(extent, dofNames_[iDir]);
-      // TEST_CONTEXT( extent )
-
-      System::info(myName_) << " ...Applying strain in direction of "
-                            << dofNames_[iDof] << "\n";
-      System::info(myName_)
-          << "      of magnitude " << scale * grad_(iDof, iDir) << "\n";
-      System::info(myName_)
-          << "      between " << PBCGroupInputModule::EDGES[2 * iEdge]
-          << " and " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
-          << " \n";
-
-      // TEST_CONTEXT( scale*grad_(iDof, iDir)*extent )
-      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-           iNode++) {
-        // set the slave DOFs to the prescribed strain
-        cons_->addConstraint(slaveDofs_(iDof, iDir)[iNode],
-                             scale * grad_(iDof, iDir) * extent);
-      }
-    }
-
-  // cons_->printTo(jive::util::Printer::get());
-  // jive::util::Printer::flush();
+  // TEST_PRINTER((*cons_))
 }
 
 void periodicBCModel::getExtVec_(const Vector &f,
                                  const Properties &globdat,
-                                 const double scale) {
+                                 const double scale)
+{
+  NOT_IMPLEMENTED
+
   double extent = 1.;
   double area = 1.;
   idx_t nNodes = 0.;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    for (idx_t iDir = 0; iDir < pbcRank_; iDir++) {
+    for (idx_t iDir = 0; iDir < pbcRank_; iDir++)
+    {
       idx_t iEdge = dofs_->getTypeIndex(dofNames_[iDir]);
-      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+      // TEST_CONTEXT(f[slaveEdgeDofs_(iDof, iDir)])
       if (std::isnan(grad_(iDof, iDir)))
-        continue; // if the dispGrad for this is not configured, skip it
+        continue; // if the dispGrad for this is not configured, skip
+                  // it
 
       area = 1.;
       for (idx_t iDim = 0; iDim < pbcRank_; iDim++)
-        if (iDim != iDir) {
-          try {
+        if (iDim != iDir)
+        {
+          try
+          {
             Globdat::getVariables("all.extent", globdat)
                 .get(extent, dofNames_[iDim]);
-          } catch (const jem::util::PropertyException &e) {
+          }
+          catch (const jem::util::PropertyException &e)
+          {
             Globdat::getVariables("SIZE", globdat)
                 .get(extent,
                      jem::String(dofNames_[iDim].back()).toUpper());
@@ -301,7 +338,7 @@ void periodicBCModel::getExtVec_(const Vector &f,
 
           area *= extent;
         }
-      nNodes = masterDofs_(iDof, iDir).size();
+      nNodes = masterEdgeDofs_(iDof, iDir).size();
       // TEST_CONTEXT(area)
 
       System::info(myName_) << " ...Applying stress in direction of "
@@ -312,25 +349,28 @@ void periodicBCModel::getExtVec_(const Vector &f,
           << "      at " << PBCGroupInputModule::EDGES[2 * iEdge + 1]
           << " \n";
 
-      for (idx_t iNode = 0; iNode < masterDofs_(iDof, iDir).size();
-           iNode++) {
+      for (idx_t iNode = 0; iNode < masterEdgeDofs_(iDof, iDir).size();
+           iNode++)
+      {
         // set the unit load at the slave nodes
-        f[slaveDofs_(iDof, iDir)[iNode]] +=
+        f[slaveEdgeDofs_(iDof, iDir)[iNode]] +=
             scale * grad_(iDof, iDir) * area / nNodes;
       }
 
-      // TEST_CONTEXT(f[slaveDofs_(iDof, iDir)])
+      // TEST_CONTEXT(f[slaveEdgeDofs_(iDof, iDir)])
     }
 }
 
 Ref<Model> periodicBCModel::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat) {
+     const Properties &globdat)
+{
   return newInstance<periodicBCModel>(name, conf, props, globdat);
 }
 
-void periodicBCModel::declare() {
+void periodicBCModel::declare()
+{
   using jive::model::ModelFactory;
 
   ModelFactory::declare(TYPE_NAME, &makeNew);

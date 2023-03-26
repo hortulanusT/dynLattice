@@ -11,14 +11,17 @@
 
 #pragma once
 
-#include <jem/util/Properties.h>
 #include <jem/io/Writer.h>
+#include <jem/util/Properties.h>
 #include <jive/Array.h>
+#include <jive/fem/NodeSet.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
+#include <jive/model/Names.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 
 using jem::Float;
 using jem::idx_t;
@@ -39,6 +42,7 @@ using jive::model::Model;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
+using jive::util::Globdat;
 
 //-----------------------------------------------------------------------
 //   class DirichletModel
@@ -70,31 +74,25 @@ public:
 
   explicit DirichletModel
 
-      (const String &name = "arclen",
-       const Ref<Model> &child = NIL);
+      (const String &name = "arclen", const Ref<Model> &child = NIL);
 
   virtual void configure
 
-      (const Properties &props,
-       const Properties &globdat);
+      (const Properties &props, const Properties &globdat);
 
   virtual void getConfig
 
-      (const Properties &conf,
-       const Properties &globdat) const;
+      (const Properties &conf, const Properties &globdat) const;
 
   virtual bool takeAction
 
-      (const String &action,
-       const Properties &params,
+      (const String &action, const Properties &params,
        const Properties &globdat);
 
   static Ref<Model> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
 
@@ -112,18 +110,15 @@ protected:
 
   void applyConstraints_
 
-      (const Properties &params,
-       const Properties &globdat);
+      (const Properties &params, const Properties &globdat);
 
   void checkCommit_
 
-      (const Properties &params,
-       const Properties &globdat);
+      (const Properties &params, const Properties &globdat);
 
   void commit_
 
-      (const Properties &params,
-       const Properties &globdat);
+      (const Properties &params, const Properties &globdat);
 
   void setDT_
 

@@ -2,7 +2,8 @@
 
 const char *GroupOutputModule::TYPE_NAME = "GroupOutput";
 
-GroupOutputModule::GroupOutputModule(const String &name) : Module(name) {
+GroupOutputModule::GroupOutputModule(const String &name) : Module(name)
+{
   // per default extract composite values for all elements
   elemGroups_.resize(1);
   elemGroups_[0] = "all";
@@ -10,7 +11,8 @@ GroupOutputModule::GroupOutputModule(const String &name) : Module(name) {
 
 Module::Status GroupOutputModule::init(const Properties &conf,
                                        const Properties &props,
-                                       const Properties &globdat) {
+                                       const Properties &globdat)
+{
   // retrieve and create subpropertysets
   Properties myProps = props.getProps(myName_);
   Properties myConf = conf.makeProps(myName_);
@@ -46,10 +48,11 @@ Module::Status GroupOutputModule::init(const Properties &conf,
                                                  : Status::DONE;
 }
 
-Module::Status GroupOutputModule::run(const Properties &globdat) {
+Module::Status GroupOutputModule::run(const Properties &globdat)
+{
   Properties myVars = Globdat::getVariables(globdat);
   Properties currentVars, loadVars, respVars, dispVars, veloVars,
-      acceVars, extentVars;
+      acceVars;
   NodeSet nodes = NodeSet::get(globdat, getContext());
   ElementSet elems = ElementSet::get(globdat, getContext());
 
@@ -62,7 +65,6 @@ Module::Status GroupOutputModule::run(const Properties &globdat) {
   Vector allDisp(dofs->dofCount());
   Vector allVelo(dofs->dofCount());
   Vector allAcce(dofs->dofCount());
-  Matrix coords(nodes.size(), nodes.rank());
 
   StateVector::get(allDisp, dofs, globdat);
   bool doVelo =
@@ -73,20 +75,27 @@ Module::Status GroupOutputModule::run(const Properties &globdat) {
   Ref<Model> model = Model::get(globdat, getContext());
   Properties params("actionParams");
   allLoad = 0.;
-  params.set(ActionParams::EXT_VECTOR, allLoad);
-  model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
-  params.erase(ActionParams::EXT_VECTOR);
+  if (!globdat.find(allResp, ActionParams::EXT_VECTOR))
+  {
+    params.set(ActionParams::EXT_VECTOR, allLoad);
+    model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
+    params.erase(ActionParams::EXT_VECTOR);
+  }
 
   allResp = 0.;
-  params.set(ActionParams::INT_VECTOR, allResp);
-  model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-  params.erase(ActionParams::INT_VECTOR);
+  if (!globdat.find(allResp, ActionParams::INT_VECTOR))
+  {
+    params.set(ActionParams::INT_VECTOR, allResp);
+    model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+    params.erase(ActionParams::INT_VECTOR);
+  }
 
   Vector load, disp, velo, acce, resp;
 
   // iterate through the node groups
   for (idx_t iNodeGroup = 0; iNodeGroup < nodeGroups_.size();
-       iNodeGroup++) {
+       iNodeGroup++)
+  {
     // get the nodes associated with this node group
     currentVars = myVars.makeProps(nodeGroups_[iNodeGroup]);
     loadVars = currentVars.makeProps("load");
@@ -108,7 +117,8 @@ Module::Status GroupOutputModule::run(const Properties &globdat) {
     nodeIndices = nodeGroup.getIndices();
 
     // iterate through all the dofs to report
-    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++) {
+    for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
+    {
       // get the indices of the dofs at those nodes
       dofs->getDofIndices(dofIndices, nodeIndices, nodeDofs_[iDof]);
 
@@ -132,14 +142,12 @@ Module::Status GroupOutputModule::run(const Properties &globdat) {
         acceVars.set(nodeDofNames_[iDof], sum(acce) / acce.size());
     }
   }
-
   // iterate through the element groups
   for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size();
-       iElemGroup++) {
+       iElemGroup++)
+  {
     // get the nodes associated with this element group
     currentVars = myVars.makeProps(elemGroups_[iElemGroup]);
-    extentVars = currentVars.makeProps(
-        "extent"); // TODO move to PBC module and use the group positions!
     ElementGroup elemGroup = ElementGroup::get(
         elemGroups_[iElemGroup], elems, globdat, getContext());
     nodeIndices.resize(elemGroup.getNodeIndices().size());
@@ -148,33 +156,31 @@ Module::Status GroupOutputModule::run(const Properties &globdat) {
     disp.resize(nodeIndices.size());
     nodeIndices = elemGroup.getNodeIndices();
 
-    nodes.getCoords(coords.transpose());
-
     // iterate through the dimensions
-    for (idx_t iDof = 0; iDof < elemDofs_.size(); iDof++) {
+    for (idx_t iDof = 0; iDof < elemDofs_.size(); iDof++)
+    {
       // get the indices of the dofs at those nodes
       dofs->getDofIndices(dofIndices, nodeIndices, elemDofs_[iDof]);
 
       // get the displacements and loads for those dofs
       disp = allDisp[dofIndices];
       load = allLoad[dofIndices];
-
-      // report back the extent
-      extentVars.set(elemDofNames_[iDof],
-                     max(coords[iDof]) - min(coords[iDof]));
     }
   }
+
   return Status::OK;
 }
 
 Ref<Module> GroupOutputModule::makeNew(const String &name,
                                        const Properties &conf,
                                        const Properties &props,
-                                       const Properties &globdat) {
+                                       const Properties &globdat)
+{
   return newInstance<GroupOutputModule>(name);
 }
 
-void GroupOutputModule::declare() {
+void GroupOutputModule::declare()
+{
   using jive::app::ModuleFactory;
 
   ModuleFactory::declare(TYPE_NAME, &makeNew);

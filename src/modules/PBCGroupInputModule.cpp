@@ -8,16 +8,17 @@
  *
  */
 
-#include <jem/base/array/operators.h>
-#include <jem/base/array/utilities.h>
-#include <jem/base/array/select.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>
+#include <jem/base/array/operators.h>
+#include <jem/base/array/select.h>
+#include <jem/base/array/utilities.h>
 #include <jem/numeric/algebra/utilities.h>
-#include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>
+#include <jem/util/Properties.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/fem/NodeGroup.h>
+#include <jive/fem/XNodeSet.h>
 
 #include "PBCGroupInputModule.h"
 #include "utils/testing.h"
@@ -28,6 +29,7 @@ using jem::numeric::norm2;
 using jem::util::ArrayBuffer;
 using jive::fem::NodeGroup;
 using jive::fem::NodeSet;
+using jive::fem::XNodeSet;
 
 //=======================================================================
 //   class PBCGroupInputModule
@@ -38,10 +40,10 @@ using jive::fem::NodeSet;
 //-----------------------------------------------------------------------
 
 const char *PBCGroupInputModule::TYPE_NAME = "PBCGroupInput";
-const char *PBCGroupInputModule::EDGES[6] =
-    {"xmin", "xmax", "ymin", "ymax", "zmin", "zmax"};
-const char *PBCGroupInputModule::CORNERS[4] =
-    {"corner0", "cornerx", "cornery", "cornerz"};
+const char *PBCGroupInputModule::EDGES[6] = {"xmin", "xmax", "ymin",
+                                             "ymax", "zmin", "zmax"};
+const char *PBCGroupInputModule::CORNERS[4] = {"corner0", "cornerx",
+                                               "cornery", "cornerz"};
 const char *PBCGroupInputModule::DUPEDNODES_PROP = "duplicatedNodes";
 const char *PBCGroupInputModule::NGROUPS_PROP = "groupSettings";
 
@@ -51,9 +53,10 @@ const char *PBCGroupInputModule::NGROUPS_PROP = "groupSettings";
 
 PBCGroupInputModule::PBCGroupInputModule
 
-    (const String &name) :
+    (const String &name)
+    :
 
-                           Super(name)
+      Super(name)
 
 {
   rank_ = -1;
@@ -73,8 +76,7 @@ PBCGroupInputModule::~PBCGroupInputModule()
 
 Module::Status PBCGroupInputModule::init
 
-    (const Properties &conf,
-     const Properties &props,
+    (const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
@@ -98,14 +100,12 @@ Module::Status PBCGroupInputModule::init
   small_ = max(dx, dy, dz) / 1.e6;
 
   // get duplicated nodes, if they exist
-
   props.findProps(myName_).find(dupedNodeGroup_, DUPEDNODES_PROP);
 
   // get the restriction Group
   props.findProps(myName_).find(groupSettings_, NGROUPS_PROP);
 
   // make default Properties object for Super
-
   Properties myProps = props.makeProps(myName_);
 
   prepareProps_(myProps);
@@ -117,11 +117,12 @@ Module::Status PBCGroupInputModule::init
     groupSettings_.find(dummyObj, groupSettings_.listProps()[i]);
 
   // make NodeGroups
-
   Super::init(conf, props, globdat);
 
-  // sort NodeGroups such that ordering of opposite faces is matching
+  // report back the extent
+  Properties myVars = Globdat::getVariables(globdat);
 
+  // sort NodeGroups such that ordering of opposite faces is matching
   for (idx_t i = 0; i < rank_; ++i)
   {
     NodeGroup edge0 = NodeGroup::find(EDGES[i * 2], nodes, globdat);
@@ -132,7 +133,9 @@ Module::Status PBCGroupInputModule::init
 
     if (inodes0.size() != inodes1.size())
     {
-      jem::System::warn() << EDGES[i * 2] << " and " << EDGES[i * 2 + 1] << " opposite edges do not have the same number of nodes\n";
+      jem::System::warn()
+          << EDGES[i * 2] << " and " << EDGES[i * 2 + 1]
+          << " opposite edges do not have the same number of nodes\n";
       continue;
     }
 
@@ -142,7 +145,53 @@ Module::Status PBCGroupInputModule::init
 
     updated.store(EDGES[i * 2 + 1], globdat);
 
-    System::info(myName_) << " ...Sorted NodeGroup `" << EDGES[i * 2 + 1] << "' wrt `" << EDGES[i * 2] << "'\n";
+    System::info(myName_) << " ...Sorted NodeGroup `" << EDGES[i * 2 + 1]
+                          << "' wrt `" << EDGES[i * 2] << "'\n";
+  }
+
+  // create corners if they do not exist
+  if (corners_)
+  {
+    XNodeSet xnodes = XNodeSet::get(globdat, getContext());
+    Vector coords(rank_);
+    Vector extent(rank_);
+    myVars.getProps("ORIGIN").get(coords[0], "X");
+    myVars.getProps("ORIGIN").get(coords[1], "Y");
+    myVars.getProps("ORIGIN").get(coords[2], "Z");
+    myVars.getProps("SIZE").get(extent[0], "X");
+    myVars.getProps("SIZE").get(extent[1], "Y");
+    myVars.getProps("SIZE").get(extent[2], "Z");
+    myVars.makeProps("all.extent").set("dx", extent[0]);
+    myVars.makeProps("all.extent").set("dy", extent[1]);
+    myVars.makeProps("all.extent").set("dz", extent[2]);
+    Vector corner_coords(rank_);
+
+    for (idx_t i = 0; i <= rank_; i++)
+    {
+      Assignable<NodeGroup> corner_nodes =
+          NodeGroup::find(CORNERS[i], xnodes, globdat);
+      if (corner_nodes.size() < 1)
+      {
+        corner_coords = coords;
+        if (i != 0)
+        {
+          if (jem::isTiny(extent[i - 1]))
+          {
+            System::info(myName_)
+                << " ...No need for corner node '" << CORNERS[i] << "'\n";
+            continue;
+          }
+          else
+            corner_coords[i - 1] += extent[i - 1];
+        }
+        idx_t cornerID = xnodes.addNode(corner_coords);
+
+        corner_nodes = jive::fem::newNodeGroup({cornerID}, nodes);
+        corner_nodes.store(CORNERS[i], globdat);
+        System::info(myName_)
+            << " ...Created corner node '" << CORNERS[i] << "' at " << corner_coords << "\n";
+      }
+    }
   }
 
   return DONE;
@@ -209,7 +258,8 @@ void PBCGroupInputModule::prepareProps_
       for (idx_t k = 0; k < rank_; k++)
       {
         if (!myProps.find(dummy, String(CORNERS[i + 1]) + VALS[k]))
-          myProps.set(String(CORNERS[i + 1]) + TYPES[k], k == i ? MAX : MIN);
+          myProps.set(String(CORNERS[i + 1]) + TYPES[k],
+                      k == i ? MAX : MIN);
       }
     if (edges_)
     {
@@ -227,10 +277,8 @@ void PBCGroupInputModule::prepareProps_
 
 void PBCGroupInputModule::sortBoundaryNodes_
 
-    (const IdxVector &islaves,
-     const IdxVector &imasters,
-     const NodeSet &nodes,
-     const Properties &globdat,
+    (const IdxVector &islaves, const IdxVector &imasters,
+     const NodeSet &nodes, const Properties &globdat,
      const idx_t ix) const
 
 {
@@ -276,8 +324,8 @@ void PBCGroupInputModule::sortBoundaryNodes_
         }
         else
         {
-          NodeGroup newNodes(NodeGroup::get(
-              dupedNodeGroup_, nodes, globdat, ""));
+          NodeGroup newNodes(
+              NodeGroup::get(dupedNodeGroup_, nodes, globdat, ""));
 
           bool neither = !newNodes.contains(imasters[in]) &&
                          !newNodes.contains(islaves[jn]);
@@ -309,9 +357,7 @@ void PBCGroupInputModule::sortBoundaryNodes_
 
 Ref<Module> PBCGroupInputModule::makeNew
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
+    (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {

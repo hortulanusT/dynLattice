@@ -9,10 +9,10 @@
  *
  */
 
-#include <jem/base/System.h>
 #include <jem/base/Float.h>
-#include <jem/numeric/utilities.h>
+#include <jem/base/System.h>
 #include <jem/io/PrintWriter.h>
+#include <jem/numeric/utilities.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/model/Actions.h>
 #include <jive/model/ModelFactory.h>
@@ -54,12 +54,13 @@ const char *DirichletModel::LOADED_PROP = "loaded";
 
 DirichletModel::DirichletModel
 
-    (const String &name,
-     const Ref<Model> &child) :
+    (const String &name, const Ref<Model> &child)
+    :
 
-                                Super(name)
+      Super(name)
 
 {
+  dispScale_ = 0.;
   dispScale0_ = 0.;
   dispIncr0_ = 0.0;
   initDisp_ = 0.0;
@@ -86,8 +87,7 @@ DirichletModel::~DirichletModel()
 
 bool DirichletModel::takeAction
 
-    (const String &action,
-     const Properties &params,
+    (const String &action, const Properties &params,
      const Properties &globdat)
 
 {
@@ -96,6 +96,7 @@ bool DirichletModel::takeAction
   if (action == Actions::INIT)
   {
     init_(globdat);
+    applyConstraints_(params, globdat);
 
     return true;
   }
@@ -106,11 +107,18 @@ bool DirichletModel::takeAction
   {
     if (method_ == LOADSCALE)
     {
-      params.get(dispScale_, ActionParams::SCALE_FACTOR);
-      System::info() << " ...Applying displacment factor " << dispScale_ << endl;
+      if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
+        System::info() << " ...Applying displacment factor " << dispScale_
+                       << endl;
+      else if (dispScale0_ != 1. && dispScale_ != 1.)
+      {
+        System::warn() << "no displacement factor given, applying unit displacement" << endl;
+        dispScale_ = 1.;
+      }
     }
 
-    applyConstraints_(params, globdat);
+    if (dispScale0_ != dispScale_)
+      applyConstraints_(params, globdat);
 
     return true;
   }
@@ -163,8 +171,7 @@ bool DirichletModel::takeAction
 
 void DirichletModel::configure
 
-    (const Properties &props,
-     const Properties &globdat)
+    (const Properties &props, const Properties &globdat)
 
 {
   Properties myProps = props.findProps(myName_);
@@ -184,7 +191,8 @@ void DirichletModel::configure
 
     method_ = INCREMENT;
     dispIncr_ = dispIncr0_;
-    dispScale0_ = dispScale_ = initDisp_ - dispIncr0_; // cancel first increment
+    dispScale0_ = dispScale_ =
+        initDisp_ - dispIncr0_; // cancel first increment
   }
   else
   {
@@ -200,16 +208,16 @@ void DirichletModel::configure
 
   if (dofTypes_.size() != ngroups_)
   {
-    throw IllegalInputException(JEM_FUNC,
-                                "dofTypes must have the same length as nodeGroups");
+    throw IllegalInputException(
+        JEM_FUNC, "dofTypes must have the same length as nodeGroups");
   }
 
   if (myProps.find(factors_, FACTORS_PROP))
   {
     if (factors_.size() != ngroups_)
     {
-      throw IllegalInputException(JEM_FUNC,
-                                  "factors must have the same length as nodeGroups");
+      throw IllegalInputException(
+          JEM_FUNC, "factors must have the same length as nodeGroups");
     }
   }
   else
@@ -233,8 +241,7 @@ void DirichletModel::configure
 
 void DirichletModel::getConfig
 
-    (const Properties &conf,
-     const Properties &globdat) const
+    (const Properties &conf, const Properties &globdat) const
 
 {
   Properties myConf = conf.makeProps(myName_);
@@ -267,9 +274,7 @@ void DirichletModel::getConfig
 
 Ref<Model> DirichletModel::makeNew
 
-    (const String &name,
-     const Properties &conf,
-     const Properties &props,
+    (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
@@ -301,12 +306,15 @@ void DirichletModel::advance_
   if (method_ == RATE && jem::numeric::abs(dispIncr_) < Float::EPSILON)
   {
     System::warn() << myName_ << " zero increment in RATE mode."
-                   << " It seems the time increment has not been set." << endl;
+                   << " It seems the time increment has not been set."
+                   << endl;
   }
 
   dispScale_ = dispScale0_ + dispIncr_;
 
-  System::info() << " ...New displacement factor " << dispScale_ << endl;
+  if (dispIncr_ != 0.)
+    System::info() << " ...New displacement factor " << dispScale_
+                   << endl;
   globdat.set(varName_, dispScale_);
 }
 
@@ -316,8 +324,7 @@ void DirichletModel::advance_
 
 void DirichletModel::applyConstraints_
 
-    (const Properties &params,
-     const Properties &globdat)
+    (const Properties &params, const Properties &globdat)
 
 {
   idx_t nn;
@@ -361,8 +368,7 @@ void DirichletModel::applyConstraints_
 
 void DirichletModel::checkCommit_
 
-    (const Properties &params,
-     const Properties &globdat)
+    (const Properties &params, const Properties &globdat)
 
 {
   // terminate the computation if displacement exceeds maximum.
@@ -383,8 +389,7 @@ void DirichletModel::checkCommit_
 
 void DirichletModel::commit_
 
-    (const Properties &params,
-     const Properties &globdat)
+    (const Properties &params, const Properties &globdat)
 
 {
   // store converged boundary quantities

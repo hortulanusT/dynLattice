@@ -28,7 +28,7 @@ const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
 const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
 const char *specialCosseratRodModel::YOUNGS_MODULUS = "young";
 const char *specialCosseratRodModel::SHEAR_MODULUS = "shear_modulus";
-const char *specialCosseratRodModel::POISSION_RATIO = "poission_ratio";
+const char *specialCosseratRodModel::POISSON_RATIO = "poisson_ratio";
 const char *specialCosseratRodModel::AREA = "area";
 const char *specialCosseratRodModel::DENSITY = "density";
 const char *specialCosseratRodModel::AREA_MOMENT = "area_moment";
@@ -144,7 +144,7 @@ specialCosseratRodModel::specialCosseratRodModel
   myProps.find(symmetric_only_, SYMMETRIC_ONLY);
   myConf.set(SYMMETRIC_ONLY, symmetric_only_);
 
-  // Get the material parameters. //LATER non-isotropic features ?
+  // Get the material parameters.
   if (myProps.find(material_ey_, MATERIAL_Y_DIR))
   {
     JEM_ASSERT(material_ey_.size() == allNodes_.rank());
@@ -156,7 +156,7 @@ specialCosseratRodModel::specialCosseratRodModel
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
   {
     double nu;
-    myProps.get(nu, POISSION_RATIO);
+    myProps.get(nu, POISSON_RATIO);
     shearMod_ = young_ / 2. / (nu + 1.);
   }
 
@@ -262,13 +262,21 @@ specialCosseratRodModel::specialCosseratRodModel
   materialC_(4, 4) = young_ * areaMoment_[1];
   materialC_(5, 5) = shearMod_ * polarMoment_;
 
-  materialM_.resize(3, 3);
-  materialM_ = eye() * density_ * area_;
+  materialM_.resize(6, 6);
+  materialM_ = 0.0;
+  materialM_(0, 0) = density_ * area_;
+  materialM_(1, 1) = density_ * area_;
+  materialM_(2, 2) = density_ * area_;
+  materialM_(3, 3) = density_ * areaMoment_[0];
+  materialM_(4, 4) = density_ * areaMoment_[1];
+  materialM_(5, 5) = density_ * polarMoment_;
+  double inertiaCorrect;
+  if (myProps.find(inertiaCorrect, "inertia_correct"))
+    for (idx_t i = 3; i < 6; i++)
+      materialM_(i, i) *= inertiaCorrect;
 
-  if (myProps.find(thickFact_, THICKENING_FACTOR))
-  {
-    if (thickFact_.size() == 1)
-    {
+  if (myProps.find(thickFact_, THICKENING_FACTOR)) {
+    if (thickFact_.size() == 1) {
       thickFact_.reshape(2);
       thickFact_[1] = thickFact_[0];
     }
@@ -279,8 +287,8 @@ specialCosseratRodModel::specialCosseratRodModel
       << " ...Stiffness matrix of the rod '" << myName_ << "':\n"
       << materialC_ << "\n";
   jem::System::debug(myName_)
-      << " ...Area density of the rod '" << myName_ << "':\n"
-      << density_ * area_ << "\n";
+    << " ...Inertia matrix of the rod '" << myName_ << "':\n"
+    << materialM_ << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -348,7 +356,6 @@ bool specialCosseratRodModel::takeAction
     Ref<MatrixBuilder> mbld;
     Vector fint;
     Vector disp;
-    Vector dispOld;
 
     // Get the action-specific parameters.
     params.get(mbld, ActionParams::MATRIX0);
@@ -357,26 +364,26 @@ bool specialCosseratRodModel::takeAction
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
-    StateVector::getOld(dispOld, dofs_, globdat);
     // TEST_CONTEXT( disp )
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(*mbld, fint, disp, dispOld);
+    assemble_(*mbld, fint, disp);
 
-    // //DEBUGGING
-    // IdxVector   dofList ( fint.size() );
-    // Matrix      K ( fint.size(), fint.size() );
-    // Matrix      D ( dofs_->typeCount(), allNodes_.size() );
-    // Matrix      F ( dofs_->typeCount(), allNodes_.size() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock( K, dofList, dofList );
-    // vec2mat( D.transpose(), disp );
-    // vec2mat( F.transpose(), fint );
-    // REPORT( action )
-    // TEST_CONTEXT ( D )
-    // TEST_CONTEXT ( K )
-    // TEST_CONTEXT ( F )
+    // // DEBUGGING
+    // IdxVector dofList(fint.size());
+    // Matrix K(fint.size(), fint.size());
+    // Matrix D(dofs_->typeCount(), allNodes_.size());
+    // Matrix F(dofs_->typeCount(), allNodes_.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(K, dofList, dofList);
+    // vec2mat(D.transpose(), disp);
+    // vec2mat(F.transpose(), fint);
+    // REPORT(action)
+    // TEST_CONTEXT(D)
+    // TEST_CONTEXT(K)
+    // TEST_CONTEXT(F)
 
     return true;
   }
@@ -392,31 +399,39 @@ bool specialCosseratRodModel::takeAction
     assembleM_(*mbld, disp);
 
     // // DEBUGGING
-    // IdxVector   dofList ( dofs_->dofCount() );
-    // Matrix      M ( dofList.size(), dofList.size() );
-    // for (idx_t i = 0; i<dofList.size(); i++) dofList[i] = i;
-    // mbld->getBlock(M, dofList, dofList );
-    // REPORT( action )
-    // TEST_CONTEXT ( mbld->toString() )
-    // TEST_CONTEXT ( M )
+    // IdxVector dofList(dofs_->dofCount());
+    // Matrix M(dofList.size(), dofList.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(M, dofList, dofList);
+    // REPORT(action)
+    // TEST_CONTEXT(mbld->toString())
+    // TEST_CONTEXT(M)
+
+    return true;
   }
 
   if (action == Actions::GET_INT_VECTOR)
   {
     Vector fint;
     Vector disp;
-    Vector dispOld;
+    Vector velo;
+    Ref<AbstractMatrix> mass;
 
     // Get the action-specific parameters.
     params.get(fint, ActionParams::INT_VECTOR);
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
-    StateVector::getOld(dispOld, dofs_, globdat);
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(fint, disp, dispOld);
+    assemble_(fint, disp);
+
+    if (params.find(mass, ActionParams::MATRIX2)) {
+      StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
+      assembleGyro_(fint, velo, mass);
+    }
 
     // //DEBUGGING
     // Matrix      F ( dofs_->typeCount(), nodes_.size() );
@@ -424,28 +439,6 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT ( F )
 
     return true;
-  }
-
-  if (action == "GET_GYRO_VECTOR")
-  {
-    Ref<FlexMBuilder> mbld;
-    Vector fgyro;
-    Vector disp;
-    Vector velo;
-
-    // Get the action-specific parameters.
-    params.get(fgyro, ActionParams::INT_VECTOR);
-
-    // Get the current velocities.
-    StateVector::get(disp, dofs_, globdat);
-    StateVector::get(velo, jive::model::STATE[1], dofs_, globdat);
-
-    mbld = newInstance<FlexMBuilder>(
-        "inertia"); // HACK get M matrix from global model
-
-    // assemble mass matrix
-    assembleM_(*mbld, disp);
-    assembleGyro_(fgyro, velo, *mbld);
   }
 
   return false;
@@ -500,7 +493,7 @@ void specialCosseratRodModel::get_strain_table_
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       strain_table.addRowValues(ielem, icols, strain(ALL, ip));
-      weights[ielem] += ipWeights[ip];
+      weights[ielem] += 1.;
     }
   }
 }
@@ -554,7 +547,7 @@ void specialCosseratRodModel::get_stress_table_
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       stress_table.addRowValues(ielem, icols, stress(ALL, ip));
-      weights[ielem] += ipWeights[ip];
+      weights[ielem] += 1.;
     }
   }
 }
@@ -733,6 +726,7 @@ void specialCosseratRodModel::get_strains_(
   const idx_t dofCount = dofs_->typeCount();
 
   const Cubix ipLambda(globRank, globRank, ipCount);
+  const Cubix ipPI(dofCount, dofCount, ipCount);
   const Cubix ipLambdaP(globRank, globRank, ipCount);
   const Matrix ipPhi(globRank, ipCount);
   const Matrix ipPhiP(globRank, ipCount);
@@ -748,10 +742,8 @@ void specialCosseratRodModel::get_strains_(
 
   ipPhi = matmul((Matrix)(nodePhi_0 + nodeU), shapes);
   ipPhiP = matmul((Matrix)(nodePhi_0 + nodeU), grads);
-  shapeK_->getRotations(ipLambda, nodeLambda);
-  // TEST_CONTEXT(ipLambda)
+  shapeK_->getPi(ipPI, ipLambda, nodeLambda);
   shapeK_->getRotationGradients(ipLambdaP, w, nodePhi_0, nodeLambda);
-  // TEST_CONTEXT(ipLambdaP)
 
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -767,14 +759,8 @@ void specialCosseratRodModel::get_strains_(
   // TEST_CONTEXT(strains)
 
   if (spatial)
-  {
-    Cubix PI(dofCount, dofCount, ipCount);
-    shapeK_->getPi(PI, nodeLambda);
-    // TEST_CONTEXT(PI)
-
     for (idx_t ip = 0; ip < ipCount; ip++)
-      strains[ip] = matmul(PI[ip], strains[ip]);
-  }
+      strains[ip] = matmul(ipPI[ip], strains[ip]);
   // TEST_CONTEXT(strains)
 }
 
@@ -851,8 +837,7 @@ void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
 
 void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &fint,
-                                        const Vector &disp,
-                                        const Vector &dispOld) const
+                                        const Vector &disp) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -949,8 +934,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 }
 
 void specialCosseratRodModel::assemble_(const Vector &fint,
-                                        const Vector &disp,
-                                        const Vector &dispOld) const
+                                        const Vector &disp) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -1000,30 +984,27 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
   }
 }
 
-void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
-                                            const Vector &velo,
-                                            MatrixBuilder &mbld) const
+void
+specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
+                                       const Vector& velo,
+                                       const Ref<AbstractMatrix> mass) const
 {
   IdxVector idofs(ROT_DOF_COUNT);
   Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
-  Vector omega(ROT_DOF_COUNT);
+  Vector temp(velo.size());
+
+  mass->matmul(temp, velo);
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
     dofs_->getDofIndices(idofs, inode, rot_types_);
-    mbld.getBlock(Theta, idofs, idofs);
-    omega = velo[idofs];
 
-    fgyro[idofs] += matmul(skew(omega), matmul(Theta, omega));
+    fgyro[idofs] += matmul(skew((Vector)velo[idofs]), (Vector)temp[idofs]);
   }
 }
 
-void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
-                                         Vector &disp) const
+void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const // TODO fix for higher order elements
 {
-  JEM_ASSERT2(cross_section_ == "rectangle" || cross_section_ == "circle",
-              "Mass Matrix cannot be constructed without knowing the "
-              "type of crossection");
   WARN_ASSERT2(density_ > 0,
                "Mass Matrix will have no effect without density!");
   MatmulChain<double, 3> mc3;
@@ -1043,15 +1024,10 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
   IdxVector jdofs(dofCount);
 
   Matrix coords(rank, nodeCount);
-  Matrix ipCoords(rank, ipCount);
-  double node_len;
   Vector weights(ipCount);
-  Vector distI(rank);
-  Vector distJ(rank);
   Cubix ipLambda(rank, rank, ipCount);
   Matrix shapes(nodeCount, ipCount);
   Matrix spatialM(rank, rank);
-  Matrix materialJ(rank, rank);
   Matrix spatialJ(rank, rank);
 
   // iterate through the elements
@@ -1074,60 +1050,26 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld,
       for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
       {
         dofs_->getDofIndices(jdofs, inodes[Jnode], jtypes_);
+
         spatialM = 0.0;
         for (idx_t ip = 0; ip < ipCount; ip++)
-        {
-          spatialM += weights[ip] * shapes(Inode, ip) *
-                      shapes(Jnode, ip) *
-                      mc3.matmul(ipLambda[ip], materialM_,
-                                 ipLambda[ip].transpose());
-        }
+          spatialM += weights[ip] * shapes(Inode, ip) * shapes(Jnode, ip) *
+                      mc3.matmul(ipLambda[ip], materialM_(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
         mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
 
-        materialJ = 0.0;
-        node_len = 0.0;
-        if (Inode == Jnode) // HACK consistent rotational inertia matrix?
+        if (Inode == Jnode)
         {
-          if (Inode == 0)
-            node_len = norm2(coords[1] - coords[0]) / 2.;
-          else if (Inode == nodeCount - 1)
-            node_len =
-                norm2(coords[nodeCount - 1] - coords[nodeCount - 2]) / 2.;
-          else
-            node_len = norm2(coords[Inode + 1] - coords[Inode - 1]) / 2.;
-
-          if (cross_section_ == "circle")
+          double length = sum(weights) / (nodeCount - 1);
+          spatialJ = 0.;
+          if (Inode == 0 || Inode == nodeCount - 1)
           {
-            materialJ(0, 0) = density_ * area_ * node_len / 12. *
-                              (pow(radius_, 2) * 3 + pow(node_len, 2));
-            materialJ(1, 1) = density_ * area_ * node_len / 12. *
-                              (pow(radius_, 2) * 3 + pow(node_len, 2));
-            materialJ(2, 2) =
-                density_ * area_ * node_len / 2. * pow(radius_, 2);
+            length /= 2.;
+            spatialJ(0, 0) = area_ * density_ * pow(length, 3) / 12.;
+            spatialJ(1, 1) = area_ * density_ * pow(length, 3) / 12.;
           }
-          if (cross_section_ == "rectangle")
-          {
-            materialJ(0, 0) =
-                density_ * area_ * node_len / 12. *
-                (pow(side_length_[1], 2) + pow(node_len, 2));
-            materialJ(1, 1) =
-                density_ * area_ * node_len / 12. *
-                (pow(side_length_[0], 2) + pow(node_len, 2));
-            materialJ(2, 2) =
-                density_ * area_ * node_len / 12. *
-                (pow(side_length_[0], 2) + pow(side_length_[1], 2));
-          }
+          spatialJ += materialM_(ROT_PART, ROT_PART) * length;
 
-          if (Inode == 0 || Inode == nodeCount - 1) // steiner parts
-          {
-            materialJ(0, 0) +=
-                density_ * area_ * node_len * pow(node_len / 2., 2);
-            materialJ(1, 1) +=
-                density_ * area_ * node_len * pow(node_len / 2., 2);
-          }
-          spatialJ = mc3.matmul(nodeLambda[Inode], materialJ,
-                                nodeLambda[Inode].transpose());
-
+          spatialJ = mc3.matmul(nodeLambda[Inode], spatialJ, nodeLambda[Inode].transpose());
           mbld.addBlock(idofs[ROT_PART], jdofs[ROT_PART], spatialJ);
         }
       }

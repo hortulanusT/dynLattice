@@ -11,6 +11,7 @@
 
 #include <cmath>
 
+#include <jem/base/Float.h>
 #include <jem/util/Properties.h>
 #include <jem/util/PropertyException.h>
 
@@ -21,6 +22,7 @@
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
@@ -32,11 +34,13 @@
 
 using jem::util::Properties;
 using jive::BoolMatrix;
+using jive::IdxMatrix;
 using jive::fem::NodeGroup;
 using jive::fem::NodeSet;
 using jive::implict::ArclenActions;
 using jive::implict::ArclenParams;
 using jive::model::Model;
+using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
@@ -44,15 +48,22 @@ using jive::util::Globdat;
 
 using namespace jive_helpers;
 
-class periodicBCModel : public Model {
+class periodicBCModel : public Model
+{
 public:
   static const char *TYPE_NAME;
   static const char *MODE_PROP;
   static const char *GRAD_PROP;
   static const char *DOF_NAMES_PROP;
   static const char *ROT_NAMES_PROP;
+  static const char *FIXEDGRAD_PARAM;
 
-  enum Mode { LOAD, DISP };
+  enum Mode
+  {
+    LOAD,
+    UPD,
+    DISP
+  };
 
   explicit periodicBCModel
 
@@ -76,9 +87,12 @@ private:
 
       (const Properties &globdat);
 
-  void setConstraints_
+  void fixCorners_
 
-      (const Properties &globdat, const double scale = 0.);
+      (const Properties &globdat, const Matrix &currentGrad,
+       const double scale = NAN);
+
+  void setConstraints_();
 
   void getExtVec_
 
@@ -94,8 +108,11 @@ private:
   StringVector dofNames_;
   StringVector rotNames_;
   IdxVector jdofs_;
-  IdxVectorMatrix masterDofs_;
-  IdxVectorMatrix slaveDofs_;
+  IdxVectorMatrix masterEdgeDofs_;
+  IdxVectorMatrix slaveEdgeDofs_;
+  IdxMatrix cornerDofs_;
+  IdxVector corner0Dofs_;
   idx_t pbcRank_;
   Mode mode_;
+  bool ghostCorners_;
 };

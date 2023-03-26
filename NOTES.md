@@ -1,24 +1,43 @@
 # :hammer_and_pick: TO DO 
 ## Investigations
-- Equivalent (linear static) unit cells in other structures
-- Do finite strain comparision
-- Do dynamic comparison
-- Fix 3D dynamics
-- Refactor Makefiles into Python scripts
+- Include Contact
+- Include Plasticity
+- Elastic, Dynamic Homogenization
 ## Code
 1. Models
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
-    - PBC Model
-      - proper adressing of H in the boundary conditions (allow for mixed loadings)
-      - get rid of load/disp factor -> detect implicitly from the loading type specified (Hxx vs Pxx)
-2. Modules
-    - PBC Output extent other side
-      - $\frac{du}{dX} \approx \frac{u_2-u_1}{\Delta X}$
-3. Environment
-    - add .cpp for all headers...
+      - Why are dynamics only working with linear elements?
+    - Explicit Solver
+      - keep M constant
+      - implement 'lumped' algorithm with direct 3x3 inverts
+1. Modules
+    - Tangent Output Module
+      - Get Matrix Condenstation to work
+1. Environment
+    - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
+    - make all plot outputs A4
+    - cleanup `.pro` file composition
+1. Tests
+    - include more reference data
  
+# :arrows_counterclockwise: Workflow for eqv-design
+1. `jive scripts/running/eqv-design.py lin_init`
+2. make sure repo on cluster(s) is updated
+## RUNS
+3. `jive scripts/running/eqv-design.py prep_runs <prep_higher_runs>`
+4. `./scripts/cluster/masterDesign.sh`
+5. make sure all runs went by nicely
+6. `./scripts/cluster/syncBack.sh`
+7. `jive scripts/running/eqv-design.py work_density_plot work_density_export`
+## LIN CHANGE
+3. `jive scripts/running/eqv-design.py lin_change_master_prep`
+4. `./scripts/cluster/masterChange.sh`
+5. make sure all runs went by nicely
+6. `./scripts/cluster/syncBack.sh`
+7. `jive scripts/running/eqv-design.py lin_change_master_plot prep_latex_data`
+
 # :heavy_check_mark: Information
 ## cluster syncing
 ``` bash
@@ -35,10 +54,8 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
-- use the `*.tiny` setting of the solver module to enable convergence for smaller load steps
 
 # :hourglass_flowing_sand: Ideas for the future
 - Modal Reduction for Homogenization
-- Custom Application
-  - add shortcuts for `$(CASE_NAME)` without folder
-  - enable multiple `.pro` files in command line
+  - dynamic homogenization for micromorphic continuum
+- Nonlocal Homogenization for dynamics

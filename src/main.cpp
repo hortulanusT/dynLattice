@@ -1,8 +1,15 @@
 #include <jive/app/Application.h>
+#include <jive/app/ChainModule.h>
+#include <jive/app/ControlModule.h>
+#include <jive/app/InfoModule.h>
+#include <jive/app/ReportModule.h>
+#include <jive/app/UserconfModule.h>
+#include <jive/fem/InitModule.h>
+#include <jive/fem/InputModule.h>
+#include <jive/fem/ShapeModule.h>
 
-#include "misc/_declare.h"
-#include "models/_declare.h"
-#include "modules/_declare.h"
+#include "models/_declareModels.h"
+#include "modules/_declareModules.h"
 
 //-----------------------------------------------------------------------
 //   mainModule
@@ -29,13 +36,14 @@ Ref<Module> mainModule()
   // Declare everything, that is needed for the modules
   declareModules();
 
-  // Declare everything, that is needed for the timesteppers
-  declareTimeSteppers();
-
   // Set up the module chain. These modules will be called by Jive in
   // the order that they have been added to the chain.
   Ref<ChainModule> chain = newInstance<ChainModule>();
 
+  // Info Module: prints information about the current calculation
+  chain->pushBack(newInstance<InfoModule>());
+
+  ///// INITIALIZATION /////
   // Git Report Module: Report the current status of the git repo
   chain->pushBack(newInstance<GitReportModule>());
 
@@ -48,9 +56,7 @@ Ref<Module> mainModule()
   // Init Module: creates the main model and initilazies it
   chain->pushBack(newInstance<InitModule>());
 
-  // Info Module: prints information about the current calculation
-  chain->pushBack(newInstance<InfoModule>());
-
+  ///// RUNNING /////
   // UserConf: Specify the solver by the user
   chain->pushBack(newInstance<UserconfModule>("Solver"));
 

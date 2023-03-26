@@ -40,4 +40,4 @@ model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
 
-Output.paraview.reportIntervall = 100;
+Output.paraview.sampleWhen = "i%100<1";

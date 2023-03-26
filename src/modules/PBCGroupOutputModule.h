@@ -15,8 +15,8 @@
 
 #include <jem/base/Slice.h>
 #include <jem/util/ArrayBuffer.h>
-#include <jive/app/SampleModule.h>
 #include <jive/app/Names.h>
+#include <jive/app/SampleModule.h>
 
 using jem::SliceTo;
 using jem::util::ArrayBuffer;
@@ -38,8 +38,7 @@ public:
 
   virtual Status init
 
-      (const Properties &conf,
-       const Properties &props,
+      (const Properties &conf, const Properties &props,
        const Properties &globdat);
 
   virtual Status run(const Properties &globdat);
@@ -48,12 +47,26 @@ public:
 
   static Ref<Module> makeNew
 
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
+      (const String &name, const Properties &conf,
+       const Properties &props, const Properties &globdat);
 
   static void declare();
+
+  /**
+   * @brief get the strings describing different strain and stress
+   * measures
+   *
+   * @param dim dimension for which to get the strain and stress measures
+   * @param strains whether to return strain measures
+   * @param stresses whether to return stress measures
+   * @param dofNames names of the dofs to use
+   * @return Vector with strings for the expressions
+   */
+  static StringVector getDataSets(const idx_t dim,
+                                  const bool strains = false,
+                                  const bool stresses = false,
+                                  const StringVector &dofNames = {
+                                      "dx", "dy", "dz"});
 
 protected:
   String getHeader_(String existing) const;

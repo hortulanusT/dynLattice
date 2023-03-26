@@ -12,15 +12,12 @@ Solver.solver.type = "Arclen";
 // SETTINGS
 params.rod_details.shape.numPoints = 2;
 params.rod_details.young = 200e6;
-params.rod_details.poission_ratio = .3;
+params.rod_details.poisson_ratio = .3;
 params.rod_details.area = 1e-4;
 params.rod_details.area_moment = 8.333333333333333333333333e-10;
 params.rod_details.material_ey = [0.,0.,1.];
 
 params.force_model.type = "StdArclen";
-params.force_model.loadIncr = 1.;
-params.force_model.minIncr = .1;
-params.force_model.maxIncr = 5.;
 params.force_model.model.type = "Neumann";
 params.force_model.model.initLoad = 1.;
 params.force_model.model.loadIncr = 0.;

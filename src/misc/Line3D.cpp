@@ -30,7 +30,7 @@ Line3D::Line3D(const String &name,
   myProps.get(numNodes, PROP_NODES);
   myConf.set(PROP_NODES, numNodes);
 
-  Ref<StdLine> stdline = nullptr;
+  Ref<StdLine> stdline;
   switch (numNodes)
   {
   case 2:
@@ -166,6 +166,20 @@ void Line3D::getPi(const Cubix &Pi,
 {
   const Cubix Ri(globalRank(), globalRank(), ipointCount());
 
+  getRotations(Ri, Rn);
+
+  Pi = 0.;
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
+    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
+  }
+}
+
+void Line3D::getPi(const Cubix &Pi,
+                   const Cubix &Ri,
+                   const Cubix &Rn) const
+{
   getRotations(Ri, Rn);
 
   Pi = 0.;
