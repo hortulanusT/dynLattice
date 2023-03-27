@@ -22,12 +22,12 @@
     - include more reference data
  
 # :arrows_counterclockwise: Workflow for eqv-design
-1. `jive scripts/running/eqv-design.py lin_init`
-1. make sure repo on cluster(s) is updated
-1. `jive scripts/running/eqv-design.py prep_runs <prep_higher_runs> lin_change_master_prep`
+1. `jive scripts/running/eqv-design.py lin_init prep_runs <prep_higher_runs> lin_change_master_prep`
+1. make sure repo on cluster is updated
 1. `./scripts/cluster/masterDesign.sh`
 1. make sure all runs went by nicely
 1. `./scripts/cluster/syncBack.sh`
+1. `./scripts/cluster/masterFailed.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot lin_change_master_plot work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
