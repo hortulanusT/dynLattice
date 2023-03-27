@@ -23,19 +23,12 @@
  
 # :arrows_counterclockwise: Workflow for eqv-design
 1. `jive scripts/running/eqv-design.py lin_init`
-2. make sure repo on cluster(s) is updated
-## RUNS
-3. `jive scripts/running/eqv-design.py prep_runs <prep_higher_runs>`
-4. `./scripts/cluster/masterDesign.sh`
-5. make sure all runs went by nicely
-6. `./scripts/cluster/syncBack.sh`
-7. `jive scripts/running/eqv-design.py work_density_plot work_density_export`
-## LIN CHANGE
-3. `jive scripts/running/eqv-design.py lin_change_master_prep`
-4. `./scripts/cluster/masterChange.sh`
-5. make sure all runs went by nicely
-6. `./scripts/cluster/syncBack.sh`
-7. `jive scripts/running/eqv-design.py lin_change_master_plot prep_latex_data`
+1. make sure repo on cluster(s) is updated
+1. `jive scripts/running/eqv-design.py prep_runs <prep_higher_runs> lin_change_master_prep`
+1. `./scripts/cluster/masterDesign.sh`
+1. make sure all runs went by nicely
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/eqv-design.py work_density_plot lin_change_master_plot work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
 ## cluster syncing
