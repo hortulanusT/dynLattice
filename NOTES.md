@@ -1,16 +1,11 @@
 # :hammer_and_pick: TO DO 
-## Investigations
-- Include Contact
-- Include Plasticity
-- Elastic, Dynamic Homogenization
-## Code
 1. Models
     - Rod Model
       - Extract material for the stress -> strain relationship
       - Create MaterialFactory
       - Why are dynamics only working with linear elements?
     - Explicit Solver
-      - keep M constant
+      - keep $M$ constant, only update $\Theta$
       - implement 'lumped' algorithm with direct 3x3 inverts
 1. Modules
     - Tangent Output Module
@@ -22,13 +17,12 @@
     - include more reference data
  
 # :arrows_counterclockwise: Workflow for eqv-design
-1. `jive scripts/running/eqv-design.py lin_init prep_runs <prep_higher_runs> lin_change_master_prep`
-1. make sure repo on cluster is updated
+:bangbang: make sure repo on cluster is updated :bangbang:
+1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
 1. `./scripts/cluster/masterDesign.sh`
-1. make sure all runs went by nicely
 1. `./scripts/cluster/syncBack.sh`
 1. `./scripts/cluster/masterFailed.sh`
-1. `jive scripts/running/eqv-design.py work_density_plot lin_change_master_plot work_density_export prep_latex_data`
+1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot lin_change_master_plot work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
 ## cluster syncing
@@ -46,8 +40,3 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
-
-# :hourglass_flowing_sand: Ideas for the future
-- Modal Reduction for Homogenization
-  - dynamic homogenization for micromorphic continuum
-- Nonlocal Homogenization for dynamics
