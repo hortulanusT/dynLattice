@@ -18,7 +18,6 @@
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4
-    - cleanup `.pro` file composition
 1. Tests
     - include more reference data
  
