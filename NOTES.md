@@ -40,3 +40,9 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
+
+# For later....
+- Nonlinear Eigenmode Decomposition
+  - start with lin eigenmodes
+  - increase force to get nonlin deformation
+  - map boundary forces to deformation using ML
