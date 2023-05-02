@@ -9,12 +9,8 @@ __pycache__/
 # reference data
 /ref_data
 
-# archiving script on the local machine and to overleaf
-scripts/archive.sh
-scripts/sync_paper0.sh
-
 # scribbling script
-scripts/scribbling.py
+scripts/scribbling.*
 
 # results
 *.log
