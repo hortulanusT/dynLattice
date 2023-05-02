@@ -76,6 +76,10 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
   stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
+  String dummy = stresses_[1];
+  stresses_[1] = stresses_[2];
+  stresses_[2] = dummy; // Transpose 1st PK stress to get nominal stress
+
   for (idx_t i = 0; i < dofs.size(); i++)
     sizes_[i] = "all.extent." + dofs[i];
 
@@ -99,7 +103,7 @@ Module::Status TangentOutputModule::init(const Properties &conf,
           jive::app::ModuleFactory::TYPE_PROP,
           jive::implict::NonlinModule::TYPE_NAME);
       myProps.getProps("solver").set(jive::implict::PropNames::MAX_ITER,
-                                     5);
+                                     0);
     }
 
     solver_ = jive::implict::newSolverModule(myName_ + ".solver", conf,
@@ -172,13 +176,13 @@ void TangentOutputModule::readStrainStress_(const Vector &strains,
                                             const Vector &stresses,
                                             const Properties &globdat)
 {
-  double size = 1;
+  // double size = 1;
   strains = 0.;
   stresses = 0.;
 
   groupUpdate_->run(globdat);
-  for (String sizeMeas : sizes_)
-    size *= FuncUtils::evalExpr(sizeMeas, globdat);
+  // for (String sizeMeas : sizes_)
+  //   size *= FuncUtils::evalExpr(sizeMeas, globdat);
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     strains[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
@@ -199,7 +203,7 @@ void TangentOutputModule::readStresses_(const Vector &stresses,
 }
 
 void TangentOutputModule::reportStrainStress_(const Vector &H,
-                                              const Vector &P)
+                                              const Vector &N)
 {
   Matrix deformTens(rank_, rank_);
   Matrix engStress(rank_, rank_);
@@ -210,17 +214,18 @@ void TangentOutputModule::reportStrainStress_(const Vector &H,
   deformTens += eye(rank_);
   J = jem::numeric::det(deformTens);
 
-  vec2mat(engStrain, H);
-  engStrain = matmul(
-      engStrain,
-      jem::numeric::inverse(deformTens)); // spatial displacement gradient
-  vec2mat(engStress, P);
-  engStress =
-      matmul(engStress, deformTens.transpose()) / J; // chauchy stresses
+  engStrain = 0.5 * (deformTens +
+                     deformTens.transpose()) -
+              eye(rank_); // linearized strain
 
-  System::info() << "### Spatial displacement gradient\n"
+  vec2mat(engStress, N);
+  engStress =
+      matmul(deformTens, engStress) / J; // chauchy stresses
+
+  System::info() << "### Cauchy's strain tensor\n"
                  << engStrain << "\n";
-  System::info() << "### Cauchy stress\n" << engStress << "\n";
+  System::info() << "### Cauchy's stress tensor\n"
+                 << engStress << "\n";
 }
 
 void TangentOutputModule::getStrainStress_(const Matrix &strains,
@@ -250,21 +255,22 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains[iPBC] += dir * .5 * perturb_;
 
       globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
+
       try
       {
         solver_->solve(info, globdat);
-        readStrainStress_(pertubStrains, pertubStresses, globdat);
-
-        strains[iPBC] += dir * pertubStrains;
-        stresses[iPBC] += dir * pertubStresses;
       }
       catch (const jem::Exception &e)
       {
-        System::warn() << e.what()
-                       << "\nStress/Strain Data set to NAN!\n";
-        strains[iPBC] = NAN;
-        stresses[iPBC] = NAN;
+        print(System::info(myName_),
+              "The Newton-Raphson solver didn't converge, taking non-converged result for tangent calculation \n\n");
       }
+
+      readStrainStress_(pertubStrains, pertubStresses, globdat);
+
+      strains[iPBC] += dir * pertubStrains;
+      stresses[iPBC] += dir * pertubStresses;
+
       globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
       StateVector::restoreNew(DofSpace::get(globdat, getContext()),
                               globdat);

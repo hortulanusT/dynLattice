@@ -78,7 +78,7 @@ public:
 private:
   void readStrainStress_(const Vector &strains, const Vector &stresses,
                          const Properties &globdat);
-  void reportStrainStress_(const Vector &H, const Vector &P);
+  void reportStrainStress_(const Vector &H, const Vector &N);
 
   void getStrainStress_(const Matrix &strains, const Matrix &stresses,
                         const Properties &globdat);
