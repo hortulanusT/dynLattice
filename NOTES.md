@@ -13,6 +13,7 @@
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4
+    - Write all logs on cluster to `\scratch\tgartner\`
 1. Tests
     - include more reference data
  
