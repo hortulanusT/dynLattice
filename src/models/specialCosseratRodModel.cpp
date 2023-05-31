@@ -26,14 +26,6 @@ const char *specialCosseratRodModel::TYPE_NAME = "specialCosseratRod";
 const char *specialCosseratRodModel::SHAPE_IDENTIFIER = "shape";
 const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
 const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
-const char *specialCosseratRodModel::YOUNGS_MODULUS = "young";
-const char *specialCosseratRodModel::SHEAR_MODULUS = "shear_modulus";
-const char *specialCosseratRodModel::POISSON_RATIO = "poisson_ratio";
-const char *specialCosseratRodModel::AREA = "area";
-const char *specialCosseratRodModel::DENSITY = "density";
-const char *specialCosseratRodModel::AREA_MOMENT = "area_moment";
-const char *specialCosseratRodModel::POLAR_MOMENT = "polar_moment";
-const char *specialCosseratRodModel::SHEAR_FACTOR = "shear_correction";
 const char *specialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
 const char *specialCosseratRodModel::ROT_DOF_NAMES = "dofNamesRot";
 const char *specialCosseratRodModel::SYMMETRIC_ONLY =
@@ -41,9 +33,6 @@ const char *specialCosseratRodModel::SYMMETRIC_ONLY =
 const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
-const char *specialCosseratRodModel::CROSS_SECTION = "cross_section";
-const char *specialCosseratRodModel::RADIUS = "radius";
-const char *specialCosseratRodModel::SIDE_LENGTH = "side_length";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
@@ -86,12 +75,6 @@ specialCosseratRodModel::specialCosseratRodModel
 
   // Initialize the internal shape.
   shapeK_ = newInstance<Line3D>(SHAPE_IDENTIFIER, myConf, myProps);
-  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M")
-      .set("intScheme", String(shapeK_->nodeCount()));
-  myProps.makeProps(String(SHAPE_IDENTIFIER) + "M")
-      .set("numPoints", shapeK_->nodeCount());
-  shapeM_ = newInstance<Line3D>(String(SHAPE_IDENTIFIER) + "M", myConf,
-                                myProps);
 
   // Check whether the mesh is valid.
   rodElems_.checkElements(getContext(), shapeK_->nodeCount());
@@ -152,77 +135,6 @@ specialCosseratRodModel::specialCosseratRodModel
     myConf.set(MATERIAL_Y_DIR, material_ey_);
   }
 
-  myProps.get(young_, YOUNGS_MODULUS);
-  if (!myProps.find(shearMod_, SHEAR_MODULUS))
-  {
-    double nu;
-    myProps.get(nu, POISSON_RATIO);
-    shearMod_ = young_ / 2. / (nu + 1.);
-  }
-
-  areaMoment_.resize(2);
-
-  if (!myProps.find(cross_section_, CROSS_SECTION))
-  {
-    myProps.get(area_, AREA);
-    myProps.get(areaMoment_, AREA_MOMENT);
-    if (areaMoment_.size() == 1)
-    {
-      areaMoment_.reshape(2);
-      areaMoment_[1] = areaMoment_[0];
-    }
-    shearParam_ = 5. / 6.; // assume standard square cross-section
-  }
-  else if (cross_section_ == "square")
-  {
-    myProps.get(side_length_, SIDE_LENGTH);
-    JEM_ASSERT2(side_length_.size() == 1, "A square has only one side!");
-    side_length_.reshape(2);
-    side_length_[1] = side_length_[0];
-    area_ = pow(side_length_[0], 2);
-    areaMoment_[0] = areaMoment_[1] = pow(side_length_[0], 4) / 12.;
-    shearParam_ = 5. / 6.;
-    cross_section_ = "rectangle";
-  }
-  else if (cross_section_ == "circle")
-  {
-    myProps.get(radius_, RADIUS);
-    area_ = M_PI * pow(radius_, 2);
-    areaMoment_ = M_PI * pow(radius_, 4) / 4.;
-    shearParam_ = 9. / 10.;
-  }
-  else if (cross_section_ == "rectangle")
-  {
-    myProps.get(side_length_, SIDE_LENGTH);
-    JEM_ASSERT2(side_length_.size() == 2,
-                "A rectangle has only two sides!");
-    area_ = jem::product(side_length_);
-    areaMoment_[0] = pow(side_length_[1], 3) * side_length_[0] / 12.;
-    areaMoment_[1] = pow(side_length_[0], 3) * side_length_[1] / 12.;
-    shearParam_ = 5. / 6.;
-  }
-  else
-    throw jem::IllegalInputException(
-        getContext(), "unknown cross section, only 'square' and 'circle' "
-                      "are supported");
-
-  polarMoment_ = jem::sum(areaMoment_);
-  myProps.find(shearParam_, SHEAR_FACTOR);
-  myProps.find(polarMoment_, POLAR_MOMENT);
-
-  density_ = 0.;
-  myProps.find(density_, DENSITY);
-
-  // Report the used material parameters.
-  myConf.set(YOUNGS_MODULUS, young_);
-  myConf.set(AREA, area_);
-  myConf.set(AREA_MOMENT, areaMoment_);
-  myConf.set(SHEAR_MODULUS, shearMod_);
-  myConf.set(POLAR_MOMENT, polarMoment_);
-  myConf.set(SHEAR_FACTOR, shearParam_);
-  myConf.set(DENSITY, density_);
-  myConf.set(CROSS_SECTION, cross_section_);
-
   // get given node dirs
   if (myProps.find(givenNodes_, GIVEN_NODES))
   {
@@ -252,43 +164,17 @@ specialCosseratRodModel::specialCosseratRodModel
     vec2mat(givenDirs_.transpose(), givenDirs);
   }
 
-  // Prepare linear stiffness matrix //LATER nonlinear material?
-  materialC_.resize(6, 6);
-  materialC_ = 0.0;
-  materialC_(0, 0) = shearMod_ * shearParam_ * area_;
-  materialC_(1, 1) = shearMod_ * shearParam_ * area_;
-  materialC_(2, 2) = young_ * area_;
-  materialC_(3, 3) = young_ * areaMoment_[0];
-  materialC_(4, 4) = young_ * areaMoment_[1];
-  materialC_(5, 5) = shearMod_ * polarMoment_;
-
-  materialM_.resize(6, 6);
-  materialM_ = 0.0;
-  materialM_(0, 0) = density_ * area_;
-  materialM_(1, 1) = density_ * area_;
-  materialM_(2, 2) = density_ * area_;
-  materialM_(3, 3) = density_ * areaMoment_[0];
-  materialM_(4, 4) = density_ * areaMoment_[1];
-  materialM_(5, 5) = density_ * polarMoment_;
-  double inertiaCorrect;
-  if (myProps.find(inertiaCorrect, "inertia_correct"))
-    for (idx_t i = 3; i < 6; i++)
-      materialM_(i, i) *= inertiaCorrect;
-
-  if (myProps.find(thickFact_, THICKENING_FACTOR)) {
-    if (thickFact_.size() == 1) {
+  if (myProps.find(thickFact_, THICKENING_FACTOR))
+  {
+    if (thickFact_.size() == 1)
+    {
       thickFact_.reshape(2);
       thickFact_[1] = thickFact_[0];
     }
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
 
-  jem::System::debug(myName_)
-      << " ...Stiffness matrix of the rod '" << myName_ << "':\n"
-      << materialC_ << "\n";
-  jem::System::debug(myName_)
-    << " ...Inertia matrix of the rod '" << myName_ << "':\n"
-    << materialM_ << "\n";
+  material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
 }
 
 //-----------------------------------------------------------------------
@@ -370,20 +256,20 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(*mbld, fint, disp);
 
-    // // DEBUGGING
-    // IdxVector dofList(fint.size());
-    // Matrix K(fint.size(), fint.size());
-    // Matrix D(dofs_->typeCount(), allNodes_.size());
-    // Matrix F(dofs_->typeCount(), allNodes_.size());
-    // for (idx_t i = 0; i < dofList.size(); i++)
-    //   dofList[i] = i;
-    // mbld->getBlock(K, dofList, dofList);
-    // vec2mat(D.transpose(), disp);
-    // vec2mat(F.transpose(), fint);
-    // REPORT(action)
-    // TEST_CONTEXT(D)
-    // TEST_CONTEXT(K)
-    // TEST_CONTEXT(F)
+    // DEBUGGING
+    IdxVector dofList(fint.size());
+    Matrix K(fint.size(), fint.size());
+    Matrix D(dofs_->typeCount(), allNodes_.size());
+    Matrix F(dofs_->typeCount(), allNodes_.size());
+    for (idx_t i = 0; i < dofList.size(); i++)
+      dofList[i] = i;
+    mbld->getBlock(K, dofList, dofList);
+    vec2mat(D.transpose(), disp);
+    vec2mat(F.transpose(), fint);
+    REPORT(action)
+    TEST_CONTEXT(D)
+    TEST_CONTEXT(K)
+    TEST_CONTEXT(F)
 
     return true;
   }
@@ -428,7 +314,8 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(fint, disp);
 
-    if (params.find(mass, ActionParams::MATRIX2)) {
+    if (params.find(mass, ActionParams::MATRIX2))
+    {
       StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
       assembleGyro_(fint, velo, mass);
     }
@@ -772,40 +659,24 @@ void specialCosseratRodModel::get_stresses_(
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
   const Matrix strains(stresses.shape());
-  const Matrix elemC(materialC_.shape());
   const Cubix stiffness(dofCount, dofCount, ipCount);
   const Cubix PI(dofCount, dofCount, ipCount);
-  MatmulChain<double, 3> mc3;
 
-  // get the strains
-  get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, spatial);
-  // TEST_CONTEXT( strains )
+  // get the (material) strains
+  get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
+  TEST_CONTEXT(strains)
 
-  elemC = materialC_;
-  if (thickFact_.size() && (ie == 0 || ie == rodElems_.size() - 1))
-  {
-    elemC(TRANS_PART, TRANS_PART) *= thickFact_[0] * thickFact_[1];
-    elemC(3, 3) *= pow(thickFact_[1], 3) * thickFact_[0];
-    elemC(4, 4) *= pow(thickFact_[0], 3) * thickFact_[1];
-    elemC(5, 5) *=
-        shearMod_ *
-        (areaMoment_[0] * pow(thickFact_[1], 3) * thickFact_[0] +
-         areaMoment_[1] * pow(thickFact_[0], 3) * thickFact_[1]);
-  }
+  // get the (material) stresses
+  for (idx_t ip = 0; ip < ipCount; ip++)
+    material_->getStress(stresses[ip], strains[ip]);
 
-  // get the stresses (material + spatial );
+  // get the (spatial) stresses
   if (spatial)
   {
     shapeK_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++)
-      stiffness[ip] = mc3.matmul(PI[ip], elemC, PI[ip].transpose());
+      stresses[ip] = matmul(PI[ip], stresses[ip]);
   }
-  else // material stiffness
-    for (idx_t ip = 0; ip < ipCount; ip++)
-      stiffness[ip] = elemC;
-
-  for (idx_t ip = 0; ip < ipCount; ip++)
-    stresses[ip] = matmul(stiffness[ip], strains[ip]);
 }
 
 void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
@@ -855,6 +726,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Quadix XI(dofCount, dofCount, nodeCount, ipCount);
   Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
   Cubix PI(dofCount, dofCount, ipCount);
+  Matrix materialC = material_->getMaterialStiff();
   Matrix spatialC(dofCount, dofCount);
   Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
                   ipCount);
@@ -892,7 +764,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
-    // TEST_CONTEXT( stress )
+    TEST_CONTEXT(stress)
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
@@ -901,7 +773,9 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], materialC_, PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], materialC, PI[ip].transpose());
+      // TEST_CONTEXT(PI[ip])
+      // TEST_CONTEXT(materialC)
       // TEST_CONTEXT(spatialC)
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
@@ -984,10 +858,9 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
   }
 }
 
-void
-specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
-                                       const Vector& velo,
-                                       const Ref<AbstractMatrix> mass) const
+void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
+                                            const Vector &velo,
+                                            const Ref<AbstractMatrix> mass) const
 {
   IdxVector idofs(ROT_DOF_COUNT);
   Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
@@ -1005,74 +878,46 @@ specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
 
 void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const // TODO fix for higher order elements
 {
-  WARN_ASSERT2(density_ > 0,
-               "Mass Matrix will have no effect without density!");
   MatmulChain<double, 3> mc3;
 
-  const idx_t ipCount = shapeM_->ipointCount();
-  const idx_t nodeCount = shapeM_->nodeCount();
   const idx_t dofCount = dofs_->typeCount();
-  const idx_t rank = shapeM_->globalRank();
+  const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t elemCount = rodElems_.size();
+  const idx_t rank = shapeK_->globalRank();
 
   // PER ELEMENT VALUES
-  Matrix nodeU(rank, nodeCount);
-  Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
   IdxVector inodes(nodeCount);
   IdxVector idofs(dofCount);
   IdxVector jdofs(dofCount);
 
-  Matrix coords(rank, nodeCount);
-  Vector weights(ipCount);
-  Cubix ipLambda(rank, rank, ipCount);
-  Matrix shapes(nodeCount, ipCount);
-  Matrix spatialM(rank, rank);
-  Matrix spatialJ(rank, rank);
+  Vector weights(shapeK_->ipointCount());
+  double l;
+  Matrix nodePhi_0(rank, nodeCount);
+  Matrix nodeU(rank, nodeCount);
+  Cubix nodeLambda(rank, rank, nodeCount);
+
+  Matrix materialM(dofCount, dofCount);
+  Matrix spatialM(dofCount, dofCount);
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    allNodes_.getSomeCoords(coords, inodes);
-
-    shapeM_->getIntegrationWeights(weights, coords);
-    shapes = shapeM_->getShapeFunctions();
-
-    // TEST_CONTEXT(weights)
-
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-    shapeM_->getRotations(ipLambda, nodeLambda);
+    shapeK_->getIntegrationWeights(weights, nodePhi_0);
+    l = sum(weights) / (nodeCount - 1);
 
     for (idx_t Inode = 0; Inode < nodeCount; Inode++)
     {
       dofs_->getDofIndices(idofs, inodes[Inode], jtypes_);
-      for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
-      {
-        dofs_->getDofIndices(jdofs, inodes[Jnode], jtypes_);
+      material_->getLumpedMaterialMass(materialM, l, (Inode == 0 || Inode == nodeCount - 1));
 
-        spatialM = 0.0;
-        for (idx_t ip = 0; ip < ipCount; ip++)
-          spatialM += weights[ip] * shapes(Inode, ip) * shapes(Jnode, ip) *
-                      mc3.matmul(ipLambda[ip], materialM_(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
-        mbld.addBlock(idofs[TRANS_PART], jdofs[TRANS_PART], spatialM);
+      spatialM(TRANS_PART, TRANS_PART) = mc3.matmul(nodeLambda[Inode],
+                                                    materialM(TRANS_PART, TRANS_PART), nodeLambda[Inode].transpose());
+      spatialM(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[Inode],
+                                                materialM(ROT_PART, ROT_PART), nodeLambda[Inode].transpose());
 
-        if (Inode == Jnode)
-        {
-          double length = sum(weights) / (nodeCount - 1);
-          spatialJ = 0.;
-          if (Inode == 0 || Inode == nodeCount - 1)
-          {
-            length /= 2.;
-            spatialJ(0, 0) = area_ * density_ * pow(length, 3) / 12.;
-            spatialJ(1, 1) = area_ * density_ * pow(length, 3) / 12.;
-          }
-          spatialJ += materialM_(ROT_PART, ROT_PART) * length;
-
-          spatialJ = mc3.matmul(nodeLambda[Inode], spatialJ, nodeLambda[Inode].transpose());
-          mbld.addBlock(idofs[ROT_PART], jdofs[ROT_PART], spatialJ);
-        }
-      }
+      mbld.addBlock(idofs, idofs, spatialM);
     }
   }
 }

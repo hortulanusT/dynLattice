@@ -1,0 +1,88 @@
+/**
+ * @file ElasticMaterial.h
+ * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @brief simple implementation of the linear elastic material laws
+ * @version 0.1
+ * @date 2023-05-31
+ *
+ * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
+ *
+ */
+
+#pragma once
+#include "materials/Material.h"
+#include "materials/MaterialFactory.h"
+#include <jem/base/Array.h>
+#include <jem/base/IllegalInputException.h>
+#include <jem/base/System.h>
+#include <jem/numeric/algebra/matmul.h>
+#include <math.h>
+
+using jem::idx_t;
+using jem::newInstance;
+using jem::numeric::matmul;
+using jive::Ref;
+using jive::Vector;
+
+class ElasticMaterial : public Material
+{
+public:
+  static const char *TYPE_NAME;
+  static const char *YOUNGS_MODULUS;
+  static const char *SHEAR_MODULUS;
+  static const char *POISSON_RATIO;
+  static const char *AREA;
+  static const char *DENSITY;
+  static const char *AREA_MOMENT;
+  static const char *SHEAR_FACTOR;
+  static const char *POLAR_MOMENT;
+  static const char *CROSS_SECTION;
+  static const char *RADIUS;
+  static const char *SIDE_LENGTH;
+
+  JEM_DECLARE_CLASS(ElasticMaterial, Material);
+
+  ElasticMaterial(const String &name,
+                  const Properties &conf,
+                  const Properties &props,
+                  const Properties &globdat);
+
+  static Ref<Material> makeNew(const String &name, const Properties &conf,
+                               const Properties &props, const Properties &globdat);
+
+  static void declare();
+
+  virtual void configure(const Properties &props) override;
+
+  virtual void getConfig(const Properties &conf) const override;
+
+  virtual Matrix getMaterialStiff() const override;
+
+  virtual void getLumpedMaterialMass(const Matrix &M, const double l, const bool border) const override;
+
+  virtual void getStress(const Vector &stress, const Vector &strain) const override;
+
+protected:
+  ~ElasticMaterial();
+
+private:
+  void calcMaterialStiff_();
+  void calcMaterialMass_();
+
+  double young_;
+  double shearMod_;
+  double shearParam_;
+
+  double area_;
+  Vector areaMoment_;
+  double polarMoment_;
+
+  String cross_section_;
+  double radius_;
+  Vector side_length_;
+
+  double density_;
+
+  Matrix materialK_;
+  Matrix materialM_;
+};
