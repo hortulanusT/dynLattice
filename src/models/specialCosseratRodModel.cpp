@@ -275,8 +275,10 @@ specialCosseratRodModel::specialCosseratRodModel
     for (idx_t i = 3; i < 6; i++)
       materialM_(i, i) *= inertiaCorrect;
 
-  if (myProps.find(thickFact_, THICKENING_FACTOR)) {
-    if (thickFact_.size() == 1) {
+  if (myProps.find(thickFact_, THICKENING_FACTOR))
+  {
+    if (thickFact_.size() == 1)
+    {
       thickFact_.reshape(2);
       thickFact_[1] = thickFact_[0];
     }
@@ -287,8 +289,8 @@ specialCosseratRodModel::specialCosseratRodModel
       << " ...Stiffness matrix of the rod '" << myName_ << "':\n"
       << materialC_ << "\n";
   jem::System::debug(myName_)
-    << " ...Inertia matrix of the rod '" << myName_ << "':\n"
-    << materialM_ << "\n";
+      << " ...Inertia matrix of the rod '" << myName_ << "':\n"
+      << materialM_ << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -370,20 +372,20 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(*mbld, fint, disp);
 
-    // // DEBUGGING
-    // IdxVector dofList(fint.size());
-    // Matrix K(fint.size(), fint.size());
-    // Matrix D(dofs_->typeCount(), allNodes_.size());
-    // Matrix F(dofs_->typeCount(), allNodes_.size());
-    // for (idx_t i = 0; i < dofList.size(); i++)
-    //   dofList[i] = i;
-    // mbld->getBlock(K, dofList, dofList);
-    // vec2mat(D.transpose(), disp);
-    // vec2mat(F.transpose(), fint);
-    // REPORT(action)
-    // TEST_CONTEXT(D)
-    // TEST_CONTEXT(K)
-    // TEST_CONTEXT(F)
+    // DEBUGGING
+    IdxVector dofList(fint.size());
+    Matrix K(fint.size(), fint.size());
+    Matrix D(dofs_->typeCount(), allNodes_.size());
+    Matrix F(dofs_->typeCount(), allNodes_.size());
+    for (idx_t i = 0; i < dofList.size(); i++)
+      dofList[i] = i;
+    mbld->getBlock(K, dofList, dofList);
+    vec2mat(D.transpose(), disp);
+    vec2mat(F.transpose(), fint);
+    REPORT(action)
+    TEST_CONTEXT(D)
+    TEST_CONTEXT(K)
+    TEST_CONTEXT(F)
 
     return true;
   }
@@ -428,7 +430,8 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(fint, disp);
 
-    if (params.find(mass, ActionParams::MATRIX2)) {
+    if (params.find(mass, ActionParams::MATRIX2))
+    {
       StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
       assembleGyro_(fint, velo, mass);
     }
@@ -902,6 +905,8 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     {
       // get the spatial stiffness
       spatialC = mc3.matmul(PI[ip], materialC_, PI[ip].transpose());
+      // TEST_CONTEXT(PI[ip])
+      // TEST_CONTEXT(materialC_)
       // TEST_CONTEXT(spatialC)
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
@@ -984,10 +989,9 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
   }
 }
 
-void
-specialCosseratRodModel::assembleGyro_(const Vector& fgyro,
-                                       const Vector& velo,
-                                       const Ref<AbstractMatrix> mass) const
+void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
+                                            const Vector &velo,
+                                            const Ref<AbstractMatrix> mass) const
 {
   IdxVector idofs(ROT_DOF_COUNT);
   Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
