@@ -20,8 +20,8 @@ const char *ExplicitModule::LEN_SCALE = "lengthScale";
 
 ExplicitModule::ExplicitModule
 
-  (const String& name)
-  : Super(name)
+    (const String &name)
+    : Super(name)
 
 {
   dtime_ = 1.0;
@@ -101,10 +101,12 @@ Module::Status ExplicitModule::init
 
     String modelType;
     props.get(modelType, "model.type");
-    if (modelType == "Matrix") {
+    if (modelType == "Matrix")
+    {
       props.set("model.matrix2.type", FlexMatrixBuilder::getType()->getName());
       props.set("model.matrix2.constant", false);
-    } else
+    }
+    else
       ERR("Couldn't find matrix model, matrix2 will not be updated!")
   }
 
@@ -242,8 +244,7 @@ void ExplicitModule::getConfig
 //-----------------------------------------------------------------------
 //   advance
 //-----------------------------------------------------------------------
-void
-ExplicitModule::advance(const Properties& globdat)
+void ExplicitModule::advance(const Properties &globdat)
 {
   Properties params;
 
@@ -261,8 +262,7 @@ ExplicitModule::advance(const Properties& globdat)
 //-----------------------------------------------------------------------
 //   cancel
 //-----------------------------------------------------------------------
-void
-ExplicitModule::cancel(const Properties& globdat)
+void ExplicitModule::cancel(const Properties &globdat)
 {
   Properties params;
 
@@ -276,8 +276,7 @@ ExplicitModule::cancel(const Properties& globdat)
 //-----------------------------------------------------------------------
 //   commit
 //-----------------------------------------------------------------------
-bool
-ExplicitModule::commit(const Properties& globdat)
+bool ExplicitModule::commit(const Properties &globdat)
 {
   double error;
   Properties params;
@@ -293,7 +292,8 @@ ExplicitModule::commit(const Properties& globdat)
     accept = true;
   accept &= error <= prec_ || dtime_ == minDtime_;
 
-  if (accept) {
+  if (accept)
+  {
     dtime_ =
         jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
                  decrFact_ * dtime_,
@@ -325,20 +325,21 @@ ExplicitModule::commit(const Properties& globdat)
 //-----------------------------------------------------------------------
 //   getAcce
 //-----------------------------------------------------------------------
-void
-ExplicitModule::getAcce(const Vector& a,
-                        const Ref<Constraints>& cons,
-                        const Vector& fres,
-                        const Properties& globdat)
+void ExplicitModule::getAcce(const Vector &a,
+                             const Ref<Constraints> &cons,
+                             const Vector &fres,
+                             const Properties &globdat)
 {
   Properties params;
 
   // Compute acceleration
-  if (mode_ == CONSISTENT) {
+  if (mode_ == CONSISTENT)
+  {
     solver_->solve(a, fres);
   }
 
-  if (mode_ == LUMPED) {
+  if (mode_ == LUMPED)
+  {
     a = massInv_ * fres;
     jive::util::setSlaveDofs(a, *cons);
   }
@@ -347,11 +348,10 @@ ExplicitModule::getAcce(const Vector& a,
 //-----------------------------------------------------------------------
 //   updateVec
 //-----------------------------------------------------------------------
-void
-ExplicitModule::updateVec(const Vector& y_new,
-                          const Vector& y_old,
-                          const Vector& delta_y,
-                          const bool rot)
+void ExplicitModule::updateVec(const Vector &y_new,
+                               const Vector &y_old,
+                               const Vector &delta_y,
+                               const bool rot)
 {
   y_new = y_old + delta_y;
 
@@ -384,9 +384,9 @@ ExplicitModule::updateVec(const Vector& y_new,
 //   getForce
 //-----------------------------------------------------------------------
 Vector
-ExplicitModule::getForce(const Vector& fint,
-                         const Vector& fext,
-                         const Properties& globdat)
+ExplicitModule::getForce(const Vector &fint,
+                         const Vector &fext,
+                         const Properties &globdat)
 {
   Properties params;
 
@@ -411,61 +411,20 @@ ExplicitModule::getForce(const Vector& fint,
 //   store_energy
 //-----------------------------------------------------------------------
 
-void
-ExplicitModule::store_energy(const Properties& globdat)
+void ExplicitModule::store_energy(const Properties &globdat)
 {
-  double E_pot, E_kin, ell;
+  double E_pot = 0;
+  double E_kin = 0;
+  Properties params;
+  Properties variables = Globdat::getVariables(globdat);
+
   Vector velo;
   StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
   Vector temp(velo.size());
 
-  ElementSet allElemes = ElementSet::get(globdat, getContext());
-  ElementGroup beamElemes =
-      ElementGroup::get("beams", allElemes, globdat, getContext());
-  IdxVector inodes(allElemes.maxElemNodeCount());
-  Matrix coords(allElemes.maxElemNodeCount(),
-                allElemes.getNodes().rank());
-
-  Properties params;
-  Ref<ItemSet> pointSet = allElemes.getData();
-  Ref<XTable> strainTable = newInstance<DenseTable>("strain", pointSet);
-  Ref<XTable> stressTable = newInstance<DenseTable>("stress", pointSet);
-  Vector strainWeights(pointSet->size());
-  Vector stressWeights(pointSet->size());
-
-  strainWeights = 0.;
-  stressWeights = 0.;
-
-  params.set(ActionParams::TABLE_NAME, "mat_stress");
-  params.set(ActionParams::TABLE_WEIGHTS, stressWeights);
-  params.set(ActionParams::TABLE, stressTable);
-  model_->takeAction(Actions::GET_TABLE, params, globdat);
-  params.set(ActionParams::TABLE_NAME, "mat_strain");
-  params.set(ActionParams::TABLE_WEIGHTS, strainWeights);
-  params.set(ActionParams::TABLE, strainTable);
-  model_->takeAction(Actions::GET_TABLE, params, globdat);
-  params.clear();
-
-  IdxVector elemIDs = beamElemes.getIDs();
-
-  stressTable->scaleRows(stressWeights);
-  strainTable->scaleRows(strainWeights);
-
-  E_pot = 0.;
-  for (idx_t i : elemIDs)
-  {
-    allElemes.getElemNodes(inodes, i);
-    allElemes.getNodes().getSomeCoords(coords.transpose(), inodes);
-    ell = 0.;
-    for (idx_t k = 0; k < coords.size(1); k++)
-      ell += pow(coords(0, k) - coords(coords.size(0) - 1, k),
-                 2.); // LATER assumes straight beam!
-    ell = sqrt(ell);
-
-    for (idx_t j = 0; j < stressTable->columnCount(); j++)
-      E_pot += 0.5 * stressTable->getValue(i, j) *
-               strainTable->getValue(i, j) * ell;
-  }
+  params.set("potentialEnergy", E_pot);
+  model_->takeAction("GET_ENERGY", params, globdat);
+  params.get(E_pot, "potentialEnergy");
 
   if (mode_ == CONSISTENT)
     solver_->getMatrix()->matmul(temp, velo);
@@ -473,7 +432,6 @@ ExplicitModule::store_energy(const Properties& globdat)
     temp = velo / massInv_;
   E_kin = 0.5 * dotProduct(temp, velo);
 
-  Properties variables = Globdat::getVariables(globdat);
   variables.set("PotentialEnergy", E_pot);
   variables.set("KineticEnergy", E_kin);
   variables.set("TotalEnergy", E_pot + E_kin);
@@ -483,8 +441,7 @@ ExplicitModule::store_energy(const Properties& globdat)
 //   updMass
 //-----------------------------------------------------------------------
 
-void
-ExplicitModule::updMass(const Properties& globdat)
+void ExplicitModule::updMass(const Properties &globdat)
 {
   Properties params;
 
@@ -524,8 +481,7 @@ ExplicitModule::updMass(const Properties& globdat)
 //   invalidate
 //-----------------------------------------------------------------------
 
-void
-ExplicitModule::invalidate()
+void ExplicitModule::invalidate()
 {
   valid_ = false;
 }
@@ -534,8 +490,7 @@ ExplicitModule::invalidate()
 //   setPrecision
 //-----------------------------------------------------------------------
 
-void
-ExplicitModule::setPrecision(double eps)
+void ExplicitModule::setPrecision(double eps)
 {
   prec_ = eps;
 }

@@ -21,7 +21,7 @@ params.rod_details.material.shear_modulus = "5e8/12";
 params.rod_details.material.shear_correction	= 2.;
 params.rod_details.material.density = "1e3/12";
 params.rod_details.material.inertia_correct = 1e4;
-params.rod_details.shape.numPoints = 2;
+params.rod_details.shape.numPoints = 3;
 
 // include model and i/o files
 include "input.pro";
@@ -29,7 +29,7 @@ include "model.pro";
 include "output.pro";
 
 // more settings
-// Input.input.order = 2;
+Input.input.order = 2;
 
 Input.groupInput.fixed.ytype = "max";
 Input.groupInput.free.ytype = "min";

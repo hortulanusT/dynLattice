@@ -229,6 +229,14 @@ private:
   void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
                   const Cubix &nodeLambda, const Vector &disp,
                   const IdxVector &inodes) const;
+  /**
+   * @brief calculate the potential Energy stored in the model
+   *
+   * @param disp displacement Vector
+   *
+   * @return double
+   */
+  double calc_pot_Energy_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;

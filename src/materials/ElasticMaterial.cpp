@@ -177,15 +177,19 @@ void ElasticMaterial::getStress(const Vector &stress, const Vector &strain) cons
 
 void ElasticMaterial::getLumpedMaterialMass(const Matrix &M, const double l, const bool border) const
 {
-  double length = l;
-  if (border)
-    length = l / 2;
+  double length = (border) ? l / 2 : l;
   M = materialM_.clone() * length;
 
+  // add steiner parts to the inertia moments
   if (border)
   {
     M(3, 3) += area_ * density_ * pow(length, 3) / 3.;
     M(4, 4) += area_ * density_ * pow(length, 3) / 3.;
+  }
+  else
+  {
+    M(3, 3) += area_ * density_ * pow(length, 3) / 12.;
+    M(4, 4) += area_ * density_ * pow(length, 3) / 12.;
   }
 }
 

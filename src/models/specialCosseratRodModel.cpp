@@ -328,6 +328,21 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
+  if (action == "GET_ENERGY")
+  {
+    Vector disp;
+    double E_pot;
+
+    StateVector::get(disp, jive::model::STATE0, dofs_, globdat);
+    params.get(E_pot, "potentialEnergy");
+
+    E_pot += calc_pot_Energy_(disp);
+
+    params.set("potentialEnergy", E_pot);
+
+    return true;
+  }
+
   return false;
 }
 
@@ -637,6 +652,7 @@ void specialCosseratRodModel::get_strains_(
   {
     strains[ip][TRANS_PART] =
         matmul(ipLambda[ip].transpose(), ipPhiP[ip]);
+    // TEST_CONTEXT(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]))
     strains[ip][ROT_PART] =
         unskew(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]));
   }
@@ -878,6 +894,7 @@ void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
 void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const // TODO fix for higher order elements
 {
+  // REPORT(JEM_FUNC)
   MatmulChain<double, 3> mc3;
 
   const idx_t dofCount = dofs_->typeCount();
@@ -909,6 +926,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
     for (idx_t Inode = 0; Inode < nodeCount; Inode++)
     {
+      // SUBHEADER2(ie, inodes[Inode])
       dofs_->getDofIndices(idofs, inodes[Inode], jtypes_);
       material_->getLumpedMaterialMass(materialM, l, (Inode == 0 || Inode == nodeCount - 1));
 
@@ -916,9 +934,48 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
       spatialM(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[Inode],
                                                 materialM(ROT_PART, ROT_PART), nodeLambda[Inode].transpose());
 
+      // TEST_CONTEXT(materialM)
+      // TEST_CONTEXT(spatialM)
+
       mbld.addBlock(idofs, idofs, spatialM);
     }
   }
+}
+
+double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t rank = shapeK_->globalRank();
+  const idx_t dofCount = dofs_->typeCount();
+  double E_pot = 0;
+
+  // PER ELEMENT VALUES
+  Matrix nodeU(rank, nodeCount);
+  Matrix nodePhi_0(rank, nodeCount);
+  Cubix nodeLambda(rank, rank, nodeCount);
+  Matrix strain(dofCount, ipCount);
+  Matrix stress(dofCount, ipCount);
+  Vector weights(ipCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
+
+    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      E_pot += weights[ip] * 0.5 * dotProduct(strain[ip], stress[ip]);
+    }
+  }
+
+  return E_pot;
 }
 
 //-----------------------------------------------------------------------
