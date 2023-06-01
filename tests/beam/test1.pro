@@ -16,12 +16,13 @@ Solver.solver.maxIter = 1;
 
 // SETTINGS
 params.rod_details.shape.numPoints = 2;
-params.rod_details.young = 2.;
-params.rod_details.shear_modulus = 2.;
-params.rod_details.shear_correction = 1.;
-params.rod_details.area = 1.;
-params.rod_details.area_moment = 1.;
-params.rod_details.polar_moment = 1.;
+params.rod_details.material.type = "Elastic";
+params.rod_details.material.young = 2.;
+params.rod_details.material.shear_modulus = 2.;
+params.rod_details.material.shear_correction = 1.;
+params.rod_details.material.area = 1.;
+params.rod_details.material.area_moment = 1.;
+params.rod_details.material.polar_moment = 1.;
 
 params.force_model.type = "Neumann";
 params.force_model.loadIncr = "8*PI";

@@ -4,7 +4,7 @@
 
 JEM_DEFINE_CLASS(ElasticMaterial);
 
-const char *ElasticMaterial::TYPE_NAME = "ElasticMat";
+const char *ElasticMaterial::TYPE_NAME = "Elastic";
 const char *ElasticMaterial::YOUNGS_MODULUS = "young";
 const char *ElasticMaterial::SHEAR_MODULUS = "shear_modulus";
 const char *ElasticMaterial::POISSON_RATIO = "poisson_ratio";
@@ -160,8 +160,8 @@ void ElasticMaterial::calcMaterialMass_()
   materialM_(0, 0) = density_ * area_;
   materialM_(1, 1) = density_ * area_;
   materialM_(2, 2) = density_ * area_;
-  materialM_(3, 3) = 0;
-  materialM_(4, 4) = 0;
+  materialM_(3, 3) = density_ * areaMoment_[0];
+  materialM_(4, 4) = density_ * areaMoment_[1];
   materialM_(5, 5) = density_ * polarMoment_;
 }
 
@@ -182,21 +182,10 @@ void ElasticMaterial::getLumpedMaterialMass(const Matrix &M, const double l, con
     length = l / 2;
   M = materialM_.clone() * length;
 
-  if (cross_section_ == "circle")
-  {
-    M(3, 3) = M(0, 0) * (3 * radius_ * radius_ + length * length) / 12.;
-    M(4, 4) = M(0, 0) * (3 * radius_ * radius_ + length * length) / 12.;
-  }
-  else if (cross_section_ == "rectangle")
-  {
-    M(3, 3) = M(0, 0) * (side_length_[1] * side_length_[1] + length * length) / 12.;
-    M(4, 4) = M(0, 0) * (side_length_[0] * side_length_[0] + length * length) / 12.;
-  }
-
   if (border)
   {
-    M(3, 3) += M(0, 0) * length / 2 * length / 2;
-    M(4, 4) += M(0, 0) * length / 2 * length / 2;
+    M(3, 3) += area_ * density_ * pow(length, 3) / 3.;
+    M(4, 4) += area_ * density_ * pow(length, 3) / 3.;
   }
 }
 

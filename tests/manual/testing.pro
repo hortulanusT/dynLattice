@@ -13,11 +13,12 @@ Solver.integrator.deltaTime = 1e-5;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
-params.rod_details.cross_section = "rectangle";
-params.rod_details.side_length = [0.75e-3, 25e-3];
-params.rod_details.young = "5.6e10/12";
-params.rod_details.shear_modulus = 2e9;
-params.rod_details.density = 200.;
+params.rod_details.material.type = "Elastic";
+params.rod_details.material.cross_section = "rectangle";
+params.rod_details.material.side_length = [0.75e-3, 25e-3];
+params.rod_details.material.young = "5.6e10/12";
+params.rod_details.material.shear_modulus = 2e9;
+params.rod_details.material.density = 200.;
 params.rod_details.shape.numPoints = 3;
 
 // include model and i/o files

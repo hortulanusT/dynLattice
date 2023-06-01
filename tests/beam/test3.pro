@@ -14,10 +14,11 @@ Solver.modules = [ "solver" ];
 Solver.solver.type = "Arclen";
 
 params.rod_details.shape.numPoints = "2";
-params.rod_details.young = 6.895e10;
-params.rod_details.shear_modulus = 2.16e10;
-params.rod_details.area = "1.27e-3";
-params.rod_details.area_moment = "1.27e-3 ^ 3 / 12";
+params.rod_details.material.type = "Elastic";
+params.rod_details.material.young = 6.895e10;
+params.rod_details.material.shear_modulus = 2.16e10;
+params.rod_details.material.area = "1.27e-3";
+params.rod_details.material.area_moment = "1.27e-3 ^ 3 / 12";
 params.rod_details.material_ey = [0.,0.,-1.];
 
 params.force_model.type = "StdArclen";

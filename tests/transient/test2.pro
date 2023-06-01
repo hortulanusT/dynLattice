@@ -10,12 +10,13 @@ Solver.integrator.deltaTime = 1e-6;
 // Solver.integrator.precision = 1e-7;
 
 // settings
-params.rod_details.cross_section = "circle";
-params.rod_details.radius = 5e-3;
-params.rod_details.young = 5e6;
-params.rod_details.poisson_ratio = 0.5;
-params.rod_details.shear_correction = 1.;
-params.rod_details.density = 1.1e3;
+params.rod_details.material.type = "Elastic";
+params.rod_details.material.cross_section = "circle";
+params.rod_details.material.radius = 5e-3;
+params.rod_details.material.young = 5e6;
+params.rod_details.material.poisson_ratio = 0.5;
+params.rod_details.material.shear_correction = 1.;
+params.rod_details.material.density = 1.1e3;
 params.rod_details.shape.numPoints = 2;
 
 // include model and i/o files

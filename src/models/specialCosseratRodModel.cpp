@@ -256,20 +256,20 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(*mbld, fint, disp);
 
-    // DEBUGGING
-    IdxVector dofList(fint.size());
-    Matrix K(fint.size(), fint.size());
-    Matrix D(dofs_->typeCount(), allNodes_.size());
-    Matrix F(dofs_->typeCount(), allNodes_.size());
-    for (idx_t i = 0; i < dofList.size(); i++)
-      dofList[i] = i;
-    mbld->getBlock(K, dofList, dofList);
-    vec2mat(D.transpose(), disp);
-    vec2mat(F.transpose(), fint);
-    REPORT(action)
-    TEST_CONTEXT(D)
-    TEST_CONTEXT(K)
-    TEST_CONTEXT(F)
+    // // DEBUGGING
+    // IdxVector dofList(fint.size());
+    // Matrix K(fint.size(), fint.size());
+    // Matrix D(dofs_->typeCount(), allNodes_.size());
+    // Matrix F(dofs_->typeCount(), allNodes_.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(K, dofList, dofList);
+    // vec2mat(D.transpose(), disp);
+    // vec2mat(F.transpose(), fint);
+    // REPORT(action)
+    // TEST_CONTEXT(D)
+    // TEST_CONTEXT(K)
+    // TEST_CONTEXT(F)
 
     return true;
   }
@@ -664,7 +664,7 @@ void specialCosseratRodModel::get_stresses_(
 
   // get the (material) strains
   get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
-  TEST_CONTEXT(strains)
+  // TEST_CONTEXT(strains)
 
   // get the (material) stresses
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -912,8 +912,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
       dofs_->getDofIndices(idofs, inodes[Inode], jtypes_);
       material_->getLumpedMaterialMass(materialM, l, (Inode == 0 || Inode == nodeCount - 1));
 
-      spatialM(TRANS_PART, TRANS_PART) = mc3.matmul(nodeLambda[Inode],
-                                                    materialM(TRANS_PART, TRANS_PART), nodeLambda[Inode].transpose());
+      spatialM = materialM;
       spatialM(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[Inode],
                                                 materialM(ROT_PART, ROT_PART), nodeLambda[Inode].transpose());
 

@@ -13,13 +13,14 @@ Solver.integrator.reportEnergy = true;
 Solver.integrator.precision = 1e-4;
 
 // settings
-params.rod_details.cross_section = "square";
-params.rod_details.side_length = "sqrt(12e-3)";
-params.rod_details.young = "1e9/12";
-params.rod_details.shear_modulus = "5e8/12";
-params.rod_details.shear_correction	= 2.;
-params.rod_details.density = "1e3/12";
-params.rod_details.inertia_correct = 1e4;
+params.rod_details.material.type = "Elastic";
+params.rod_details.material.cross_section = "square";
+params.rod_details.material.side_length = "sqrt(12e-3)";
+params.rod_details.material.young = "1e9/12";
+params.rod_details.material.shear_modulus = "5e8/12";
+params.rod_details.material.shear_correction	= 2.;
+params.rod_details.material.density = "1e3/12";
+params.rod_details.material.inertia_correct = 1e4;
 params.rod_details.shape.numPoints = 2;
 
 // include model and i/o files
