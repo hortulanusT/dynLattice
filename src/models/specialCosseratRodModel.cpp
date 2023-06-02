@@ -73,7 +73,7 @@ specialCosseratRodModel::specialCosseratRodModel
   rodNodes_[rodElems_.getNodeIndices()] =
       jem::iarray(rodElems_.getNodeIndices().size());
 
-  // Initialize the internal shape.
+  // Initialize the internal shape. // TODO determine node Count automatically
   shapeK_ = newInstance<Line3D>(SHAPE_IDENTIFIER, myConf, myProps);
 
   // Check whether the mesh is valid.
