@@ -892,7 +892,7 @@ void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
   }
 }
 
-void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const // TODO fix for higher order elements
+void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
 {
   // REPORT(JEM_FUNC)
   MatmulChain<double, 3> mc3;
