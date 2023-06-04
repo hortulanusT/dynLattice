@@ -13,13 +13,13 @@ Solver.integrator.deltaTime = 1e-5;
 // Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 
 // settings
-params.rod_details.material.type = "Elastic";
+params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.cross_section = "rectangle";
 params.rod_details.material.side_length = [0.75e-3, 25e-3];
 params.rod_details.material.young = "5.6e10/12";
 params.rod_details.material.shear_modulus = 2e9;
 params.rod_details.material.density = 200.;
-params.rod_details.shape.numPoints = 3;
+
 
 // include model and i/o files
 include "../transient/input.pro";
@@ -70,7 +70,7 @@ Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
 // Output.paraview.type = "ParaView";
 // Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
 // Output.paraview.groups = [ "beams" ];
-// Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+// Output.paraview.beams.shape = "Line2";
 // Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
 // Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
 // Output.paraview.beams.node_data = ["fint", "fext", "fres"];

@@ -1,5 +1,5 @@
 /**
- * @file ElasticMaterial.h
+ * @file ElasticRodMaterial.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
  * @brief simple implementation of the linear elastic material laws
  * @version 0.1
@@ -24,7 +24,7 @@ using jem::numeric::matmul;
 using jive::Ref;
 using jive::Vector;
 
-class ElasticMaterial : public Material
+class ElasticRodMaterial : public Material
 {
 public:
   static const char *TYPE_NAME;
@@ -40,12 +40,12 @@ public:
   static const char *RADIUS;
   static const char *SIDE_LENGTH;
 
-  JEM_DECLARE_CLASS(ElasticMaterial, Material);
+  JEM_DECLARE_CLASS(ElasticRodMaterial, Material);
 
-  ElasticMaterial(const String &name,
-                  const Properties &conf,
-                  const Properties &props,
-                  const Properties &globdat);
+  ElasticRodMaterial(const String &name,
+                     const Properties &conf,
+                     const Properties &props,
+                     const Properties &globdat);
 
   static Ref<Material> makeNew(const String &name, const Properties &conf,
                                const Properties &props, const Properties &globdat);
@@ -56,14 +56,16 @@ public:
 
   virtual void getConfig(const Properties &conf) const override;
 
-  virtual Matrix getMaterialStiff() const override;
+  virtual inline Matrix getMaterialStiff() const override;
 
-  virtual void getLumpedMaterialMass(const Matrix &M, const double l, const bool border) const override;
+  virtual inline Matrix getMaterialMass() const override;
 
-  virtual void getStress(const Vector &stress, const Vector &strain) const override;
+  virtual Matrix getLumpedMass(double l) const override;
+
+  virtual inline void getStress(const Vector &stress, const Vector &strain) const override;
 
 protected:
-  ~ElasticMaterial();
+  ~ElasticRodMaterial();
 
 private:
   void calcMaterialStiff_();
@@ -86,3 +88,18 @@ private:
   Matrix materialK_;
   Matrix materialM_;
 };
+
+Matrix ElasticRodMaterial::getMaterialStiff() const
+{
+  return materialK_.clone();
+}
+
+Matrix ElasticRodMaterial::getMaterialMass() const
+{
+  return materialM_.clone();
+}
+
+void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain) const
+{
+  stress = matmul(materialK_, strain);
+}

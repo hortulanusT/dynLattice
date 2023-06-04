@@ -1,36 +1,36 @@
-#include "materials/ElasticMaterial.h"
+#include "materials/ElasticRodMaterial.h"
 #include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>
 
-JEM_DEFINE_CLASS(ElasticMaterial);
+JEM_DEFINE_CLASS(ElasticRodMaterial);
 
-const char *ElasticMaterial::TYPE_NAME = "Elastic";
-const char *ElasticMaterial::YOUNGS_MODULUS = "young";
-const char *ElasticMaterial::SHEAR_MODULUS = "shear_modulus";
-const char *ElasticMaterial::POISSON_RATIO = "poisson_ratio";
-const char *ElasticMaterial::AREA = "area";
-const char *ElasticMaterial::DENSITY = "density";
-const char *ElasticMaterial::AREA_MOMENT = "area_moment";
-const char *ElasticMaterial::POLAR_MOMENT = "polar_moment";
-const char *ElasticMaterial::SHEAR_FACTOR = "shear_correction";
-const char *ElasticMaterial::CROSS_SECTION = "cross_section";
-const char *ElasticMaterial::RADIUS = "radius";
-const char *ElasticMaterial::SIDE_LENGTH = "side_length";
+const char *ElasticRodMaterial::TYPE_NAME = "ElasticRod";
+const char *ElasticRodMaterial::YOUNGS_MODULUS = "young";
+const char *ElasticRodMaterial::SHEAR_MODULUS = "shear_modulus";
+const char *ElasticRodMaterial::POISSON_RATIO = "poisson_ratio";
+const char *ElasticRodMaterial::AREA = "area";
+const char *ElasticRodMaterial::DENSITY = "density";
+const char *ElasticRodMaterial::AREA_MOMENT = "area_moment";
+const char *ElasticRodMaterial::POLAR_MOMENT = "polar_moment";
+const char *ElasticRodMaterial::SHEAR_FACTOR = "shear_correction";
+const char *ElasticRodMaterial::CROSS_SECTION = "cross_section";
+const char *ElasticRodMaterial::RADIUS = "radius";
+const char *ElasticRodMaterial::SIDE_LENGTH = "side_length";
 
-ElasticMaterial::ElasticMaterial(const String &name,
-                                 const Properties &conf,
-                                 const Properties &props,
-                                 const Properties &globdat) : Super(name, conf, props, globdat)
+ElasticRodMaterial::ElasticRodMaterial(const String &name,
+                                       const Properties &conf,
+                                       const Properties &props,
+                                       const Properties &globdat) : Super(name, conf, props, globdat)
 {
   configure(props);
   getConfig(conf);
 }
 
-ElasticMaterial::~ElasticMaterial()
+ElasticRodMaterial::~ElasticRodMaterial()
 {
 }
 
-void ElasticMaterial::configure(const Properties &props)
+void ElasticRodMaterial::configure(const Properties &props)
 {
   Properties myProps = props.getProps(myName_);
 
@@ -115,7 +115,7 @@ void ElasticMaterial::configure(const Properties &props)
       << materialM_ << "\n";
 }
 
-void ElasticMaterial::getConfig(const Properties &conf) const
+void ElasticRodMaterial::getConfig(const Properties &conf) const
 {
   Properties myConf = conf.getProps(myName_);
 
@@ -141,7 +141,7 @@ void ElasticMaterial::getConfig(const Properties &conf) const
   myConf.set(DENSITY, density_);
 }
 
-void ElasticMaterial::calcMaterialStiff_()
+void ElasticRodMaterial::calcMaterialStiff_()
 {
   materialK_.resize(6, 6);
   materialK_ = 0.0;
@@ -153,7 +153,7 @@ void ElasticMaterial::calcMaterialStiff_()
   materialK_(5, 5) = shearMod_ * polarMoment_;
 }
 
-void ElasticMaterial::calcMaterialMass_()
+void ElasticRodMaterial::calcMaterialMass_()
 {
   materialM_.resize(6, 6);
   materialM_ = 0.0;
@@ -165,44 +165,26 @@ void ElasticMaterial::calcMaterialMass_()
   materialM_(5, 5) = density_ * polarMoment_;
 }
 
-Matrix ElasticMaterial::getMaterialStiff() const
+Matrix ElasticRodMaterial::getLumpedMass(double l) const
 {
-  return materialK_.clone();
+  Matrix M = Matrix(getMaterialMass() * l);
+
+  M(3, 3) = area_ * density_ * pow(l, 3) / 6.;
+  M(4, 4) = area_ * density_ * pow(l, 3) / 6.;
+
+  return M;
 }
 
-void ElasticMaterial::getStress(const Vector &stress, const Vector &strain) const
-{
-  stress = matmul(materialK_, strain);
-}
-
-void ElasticMaterial::getLumpedMaterialMass(const Matrix &M, const double l, const bool border) const
-{
-  double length = (border) ? l / 2 : l;
-  M = materialM_.clone() * length;
-
-  // add steiner parts to the inertia moments
-  if (border)
-  {
-    M(3, 3) += area_ * density_ * pow(length, 3) / 3.;
-    M(4, 4) += area_ * density_ * pow(length, 3) / 3.;
-  }
-  else
-  {
-    M(3, 3) += area_ * density_ * pow(length, 3) / 12.;
-    M(4, 4) += area_ * density_ * pow(length, 3) / 12.;
-  }
-}
-
-Ref<Material> ElasticMaterial::makeNew
+Ref<Material> ElasticRodMaterial::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
-  return newInstance<ElasticMaterial>(name, conf, props, globdat);
+  return newInstance<ElasticRodMaterial>(name, conf, props, globdat);
 }
 
-void ElasticMaterial::declare()
+void ElasticRodMaterial::declare()
 {
   MaterialFactory::declare(TYPE_NAME, &makeNew);
   MaterialFactory::declare(CLASS_NAME, &makeNew);

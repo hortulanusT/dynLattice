@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <jem/base/Array.h>
 #include <jem/base/NamedObject.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
@@ -60,13 +61,13 @@ public:
   virtual Matrix getMaterialStiff() const = 0;
 
   /**
-   * @brief get the rigid body mass (assuming cantilever at end)
+   * @brief get the material mass matrix
    *
-   * @param[out] M ridig body mass matrix
-   * @param[in] l length of cantilever
-   * @param[in] border wether to calculate the mass for a border element (half the length + steiner contribution)
+   * @return mass matrix (per unit)
    */
-  virtual void getLumpedMaterialMass(const Matrix &M, const double l, const bool border) const = 0;
+  virtual Matrix getMaterialMass() const = 0;
+
+  virtual Matrix getLumpedMass(double l) const;
 
 protected:
   /**

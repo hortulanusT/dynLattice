@@ -1,6 +1,6 @@
 #pragma once
 
-#include "materials/ElasticMaterial.h"
+#include "materials/ElasticRodMaterial.h"
 
 //-----------------------------------------------------------------------
 //   declareMaterials

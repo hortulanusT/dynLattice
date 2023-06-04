@@ -14,8 +14,7 @@ Solver.modules = [ "solver" ];
 Solver.solver.type = "Arclen";
 
 // SETTINGS
-params.rod_details.shape.numPoints = "3";
-params.rod_details.material.type = "Elastic";
+params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.young = 7.2e6;
 params.rod_details.material.poisson_ratio = .3;
 params.rod_details.material.area = 2.;
@@ -50,3 +49,4 @@ model.model.model.lattice.child += params.rod_details;
 model.model.model.force = params.force_model;
 
 Output.paraview.sampleWhen = "i%10<1";
+Output.paraview.beams.shape = "Line3";

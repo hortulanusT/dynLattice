@@ -23,7 +23,6 @@
 //-----------------------------------------------------------------------
 
 const char *specialCosseratRodModel::TYPE_NAME = "specialCosseratRod";
-const char *specialCosseratRodModel::SHAPE_IDENTIFIER = "shape";
 const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
 const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
 const char *specialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
@@ -34,6 +33,7 @@ const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
+const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -73,11 +73,16 @@ specialCosseratRodModel::specialCosseratRodModel
   rodNodes_[rodElems_.getNodeIndices()] =
       jem::iarray(rodElems_.getNodeIndices().size());
 
-  // Initialize the internal shape. // TODO determine node Count automatically
-  shapeK_ = newInstance<Line3D>(SHAPE_IDENTIFIER, myConf, myProps);
+  // Initialize the internal shape.
+  myProps.makeProps("stiffShape").set("numPoints", allElems_.getElemNodeCount(rodElems_.getIndex(0)));
+  shapeK_ = newInstance<Line3D>("stiffShape", myConf, myProps);
+  myProps.makeProps("massShape").set("numPoints", allElems_.getElemNodeCount(rodElems_.getIndex(0)));
+  myProps.makeProps("massShape").set("intScheme", "Gauss" + String(allElems_.getElemNodeCount(rodElems_.getIndex(0))));
+  shapeM_ = newInstance<Line3D>("massShape", myConf, myProps);
 
   // Check whether the mesh is valid.
   rodElems_.checkElements(getContext(), shapeK_->nodeCount());
+  rodElems_.checkElements(getContext(), shapeM_->nodeCount());
 
   // Define the DOFs.
   Ref<XDofSpace> dofs = XDofSpace::get(allNodes_.getData(), globdat);
@@ -173,6 +178,10 @@ specialCosseratRodModel::specialCosseratRodModel
     }
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
+
+  lumped_mass_ = false;
+  if (myProps.find(lumped_mass_, LUMPED_MASS))
+    myConf.set(LUMPED_MASS, lumped_mass_);
 
   material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
 }
@@ -780,7 +789,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
-    TEST_CONTEXT(stress)
+    // TEST_CONTEXT(stress)
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
@@ -898,46 +907,65 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   MatmulChain<double, 3> mc3;
 
   const idx_t dofCount = dofs_->typeCount();
-  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t nodeCount = shapeM_->nodeCount();
   const idx_t elemCount = rodElems_.size();
-  const idx_t rank = shapeK_->globalRank();
+  const idx_t rank = shapeM_->globalRank();
+  const idx_t ipCount = shapeM_->ipointCount();
 
   // PER ELEMENT VALUES
   IdxVector inodes(nodeCount);
   IdxVector idofs(dofCount);
   IdxVector jdofs(dofCount);
 
-  Vector weights(shapeK_->ipointCount());
+  Vector weights(shapeM_->ipointCount());
+  Matrix shapes(nodeCount, ipCount);
   double l;
   Matrix nodePhi_0(rank, nodeCount);
   Matrix nodeU(rank, nodeCount);
   Cubix nodeLambda(rank, rank, nodeCount);
 
-  Matrix materialM(dofCount, dofCount);
-  Matrix spatialM(dofCount, dofCount);
+  Cubix ipLambda(rank, rank, ipCount);
+
+  Matrix materialM = material_->getMaterialMass()(TRANS_PART, TRANS_PART);
+  Matrix materialJ(rank, rank);
+  Matrix spatialInertia(dofCount, dofCount);
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-    shapeK_->getIntegrationWeights(weights, nodePhi_0);
+    shapeM_->getRotations(ipLambda, nodeLambda);
+
+    shapeM_->getIntegrationWeights(weights, nodePhi_0);
+    shapes = shapeM_->getShapeFunctions();
+
     l = sum(weights) / (nodeCount - 1);
+    materialJ = material_->getLumpedMass(l)(ROT_PART, ROT_PART);
 
-    for (idx_t Inode = 0; Inode < nodeCount; Inode++)
+    for (idx_t inode = 0; inode < nodeCount; inode++)
     {
-      // SUBHEADER2(ie, inodes[Inode])
-      dofs_->getDofIndices(idofs, inodes[Inode], jtypes_);
-      material_->getLumpedMaterialMass(materialM, l, (Inode == 0 || Inode == nodeCount - 1));
+      dofs_->getDofIndices(idofs, inodes[inode], jtypes_);
+      for (idx_t jnode = 0; jnode < nodeCount; jnode++)
+      {
+        dofs_->getDofIndices(jdofs, inodes[jnode], jtypes_);
 
-      spatialM = materialM;
-      spatialM(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[Inode],
-                                                materialM(ROT_PART, ROT_PART), nodeLambda[Inode].transpose());
+        spatialInertia = 0.;
+        for (idx_t ip = 0; ip < ipCount; ip++)
+          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
+                                                    mc3.matmul(ipLambda[ip], materialM, ipLambda[ip].transpose());
 
-      // TEST_CONTEXT(materialM)
-      // TEST_CONTEXT(spatialM)
+        if (inode == jnode)
+        {
+          spatialInertia(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[inode],
+                                                          materialJ, nodeLambda[inode].transpose());
 
-      mbld.addBlock(idofs, idofs, spatialM);
+          if (inode == inodes[0] || inode == inodes[nodeCount - 1])
+            spatialInertia /= 2.;
+        }
+
+        mbld.addBlock(idofs, jdofs, spatialInertia);
+      }
     }
   }
 }

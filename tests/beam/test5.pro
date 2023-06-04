@@ -16,8 +16,7 @@ Solver.modules = [ "solver" ];
 Solver.solver.type = "Nonlin";
 
 // SETTINGS
-params.rod_details.shape.numPoints = "2";
-params.rod_details.material.type = "Elastic";
+params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.young = 1e7;
 params.rod_details.material.shear_modulus = .5e7;
 params.rod_details.material.area = 1.;
@@ -38,3 +37,5 @@ include "output.pro";
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];
+
+Output.paraview.beams.shape = "Line2";

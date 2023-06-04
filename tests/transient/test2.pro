@@ -10,14 +10,14 @@ Solver.integrator.deltaTime = 1e-6;
 // Solver.integrator.precision = 1e-7;
 
 // settings
-params.rod_details.material.type = "Elastic";
+params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.cross_section = "circle";
 params.rod_details.material.radius = 5e-3;
 params.rod_details.material.young = 5e6;
 params.rod_details.material.poisson_ratio = 0.5;
 params.rod_details.material.shear_correction = 1.;
 params.rod_details.material.density = 1.1e3;
-params.rod_details.shape.numPoints = 2;
+
 
 // include model and i/o files
 include "input.pro";
@@ -45,7 +45,7 @@ Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+Output.paraview.beams.shape = "Line2";
 Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];

@@ -22,3 +22,8 @@ void Material::configure(const Properties &props)
 void Material::getConfig(const Properties &props) const
 {
 }
+
+Matrix Material::getLumpedMass(double l) const
+{
+  return Matrix(getMaterialMass() * l);
+}

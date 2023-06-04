@@ -87,7 +87,6 @@ class specialCosseratRodModel : public Model
 {
 public:
   static const char *TYPE_NAME;
-  static const char *SHAPE_IDENTIFIER;
   static const char *TRANS_DOF_DEFAULT;
   static const char *ROT_DOF_DEFAULT;
   static const char *TRANS_DOF_NAMES;
@@ -97,6 +96,7 @@ public:
   static const char *GIVEN_NODES;
   static const char *GIVEN_DIRS;
   static const char *THICKENING_FACTOR;
+  static const char *LUMPED_MASS;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -245,11 +245,13 @@ private:
   Assignable<NodeSet> allNodes_;
   Ref<DofSpace> dofs_;
   Ref<Line3D> shapeK_;
+  Ref<Line3D> shapeM_;
   Ref<Material> material_;
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;
   bool symmetric_only_;
+  bool lumped_mass_;
 
   Vector thickFact_;
 

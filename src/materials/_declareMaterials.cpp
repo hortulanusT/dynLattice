@@ -6,5 +6,5 @@
 
 void declareMaterials()
 {
-  ElasticMaterial::declare();
+  ElasticRodMaterial::declare();
 }
