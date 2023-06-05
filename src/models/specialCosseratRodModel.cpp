@@ -504,7 +504,7 @@ void specialCosseratRodModel::init_strain_()
 //-----------------------------------------------------------------------
 //   init_rot_
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::init_rot_() // LATER non-straight rods?
+void specialCosseratRodModel::init_rot_()
 {
   const idx_t nodeCount = rodElems_.getNodeIndices().size();
   const idx_t elemCount = rodElems_.size();
@@ -917,7 +917,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   IdxVector idofs(dofCount);
   IdxVector jdofs(dofCount);
 
-  Vector weights(shapeM_->ipointCount());
+  Vector weights(ipCount);
   Matrix shapes(nodeCount, ipCount);
   double l;
   Matrix nodePhi_0(rank, nodeCount);
@@ -950,21 +950,19 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
       {
         dofs_->getDofIndices(jdofs, inodes[jnode], jtypes_);
 
-        spatialInertia = 0.;
+        spatialInertia = 0;
+
         for (idx_t ip = 0; ip < ipCount; ip++)
           spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
                                                     mc3.matmul(ipLambda[ip], materialM, ipLambda[ip].transpose());
-
         if (inode == jnode)
-        {
-          spatialInertia(ROT_PART, ROT_PART) = mc3.matmul(nodeLambda[inode],
-                                                          materialJ, nodeLambda[inode].transpose());
+          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], materialJ,
+                                                           nodeLambda[inode].transpose());
+        if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
+          spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
-          if (inode == inodes[0] || inode == inodes[nodeCount - 1])
-            spatialInertia /= 2.;
-        }
-
-        mbld.addBlock(idofs, jdofs, spatialInertia);
+        TEST_CONTEXT(spatialInertia)
+        mbld.addBlock(idofs, idofs, spatialInertia);
       }
     }
   }

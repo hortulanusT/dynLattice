@@ -169,8 +169,8 @@ Matrix ElasticRodMaterial::getLumpedMass(double l) const
 {
   Matrix M = Matrix(getMaterialMass() * l);
 
-  M(3, 3) = area_ * density_ * pow(l, 3) / 6.;
-  M(4, 4) = area_ * density_ * pow(l, 3) / 6.;
+  M(3, 3) += area_ * density_ * pow(l, 3) / 12.;
+  M(4, 4) += area_ * density_ * pow(l, 3) / 12.;
 
   return M;
 }
