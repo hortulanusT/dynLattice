@@ -17,11 +17,11 @@ Solver.solver.type = "Nonlin";
 // Solver.solver.precision = 1e-9;
 
 // SETTINGS
-params.rod_details.shape.numPoints = "3";
-params.rod_details.young = 2.1e7;
-params.rod_details.poisson_ratio = .3;
-params.rod_details.area = 20.;
-params.rod_details.area_moment = 1.666666666666667;
+params.rod_details.material.type = "ElasticRod";
+params.rod_details.material.young = 2.1e7;
+params.rod_details.material.poisson_ratio = .3;
+params.rod_details.material.area = 20.;
+params.rod_details.material.area_moment = 1.666666666666667;
 params.rod_details.symmetric_tanget_stiffness =  true;
 
 params.force_model.type = "LoadScale";
@@ -39,6 +39,7 @@ include "output.pro";
 
 Input.input.order = 2;
 
+Output.paraview.beams.shape = "Line3";
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];

@@ -8,6 +8,7 @@
 #include <jive/fem/InputModule.h>
 #include <jive/fem/ShapeModule.h>
 
+#include "materials/_declareMaterials.h"
 #include "models/_declareModels.h"
 #include "modules/_declareModules.h"
 
@@ -35,6 +36,9 @@ Ref<Module> mainModule()
 
   // Declare everything, that is needed for the modules
   declareModules();
+
+  // Declare everything, that is needed for the materials
+  declareMaterials();
 
   // Set up the module chain. These modules will be called by Jive in
   // the order that they have been added to the chain.

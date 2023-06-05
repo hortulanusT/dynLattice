@@ -12,6 +12,9 @@
 
 #pragma once
 
+#include <materials/Material.h>
+#include <materials/MaterialFactory.h>
+
 #include <jem/base/Array.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
@@ -84,27 +87,16 @@ class specialCosseratRodModel : public Model
 {
 public:
   static const char *TYPE_NAME;
-  static const char *SHAPE_IDENTIFIER;
   static const char *TRANS_DOF_DEFAULT;
   static const char *ROT_DOF_DEFAULT;
-  static const char *YOUNGS_MODULUS;
-  static const char *SHEAR_MODULUS;
-  static const char *POISSON_RATIO;
-  static const char *AREA;
-  static const char *DENSITY;
-  static const char *AREA_MOMENT;
-  static const char *SHEAR_FACTOR;
-  static const char *POLAR_MOMENT;
   static const char *TRANS_DOF_NAMES;
   static const char *ROT_DOF_NAMES;
   static const char *SYMMETRIC_ONLY;
   static const char *MATERIAL_Y_DIR;
   static const char *GIVEN_NODES;
   static const char *GIVEN_DIRS;
-  static const char *CROSS_SECTION;
-  static const char *RADIUS;
-  static const char *SIDE_LENGTH;
   static const char *THICKENING_FACTOR;
+  static const char *LUMPED_MASS;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -150,8 +142,8 @@ private:
    * @param[in]  velo current values for the DOF - velocities
    * @param[in]  mass current mass matrix
    */
-  void assembleGyro_(const Vector& fint,
-                     const Vector& velo,
+  void assembleGyro_(const Vector &fint,
+                     const Vector &velo,
                      const Ref<AbstractMatrix> mass) const;
 
   /**
@@ -191,10 +183,10 @@ private:
    * @brief Get the geometric stiffness matrix
    */
   void get_geomStiff_(
-      const Cubix &B, ///< B(.,.,i), where it refers to the B-matrix at
-                      ///< the i-th integration point
-      const Matrix &stresses, ///< spatial stress(i,j), stress component i
-                              ///< at the j-th integration points
+      const Cubix &B,          ///< B(.,.,i), where it refers to the B-matrix at
+                               ///< the i-th integration point
+      const Matrix &stresses,  ///< spatial stress(i,j), stress component i
+                               ///< at the j-th integration points
       const Matrix &nodePhi_0, ///< location of the nodes
       const Matrix &nodeU)
       const; ///< nodeU(.,j), translational displacement j-th node
@@ -209,7 +201,7 @@ private:
       const Matrix
           &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
       const Matrix
-          &nodeU, ///< nodeU(.,j), translational displacement j-th node
+          &nodeU,              ///< nodeU(.,j), translational displacement j-th node
       const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
                                ///< orientation j-th node
       const idx_t ie,
@@ -225,7 +217,7 @@ private:
       const Matrix
           &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
       const Matrix
-          &nodeU, ///< nodeU(.,j), translational displacement j-th node
+          &nodeU,              ///< nodeU(.,j), translational displacement j-th node
       const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
                                ///< orientation j-th node
       const idx_t ie,
@@ -237,6 +229,14 @@ private:
   void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
                   const Cubix &nodeLambda, const Vector &disp,
                   const IdxVector &inodes) const;
+  /**
+   * @brief calculate the potential Energy stored in the model
+   *
+   * @param disp displacement Vector
+   *
+   * @return double
+   */
+  double calc_pot_Energy_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;
@@ -246,26 +246,16 @@ private:
   Ref<DofSpace> dofs_;
   Ref<Line3D> shapeK_;
   Ref<Line3D> shapeM_;
+  Ref<Material> material_;
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;
   bool symmetric_only_;
+  bool lumped_mass_;
 
-  double young_;
-  double density_;
-  double area_;
-  double shearMod_;
-  Vector areaMoment_;
-  double polarMoment_;
-  String cross_section_;
-  double radius_;
-  Vector side_length_;
-  double shearParam_;
   Vector thickFact_;
 
   Vector material_ey_;
-  Matrix materialC_;
-  Matrix materialM_;
 
   IdxVector
       givenNodes_; ///< given directions for nodes (especially end-nodes)

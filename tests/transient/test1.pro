@@ -7,12 +7,13 @@ Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 5e-5;
 
 // settings
-params.rod_details.cross_section = "square";
-params.rod_details.side_length = "sqrt(12/2e3)";
-params.rod_details.young = "5.6e10/12";
-params.rod_details.shear_modulus = 2e9;
-params.rod_details.density = 200.;
-params.rod_details.shape.numPoints = 3;
+params.rod_details.material.type = "ElasticRod";
+params.rod_details.material.cross_section = "square";
+params.rod_details.material.side_length = "sqrt(12/2e3)";
+params.rod_details.material.young = "5.6e10/12";
+params.rod_details.material.shear_modulus = 2e9;
+params.rod_details.material.density = 200.;
+
 
 // include model and i/o files
 include "input.pro";
@@ -42,7 +43,7 @@ Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+Output.paraview.beams.shape = "Line3";
 Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
