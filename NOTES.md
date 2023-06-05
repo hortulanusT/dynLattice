@@ -1,9 +1,5 @@
 # :hammer_and_pick: TO DO 
 1. Models
-    - Rod Model
-      - Extract material for the stress -> strain relationship
-      - Create MaterialFactory
-      - Why are dynamics only working with linear elements?
     - Explicit Solver
       - keep $M$ constant, only update $\Theta$
       - implement 'lumped' algorithm with direct 3x3 inverts
