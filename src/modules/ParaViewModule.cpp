@@ -144,9 +144,10 @@ Module::Status ParaViewModule::run
     if (!globdat.find(currentTime, Globdat::TIME))
       currentTime = currentStep;
     folder_sep =
-      currentFile.rfind("/") + 1; // LATER make compatible with other OS's?
+        currentFile.rfind(std::filesystem::path::preferred_separator) + 1;
 
-    if (pvd_print_) {
+    if (pvd_print_)
+    {
       pvd_time_buffer_.pushBack(currentTime);
       pvd_name_buffer_.pushBack(currentFile[SliceFrom(folder_sep)]);
 
@@ -162,7 +163,8 @@ Module::Status ParaViewModule::run
       pvd_printer->incrIndentLevel();
       pvd_printer->flush();
 
-      for (idx_t i_out = 0; i_out < out_num_; i_out++) {
+      for (idx_t i_out = 0; i_out < out_num_; i_out++)
+      {
         *pvd_printer << "<DataSet ";
         *pvd_printer << "timestep=\"" << pvd_time_buffer_[i_out] << "\" ";
         *pvd_printer << "group=\"\" part=\"0\" ";
@@ -187,10 +189,9 @@ Module::Status ParaViewModule::run
 //   shutdown
 //-----------------------------------------------------------------------
 
-void
-ParaViewModule::shutdown
+void ParaViewModule::shutdown
 
-  (const Properties& globdat)
+    (const Properties &globdat)
 {
 }
 
