@@ -32,7 +32,6 @@ def bending_v(d):
 ideal_disp = {eDir: {} for eDir in ["x", "y", "z"]}
 ideal_resp = {}
 
-# LATER find some expressions for point force bending
 ideal_disp["x"]["dx"] = np.array([[d, 0, 0, 0, 0, 0] for d in displs])
 ideal_disp["x"]["dy"] = np.array(
     [[math.nan, math.nan, math.nan, math.nan, math.nan, math.nan]

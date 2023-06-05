@@ -7,15 +7,16 @@ model.model.model.models = [ "rodMesh", "fixed", "force", "disp" ];
 model.model.model.rodMesh.type = "Lattice";
 model.model.model.rodMesh.prefix = "beam_";
 model.model.model.rodMesh.child.type = "specialCosseratRod";
-model.model.model.rodMesh.child.young = 1000.;
-model.model.model.rodMesh.child.shear_modulus = 1000.;
-model.model.model.rodMesh.child.area = 1.;
-model.model.model.rodMesh.child.area_moment = 1.;
-model.model.model.rodMesh.child.shear_correction = 1.;
-model.model.model.rodMesh.child.polar_moment = 1.;
+model.model.model.rodMesh.child.material.type = "ElasticRod";
+model.model.model.rodMesh.child.material.young = 1000.;
+model.model.model.rodMesh.child.material.shear_modulus = 1000.;
+model.model.model.rodMesh.child.material.area = 1.;
+model.model.model.rodMesh.child.material.area_moment = 1.;
+model.model.model.rodMesh.child.material.shear_correction = 1.;
+model.model.model.rodMesh.child.material.polar_moment = 1.;
 model.model.model.rodMesh.child.dofNamesTrans = ["dx", "dy", "dz"];
 model.model.model.rodMesh.child.dofNamesRot = ["rx", "ry", "rz"];
-model.model.model.rodMesh.child.shape.numPoints = 0;
+
 
 model.model.model.fixed.type = "Dirichlet";
 model.model.model.fixed.maxDisp = 0.;

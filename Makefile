@@ -61,7 +61,7 @@ GIT_DIRTY := $(shell git status --porcelain | wc -l)
 ifeq ($(GIT_DIRTY), 0)
 	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT)"'
 else
-	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT) !!! $(GIT_DIRTY) UNCOMITTED CHANGES !!!"'
+	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT) !!! $(GIT_DIRTY) UNCOMITTED !!!"'
 endif
 
 srcfiles := $(shell find $(SRCDIR) -type f -name '*.cpp')

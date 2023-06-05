@@ -45,7 +45,6 @@ Module::Status PBCGroupOutputModule::init(const Properties &conf,
                 "Error setting up the GroupOutputModule!");
 
   // configure the output module
-  // LATER get multiple Children for different kinds of outputs
   Properties childProps = props.makeProps(myName_ + "." + CHILD_NAME);
   bool append = false;
   if (!childProps.find(append, PropNames::APPEND) || !append)

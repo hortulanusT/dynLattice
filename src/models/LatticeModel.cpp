@@ -65,7 +65,7 @@ LatticeModel::LatticeModel
     childProps.set("elements", childName);
     childBuffer.pushBack(ModelFactory::newInstance(CHILD_PROPS, myConf, myProps, globdat));
   }
-  jem::System::info(myName_) << " ..." << ichild << " Models created\n";
+  jem::System::info(myName_) << " ..." << --ichild << " Models created\n";
   children_.resize(childBuffer.size());
   children_ = childBuffer.toArray();
 

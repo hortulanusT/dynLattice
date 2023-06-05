@@ -14,12 +14,13 @@ params.X = "sin(PI/180) * sin(PI/4)";
 params.Y = "sin(PI/180) * cos(PI/4)";
 params.Z = "cos(PI/180)";
 
-params.rod_details.cross_section = "circle";
-params.rod_details.radius = 0.05;
-params.rod_details.young = 205e9;
-params.rod_details.poisson_ratio = 0.33;
-params.rod_details.density = 7850.;
-params.rod_details.shape.numPoints = 2;
+params.rod_details.material.type = "ElasticRod";
+params.rod_details.material.cross_section = "circle";
+params.rod_details.material.radius = 0.05;
+params.rod_details.material.young = 205e9;
+params.rod_details.material.poisson_ratio = 0.33;
+params.rod_details.material.density = 7850.;
+
 
 // include model and i/o files
 include "input.pro";
@@ -53,7 +54,7 @@ Output.modules += "paraview";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";
 Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
+Output.paraview.beams.shape = "Line2";
 Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];
