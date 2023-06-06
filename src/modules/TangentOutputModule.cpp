@@ -359,8 +359,8 @@ void TangentOutputModule::condenseMatrix_(const Matrix &strains,
 
       readStresses_(stresses[i * rank_ + j], fint, globdat);
 
-      TEST_CONTEXT(strains[i * rank_ + j])
-      TEST_CONTEXT(stresses[i * rank_ + j])
+      // TEST_CONTEXT(strains[i * rank_ + j])
+      // TEST_CONTEXT(stresses[i * rank_ + j])
     }
 }
 

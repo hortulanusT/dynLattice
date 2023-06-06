@@ -203,6 +203,7 @@ bool specialCosseratRodModel::takeAction
   using jive::model::StateVector;
 
   // REPORT(action)
+  // TEST_CONTEXT(myName_)
   // TEST_CONTEXT(params)
 
   if (action == Actions::INIT)
@@ -265,20 +266,20 @@ bool specialCosseratRodModel::takeAction
     // the internal vector.
     assemble_(*mbld, fint, disp);
 
-    // DEBUGGING
-    IdxVector dofList(fint.size());
-    Matrix K(fint.size(), fint.size());
-    Matrix D(dofs_->typeCount(), allNodes_.size());
-    Matrix F(dofs_->typeCount(), allNodes_.size());
-    for (idx_t i = 0; i < dofList.size(); i++)
-      dofList[i] = i;
-    mbld->getBlock(K, dofList, dofList);
-    vec2mat(D.transpose(), disp);
-    vec2mat(F.transpose(), fint);
-    REPORT(action)
-    TEST_CONTEXT(D)
-    TEST_CONTEXT(K)
-    TEST_CONTEXT(F)
+    // // DEBUGGING
+    // IdxVector dofList(fint.size());
+    // Matrix K(fint.size(), fint.size());
+    // Matrix D(dofs_->typeCount(), allNodes_.size());
+    // Matrix F(dofs_->typeCount(), allNodes_.size());
+    // for (idx_t i = 0; i < dofList.size(); i++)
+    //   dofList[i] = i;
+    // mbld->getBlock(K, dofList, dofList);
+    // vec2mat(D.transpose(), disp);
+    // vec2mat(F.transpose(), fint);
+    // REPORT(action)
+    // TEST_CONTEXT(D)
+    // TEST_CONTEXT(K)
+    // TEST_CONTEXT(F)
 
     return true;
   }
@@ -961,7 +962,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
           spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
-        TEST_CONTEXT(spatialInertia)
+        // TEST_CONTEXT(spatialInertia)
         mbld.addBlock(idofs, idofs, spatialInertia);
       }
     }
