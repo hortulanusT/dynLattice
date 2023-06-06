@@ -25,7 +25,6 @@ Output.resp.separator = ",";
 Output.paraview.type = "ParaView";
 Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
 Output.paraview.groups = [ "beams" ];
-Output.paraview.beams.shape = "Line$(params.rod_details.shape.numPoints)";
 Output.paraview.beams.disps = model.model.model.lattice.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.model.lattice.child.dofNamesRot;
 Output.paraview.beams.node_data = ["fint", "fext", "fres"];

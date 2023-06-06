@@ -32,13 +32,11 @@ tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%
 	@$(MKDIR_P) $(dir $@)
 	$(eval options := $(call getoptions, $*))
 	$(eval order := $(patsubst lin, 1, $(patsubst quad, 2, $(patsubst cub, 3, $(word 1,$(options))))))
-	$(eval nodes := $(patsubst lin, 2, $(patsubst quad, 3, $(patsubst cub, 4, $(word 1,$(options))))))
 	$(eval elemD := $(word 2, $(options)))
 	$(eval loadT := $(word 3, $(options)))
 	$(eval loadD := $(word 4, $(options)))
 	@$^ -p Input.input.order=$(order)\
 			-p Input.input.onelab.$(elemD)=1.\
-			-p model.model.model.rodMesh.child.shape.numPoints=$(nodes)\
 			-p model.model.model.$(loadT).nodeGroups=[\"free\"]\
 			-p model.model.model.$(loadT).dofs=[\"$(loadD)\"]\
 			-p model.model.model.$(loadT).factors=[1.]\

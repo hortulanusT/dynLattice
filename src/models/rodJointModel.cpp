@@ -170,7 +170,7 @@ void rodJointModel::assembleRot_
     inodes.resize(nodeCount);
     elems_.getElemNodes(inodes, ielem);
 
-    stiff_mat = (Matrix)(rot_stiff_ / binom(nodeCount, 2) * eye()); // LATER get something more meaningfull???
+    stiff_mat = (Matrix)(rot_stiff_ / binom(nodeCount, 2) * eye()); // LATER get something more meaningfull
 
     // iterate through the nodes
     for (idx_t inode = 0; inode < nodeCount; inode++)
