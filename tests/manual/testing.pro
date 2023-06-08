@@ -16,10 +16,10 @@ params.rod_details.material.area = 1.;
 params.rod_details.material.area_moment = 1.;
 params.rod_details.material.polar_moment = 1.;
 params.rod_details.hinges.type = "rigidHinge";
-params.rod_details.hinges.limitLoads = [1., 1., 1., 10., 10., 10.];
+params.rod_details.hinges.limitLoads = [1., 1., 1., 5., 5., 5.];
 
 params.force_model.type = "LoadScale";
-params.force_model.scaleFunc = "if ((i-1)<=5, (i-1)*4/5*PI, (11-i)*4/5*PI)";
+params.force_model.scaleFunc = "if ((i-1)<=5, (i-1)/2*PI, (11-i)/2*PI)";
 params.force_model.model.type = "Neumann";
 params.force_model.model.nodeGroups =  [ "free", "free" ] ;
 params.force_model.model.dofs = [ "rx", "rz" ];

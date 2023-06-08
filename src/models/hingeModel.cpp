@@ -52,8 +52,15 @@ hingeModel::hingeModel
   myConf.set("elements", elementName);
 
   // get the limit loads
-  myProps.get(limits_, LIMIT_LOADS);
-  myConf.set(LIMIT_LOADS, limits_);
+  Vector limits;
+  myProps.get(limits, LIMIT_LOADS);
+  myConf.set(LIMIT_LOADS, limits);
+
+  limits_.resize(limits.size(), egroup_.size());
+  for (idx_t i = 0; i < limits.size(); i++)
+  {
+    limits_(i, ALL) = limits[i];
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -80,7 +87,7 @@ bool hingeModel::takeAction
   }
 
   if (action == Actions::GET_CONSTRAINTS)
-  {    
+  {
     getCons_();
     return true;
   }
@@ -98,22 +105,14 @@ bool hingeModel::takeAction
   {
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
-
-    TEST_CONTEXT(intForces_)
-
     bool accepted = evalPlastic_(disp);
     params.set(ActionParams::ACCEPT, accepted);
-
-    TEST_CONTEXT(accepted)
 
     return true;
   }
 
   if (action == Actions::COMMIT)
   {
-    plasticDispOld_ = plasticDisp_.clone();
-    loading_ = false;
-
     return true;
   }
 
@@ -133,17 +132,13 @@ void hingeModel::init_(const Properties &globdat)
   for (idx_t i = 0; i < jtypes_.size(); i++)
     jtypes_[i] = dofs_->getTypeIndex(dofs_->getTypeNames()[i]);
 
-  JEM_PRECHECK2(jtypes_.size() == limits_.size(), "DOF types and limit types do not match!");
+  JEM_PRECHECK2(jtypes_.size() == limits_.size(0), "DOF types and limit types do not match!");
 
   intForces_.resize(jtypes_.size(), egroup_.size());
   plasticDisp_.resize(jtypes_.size(), egroup_.size());
-  plasticDispOld_.resize(jtypes_.size(), egroup_.size());
-  loading_.resize(jtypes_.size(), egroup_.size());
 
   intForces_ = 0.;
   plasticDisp_ = 0.;
-  plasticDispOld_ = 0.;
-  loading_ = false;
 }
 
 //-----------------------------------------------------------------------
@@ -166,6 +161,57 @@ void hingeModel::getCons_()
     for (idx_t idof = 0; idof < jtypes_.size(); idof++)
       constraints_->addConstraint(dofsA[idof], plasticDisp_[ielem][idof], dofsB[idof], 1.);
   }
+}
+
+//-----------------------------------------------------------------------
+//   updForces_
+//-----------------------------------------------------------------------
+
+void hingeModel::updForces_(const Vector &fint)
+{
+  IdxVector inodes(2);
+  idx_t jdofA, jdofB;
+
+  for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
+  {
+    elems_.getElemNodes(inodes, egroup_.getIndex(ielem));
+    for (idx_t idof = 0; idof < jtypes_.size(); idof++)
+    {
+      jdofA = dofs_->getDofIndex(inodes[0], idof);
+      jdofB = dofs_->getDofIndex(inodes[1], idof);
+
+      intForces_[ielem][idof] = fint[jdofA];
+    }
+  }
+}
+
+//-----------------------------------------------------------------------
+//   evalPlastic_
+//-----------------------------------------------------------------------
+
+bool hingeModel::evalPlastic_(const Vector &disp)
+{
+  idx_t dofA, dofB;
+  IdxVector inodes(2);
+
+  bool checked = true;
+
+  for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
+    for (idx_t idof = 0; idof < jtypes_.size(); idof++)
+      if (fabs(intForces_[ielem][idof]) > limits_[ielem][idof])
+      {
+        checked = false;
+
+        elems_.getElemNodes(inodes, egroup_.getIndex(ielem));
+
+        dofA = dofs_->getDofIndex(inodes[0], jtypes_[idof]);
+        dofB = dofs_->getDofIndex(inodes[1], jtypes_[idof]);
+
+        plasticDisp_[ielem][idof] -= (fabs(intForces_[ielem][idof]) - limits_[ielem][idof]) / 10.;
+        limits_[ielem][idof] = fabs(intForces_[ielem][idof]);
+      }
+
+  return checked;
 }
 
 //-----------------------------------------------------------------------
@@ -214,7 +260,7 @@ ElementGroup hingeModel::createHinges_(const String &elementName, const Properti
             xelems.setElemNodes(ielem_moving, newnodes_moving);
             newElem = xelems.addElement(IdxVector({inode_base, newNode}));
             jem::System::info(myName_) << " ...Created new hinge " << newElem << " with nodes " << IdxVector({inode_base, newNode}) << "\n";
-            
+
             newElems.pushBack(newElem);
           }
       }
@@ -222,64 +268,6 @@ ElementGroup hingeModel::createHinges_(const String &elementName, const Properti
 
   jem::System::info(myName_) << "\n";
   return jive::fem::newElementGroup(newElems.toArray(), xelems);
-}
-
-
-//-----------------------------------------------------------------------
-//   updForces_
-//-----------------------------------------------------------------------
-
-void hingeModel::updForces_(const Vector &fint)
-{
-  IdxVector inodes(2);
-  idx_t jdofA, jdofB;
-
-  for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
-  {
-    elems_.getElemNodes(inodes, egroup_.getIndex(ielem));
-      for (idx_t idof = 0; idof<jtypes_.size(); idof++)
-      {
-        jdofA = dofs_->getDofIndex(inodes[0], idof);
-        jdofB = dofs_->getDofIndex(inodes[1], idof);
-        if (loading_[ielem][idof])
-        {
-          fint[jdofA] -= (plasticDisp_[ielem][idof] - plasticDispOld_[ielem][idof]);
-          fint[jdofB] += (plasticDisp_[ielem][idof] - plasticDispOld_[ielem][idof]);
-        }
-
-        intForces_[ielem][idof] = fint[jdofA];
-      }
-  }
-}
-
-
-//-----------------------------------------------------------------------
-//   evalPlastic_
-//-----------------------------------------------------------------------
-
-bool hingeModel::evalPlastic_(const Vector &disp)
-{
-  idx_t dofA, dofB;
-  IdxVector inodes(2);
-
-  bool checked = true;
-
-  for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
-    for (idx_t idof = 0; idof<jtypes_.size(); idof++)
-      if (fabs(intForces_[ielem][idof])>limits_[idof])
-      {
-        checked = false;       
-        
-        elems_.getElemNodes(inodes, egroup_.getIndex(ielem));
-
-        dofA = dofs_->getDofIndex(inodes[0], jtypes_[idof]);
-        dofB = dofs_->getDofIndex(inodes[1], jtypes_[idof]);
-
-        plasticDisp_[ielem][idof] += (fabs(intForces_[ielem][idof]) - limits_[idof]);
-        loading_[ielem][idof] = true; 
-      }
-
-  return checked;
 }
 
 //-----------------------------------------------------------------------

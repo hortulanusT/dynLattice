@@ -38,8 +38,8 @@ using jem::Ref;
 using jem::String;
 using jem::util::Properties;
 
-using jive::StringVector;
 using jive::BoolMatrix;
+using jive::StringVector;
 using jive::algebra::MatrixBuilder;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
@@ -89,21 +89,21 @@ private:
    *
    * @param elementName name of the Element group
    * @param globdat global database
-   * 
+   *
    * @return created element Group
    */
   ElementGroup createHinges_(const String &elementName, const Properties &globdat) const;
 
   /**
    * @brief stores the forces relevant for the existing hinges
-   * 
+   *
    * @param fint global internal force vector
    */
   void updForces_(const Vector &fint);
 
   /**
    * @brief evaluate the plastic development in the beams
-   * 
+   *
    * @return true if not new plasticity was discovered
    * @return false if some plastic movement is discovered
    */
@@ -120,11 +120,9 @@ private:
   Ref<DofSpace> dofs_;
   Ref<Constraints> constraints_;
 
-  Matrix intForces_;
-  Matrix plasticDisp_;
-  Matrix plasticDispOld_;
-  BoolMatrix loading_;
-
   IdxVector jtypes_;
-  Vector limits_;
+
+  Matrix intForces_;
+  Matrix limits_;
+  Matrix plasticDisp_;
 };
