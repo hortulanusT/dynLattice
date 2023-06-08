@@ -1,81 +1,40 @@
+
+
 // PROGRAM_CONTROL
-control.runWhile = "t < 30";
+control.runWhile = "i<=10";
 
 // SOLVER
-Solver.modules = [ "integrator" ];
-Solver.integrator.type = "Newmark";
-Solver.integrator.solver.type = "Nonlin";
-Solver.integrator.solver.precision = 1e-6;
-// Solver.integrator.solver.lineSearch = true;
-Solver.integrator.deltaTime = 1e-5;
-// Solver.integrator.type = "MilneDevice";
-// Solver.integrator.updateWhen = true;
-// Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+Solver.modules = [ "solver" ];
+Solver.solver.type = "Nonlin";
 
-// settings
+// SETTINGS
 params.rod_details.material.type = "ElasticRod";
-params.rod_details.material.cross_section = "rectangle";
-params.rod_details.material.side_length = [0.75e-3, 25e-3];
-params.rod_details.material.young = "5.6e10/12";
-params.rod_details.material.shear_modulus = 2e9;
-params.rod_details.material.density = 200.;
+params.rod_details.material.young = 2.;
+params.rod_details.material.shear_modulus = 2.;
+params.rod_details.material.shear_correction = 1.;
+params.rod_details.material.area = 1.;
+params.rod_details.material.area_moment = 1.;
+params.rod_details.material.polar_moment = 1.;
+params.rod_details.hinges.type = "rigidHinge";
+params.rod_details.hinges.limitLoads = [1., 1., 1., 10., 10., 10.];
 
+params.force_model.type = "LoadScale";
+params.force_model.scaleFunc = "if ((i-1)<=5, (i-1)*4/5*PI, (11-i)*4/5*PI)";
+params.force_model.model.type = "Neumann";
+params.force_model.model.nodeGroups =  [ "free", "free" ] ;
+params.force_model.model.dofs = [ "rx", "rz" ];
+params.force_model.model.factors = [ 0., 1. ];
 
 // include model and i/o files
-include "../transient/input.pro";
-include "../transient/model.pro";
-include "../transient/output.pro";
+include "../beam/input.pro";
+include "../beam/model.pro";
+include "../beam/output.pro";
 
-// more settings
-MODIFIER = "";
-CASE_NAME = "$(CASE_NAME)$(MODIFIER)";
+Output.paraview.beams.shape = "Line2";
+model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
+model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
+model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 
-Input.input.order = 2;
-
-model.model.matrix2.type = "FEM";
-
-model.model.model.force.type = "None";
-
-model.model.model.disp.type = "LoadScale";
-// acceleration for explicit solver
-// model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";
-// displacement for implicit solver
-model.model.model.disp.scaleFunc = "if (t<15, 6/15 * (t^2/2 + (15/2/PI)^2 * (cos(2*PI/15 * t) - 1)), (6*t-45))";
-model.model.model.disp.model.type = "Dirichlet";
-model.model.model.disp.model.nodeGroups =  [ "fixed", "fixed" ] ;
-model.model.model.disp.model.factors = [ 0., 1. ]; // [ "1/sqrt(2)", "1/sqrt(2)" ]; //
-model.model.model.disp.model.dofs = [ "ry", "rz" ];
-
-Output.disp.file = "$(CASE_NAME)/stateVectors.gz";
-Output.disp.vectors = [ "state = disp", "state1 = velo", "state2 = acce" ];
-
-// Output.modules += "force";
-// Output.force.type = "ForceOutput";
-// Output.force.file = "$(CASE_NAME)/forceVectors.gz";
-// Output.force.writeGyroForce = true;
-
-// Output.modules += "strain";
-// Output.strain.type = "CSVOutput";
-// Output.strain.file = "$(CASE_NAME)/test.csv";
-// Output.strain.tables = "elements/strain";
-
-// Output.disp.type = "Sample";
-// Output.disp.file = "$(CASE_NAME)/disp.csv";
-// Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];
-// Output.disp.dataSets += "sqrt(fixed.disp.ry^2 + fixed.disp.rz^2)";
-// Output.disp.dataSets += "t";
-// Output.disp.separator	= ",";
-
-// Output.modules += "paraview";
-// Output.paraview.type = "ParaView";
-// Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
-// Output.paraview.groups = [ "beams" ];
-// Output.paraview.beams.shape = "Line2";
-// Output.paraview.beams.disps = model.model.model.rodMesh.child.dofNamesTrans;
-// Output.paraview.beams.otherDofs = model.model.model.rodMesh.child.dofNamesRot;
-// Output.paraview.beams.node_data = ["fint", "fext", "fres"];
-// Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
-// Output.paraview.sampleWhen = "t % 0.1 < $(Solver.integrator.deltaTime)";
-
-log.pattern = "*";
-log.file = "$(CASE_NAME)/run.log";
+// LOGGING
+log.pattern = "*"; //
+log.file = "$(CASE_NAME).log";

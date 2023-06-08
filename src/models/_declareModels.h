@@ -11,7 +11,7 @@
 #include "models/LatticeModel.h"
 #include "models/NeumannModel.h"
 #include "models/PeriodicBCModel.h"
-#include "models/rodJointModel.h"
+#include "models/hingeModel.h"
 #include "models/specialCosseratRodModel.h"
 
 //-----------------------------------------------------------------------

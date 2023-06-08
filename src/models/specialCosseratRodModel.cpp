@@ -34,6 +34,7 @@ const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
+const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -58,9 +59,21 @@ specialCosseratRodModel::specialCosseratRodModel
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
 
-  // Get the elements and nodes from the global database
+  // Get the element name from the global database
   String elementsName;
   myProps.find(elementsName, "elements");
+
+  // create hinges in the first step (if neccessary)
+  if (myProps.contains(HINGES))
+  {
+    Properties hingeProps = myProps.getProps(HINGES);
+    hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
+    hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
+  }
+  else
+    hinges_ = nullptr;
+
+  // Get the elements and nodes from the global database
   rodElems_ = ElementGroup::get(myConf, myProps, globdat,
                                 getContext()); // only the desired group
   allElems_ = rodElems_.getElements();         // all the elements
@@ -179,10 +192,6 @@ specialCosseratRodModel::specialCosseratRodModel
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
 
-  lumped_mass_ = false;
-  if (myProps.find(lumped_mass_, LUMPED_MASS))
-    myConf.set(LUMPED_MASS, lumped_mass_);
-
   material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
 }
 
@@ -202,6 +211,7 @@ bool specialCosseratRodModel::takeAction
   using jive::model::Actions;
   using jive::model::StateVector;
 
+
   // REPORT(action)
   // TEST_CONTEXT(params)
 
@@ -211,7 +221,10 @@ bool specialCosseratRodModel::takeAction
     init_strain_();
     // TEST_CONTEXT ( LambdaN_ )
     // TEST_CONTEXT ( mat_strain0_ )
-    return true;
+    if (hinges_)
+      return hinges_->takeAction(action, params, globdat);
+    else
+      return true;
   }
 
   if (action == Actions::GET_TABLE)
@@ -280,7 +293,10 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT(K)
     // TEST_CONTEXT(F)
 
-    return true;
+    if (hinges_)
+      return hinges_->takeAction(action, params, globdat);
+    else
+      return true;
   }
 
   if (action == Actions::GET_MATRIX2)
@@ -334,7 +350,10 @@ bool specialCosseratRodModel::takeAction
     // vec2mat( F.transpose(), fint );
     // TEST_CONTEXT ( F )
 
-    return true;
+    if (hinges_)
+      return hinges_->takeAction(action, params, globdat);
+    else
+      return true;
   }
 
   if (action == "GET_ENERGY")
@@ -352,7 +371,10 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  return false;
+  if (hinges_)
+    return hinges_->takeAction(action, params, globdat);
+  else
+    return false;
 }
 
 //-----------------------------------------------------------------------

@@ -97,6 +97,7 @@ public:
   static const char *GIVEN_DIRS;
   static const char *THICKENING_FACTOR;
   static const char *LUMPED_MASS;
+  static const char *HINGES;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -247,11 +248,11 @@ private:
   Ref<Line3D> shapeK_;
   Ref<Line3D> shapeM_;
   Ref<Material> material_;
+  Ref<Model> hinges_;
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;
   bool symmetric_only_;
-  bool lumped_mass_;
 
   Vector thickFact_;
 

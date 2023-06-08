@@ -11,23 +11,27 @@
 
 #pragma once
 
+#include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
+#include <jem/util/StringUtils.h>
 
 #include <jive/Array.h>
-#include <jive/model/Model.h>
-#include <jive/model/ModelFactory.h>
-#include <jive/model/Actions.h>
-#include <jive/model/StateVector.h>
-#include <jive/util/Assignable.h>
-#include <jive/util/DofSpace.h>
-#include <jive/util/Constraints.h>
 #include <jive/algebra/MatrixBuilder.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeSet.h>
+#include <jive/fem/XElementSet.h>
+#include <jive/fem/XNodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
+#include <jive/util/Assignable.h>
+#include <jive/util/Constraints.h>
+#include <jive/util/DofSpace.h>
 
-#include "utils/testing.h"
 #include "utils/helpers.h"
+#include "utils/testing.h"
 
 using jem::newInstance;
 using jem::Ref;
@@ -35,23 +39,29 @@ using jem::String;
 using jem::util::Properties;
 
 using jive::StringVector;
+using jive::BoolMatrix;
 using jive::algebra::MatrixBuilder;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
 using jive::fem::NodeSet;
+using jive::fem::XElementSet;
+using jive::fem::XNodeSet;
 using jive::model::Model;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
 
+typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
+
 using namespace jive_helpers;
 
-class rodJointModel : public Model
+class hingeModel : public Model
 {
 public:
   static const char *TYPE_NAME;
+  static const char *LIMIT_LOADS;
 
-  explicit rodJointModel
+  explicit hingeModel
 
       (const String &name,
        const Properties &conf,
@@ -75,30 +85,31 @@ public:
 
 private:
   /**
-   * @brief assemble the stiffness matrix for rotational springs
-   * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
-   * @param[out] fint internal force Vector
-   * @param[in]  disp current values for the DOFs
+   * @brief creates the elements for the hinges
+   *
+   * @param elementName name of the Element group
+   * @param globdat global database
+   * 
+   * @return created element Group
    */
-  void assembleRot_
-
-      (MatrixBuilder &mbld,
-       const Vector &fint,
-       const Vector &disp);
+  ElementGroup createHinges_(const String &elementName, const Properties &globdat) const;
 
   /**
-   * @brief assemble the stiffness matrix for translational springs
-   * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
-   * @param[out] fint internal force Vector
-   * @param[in]  disp current values for the DOFs
+   * @brief stores the forces relevant for the existing hinges
+   * 
+   * @param fint global internal force vector
    */
-  void assembleTrans_
+  void updForces_(const Vector &fint);
 
-      (MatrixBuilder &mbld,
-       const Vector &fint,
-       const Vector &disp);
+  /**
+   * @brief evaluate the plastic development in the beams
+   * 
+   * @return true if not new plasticity was discovered
+   * @return false if some plastic movement is discovered
+   */
+  bool evalPlastic_(const Vector &disp);
 
-  void init_();
+  void init_(const Properties &globdat);
 
   void getCons_();
 
@@ -109,13 +120,11 @@ private:
   Ref<DofSpace> dofs_;
   Ref<Constraints> constraints_;
 
-  StringVector lockDofs_;
+  Matrix intForces_;
+  Matrix plasticDisp_;
+  Matrix plasticDispOld_;
+  BoolMatrix loading_;
 
-  StringVector rotDofs_;
-  IdxVector iRotDofs_;
-  double rot_stiff_;
-
-  StringVector transDofs_;
-  IdxVector iTransDofs_;
-  double trans_stiff_;
+  IdxVector jtypes_;
+  Vector limits_;
 };
