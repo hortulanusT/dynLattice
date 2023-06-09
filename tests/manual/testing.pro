@@ -31,6 +31,7 @@ include "../beam/model.pro";
 include "../beam/output.pro";
 
 Input.input.store_tangents = false;
+model.model.model.models = [ "diriFixed", "force", "lattice" ];
 model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed_right" ];
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];

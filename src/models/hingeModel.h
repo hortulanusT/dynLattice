@@ -123,7 +123,7 @@ private:
   Assignable<ElementSet> elems_;
 
   Ref<DofSpace> dofs_;
-  Ref<Constraints> constraints_;
+  Ref<Constraints> cons_;
   IdxVector jtypes_;
   StringVector jnames_;
 

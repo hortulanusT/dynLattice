@@ -91,6 +91,7 @@ bool hingeModel::takeAction
 
   if (action == Actions::GET_CONSTRAINTS)
   {
+    // !!! THIS NEEDS TO BE DONE LAST IN THE MULTI-MODEL !!!
     getCons_();
     return true;
   }
@@ -104,19 +105,19 @@ bool hingeModel::takeAction
     return true;
   }
 
-  // if (action == Actions::CHECK_COMMIT)
-  // {
-  //   Vector disp;
-  //   StateVector::get(disp, dofs_, globdat);
+  if (action == Actions::CHECK_COMMIT)
+  {
+    Vector disp;
+    StateVector::get(disp, dofs_, globdat);
 
-  //   bool accepted = evalPlastic_(disp);
-  //   params.set(ActionParams::ACCEPT, accepted);
+    bool accepted = evalPlastic_(disp);
+    params.set(ActionParams::ACCEPT, accepted);
 
-  //   TEST_CONTEXT(accepted);
-  //   TEST_CONTEXT(plasticDisp_);
+    TEST_CONTEXT(accepted);
+    TEST_CONTEXT(plasticDisp_);
 
-  //   return true;
-  // }
+    return true;
+  }
 
   if (action == Actions::COMMIT)
   {
@@ -133,8 +134,8 @@ bool hingeModel::takeAction
 
 void hingeModel::init_(const Properties &globdat)
 {
-  dofs_ = DofSpace::get(globdat, getContext());    // all the dofs
-  constraints_ = Constraints::get(dofs_, globdat); // all the constraints
+  dofs_ = DofSpace::get(globdat, getContext()); // all the dofs
+  cons_ = Constraints::get(dofs_, globdat);     // all the constraints
 
   jtypes_.resize(dofs_->typeCount());
   jnames_.resize(dofs_->typeCount());
@@ -169,11 +170,15 @@ void hingeModel::getCons_()
     dofs_->getDofIndices(dofsB, inodes[1], jtypes_);
 
     for (idx_t idof = 0; idof < jtypes_.size(); idof++)
+    {
       if (ielem == 0)
-        constraints_->addConstraint(dofsB[idof], -1. * plasticDisp_[ielem][idof], dofsA[idof], 1.);
+        cons_->addConstraint(dofsB[idof], -1. * plasticDisp_[ielem][idof], dofsA[idof], 1.);
       else
-        constraints_->addConstraint(dofsB[idof], plasticDisp_[ielem][idof], dofsA[idof], 1.);
+        cons_->addConstraint(dofsB[idof], plasticDisp_[ielem][idof], dofsA[idof], 1.);
+    }
   }
+
+  cons_->compress();
 }
 
 //-----------------------------------------------------------------------
@@ -221,8 +226,9 @@ bool hingeModel::evalPlastic_(const Vector &disp)
     f_trial = yieldCond_->getValue(intForces_[ielem].addr());
     if (f_trial > 0 && !jem::isTiny(f_trial))
     {
-      f_old = yieldCond_->getValue(intForcesOld_[ielem].addr());
       checked = false;
+
+      f_old = yieldCond_->getValue(intForcesOld_[ielem].addr());
       critForces = intForcesOld_[ielem] - (intForces_[ielem] - intForcesOld_[ielem]) * f_old / (f_trial - f_old);
 
       for (idx_t idof = 0; idof < jtypes_.size(); idof++)
