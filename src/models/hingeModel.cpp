@@ -113,9 +113,6 @@ bool hingeModel::takeAction
     bool accepted = evalPlastic_(disp);
     params.set(ActionParams::ACCEPT, accepted);
 
-    TEST_CONTEXT(accepted);
-    TEST_CONTEXT(plasticDisp_);
-
     return true;
   }
 
