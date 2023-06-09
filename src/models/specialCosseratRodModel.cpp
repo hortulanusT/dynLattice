@@ -63,10 +63,31 @@ specialCosseratRodModel::specialCosseratRodModel
   String elementsName;
   myProps.find(elementsName, "elements");
 
+  // ARRANGE DOF NAMES FIRST
+  // set the default
+  Array<String> trans_dofs(TRANS_DOF_COUNT);
+  Array<String> rot_dofs(ROT_DOF_COUNT);
+
+  for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
+    trans_dofs[i] = TRANS_DOF_DEFAULT + String(i);
+  for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+    rot_dofs[i] = ROT_DOF_DEFAULT + String(i);
+
+  // get the names
+  myProps.find(trans_dofs, TRANS_DOF_NAMES);
+  myProps.find(rot_dofs, ROT_DOF_NAMES);
+
+  myConf.set(TRANS_DOF_NAMES, trans_dofs);
+  myConf.set(ROT_DOF_NAMES, rot_dofs);
+
+  // get the material
+  material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
+
   // create hinges in the first step (if neccessary)
   if (myProps.contains(HINGES))
   {
     Properties hingeProps = myProps.getProps(HINGES);
+    hingeProps.set("material", material_);
     hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
     hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
   }
@@ -102,22 +123,6 @@ specialCosseratRodModel::specialCosseratRodModel
   trans_types_.resize(TRANS_DOF_COUNT);
   rot_types_.resize(ROT_DOF_COUNT);
   jtypes_.resize(TRANS_DOF_COUNT + ROT_DOF_COUNT);
-
-  // set the default
-  Array<String> trans_dofs(TRANS_DOF_COUNT);
-  Array<String> rot_dofs(ROT_DOF_COUNT);
-
-  for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
-    trans_dofs[i] = TRANS_DOF_DEFAULT + String(i);
-  for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
-    rot_dofs[i] = ROT_DOF_DEFAULT + String(i);
-
-  // get the names
-  myProps.find(trans_dofs, TRANS_DOF_NAMES);
-  myProps.find(rot_dofs, ROT_DOF_NAMES);
-
-  myConf.set(TRANS_DOF_NAMES, trans_dofs);
-  myConf.set(ROT_DOF_NAMES, rot_dofs);
 
   // create the DOFs
   for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
@@ -191,8 +196,6 @@ specialCosseratRodModel::specialCosseratRodModel
     }
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
-
-  material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
 }
 
 //-----------------------------------------------------------------------
@@ -211,7 +214,6 @@ bool specialCosseratRodModel::takeAction
   using jive::model::Actions;
   using jive::model::StateVector;
 
-
   // REPORT(action)
   // TEST_CONTEXT(params)
 
@@ -222,9 +224,8 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT ( LambdaN_ )
     // TEST_CONTEXT ( mat_strain0_ )
     if (hinges_)
-      return hinges_->takeAction(action, params, globdat);
-    else
-      return true;
+      hinges_->takeAction(action, params, globdat);
+    return true;
   }
 
   if (action == Actions::GET_TABLE)
@@ -294,9 +295,8 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT(F)
 
     if (hinges_)
-      return hinges_->takeAction(action, params, globdat);
-    else
-      return true;
+      hinges_->takeAction(action, params, globdat);
+    return true;
   }
 
   if (action == Actions::GET_MATRIX2)
@@ -351,9 +351,8 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT ( F )
 
     if (hinges_)
-      return hinges_->takeAction(action, params, globdat);
-    else
-      return true;
+      hinges_->takeAction(action, params, globdat);
+    return true;
   }
 
   if (action == "GET_ENERGY")

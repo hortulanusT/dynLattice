@@ -29,13 +29,16 @@
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
 
+#include "models/specialCosseratRodModel.h"
 #include "utils/helpers.h"
 #include "utils/testing.h"
 
 using jem::newInstance;
 using jem::Ref;
 using jem::String;
+using jem::numeric::Function;
 using jem::util::Properties;
 
 using jive::BoolMatrix;
@@ -50,6 +53,7 @@ using jive::model::Model;
 using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
+using jive::util::FuncUtils;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
@@ -59,7 +63,7 @@ class hingeModel : public Model
 {
 public:
   static const char *TYPE_NAME;
-  static const char *LIMIT_LOADS;
+  static const char *YIELD_PROP;
 
   explicit hingeModel
 
@@ -92,7 +96,7 @@ private:
    *
    * @return created element Group
    */
-  ElementGroup createHinges_(const String &elementName, const Properties &globdat) const;
+  ElementGroup createHinges_(const String &elementName, const Properties &globdat);
 
   /**
    * @brief stores the forces relevant for the existing hinges
@@ -117,12 +121,16 @@ private:
   Assignable<ElementGroup> egroup_;
   Assignable<NodeSet> nodes_;
   Assignable<ElementSet> elems_;
+
   Ref<DofSpace> dofs_;
   Ref<Constraints> constraints_;
-
   IdxVector jtypes_;
+  StringVector jnames_;
 
+  Ref<Material> material_;
+  Ref<Function> yieldCond_;
+  Vector ell_;
   Matrix intForces_;
-  Matrix limits_;
+  Matrix intForcesOld_;
   Matrix plasticDisp_;
 };

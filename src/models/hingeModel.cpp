@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------
 
 const char *hingeModel::TYPE_NAME = "rigidHinge";
-const char *hingeModel::LIMIT_LOADS = "limitLoads";
+const char *hingeModel::YIELD_PROP = "yieldCond";
 
 //-----------------------------------------------------------------------
 //   constructor
@@ -51,16 +51,19 @@ hingeModel::hingeModel
 
   myConf.set("elements", elementName);
 
-  // get the limit loads
-  Vector limits;
-  myProps.get(limits, LIMIT_LOADS);
-  myConf.set(LIMIT_LOADS, limits);
+  StringVector namesT(specialCosseratRodModel::TRANS_DOF_COUNT);
+  StringVector namesR(specialCosseratRodModel::ROT_DOF_COUNT);
+  conf.get(namesT, specialCosseratRodModel::TRANS_DOF_NAMES);
+  conf.get(namesR, specialCosseratRodModel::ROT_DOF_NAMES);
+  String args = jem::util::StringUtils::join(namesT, ", ") + ", " + jem::util::StringUtils::join(namesR, ", ");
 
-  limits_.resize(limits.size(), egroup_.size());
-  for (idx_t i = 0; i < limits.size(); i++)
-  {
-    limits_(i, ALL) = limits[i];
-  }
+  // get the limit loads
+  FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
+  FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
+
+  // get the mother material
+  myProps.get(material_, "material");
+  myConf.set("material", material_);
 }
 
 //-----------------------------------------------------------------------
@@ -105,14 +108,19 @@ bool hingeModel::takeAction
   {
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
+
     bool accepted = evalPlastic_(disp);
     params.set(ActionParams::ACCEPT, accepted);
+
+    TEST_CONTEXT(accepted);
+    TEST_CONTEXT(plasticDisp_);
 
     return true;
   }
 
   if (action == Actions::COMMIT)
   {
+    intForcesOld_ = intForces_;
     return true;
   }
 
@@ -129,15 +137,17 @@ void hingeModel::init_(const Properties &globdat)
   constraints_ = Constraints::get(dofs_, globdat); // all the constraints
 
   jtypes_.resize(dofs_->typeCount());
+  jnames_.resize(dofs_->typeCount());
+  jnames_ = dofs_->getTypeNames();
   for (idx_t i = 0; i < jtypes_.size(); i++)
-    jtypes_[i] = dofs_->getTypeIndex(dofs_->getTypeNames()[i]);
-
-  JEM_PRECHECK2(jtypes_.size() == limits_.size(0), "DOF types and limit types do not match!");
+    jtypes_[i] = dofs_->getTypeIndex(jnames_[i]);
 
   intForces_.resize(jtypes_.size(), egroup_.size());
+  intForcesOld_.resize(jtypes_.size(), egroup_.size());
   plasticDisp_.resize(jtypes_.size(), egroup_.size());
 
   intForces_ = 0.;
+  intForcesOld_ = 0.;
   plasticDisp_ = 0.;
 }
 
@@ -159,7 +169,7 @@ void hingeModel::getCons_()
     dofs_->getDofIndices(dofsB, inodes[1], jtypes_);
 
     for (idx_t idof = 0; idof < jtypes_.size(); idof++)
-      constraints_->addConstraint(dofsA[idof], plasticDisp_[ielem][idof], dofsB[idof], 1.);
+      constraints_->addConstraint(dofsB[idof], plasticDisp_[ielem][idof], dofsA[idof], 1.);
   }
 }
 
@@ -191,25 +201,30 @@ void hingeModel::updForces_(const Vector &fint)
 
 bool hingeModel::evalPlastic_(const Vector &disp)
 {
-  idx_t dofA, dofB;
-  IdxVector inodes(2);
-
   bool checked = true;
+  double f_old, f_trial;
+  double deltaFlow;
+  Vector deriv(jtypes_.size());
+  Vector critForces(jtypes_.size());
 
   for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
-    for (idx_t idof = 0; idof < jtypes_.size(); idof++)
-      if (fabs(intForces_[ielem][idof]) > limits_[ielem][idof])
-      {
-        checked = false;
+  {
+    f_trial = yieldCond_->getValue(intForces_[ielem].addr());
+    TEST_CONTEXT(f_trial)
+    if (f_trial > 0 && !jem::isTiny(f_trial))
+    {
+      f_old = yieldCond_->getValue(intForcesOld_[ielem].addr());
+      checked = false;
+      critForces = intForcesOld_[ielem] - (intForces_[ielem] - intForcesOld_[ielem]) * f_old / (f_trial - f_old);
 
-        elems_.getElemNodes(inodes, egroup_.getIndex(ielem));
+      for (idx_t idof = 0; idof < jtypes_.size(); idof++)
+        deriv[idof] = yieldCond_->getDeriv(idof, critForces.addr());
 
-        dofA = dofs_->getDofIndex(inodes[0], jtypes_[idof]);
-        dofB = dofs_->getDofIndex(inodes[1], jtypes_[idof]);
+      deltaFlow = dotProduct(deriv, intForces_[ielem] - critForces) / dotProduct(deriv, matmul(material_->getMaterialStiff(), deriv));
 
-        plasticDisp_[ielem][idof] -= (fabs(intForces_[ielem][idof]) - limits_[ielem][idof]) / 10.;
-        limits_[ielem][idof] = fabs(intForces_[ielem][idof]);
-      }
+      plasticDisp_[ielem] += ell_[ielem] * deltaFlow * deriv;
+    }
+  }
 
   return checked;
 }
@@ -218,26 +233,33 @@ bool hingeModel::evalPlastic_(const Vector &disp)
 //   createHinges_
 //-----------------------------------------------------------------------
 
-ElementGroup hingeModel::createHinges_(const String &elementName, const Properties &globdat) const
+ElementGroup hingeModel::createHinges_(const String &elementName, const Properties &globdat)
 {
   IdxVector inodes_base, inodes_moving, newnodes_moving;
+  Matrix coords_base, coords_moving;
+  double base_l, moving_l;
   idx_t newNode, newElem;
-  Vector coords(nodes_.rank());
   IdxBuffer newElems;
+  jem::util::ArrayBuffer<double> elemLengths;
 
-  Assignable<XNodeSet>
-      xnodes = XNodeSet::get(globdat, getContext());
+  Assignable<XNodeSet> xnodes = XNodeSet::get(globdat, getContext());
   Assignable<XElementSet> xelems = XElementSet::get(globdat, getContext());
   Assignable<ElementGroup> motherElems = ElementGroup::get(jem::util::StringUtils::split(elementName, '.')[0], xelems, globdat, getContext());
 
-  jem::System::info(myName_) << " ...Creating " << myName_ << "\n";
+  jem::System::info(myName_) << " ...Creating " << elementName << "\n";
 
   for (idx_t ielem_base : motherElems.getIndices())
   {
     inodes_base.resize(xelems.getElemNodeCount(ielem_base));
-    xelems.getElemNodes(inodes_base, ielem_base);
+    coords_base.resize(xnodes.rank(), inodes_base.size());
 
-    for (idx_t inode_base : inodes_base)
+    xelems.getElemNodes(inodes_base, ielem_base);
+    xnodes.getSomeCoords(coords_base, inodes_base);
+    base_l = 0;
+    for (idx_t i = 1; i < inodes_base.size(); i++)
+      base_l += norm2(coords_base[i] - coords_base[i - 1]);
+
+    for (idx_t inode_base = 0; inode_base < inodes_base.size(); inode_base += inodes_base.size() - 1)
       for (idx_t ielem_moving : motherElems.getIndices())
       {
         if (ielem_moving == ielem_base)
@@ -245,28 +267,35 @@ ElementGroup hingeModel::createHinges_(const String &elementName, const Properti
 
         inodes_moving.resize(xelems.getElemNodeCount(ielem_moving));
         newnodes_moving.resize(xelems.getElemNodeCount(ielem_moving));
+        coords_moving.resize(xnodes.rank(), inodes_moving.size());
         xelems.getElemNodes(inodes_moving, ielem_moving);
+        xnodes.getSomeCoords(coords_moving, inodes_moving);
+        moving_l = 0;
+        for (idx_t i = 1; i < inodes_moving.size(); i++)
+          moving_l += norm2(coords_moving[i] - coords_moving[i - 1]);
 
-        for (idx_t imoving = 0; imoving < inodes_moving.size(); imoving++)
-          if (inodes_moving[imoving] == inode_base)
+        for (idx_t imoving = 0; imoving < inodes_moving.size(); imoving += inodes_moving.size() - 1)
+          if (inodes_moving[imoving] == inodes_base[inode_base])
           {
-            xnodes.getNodeCoords(coords, inodes_moving[imoving]);
-            newNode = xnodes.addNode(coords);
-            jem::System::info(myName_) << " ...Duplicated node " << inodes_moving[imoving] << " with coords " << coords << " into node " << newNode << "\n";
+            newNode = xnodes.addNode(coords_base[inode_base]);
+            jem::System::info(myName_) << " ...Duplicated node " << inodes_moving[imoving] << " with coords " << coords_base[inode_base] << " into node " << newNode << "\n";
 
             newnodes_moving = inodes_moving.clone();
             newnodes_moving[imoving] = newNode;
 
             xelems.setElemNodes(ielem_moving, newnodes_moving);
-            newElem = xelems.addElement(IdxVector({inode_base, newNode}));
-            jem::System::info(myName_) << " ...Created new hinge " << newElem << " with nodes " << IdxVector({inode_base, newNode}) << "\n";
+            newElem = xelems.addElement(IdxVector({inodes_base[inode_base], newNode}));
+            jem::System::info(myName_) << " ...Created new hinge " << newElem << " with nodes " << IdxVector({inodes_base[inode_base], newNode}) << "\n";
 
             newElems.pushBack(newElem);
+            elemLengths.pushBack(base_l / 4. + moving_l / 4.);
           }
       }
   }
 
   jem::System::info(myName_) << "\n";
+  ell_.resize(elemLengths.size());
+  ell_ = elemLengths.toArray();
   return jive::fem::newElementGroup(newElems.toArray(), xelems);
 }
 
