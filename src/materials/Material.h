@@ -17,6 +17,8 @@
 
 using jem::NamedObject;
 using jem::util::Properties;
+using jive::Cubix;
+using jive::idx_t;
 using jive::Matrix;
 using jive::String;
 using jive::Vector;
@@ -36,14 +38,14 @@ public:
    *
    * @param props properties to be used in the configuration
    */
-  virtual void configure(const Properties &props);
+  virtual void configure(const Properties &props, const Properties &globdat);
 
   /**
    * @brief get the configuration
    *
    * @param conf properties to store the configuration to
    */
-  virtual void getConfig(const Properties &conf) const;
+  virtual void getConfig(const Properties &conf, const Properties &globdat) const;
 
   /**
    * @brief compute the stresses
@@ -52,6 +54,16 @@ public:
    * @param[in] strain
    */
   virtual void getStress(const Vector &stress, const Vector &strain) const = 0;
+
+  /**
+   * @brief compute the stresses
+   *
+   * @param[out] stress
+   * @param[in] strain
+   * @param[in] ielem
+   * @param[in] ip
+   */
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const;
 
   /**
    * @brief get the material stiffness matrix
@@ -75,4 +87,8 @@ protected:
    *
    */
   virtual ~Material();
+
+public:
+  Cubix stresses;
+  Cubix plastStrains;
 };

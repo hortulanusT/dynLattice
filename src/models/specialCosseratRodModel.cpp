@@ -34,7 +34,7 @@ const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
-const char *specialCosseratRodModel::HINGES = "hinges";
+// const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -80,24 +80,21 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set(TRANS_DOF_NAMES, trans_dofs);
   myConf.set(ROT_DOF_NAMES, rot_dofs);
 
-  // get the material
-  material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
-
   // create hinges in the first step (if neccessary)
-  if (myProps.contains(HINGES))
-  {
-    Properties hingeProps = myProps.getProps(HINGES);
-    hingeProps.set("material", material_);
-    hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
-    hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
-  }
-  else
-    hinges_ = nullptr;
+  // if (myProps.contains(HINGES))
+  // {
+  //   Properties hingeProps = myProps.getProps(HINGES);
+  //   hingeProps.set("material", material_);
+  //   hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
+  //   hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
+  // }
+  // else
+  //   hinges_ = nullptr;
 
   // Get the elements and nodes from the global database
-  rodElems_ = ElementGroup::get(myConf, myProps, globdat,
+  allElems_ = ElementSet::get(globdat, getContext()); // all the elements
+  rodElems_ = ElementGroup::get(myName_, allElems_, globdat,
                                 getContext()); // only the desired group
-  allElems_ = rodElems_.getElements();         // all the elements
   allNodes_ = allElems_.getNodes();            // all the inodes
 
   // store the inverse relation from the global node ids to the local
@@ -144,6 +141,14 @@ specialCosseratRodModel::specialCosseratRodModel
 
   // get the nonmutable DOF-Space into the class member
   dofs_ = dofs;
+
+  // get the material
+  material_ = MaterialFactory::newInstance(joinNames(myName_, "material"), conf, props, globdat);
+  // store (old) stresses and plastic strains in globdat
+  material_->stresses.resize(dofs_->typeCount(), shapeK_->ipointCount(), rodElems_.size());
+  material_->plastStrains.resize(dofs_->typeCount(), shapeK_->ipointCount(), rodElems_.size());
+  material_->stresses = 0.;
+  material_->plastStrains = 0.;
 
   // get the incremental property
   symmetric_only_ = false;
@@ -223,8 +228,8 @@ bool specialCosseratRodModel::takeAction
     init_strain_();
     // TEST_CONTEXT ( LambdaN_ )
     // TEST_CONTEXT ( mat_strain0_ )
-    if (hinges_)
-      hinges_->takeAction(action, params, globdat);
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
     return true;
   }
 
@@ -294,8 +299,8 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT(K)
     // TEST_CONTEXT(F)
 
-    if (hinges_)
-      hinges_->takeAction(action, params, globdat);
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
     return true;
   }
 
@@ -350,8 +355,20 @@ bool specialCosseratRodModel::takeAction
     // vec2mat( F.transpose(), fint );
     // TEST_CONTEXT ( F )
 
-    if (hinges_)
-      hinges_->takeAction(action, params, globdat);
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
+    return true;
+  }
+
+  if (action == Actions::ADVANCE)
+  {
+    stress_current_ = false;
+    return true;
+  }
+
+  if (action == Actions::COMMIT)
+  {
+    stress_current_ = true;
     return true;
   }
 
@@ -370,10 +387,10 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  if (hinges_)
-    return hinges_->takeAction(action, params, globdat);
-  else
-    return false;
+  // if (hinges_)
+  //   return hinges_->takeAction(action, params, globdat);
+  // else
+  return false;
 }
 
 //-----------------------------------------------------------------------
@@ -708,13 +725,23 @@ void specialCosseratRodModel::get_stresses_(
   const Cubix stiffness(dofCount, dofCount, ipCount);
   const Cubix PI(dofCount, dofCount, ipCount);
 
-  // get the (material) strains
-  get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
-  // TEST_CONTEXT(strains)
-
   // get the (material) stresses
-  for (idx_t ip = 0; ip < ipCount; ip++)
-    material_->getStress(stresses[ip], strains[ip]);
+  if (!stress_current_)
+  {
+    // get the (material) strains
+    get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
+    // TEST_CONTEXT(strains)
+
+    Matrix newStress(stresses.shape());
+    newStress = 0.;
+
+    for (idx_t ip = 0; ip < ipCount; ip++)
+      material_->getStress(newStress[ip], strains[ip], ie, ip);
+
+    material_->stresses[ie] = newStress;
+  }
+
+  stresses = material_->stresses[ie];
 
   // get the (spatial) stresses
   if (spatial)

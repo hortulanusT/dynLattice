@@ -16,6 +16,7 @@
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
+#include <jem/util/StringUtils.h>
 #include <math.h>
 
 using jem::idx_t;
@@ -52,9 +53,9 @@ public:
 
   static void declare();
 
-  virtual void configure(const Properties &props) override;
+  virtual void configure(const Properties &props, const Properties &globdat) override;
 
-  virtual void getConfig(const Properties &conf) const override;
+  virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
   virtual inline Matrix getMaterialStiff() const override;
 
@@ -67,7 +68,7 @@ public:
 protected:
   ~ElasticRodMaterial();
 
-private:
+protected:
   void calcMaterialStiff_();
   void calcMaterialMass_();
 
@@ -87,6 +88,8 @@ private:
 
   Matrix materialK_;
   Matrix materialM_;
+
+  String rodName_;
 };
 
 Matrix ElasticRodMaterial::getMaterialStiff() const
