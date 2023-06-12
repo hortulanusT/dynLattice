@@ -133,7 +133,6 @@ bool hingeModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    TEST_CONTEXT(plasticDisp_)
     intForcesOld_ = intForces_;
     iiter_ = 0;
     return true;
