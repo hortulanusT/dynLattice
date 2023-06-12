@@ -16,7 +16,7 @@ params.rod_details.material.area = 1.;
 params.rod_details.material.area_moment = 1.;
 params.rod_details.material.polar_moment = 1.;
 params.rod_details.hinges.type = "rigidHinge";
-params.rod_details.hinges.yieldCond = "rz-5";
+params.rod_details.hinges.yieldCond = "max(abs(dx)-.5, abs(dy)-.5, abs(dz)-.5, abs(rx)-5, abs(ry)-5, abs(rz)-5)";
 
 params.force_model.type = "LoadScale";
 params.force_model.scaleFunc = "if ((i-1)<=5, (i-1)/5*2*PI, (11-i)/5*2*PI)";
