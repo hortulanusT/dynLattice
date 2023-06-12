@@ -38,5 +38,5 @@ model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 Output.paraview.beams.shape = "Line2";
 
 // LOGGING
-log.pattern = "*"; //
+log.pattern = "*";
 log.file = "$(CASE_NAME).log";

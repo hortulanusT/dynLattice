@@ -22,10 +22,12 @@
 #include <jive/fem/NodeSet.h>
 #include <jive/fem/XElementSet.h>
 #include <jive/fem/XNodeSet.h>
+#include <jive/implict/Names.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/StateVector.h>
+#include <jive/solver/Solver.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>
 #include <jive/util/DofSpace.h>
@@ -126,6 +128,11 @@ private:
   Ref<Constraints> cons_;
   IdxVector jtypes_;
   StringVector jnames_;
+
+  String elName_;
+  double prec_;
+  idx_t maxIter_;
+  idx_t iiter_;
 
   Ref<Material> material_;
   Ref<Function> yieldCond_;

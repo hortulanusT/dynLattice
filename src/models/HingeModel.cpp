@@ -8,7 +8,7 @@
  *
  */
 
-#include "hingeModel.h"
+#include "HingeModel.h"
 //=======================================================================
 //    class specialCosseratRodModel -- implementation
 //=======================================================================
@@ -38,18 +38,17 @@ hingeModel::hingeModel
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
 
-  String elementName;
-  myProps.get(elementName, "elements");
+  myProps.get(elName_, "elements");
 
   // Get the elements and nodes from the global database.
   elems_ = ElementSet::get(globdat, getContext()); // all the elements
   nodes_ = elems_.getNodes();                      // all the nodes
 
-  egroup_ = ElementGroup::find(elementName, elems_, globdat); // only the desired group
+  egroup_ = ElementGroup::find(elName_, elems_, globdat); // only the desired group
   if (!egroup_)
-    egroup_ = createHinges_(elementName, globdat);
+    egroup_ = createHinges_(elName_, globdat);
 
-  myConf.set("elements", elementName);
+  myConf.set("elements", elName_);
 
   StringVector namesT(specialCosseratRodModel::TRANS_DOF_COUNT);
   StringVector namesR(specialCosseratRodModel::ROT_DOF_COUNT);
@@ -64,6 +63,16 @@ hingeModel::hingeModel
   // get the mother material
   myProps.get(material_, "material");
   myConf.set("material", material_);
+
+  // get iteration settings
+  maxIter_ = 3;
+  iiter_ = 0;
+  myProps.find(maxIter_, jive::implict::PropNames::MAX_ITER);
+  myProps.set(jive::implict::PropNames::MAX_ITER, maxIter_);
+
+  prec_ = jive::solver::Solver::PRECISION;
+  myProps.find(prec_, jive::implict::PropNames::PRECISION);
+  myConf.set(jive::implict::PropNames::PRECISION, prec_);
 }
 
 //-----------------------------------------------------------------------
@@ -113,12 +122,20 @@ bool hingeModel::takeAction
     bool accepted = evalPlastic_(disp);
     params.set(ActionParams::ACCEPT, accepted);
 
+    if (accepted)
+      jem::System::info(myName_) << " ...Plastic patterns accepted (it " << iiter_ << " for " << elName_ << ")\n";
+    else
+      jem::System::info(myName_) << " ...Plastic patterns rejected (it " << iiter_ << " for " << elName_ << ")\n";
+
+    iiter_++;
     return true;
   }
 
   if (action == Actions::COMMIT)
   {
+    TEST_CONTEXT(plasticDisp_)
     intForcesOld_ = intForces_;
+    iiter_ = 0;
     return true;
   }
 
@@ -168,8 +185,10 @@ void hingeModel::getCons_()
 
     for (idx_t idof = 0; idof < jtypes_.size(); idof++)
     {
-      if (ielem == 0)
-        cons_->addConstraint(dofsB[idof], -1. * plasticDisp_[ielem][idof], dofsA[idof], 1.);
+      if (ielem == egroup_.size() - 1)
+      {
+        cons_->addConstraint(dofsA[idof], -1. * plasticDisp_[ielem][idof], dofsB[idof], 1.);
+      }
       else
         cons_->addConstraint(dofsB[idof], plasticDisp_[ielem][idof], dofsA[idof], 1.);
     }
@@ -198,8 +217,6 @@ void hingeModel::updForces_(const Vector &fint)
 
       if (ielem == 0)
         intForces_[ielem][idof] = -1 * fint[jdofB];
-      else if (ielem == hingeCount - 1)
-        intForces_[ielem][idof] = fint[jdofB];
       else
         intForces_[ielem][idof] = fint[jdofA];
     }
@@ -217,6 +234,7 @@ bool hingeModel::evalPlastic_(const Vector &disp)
   double deltaFlow;
   Vector deriv(jtypes_.size());
   Vector critForces(jtypes_.size());
+  double change = 0;
 
   for (idx_t ielem = 0; ielem < egroup_.size(); ielem++)
   {
@@ -234,10 +252,11 @@ bool hingeModel::evalPlastic_(const Vector &disp)
       deltaFlow = dotProduct(deriv, intForces_[ielem] - critForces) / dotProduct(deriv, matmul(material_->getMaterialStiff(), deriv));
 
       plasticDisp_[ielem] += ell_[ielem] * deltaFlow * deriv;
+      change += norm2(ell_[ielem] * deltaFlow * deriv);
     }
   }
 
-  return checked;
+  return checked || iiter_ > maxIter_ || change < prec_;
 }
 
 //-----------------------------------------------------------------------
@@ -316,8 +335,8 @@ ElementGroup hingeModel::createHinges_(const String &elementName, const Properti
   xelems.setElemNodes(elemB, inodesNew);
   jem::System::info(myName_) << " ...Changed nodes of element " << elemB << " to " << inodesNew << "\n";
 
-  newHinge = xelems.addElement(IdxVector({inodesB[nodeCount - 1], newNode}));
-  jem::System::info(myName_) << " ...Created new hinge element " << newHinge << " with nodes " << IdxVector({inodesB[nodeCount - 1], newNode}) << "\n";
+  newHinge = xelems.addElement(IdxVector({newNode, inodesB[nodeCount - 1]}));
+  jem::System::info(myName_) << " ...Created new hinge element " << newHinge << " with nodes " << IdxVector({newNode, inodesB[nodeCount - 1]}) << "\n";
 
   newElems.pushBack(newHinge);
   elemLengths.pushBack(lB / 2. + lA / 2.);

@@ -6,12 +6,12 @@
 
 #include "models/DirichletModel.h"
 #include "models/FollowerLoadModel.h"
+#include "models/HingeModel.h"
 #include "models/ImpactModel.h"
 #include "models/InitLoadModel.h"
 #include "models/LatticeModel.h"
 #include "models/NeumannModel.h"
 #include "models/PeriodicBCModel.h"
-#include "models/hingeModel.h"
 #include "models/specialCosseratRodModel.h"
 
 //-----------------------------------------------------------------------
