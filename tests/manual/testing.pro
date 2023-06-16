@@ -16,7 +16,7 @@ params.rod_details.material.area = 1.;
 params.rod_details.material.area_moment = 1.;
 params.rod_details.material.polar_moment = 1.;
 params.rod_details.material.dofNames = ["dx", "dy", "dz", "rx", "ry", "rz"];
-params.rod_details.material.yieldCond = "max(abs(rx), abs(ry), abs(rz)) - 5 ";
+params.rod_details.material.yieldCond = "sqrt(rx*rx + ry*ry + rz*rz) - 5 ";
 // params.rod_details.hinges.type = "rigidHinge";
 // params.rod_details.hinges.yieldCond = "max(abs(dx)-.5, abs(dy)-.5, abs(dz)-.5, abs(rx)-5, abs(ry)-5, abs(rz)-5)";
 
@@ -38,6 +38,7 @@ model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 Output.paraview.beams.shape = "Line2";
+Output.paraview.beams.el_data += "plast_strain";
 
 // LOGGING
 log.pattern = "*";

@@ -12,6 +12,7 @@
 #pragma once
 #include "materials/ElasticRodMaterial.h"
 #include "materials/MaterialFactory.h"
+#include "utils/helpers.h"
 #include <jem/numeric/algebra/utilities.h>
 #include <jem/util/StringUtils.h>
 #include <jive/fem/ElementGroup.h>
@@ -55,6 +56,8 @@ public:
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
   virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const override;
+
+  Matrix getConsistentStiff(const Vector &stress) const;
 
 protected:
   ~ElastoPlasticRodMaterial();

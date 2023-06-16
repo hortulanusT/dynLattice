@@ -2,6 +2,50 @@
 
 namespace jive_helpers
 {
+  Vector funcGrad(const Ref<Function> func, const Vector &args)
+  {
+    Vector res(func->argCount());
+
+    for (idx_t i = 0; i < func->argCount(); i++)
+      res[i] = func->getDeriv(i, args.addr());
+
+    return res;
+  }
+
+  Matrix funcHessian(const Ref<Function> func, const Vector &args)
+  {
+    const idx_t argc = func->argCount();
+
+    Matrix res(argc, argc);
+    Vector g1(argc), g2(argc);
+    Vector x1(argc), x2(argc);
+    double dx;
+
+    for (idx_t iarg = 0; iarg < argc; iarg++)
+    {
+      dx = 1.0e-6 * args[iarg];
+
+      if (jem::isTiny(dx))
+      {
+        res[iarg] = 0.0;
+        continue;
+      }
+
+      x1 = args;
+      x2 = args;
+      x1[iarg] -= dx;
+      x2[iarg] += dx;
+      dx = x2[iarg] - x1[iarg];
+
+      g1 = funcGrad(func, x1);
+      g2 = funcGrad(func, x2);
+
+      res[iarg] = (g2 - g1) / dx;
+    }
+
+    return res;
+  }
+
   Matrix eye(const idx_t dim)
   {
     Matrix ret(dim, dim);

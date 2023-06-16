@@ -97,7 +97,7 @@ public:
   static const char *GIVEN_DIRS;
   static const char *THICKENING_FACTOR;
   static const char *LUMPED_MASS;
-  // static const char *HINGES;
+  static const char *HINGES;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -161,6 +161,13 @@ private:
 
       (XTable &strain_table, const Vector &weights, const Vector &disp,
        const bool mat_vals = false);
+
+  /**
+   * @brief fill the table with the plastic strain values per element
+   */
+  void get_strain_table_
+
+      (XTable &strain_table, const Vector &weights);
 
   /**
    * @brief fill the table with the stress values per element
@@ -249,7 +256,7 @@ private:
   Ref<Line3D> shapeM_;
   Ref<Material> material_;
   bool stress_current_;
-  // Ref<Model> hinges_;
+  Ref<Model> hinges_;
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;

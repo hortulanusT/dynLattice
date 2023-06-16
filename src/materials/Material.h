@@ -72,6 +72,8 @@ public:
    */
   virtual Matrix getMaterialStiff() const = 0;
 
+  virtual Matrix getConsistentStiff(const Vector &stress) const;
+
   /**
    * @brief get the material mass matrix
    *

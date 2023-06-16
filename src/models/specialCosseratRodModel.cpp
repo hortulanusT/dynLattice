@@ -34,7 +34,7 @@ const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
-// const char *specialCosseratRodModel::HINGES = "hinges";
+const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -81,15 +81,15 @@ specialCosseratRodModel::specialCosseratRodModel
   myConf.set(ROT_DOF_NAMES, rot_dofs);
 
   // create hinges in the first step (if neccessary)
-  // if (myProps.contains(HINGES))
-  // {
-  //   Properties hingeProps = myProps.getProps(HINGES);
-  //   hingeProps.set("material", material_);
-  //   hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
-  //   hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
-  // }
-  // else
-  //   hinges_ = nullptr;
+  if (myProps.contains(HINGES))
+  {
+    Properties hingeProps = myProps.getProps(HINGES);
+    hingeProps.set("material", material_);
+    hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
+    hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
+  }
+  else
+    hinges_ = nullptr;
 
   // Get the elements and nodes from the global database
   allElems_ = ElementSet::get(globdat, getContext()); // all the elements
@@ -258,6 +258,8 @@ bool specialCosseratRodModel::takeAction
         get_strain_table_(*table, weights, disp, true);
       else if (name == "mat_stress")
         get_stress_table_(*table, weights, disp, true);
+      else if (name == "plast_strain")
+        get_strain_table_(*table, weights);
       else
         return false;
 
@@ -392,7 +394,41 @@ bool specialCosseratRodModel::takeAction
   // else
   return false;
 }
+//-----------------------------------------------------------------------
+//   get_strain_table_ (plastic version)
+//-----------------------------------------------------------------------
+void specialCosseratRodModel::get_strain_table_
 
+    (XTable &strain_table, const Vector &weights)
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  IdxVector icols(dofs_->typeCount());
+  String dofName;
+
+  // add all the dofs to the Table
+  for (idx_t idof = 0; idof < dofs_->typeCount(); idof++)
+  {
+    dofName = dofs_->getTypeName(idof);
+    if (idof < TRANS_DOF_COUNT)
+      icols[idof] = strain_table.addColumn(
+          "gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
+    else
+      icols[idof] = strain_table.addColumn(
+          "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
+  }
+
+  // iterate through the elements
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      idx_t ielem = rodElems_.getIndices()[ie];
+      strain_table.addRowValues(ielem, icols, material_->plastStrains(ALL, ip, ie));
+      weights[ielem] += 1.;
+    }
+  }
+}
 //-----------------------------------------------------------------------
 //   get_strain_table_
 //-----------------------------------------------------------------------
@@ -846,7 +882,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], materialC, PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], material_->getConsistentStiff(stress[ip]), PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
       // TEST_CONTEXT(materialC)
       // TEST_CONTEXT(spatialC)

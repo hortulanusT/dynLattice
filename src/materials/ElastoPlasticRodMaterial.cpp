@@ -51,14 +51,29 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     double f_old = yieldCond_->getValue(oldStress.addr());
     critStress = oldStress - (stress - oldStress) * f_old / (f_trial - f_old);
 
-    for (idx_t idof = 0; idof < dofNames_.size(); idof++)
-      deriv[idof] = yieldCond_->getDeriv(idof, critStress.addr());
+    deriv = jive_helpers::funcGrad(yieldCond_, critStress);
 
     double deltaFlow = dotProduct(deriv, stress - critStress) / dotProduct(deriv, matmul(materialK_, deriv));
 
     plastStrains[ielem][ip] += deltaFlow * deriv;
     Super::getStress(stress, Vector(strain - plastStrains[ielem][ip]));
   }
+}
+
+Matrix ElastoPlasticRodMaterial::getConsistentStiff(const Vector &stress) const
+{
+  Vector deriv = jive_helpers::funcGrad(yieldCond_, stress);
+  double deltaFlow = dotProduct(deriv, stress - stress) / dotProduct(deriv, matmul(materialK_, deriv));
+  if (isnan(deltaFlow))
+    return materialK_;
+
+  Matrix H = jive_helpers::eye(dofNames_.size());
+  H += deltaFlow * matmul(materialK_, jive_helpers::funcHessian(yieldCond_, stress));
+  H = matmul(jem::numeric::inverse(H), materialK_);
+
+  H -= matmul(matmul(H, matmul(deriv, deriv)), H) / dotProduct(deriv, matmul(H, deriv));
+
+  return H;
 }
 
 Ref<Material> ElastoPlasticRodMaterial::makeNew
