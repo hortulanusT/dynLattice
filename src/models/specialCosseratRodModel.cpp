@@ -220,6 +220,7 @@ bool specialCosseratRodModel::takeAction
   using jive::model::StateVector;
 
   // REPORT(action)
+  // TEST_CONTEXT(myName_)
   // TEST_CONTEXT(params)
 
   if (action == Actions::INIT)
@@ -1045,7 +1046,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
           spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
-        TEST_CONTEXT(spatialInertia)
+        // TEST_CONTEXT(spatialInertia)
         mbld.addBlock(idofs, idofs, spatialInertia);
       }
     }

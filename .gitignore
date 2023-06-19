@@ -28,7 +28,11 @@ tests/element/runs/
 tests/element/*.txt
 tests/beam/test*/
 tests/transient/test*/
-tests/manual/testing*/
+tests/manual/*
+
+# save some manual testing settings
+!tests/manual/*.pro
+!tests/manual/*.geo
 
 # save the folder structure
 !.gitkeep
