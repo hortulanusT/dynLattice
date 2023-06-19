@@ -17,8 +17,9 @@
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
 1. `./scripts/cluster/masterDesign.sh`
 1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/eqv-design.py lin_change_master_plot`
 1. `./scripts/cluster/masterFailed.sh`
-1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot lin_change_master_plot stress_plot comp_speeds_locale_plot`
+1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
