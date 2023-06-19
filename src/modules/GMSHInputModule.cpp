@@ -117,11 +117,14 @@ Module::Status GMSHInputModule::init
 
   if (geoFile.size())
   {
+    std::filesystem::path geoPath = std::filesystem::path(jem::makeCString(geoFile).addr());
+    JEM_PRECHECK2(std::filesystem::exists(geoPath), std::filesystem::absolute(geoPath).c_str());
     prepareOnelab_(onelab);
     openMesh_(geoFile, order);
   }
   else
   {
+    NOT_IMPLEMENTED
     // LATER Leon's function
   }
 
