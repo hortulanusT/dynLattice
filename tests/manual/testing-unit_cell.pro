@@ -1,11 +1,12 @@
 include "../../studies/programs/nonlin-comp.pro";
 
+control.runWhile = "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy >= -.9";
 Input.input.verbose = true;
 Input.input.file="studies/geometries/re-entrant.geo";
 model.model.load.model.H11="nan";
 model.model.load.model.H22=-1.;
 model.model.lattice.child.material.type = "ElastoPlasticRod";
-model.model.lattice.child.material.yieldCond = "abs(ry/2.5e-3) + (dz/10)^2*(1+(dx/10)^2) + (dx/10) - 1";
+model.model.lattice.child.material.yieldCond = "abs(dx/0.82)^2.68 + abs(dy/0.82)^2.68 + abs(dz/1.87)^1.75 + abs(rx/0.94)^1.93 + abs(ry/0.94)^1.93 + abs(rz/0.75)^1.70 - 1";
 model.model.lattice.child.material.side_length=0.1e-3;
 Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangentModuli.E_x", "tangentModuli.E_y", "tangentModuli.nu_xy",
       "tangentModuli.nu_yx", "tangentModuli.G_xy", "tangentModuli.G_yx" ];
