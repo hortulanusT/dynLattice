@@ -860,7 +860,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], material_->getConsistentStiff(stress[ip]), PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(), PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
       // TEST_CONTEXT(materialC)
       // TEST_CONTEXT(spatialC)

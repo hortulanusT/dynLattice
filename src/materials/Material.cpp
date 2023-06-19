@@ -23,11 +23,6 @@ void Material::getConfig(const Properties &props, const Properties &globdat) con
 {
 }
 
-Matrix Material::getConsistentStiff(const Vector &stress) const
-{
-  return getMaterialStiff();
-}
-
 Matrix Material::getLumpedMass(double l) const
 {
   return Matrix(getMaterialMass() * l);

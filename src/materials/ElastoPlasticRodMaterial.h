@@ -64,8 +64,6 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
-  Matrix getConsistentStiff(const Vector &stress) const;
-
 protected:
   ~ElastoPlasticRodMaterial();
 

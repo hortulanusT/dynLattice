@@ -68,14 +68,6 @@ public:
   virtual Matrix getMaterialStiff() const = 0;
 
   /**
-   * @brief Get the Consistent Stiffness matrix
-   *
-   * @param stress current stress
-   * @return consistent stiffness matrix
-   */
-  virtual Matrix getConsistentStiff(const Vector &stress) const;
-
-  /**
    * @brief get the material mass matrix
    *
    * @return mass matrix (per unit)
