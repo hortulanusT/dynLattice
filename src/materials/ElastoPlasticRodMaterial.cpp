@@ -37,6 +37,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   oldStresses_.resize(dofNames.size(), ipCount, elemCount);
   oldStresses_ = 0.;
 
+  yieldCond_ = FuncUtils::newFunc(args, "-1.");
   FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
 }
 
@@ -59,8 +60,11 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   double f_trial = yieldCond_->getValue(stress.addr());
   if (f_trial > 0 && !jem::isTiny(f_trial))
   {
-
+    TEST_CONTEXT(strain)
+    TEST_CONTEXT(stress)
+    TEST_CONTEXT(f_trial)
     double f_old = yieldCond_->getValue(oldStress.addr());
+    TEST_CONTEXT(f_old)
     critStress = oldStress - (stress - oldStress) * f_old / (f_trial - f_old);
 
     deriv = jive_helpers::funcGrad(yieldCond_, critStress);
@@ -75,18 +79,20 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
 
 Matrix ElastoPlasticRodMaterial::getConsistentStiff(const Vector &stress) const
 {
-  Vector deriv = jive_helpers::funcGrad(yieldCond_, stress);
-  double deltaFlow = dotProduct(deriv, stress) / dotProduct(deriv, matmul(materialK_, deriv));
-  if (isnan(deltaFlow))
-    return materialK_;
+  return Super::getConsistentStiff(stress);
 
-  Matrix H = jive_helpers::eye(stress.size());
-  H += deltaFlow * matmul(materialK_, jive_helpers::funcHessian(yieldCond_, stress));
-  H = matmul(jem::numeric::inverse(H), materialK_);
+  // Vector deriv = jive_helpers::funcGrad(yieldCond_, stress);
+  // double deltaFlow = dotProduct(deriv, stress) / dotProduct(deriv, matmul(materialK_, deriv));
+  // if (isnan(deltaFlow))
+  //   return materialK_;
 
-  H -= matmul(matmul(H, matmul(deriv, deriv)), H) / dotProduct(deriv, matmul(H, deriv));
+  // Matrix H = jive_helpers::eye(stress.size());
+  // H += deltaFlow * matmul(materialK_, jive_helpers::funcHessian(yieldCond_, stress));
+  // H = matmul(jem::numeric::inverse(H), materialK_);
 
-  return H;
+  // H -= matmul(matmul(H, matmul(deriv, deriv)), H) / dotProduct(deriv, matmul(H, deriv));
+
+  // return H;
 }
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const

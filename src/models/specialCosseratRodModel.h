@@ -22,6 +22,7 @@
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/util/Properties.h>
+#include <jem/util/StringUtils.h>
 
 #include <jive/Array.h>
 #include <jive/algebra/AbstractMatrix.h>

@@ -60,8 +60,7 @@ specialCosseratRodModel::specialCosseratRodModel
   Properties myConf = conf.makeProps(myName_);
 
   // Get the element name from the global database
-  String elementsName;
-  myProps.find(elementsName, "elements");
+  String elementsName = jem::util::StringUtils::split(myName_, '.').back();
 
   // ARRANGE DOF NAMES FIRST
   // set the default
@@ -360,7 +359,7 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  if (action == Actions::UPDATE)
+  if (action == Actions::COMMIT)
   {
     Vector disp;
 
