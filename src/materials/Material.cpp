@@ -32,8 +32,3 @@ Matrix Material::getLumpedMass(double l) const
 {
   return Matrix(getMaterialMass() * l);
 }
-
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
-{
-  getStress(stress, strain);
-}

@@ -17,6 +17,7 @@
 #include <jem/util/StringUtils.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/utilities.h>
 
@@ -29,8 +30,10 @@ using jive::Ref;
 using jive::Vector;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
+using jive::util::DofSpace;
 using jive::util::FuncUtils;
 using jive::util::joinNames;
+using jive::util::XTable;
 
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
 {
@@ -57,12 +60,22 @@ public:
 
   virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const override;
 
+  virtual void update(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+
+  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+
   Matrix getConsistentStiff(const Vector &stress) const;
 
 protected:
   ~ElastoPlasticRodMaterial();
 
 protected:
-  StringVector dofNames_;
   Ref<Function> yieldCond_;
+  Cubix plastStrains_;
+  Cubix oldStresses_;
 };
+
+void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
+{
+  stress = matmul(materialK_, Vector(strain - plastStrains_[ielem][ip]));
+}

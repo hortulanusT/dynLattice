@@ -246,6 +246,13 @@ private:
    */
   double calc_pot_Energy_(const Vector &disp) const;
 
+  /**
+   * @brief update the material
+   *
+   * @param disp displacement vector
+   */
+  void update_(const Vector &disp) const;
+
 private:
   Assignable<ElementGroup> rodElems_;
   IdxVector rodNodes_;
@@ -255,7 +262,6 @@ private:
   Ref<Line3D> shapeK_;
   Ref<Line3D> shapeM_;
   Ref<Material> material_;
-  bool stress_current_;
   Ref<Model> hinges_;
   IdxVector trans_types_;
   IdxVector rot_types_;

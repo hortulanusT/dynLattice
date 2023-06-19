@@ -24,8 +24,18 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 {
   Properties myProps = props.findProps(myName_);
 
-  myProps.get(dofNames_, "dofNames"); // TODO get from the globdat dofs
-  String args = jem::util::StringUtils::join(dofNames_, ", ");
+  Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
+  StringVector dofNames = dofs->getTypeNames();
+  String args = jem::util::StringUtils::join(dofNames, ", ");
+
+  idx_t ipCount;
+  idx_t elemCount;
+  myProps.find(ipCount, "ipCount");
+  myProps.find(elemCount, "elemCount");
+  plastStrains_.resize(dofNames.size(), ipCount, elemCount);
+  plastStrains_ = 0.;
+  oldStresses_.resize(dofNames.size(), ipCount, elemCount);
+  oldStresses_ = 0.;
 
   FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
 }
@@ -37,16 +47,18 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
   FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
 }
 
-void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
+void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  Super::getStress(stress, Vector(strain - plastStrains[ielem][ip]));
+  Vector stress(strain.size());
+  Vector oldStress = oldStresses_[ielem][ip];
+  Vector critStress(strain.size());
+  Vector deriv(strain.size());
+
+  Super::getStress(stress, Vector(strain - plastStrains_[ielem][ip]));
 
   double f_trial = yieldCond_->getValue(stress.addr());
   if (f_trial > 0 && !jem::isTiny(f_trial))
   {
-    Vector oldStress = stresses[ielem][ip];
-    Vector critStress(dofNames_.size());
-    Vector deriv(dofNames_.size());
 
     double f_old = yieldCond_->getValue(oldStress.addr());
     critStress = oldStress - (stress - oldStress) * f_old / (f_trial - f_old);
@@ -55,25 +67,49 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     double deltaFlow = dotProduct(deriv, stress - critStress) / dotProduct(deriv, matmul(materialK_, deriv));
 
-    plastStrains[ielem][ip] += deltaFlow * deriv;
-    Super::getStress(stress, Vector(strain - plastStrains[ielem][ip]));
+    plastStrains_[ielem][ip] += deltaFlow * deriv;
   }
+
+  Super::getStress(oldStresses_[ielem][ip], Vector(strain - plastStrains_[ielem][ip]));
 }
 
 Matrix ElastoPlasticRodMaterial::getConsistentStiff(const Vector &stress) const
 {
   Vector deriv = jive_helpers::funcGrad(yieldCond_, stress);
-  double deltaFlow = dotProduct(deriv, stress - stress) / dotProduct(deriv, matmul(materialK_, deriv));
+  double deltaFlow = dotProduct(deriv, stress) / dotProduct(deriv, matmul(materialK_, deriv));
   if (isnan(deltaFlow))
     return materialK_;
 
-  Matrix H = jive_helpers::eye(dofNames_.size());
+  Matrix H = jive_helpers::eye(stress.size());
   H += deltaFlow * matmul(materialK_, jive_helpers::funcHessian(yieldCond_, stress));
   H = matmul(jem::numeric::inverse(H), materialK_);
 
   H -= matmul(matmul(H, matmul(deriv, deriv)), H) / dotProduct(deriv, matmul(H, deriv));
 
   return H;
+}
+
+void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
+{
+  if (name != "plast_strain")
+  {
+    WARN(name + " not supported by this material");
+    return;
+  }
+
+  const idx_t elemCount = items.size();
+  const idx_t ipCount = plastStrains_.size(1);
+  const IdxVector columns(strain_table.columnCount());
+  columns = jem::iarray(strain_table.columnCount());
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      strain_table.addRowValues(items[ie], columns, plastStrains_(ALL, ip, ie));
+      weights[items[ie]] += 1.;
+    }
+  }
 }
 
 Ref<Material> ElastoPlasticRodMaterial::makeNew

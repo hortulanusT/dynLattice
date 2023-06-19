@@ -143,12 +143,9 @@ specialCosseratRodModel::specialCosseratRodModel
   dofs_ = dofs;
 
   // get the material
+  props.set(joinNames(myName_, "material.ipCount"), shapeK_->ipointCount());
+  props.set(joinNames(myName_, "material.elemCount"), rodElems_.size());
   material_ = MaterialFactory::newInstance(joinNames(myName_, "material"), conf, props, globdat);
-  // store (old) stresses and plastic strains in globdat
-  material_->stresses.resize(dofs_->typeCount(), shapeK_->ipointCount(), rodElems_.size());
-  material_->plastStrains.resize(dofs_->typeCount(), shapeK_->ipointCount(), rodElems_.size());
-  material_->stresses = 0.;
-  material_->plastStrains = 0.;
 
   // get the incremental property
   symmetric_only_ = false;
@@ -363,15 +360,15 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  if (action == Actions::ADVANCE)
+  if (action == Actions::UPDATE)
   {
-    stress_current_ = false;
-    return true;
-  }
+    Vector disp;
 
-  if (action == Actions::COMMIT)
-  {
-    stress_current_ = true;
+    // Get the current displacements.
+    StateVector::get(disp, dofs_, globdat);
+
+    update_(disp);
+
     return true;
   }
 
@@ -402,8 +399,6 @@ void specialCosseratRodModel::get_strain_table_
 
     (XTable &strain_table, const Vector &weights)
 {
-  const idx_t elemCount = rodElems_.size();
-  const idx_t ipCount = shapeK_->ipointCount();
   IdxVector icols(dofs_->typeCount());
   String dofName;
 
@@ -419,16 +414,7 @@ void specialCosseratRodModel::get_strain_table_
           "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
-  // iterate through the elements
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    for (idx_t ip = 0; ip < ipCount; ip++)
-    {
-      idx_t ielem = rodElems_.getIndices()[ie];
-      strain_table.addRowValues(ielem, icols, material_->plastStrains(ALL, ip, ie));
-      weights[ielem] += 1.;
-    }
-  }
+  material_->getTable("plast_strain", strain_table, rodElems_.getIndices(), weights);
 }
 //-----------------------------------------------------------------------
 //   get_strain_table_
@@ -762,23 +748,15 @@ void specialCosseratRodModel::get_stresses_(
   const Cubix stiffness(dofCount, dofCount, ipCount);
   const Cubix PI(dofCount, dofCount, ipCount);
 
-  // get the (material) stresses
-  if (!stress_current_)
-  {
-    // get the (material) strains
-    get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
-    // TEST_CONTEXT(strains)
+  // get the (material) strains
+  get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
+  // TEST_CONTEXT(strains)
 
-    Matrix newStress(stresses.shape());
-    newStress = 0.;
+  Matrix newStress(stresses.shape());
+  newStress = 0.;
 
-    for (idx_t ip = 0; ip < ipCount; ip++)
-      material_->getStress(newStress[ip], strains[ip], ie, ip);
-
-    material_->stresses[ie] = newStress;
-  }
-
-  stresses = material_->stresses[ie];
+  for (idx_t ip = 0; ip < ipCount; ip++)
+    material_->getStress(stresses[ip], strains[ip], ie, ip);
 
   // get the (spatial) stresses
   if (spatial)
@@ -1049,6 +1027,36 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         // TEST_CONTEXT(spatialInertia)
         mbld.addBlock(idofs, idofs, spatialInertia);
       }
+    }
+  }
+}
+
+void specialCosseratRodModel::update_(const Vector &disp) const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t rank = shapeK_->globalRank();
+  const idx_t dofCount = dofs_->typeCount();
+
+  Matrix nodeU(rank, nodeCount);
+  Matrix nodePhi_0(rank, nodeCount);
+  Cubix nodeLambda(rank, rank, nodeCount);
+  Matrix strain(dofCount, ipCount);
+  Vector weights(ipCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
+
+    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      material_->update(strain[ip], ie, ip);
     }
   }
 }
