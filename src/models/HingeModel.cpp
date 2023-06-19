@@ -226,7 +226,7 @@ void hingeModel::updForces_(const Vector &fint)
 //   evalPlastic_
 //-----------------------------------------------------------------------
 
-bool hingeModel::evalPlastic_(const Vector &disp) // TODO transform to matrial coordinates
+bool hingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial coordinates
 {
   bool checked = true;
   double f_old, f_trial;
