@@ -292,20 +292,8 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
 
   const idx_t compCount = strains.size();
   Properties myVars = Globdat::getVariables("tangent", globdat);
-  double zero_stress = max(abs(stresses)) * 1e-6;
 
-  for (idx_t i = 0; i < compCount; i++)
-  {
-    for (idx_t j = 0; j < compCount; j++)
-    {
-      if (fabs(stresses(i, j)) < zero_stress || fabs(stresses(i, j)) < 1e-6)
-      {
-        stresses(i, j) = 0.;
-      }
-    }
-  }
-
-  Matrix C = Matrix(stresses / perturb_);
+  Matrix C = Matrix(stresses / thickness_ / perturb_);
   Vector C_prop(jem::product(stresses.shape()));
   Matrix S = jem::numeric::inverse(C);
   Vector S_prop(jem::product(stresses.shape()));
