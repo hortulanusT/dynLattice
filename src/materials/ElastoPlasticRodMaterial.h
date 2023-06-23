@@ -14,6 +14,7 @@
 #include "materials/MaterialFactory.h"
 #include "utils/helpers.h"
 #include <jem/numeric/algebra/utilities.h>
+#include <jem/util/PropertyException.h>
 #include <jem/util/StringUtils.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
@@ -40,7 +41,8 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
 public:
   static const char *TYPE_NAME;
   static const char *YIELD_PROP;
-  static const char *DOF_PROP;
+  static const char *ISO_HARD_PROP;
+  static const char *KIN_HARD_PROP;
 
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
 
@@ -69,6 +71,11 @@ protected:
 
 protected:
   Ref<Function> yieldCond_;
+  double isoFact_;
+  Matrix isoParams_;
+  Matrix kinFacts_;
+  Cubix kinParams_;
+
   Cubix plastStrains_;
   Cubix oldStresses_;
 };
