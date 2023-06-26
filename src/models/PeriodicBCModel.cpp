@@ -296,7 +296,7 @@ void periodicBCModel::setConstraints_()
   idx_t midNode = (masterEdgeDofs_(0, 0).size() - 1) / 2;
 
   for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    cons_->addConstraint(masterEdgeDofs_(iDof, 1)[midNode]);
+    cons_->addConstraint(masterEdgeDofs_(iDof, 0)[midNode]);
 
   // TEST_PRINTER((*cons_))
 }
