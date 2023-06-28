@@ -28,7 +28,7 @@ tests/element/runs/
 tests/element/*.txt
 tests/beam/test*/
 tests/transient/test*/
-tests/manual/testing*/
+tests/manual/*
 
 # save the folder structure
 !.gitkeep

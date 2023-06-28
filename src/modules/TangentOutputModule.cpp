@@ -76,9 +76,9 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
   stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
-  String dummy = stresses_[1];
-  stresses_[1] = stresses_[2];
-  stresses_[2] = dummy; // Transpose 1st PK stress to get nominal stress
+  // String dummy = stresses_[1];
+  // stresses_[1] = stresses_[2];
+  // stresses_[2] = dummy; // Transpose 1st PK stress to get nominal stress
 
   for (idx_t i = 0; i < dofs.size(); i++)
     sizes_[i] = "all.extent." + dofs[i];
@@ -285,43 +285,34 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
                                              const Matrix &stresses,
                                              const Properties &globdat)
 {
-  Properties myVars = Globdat::getVariables("tangentModuli", globdat);
+  JEM_ASSERT(strains.size(0) == strains.size(1));
+  JEM_ASSERT(stresses.size(0) == stresses.size(1));
+  JEM_ASSERT(strains.size() == stresses.size());
+  JEM_ASSERT(strains.size() == rank_ * rank_);
 
-  switch (strains.size(0))
+  const idx_t compCount = strains.size();
+  Properties myVars = Globdat::getVariables("tangent", globdat);
+
+  Matrix C = Matrix(stresses / thickness_ / perturb_);
+  Vector C_prop(jem::product(stresses.shape()));
+  Matrix S = jem::numeric::inverse(C);
+  Vector S_prop(jem::product(stresses.shape()));
+
+  for (idx_t i = 0; i < compCount; i++)
   {
-  case 4:
-    myVars.set("G_xy", stresses[1][1] / strains[1][1] / thickness_);
-    myVars.set("G_yx", stresses[2][2] / strains[2][2] / thickness_);
-
-    myVars.set("nu_xy", stresses[3][0] / stresses[3][3]);
-    myVars.set("nu_yx", stresses[0][3] / stresses[0][0]);
-
-    myVars.set("E_x", (stresses[0][0] -
-                       stresses[3][0] * stresses[0][3] / stresses[3][3]) /
-                          strains[0][0] / thickness_);
-    myVars.set("E_y", (stresses[3][3] -
-                       stresses[0][3] * stresses[3][0] / stresses[0][0]) /
-                          strains[3][3] / thickness_);
-    break;
-
-  case 1:
-    myVars.set("E", stresses(0, 0) / strains(0, 0) / thickness_);
-    break;
-
-  default:
-    NOT_IMPLEMENTED
-    break;
+    C_prop[slice(i * compCount, (i + 1) * compCount)] = C[i];
+    S_prop[slice(i * compCount, (i + 1) * compCount)] = S[i];
   }
 
-  // TEST_CONTEXT(strains)
-  // TEST_CONTEXT(stresses)
-  // TEST_CONTEXT(myVars)
+  myVars.set("stiffness", C_prop);
+  myVars.set("compliance", S_prop);
 }
 
 void TangentOutputModule::condenseMatrix_(const Matrix &strains,
                                           const Matrix &stresses,
                                           const Properties &globdat)
 {
+  NOT_IMPLEMENTED
   Vector fint(cons_->dofCount());
   Ref<FEMatrixBuilder> mB = newInstance<FEMatrixBuilder>(
       "tangentBuilder", ElementSet::get(globdat, "tangentBuild"),
