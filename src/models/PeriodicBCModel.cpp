@@ -275,7 +275,7 @@ void periodicBCModel::fixCorners_(const Properties &globdat,
         cons_->addConstraint(cornerDofs_(iDof, iCorner),
                              corner_deform(iDof, iCorner));
 
-  // fix nodes to prevent rigid body movements // TODO check for ghostCorner setting and also make for 3D
+  // fix nodes to prevent rigid body movements
   if (ghostCorners_)
   {
     Matrix edge0Deform = matmul(applyGrad, edge0Coords_(jem::SliceTo(pbcRank_), ALL));
