@@ -282,11 +282,22 @@ void periodicBCModel::fixCorners_(const Properties &globdat,
 
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
     {
-      cons_->addConstraint(masterEdgeDofs_(iDof, 0)[0], edge0Deform[0][iDof]);
+      if (std::isnan(edge0Deform[0][iDof]))
+        cons_->eraseConstraint(masterEdgeDofs_(iDof, 0)[0]);
+      else
+        cons_->addConstraint(masterEdgeDofs_(iDof, 0)[0], edge0Deform[0][iDof]);
+
       if (iDof < pbcRank_ - 1)
-        cons_->addConstraint(masterEdgeDofs_(iDof, 1)[0], edge0Deform[1][iDof]);
+        if (std::isnan(edge0Deform[1][iDof]))
+          cons_->eraseConstraint(masterEdgeDofs_(iDof, 1)[0]);
+        else
+          cons_->addConstraint(masterEdgeDofs_(iDof, 1)[0], edge0Deform[1][iDof]);
+
       if (iDof < pbcRank_ - 2)
-        cons_->addConstraint(masterEdgeDofs_(iDof, 1)[0], edge0Deform[2][iDof]);
+        if (std::isnan(edge0Deform[2][iDof]))
+          cons_->eraseConstraint(masterEdgeDofs_(iDof, 2)[0]);
+        else
+          cons_->addConstraint(masterEdgeDofs_(iDof, 2)[0], edge0Deform[2][iDof]);
     }
   }
 }
