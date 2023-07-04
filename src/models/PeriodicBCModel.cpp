@@ -167,7 +167,6 @@ void periodicBCModel::init_(const Properties &globdat)
   slaveEdgeDofs_.resize(pbcRank_, pbcRank_);
   cornerDofs_.resize(pbcRank_, pbcRank_);
   corner0Dofs_.resize(pbcRank_);
-  edge0Coords_.resize(nodes_.rank(), pbcRank_);
 
   IdxVector masterRots;
   IdxVector slaveRots;
@@ -202,10 +201,6 @@ void periodicBCModel::init_(const Properties &globdat)
                                nodes_, globdat, getContext());
     corner = NodeGroup::get(PBCGroupInputModule::CORNERS[iEdge + 1],
                             nodes_, globdat, getContext());
-
-    // save the 0 coordinates of the edge starts
-    if (ghostCorners_)
-      nodes_.getNodeCoords(edge0Coords_[iDir], masterEdge.getIndex(0));
 
     // save the translational DOFs for the
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
@@ -275,34 +270,11 @@ void periodicBCModel::fixCorners_(const Properties &globdat,
         cons_->addConstraint(cornerDofs_(iDof, iCorner),
                              corner_deform(iDof, iCorner));
 
-  // fix nodes to prevent rigid body movements
+  // fix first node on ymin to prevent rigid body movements
   if (ghostCorners_)
   {
-    Matrix edge0Deform = matmul(applyGrad, edge0Coords_(jem::SliceTo(pbcRank_), ALL));
-
     for (idx_t iDof = 0; iDof < pbcRank_; iDof++)
-    {
-      if (std::isnan(edge0Deform[0][iDof]))
-        cons_->eraseConstraint(masterEdgeDofs_(iDof, 0)[0]);
-      else
-        cons_->addConstraint(masterEdgeDofs_(iDof, 0)[0], edge0Deform[0][iDof]);
-
-      if (iDof < pbcRank_ - 1)
-      {
-        if (std::isnan(edge0Deform[1][iDof]))
-          cons_->eraseConstraint(masterEdgeDofs_(iDof, 1)[0]);
-        else
-          cons_->addConstraint(masterEdgeDofs_(iDof, 1)[0], edge0Deform[1][iDof]);
-      }
-
-      if (iDof < pbcRank_ - 2)
-      {
-        if (std::isnan(edge0Deform[2][iDof]))
-          cons_->eraseConstraint(masterEdgeDofs_(iDof, 2)[0]);
-        else
-          cons_->addConstraint(masterEdgeDofs_(iDof, 2)[0], edge0Deform[2][iDof]);
-      }
-    }
+      cons_->addConstraint(masterEdgeDofs_(iDof, 1)[0]);
   }
 }
 

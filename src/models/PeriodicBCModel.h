@@ -110,7 +110,6 @@ private:
   IdxVector jdofs_;
   IdxVectorMatrix masterEdgeDofs_;
   IdxVectorMatrix slaveEdgeDofs_;
-  Matrix edge0Coords_;
   IdxMatrix cornerDofs_;
   IdxVector corner0Dofs_;
   idx_t pbcRank_;
