@@ -223,8 +223,8 @@ bool specialCosseratRodModel::takeAction
   {
     init_rot_();
     init_strain_();
-    // TEST_CONTEXT ( LambdaN_ )
-    // TEST_CONTEXT ( mat_strain0_ )
+    // TEST_CONTEXT(LambdaN_)
+    // TEST_CONTEXT(mat_strain0_)
     // if (hinges_)
     //   hinges_->takeAction(action, params, globdat);
     return true;
@@ -374,10 +374,10 @@ bool specialCosseratRodModel::takeAction
   if (action == "GET_ENERGY")
   {
     Vector disp;
-    double E_pot;
+    double E_pot = 0;
 
-    StateVector::get(disp, jive::model::STATE0, dofs_, globdat);
-    params.get(E_pot, "potentialEnergy");
+    StateVector::get(disp, dofs_, globdat);
+    params.find(E_pot, "potentialEnergy");
 
     E_pot += calc_pot_Energy_(disp);
 

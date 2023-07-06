@@ -88,22 +88,22 @@ String PBCGroupOutputModule::getHeader_(String head) const
 
   // step
   if (head.size() < 1)
-    head = "            step,";
+    head = "step";
 
-  if (head.back() != ',')
-    head = head + ",";
+  if (head.back() == ',')
+    head = head[SliceTo(head.size() - 1)];
 
   // displacement gradient
   for (idx_t i = 1; i <= dim; i++)
     for (idx_t j = 1; j <= dim; j++)
-      head = head + String::format("             H%d%d,", i, j);
+      head = head + String::format(",H%d%d", i, j);
 
   // 1st PK Tensor
   for (idx_t i = 1; i <= dim; i++)
     for (idx_t j = 1; j <= dim; j++)
-      head = head + String::format("             P%d%d,", i, j);
+      head = head + String::format(",P%d%d", i, j);
 
-  return head[SliceTo(head.size() - 1)];
+  return head;
 }
 
 StringVector PBCGroupOutputModule::getDataSets_(

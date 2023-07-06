@@ -1,5 +1,6 @@
 # vs code settings
 .vscode
+.config
 
 # binary files
 OBJ*
@@ -29,10 +30,6 @@ tests/element/*.txt
 tests/beam/test*/
 tests/transient/test*/
 tests/manual/*
-
-# save some manual testing settings
-!tests/manual/*.pro
-!tests/manual/*.geo
 
 # save the folder structure
 !.gitkeep
