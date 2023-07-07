@@ -139,7 +139,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     {
       Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
       kinParams_[ielem][ip] += deltaFlow * d_dBeta;
-      TEST_CONTEXT(kinParams_[ielem][ip])
+      TEST_CONTEXT(-1. * matmul(kinFacts_, kinParams_[ielem][ip]))
     }
   }
 
