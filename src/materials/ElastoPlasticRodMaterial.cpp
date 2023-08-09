@@ -88,7 +88,7 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
 void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  SUBHEADER2(ielem, ip)
+  // SUBHEADER2(ielem, ip)
   const idx_t argCount = strain.size() + (isoParams_.size() ? 1 : 0) + (kinParams_.size() ? strain.size() : (idx_t)0);
 
   Vector args(argCount);
@@ -133,13 +133,13 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     {
       Vector d_dAlpha = deriv[jem::SliceFrom(strain.size())];
       isoParams_[ielem][ip] += deltaFlow * d_dAlpha[0];
-      TEST_CONTEXT(isoParams_)
+      // TEST_CONTEXT(isoParams_)
     }
     else if (kinParams_.size())
     {
       Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
       kinParams_[ielem][ip] += deltaFlow * d_dBeta;
-      TEST_CONTEXT(-1. * matmul(kinFacts_, kinParams_[ielem][ip]))
+      // TEST_CONTEXT(-1. * matmul(kinFacts_, kinParams_[ielem][ip]))
     }
   }
 
