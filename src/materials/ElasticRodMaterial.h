@@ -18,6 +18,7 @@
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/util/StringUtils.h>
+#include <jive/util/ObjectConverter.h>
 #include <math.h>
 
 using jem::idx_t;

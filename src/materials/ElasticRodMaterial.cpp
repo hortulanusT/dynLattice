@@ -36,6 +36,8 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 {
   Properties myProps = props.getProps(myName_);
 
+  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
+
   myProps.get(young_, YOUNGS_MODULUS);
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
   {
