@@ -36,6 +36,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   idx_t ipCount;
   idx_t elemCount;
   idx_t dofCount;
+  idx_t argCount;
   StringVector dofNames = dofs->getTypeNames();
   String args = StringUtils::join(dofNames, ", ");
   Vector kinHard;
@@ -43,12 +44,14 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   myProps.find(ipCount, "ipCount");
   myProps.find(elemCount, "elemCount");
   dofCount = dofs->typeCount();
+  argCount = dofCount;
 
   if (myProps.find(isoFact_, ISO_HARD_PROP))
   {
     isoParams_.resize(ipCount, elemCount);
     isoParams_ = 0.;
     args = args + ", a";
+    argCount += 1;
   }
   kinFacts_.resize(dofCount, dofCount);
   if (myProps.find(kinHard, KIN_HARD_PROP))
@@ -57,12 +60,15 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     kinParams_ = 0.;
     jive_helpers::vec2mat(kinFacts_.transpose(), kinHard);
     for (String dofName : dofNames)
+    {
       args = args + ", b_" + dofName;
+      argCount += 1;
+    }
   }
   plastStrains_.resize(dofCount, ipCount, elemCount);
   plastStrains_ = 0.;
-  oldStresses_.resize(dofCount, ipCount, elemCount);
-  oldStresses_ = 0.;
+  oldYieldArgs_.resize(argCount, ipCount, elemCount);
+  oldYieldArgs_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
@@ -113,8 +119,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   double f_trial = yieldCond_->getValue(args.addr());
   if (f_trial > 0 && !jem::isTiny(f_trial))
   {
-    oldArgs = args;
-    oldArgs[jem::SliceTo(strain.size())] = oldStresses_[ielem][ip];
+    oldArgs = oldYieldArgs_[ielem][ip];
     double f_old = yieldCond_->getValue(oldArgs.addr());
     critArgs = oldArgs - (args - oldArgs) * f_old / (f_trial - f_old);
 
@@ -143,7 +148,19 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     }
   }
 
-  Super::getStress(oldStresses_[ielem][ip], Vector(strain - plastStrains_[ielem][ip]));
+  Super::getStress(oldYieldArgs_[ielem][ip][jem::SliceTo(strain.size())], Vector(strain - plastStrains_[ielem][ip]));
+  if (isoParams_.size() && kinParams_.size())
+  {
+    NOT_IMPLEMENTED
+  }
+  else if (isoParams_.size())
+  {
+    oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = isoFact_ * isoParams_[ielem][ip];
+  }
+  else if (kinParams_.size())
+  {
+    oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
+  }
 }
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
