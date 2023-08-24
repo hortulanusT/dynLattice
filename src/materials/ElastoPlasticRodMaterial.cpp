@@ -6,6 +6,7 @@ JEM_DEFINE_CLASS(ElastoPlasticRodMaterial);
 
 const char *ElastoPlasticRodMaterial::TYPE_NAME = "ElastoPlasticRod";
 const char *ElastoPlasticRodMaterial::YIELD_PROP = "yieldCond";
+const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "hardeningCoefficient";
 const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "hardeningTensor";
 
 ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
@@ -13,7 +14,9 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &props,
                                                    const Properties &globdat) : Super(name, conf, props, globdat)
 {
+  isoParams_.resize(0);
   kinParams_.resize(0);
+  argCount_ = 0;
   configure(props, globdat);
   getConfig(conf, globdat);
 }
@@ -33,7 +36,6 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   idx_t ipCount;
   idx_t elemCount;
   idx_t dofCount;
-  idx_t argCount;
   StringVector dofNames = dofs->getTypeNames();
   String args = StringUtils::join(dofNames, ", ");
   Vector kinHard;
@@ -41,7 +43,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   myProps.find(ipCount, "ipCount");
   myProps.find(elemCount, "elemCount");
   dofCount = dofs->typeCount();
-  argCount = dofCount;
+  argCount_ = dofCount;
 
   if (myProps.find(kinHard, KIN_HARD_PROP))
   {
@@ -50,15 +52,22 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     for (String dofName : dofNames)
     {
       args = args + ", b_" + dofName;
-      argCount += 1;
+      argCount_ += 1;
     }
     kinParams_.resize(dofCount, ipCount, elemCount);
     kinParams_ = 0.;
   }
+  else if (myProps.find(isoCoeff_, ISO_HARD_PROP)) // DONT USE KINEMATIC AND ISOTROPIC HARDENING AT THE SAME TIME, LATER STAGES WILL BREAK!!!
+  {
+    args = args + ", a";
+    argCount_ += 1;
+    isoParams_.resize(ipCount, elemCount);
+    isoParams_ = 0.;
+  }
 
   plastStrains_.resize(dofCount, ipCount, elemCount);
   plastStrains_ = 0.;
-  oldYieldArgs_.resize(argCount, ipCount, elemCount);
+  oldYieldArgs_.resize(argCount_, ipCount, elemCount);
   oldYieldArgs_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
@@ -82,15 +91,16 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
 void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  // SUBHEADER2(ielem, ip)
-  const idx_t argCount = strain.size() + (kinParams_.size() ? strain.size() : (idx_t)0);
-
-  Vector args(argCount);
-  Vector oldArgs(argCount);
-  Vector critArgs(argCount);
-  Vector deriv(argCount);
+  Vector args(argCount_);
+  Vector oldArgs(argCount_);
+  Vector critArgs(argCount_);
+  Vector deriv(argCount_);
 
   Super::getStress(args[jem::SliceTo(strain.size())], Vector(strain - plastStrains_[ielem][ip]));
+  if (isoParams_.size())
+  {
+    args[jem::SliceFrom(strain.size())] = -1. * isoCoeff_ * isoParams_[ielem][ip];
+  }
   if (kinParams_.size())
   {
     args[jem::SliceFrom(strain.size())] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
@@ -106,19 +116,28 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
 
     Vector d_dStress = deriv[jem::SliceTo(strain.size())];
-    double deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) / dotProduct(d_dStress, matmul(materialK_, d_dStress));
+    double deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
+                       dotProduct(d_dStress, matmul(materialK_, d_dStress));
 
+    if (isoParams_.size())
+    {
+      double d_dAlpha = deriv[strain.size()];
+      isoParams_[ielem][ip] += deltaFlow * d_dAlpha;
+    }
     if (kinParams_.size())
     {
       Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
       kinParams_[ielem][ip] += deltaFlow * d_dBeta;
-      // TEST_CONTEXT(-1. * matmul(kinFacts_, kinParams_[ielem][ip]))
     }
 
     plastStrains_[ielem][ip] += deltaFlow * d_dStress;
   }
 
   Super::getStress(oldYieldArgs_[ielem][ip][jem::SliceTo(strain.size())], Vector(strain - plastStrains_[ielem][ip]));
+  if (isoParams_.size())
+  {
+    oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = -1. * isoCoeff_ * isoParams_[ielem][ip];
+  }
   if (kinParams_.size())
   {
     oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);

@@ -41,6 +41,7 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
 public:
   static const char *TYPE_NAME;
   static const char *YIELD_PROP;
+  static const char *ISO_HARD_PROP;
   static const char *KIN_HARD_PROP;
 
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
@@ -70,6 +71,10 @@ protected:
 
 protected:
   Ref<Function> yieldCond_;
+  idx_t argCount_;
+
+  double isoCoeff_;
+  Matrix isoParams_;
 
   Matrix kinFacts_;
   Cubix kinParams_;
