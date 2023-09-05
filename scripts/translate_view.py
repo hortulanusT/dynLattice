@@ -6,6 +6,10 @@ import sys
 
 data_file = sys.argv[1]
 load_step = int(sys.argv[2])
+if len(sys.argv) > 3:
+  visual_fact = float(sys.argv[3])
+else:
+  visual_fact = 1.
 
 gmsh.initialize()
 
@@ -32,7 +36,7 @@ for element in el_tags[0]:
       continue
     idx = np.squeeze(np.where(data_tags == node))
     tikz_str += ('\n' if j == 0 else ' -- ') + \
-        f"({(new_coords[0]+data[idx][0])*fact},{(new_coords[1]+data[idx][1])*fact})"
+        f"({(new_coords[0]+data[idx][0]*visual_fact)*fact},{(new_coords[1]+data[idx][1]*visual_fact)*fact})"
 
 with open(f"{data_file[:-4]}{load_step}.tikz", "w") as file:
   file.write(tikz_str + "\n")
