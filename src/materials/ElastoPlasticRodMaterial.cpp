@@ -123,18 +123,25 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
 
     Vector d_dStress = deriv[jem::SliceTo(strain.size())];
-    double deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
-                       dotProduct(d_dStress, matmul(materialK_, d_dStress));
 
     if (isoParams_.size())
     {
-      double d_dAlpha = deriv[strain.size()];
-      isoParams_[ielem][ip] += deltaFlow * d_dAlpha;
+      double hardModulus = deriv[strain.size()] * dotProduct(critArgs[jem::SliceTo(strain.size())], d_dStress);
+      deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
+                  (hardModulus + dotProduct(d_dStress, matmul(materialK_, d_dStress)));
     }
     else if (kinParams_.size())
     {
+      deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
+                  dotProduct(d_dStress, matmul(materialK_, d_dStress));
+
       Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
       kinParams_[ielem][ip] += deltaFlow * d_dBeta;
+    }
+    else
+    {
+      deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
+                  dotProduct(d_dStress, matmul(materialK_, d_dStress));
     }
 
     plastStrains_[ielem][ip] += deltaFlow * d_dStress;
