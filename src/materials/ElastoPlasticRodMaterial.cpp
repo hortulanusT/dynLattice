@@ -57,7 +57,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     kinParams_.resize(dofCount, ipCount, elemCount);
     kinParams_ = 0.;
   }
-  else if (myProps.find(isoCoeff_, ISO_HARD_PROP)) // DONT USE KINEMATIC AND ISOTROPIC HARDENING AT THE SAME TIME, LATER STAGES WILL BREAK!!!
+  else if (myProps.find(isoCoeff_, ISO_HARD_PROP)) // Kinematic hardening overides isotropic hardening!
   {
     args = args + ", a";
     argCount_ += 1;
@@ -81,6 +81,11 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
   FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
 
+  if (isoParams_.size())
+  {
+    myConf.set(ISO_HARD_PROP, isoCoeff_);
+  }
+
   if (kinParams_.size())
   {
     Vector kinHard(kinFacts_.size(0) * kinFacts_.size(1));
@@ -101,7 +106,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   {
     args[jem::SliceFrom(strain.size())] = -1. * isoCoeff_ * isoParams_[ielem][ip];
   }
-  if (kinParams_.size())
+  else if (kinParams_.size())
   {
     args[jem::SliceFrom(strain.size())] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
   }
@@ -109,10 +114,12 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   double f_trial = yieldCond_->getValue(args.addr());
   if (f_trial > 0 && !jem::isTiny(f_trial))
   {
+    double deltaFlow = 0.;
+
     oldArgs = oldYieldArgs_[ielem][ip];
     double f_old = yieldCond_->getValue(oldArgs.addr());
-    critArgs = oldArgs - (args - oldArgs) * f_old / (f_trial - f_old);
 
+    critArgs = oldArgs - (args - oldArgs) * f_old / (f_trial - f_old);
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
 
     Vector d_dStress = deriv[jem::SliceTo(strain.size())];
@@ -124,7 +131,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
       double d_dAlpha = deriv[strain.size()];
       isoParams_[ielem][ip] += deltaFlow * d_dAlpha;
     }
-    if (kinParams_.size())
+    else if (kinParams_.size())
     {
       Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
       kinParams_[ielem][ip] += deltaFlow * d_dBeta;
