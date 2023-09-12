@@ -80,7 +80,7 @@ protected:
   Cubix kinParams_;
 
   Cubix plastStrains_;
-  Cubix oldYieldArgs_;
+  Cubix oldStresses_;
 };
 
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const

@@ -67,8 +67,8 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
   plastStrains_.resize(dofCount, ipCount, elemCount);
   plastStrains_ = 0.;
-  oldYieldArgs_.resize(argCount_, ipCount, elemCount);
-  oldYieldArgs_ = 0.;
+  oldStresses_.resize(dofCount, ipCount, elemCount);
+  oldStresses_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
@@ -97,14 +97,16 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
   Vector args(argCount_);
+  args = 0.;
   Vector oldArgs(argCount_);
   Vector critArgs(argCount_);
   Vector deriv(argCount_);
 
   Super::getStress(args[jem::SliceTo(strain.size())], Vector(strain - plastStrains_[ielem][ip]));
+
   if (isoParams_.size())
   {
-    args[jem::SliceFrom(strain.size())] = -1. * isoCoeff_ * isoParams_[ielem][ip];
+    args[jem::SliceFrom(strain.size())] = 1. - isoParams_[ielem][ip];
   }
   else if (kinParams_.size())
   {
@@ -116,7 +118,8 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   {
     double deltaFlow = 0.;
 
-    oldArgs = oldYieldArgs_[ielem][ip];
+    oldArgs = args;
+    oldArgs[jem::SliceTo(strain.size())] = oldStresses_[ielem][ip];
     double f_old = yieldCond_->getValue(oldArgs.addr());
 
     critArgs = oldArgs - (args - oldArgs) * f_old / (f_trial - f_old);
@@ -126,17 +129,19 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
 
     if (isoParams_.size())
     {
-      double hardModulus = deriv[strain.size()] * dotProduct(critArgs[jem::SliceTo(strain.size())], d_dStress);
+      double hardModulus = isoCoeff_ * deriv[strain.size()] * dotProduct(critArgs[jem::SliceTo(strain.size())], d_dStress);
+      TEST_CONTEXT(hardModulus)
       deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
                   (hardModulus + dotProduct(d_dStress, matmul(materialK_, d_dStress)));
+
+      isoParams_[ielem][ip] += dotProduct(deltaFlow * d_dStress, critArgs[jem::SliceTo(strain.size())]);
     }
     else if (kinParams_.size())
     {
       deltaFlow = dotProduct(d_dStress, args[jem::SliceTo(strain.size())] - critArgs[jem::SliceTo(strain.size())]) /
                   dotProduct(d_dStress, matmul(materialK_, d_dStress));
 
-      Vector d_dBeta = deriv[jem::SliceFrom(strain.size())];
-      kinParams_[ielem][ip] += deltaFlow * d_dBeta;
+      kinParams_[ielem][ip] += deltaFlow * deriv[jem::SliceFrom(strain.size())];
     }
     else
     {
@@ -147,15 +152,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     plastStrains_[ielem][ip] += deltaFlow * d_dStress;
   }
 
-  Super::getStress(oldYieldArgs_[ielem][ip][jem::SliceTo(strain.size())], Vector(strain - plastStrains_[ielem][ip]));
-  if (isoParams_.size())
-  {
-    oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = -1. * isoCoeff_ * isoParams_[ielem][ip];
-  }
-  if (kinParams_.size())
-  {
-    oldYieldArgs_[ielem][ip][jem::SliceFrom(strain.size())] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
-  }
+  Super::getStress(oldStresses_[ielem][ip], Vector(strain - plastStrains_[ielem][ip]));
 }
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
