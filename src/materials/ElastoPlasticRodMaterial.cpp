@@ -138,7 +138,6 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     if (isoParams_.size())
     {
       A(harden_part, harden_part) = isoCoeff_;
-      TEST_CONTEXT(A)
     }
     else if (kinParams_.size())
     {
