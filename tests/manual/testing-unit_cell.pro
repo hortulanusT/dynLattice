@@ -6,7 +6,7 @@ include "../../studies/programs/nonlin-comp.pro";
 Input.input.onelab.BaseWidth = "$(params.scale) * 1e-2";
 model.model.lattice.child.material.radius = "$(params.scale) * 1e-3";
 
-control.runWhile = "i < 501";
+control.runWhile = "i < 1001";
 Input.input.verbose = true;
 Input.input.file="studies/geometries/re-entrant.geo";
 Input.input.onelab.Angle='64.471220634490691369245999339962435963006843100907948288171106356';
