@@ -71,13 +71,16 @@ protected:
 
 protected:
   Ref<Function> yieldCond_;
-  double isoFact_;
+  idx_t argCount_;
+
+  double isoCoeff_;
   Matrix isoParams_;
+
   Matrix kinFacts_;
   Cubix kinParams_;
 
   Cubix plastStrains_;
-  Cubix oldStresses_;
+  Cubix oldStrains_;
 };
 
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const

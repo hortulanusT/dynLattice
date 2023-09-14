@@ -35,7 +35,6 @@ ElasticRodMaterial::~ElasticRodMaterial()
 void ElasticRodMaterial::configure(const Properties &props, const Properties &globdat)
 {
   Properties myProps = props.getProps(myName_);
-
   myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
 
   myProps.get(young_, YOUNGS_MODULUS);
