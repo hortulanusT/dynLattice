@@ -30,6 +30,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   using jem::util::StringUtils;
 
   Properties myProps = props.findProps(myName_);
+  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
 
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
 
@@ -115,13 +116,12 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
   double f_trial = yieldCond_->getValue(args.addr());
   if (f_trial > 0 && !jem::isTiny(f_trial))
   {
-    double deltaFlow;
+    double deltaFlowNum, deltaFlowDenom, deltaFlow;
     Vector oldArgs(argCount_);
     Vector critArgs(argCount_);
     Vector critStrain(strain.size());
     Vector deriv(argCount_);
-    Matrix A(argCount_, argCount_);
-    Vector dStrain(argCount_);
+    Vector dStrain(strain.size());
 
     oldArgs = critArgs = args;
     Super::getStress(oldArgs[strain_part], Vector(oldStrains_[ielem][ip] - plastStrains_[ielem][ip]));
@@ -131,23 +131,21 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     Super::getStress(critArgs[strain_part], Vector(critStrain - plastStrains_[ielem][ip]));
 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
+    dStrain = strain - critStrain;
 
-    A = 0.;
-    A(strain_part, strain_part) = Super::getMaterialStiff();
+    deltaFlowNum = dotProduct(deriv[strain_part], matmul(materialK_, dStrain));
+    deltaFlowDenom = dotProduct(deriv[strain_part], matmul(materialK_, deriv[strain_part]));
 
     if (isoParams_.size())
     {
-      A(harden_part, harden_part) = isoCoeff_;
+      deltaFlowDenom += dotProduct(deriv[harden_part], isoCoeff_ * deriv[harden_part]);
     }
     else if (kinParams_.size())
     {
-      A(harden_part, harden_part) = kinFacts_;
+      deltaFlowDenom += dotProduct(deriv[harden_part], matmul(kinFacts_, deriv[harden_part]));
     }
 
-    dStrain = 0.;
-    dStrain[strain_part] = strain - critStrain;
-
-    deltaFlow = -1. * dotProduct(deriv, matmul(A, dStrain)) / dotProduct(deriv, matmul(Matrix(-1. * A), deriv));
+    deltaFlow = deltaFlowNum / deltaFlowDenom;
 
     plastStrains_[ielem][ip] += deltaFlow * deriv[strain_part];
     if (isoParams_.size())
