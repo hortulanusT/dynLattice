@@ -36,7 +36,7 @@ params.force_model.twist.type = "Dirichlet";
 params.force_model.twist.maxDisp = 0.;
 params.force_model.twist.initDisp = 0.;
 params.force_model.twist.dispIncr = 0.;
-params.force_model.twist.nodeGroups = "all";
+params.force_model.twist.nodeGroups = "free";
 params.force_model.twist.dofs = "ry";
 params.force_model.twist.factors = 0.; 
 
