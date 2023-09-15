@@ -11,9 +11,9 @@ try:
   sim_disp = np.loadtxt("tests/plastic/test1/disp.csv", delimiter=',')
   sim_resp = np.loadtxt("tests/plastic/test1/resp.csv", delimiter=',')
   ref_data = np.loadtxt("tests/plastic/ref_data/test1_ref.csv", delimiter=',')
-  
+
   plt.figure(figsize=(16/3, 6))
-  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom implementation)")
+  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom)")
   plt.plot(ref_data[:, 0]*1e-3, ref_data[:, 1], ":", label="(Smriti et al.)")
   plt.legend(loc="lower right")
   plt.xlabel("Axial strain")

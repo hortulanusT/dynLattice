@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# TEST 1 from Smirit et al. (axial stretch under twist, no hardening)
+# TEST 2b from Smirit et al. (axial stretch kinematic hardening)
 import numpy as np
 from termcolor import colored
 from matplotlib import pyplot as plt
@@ -13,7 +13,7 @@ try:
   ref_data = np.loadtxt("tests/plastic/ref_data/test2b_ref.csv", delimiter=',')
 
   plt.figure(figsize=(16/3, 6))
-  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom implementation)")
+  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom)")
   plt.plot(ref_data[:, 0], ref_data[:, 1], ":", label="(Smriti et al.)")
   plt.legend(loc="lower right")
   plt.xlabel("Axial strain")
