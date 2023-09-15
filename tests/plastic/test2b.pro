@@ -26,8 +26,8 @@ params.rod_details.material.yieldCond += "+ abs((rx+b_rx)/0.12) ";
 params.rod_details.material.yieldCond += "+ abs((ry+b_ry)/0.12) "; 
 params.rod_details.material.yieldCond += "+ abs((rz+b_rz)/0.12) "; 
 params.rod_details.material.yieldCond += "- 10 * (1+a)";
-params.rod_details.material.isotropicCoefficient = 1.;
-params.rod_details.material.kinematicTensor = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.];
+params.rod_details.material.isotropicCoefficient = 0.;
+params.rod_details.material.kinematicTensor = [10., 0., 0., 0., 0., 0., 0., 10., 0., 0., 0., 0., 0., 0., 10., 0., 0., 0., 0., 0., 0., 10., 0., 0., 0., 0., 0., 0., 10., 0., 0., 0., 0., 0., 0., 10.];
 
 params.force_model.type = "Multi";
 params.force_model.models = [ "twist", "stretch"];

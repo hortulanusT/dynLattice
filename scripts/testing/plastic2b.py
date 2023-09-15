@@ -8,13 +8,13 @@ from matplotlib import pyplot as plt
 test_passed = False
 
 try:
-  sim_disp = np.loadtxt("tests/plastic/test1/disp.csv", delimiter=',')
-  sim_resp = np.loadtxt("tests/plastic/test1/resp.csv", delimiter=',')
-  ref_data = np.loadtxt("tests/plastic/ref_data/test1_ref.csv", delimiter=',')
-  
+  sim_disp = np.loadtxt("tests/plastic/test2b/disp.csv", delimiter=',')
+  sim_resp = np.loadtxt("tests/plastic/test2b/resp.csv", delimiter=',')
+  ref_data = np.loadtxt("tests/plastic/ref_data/test2b_ref.csv", delimiter=',')
+
   plt.figure(figsize=(16/3, 6))
   plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom implementation)")
-  plt.plot(ref_data[:, 0]*1e-3, ref_data[:, 1], ":", label="(Smriti et al.)")
+  plt.plot(ref_data[:, 0], ref_data[:, 1], ":", label="(Smriti et al.)")
   plt.legend(loc="lower right")
   plt.xlabel("Axial strain")
   plt.ylabel("Axial load (per yield limit)")
@@ -23,16 +23,16 @@ try:
   plt.axhline(-1, alpha=.2, color="k", lw=.5)
   plt.axvline(0, alpha=.2, color="k", lw=.5)
   plt.xlim(-6e-3, 6e-3)
-  plt.ylim(-1.1, 1.1)
+  plt.ylim(-1.5, 1.5)
 except Exception as e:
   print(e)
 else:
   test_passed = True
 
 if test_passed:
-  print(colored("PLASTIC TEST 1 RUN THROUGH", "green"))
+  print(colored("PLASTIC TEST 2b RUN THROUGH", "green"))
 
   plt.tight_layout()
-  plt.savefig("tests/plastic/test1/result.pdf")
+  plt.savefig("tests/plastic/test2b/result.pdf")
 else:
-  print(colored("PLASTIC TEST 1 FAILED", "red", attrs=["bold"]))
+  print(colored("PLASTIC TEST 2b FAILED", "red", attrs=["bold"]))

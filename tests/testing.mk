@@ -16,7 +16,7 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 
 beam_cases = 0 1 2 3 4 5
 transient_cases = 0 1 2 3
-plastic_cases = 1 2a #2b
+plastic_cases = 1 2a 2b
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -100,7 +100,7 @@ tests/plastic/test%/result.pdf : scripts/testing/plastic%.py\
 tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv :\
 															$(program) tests/plastic/test%.pro
 	@$(MKDIR_P) $(dir $@)
-	-@$^ > tests/plastic/test$*/run.log
+	@$^ > tests/plastic/test$*/run.log
 
 tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/plastic/model.pro
 
