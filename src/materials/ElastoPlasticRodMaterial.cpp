@@ -48,7 +48,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
   if (myProps.find(isoCoeff_, ISO_HARD_PROP))
   {
-    args = args + ", a";
+    args = args + ", h_0";
     argCount_ += 1;
     isoParams_.resize(ipCount, elemCount);
     isoParams_ = 0.;
@@ -59,7 +59,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     jive_helpers::vec2mat(kinFacts_.transpose(), kinHard);
     for (String dofName : dofNames)
     {
-      args = args + ", b_" + dofName;
+      args = args + ", h_" + dofName;
       argCount_ += 1;
     }
     kinParams_.resize(dofCount, ipCount, elemCount);
