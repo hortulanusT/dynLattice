@@ -19,15 +19,9 @@ params.rod_details.material.poisson_ratio = .4;
 params.rod_details.material.shear_correction = "(6*1.4)/(7+9*0.4)";
 params.rod_details.material.cross_section = "circle";
 params.rod_details.material.radius = 0.05;
-params.rod_details.material.yieldCond  = "  abs(dx+h_dx) ";
-params.rod_details.material.yieldCond += "+ abs(dy+h_dy) "; 
-params.rod_details.material.yieldCond += "+ abs(dz+h_dz) "; 
-params.rod_details.material.yieldCond += "+ abs((rx+h_rx)/0.12) "; 
-params.rod_details.material.yieldCond += "+ abs((ry+h_ry)/0.12) "; 
-params.rod_details.material.yieldCond += "+ abs((rz+h_rz)/0.12) "; 
-params.rod_details.material.yieldCond += "- 10 * (1+h_0)";
+params.rod_details.material.yieldCond = "abs(dz+0*h_dz) - 10 * (1+1*h_0)";
 params.rod_details.material.isotropicCoefficient = 1.;
-params.rod_details.material.kinematicTensor = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.];
+params.rod_details.material.kinematicTensor = [1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1.];
 
 params.force_model.type = "Multi";
 params.force_model.models = [ "twist", "stretch"];
@@ -63,7 +57,7 @@ model.model.model.diriFixed.nodeGroups += [ "fixed_right", "fixed_right", "fixed
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ];
 
-model.model.model.diriFixed.nodeGroups += [ "all", "all", "all", "all" ];
+model.model.model.diriFixed.nodeGroups += [ "free", "free", "free", "free" ];
 model.model.model.diriFixed.dofs += ["dx","dz","rx","rz"];
 model.model.model.diriFixed.factors += [ 0., 0., 0., 0. ];
 
