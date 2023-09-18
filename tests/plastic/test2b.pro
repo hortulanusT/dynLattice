@@ -19,7 +19,7 @@ params.rod_details.material.poisson_ratio = .4;
 params.rod_details.material.shear_correction = "(6*1.4)/(7+9*0.4)";
 params.rod_details.material.cross_section = "circle";
 params.rod_details.material.radius = 0.05;
-params.rod_details.material.yieldCond = "abs(dz+10*h_dz) - 10 * (1+0*h_0)";
+params.rod_details.material.yieldCond = "abs(dz+20*h_dz) - 10 * (1+0*h_0)"; // HACK why does it work with 20 but not with 10?
 params.rod_details.material.isotropicCoefficient = 1.;
 params.rod_details.material.kinematicTensor = [1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1.];
 
