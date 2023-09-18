@@ -68,5 +68,3 @@ model.model.model.diriFixed.factors += [ 0., 0., 0., 0. ];
 Output.paraview.sampleWhen = "i%10<1";
 Output.paraview.beams.shape = "Line2";
 Output.paraview.beams.el_data += "plast_strain";
-
-log.file = "$(CASE_NAME)/run.log";
