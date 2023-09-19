@@ -32,14 +32,18 @@ try:
   ref_m[2] = ref_m[2][ref_m[2][:, 0].argsort()]
 
   fig, axs = plt.subplots(1, 2, figsize=(32/3, 6))
+
+  scale = sim_resp[:, 6] if sim_resp.shape[1] == 7 else np.linspace(
+      0, 1, len(sim_resp))
+
   for i in range(3):
-    axs[0].plot(np.linspace(0, 1, len(sim_disp)),
+    axs[0].plot(scale,
                 sim_resp[:, i], label=f"n{i+1} (custom)")
-    axs[0].plot(ref_n[i][:, 0], ref_n[i][:, 1]*1e3,
+    axs[0].plot(ref_n[i][:, 0], ref_n[i][:, 1],
                 ":", label=f"n{i+1} (Herrnböck et al.)")
-    axs[1].plot(np.linspace(0, 1, len(sim_disp)),
+    axs[1].plot(scale,
                 sim_resp[:, i+3], label=f"m{i+1} (custom)")
-    axs[1].plot(ref_m[i][:, 0], ref_m[i][:, 1],
+    axs[1].plot(ref_m[i][:, 0], ref_m[i][:, 1]*1e-3,
                 ":", label=f"m{i+1} (Herrnböck et al.)")
   axs[0].legend()
   axs[1].legend()
@@ -47,6 +51,8 @@ try:
   axs[1].set_ylabel("m [Nm]")
   axs[0].set_xlabel(r"$\lambda$")
   axs[1].set_xlabel(r"$\lambda$")
+  axs[0].set_ylim(-5, 25)
+  axs[1].set_ylim(-1, 2)
   axs[0].set_xlim(0, 1)
   axs[1].set_xlim(0, 1)
 except Exception as e:
