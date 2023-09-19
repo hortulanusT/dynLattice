@@ -16,7 +16,7 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 
 beam_cases = 0 1 2 3 4 5
 transient_cases = 0 1 2 3
-plastic_cases = 1 2a 2b 3
+plastic_cases = 1 2a 2b 3 4
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
