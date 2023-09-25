@@ -6,8 +6,8 @@ JEM_DEFINE_CLASS(ElastoPlasticRodMaterial);
 
 const char *ElastoPlasticRodMaterial::TYPE_NAME = "ElastoPlasticRod";
 const char *ElastoPlasticRodMaterial::YIELD_PROP = "yieldCond";
-const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "hardeningCoefficient";
-const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "hardeningTensor";
+const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "isotropicCoefficient";
+const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "kinematicTensor";
 
 ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &conf,
@@ -46,24 +46,24 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   dofCount = dofs->typeCount();
   argCount_ = dofCount;
 
+  if (myProps.find(isoCoeff_, ISO_HARD_PROP))
+  {
+    args = args + ", h_0";
+    argCount_ += 1;
+    isoParams_.resize(ipCount, elemCount);
+    isoParams_ = 0.;
+  }
   if (myProps.find(kinHard, KIN_HARD_PROP))
   {
     kinFacts_.resize(dofCount, dofCount);
     jive_helpers::vec2mat(kinFacts_.transpose(), kinHard);
     for (String dofName : dofNames)
     {
-      args = args + ", b_" + dofName;
+      args = args + ", h_" + dofName;
       argCount_ += 1;
     }
     kinParams_.resize(dofCount, ipCount, elemCount);
     kinParams_ = 0.;
-  }
-  else if (myProps.find(isoCoeff_, ISO_HARD_PROP)) // Kinematic hardening overides isotropic hardening!
-  {
-    args = args + ", a";
-    argCount_ += 1;
-    isoParams_.resize(ipCount, elemCount);
-    isoParams_ = 0.;
   }
 
   plastStrains_.resize(dofCount, ipCount, elemCount);
@@ -97,20 +97,21 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
 void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  const jem::Slice strain_part = jem::SliceTo(strain.size());
-  const jem::Slice harden_part = jem::SliceFrom(strain.size());
+  const jem::Slice elast_part = jem::SliceTo(strain.size());
+  const idx_t iso_part = strain.size();
+  const jem::Slice kin_part = jem::SliceFrom(argCount_ - strain.size());
   Vector args(argCount_);
   args = 0.;
 
-  Super::getStress(args[strain_part], Vector(strain - plastStrains_[ielem][ip]));
+  Super::getStress(args[elast_part], Vector(strain - plastStrains_[ielem][ip]));
 
   if (isoParams_.size())
   {
-    args[harden_part] = 1. - isoCoeff_ * isoParams_[ielem][ip];
+    args[iso_part] = -1. * isoCoeff_ * isoParams_[ielem][ip];
   }
-  else if (kinParams_.size())
+  if (kinParams_.size())
   {
-    args[harden_part] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
+    args[kin_part] = -1. * matmul(kinFacts_, kinParams_[ielem][ip]);
   }
 
   double f_trial = yieldCond_->getValue(args.addr());
@@ -124,37 +125,37 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     Vector dStrain(strain.size());
 
     oldArgs = critArgs = args;
-    Super::getStress(oldArgs[strain_part], Vector(oldStrains_[ielem][ip] - plastStrains_[ielem][ip]));
+    Super::getStress(oldArgs[elast_part], Vector(oldStrains_[ielem][ip] - plastStrains_[ielem][ip]));
     double f_old = yieldCond_->getValue(oldArgs.addr());
 
     critStrain = oldStrains_[ielem][ip] - (strain - oldStrains_[ielem][ip]) * f_old / (f_trial - f_old);
-    Super::getStress(critArgs[strain_part], Vector(critStrain - plastStrains_[ielem][ip]));
+    Super::getStress(critArgs[elast_part], Vector(critStrain - plastStrains_[ielem][ip]));
 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
     dStrain = strain - critStrain;
 
-    deltaFlowNum = dotProduct(deriv[strain_part], matmul(materialK_, dStrain));
-    deltaFlowDenom = dotProduct(deriv[strain_part], matmul(materialK_, deriv[strain_part]));
+    deltaFlowNum = dotProduct(deriv[elast_part], matmul(materialK_, dStrain));
+    deltaFlowDenom = dotProduct(deriv[elast_part], matmul(materialK_, deriv[elast_part]));
 
     if (isoParams_.size())
     {
-      deltaFlowDenom += dotProduct(deriv[harden_part], isoCoeff_ * deriv[harden_part]);
+      deltaFlowDenom += deriv[iso_part] * isoCoeff_ * deriv[iso_part];
     }
-    else if (kinParams_.size())
+    if (kinParams_.size())
     {
-      deltaFlowDenom += dotProduct(deriv[harden_part], matmul(kinFacts_, deriv[harden_part]));
+      deltaFlowDenom += dotProduct(deriv[kin_part], matmul(kinFacts_, deriv[kin_part]));
     }
 
     deltaFlow = deltaFlowNum / deltaFlowDenom;
 
-    plastStrains_[ielem][ip] += deltaFlow * deriv[strain_part];
+    plastStrains_[ielem][ip] += deltaFlow * deriv[elast_part];
     if (isoParams_.size())
     {
-      isoParams_[ielem][ip] += deltaFlow * deriv[strain.size()];
+      isoParams_[ielem][ip] += deltaFlow * deriv[iso_part];
     }
-    else if (kinParams_.size())
+    if (kinParams_.size())
     {
-      kinParams_[ielem][ip] += deltaFlow * deriv[harden_part];
+      kinParams_[ielem][ip] += deltaFlow * deriv[kin_part];
     }
   }
 

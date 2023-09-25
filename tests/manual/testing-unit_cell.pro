@@ -31,22 +31,22 @@ model.model.lattice.child.material.cross_section = "circle";
 // model.model.lattice.child.material.yieldCond += "+ abs(rx/0.62/$(params.scale)^3)^2.09 ";
 // model.model.lattice.child.material.yieldCond += "+ abs(ry/0.62/$(params.scale)^3)^2.09 ";
 // model.model.lattice.child.material.yieldCond += "+ abs(rz/0.56/$(params.scale)^3)^1.73 ";
-// model.model.lattice.child.material.yieldCond += "- a";
-// model.model.lattice.child.material.hardeningCoefficient = 1.;
+// model.model.lattice.child.material.yieldCond += "- (1 + h_0)";
+// model.model.lattice.child.material.isotropicCoefficient = "500/$(params.scale)^2";
 
-// model.model.lattice.child.material.yieldCond  = "  abs(dx/( 700-b_dx)/$(params.scale)^2)^2.04 ";
-// model.model.lattice.child.material.yieldCond += "+ abs(dy/( 700-b_dy)/$(params.scale)^2)^2.04 "; 
-// model.model.lattice.child.material.yieldCond += "+ abs(dz/(1470-b_dz)/$(params.scale)^2)^1.76 ";
-// model.model.lattice.child.material.yieldCond += "+ abs(rx/(0.62-b_rx)/$(params.scale)^3)^2.09 ";
-// model.model.lattice.child.material.yieldCond += "+ abs(ry/(0.62-b_ry)/$(params.scale)^3)^2.09 ";
-// model.model.lattice.child.material.yieldCond += "+ abs(rz/(0.56-b_rz)/$(params.scale)^3)^1.73 ";
+// model.model.lattice.child.material.yieldCond  = "  abs(dx/( 700-h_dx)/$(params.scale)^2)^2.04 ";
+// model.model.lattice.child.material.yieldCond += "+ abs(dy/( 700-h_dy)/$(params.scale)^2)^2.04 "; 
+// model.model.lattice.child.material.yieldCond += "+ abs(dz/(1470-h_dz)/$(params.scale)^2)^1.76 ";
+// model.model.lattice.child.material.yieldCond += "+ abs(rx/(0.62-h_rx)/$(params.scale)^3)^2.09 ";
+// model.model.lattice.child.material.yieldCond += "+ abs(ry/(0.62-h_ry)/$(params.scale)^3)^2.09 ";
+// model.model.lattice.child.material.yieldCond += "+ abs(rz/(0.56-h_rz)/$(params.scale)^3)^1.73 ";
 // model.model.lattice.child.material.yieldCond += "- 1";
-// model.model.lattice.child.material.hardeningTensor = [ 19014e+0, 17547e+0, 33121e+0, 16069e-3, 16743e-3, 15552e-3,
-//                                                        17547e+0, 19014e+0, 33121e+0, 16743e-3, 16069e-3, 15556e-3,
-//                                                        33121e+0, 33121e+0, 56864e+0, 24578e-3, 24578e-3, 26757e-3,
-//                                                        16069e-3, 16743e-3, 24578e-3, 15015e-6, 15009e-6, 12715e-6,
-//                                                        16743e-3, 16069e-3, 24578e-3, 15009e-6, 16015e-6, 12715e-6,
-//                                                        15552e-3, 15556e-3, 26757e-3, 12715e-6, 12715e-6, 10434e-6];
+// model.model.lattice.child.material.kinematicTensor = ["19014e+0/$(params.scale)^2","17547e+0/$(params.scale)^2","33121e+0/$(params.scale)^2","16069e-3/$(params.scale)^2","16743e-3/$(params.scale)^2","15552e-3/$(params.scale)^2",
+//                                                       "17547e+0/$(params.scale)^2","19014e+0/$(params.scale)^2","33121e+0/$(params.scale)^2","16743e-3/$(params.scale)^2","16069e-3/$(params.scale)^2","15556e-3/$(params.scale)^2",
+//                                                       "33121e+0/$(params.scale)^2","33121e+0/$(params.scale)^2","56864e+0/$(params.scale)^2","24578e-3/$(params.scale)^2","24578e-3/$(params.scale)^2","26757e-3/$(params.scale)^2",
+//                                                       "16069e-3/$(params.scale)^2","16743e-3/$(params.scale)^2","24578e-3/$(params.scale)^2","15015e-6/$(params.scale)^2","15009e-6/$(params.scale)^2","12715e-6/$(params.scale)^2",
+//                                                       "16743e-3/$(params.scale)^2","16069e-3/$(params.scale)^2","24578e-3/$(params.scale)^2","15009e-6/$(params.scale)^2","16015e-6/$(params.scale)^2","12715e-6/$(params.scale)^2",
+//                                                       "15552e-3/$(params.scale)^2","15556e-3/$(params.scale)^2","26757e-3/$(params.scale)^2","12715e-6/$(params.scale)^2","12715e-6/$(params.scale)^2","10434e-6/$(params.scale)^2"];
 
 Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]" ];
 Output.sampling.append	= false;

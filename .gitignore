@@ -29,8 +29,7 @@ studies/results/*
 
 tests/element/runs/
 tests/element/*.txt
-tests/beam/test*/
-tests/transient/test*/
+tests/*/test*/
 tests/manual/*.csv
 
 # save the folder structure
