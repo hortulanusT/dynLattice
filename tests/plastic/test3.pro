@@ -14,8 +14,8 @@ Solver.solver.type = "Nonlin";
 
 // SETTINGS
 params.rod_details.material.type = "ElastoPlasticRod";
-params.rod_details.material.young = "9*164.210e9*80.193e9/(3*164.210e9+80.193e9)"; // HACK material parameters in MPa not in GPa!
-params.rod_details.material.shear_modulus = 80.193e9; // HACK material parameters in MPa not in GPa!
+params.rod_details.material.young = "9*164.210e9*80.193e9/(3*164.210e9+80.193e9)";
+params.rod_details.material.shear_modulus = 80.193e9;
 params.rod_details.material.cross_section = "circle";
 params.rod_details.material.radius = 1e-3;
 params.rod_details.material.yieldCond  = "  abs(dx/( 700-h_dx))^2.04 ";
