@@ -97,13 +97,13 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
 void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  const jem::Slice elast_part = jem::SliceTo(strain.size());
+  const jem::Slice stress_part = jem::SliceTo(strain.size());
   const idx_t iso_part = strain.size();
   const jem::Slice kin_part = jem::SliceFrom(argCount_ - strain.size());
   Vector args(argCount_);
   args = 0.;
 
-  Super::getStress(args[elast_part], Vector(strain - plastStrains_[ielem][ip]));
+  Super::getStress(args[stress_part], Vector(strain - plastStrains_[ielem][ip]));
 
   if (isoParams_.size())
   {
@@ -125,17 +125,24 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     Vector dStrain(strain.size());
 
     oldArgs = critArgs = args;
-    Super::getStress(oldArgs[elast_part], Vector(oldStrains_[ielem][ip] - plastStrains_[ielem][ip]));
+    Super::getStress(oldArgs[stress_part], Vector(oldStrains_[ielem][ip] - plastStrains_[ielem][ip]));
     double f_old = yieldCond_->getValue(oldArgs.addr());
 
     critStrain = oldStrains_[ielem][ip] - (strain - oldStrains_[ielem][ip]) * f_old / (f_trial - f_old);
-    Super::getStress(critArgs[elast_part], Vector(critStrain - plastStrains_[ielem][ip]));
+    Super::getStress(critArgs[stress_part], Vector(critStrain - plastStrains_[ielem][ip]));
 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
+    for (idx_t iStress = 0; iStress < strain.size(); iStress++) // TODO is this really working as intended?
+    {
+      if (args[iStress] == 0.0)
+      {
+        deriv[iStress] = 0.0;
+      }
+    }
     dStrain = strain - critStrain;
 
-    deltaFlowNum = dotProduct(deriv[elast_part], matmul(materialK_, dStrain));
-    deltaFlowDenom = dotProduct(deriv[elast_part], matmul(materialK_, deriv[elast_part]));
+    deltaFlowNum = dotProduct(deriv[stress_part], matmul(materialK_, dStrain));
+    deltaFlowDenom = dotProduct(deriv[stress_part], matmul(materialK_, deriv[stress_part]));
 
     if (isoParams_.size())
     {
@@ -147,8 +154,7 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     }
 
     deltaFlow = deltaFlowNum / deltaFlowDenom;
-
-    plastStrains_[ielem][ip] += deltaFlow * deriv[elast_part];
+    plastStrains_[ielem][ip] += deltaFlow * deriv[stress_part];
     if (isoParams_.size())
     {
       isoParams_[ielem][ip] += deltaFlow * deriv[iso_part];

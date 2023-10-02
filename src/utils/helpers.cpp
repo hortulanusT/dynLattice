@@ -5,9 +5,12 @@ namespace jive_helpers
   Vector funcGrad(const Ref<Function> func, const Vector &args)
   {
     Vector res(func->argCount());
+    res = 0.;
 
     for (idx_t i = 0; i < func->argCount(); i++)
+    {
       res[i] = func->getDeriv(i, args.addr());
+    }
 
     return res;
   }
