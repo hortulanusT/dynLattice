@@ -116,10 +116,10 @@ Module::Status ExplicitModule::init
     FuncUtils::configCond(updCond_, PropNames::UPDATE_COND, myProps,
                           globdat);
   else
-    updCond_ = FuncUtils::newCond(false);
+    updCond_ = FuncUtils::newCond(true);
   FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
 
-  // time stepping setttings
+  // time stepping settings
   myProps.find(prec_, PropNames::PRECISION);
   myConf.set(PropNames::PRECISION, prec_);
   myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
