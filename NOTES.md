@@ -28,7 +28,7 @@
 rsync -vax $TARGET $DESTINATION
 ```
 ## debugging
-- call (dbg) call dprint(&...) to get any matrix/vector/... printed live
+- (gdb) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
 ## .pro files
 - `$(CASE_NAME)` also works with environment variables (and other settings)

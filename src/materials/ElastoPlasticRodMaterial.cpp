@@ -132,9 +132,9 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     Super::getStress(critArgs[stress_part], Vector(critStrain - plastStrains_[ielem][ip]));
 
     deriv = jive_helpers::funcGrad(yieldCond_, critArgs);
-    for (idx_t iStress = 0; iStress < strain.size(); iStress++) // TODO is this really working as intended?
+    for (idx_t iStress = 0; iStress < strain.size(); iStress++)
     {
-      if (args[iStress] == 0.0)
+      if (args[iStress] == 0.0) // TODO is this really working as intended?
       {
         deriv[iStress] = 0.0;
       }
