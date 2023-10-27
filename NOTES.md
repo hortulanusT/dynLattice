@@ -8,7 +8,7 @@
       - Get Matrix Condenstation to work
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
-    - make all plot outputs A4
+    - make all plot outputs A4/A3
 1. Tests
     - include more reference data
  
@@ -17,8 +17,9 @@
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
 1. `./scripts/cluster/masterDesign.sh`
 1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/eqv-design.py lin_change_master_plot`
 1. `./scripts/cluster/masterFailed.sh`
-1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot lin_change_master_plot stress_plot comp_speeds_locale_plot`
+1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
@@ -27,7 +28,7 @@
 rsync -vax $TARGET $DESTINATION
 ```
 ## debugging
-- call (dbg) call dprint(&...) to get any matrix/vector/... printed live
+- (gdb) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
 ## .pro files
 - `$(CASE_NAME)` also works with environment variables (and other settings)

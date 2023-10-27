@@ -1,5 +1,6 @@
 # vs code settings
 .vscode
+.config
 
 # binary files
 OBJ*
@@ -20,15 +21,16 @@ scripts/scribbling.*
 *.pvd
 *.pvsm
 *.tar
+*.pdf
+*.avi
 
 studies/output/*
 studies/results/*
 
 tests/element/runs/
 tests/element/*.txt
-tests/beam/test*/
-tests/transient/test*/
-tests/manual/testing*/
+tests/*/test*/
+tests/manual/*.csv
 
 # save the folder structure
 !.gitkeep

@@ -168,6 +168,13 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     }
   }
 
+  double E_pot = 0.;
+  model->takeAction("GET_ENERGY", params, globdat);
+  if (params.find(E_pot, "potentialEnergy"))
+  {
+    myVars.set("potentialEnergy", E_pot);
+  }
+
   return Status::OK;
 }
 

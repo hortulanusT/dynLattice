@@ -11,7 +11,7 @@ void declareModels()
   jive::implict ::declareModels();
 
   specialCosseratRodModel::declare();
-  rodJointModel::declare();
+  hingeModel::declare();
   periodicBCModel::declare();
   FollowerLoadModel::declare();
   DirichletModel::declare();

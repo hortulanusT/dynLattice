@@ -15,11 +15,11 @@ Material::~Material()
 {
 }
 
-void Material::configure(const Properties &props)
+void Material::configure(const Properties &props, const Properties &globdat)
 {
 }
 
-void Material::getConfig(const Properties &props) const
+void Material::getConfig(const Properties &props, const Properties &globdat) const
 {
 }
 
