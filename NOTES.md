@@ -8,7 +8,7 @@
       - Get Matrix Condenstation to work
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
-    - make all plot outputs A4
+    - make all plot outputs A4/A3
 1. Tests
     - include more reference data
  
@@ -28,7 +28,7 @@
 rsync -vax $TARGET $DESTINATION
 ```
 ## debugging
-- call (dbg) call dprint(&...) to get any matrix/vector/... printed live
+- (gdb) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
 ## .pro files
 - `$(CASE_NAME)` also works with environment variables (and other settings)

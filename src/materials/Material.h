@@ -14,12 +14,17 @@
 #include <jem/base/NamedObject.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
+#include <jive/util/XTable.h>
 
 using jem::NamedObject;
 using jem::util::Properties;
+using jive::Cubix;
+using jive::idx_t;
+using jive::IdxVector;
 using jive::Matrix;
 using jive::String;
 using jive::Vector;
+using jive::util::XTable;
 
 class Material : public NamedObject
 {
@@ -36,14 +41,14 @@ public:
    *
    * @param props properties to be used in the configuration
    */
-  virtual void configure(const Properties &props);
+  virtual void configure(const Properties &props, const Properties &globdat);
 
   /**
    * @brief get the configuration
    *
    * @param conf properties to store the configuration to
    */
-  virtual void getConfig(const Properties &conf) const;
+  virtual void getConfig(const Properties &conf, const Properties &globdat) const;
 
   /**
    * @brief compute the stresses
@@ -53,10 +58,12 @@ public:
    */
   virtual void getStress(const Vector &stress, const Vector &strain) const = 0;
 
+  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const;
+
   /**
    * @brief get the material stiffness matrix
    *
-   * @return stiffness matrix
+   * @return material stiffness matrix
    */
   virtual Matrix getMaterialStiff() const = 0;
 
@@ -69,6 +76,10 @@ public:
 
   virtual Matrix getLumpedMass(double l) const;
 
+  virtual void update(const Vector &strain, const idx_t &ielem, const idx_t &ip) = 0;
+
+  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
+
 protected:
   /**
    * @brief Destroy the Material object
@@ -76,3 +87,8 @@ protected:
    */
   virtual ~Material();
 };
+
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
+{
+  getStress(stress, strain);
+}

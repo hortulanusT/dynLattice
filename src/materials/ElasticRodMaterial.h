@@ -12,17 +12,22 @@
 #pragma once
 #include "materials/Material.h"
 #include "materials/MaterialFactory.h"
+#include "utils/helpers.h"
 #include <jem/base/Array.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
+#include <jem/util/StringUtils.h>
+#include <jive/util/ObjectConverter.h>
 #include <math.h>
 
 using jem::idx_t;
 using jem::newInstance;
 using jem::numeric::matmul;
+using jive::IdxVector;
 using jive::Ref;
 using jive::Vector;
+using jive::util::XTable;
 
 class ElasticRodMaterial : public Material
 {
@@ -52,9 +57,9 @@ public:
 
   static void declare();
 
-  virtual void configure(const Properties &props) override;
+  virtual void configure(const Properties &props, const Properties &globdat) override;
 
-  virtual void getConfig(const Properties &conf) const override;
+  virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
   virtual inline Matrix getMaterialStiff() const override;
 
@@ -64,10 +69,14 @@ public:
 
   virtual inline void getStress(const Vector &stress, const Vector &strain) const override;
 
+  virtual inline void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+
+  virtual inline void update(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+
 protected:
   ~ElasticRodMaterial();
 
-private:
+protected:
   void calcMaterialStiff_();
   void calcMaterialMass_();
 
@@ -87,19 +96,30 @@ private:
 
   Matrix materialK_;
   Matrix materialM_;
+
+  String rodName_;
 };
 
 Matrix ElasticRodMaterial::getMaterialStiff() const
 {
-  return materialK_.clone();
+  return materialK_;
 }
 
 Matrix ElasticRodMaterial::getMaterialMass() const
 {
-  return materialM_.clone();
+  return materialM_;
 }
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain) const
 {
   stress = matmul(materialK_, strain);
+}
+
+void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
+{
+  WARN(name + " not supported by this material");
+}
+
+void ElasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
+{
 }

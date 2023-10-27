@@ -33,7 +33,8 @@ LatticeModel::LatticeModel
      const Properties &globdat) : Model(name)
 {
   String prefix;
-  Properties childProps;
+  Properties childProps, childConf;
+  Properties dummyProps, dummyConf;
   Assignable<ElementSet> elems;
   ArrayBuffer<Ref<Model>> childBuffer;
   idx_t ichild = 0;
@@ -60,14 +61,22 @@ LatticeModel::LatticeModel
     if (!ElementGroup::find(childName, elems, globdat))
       break;
 
+    dummyProps.clear();
+    dummyConf.clear();
+
     jem::System::debug(myName_) << " ...Creating Model for ElementGroup '" << childName << "'\n";
 
-    childProps.set("elements", childName);
-    childBuffer.pushBack(ModelFactory::newInstance(CHILD_PROPS, myConf, myProps, globdat));
+    dummyProps.set(childName, childProps);
+    childBuffer.pushBack(ModelFactory::newInstance(childName, dummyConf, dummyProps, globdat));
   }
-  jem::System::info(myName_) << " ..." << --ichild << " Models created\n";
+  childName = prefix + String(--ichild);
+  jem::System::info(myName_) << " ..." << ichild << " Models created\n";
   children_.resize(childBuffer.size());
   children_ = childBuffer.toArray();
+
+  // set the children configuration
+  dummyConf.get(childConf, childName);
+  myConf.set(CHILD_PROPS, childConf);
 
   JEM_PRECHECK2(children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)));
 }

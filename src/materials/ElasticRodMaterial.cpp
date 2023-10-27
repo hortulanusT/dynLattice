@@ -22,17 +22,20 @@ ElasticRodMaterial::ElasticRodMaterial(const String &name,
                                        const Properties &props,
                                        const Properties &globdat) : Super(name, conf, props, globdat)
 {
-  configure(props);
-  getConfig(conf);
+  rodName_ = jem::util::StringUtils::split(myName_, '.')[0];
+
+  configure(props, globdat);
+  getConfig(conf, globdat);
 }
 
 ElasticRodMaterial::~ElasticRodMaterial()
 {
 }
 
-void ElasticRodMaterial::configure(const Properties &props)
+void ElasticRodMaterial::configure(const Properties &props, const Properties &globdat)
 {
   Properties myProps = props.getProps(myName_);
+  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
 
   myProps.get(young_, YOUNGS_MODULUS);
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
@@ -115,7 +118,7 @@ void ElasticRodMaterial::configure(const Properties &props)
       << materialM_ << "\n";
 }
 
-void ElasticRodMaterial::getConfig(const Properties &conf) const
+void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
   Properties myConf = conf.getProps(myName_);
 

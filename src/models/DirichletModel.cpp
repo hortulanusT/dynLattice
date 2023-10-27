@@ -134,15 +134,6 @@ bool DirichletModel::takeAction
       return true;
     }
 
-    // proceed to next time step
-
-    if (action == Actions::COMMIT)
-    {
-      commit_(params, globdat);
-
-      return true;
-    }
-
     // advance to next time step
 
     if (action == Actions::ADVANCE)
@@ -160,6 +151,15 @@ bool DirichletModel::takeAction
     {
       setDT_(params);
     }
+  }
+
+  // proceed to next time step
+
+  if (action == Actions::COMMIT)
+  {
+    commit_(params, globdat);
+
+    return true;
   }
 
   return false;

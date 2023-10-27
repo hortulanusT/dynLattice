@@ -34,6 +34,7 @@ const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
+const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -58,12 +59,41 @@ specialCosseratRodModel::specialCosseratRodModel
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
 
+  // Get the element name from the global database
+  String elementsName = jem::util::StringUtils::split(myName_, '.').back();
+
+  // ARRANGE DOF NAMES FIRST
+  // set the default
+  Array<String> trans_dofs(TRANS_DOF_COUNT);
+  Array<String> rot_dofs(ROT_DOF_COUNT);
+
+  for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
+    trans_dofs[i] = TRANS_DOF_DEFAULT + String(i);
+  for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+    rot_dofs[i] = ROT_DOF_DEFAULT + String(i);
+
+  // get the names
+  myProps.find(trans_dofs, TRANS_DOF_NAMES);
+  myProps.find(rot_dofs, ROT_DOF_NAMES);
+
+  myConf.set(TRANS_DOF_NAMES, trans_dofs);
+  myConf.set(ROT_DOF_NAMES, rot_dofs);
+
+  // create hinges in the first step (if neccessary)
+  if (myProps.contains(HINGES))
+  {
+    Properties hingeProps = myProps.getProps(HINGES);
+    hingeProps.set("material", material_);
+    hingeProps.set("elements", jive::util::joinNames(elementsName, HINGES));
+    hinges_ = jive::model::ModelFactory::newInstance(HINGES, myConf, myProps, globdat);
+  }
+  else
+    hinges_ = nullptr;
+
   // Get the elements and nodes from the global database
-  String elementsName;
-  myProps.find(elementsName, "elements");
-  rodElems_ = ElementGroup::get(myConf, myProps, globdat,
+  allElems_ = ElementSet::get(globdat, getContext()); // all the elements
+  rodElems_ = ElementGroup::get(myName_, allElems_, globdat,
                                 getContext()); // only the desired group
-  allElems_ = rodElems_.getElements();         // all the elements
   allNodes_ = allElems_.getNodes();            // all the inodes
 
   // store the inverse relation from the global node ids to the local
@@ -90,22 +120,6 @@ specialCosseratRodModel::specialCosseratRodModel
   rot_types_.resize(ROT_DOF_COUNT);
   jtypes_.resize(TRANS_DOF_COUNT + ROT_DOF_COUNT);
 
-  // set the default
-  Array<String> trans_dofs(TRANS_DOF_COUNT);
-  Array<String> rot_dofs(ROT_DOF_COUNT);
-
-  for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
-    trans_dofs[i] = TRANS_DOF_DEFAULT + String(i);
-  for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
-    rot_dofs[i] = ROT_DOF_DEFAULT + String(i);
-
-  // get the names
-  myProps.find(trans_dofs, TRANS_DOF_NAMES);
-  myProps.find(rot_dofs, ROT_DOF_NAMES);
-
-  myConf.set(TRANS_DOF_NAMES, trans_dofs);
-  myConf.set(ROT_DOF_NAMES, rot_dofs);
-
   // create the DOFs
   for (idx_t i = 0; i < TRANS_DOF_COUNT; i++)
     trans_types_[i] = dofs->addType(trans_dofs[i]);
@@ -126,6 +140,11 @@ specialCosseratRodModel::specialCosseratRodModel
 
   // get the nonmutable DOF-Space into the class member
   dofs_ = dofs;
+
+  // get the material
+  props.set(joinNames(myName_, "material.ipCount"), shapeK_->ipointCount());
+  props.set(joinNames(myName_, "material.elemCount"), rodElems_.size());
+  material_ = MaterialFactory::newInstance(joinNames(myName_, "material"), conf, props, globdat);
 
   // get the incremental property
   symmetric_only_ = false;
@@ -178,12 +197,6 @@ specialCosseratRodModel::specialCosseratRodModel
     }
     myConf.set(THICKENING_FACTOR, thickFact_);
   }
-
-  lumped_mass_ = false;
-  if (myProps.find(lumped_mass_, LUMPED_MASS))
-    myConf.set(LUMPED_MASS, lumped_mass_);
-
-  material_ = MaterialFactory::newInstance("material", myConf, myProps, globdat);
 }
 
 //-----------------------------------------------------------------------
@@ -212,6 +225,8 @@ bool specialCosseratRodModel::takeAction
     init_strain_();
     // TEST_CONTEXT(LambdaN_)
     // TEST_CONTEXT(mat_strain0_)
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
     return true;
   }
 
@@ -240,6 +255,8 @@ bool specialCosseratRodModel::takeAction
         get_strain_table_(*table, weights, disp, true);
       else if (name == "mat_stress")
         get_stress_table_(*table, weights, disp, true);
+      else if (name == "plast_strain")
+        get_strain_table_(*table, weights);
       else
         return false;
 
@@ -281,6 +298,8 @@ bool specialCosseratRodModel::takeAction
     // TEST_CONTEXT(K)
     // TEST_CONTEXT(F)
 
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
     return true;
   }
 
@@ -335,6 +354,20 @@ bool specialCosseratRodModel::takeAction
     // vec2mat( F.transpose(), fint );
     // TEST_CONTEXT ( F )
 
+    // if (hinges_)
+    //   hinges_->takeAction(action, params, globdat);
+    return true;
+  }
+
+  if (action == Actions::COMMIT)
+  {
+    Vector disp;
+
+    // Get the current displacements.
+    StateVector::get(disp, dofs_, globdat);
+
+    update_(disp);
+
     return true;
   }
 
@@ -353,9 +386,35 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
+  // if (hinges_)
+  //   return hinges_->takeAction(action, params, globdat);
+  // else
   return false;
 }
+//-----------------------------------------------------------------------
+//   get_strain_table_ (plastic version)
+//-----------------------------------------------------------------------
+void specialCosseratRodModel::get_strain_table_
 
+    (XTable &strain_table, const Vector &weights)
+{
+  IdxVector icols(dofs_->typeCount());
+  String dofName;
+
+  // add all the dofs to the Table
+  for (idx_t idof = 0; idof < dofs_->typeCount(); idof++)
+  {
+    dofName = dofs_->getTypeName(idof);
+    if (idof < TRANS_DOF_COUNT)
+      icols[idof] = strain_table.addColumn(
+          "gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
+    else
+      icols[idof] = strain_table.addColumn(
+          "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
+  }
+
+  material_->getTable("plast_strain", strain_table, rodElems_.getIndices(), weights);
+}
 //-----------------------------------------------------------------------
 //   get_strain_table_
 //-----------------------------------------------------------------------
@@ -692,9 +751,11 @@ void specialCosseratRodModel::get_stresses_(
   get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
   // TEST_CONTEXT(strains)
 
-  // get the (material) stresses
+  Matrix newStress(stresses.shape());
+  newStress = 0.;
+
   for (idx_t ip = 0; ip < ipCount; ip++)
-    material_->getStress(stresses[ip], strains[ip]);
+    material_->getStress(stresses[ip], strains[ip], ie, ip);
 
   // get the (spatial) stresses
   if (spatial)
@@ -799,7 +860,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], materialC, PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(), PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
       // TEST_CONTEXT(materialC)
       // TEST_CONTEXT(spatialC)
@@ -965,6 +1026,36 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         // TEST_CONTEXT(spatialInertia)
         mbld.addBlock(idofs, idofs, spatialInertia);
       }
+    }
+  }
+}
+
+void specialCosseratRodModel::update_(const Vector &disp) const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t rank = shapeK_->globalRank();
+  const idx_t dofCount = dofs_->typeCount();
+
+  Matrix nodeU(rank, nodeCount);
+  Matrix nodePhi_0(rank, nodeCount);
+  Cubix nodeLambda(rank, rank, nodeCount);
+  Matrix strain(dofCount, ipCount);
+  Vector weights(ipCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
+
+    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      material_->update(strain[ip], ie, ip);
     }
   }
 }

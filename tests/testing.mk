@@ -1,6 +1,6 @@
 .PHONY: tests element-tests beam-tests transient-tests clean-tests
 
-tests: element-tests beam-tests transient-tests
+tests: element-tests beam-tests transient-tests plastic-tests
 
 clean-all: clean-tests
 
@@ -16,6 +16,7 @@ resp_results := $(addprefix tests/element/runs/%_, $(addsuffix -resp.csv, $(ELEM
 
 beam_cases = 0 1 2 3 4 5
 transient_cases = 0 1 2 3
+plastic_cases = 1 2a 2b 3 4
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -86,11 +87,28 @@ tests/transient/test%/disp.gz: $(program) tests/transient/test%.pro
 
 tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro tests/transient/model.pro
 
+# PLASTIC TEST RESULTS
+.PRECIOUS: tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv
+
+plastic-tests : $(addprefix tests/plastic/test, $(addsuffix /result.pdf, $(plastic_cases)))
+
+tests/plastic/test%/result.pdf : scripts/testing/plastic%.py\
+															 tests/plastic/test%/disp.csv\
+															 tests/plastic/test%/resp.csv
+	@$<
+
+tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv :\
+															$(program) tests/plastic/test%.pro
+	@$(MKDIR_P) $(dir $@)
+	@$^ > tests/plastic/test$*/run.log
+
+tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/plastic/model.pro
+
 # CLEAN UP THE TESTS
 clean-tests :
 	@$(RM_R) tests/element/runs
 	@$(RM) tests/element/result_*.txt
 
-	@$(RM_R) tests/beam/test*/
-	
+	@$(RM_R) tests/beam/test*/	
 	@$(RM_R) tests/transient/test*/
+	@$(RM_R) tests/plastic/test*/
