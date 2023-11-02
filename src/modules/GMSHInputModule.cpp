@@ -3,7 +3,7 @@
 //
 
 #include "GMSHInputModule.h"
-#include "utils/testing.h"
+// #include "utils/testing.h"
 
 //=======================================================================
 //   class GMSHInputModule
@@ -124,7 +124,7 @@ Module::Status GMSHInputModule::init
   }
   else
   {
-    NOT_IMPLEMENTED
+    // NOT_IMPLEMENTED
     // LATER Leon's function
   }
 
