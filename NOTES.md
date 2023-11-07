@@ -9,8 +9,6 @@
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4/A3
-1. Tests
-    - include more reference data
  
 # :arrows_counterclockwise: Workflow for eqv-design
 :bangbang: make sure repo on cluster is updated :bangbang:
@@ -30,17 +28,11 @@ rsync -vax $TARGET $DESTINATION
 ## debugging
 - (gdb) call dprint(&...) to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
+- `./jive xyz.pro |c++filt` for nicer stack traces
 ## .pro files
 - `$(CASE_NAME)` also works with environment variables (and other settings)
 - `include "xyz.pro";` works to include other .pro files
 ## others
 - shape function node numbering in `$JIVEDIR/packages/geom/doc/images`
 - `StdShape` for local coordinates and `Shape` for global coordinates
-- `./jive xyz.pro |c++filt` for nicer stack traces
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
-
-# For later....
-- Nonlinear Eigenmode Decomposition
-  - start with lin eigenmodes
-  - increase force to get nonlin deformation
-  - map boundary forces to deformation using ML

@@ -14,24 +14,28 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
 ├── README.md
 ├── NOTES.md
 ├── Makefile
+├── jive.def
 ├── bin                 <- Compiled and external code, ignored by git
 ├── src
 │   ├── main.cpp        <- origin file for the JEM/JIVE program
 │   ├── models          <- custom JIVE models
 │   ├── modules         <- custom JIVE modules
+│   ├── modules         <- custom JIVE materials
 │   ├── misc            <- other custom JIVE files
 │   └── utils           <- utility functions and macros
 ├── scripts
 │   ├── testing         <- ptyhon scripts for some testing runs
 │   ├── running         <- ptyhon scripts for the real runs
-│   ├── cluster         <- bash scripts for running on the clusters
+│   └── cluster         <- bash scripts for running on the clusters
 ├── tests
 │   ├── testing.mk      <- makefile for testing setup
 │   ├── element         <- test setups for single elments
-│   └── beam            <- test setups for static beam (networks)
-│   └── transient       <- test setupt for dynamic computations
+│   ├── beam            <- test setups for static beam (networks)
+│   ├── transient       <- test setups for dynamic computations
+│   ├── plastic         <- test setups for dynamic beam (networkds)
+│   └── manual          <- test setup for manual test runs
 └── studies
-    ├── running.mk      <- makefile for running studies
+    ├── running*.mk     <- makefiles for running studies
     ├── configs         <- folder containing some standard settings
     ├── geometries      <- folder containing the different geometries
     ├── programs        <- folder containing different studies to conducts
