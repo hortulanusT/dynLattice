@@ -99,7 +99,11 @@ Module::Status ParaViewModule::init
   // construct the file folder, if it does not exist
   std::filesystem::path paraFolder = makeCString(nameFormat_).addr();
   paraFolder.remove_filename();
-  std::filesystem::create_directories(paraFolder);
+  if (!paraFolder.empty())
+  {
+    std::filesystem::create_directories(paraFolder);
+    jem::System::log(myName_) << " ...Created folder `" << paraFolder.c_str() << "' for the paraview files\n";
+  }
 
   // write the pvd file
   idx_t format_pos = nameFormat_.rfind("%i");
