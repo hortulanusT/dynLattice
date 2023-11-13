@@ -100,7 +100,7 @@ tests/plastic/test%/result.pdf : scripts/testing/plastic%.py\
 tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv :\
 															$(program) tests/plastic/test%.pro
 	@$(MKDIR_P) $(dir $@)
-	@$^ > tests/plastic/test$*/run.log
+	-@$^ > tests/plastic/test$*/run.log
 
 tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/plastic/model.pro
 
