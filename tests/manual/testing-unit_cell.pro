@@ -44,7 +44,7 @@ Input.input.onelab.LengthRatio='0.75';
 Input.input.onelab.Elems = '25';
 model.model.lattice.child.material.type = "ElastoPlasticRod";
 model.model.lattice.child.material.cross_section = "circle";
-model.model.lattice.child.material.tolerance = 1e-3;
+model.model.lattice.child.material.tolerance = 1e-4;
 
 // model.model.lattice.child.material.yieldCond  = "  abs(dx/ 700/$(params.scale)^2)^2.04 ";
 // model.model.lattice.child.material.yieldCond += "+ abs(dy/ 700/$(params.scale)^2)^2.04 "; 
@@ -79,7 +79,7 @@ model.model.lattice.child.material.tolerance = 1e-3;
 
 
 
-Output.modules = [ "tangent", "sampling", "paraview"];
+Output.modules = [ "tangent", "sampling"];
 // overwriting settings
 
 Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]" ];
@@ -88,10 +88,9 @@ Output.sampling.header	= "H22, C_44";
 Output.paraview.beams.shape = "Line2";
 // Output.paraview.beams.el_data += "plast_strain";
 
-Output.sampling.sampleWhen = "(i-1) % 10 < 1";
-Output.tangent.sampleWhen = "(i-1) % 10 < 1";
+Output.sampling.sampleWhen = true;
+Output.tangent.sampleWhen = true;
 Output.tangent.thickness = model.model.lattice.child.material.radius;
-Output.paraview.sampleWhen = "(i-1) % 10 < 1";
 
 // LOGGING
 log.pattern = "*";
