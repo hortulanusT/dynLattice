@@ -249,7 +249,7 @@ void ExplicitModule::advance(const Properties &globdat)
   Properties params;
 
   // check if mass needs to be updated
-  valid_ &= !FuncUtils::evalCond(*updCond_, globdat);
+  valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
   if (!valid_)
     updMass(globdat);
 
@@ -290,7 +290,7 @@ bool ExplicitModule::commit(const Properties &globdat)
     params.get(accept, ActionParams::ACCEPT);
   else // if the model doesnt care accept the solution
     accept = true;
-  accept &= error <= prec_ || dtime_ == minDtime_;
+  accept = accept && (error <= prec_ || dtime_ == minDtime_);
 
   if (accept)
   {

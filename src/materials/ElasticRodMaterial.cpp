@@ -178,6 +178,39 @@ Matrix ElasticRodMaterial::getLumpedMass(double l) const
   return M;
 }
 
+Matrix ElasticRodMaterial::getMaterialStiff() const
+{
+  return materialK_;
+}
+
+Matrix ElasticRodMaterial::getMaterialMass() const
+{
+  return materialM_;
+}
+
+void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain) const
+{
+  stress = matmul(materialK_, strain);
+}
+
+void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
+{
+  WARN(name + " not supported by this material");
+}
+
+bool ElasticRodMaterial::calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
+{
+  return true;
+}
+
+void ElasticRodMaterial::apply_update()
+{
+}
+
+void ElasticRodMaterial::reject_update()
+{
+}
+
 Ref<Material> ElasticRodMaterial::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,

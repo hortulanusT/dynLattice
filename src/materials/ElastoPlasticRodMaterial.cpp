@@ -8,6 +8,7 @@ const char *ElastoPlasticRodMaterial::TYPE_NAME = "ElastoPlasticRod";
 const char *ElastoPlasticRodMaterial::YIELD_PROP = "yieldCond";
 const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "isotropicCoefficient";
 const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "kinematicTensor";
+const char *ElastoPlasticRodMaterial::TOLERANCE_PROP = "tolerance";
 
 ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &conf,
@@ -17,6 +18,7 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
   isoParams_.resize(0);
   kinParams_.resize(0);
   argCount_ = 0;
+  tolerance_ = 1e-9;
   configure(props, globdat);
   getConfig(conf, globdat);
 }
@@ -70,10 +72,17 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   plastStrains_ = 0.;
   oldStrains_.resize(dofCount, ipCount, elemCount);
   oldStrains_ = 0.;
+  currStrains_.resize(dofCount, ipCount, elemCount);
+  currStrains_ = 0.;
+
+  intUpdate_.resize(argCount_, ipCount, elemCount);
+  intUpdate_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
   FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
+
+  myProps.find(tolerance_, TOLERANCE_PROP);
 }
 
 void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -93,13 +102,18 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
     jive_helpers::mat2vec(kinHard, kinFacts_);
     myConf.set(KIN_HARD_PROP, kinHard);
   }
+
+  myConf.set(TOLERANCE_PROP, tolerance_);
 }
 
-void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
+bool ElastoPlasticRodMaterial::calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
   const jem::Slice stress_part = jem::SliceTo(strain.size());
   const idx_t iso_part = strain.size();
   const jem::Slice kin_part = jem::SliceFrom(argCount_ - strain.size());
+
+  currStrains_[ielem][ip] = strain;
+
   Vector args(argCount_);
   args = 0.;
 
@@ -154,18 +168,47 @@ void ElastoPlasticRodMaterial::update(const Vector &strain, const idx_t &ielem, 
     }
 
     deltaFlow = deltaFlowNum / deltaFlowDenom;
-    plastStrains_[ielem][ip] += deltaFlow * deriv[stress_part];
+    intUpdate_[ielem][ip] = deltaFlow * deriv;
+
+    // calc and return the updated yield function value
+    args = 0.;
+
+    Super::getStress(args[stress_part], Vector(strain - plastStrains_[ielem][ip] - intUpdate_[ielem][ip][stress_part]));
     if (isoParams_.size())
     {
-      isoParams_[ielem][ip] += deltaFlow * deriv[iso_part];
+      args[iso_part] = -1. * isoCoeff_ * (isoParams_[ielem][ip] + intUpdate_[ielem][ip][iso_part]);
     }
     if (kinParams_.size())
     {
-      kinParams_[ielem][ip] += deltaFlow * deriv[kin_part];
+      args[kin_part] = -1. * matmul(kinFacts_, Vector(kinParams_[ielem][ip] + intUpdate_[ielem][ip][kin_part]));
     }
   }
 
-  oldStrains_[ielem][ip] = strain;
+  return (yieldCond_->getValue(args.addr()) < tolerance_);
+}
+
+void ElastoPlasticRodMaterial::apply_update()
+{
+  const jem::Slice stress_part = jem::SliceTo(oldStrains_.size(0));
+  const idx_t iso_part = oldStrains_.size(0);
+  const jem::Slice kin_part = jem::SliceFrom(argCount_ - oldStrains_.size(0));
+
+  oldStrains_ = currStrains_;
+  plastStrains_ += intUpdate_(stress_part, ALL, ALL);
+  if (isoParams_.size())
+  {
+    isoParams_ += intUpdate_(iso_part, ALL, ALL);
+  }
+  if (kinParams_.size())
+  {
+    kinParams_ += intUpdate_(kin_part, ALL, ALL);
+  }
+}
+
+void ElastoPlasticRodMaterial::reject_update()
+{
+  currStrains_ = oldStrains_;
+  intUpdate_ = 0.;
 }
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const

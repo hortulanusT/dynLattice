@@ -76,7 +76,11 @@ public:
 
   virtual Matrix getLumpedMass(double l) const;
 
-  virtual void update(const Vector &strain, const idx_t &ielem, const idx_t &ip) = 0;
+  virtual bool calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip) = 0;
+
+  virtual void apply_update() = 0;
+
+  virtual void reject_update() = 0;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
 

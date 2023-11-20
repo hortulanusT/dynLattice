@@ -92,7 +92,7 @@ bool LatticeModel::takeAction
 {
   bool success = true;
   for (Ref<Model> child : children_)
-    success &= child->takeAction(action, params, globdat);
+    success = child->takeAction(action, params, globdat) && success;
   return success;
 }
 

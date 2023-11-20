@@ -32,6 +32,7 @@
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/fem/NodeSet.h>
+#include <jive/implict/SolverInfo.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
@@ -57,6 +58,7 @@ using jem::numeric::norm2;
 using jem::numeric::Quaternion;
 using jem::util::Properties;
 
+using jive::BoolVector;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::FlexMBuilder;
 using jive::algebra::MatrixBuilder;
@@ -252,7 +254,7 @@ private:
    *
    * @param disp displacement vector
    */
-  void update_(const Vector &disp) const;
+  bool update_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;

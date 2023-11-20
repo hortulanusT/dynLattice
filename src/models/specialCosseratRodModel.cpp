@@ -359,15 +359,33 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  if (action == Actions::COMMIT)
+  if (action == Actions::CHECK_COMMIT)
   {
     Vector disp;
+    bool accept = true;
+    params.find(accept, ActionParams::ACCEPT);
 
-    // Get the current displacements.
+    // Get the current displacements
     StateVector::get(disp, dofs_, globdat);
 
-    update_(disp);
+    // update the material state
+    if (accept)
+    {
+      params.set(ActionParams::ACCEPT, update_(disp));
+    }
 
+    return true;
+  }
+
+  if (action == Actions::COMMIT)
+  {
+    material_->apply_update();
+    return true;
+  }
+
+  if (action == Actions::CANCEL)
+  {
+    material_->reject_update();
     return true;
   }
 
@@ -1030,13 +1048,14 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   }
 }
 
-void specialCosseratRodModel::update_(const Vector &disp) const
+bool specialCosseratRodModel::update_(const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
+  bool accept = true;
 
   Matrix nodeU(rank, nodeCount);
   Matrix nodePhi_0(rank, nodeCount);
@@ -1055,9 +1074,11 @@ void specialCosseratRodModel::update_(const Vector &disp) const
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      material_->update(strain[ip], ie, ip);
+      accept = accept && material_->calc_update(strain[ip], ie, ip);
     }
   }
+
+  return accept;
 }
 
 double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
