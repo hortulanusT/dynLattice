@@ -101,6 +101,7 @@ public:
   static const char *THICKENING_FACTOR;
   static const char *LUMPED_MASS;
   static const char *HINGES;
+  static const char *MAX_DISSP;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -250,11 +251,11 @@ private:
   double calc_pot_Energy_(const Vector &disp) const;
 
   /**
-   * @brief update the material
+   * @brief calculate the possible dissipation from a material update
    *
    * @param disp displacement vector
    */
-  bool update_(const Vector &disp) const;
+  double calcDissipation_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;
@@ -270,6 +271,10 @@ private:
   IdxVector rot_types_;
   IdxVector jtypes_;
   bool symmetric_only_;
+
+  double max_diss_per_pot_;
+  double delta_E_diss_;
+  double E_diss_; ///< dissipated energy
 
   Vector thickFact_;
 

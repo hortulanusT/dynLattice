@@ -8,7 +8,6 @@ const char *ElastoPlasticRodMaterial::TYPE_NAME = "ElastoPlasticRod";
 const char *ElastoPlasticRodMaterial::YIELD_PROP = "yieldCond";
 const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "isotropicCoefficient";
 const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "kinematicTensor";
-const char *ElastoPlasticRodMaterial::TOLERANCE_PROP = "tolerance";
 
 ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &conf,
@@ -18,7 +17,6 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
   isoParams_.resize(0);
   kinParams_.resize(0);
   argCount_ = 0;
-  tolerance_ = 1e-9;
   configure(props, globdat);
   getConfig(conf, globdat);
 }
@@ -81,8 +79,6 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
   FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
-
-  myProps.find(tolerance_, TOLERANCE_PROP);
 }
 
 void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -102,11 +98,9 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
     jive_helpers::mat2vec(kinHard, kinFacts_);
     myConf.set(KIN_HARD_PROP, kinHard);
   }
-
-  myConf.set(TOLERANCE_PROP, tolerance_);
 }
 
-bool ElastoPlasticRodMaterial::calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
+double ElastoPlasticRodMaterial::calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
   const jem::Slice stress_part = jem::SliceTo(strain.size());
   const idx_t iso_part = strain.size();
@@ -170,24 +164,16 @@ bool ElastoPlasticRodMaterial::calc_update(const Vector &strain, const idx_t &ie
     deltaFlow = deltaFlowNum / deltaFlowDenom;
     intUpdate_[ielem][ip] = deltaFlow * deriv;
 
-    // calc and return the updated yield function value
-    args = 0.;
+    // calc the dissipation
+    double delta_E_diss_ = dotProduct(args, intUpdate_[ielem][ip]);
 
-    Super::getStress(args[stress_part], Vector(strain - plastStrains_[ielem][ip] - intUpdate_[ielem][ip][stress_part]));
-    if (isoParams_.size())
-    {
-      args[iso_part] = -1. * isoCoeff_ * (isoParams_[ielem][ip] + intUpdate_[ielem][ip][iso_part]);
-    }
-    if (kinParams_.size())
-    {
-      args[kin_part] = -1. * matmul(kinFacts_, Vector(kinParams_[ielem][ip] + intUpdate_[ielem][ip][kin_part]));
-    }
+    return delta_E_diss_;
   }
 
-  return (yieldCond_->getValue(args.addr()) < tolerance_);
+  return 0.0;
 }
 
-void ElastoPlasticRodMaterial::apply_update()
+void ElastoPlasticRodMaterial::apply_inelast_corr()
 {
   const jem::Slice stress_part = jem::SliceTo(oldStrains_.size(0));
   const idx_t iso_part = oldStrains_.size(0);
@@ -205,7 +191,7 @@ void ElastoPlasticRodMaterial::apply_update()
   }
 }
 
-void ElastoPlasticRodMaterial::reject_update()
+void ElastoPlasticRodMaterial::reject_inelast_corr()
 {
   currStrains_ = oldStrains_;
   intUpdate_ = 0.;

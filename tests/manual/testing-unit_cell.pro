@@ -1,10 +1,11 @@
 // PROGRAM CONTROL
-control.runWhile = "loadScale <= 0.1";
+control.runWhile = "loadScale <= 0.9";
 
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.type = "AdaptiveStep";
 Solver.solver.loadIncr = 0.001;
+Solver.solver.maxIncr = 0.01;
 Solver.solver.minIncr = 0.00005;
 
 // SETUP
@@ -42,9 +43,9 @@ Input.input.file="studies/geometries/re-entrant.geo";
 Input.input.onelab.Angle='64.471220634490691369245999339962435963006843100907948288171106356';
 Input.input.onelab.LengthRatio='0.75';
 Input.input.onelab.Elems = '25';
+model.model.lattice.child.maximum_relative_dissipation = 0.0025;
 model.model.lattice.child.material.type = "ElastoPlasticRod";
 model.model.lattice.child.material.cross_section = "circle";
-model.model.lattice.child.material.tolerance = 1e-4;
 
 // model.model.lattice.child.material.yieldCond  = "  abs(dx/ 700/$(params.scale)^2)^2.04 ";
 // model.model.lattice.child.material.yieldCond += "+ abs(dy/ 700/$(params.scale)^2)^2.04 "; 
@@ -79,18 +80,18 @@ model.model.lattice.child.material.tolerance = 1e-4;
 
 
 
-Output.modules = [ "tangent", "sampling"];
+Output.modules = [ "tangent", "sampling", "paraview" ];
 // overwriting settings
 
-Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]" ];
+Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]", "potentialEnergy", "dissipatedEnergy" ];
 Output.sampling.append	= false;
-Output.sampling.header	= "H22, C_44";
+Output.sampling.header	= "H22, C_44, E_pot, E_plast";
 Output.paraview.beams.shape = "Line2";
-// Output.paraview.beams.el_data += "plast_strain";
 
 Output.sampling.sampleWhen = true;
 Output.tangent.sampleWhen = true;
 Output.tangent.thickness = model.model.lattice.child.material.radius;
+Output.paraview.sampleWhen = "(i-1) % 10 < 1";
 
 // LOGGING
 log.pattern = "*";

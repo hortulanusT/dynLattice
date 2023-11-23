@@ -198,16 +198,16 @@ void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, cons
   WARN(name + " not supported by this material");
 }
 
-bool ElasticRodMaterial::calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
+double ElasticRodMaterial::calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
-  return true;
+  return 0.0;
 }
 
-void ElasticRodMaterial::apply_update()
+void ElasticRodMaterial::apply_inelast_corr()
 {
 }
 
-void ElasticRodMaterial::reject_update()
+void ElasticRodMaterial::reject_inelast_corr()
 {
 }
 

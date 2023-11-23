@@ -43,7 +43,6 @@ public:
   static const char *YIELD_PROP;
   static const char *ISO_HARD_PROP;
   static const char *KIN_HARD_PROP;
-  static const char *TOLERANCE_PROP;
 
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
 
@@ -63,11 +62,11 @@ public:
 
   virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const override;
 
-  virtual bool calc_update(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+  virtual double calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
 
-  virtual void apply_update() override;
+  virtual void apply_inelast_corr() override;
 
-  virtual void reject_update() override;
+  virtual void reject_inelast_corr() override;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
@@ -89,8 +88,6 @@ protected:
 
   Cubix currStrains_;
   Cubix intUpdate_;
-
-  double tolerance_;
 };
 
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
