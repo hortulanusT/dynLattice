@@ -189,6 +189,8 @@ void ElastoPlasticRodMaterial::apply_inelast_corr()
   {
     kinParams_ += intUpdate_(kin_part, ALL, ALL);
   }
+
+  intUpdate_ = 0.;
 }
 
 void ElastoPlasticRodMaterial::reject_inelast_corr()

@@ -200,10 +200,8 @@ specialCosseratRodModel::specialCosseratRodModel
   }
 
   max_diss_per_pot_ = std::numeric_limits<double>::infinity();
-  if (myProps.find(max_diss_per_pot_, MAX_DISSP))
-  {
-    myConf.set(MAX_DISSP, max_diss_per_pot_);
-  }
+  myProps.find(max_diss_per_pot_, MAX_DISSP);
+  myConf.set(MAX_DISSP, max_diss_per_pot_);
 }
 
 //-----------------------------------------------------------------------
@@ -371,16 +369,21 @@ bool specialCosseratRodModel::takeAction
   if (action == Actions::CHECK_COMMIT)
   {
     Vector disp;
-    bool accept = true;
-    params.find(accept, ActionParams::ACCEPT);
 
     // Get the current displacements
     StateVector::get(disp, dofs_, globdat);
 
     // update the material state
     delta_E_diss_ = calcDissipation_(disp);
-    accept = (delta_E_diss_ < max_diss_per_pot_ * calc_pot_Energy_(disp)) && accept;
-    params.set(ActionParams::ACCEPT, accept);
+
+    // update the acceptance if a maximum dissipation is set
+    if (std::isfinite(max_diss_per_pot_))
+    {
+      bool accept = true;
+      params.find(accept, ActionParams::ACCEPT);
+      accept = (delta_E_diss_ < max_diss_per_pot_ * calc_pot_Energy_(disp)) && accept;
+      params.set(ActionParams::ACCEPT, accept);
+    }
 
     return true;
   }
