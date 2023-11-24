@@ -286,10 +286,11 @@ bool ExplicitModule::commit(const Properties &globdat)
 
   double dtime_opt = dtime_ * pow(prec_ / error, 1. / ((double)order_ + 1.));
 
+  accept = true;
   if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
-    params.get(accept, ActionParams::ACCEPT);
-  else // if the model doesnt care accept the solution
-    accept = true;
+  {
+    params.find(accept, ActionParams::ACCEPT);
+  }
   accept = accept && (error <= prec_ || dtime_ == minDtime_);
 
   if (accept)

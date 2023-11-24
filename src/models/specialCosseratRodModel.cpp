@@ -377,13 +377,13 @@ bool specialCosseratRodModel::takeAction
     delta_E_diss_ = calcDissipation_(disp);
 
     // update the acceptance if a maximum dissipation is set
+    bool accept = true;
+    params.find(accept, ActionParams::ACCEPT);
     if (std::isfinite(max_diss_per_pot_))
     {
-      bool accept = true;
-      params.find(accept, ActionParams::ACCEPT);
       accept = (delta_E_diss_ < max_diss_per_pot_ * calc_pot_Energy_(disp)) && accept;
-      params.set(ActionParams::ACCEPT, accept);
     }
+    params.set(ActionParams::ACCEPT, accept);
 
     return true;
   }
