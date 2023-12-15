@@ -1,3 +1,17 @@
+# :arrows_counterclockwise: Workflows
+## *eqv-design* study
+> :warning: make sure repo on cluster is updated :warning:
+1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
+1. `./scripts/cluster/masterDesign.sh`
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/eqv-design.py lin_change_master_plot`
+1. `./scripts/cluster/masterFailed.sh`
+1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
+1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
+## *plast-size* study
+1. `jive scripts/running/plast-size.py do_plast_studies_anew`
+1. `jive scripts/running/plast-size.py prep_latex_plast`
+
 # :hammer_and_pick: TO DO 
 1. Models
     - Explicit Solver
@@ -9,16 +23,6 @@
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4/A3
- 
-# :arrows_counterclockwise: Workflow for eqv-design
-:bangbang: make sure repo on cluster is updated :bangbang:
-1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
-1. `./scripts/cluster/masterDesign.sh`
-1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/eqv-design.py lin_change_master_plot`
-1. `./scripts/cluster/masterFailed.sh`
-1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
-1. `jive scripts/running/eqv-design.py work_density_export prep_latex_data`
 
 # :heavy_check_mark: Information
 ## cluster syncing
@@ -26,7 +30,7 @@
 rsync -vax $TARGET $DESTINATION
 ```
 ## debugging
-- (gdb) call dprint(&...) to get any matrix/vector/... printed live
+- `(gdb) call dprint(&...)` to get any matrix/vector/... printed live
 - when compiling OPT, it sets the flag `NDEBUG`
 - `./jive xyz.pro |c++filt` for nicer stack traces
 ## .pro files
