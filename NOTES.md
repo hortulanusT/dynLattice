@@ -9,8 +9,8 @@
 1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
 ## *plast-size* study
-1. `jive scripts/running/plast-size.py do_plast_studies_anew`
-1. `jive scripts/running/plast-size.py prep_latex_plast`
+1. `jive scripts/running/plast-size.py do_plast_studies_anew prep_latex_plast`
+</br></br></br></br>
 
 # :hammer_and_pick: TO DO 
 1. Models
@@ -23,6 +23,7 @@
 1. Environment
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
     - make all plot outputs A4/A3
+</br></br></br></br>
 
 # :heavy_check_mark: Information
 ## cluster syncing
