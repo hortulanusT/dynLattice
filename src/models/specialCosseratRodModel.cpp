@@ -406,18 +406,30 @@ bool specialCosseratRodModel::takeAction
   if (action == "GET_ENERGY")
   {
     Vector disp;
+    Vector velo;
     double E_pot = 0.;
     double E_diss = 0.;
 
     StateVector::get(disp, dofs_, globdat);
+
     params.find(E_pot, "potentialEnergy");
     params.find(E_diss, "dissipatedEnergy");
 
     E_pot += calc_pot_Energy_(disp);
-    E_diss += E_diss_;
+    E_diss += material_->getDisspiatedEnergy();
 
     params.set("potentialEnergy", E_pot);
     params.set("dissipatedEnergy", E_diss);
+
+    if (StateVector::find(velo, jive::model::STATE1, dofs_, globdat))
+    {
+      double E_kin = 0.;
+      params.find(E_kin, "potentialEnergy");
+
+      E_kin += calc_kin_Energy_(velo);
+
+      params.set("kineticEnergy", E_kin);
+    }
 
     return true;
   }

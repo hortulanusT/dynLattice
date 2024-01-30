@@ -168,18 +168,10 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     }
   }
 
-  double E_pot = 0.;
-  double E_diss = 0.;
+  // report the energy
   params.clear();
   model->takeAction("GET_ENERGY", params, globdat);
-  if (params.find(E_pot, "potentialEnergy"))
-  {
-    myVars.set("potentialEnergy", E_pot);
-  }
-  if (params.find(E_diss, "dissipatedEnergy"))
-  {
-    myVars.set("dissipatedEnergy", E_diss);
-  }
+  myVars.mergeWith(params);
 
   return Status::OK;
 }

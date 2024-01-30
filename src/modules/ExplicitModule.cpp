@@ -414,28 +414,14 @@ ExplicitModule::getForce(const Vector &fint,
 
 void ExplicitModule::store_energy(const Properties &globdat)
 {
-  double E_pot = 0;
-  double E_kin = 0;
+  double E_pot = 0.;
+  double E_diss = 0.;
+  double E_kin = 0.;
   Properties params;
   Properties variables = Globdat::getVariables(globdat);
 
-  Vector velo;
-  StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
-  Vector temp(velo.size());
-
-  params.set("potentialEnergy", E_pot);
   model_->takeAction("GET_ENERGY", params, globdat);
-  params.get(E_pot, "potentialEnergy");
-
-  if (mode_ == CONSISTENT)
-    solver_->getMatrix()->matmul(temp, velo);
-  if (mode_ == LUMPED)
-    temp = velo / massInv_;
-  E_kin = 0.5 * dotProduct(temp, velo);
-
-  variables.set("PotentialEnergy", E_pot);
-  variables.set("KineticEnergy", E_kin);
-  variables.set("TotalEnergy", E_pot + E_kin);
+  variables.mergeWith(params);
 }
 
 //-----------------------------------------------------------------------

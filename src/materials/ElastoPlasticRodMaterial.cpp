@@ -221,6 +221,10 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
     }
   }
 }
+double ElastoPlasticRodMaterial::getDisspiatedEnergy() const
+{
+  return E_diss_;
+}
 
 Ref<Material> ElastoPlasticRodMaterial::makeNew
 

@@ -70,14 +70,16 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
+  virtual double getDisspiatedEnergy() const override;
+
 protected:
   ~ElastoPlasticRodMaterial();
 
 protected:
-  Ref<Function> yieldCond_;
-  idx_t argCount_;
+  Ref<Function> yieldCond_; // yield condition
+  idx_t argCount_;          // number of arguments to yield condition
+  double E_diss_;           // dissipated energy
 
-  double isoCoeff_;
   Matrix isoParams_;
 
   Matrix kinFacts_;

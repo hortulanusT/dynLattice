@@ -84,6 +84,8 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
 
+  virtual double getDisspiatedEnergy() const;
+
 protected:
   /**
    * @brief Destroy the Material object
@@ -95,4 +97,8 @@ protected:
 void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
 {
   getStress(stress, strain);
+}
+double Material::getDisspiatedEnergy() const
+{
+  return 0.;
 }
