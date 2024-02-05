@@ -32,7 +32,6 @@ const char *specialCosseratRodModel::SYMMETRIC_ONLY =
 const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
-const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const char *specialCosseratRodModel::HINGES = "hinges";
 const char *specialCosseratRodModel::MAX_DISSP = "maximum_relative_dissipation";
@@ -187,16 +186,6 @@ specialCosseratRodModel::specialCosseratRodModel
     myConf.set(GIVEN_DIRS, givenDirs);
 
     vec2mat(givenDirs_.transpose(), givenDirs);
-  }
-
-  if (myProps.find(thickFact_, THICKENING_FACTOR))
-  {
-    if (thickFact_.size() == 1)
-    {
-      thickFact_.reshape(2);
-      thickFact_[1] = thickFact_[0];
-    }
-    myConf.set(THICKENING_FACTOR, thickFact_);
   }
 
   max_diss_per_pot_ = std::numeric_limits<double>::infinity();

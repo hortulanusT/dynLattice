@@ -276,8 +276,6 @@ private:
   double delta_E_diss_;
   double E_diss_; ///< dissipated energy
 
-  Vector thickFact_;
-
   Vector material_ey_;
 
   IdxVector
