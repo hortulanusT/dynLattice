@@ -83,9 +83,9 @@ model.model.lattice.child.material.cross_section = "circle";
 Output.modules = [ "tangent", "sampling", "paraview" ];
 // overwriting settings
 
-Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]", "potentialEnergy", "dissipatedEnergy" ];
+Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]", "(0.5 * ymax.resp.dy / all.extent.dx - 0.5 * ymin.resp.dy / all.extent.dx) / $(params.scale)", "potentialEnergy / $(params.scale)^3", "dissipatedEnergy  / $(params.scale)^3" ];
 Output.sampling.append	= false;
-Output.sampling.header	= "H22, C_44, E_pot, E_plast";
+Output.sampling.header	= "H22, C_44, P22, E_pot, E_plast";
 Output.paraview.beams.shape = "Line2";
 
 Output.sampling.sampleWhen = true;
