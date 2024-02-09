@@ -186,16 +186,6 @@ specialCosseratRodModel::specialCosseratRodModel
 
     vec2mat(givenDirs_.transpose(), givenDirs);
   }
-
-  if (myProps.find(thickFact_, THICKENING_FACTOR))
-  {
-    if (thickFact_.size() == 1)
-    {
-      thickFact_.reshape(2);
-      thickFact_[1] = thickFact_[0];
-    }
-    myConf.set(THICKENING_FACTOR, thickFact_);
-  }
 }
 
 //-----------------------------------------------------------------------
