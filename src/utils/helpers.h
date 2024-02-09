@@ -16,6 +16,7 @@
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/func/Function.h>
 #include <jive/Array.h>
+#include <jive/util/FuncUtils.h>
 
 #include "utils/testing.h"
 
@@ -39,6 +40,7 @@ using jive::IdxVector;
 using jive::Matrix;
 using jive::Ref;
 using jive::Vector;
+using jive::util::FuncUtils;
 
 namespace jive_helpers
 {
@@ -61,6 +63,15 @@ namespace jive_helpers
   Vector funcGrad(const Ref<Function> func, const Vector &args);
 
   /**
+   * @brief evaluates an array of functions at a given point
+   *
+   * @param funcs array of functions to evaluate
+   * @param args point to evaluat at
+   * @return results of the evaluation
+   */
+  Vector evalFuncs(const FuncUtils::FuncArray funcs, const Vector &args);
+
+  /**
    * @brief gets the Hessian of a function dependent on multiple arguments
    *
    * @param func function of which to evaluat the Hessian
@@ -68,6 +79,15 @@ namespace jive_helpers
    * @return Hessian
    */
   Matrix funcHessian(const Ref<Function> func, const Vector &args);
+
+  /**
+   * @brief gets the gradient an array of functions dependent on multiple arguments
+   *
+   * @param funcs array of functions of which to evaluat the gradient
+   * @param args point to evaluat the gradient
+   * @return Matrix of the gradients
+   */
+  Matrix gradFuncs(const FuncUtils::FuncArray funcs, const Vector &args);
 
   /**
    * @brief generates an identity matrix of the given dimension

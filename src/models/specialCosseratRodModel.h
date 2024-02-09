@@ -101,7 +101,6 @@ public:
   static const char *THICKENING_FACTOR;
   static const char *LUMPED_MASS;
   static const char *HINGES;
-  static const char *MAX_DISSP;
   static const idx_t TRANS_DOF_COUNT;
   static const idx_t ROT_DOF_COUNT;
   static const Slice TRANS_PART;
@@ -241,41 +240,33 @@ private:
   void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
                   const Cubix &nodeLambda, const Vector &disp,
                   const IdxVector &inodes) const;
-  /**
-   * @brief calculate the potential Energy stored in the model
-   *
-   * @param disp displacement Vector
-   *
-   * @return double
-   */
-  double calc_pot_Energy_(const Vector &disp) const;
 
   /**
-   * @brief calculate the possible dissipation from a material update
+   * Calculates the potential energy of the special Cosserat rod model.
    *
-   * @param disp displacement vector
+   * @param disp The displacement vector.
+   * @return The potential energy.
    */
-  double calcDissipation_(const Vector &disp) const;
+  double calc_pot_Energy_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;
   IdxVector rodNodes_;
   Assignable<ElementSet> allElems_;
   Assignable<NodeSet> allNodes_;
+
   Ref<DofSpace> dofs_;
   Ref<Line3D> shapeK_;
   Ref<Line3D> shapeM_;
   Ref<Material> material_;
   Ref<Model> hinges_;
+
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;
+
   bool symmetric_only_;
-
-  double max_diss_per_pot_;
-  double delta_E_diss_;
-  double E_diss_; ///< dissipated energy
-
+  Vector thickFact_;
   Vector material_ey_;
 
   IdxVector

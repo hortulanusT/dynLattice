@@ -11,32 +11,48 @@
 
 #pragma once
 
+#include <jem/base/CString.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
-#include <jem/base/CString.h>
 #include <jem/base/array/Array.h>
-#include <jem/util/Properties.h>
+#include <jem/numeric/algebra/utilities.h>
 #include <jem/util/ArrayBuffer.h>
-#include <jive/model/Model.h>
-#include <jive/model/ModelFactory.h>
+#include <jem/util/Properties.h>
+#include <jive/algebra/AbstractMatrix.h>
+#include <jive/algebra/MatrixBuilder.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
-#include <jive/util/utilities.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 #include <jive/util/ObjectConverter.h>
+#include <jive/util/utilities.h>
 
 using jem::Array;
 using jem::idx_t;
 using jem::newInstance;
 using jem::Ref;
+using jem::numeric::dotProduct;
 using jem::util::ArrayBuffer;
 using jive::Properties;
 using jive::String;
+using jive::Vector;
+using jive::algebra::AbstractMatrix;
+using jive::algebra::MatrixBuilder;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
+using jive::model::ActionParams;
+using jive::model::Actions;
 using jive::model::Model;
 using jive::model::ModelFactory;
+using jive::model::StateVector;
 using jive::util::Assignable;
+using jive::util::DofSpace;
+using jive::util::Globdat;
 
 class LatticeModel : public Model
 {
@@ -58,6 +74,15 @@ public:
        const Properties &params,
        const Properties &globdat);
 
+  /**
+   * Calculates the kinetic energy of the special Cosserat rod model.
+   *
+   * @param params The parameters.
+   * @param globdat The global data.
+   * @return The kinetic energy.
+   */
+  void calc_kin_Energy_(const Properties &params, const Properties &globdat) const;
+
   static Ref<Model> makeNew
 
       (const String &name,
@@ -69,4 +94,6 @@ public:
 
 private:
   Array<Ref<Model>> children_;
+
+  Ref<AbstractMatrix> M_;
 };

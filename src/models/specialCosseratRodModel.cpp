@@ -34,7 +34,6 @@ const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const char *specialCosseratRodModel::HINGES = "hinges";
-const char *specialCosseratRodModel::MAX_DISSP = "maximum_relative_dissipation";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
 const Slice specialCosseratRodModel::TRANS_PART =
@@ -188,9 +187,15 @@ specialCosseratRodModel::specialCosseratRodModel
     vec2mat(givenDirs_.transpose(), givenDirs);
   }
 
-  max_diss_per_pot_ = std::numeric_limits<double>::infinity();
-  myProps.find(max_diss_per_pot_, MAX_DISSP);
-  myConf.set(MAX_DISSP, max_diss_per_pot_);
+  if (myProps.find(thickFact_, THICKENING_FACTOR))
+  {
+    if (thickFact_.size() == 1)
+    {
+      thickFact_.reshape(2);
+      thickFact_[1] = thickFact_[0];
+    }
+    myConf.set(THICKENING_FACTOR, thickFact_);
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -215,8 +220,6 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::INIT)
   {
-    E_diss_ = 0.;
-    delta_E_diss_ = 0.0;
     init_rot_();
     init_strain_();
     // TEST_CONTEXT(LambdaN_)
@@ -355,59 +358,33 @@ bool specialCosseratRodModel::takeAction
     return true;
   }
 
-  if (action == Actions::CHECK_COMMIT)
-  {
-    Vector disp;
-
-    // Get the current displacements
-    StateVector::get(disp, dofs_, globdat);
-
-    // update the material state
-    delta_E_diss_ = calcDissipation_(disp);
-
-    // update the acceptance if a maximum dissipation is set
-    bool accept = true;
-    params.find(accept, ActionParams::ACCEPT);
-    if (std::isfinite(max_diss_per_pot_))
-    {
-      accept = (delta_E_diss_ < max_diss_per_pot_ * calc_pot_Energy_(disp)) && accept;
-    }
-    params.set(ActionParams::ACCEPT, accept);
-
-    return true;
-  }
-
   if (action == Actions::COMMIT)
   {
     material_->apply_inelast_corr();
-    E_diss_ += delta_E_diss_;
-    delta_E_diss_ = 0.0;
+
+    Properties vars = Globdat::getVariables(globdat);
+    Vector disp;
+    Vector velo;
+    double E_pot = 0.;
+    double E_diss = 0.;
+
+    StateVector::get(disp, dofs_, globdat);
+
+    vars.find(E_pot, "potentialEnergy");
+    vars.find(E_diss, "dissipatedEnergy");
+
+    E_pot += calc_pot_Energy_(disp);
+    E_diss += material_->getDisspiatedEnergy();
+
+    vars.set("potentialEnergy", E_pot);
+    vars.set("dissipatedEnergy", E_diss);
+
     return true;
   }
 
   if (action == Actions::CANCEL)
   {
     material_->reject_inelast_corr();
-    delta_E_diss_ = 0.0;
-    return true;
-  }
-
-  if (action == "GET_ENERGY")
-  {
-    Vector disp;
-    double E_pot = 0.;
-    double E_diss = 0.;
-
-    StateVector::get(disp, dofs_, globdat);
-    params.find(E_pot, "potentialEnergy");
-    params.find(E_diss, "dissipatedEnergy");
-
-    E_pot += calc_pot_Energy_(disp);
-    E_diss += E_diss_;
-
-    params.set("potentialEnergy", E_pot);
-    params.set("dissipatedEnergy", E_diss);
-
     return true;
   }
 
@@ -776,9 +753,6 @@ void specialCosseratRodModel::get_stresses_(
   get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
   // TEST_CONTEXT(strains)
 
-  Matrix newStress(stresses.shape());
-  newStress = 0.;
-
   for (idx_t ip = 0; ip < ipCount; ip++)
     material_->getStress(stresses[ip], strains[ip], ie, ip);
 
@@ -876,7 +850,6 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
-    // TEST_CONTEXT(stress)
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
@@ -885,10 +858,9 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(), PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(ie, ip), PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
-      // TEST_CONTEXT(materialC)
-      // TEST_CONTEXT(spatialC)
+      // TEST_CONTEXT(material_->getMaterialStiff(ie, ip))
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
@@ -1053,39 +1025,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
       }
     }
   }
-}
-
-double specialCosseratRodModel::calcDissipation_(const Vector &disp) const
-{
-  const idx_t elemCount = rodElems_.size();
-  const idx_t ipCount = shapeK_->ipointCount();
-  const idx_t nodeCount = shapeK_->nodeCount();
-  const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
-  double dissipation = 0.;
-
-  Matrix nodeU(rank, nodeCount);
-  Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Vector weights(ipCount);
-  // DOF INDICES
-  IdxVector inodes(nodeCount);
-
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-
-    for (idx_t ip = 0; ip < ipCount; ip++)
-    {
-      dissipation += weights[ip] * material_->calc_inelast_corr(strain[ip], ie, ip);
-    }
-  }
-
-  return dissipation;
 }
 
 double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const

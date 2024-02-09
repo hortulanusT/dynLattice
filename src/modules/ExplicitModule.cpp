@@ -11,7 +11,6 @@ JEM_DEFINE_CLASS(ExplicitModule);
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
-const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
 
 //-----------------------------------------------------------------------
@@ -26,7 +25,6 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
-  report_energy_ = false;
   lenScale_ = 1e-3;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
@@ -61,10 +59,6 @@ Module::Status ExplicitModule::init
   Properties sparams;
   Ref<AbstractMatrix> inertia;
   Ref<DiagMatrixObject> diagInertia;
-
-  // whether to report the energy
-  myProps.find(report_energy_, REPORT_ENERGY);
-  myConf.set(REPORT_ENERGY, report_energy_);
 
   // get the length scale
   myProps.find(lenScale_, LEN_SCALE);
@@ -304,8 +298,6 @@ bool ExplicitModule::commit(const Properties &globdat)
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     StateVector::updateOld(dofs_, globdat);
-    if (report_energy_)
-      store_energy(globdat);
   }
   else
   {
@@ -406,36 +398,6 @@ ExplicitModule::getForce(const Vector &fint,
   model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
 
   return Vector(fext - fint);
-}
-
-//-----------------------------------------------------------------------
-//   store_energy
-//-----------------------------------------------------------------------
-
-void ExplicitModule::store_energy(const Properties &globdat)
-{
-  double E_pot = 0;
-  double E_kin = 0;
-  Properties params;
-  Properties variables = Globdat::getVariables(globdat);
-
-  Vector velo;
-  StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
-  Vector temp(velo.size());
-
-  params.set("potentialEnergy", E_pot);
-  model_->takeAction("GET_ENERGY", params, globdat);
-  params.get(E_pot, "potentialEnergy");
-
-  if (mode_ == CONSISTENT)
-    solver_->getMatrix()->matmul(temp, velo);
-  if (mode_ == LUMPED)
-    temp = velo / massInv_;
-  E_kin = 0.5 * dotProduct(temp, velo);
-
-  variables.set("PotentialEnergy", E_pot);
-  variables.set("KineticEnergy", E_kin);
-  variables.set("TotalEnergy", E_pot + E_kin);
 }
 
 //-----------------------------------------------------------------------

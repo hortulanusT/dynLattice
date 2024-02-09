@@ -113,9 +113,12 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   jem::System::debug(myName_)
       << " ...Stiffness matrix of the material '" << myName_ << "':\n"
       << materialK_ << "\n";
-  jem::System::debug(myName_)
-      << " ...Inertia matrix of the material '" << myName_ << "':\n"
-      << materialM_ << "\n";
+  if (density_ > 0.)
+  {
+    jem::System::debug(myName_)
+        << " ...Inertia matrix of the material '" << myName_ << "':\n"
+        << materialM_ << "\n";
+  }
 }
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -188,7 +191,7 @@ Matrix ElasticRodMaterial::getMaterialMass() const
   return materialM_;
 }
 
-void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain) const
+void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
 {
   stress = matmul(materialK_, strain);
 }
@@ -198,17 +201,17 @@ void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, cons
   WARN(name + " not supported by this material");
 }
 
-double ElasticRodMaterial::calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip)
-{
-  return 0.0;
-}
-
 void ElasticRodMaterial::apply_inelast_corr()
 {
 }
 
 void ElasticRodMaterial::reject_inelast_corr()
 {
+}
+
+double ElasticRodMaterial::getDisspiatedEnergy() const
+{
+  return 0.;
 }
 
 Ref<Material> ElasticRodMaterial::makeNew
