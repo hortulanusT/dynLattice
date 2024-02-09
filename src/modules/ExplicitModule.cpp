@@ -414,9 +414,6 @@ ExplicitModule::getForce(const Vector &fint,
 
 void ExplicitModule::store_energy(const Properties &globdat)
 {
-  double E_pot = 0.;
-  double E_diss = 0.;
-  double E_kin = 0.;
   Properties params;
   Properties variables = Globdat::getVariables(globdat);
 

@@ -41,6 +41,7 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
 public:
   static const char *TYPE_NAME;
   static const char *YIELD_PROP;
+  static const char *YIELD_DERIV_PROP;
   static const char *ISO_HARD_PROP;
   static const char *KIN_HARD_PROP;
 
@@ -60,9 +61,9 @@ public:
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
-  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const override;
+  virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
-  virtual double calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
 
   virtual void apply_inelast_corr() override;
 
@@ -76,23 +77,24 @@ protected:
   ~ElastoPlasticRodMaterial();
 
 protected:
-  Ref<Function> yieldCond_; // yield condition
-  idx_t argCount_;          // number of arguments to yield condition
-  double E_diss_;           // dissipated energy
+  Ref<Function> yieldCond_;         // yield condition
+  FuncUtils::FuncArray yieldDeriv_; // derivative of the yield condition
+  idx_t argCount_;                  // number of arguments to yield condition
 
-  Matrix isoParams_;
+  jem::Slice stress_part_; // slice for the stress part of the arguments
+  jem::Slice hard_part_;   // slice for the hardening part of the arguments
 
-  Matrix kinFacts_;
-  Cubix kinParams_;
+  Matrix materialH_; // hardening factors
 
-  Cubix plastStrains_;
-  Cubix oldStrains_;
+  Cubix old_hardParams_;  // last converged load step
+  Cubix curr_hardParams_; // last inner converged solution
 
-  Cubix currStrains_;
-  Cubix intUpdate_;
+  Cubix old_plastStrains_;  // last converged load step
+  Cubix curr_plastStrains_; // last inner converged solution
+
+  Cubix old_Strains_;  // last converged load step
+  Cubix curr_Strains_; // current load step iteration
+
+  Matrix curr_deltaFlow_; // last inner converged solution
+  double E_diss_;         // dissipated energy
 };
-
-void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
-{
-  stress = matmul(materialK_, Vector(strain - plastStrains_[ielem][ip]));
-}

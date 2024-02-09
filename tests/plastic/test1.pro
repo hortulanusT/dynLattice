@@ -6,7 +6,7 @@
 log.pattern = "*.info | *.debug"; //
 
 // PROGRAM_CONTROL
-control.runWhile = "i<5001";
+control.runWhile = "i<501";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -41,11 +41,11 @@ params.force_model.twist.dofs = "ry";
 params.force_model.twist.factors = 1.; 
 
 params.force_model.stretch.type = "LoadScale";
-params.force_model.stretch.scaleFunc =  "   if(i>   1, 0.0031*(i-   1),0) - if(i>1001, 0.0031*(i-1001),0)";
-params.force_model.stretch.scaleFunc += " + if(i>1001,-0.0059*(i-1001),0) - if(i>2001,-0.0059*(i-2001),0)";
-params.force_model.stretch.scaleFunc += " + if(i>2001, 0.0071*(i-2001),0) - if(i>3001, 0.0071*(i-3001),0)";
-params.force_model.stretch.scaleFunc += " + if(i>3001,-0.0084*(i-3001),0) - if(i>4001,-0.0084*(i-4001),0)";
-params.force_model.stretch.scaleFunc += " + if(i>4001, 0.0056*(i-4001),0) - if(i>5001, 0.0056*(i-5001),0)";
+params.force_model.stretch.scaleFunc =  "   if(i>  1, 0.031*(i-  1),0) - if(i>101, 0.031*(i-101),0)";
+params.force_model.stretch.scaleFunc += " + if(i>101,-0.059*(i-101),0) - if(i>201,-0.059*(i-201),0)";
+params.force_model.stretch.scaleFunc += " + if(i>201, 0.071*(i-201),0) - if(i>301, 0.071*(i-301),0)";
+params.force_model.stretch.scaleFunc += " + if(i>301,-0.084*(i-301),0) - if(i>401,-0.084*(i-401),0)";
+params.force_model.stretch.scaleFunc += " + if(i>401, 0.056*(i-401),0) - if(i>501, 0.056*(i-501),0)";
 params.force_model.stretch.model.type = "Dirichlet";
 params.force_model.stretch.model.nodeGroups =  [ "free" ] ;
 params.force_model.stretch.model.factors = [ 1e-3 ];

@@ -15,6 +15,11 @@ Material::~Material()
 {
 }
 
+String Material::getContext() const
+{
+  return NamedObject::makeContext("material", myName_);
+}
+
 void Material::configure(const Properties &props, const Properties &globdat)
 {
 }

@@ -56,9 +56,9 @@ public:
    * @param[out] stress
    * @param[in] strain
    */
-  virtual void getStress(const Vector &stress, const Vector &strain) const = 0;
+  virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
-  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const;
+  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip);
 
   /**
    * @brief get the material stiffness matrix
@@ -67,6 +67,8 @@ public:
    */
   virtual Matrix getMaterialStiff() const = 0;
 
+  virtual inline Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const;
+
   /**
    * @brief get the material mass matrix
    *
@@ -74,9 +76,9 @@ public:
    */
   virtual Matrix getMaterialMass() const = 0;
 
-  virtual Matrix getLumpedMass(double l) const;
+  virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
 
-  virtual double calc_inelast_corr(const Vector &strain, const idx_t &ielem, const idx_t &ip) = 0;
+  virtual Matrix getLumpedMass(double l) const;
 
   virtual void apply_inelast_corr() = 0;
 
@@ -84,7 +86,9 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
 
-  virtual double getDisspiatedEnergy() const;
+  virtual double getDisspiatedEnergy() const = 0;
+
+  virtual String getContext() const override;
 
 protected:
   /**
@@ -94,11 +98,17 @@ protected:
   virtual ~Material();
 };
 
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) const
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
   getStress(stress, strain);
 }
-double Material::getDisspiatedEnergy() const
+
+Matrix Material::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
 {
-  return 0.;
+  return getMaterialStiff();
+}
+
+Matrix Material::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
+{
+  return getMaterialMass();
 }
