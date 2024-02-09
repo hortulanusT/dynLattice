@@ -249,14 +249,6 @@ private:
    */
   double calc_pot_Energy_(const Vector &disp) const;
 
-  /**
-   * Calculates the kinetic energy of the special Cosserat rod model.
-   *
-   * @param velo The velocity vector.
-   * @return The kinetic energy.
-   */
-  double calc_kin_Energy_(const Vector &velo) const;
-
 private:
   Assignable<ElementGroup> rodElems_;
   IdxVector rodNodes_;

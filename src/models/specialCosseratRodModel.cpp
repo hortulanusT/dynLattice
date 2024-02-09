@@ -362,17 +362,8 @@ bool specialCosseratRodModel::takeAction
   if (action == Actions::COMMIT)
   {
     material_->apply_inelast_corr();
-    return true;
-  }
 
-  if (action == Actions::CANCEL)
-  {
-    material_->reject_inelast_corr();
-    return true;
-  }
-
-  if (action == "GET_ENERGY")
-  {
+    Properties vars = Globdat::getVariables(globdat);
     Vector disp;
     Vector velo;
     double E_pot = 0.;
@@ -380,25 +371,21 @@ bool specialCosseratRodModel::takeAction
 
     StateVector::get(disp, dofs_, globdat);
 
-    params.find(E_pot, "potentialEnergy");
-    params.find(E_diss, "dissipatedEnergy");
+    vars.find(E_pot, "potentialEnergy");
+    vars.find(E_diss, "dissipatedEnergy");
 
     E_pot += calc_pot_Energy_(disp);
     E_diss += material_->getDisspiatedEnergy();
 
-    params.set("potentialEnergy", E_pot);
-    params.set("dissipatedEnergy", E_diss);
+    vars.set("potentialEnergy", E_pot);
+    vars.set("dissipatedEnergy", E_diss);
 
-    if (StateVector::find(velo, jive::model::STATE1, dofs_, globdat))
-    {
-      double E_kin = 0.;
-      params.find(E_kin, "potentialEnergy");
+    return true;
+  }
 
-      E_kin += calc_kin_Energy_(velo);
-
-      params.set("kineticEnergy", E_kin);
-    }
-
+  if (action == Actions::CANCEL)
+  {
+    material_->reject_inelast_corr();
     return true;
   }
 
@@ -1075,11 +1062,6 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
   }
 
   return E_pot;
-}
-
-double specialCosseratRodModel::calc_kin_Energy_(const Vector &velo) const
-{
-  return 0.0;
 }
 
 //-----------------------------------------------------------------------

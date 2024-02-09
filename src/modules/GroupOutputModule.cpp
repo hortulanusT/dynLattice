@@ -168,11 +168,6 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     }
   }
 
-  // report the energy
-  params.clear();
-  model->takeAction("GET_ENERGY", params, globdat);
-  myVars.mergeWith(params);
-
   return Status::OK;
 }
 

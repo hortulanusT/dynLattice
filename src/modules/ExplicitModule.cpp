@@ -11,7 +11,6 @@ JEM_DEFINE_CLASS(ExplicitModule);
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
-const char *ExplicitModule::REPORT_ENERGY = "reportEnergy";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
 
 //-----------------------------------------------------------------------
@@ -26,7 +25,6 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
-  report_energy_ = false;
   lenScale_ = 1e-3;
   SO3_dofs_.resize(0);
   rdofs_.resize(0, 0);
@@ -61,10 +59,6 @@ Module::Status ExplicitModule::init
   Properties sparams;
   Ref<AbstractMatrix> inertia;
   Ref<DiagMatrixObject> diagInertia;
-
-  // whether to report the energy
-  myProps.find(report_energy_, REPORT_ENERGY);
-  myConf.set(REPORT_ENERGY, report_energy_);
 
   // get the length scale
   myProps.find(lenScale_, LEN_SCALE);
@@ -304,8 +298,6 @@ bool ExplicitModule::commit(const Properties &globdat)
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     StateVector::updateOld(dofs_, globdat);
-    if (report_energy_)
-      store_energy(globdat);
   }
   else
   {
@@ -406,19 +398,6 @@ ExplicitModule::getForce(const Vector &fint,
   model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
 
   return Vector(fext - fint);
-}
-
-//-----------------------------------------------------------------------
-//   store_energy
-//-----------------------------------------------------------------------
-
-void ExplicitModule::store_energy(const Properties &globdat)
-{
-  Properties params;
-  Properties variables = Globdat::getVariables(globdat);
-
-  model_->takeAction("GET_ENERGY", params, globdat);
-  variables.mergeWith(params);
 }
 
 //-----------------------------------------------------------------------
