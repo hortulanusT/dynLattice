@@ -18,6 +18,7 @@
 #include <jem/util/StringUtils.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/implict/Names.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/utilities.h>
@@ -79,8 +80,10 @@ protected:
 protected:
   Ref<Function> yieldCond_;         // yield condition
   FuncUtils::FuncArray yieldDeriv_; // derivative of the yield condition
-  idx_t argCount_;                  // number of arguments to yield condition
+  idx_t maxIter_;                   // maximum iterations in the stress update
+  double precision_;                // tolerance for the stress update
 
+  idx_t argCount_;         // number of arguments to yield condition
   jem::Slice stress_part_; // slice for the stress part of the arguments
   jem::Slice hard_part_;   // slice for the hardening part of the arguments
 

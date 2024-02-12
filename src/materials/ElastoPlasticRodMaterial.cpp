@@ -15,6 +15,8 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &props,
                                                    const Properties &globdat) : Super(name, conf, props, globdat)
 {
+  maxIter_ = 20;
+  precision_ = 1e-5;
   materialH_.resize(0);
   argCount_ = 0;
   E_diss_ = 0.;
@@ -118,6 +120,9 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   {
     yieldDeriv_.resize(0);
   }
+
+  myProps.find(maxIter_, jive::implict::PropNames::MAX_ITER);
+  myProps.find(precision_, jive::implict::PropNames::PRECISION);
 }
 
 void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -149,6 +154,9 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
     jive_helpers::vec2mat(kinFacts.transpose(), kinHard);
     myConf.set(KIN_HARD_PROP, kinHard);
   }
+
+  myConf.set(jive::implict::PropNames::MAX_ITER, maxIter_);
+  myConf.set(jive::implict::PropNames::PRECISION, precision_);
 }
 
 void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector &hardParams) const
