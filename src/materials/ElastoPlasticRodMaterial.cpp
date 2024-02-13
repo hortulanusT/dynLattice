@@ -164,90 +164,68 @@ void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector 
   hardVals = -1. * matmul(materialH_, hardParams);
 }
 
-// an Euler Forward explicit integration scheme (iterative until the yield function is satisfied)
-// normaility is enforced at an lineraized ciritcal point
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
 {
   jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   curr_Strains_(ALL, ip, ielem) = strain;
   // REPORT("Step 1")
   idx_t liter = 0;
-  Vector plastStrain_trial = old_plastStrains_(ALL, ip, ielem).clone();
-  Vector hardParams_trial = old_hardParams_(ALL, ip, ielem).clone();
-  double deltaFlow_trial = 0.;
+  Vector plastStrain = old_plastStrains_(ALL, ip, ielem).clone();
+  Vector hardParams = old_hardParams_(ALL, ip, ielem).clone();
+  double deltaFlow = 0.;
 
-  Vector hardStress_trial(argCount_ - stress.size());
-  Vector args_trial(argCount_);
-  double f_trial = 0.;
-  Vector f_critDeriv(argCount_);
+  Vector hardStress(argCount_ - stress.size());
+  Vector args(argCount_);
+  double f = 0.;
+  Vector f_deriv(argCount_);
   double deltaDeltaFlow = 0.;
-
-  Vector args_old(argCount_);
-  Vector args_crit(argCount_);
-  ElasticRodMaterial::getStress(args_old[stress_part_], Vector(old_Strains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem)));
-  getHardVals(args_old[hard_part_], old_hardParams_(ALL, ip, ielem));
-  double f_old = yieldCond_->getValue(args_old.addr());
 
   while (true)
   {
     // SUBHEADER2("Step 2", liter)
-    ElasticRodMaterial::getStress(stress, Vector(strain - plastStrain_trial));
-    getHardVals(hardStress_trial, hardParams_trial);
+    ElasticRodMaterial::getStress(stress, Vector(strain - plastStrain));
+    getHardVals(hardStress, hardParams);
 
-    args_trial[stress_part_] = stress;
-    args_trial[hard_part_] = hardStress_trial;
+    args[stress_part_] = stress;
+    args[hard_part_] = hardStress;
 
-    f_trial = yieldCond_->getValue(args_trial.addr());
+    f = yieldCond_->getValue(args.addr());
 
-    jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f_trial << "\n";
+    jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f << "\n";
     JEM_PRECHECK2(liter < maxIter_, "Too many iterations in plasticity loop");
-    if (f_trial < precision_)
+    if (f < precision_)
     {
       break;
     }
     // SUBHEADER2("Step 3", liter)
-    args_crit = args_old - (args_trial - args_old) * f_old / (f_trial - f_old);
-
-    // TEST_CONTEXT(args_old)
-    // TEST_CONTEXT(yieldCond_->getValue(args_old.addr()))
-    // TEST_CONTEXT(args_trial)
-    // TEST_CONTEXT(yieldCond_->getValue(args_trial.addr()))
-    // TEST_CONTEXT(args_crit)
-    // TEST_CONTEXT(yieldCond_->getValue(args_crit.addr()))
 
     if (yieldDeriv_.size() > 0)
     {
-      f_critDeriv = jive_helpers::evalFuncs(yieldDeriv_, args_crit);
+      f_deriv = jive_helpers::evalFuncs(yieldDeriv_, args);
     }
     else
     {
-      f_critDeriv = jive_helpers::funcGrad(yieldCond_, args_crit);
+      f_deriv = jive_helpers::funcGrad(yieldCond_, args);
       for (idx_t i = 0; i < strain.size(); i++)
-        if (args_crit[i] == 0.)
-          f_critDeriv[i] = 0.;
+        if (args[i] == 0.)
+          f_deriv[i] = 0.;
     }
 
-    // TEST_CONTEXT(f_critDeriv)
-
-    deltaDeltaFlow = dotProduct(f_critDeriv[stress_part_], args_trial[stress_part_] - args_crit[stress_part_]) / (dotProduct(f_critDeriv[stress_part_], matmul(materialK_, f_critDeriv[stress_part_])) + dotProduct(f_critDeriv[hard_part_], matmul(materialH_, f_critDeriv[hard_part_])));
+    deltaDeltaFlow = f / (dotProduct(f_deriv[stress_part_], matmul(materialK_, f_deriv[stress_part_])) + dotProduct(f_deriv[hard_part_], matmul(materialH_, f_deriv[hard_part_])));
 
     // SUBHEADER2("Step 4", liter)
-    plastStrain_trial += deltaDeltaFlow * f_critDeriv[stress_part_];
-    hardParams_trial += deltaDeltaFlow * f_critDeriv[hard_part_];
-    deltaFlow_trial += deltaDeltaFlow;
-
-    // TEST_CONTEXT(plastStrain_trial)
-    // TEST_CONTEXT(hardParams_trial)
-    // TEST_CONTEXT(deltaFlow_trial)
+    plastStrain += deltaDeltaFlow * f_deriv[stress_part_];
+    hardParams += deltaDeltaFlow * f_deriv[hard_part_];
+    deltaFlow += deltaDeltaFlow;
 
     liter++;
   }
 
   jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
 
-  curr_plastStrains_(ALL, ip, ielem) = plastStrain_trial;
-  curr_hardParams_(ALL, ip, ielem) = hardParams_trial;
-  curr_deltaFlow_(ip, ielem) = deltaFlow_trial;
+  curr_plastStrains_(ALL, ip, ielem) = plastStrain;
+  curr_hardParams_(ALL, ip, ielem) = hardParams;
+  curr_deltaFlow_(ip, ielem) = deltaFlow;
 }
 
 void ElastoPlasticRodMaterial::apply_inelast_corr()

@@ -11,6 +11,7 @@ control.runWhile = "force.factor <= 1";
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.type = "Nonlin";
+Solver.solver.maxIter = 100;
 
 // SETTINGS
 params.rod_details.material.type = "ElastoPlasticRod";
