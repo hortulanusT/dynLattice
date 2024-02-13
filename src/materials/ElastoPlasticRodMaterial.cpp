@@ -172,8 +172,8 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
   curr_Strains_(ALL, ip, ielem) = strain;
   // REPORT("Step 1")
   idx_t liter = 0;
-  Vector plastStrain_trial = curr_plastStrains_(ALL, ip, ielem).clone();
-  Vector hardParams_trial = curr_hardParams_(ALL, ip, ielem).clone();
+  Vector plastStrain_trial = old_plastStrains_(ALL, ip, ielem).clone();
+  Vector hardParams_trial = old_hardParams_(ALL, ip, ielem).clone();
   double deltaFlow_trial = 0.;
 
   Vector hardStress_trial(argCount_ - stress.size());
@@ -200,8 +200,8 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     f_trial = yieldCond_->getValue(args_trial.addr());
 
     jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f_trial << "\n";
-    JEM_PRECHECK2(liter < 20, "Too many iterations in plasticity loop"); // TODO make this a property
-    if (f_trial < 1e-5)                                                  // TODO make those properties
+    JEM_PRECHECK2(liter < maxIter_, "Too many iterations in plasticity loop");
+    if (f_trial < precision_)
     {
       break;
     }
