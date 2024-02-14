@@ -89,14 +89,13 @@ public:
   static const char *TYPE_NAME;
   static const char *STEP_COUNT;
   static const char *SO3_DOFS;
-  static const char *REPORT_ENERGY;
   static const char *LEN_SCALE;
 
   virtual Status init
 
-    (const Properties& conf,
-     const Properties& props,
-     const Properties& globdat) override;
+      (const Properties &conf,
+       const Properties &props,
+       const Properties &globdat) override;
 
   virtual void shutdown
 
@@ -104,33 +103,33 @@ public:
 
   virtual void configure
 
-    (const Properties& props, const Properties& globdat) override;
+      (const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig
 
-    (const Properties& props, const Properties& globdat) const override;
+      (const Properties &props, const Properties &globdat) const override;
 
   virtual void advance
 
-    (const Properties& globdat) override;
+      (const Properties &globdat) override;
 
   virtual void solve
 
-    (const Properties& info, const Properties& globdat) = 0;
+      (const Properties &info, const Properties &globdat) = 0;
 
   virtual void cancel
 
-    (const Properties& globdat) override;
+      (const Properties &globdat) override;
 
   /// @brief comupte the next step size
   /// @return whether this step can be accepted
   virtual bool commit
 
-    (const Properties& globdat) override;
+      (const Properties &globdat) override;
 
   virtual void setPrecision
 
-    (double eps) override;
+      (double eps) override;
 
   virtual double getPrecision() const override;
 
@@ -142,47 +141,44 @@ public:
   // static void declare();
 
 protected:
-  explicit ExplicitModule(const String& name = "");
+  explicit ExplicitModule(const String &name = "");
 
   virtual ~ExplicitModule();
 
-  void updMass(const Properties& globdat);
+  void updMass(const Properties &globdat);
 
   void invalidate();
 
-  void store_energy(const Properties& globdat);
-
   /// @brief Adams Bashforth 2 step update
-  inline void ABupdate(const Vector& delta_y,
-                       const Vector& f_cur,
-                       const Vector& f_old) const;
+  inline void ABupdate(const Vector &delta_y,
+                       const Vector &f_cur,
+                       const Vector &f_old) const;
   /// @brief Adams Bashforth 1 step update (Euler Explicit)
-  inline void ABupdate(const Vector& delta_y, const Vector& f_cur) const;
+  inline void ABupdate(const Vector &delta_y, const Vector &f_cur) const;
 
   /// @brief update of the displacement vectors optionally taking SO(3)
   /// into account
-  void updateVec(const Vector& y_new,
-                 const Vector& y_old,
-                 const Vector& delta_y,
+  void updateVec(const Vector &y_new,
+                 const Vector &y_old,
+                 const Vector &delta_y,
                  const bool rot = false);
 
   /// @brief get the accelration (and return the resulting force Vector)
-  void getAcce(const Vector& a,
-               const Ref<Constraints>& cons,
-               const Vector& fres,
-               const Properties& globdat);
+  void getAcce(const Vector &a,
+               const Ref<Constraints> &cons,
+               const Vector &fres,
+               const Properties &globdat);
 
   /// @brief get the forces
   /// @return resulting forces = external - internal
-  Vector getForce(const Vector& fint,
-                  const Vector& fext,
-                  const Properties& globdat);
+  Vector getForce(const Vector &fint,
+                  const Vector &fext,
+                  const Properties &globdat);
 
-  double getQuality(const Vector& y_pre, const Vector& y_cor);
+  double getQuality(const Vector &y_pre, const Vector &y_cor);
 
 protected:
   bool valid_;
-  bool report_energy_;
 
   double dtime_;
   double prec_;
@@ -208,16 +204,15 @@ protected:
 };
 
 inline void
-ExplicitModule::ABupdate(const Vector& delta_y,
-                         const Vector& f_cur,
-                         const Vector& f_old) const
+ExplicitModule::ABupdate(const Vector &delta_y,
+                         const Vector &f_cur,
+                         const Vector &f_old) const
 {
   delta_y = dtime_ / 2. * (3. * f_cur - 1. * f_old);
 }
 
 inline void
-ExplicitModule::ABupdate(const Vector& delta_y, const Vector& f_cur) const
+ExplicitModule::ABupdate(const Vector &delta_y, const Vector &f_cur) const
 {
   delta_y = dtime_ * f_cur;
 }
-

@@ -15,6 +15,19 @@ namespace jive_helpers
     return res;
   }
 
+  Vector evalFuncs(const FuncUtils::FuncArray funcs, const Vector &args)
+  {
+    Vector res(funcs.size());
+    res = 0.;
+
+    for (idx_t i = 0; i < funcs.size(); i++)
+    {
+      res[i] = funcs[i]->getValue(args.addr());
+    }
+
+    return res;
+  }
+
   Matrix funcHessian(const Ref<Function> func, const Vector &args)
   {
     const idx_t argc = func->argCount();
@@ -44,6 +57,23 @@ namespace jive_helpers
       g2 = funcGrad(func, x2);
 
       res[iarg] = (g2 - g1) / dx;
+    }
+
+    return res;
+  }
+
+  Matrix gradFuncs(const FuncUtils::FuncArray funcs, const Vector &args)
+  {
+    const idx_t argc = funcs.size();
+
+    Matrix res(argc, argc);
+
+    for (idx_t iarg = 0; iarg < argc; iarg++)
+    {
+      for (idx_t jarg = 0; jarg < argc; jarg++)
+      {
+        res(iarg, jarg) = funcs[iarg]->getDeriv(jarg, args.addr());
+      }
     }
 
     return res;

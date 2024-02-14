@@ -61,17 +61,21 @@ public:
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
-  virtual inline Matrix getMaterialStiff() const override;
+  virtual Matrix getMaterialStiff() const override;
 
-  virtual inline Matrix getMaterialMass() const override;
+  virtual Matrix getMaterialMass() const override;
 
   virtual Matrix getLumpedMass(double l) const override;
 
-  virtual inline void getStress(const Vector &stress, const Vector &strain) const override;
+  virtual void getStress(const Vector &stress, const Vector &strain) override;
 
-  virtual inline void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
-  virtual inline void update(const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+  virtual void apply_inelast_corr() override;
+
+  virtual void reject_inelast_corr() override;
+
+  virtual double getDisspiatedEnergy() const override;
 
 protected:
   ~ElasticRodMaterial();
@@ -99,27 +103,3 @@ protected:
 
   String rodName_;
 };
-
-Matrix ElasticRodMaterial::getMaterialStiff() const
-{
-  return materialK_;
-}
-
-Matrix ElasticRodMaterial::getMaterialMass() const
-{
-  return materialM_;
-}
-
-void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain) const
-{
-  stress = matmul(materialK_, strain);
-}
-
-void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
-{
-  WARN(name + " not supported by this material");
-}
-
-void ElasticRodMaterial::update(const Vector &strain, const idx_t &ielem, const idx_t &ip)
-{
-}

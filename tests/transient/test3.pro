@@ -52,7 +52,7 @@ Output.modules += "enSample";
 Output.enSample.type = "Sample";
 Output.enSample.file = "$(CASE_NAME)/energy.csv";
 Output.enSample.header = "time,time_step,run_time,load,E_kin,E_pot,E_tot";
-Output.enSample.dataSets = ["t", "deltaTime", "runtime", "$(model.model.force.scaleFunc)", "KineticEnergy", "PotentialEnergy", "TotalEnergy"];
+Output.enSample.dataSets = ["t", "deltaTime", "runtime", "$(model.model.force.scaleFunc)", "kineticEnergy", "potentialEnergy", "kineticEnergy+potentialEnergy"];
 Output.enSample.separator = ",";
 Output.enSample.sampleWhen = Output.disp.saveWhen;
 

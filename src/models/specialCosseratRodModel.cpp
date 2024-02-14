@@ -32,7 +32,6 @@ const char *specialCosseratRodModel::SYMMETRIC_ONLY =
 const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
-const char *specialCosseratRodModel::THICKENING_FACTOR = "thickening";
 const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
@@ -187,16 +186,6 @@ specialCosseratRodModel::specialCosseratRodModel
 
     vec2mat(givenDirs_.transpose(), givenDirs);
   }
-
-  if (myProps.find(thickFact_, THICKENING_FACTOR))
-  {
-    if (thickFact_.size() == 1)
-    {
-      thickFact_.reshape(2);
-      thickFact_[1] = thickFact_[0];
-    }
-    myConf.set(THICKENING_FACTOR, thickFact_);
-  }
 }
 
 //-----------------------------------------------------------------------
@@ -255,10 +244,8 @@ bool specialCosseratRodModel::takeAction
         get_strain_table_(*table, weights, disp, true);
       else if (name == "mat_stress")
         get_stress_table_(*table, weights, disp, true);
-      else if (name == "plast_strain")
-        get_strain_table_(*table, weights);
       else
-        return false;
+        get_mat_table_(*table, weights, name);
 
       return true;
     }
@@ -361,28 +348,31 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    Vector disp;
+    material_->apply_inelast_corr();
 
-    // Get the current displacements.
+    Properties vars = Globdat::getVariables(globdat);
+    Vector disp;
+    Vector velo;
+    double E_pot = 0.;
+    double E_diss = 0.;
+
     StateVector::get(disp, dofs_, globdat);
 
-    update_(disp);
+    vars.find(E_pot, "potentialEnergy");
+    vars.find(E_diss, "dissipatedEnergy");
+
+    E_pot += calc_pot_Energy_(disp);
+    E_diss += material_->getDisspiatedEnergy();
+
+    vars.set("potentialEnergy", E_pot);
+    vars.set("dissipatedEnergy", E_diss);
 
     return true;
   }
 
-  if (action == "GET_ENERGY")
+  if (action == Actions::CANCEL)
   {
-    Vector disp;
-    double E_pot = 0;
-
-    StateVector::get(disp, dofs_, globdat);
-    params.find(E_pot, "potentialEnergy");
-
-    E_pot += calc_pot_Energy_(disp);
-
-    params.set("potentialEnergy", E_pot);
-
+    material_->reject_inelast_corr();
     return true;
   }
 
@@ -392,11 +382,11 @@ bool specialCosseratRodModel::takeAction
   return false;
 }
 //-----------------------------------------------------------------------
-//   get_strain_table_ (plastic version)
+//   get_mat_table_ (plastic version)
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::get_strain_table_
+void specialCosseratRodModel::get_mat_table_
 
-    (XTable &strain_table, const Vector &weights)
+    (XTable &mat_table, const Vector &weights, const String &name)
 {
   IdxVector icols(dofs_->typeCount());
   String dofName;
@@ -406,14 +396,14 @@ void specialCosseratRodModel::get_strain_table_
   {
     dofName = dofs_->getTypeName(idof);
     if (idof < TRANS_DOF_COUNT)
-      icols[idof] = strain_table.addColumn(
+      icols[idof] = mat_table.addColumn(
           "gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
     else
-      icols[idof] = strain_table.addColumn(
+      icols[idof] = mat_table.addColumn(
           "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
-  material_->getTable("plast_strain", strain_table, rodElems_.getIndices(), weights);
+  material_->getTable(name, mat_table, rodElems_.getIndices(), weights);
 }
 //-----------------------------------------------------------------------
 //   get_strain_table_
@@ -751,9 +741,6 @@ void specialCosseratRodModel::get_stresses_(
   get_strains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
   // TEST_CONTEXT(strains)
 
-  Matrix newStress(stresses.shape());
-  newStress = 0.;
-
   for (idx_t ip = 0; ip < ipCount; ip++)
     material_->getStress(stresses[ip], strains[ip], ie, ip);
 
@@ -851,7 +838,6 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
     get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
-    // TEST_CONTEXT(stress)
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
@@ -860,10 +846,9 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(), PI[ip].transpose());
+      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(ie, ip), PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
-      // TEST_CONTEXT(materialC)
-      // TEST_CONTEXT(spatialC)
+      // TEST_CONTEXT(material_->getMaterialStiff(ie, ip))
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
@@ -1026,36 +1011,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         // TEST_CONTEXT(spatialInertia)
         mbld.addBlock(idofs, idofs, spatialInertia);
       }
-    }
-  }
-}
-
-void specialCosseratRodModel::update_(const Vector &disp) const
-{
-  const idx_t elemCount = rodElems_.size();
-  const idx_t ipCount = shapeK_->ipointCount();
-  const idx_t nodeCount = shapeK_->nodeCount();
-  const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
-
-  Matrix nodeU(rank, nodeCount);
-  Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Vector weights(ipCount);
-  // DOF INDICES
-  IdxVector inodes(nodeCount);
-
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-
-    for (idx_t ip = 0; ip < ipCount; ip++)
-    {
-      material_->update(strain[ip], ie, ip);
     }
   }
 }

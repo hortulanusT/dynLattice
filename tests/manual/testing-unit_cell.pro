@@ -1,4 +1,36 @@
-include "../../studies/programs/nonlin-comp.pro";
+// PROGRAM CONTROL
+control.runWhile = "loadScale <= 0.9";
+
+// SOLVER
+Solver.modules = [ "solver" ];
+Solver.solver.type = "AdaptiveStep";
+Solver.solver.loadIncr = 0.001;
+Solver.solver.maxIncr = 0.01;
+Solver.solver.minIncr = 0.00005;
+
+// SETUP
+// material settings
+
+params.material.young = 210e9;
+params.material.poisson_ratio = 0.3;
+params.material.cross_section = "square";
+// pbc settings
+params.pbcDofs = [ "dx", "dy" ];
+
+params.load.type = "PeriodicBC";
+params.load.dofs = ["dx", "dy"];
+params.load.rotDofs = [ "rz" ];
+params.load.H11="nan";
+params.load.H22=-1.;
+
+// 2D settings
+params.dofs2D = ["dz", "rx", "ry"];
+params.groups2D = [ "all", "all", "all" ];
+
+// standard configs
+include "../../studies/configs/input.pro";
+include "../../studies/configs/model.pro";
+include "../../studies/configs/output.pro";
 
 // params.scale = 1;
 // params.name = "elastic";
@@ -6,14 +38,12 @@ include "../../studies/programs/nonlin-comp.pro";
 Input.input.onelab.BaseWidth = "$(params.scale) * 1e-2";
 model.model.lattice.child.material.radius = "$(params.scale) * 1e-3";
 
-control.runWhile = "i < 1001";
 Input.input.verbose = true;
 Input.input.file="studies/geometries/re-entrant.geo";
 Input.input.onelab.Angle='64.471220634490691369245999339962435963006843100907948288171106356';
 Input.input.onelab.LengthRatio='0.75';
 Input.input.onelab.Elems = '25';
-model.model.load.model.H11="nan";
-model.model.load.model.H22=-1.;
+model.model.lattice.child.maximum_relative_dissipation = 0.0025;
 model.model.lattice.child.material.type = "ElastoPlasticRod";
 model.model.lattice.child.material.cross_section = "circle";
 
@@ -48,15 +78,18 @@ model.model.lattice.child.material.cross_section = "circle";
 //                                                       "16743e-3/$(params.scale)^2","16069e-3/$(params.scale)^2","24578e-3/$(params.scale)^2","15009e-6/$(params.scale)^2","16015e-6/$(params.scale)^2","12715e-6/$(params.scale)^2",
 //                                                       "15552e-3/$(params.scale)^2","15556e-3/$(params.scale)^2","26757e-3/$(params.scale)^2","12715e-6/$(params.scale)^2","12715e-6/$(params.scale)^2","10434e-6/$(params.scale)^2"];
 
-Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]" ];
-Output.sampling.append	= false;
-Output.sampling.header	= "H22, C_44";
-Output.modules+="paraview";
-Output.paraview.beams.shape = "Line2";
-// Output.paraview.beams.el_data += "plast_strain";
 
-Output.sampling.sampleWhen = "(i-1) % 10 < 1";
-Output.tangent.sampleWhen = "(i-1) % 10 < 1";
+
+Output.modules = [ "tangent", "sampling", "paraview" ];
+// overwriting settings
+
+Output.sampling.dataSets	= [ "(ymax.disp.dy - ymin.disp.dy) / all.extent.dy", "tangent.stiffness[15]", "(0.5 * ymax.resp.dy / all.extent.dx - 0.5 * ymin.resp.dy / all.extent.dx) / $(params.scale)", "potentialEnergy / $(params.scale)^3", "dissipatedEnergy  / $(params.scale)^3" ];
+Output.sampling.append	= false;
+Output.sampling.header	= "H22, C_44, P22, E_pot, E_plast";
+Output.paraview.beams.shape = "Line2";
+
+Output.sampling.sampleWhen = true;
+Output.tangent.sampleWhen = true;
 Output.tangent.thickness = model.model.lattice.child.material.radius;
 Output.paraview.sampleWhen = "(i-1) % 10 < 1";
 
