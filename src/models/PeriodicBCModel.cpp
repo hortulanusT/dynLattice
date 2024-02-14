@@ -123,10 +123,16 @@ bool periodicBCModel::takeAction
 
       // get the scale factor
       if (!globdat.find(currVec, FIXEDGRAD_PARAM))
-        params.get(scale, ActionParams::SCALE_FACTOR);
+      {
+        if (!params.find(scale, ActionParams::SCALE_FACTOR))
+        {
+          Globdat::getVariables(globdat).get(scale, jive::model::RunvarNames::LOAD_SCALE);
+        }
+      }
       else
+      {
         vec2mat(currentGrad, currVec);
-
+      }
       fixCorners_(globdat, currentGrad, scale);
     }
     setConstraints_();
@@ -142,7 +148,7 @@ bool periodicBCModel::takeAction
     // get the scale factor & external force vector
     params.get(f, ActionParams::EXT_VECTOR);
 
-    if (params.find(scale, ActionParams::SCALE_FACTOR))
+    if (params.find(scale, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(scale, jive::model::RunvarNames::LOAD_SCALE))
       getExtVec_(f, globdat, scale);
     else
       getExtVec_(f, globdat);

@@ -11,6 +11,7 @@ control.runWhile = "force.factor <= 1";
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.type = "Nonlin";
+Solver.solver.maxIter = 100;
 
 // SETTINGS
 params.rod_details.material.type = "ElastoPlasticRod";
@@ -25,6 +26,19 @@ params.rod_details.material.yieldCond += "+ abs(rx/(0.62-h_rx))^2.09 ";
 params.rod_details.material.yieldCond += "+ abs(ry/(0.62-h_ry))^2.09 ";
 params.rod_details.material.yieldCond += "+ abs(rz/(0.56-h_rz))^1.73 ";
 params.rod_details.material.yieldCond += "- 1";
+params.rod_details.material.yieldDeriv  = ["2.04 * abs(dx/( 700-h_dx))^1.04 * if(dx/( 700-h_dx)>0, 1, if(dx/( 700-h_dx)<0, -1, 0)) / ( 700-h_dx)"];
+params.rod_details.material.yieldDeriv += ["2.04 * abs(dy/( 700-h_dy))^1.04 * if(dy/( 700-h_dy)>0, 1, if(dy/( 700-h_dy)<0, -1, 0)) / ( 700-h_dy)"];
+params.rod_details.material.yieldDeriv += ["1.76 * abs(dz/(1470-h_dz))^0.76 * if(dz/(1470-h_dz)>0, 1, if(dz/(1470-h_dz)<0, -1, 0)) / (1470-h_dz)"];
+params.rod_details.material.yieldDeriv += ["2.09 * abs(rx/(0.62-h_rx))^1.09 * if(rx/(0.62-h_rx)>0, 1, if(rx/(0.62-h_rx)<0, -1, 0)) / (0.62-h_rx)"];
+params.rod_details.material.yieldDeriv += ["2.09 * abs(ry/(0.62-h_ry))^1.09 * if(ry/(0.62-h_ry)>0, 1, if(ry/(0.62-h_ry)<0, -1, 0)) / (0.62-h_ry)"];
+params.rod_details.material.yieldDeriv += ["1.73 * abs(rz/(0.56-h_rz))^0.73 * if(rz/(0.56-h_rz)>0, 1, if(rz/(0.56-h_rz)<0, -1, 0)) / (0.56-h_rz)"];
+params.rod_details.material.yieldDeriv += ["2.04 * abs(dx/( 700-h_dx))^1.04 * if(dx/( 700-h_dx)>0, 1, if(dx/( 700-h_dx)<0, -1, 0)) * dx/(( 700-h_dx)^2)"];
+params.rod_details.material.yieldDeriv += ["2.04 * abs(dy/( 700-h_dy))^1.04 * if(dy/( 700-h_dy)>0, 1, if(dy/( 700-h_dy)<0, -1, 0)) * dy/(( 700-h_dy)^2)"];
+params.rod_details.material.yieldDeriv += ["1.76 * abs(dz/(1470-h_dz))^0.76 * if(dz/(1470-h_dz)>0, 1, if(dz/(1470-h_dz)<0, -1, 0)) * dz/((1470-h_dz)^2)"];
+params.rod_details.material.yieldDeriv += ["2.09 * abs(rx/(0.62-h_rx))^1.09 * if(rx/(0.62-h_rx)>0, 1, if(rx/(0.62-h_rx)<0, -1, 0)) * rx/((0.62-h_rx)^2)"];
+params.rod_details.material.yieldDeriv += ["2.09 * abs(ry/(0.62-h_ry))^1.09 * if(ry/(0.62-h_ry)>0, 1, if(ry/(0.62-h_ry)<0, -1, 0)) * ry/((0.62-h_ry)^2)"];
+params.rod_details.material.yieldDeriv += ["1.73 * abs(rz/(0.56-h_rz))^0.73 * if(rz/(0.56-h_rz)>0, 1, if(rz/(0.56-h_rz)<0, -1, 0)) * rz/((0.56-h_rz)^2)"];
+
 params.rod_details.material.kinematicTensor = [19014e+0, 17547e+0, 33121e+0, 16069e-3, 16743e-3, 15552e-3,
                                                17547e+0, 19014e+0, 33121e+0, 16743e-3, 16069e-3, 15556e-3,
                                                33121e+0, 33121e+0, 56864e+0, 24578e-3, 24578e-3, 26757e-3,

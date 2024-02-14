@@ -22,6 +22,7 @@
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
+#include <jive/model/Names.h>
 #include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/Constraints.h>

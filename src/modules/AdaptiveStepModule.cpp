@@ -19,10 +19,8 @@ AdaptiveStepModule::AdaptiveStepModule(const String &name,
 {
   oldLoadScale_ = loadScale_ = 0.;
   incr_ = minIncr_ = maxIncr_ = 0.;
-  optIter_ = 4;
-  incrFact_ = 1.5;
+  incrFact_ = 1.2;
   decrFact_ = 0.5;
-  minTried_ = maxTried_ = false;
 }
 
 AdaptiveStepModule::~AdaptiveStepModule()
@@ -45,7 +43,6 @@ void AdaptiveStepModule::configure
 
   Properties myProps = props.findProps(myName_);
 
-  myProps.find(optIter_, "optIter");
   myProps.find(incrFact_, "increaseFactor");
   myProps.find(decrFact_, "decreaseFactor");
 }
@@ -67,7 +64,6 @@ void AdaptiveStepModule::getConfig
 
   Properties myProps = props.findProps(myName_);
 
-  myProps.set("optIter", optIter_);
   myProps.set("increaseFactor", incrFact_);
   myProps.set("decreaseFactor", decrFact_);
 }
@@ -78,13 +74,17 @@ void AdaptiveStepModule::getConfig
 
 void AdaptiveStepModule::advance(const Properties &globdat)
 {
+  Properties params;
+
   oldLoadScale_ = loadScale_;
   loadScale_ += incr_;
 
   Properties vars = Globdat::getVariables(globdat);
   vars.set(jive::model::RunvarNames::LOAD_SCALE, loadScale_);
+  jem::System::info(myName_) << " ...Applying " << jive::model::RunvarNames::LOAD_SCALE << " of " << loadScale_ << "\n";
 
-  solver_->advance(globdat);
+  Globdat::advanceStep(globdat);
+  model_->takeAction(Actions::ADVANCE, params, globdat);
 }
 
 //-----------------------------------------------------------------------
@@ -122,6 +122,9 @@ Module::Status AdaptiveStepModule::init(const Properties &conf,
   Properties vars = Globdat::getVariables(globdat);
   vars.set(jive::model::RunvarNames::LOAD_SCALE, loadScale_);
 
+  model_ = Model::get(globdat, getContext());
+  dofs_ = DofSpace::get(globdat, getContext());
+
   return solver_->init(conf, props, globdat);
 }
 
@@ -137,8 +140,12 @@ void AdaptiveStepModule::solve(const Properties &info,
   }
   catch (const jem::Exception &e)
   {
-    jem::System::info(myName_) << e.name() << " occured in the inner solver!\n\t"
+    jem::System::info(myName_) << e.name() << " occured in " << e.where() << "\n\t"
                                << e.what() << "\n";
+#ifndef NDEBUG
+    jem::System::debug(myName_) << "\n\n"
+                                << e.getStackTrace() << "\n\n";
+#endif
     info.set(SolverInfo::CONVERGED, false);
   }
 }
@@ -148,12 +155,15 @@ void AdaptiveStepModule::solve(const Properties &info,
 //-----------------------------------------------------------------------
 void AdaptiveStepModule::cancel(const Properties &globdat)
 {
-  loadScale_ = oldLoadScale_;
+  Properties params;
 
+  loadScale_ = oldLoadScale_;
   Properties vars = Globdat::getVariables(globdat);
   vars.set(jive::model::RunvarNames::LOAD_SCALE, loadScale_);
 
-  solver_->cancel(globdat);
+  Globdat::restoreStep(globdat);
+  StateVector::restoreNew(dofs_, globdat);
+  model_->takeAction(Actions::CANCEL, params, globdat);
 }
 
 //-----------------------------------------------------------------------
@@ -164,39 +174,39 @@ bool AdaptiveStepModule::commit
 
     (const Properties &globdat)
 {
-  bool accept = false;
-  double optIncr;
-  idx_t currIter;
+  Properties params;
+  bool accept;
 
-  Properties solverInfo = SolverInfo::get(globdat);
-  solverInfo.find(accept, SolverInfo::CONVERGED);
-  accept = accept && solver_->commit(globdat);
+  if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
+  {
+    params.get(accept, ActionParams::ACCEPT);
+  }
+  else // if the model doesnt care accept the solution
+  {
+    accept = true;
+  }
 
-  // adapt step size based on the iterations (compare Module of Frans)
-  if (accept && solverInfo.find(currIter, SolverInfo::ITER_COUNT))
-    optIncr = incr_ * pow(0.5, (currIter - optIter_) / 4.);
-  else
-    optIncr = incr_ * decrFact_;
-
-  if (!accept && incr_ == minIncr_)
-    minTried_ = true;
-  if (!accept && incr_ == maxIncr_)
-    maxTried_ = true;
-
-  if (accept && currIter < optIter_) // increase step size
-    incr_ = jem::max(jem::min(optIncr, incrFact_ * incr_, maxIncr_), decrFact_ * incr_, minIncr_);
-  if (!accept || currIter > optIter_) // decrease step size
-    incr_ = jem::max(optIncr, decrFact_ * incr_, minIncr_);
-
+  // adapt step size
   if (accept)
-    minTried_ = maxTried_ = false;
+  {
+    incr_ = jem::min(maxIncr_, incr_ * incrFact_);
+  }
+  else if (incr_ == minIncr_) // if the step size is already minimal accept the current solution
+  {
+    jem::System::warn() << " ...Continuing with smallest possible step size\n";
+    accept = true;
+  }
   else
   {
-    if (minTried_ && maxTried_)
-      throw jive::solver::SolverException("step size adaptation", "Solver is out of inspiration, sorry!");
+    incr_ = jem::max(minIncr_, incr_ * decrFact_);
+  }
 
-    if (minTried_)
-      incr_ = maxIncr_;
+  if (accept)
+  {
+    params.clear();
+    model_->takeAction(Actions::COMMIT, params, globdat);
+    Globdat::commitStep(globdat);
+    StateVector::updateOld(dofs_, globdat);
   }
 
   jem::System::info(myName_) << " ...Adapting load step size to " << incr_ << "\n";

@@ -32,6 +32,7 @@
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/fem/NodeSet.h>
+#include <jive/implict/SolverInfo.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
@@ -57,6 +58,7 @@ using jem::numeric::norm2;
 using jem::numeric::Quaternion;
 using jem::util::Properties;
 
+using jive::BoolVector;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::FlexMBuilder;
 using jive::algebra::MatrixBuilder;
@@ -166,9 +168,9 @@ private:
   /**
    * @brief fill the table with the plastic strain values per element
    */
-  void get_strain_table_
+  void get_mat_table_
 
-      (XTable &strain_table, const Vector &weights);
+      (XTable &mat_table, const Vector &weights, const String &name);
 
   /**
    * @brief fill the table with the stress values per element
@@ -238,39 +240,33 @@ private:
   void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
                   const Cubix &nodeLambda, const Vector &disp,
                   const IdxVector &inodes) const;
-  /**
-   * @brief calculate the potential Energy stored in the model
-   *
-   * @param disp displacement Vector
-   *
-   * @return double
-   */
-  double calc_pot_Energy_(const Vector &disp) const;
 
   /**
-   * @brief update the material
+   * Calculates the potential energy of the special Cosserat rod model.
    *
-   * @param disp displacement vector
+   * @param disp The displacement vector.
+   * @return The potential energy.
    */
-  void update_(const Vector &disp) const;
+  double calc_pot_Energy_(const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;
   IdxVector rodNodes_;
   Assignable<ElementSet> allElems_;
   Assignable<NodeSet> allNodes_;
+
   Ref<DofSpace> dofs_;
   Ref<Line3D> shapeK_;
   Ref<Line3D> shapeM_;
   Ref<Material> material_;
   Ref<Model> hinges_;
+
   IdxVector trans_types_;
   IdxVector rot_types_;
   IdxVector jtypes_;
+
   bool symmetric_only_;
-
   Vector thickFact_;
-
   Vector material_ey_;
 
   IdxVector

@@ -91,16 +91,16 @@ public:
   static void declare();
 
 protected:
-  StringVector nodeGroups_; ///< groups of nodes used to calculate the
-                            ///< singular element forces/displacements
-  StringVector elemGroups_; ///< groups of elements used to calculate the
-                            ///< extent/strain/stress values
+  StringVector nodeGroups_;   ///< groups of nodes used to calculate the
+                              ///< singular element forces/displacements
+  StringVector elemGroups_;   ///< groups of elements used to calculate the
+                              ///< extent/strain/stress values
   StringVector nodeDofNames_; ///< vector containing the names of the dofs
                               ///< used for singular calculations
-  IdxVector nodeDofs_; ///< vector containing the ids of the dofs used for
-                       ///< the singular caluclations
+  IdxVector nodeDofs_;        ///< vector containing the ids of the dofs used for
+                              ///< the singular caluclations
   StringVector elemDofNames_; ///< vector containing the names of the dofs
                               ///< used for aggregate calculations
-  IdxVector elemDofs_; ///< vector containing the ids of the dofs used for
-                       ///< the aggregate calculations
+  IdxVector elemDofs_;        ///< vector containing the ids of the dofs used for
+                              ///< the aggregate calculations
 };

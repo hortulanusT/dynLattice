@@ -1,7 +1,7 @@
 /**
  * @file AdaptiveStepModule.h
  * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief class that implements adaptive time stepping with a NonlinModule for tracing equilibrium paths without snapback behaviour
+ * @brief class that implements adaptive time stepping with a NonlinModule for adapting to explicit plasicity stepping
  * @version 0.1
  * @date 2023-01-27
  *
@@ -21,8 +21,12 @@
 #include <jive/implict/NonlinModule.h>
 #include <jive/implict/SolverInfo.h>
 #include <jive/implict/SolverModule.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
 #include <jive/model/Names.h>
+#include <jive/model/StateVector.h>
 #include <jive/solver/SolverException.h>
+#include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
 #include <jive/util/utilities.h>
@@ -36,7 +40,11 @@ using jive::app::Module;
 using jive::implict::NonlinModule;
 using jive::implict::SolverInfo;
 using jive::implict::SolverModule;
+using jive::model::ActionParams;
+using jive::model::Actions;
 using jive::model::Model;
+using jive::model::StateVector;
+using jive::util::DofSpace;
 using jive::util::FuncUtils;
 using jive::util::Globdat;
 
@@ -107,17 +115,16 @@ protected:
 
 private:
   Ref<NonlinModule> solver_;
+  Ref<Model> model_;
+  Ref<DofSpace> dofs_;
 
   double oldLoadScale_;
   double loadScale_;
   double incr_;
   double minIncr_;
   double maxIncr_;
-  idx_t optIter_;
   double incrFact_;
   double decrFact_;
-  bool minTried_;
-  bool maxTried_;
 };
 
 //-----------------------------------------------------------------------

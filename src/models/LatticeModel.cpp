@@ -10,6 +10,7 @@
  */
 
 #include "models/LatticeModel.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class LatticeModel
@@ -92,8 +93,48 @@ bool LatticeModel::takeAction
 {
   bool success = true;
   for (Ref<Model> child : children_)
-    success &= child->takeAction(action, params, globdat);
+    success = child->takeAction(action, params, globdat) && success;
+
+  if (action == Actions::GET_MATRIX2)
+  {
+    Ref<MatrixBuilder> mbld;
+
+    params.get(mbld, ActionParams::MATRIX2);
+
+    M_ = mbld->getMatrix();
+  }
+
+  if (action == Actions::ADVANCE || action == Actions::INIT)
+  {
+    Properties vars = Globdat::getVariables(globdat);
+    vars.set("potentialEnergy", 0.);
+    vars.set("dissipatedEnergy", 0.);
+    vars.set("kineticEnergy", 0.);
+  }
+
+  if (action == Actions::COMMIT)
+  {
+    calc_kin_Energy_(params, globdat);
+  }
+
   return success;
+}
+
+void LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &globdat) const
+{
+  double kineticEnergy = 0.0;
+  Properties vars = Globdat::getVariables(globdat);
+  vars.find(kineticEnergy, "kineticEnergy");
+
+  Vector velo;
+  if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat))
+  {
+    Vector temp(velo.size());
+    M_->matmul(temp, velo);
+    kineticEnergy += 0.5 * dotProduct(velo, temp);
+
+    vars.set("kineticEnergy", kineticEnergy);
+  }
 }
 
 //-----------------------------------------------------------------------
