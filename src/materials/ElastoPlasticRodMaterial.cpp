@@ -234,8 +234,8 @@ void ElastoPlasticRodMaterial::apply_inelast_corr()
   {
     for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
     {
-      E_diss_ += dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
-                            matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
+      E_diss_ += 0.5 * dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
+                                  matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
     }
   }
 
