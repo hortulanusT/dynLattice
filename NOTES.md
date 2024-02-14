@@ -1,4 +1,8 @@
 # :arrows_counterclockwise: Workflows
+## *testing/standard studies*
+1. `jive make clean-all`
+1. `jive make tests`
+1. `jive make studies`
 ## *eqv-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
