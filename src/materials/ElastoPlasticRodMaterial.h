@@ -18,6 +18,7 @@
 #include <jem/util/StringUtils.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/implict/Names.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 #include <jive/util/utilities.h>
@@ -63,6 +64,15 @@ public:
 
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
+  /**
+   * Calculates the stress for a given strain using the convex cutting plane algorithm.
+   * Compare Simo/Hughes Computational Inelasticity Box 3.6
+   *
+   * @param stress The calculated stress will be stored in this vector.
+   * @param strain The strain vector for which the stress needs to be calculated.
+   * @param ielem The index of the element.
+   * @param ip The index of the integration point.
+   */
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
 
   virtual void apply_inelast_corr() override;
@@ -79,8 +89,10 @@ protected:
 protected:
   Ref<Function> yieldCond_;         // yield condition
   FuncUtils::FuncArray yieldDeriv_; // derivative of the yield condition
-  idx_t argCount_;                  // number of arguments to yield condition
+  idx_t maxIter_;                   // maximum iterations in the stress update
+  double precision_;                // tolerance for the stress update
 
+  idx_t argCount_;         // number of arguments to yield condition
   jem::Slice stress_part_; // slice for the stress part of the arguments
   jem::Slice hard_part_;   // slice for the hardening part of the arguments
 

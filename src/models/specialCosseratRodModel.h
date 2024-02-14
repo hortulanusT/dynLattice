@@ -168,9 +168,9 @@ private:
   /**
    * @brief fill the table with the plastic strain values per element
    */
-  void get_strain_table_
+  void get_mat_table_
 
-      (XTable &strain_table, const Vector &weights);
+      (XTable &mat_table, const Vector &weights, const String &name);
 
   /**
    * @brief fill the table with the stress values per element

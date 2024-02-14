@@ -6,7 +6,8 @@ from matplotlib import pyplot as plt
 
 testing_measure = "P22"
 
-fig, axs = plt.subplots(3, 4, sharex=True, figsize=(12, 8))
+# creat a figure with 3x4 subplots and A4 size
+fig, axs = plt.subplots(3, 4, sharex=True, figsize=(29.7 / 2.54, 21 / 2.54))
 
 # elastic
 regular = pd.read_csv(

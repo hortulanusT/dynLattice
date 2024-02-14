@@ -244,10 +244,8 @@ bool specialCosseratRodModel::takeAction
         get_strain_table_(*table, weights, disp, true);
       else if (name == "mat_stress")
         get_stress_table_(*table, weights, disp, true);
-      else if (name == "plast_strain")
-        get_strain_table_(*table, weights);
       else
-        return false;
+        get_mat_table_(*table, weights, name);
 
       return true;
     }
@@ -384,11 +382,11 @@ bool specialCosseratRodModel::takeAction
   return false;
 }
 //-----------------------------------------------------------------------
-//   get_strain_table_ (plastic version)
+//   get_mat_table_ (plastic version)
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::get_strain_table_
+void specialCosseratRodModel::get_mat_table_
 
-    (XTable &strain_table, const Vector &weights)
+    (XTable &mat_table, const Vector &weights, const String &name)
 {
   IdxVector icols(dofs_->typeCount());
   String dofName;
@@ -398,14 +396,14 @@ void specialCosseratRodModel::get_strain_table_
   {
     dofName = dofs_->getTypeName(idof);
     if (idof < TRANS_DOF_COUNT)
-      icols[idof] = strain_table.addColumn(
+      icols[idof] = mat_table.addColumn(
           "gamma_" + dofName[SliceFrom(dofName.size() - 1)]);
     else
-      icols[idof] = strain_table.addColumn(
+      icols[idof] = mat_table.addColumn(
           "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
-  material_->getTable("plast_strain", strain_table, rodElems_.getIndices(), weights);
+  material_->getTable(name, mat_table, rodElems_.getIndices(), weights);
 }
 //-----------------------------------------------------------------------
 //   get_strain_table_
