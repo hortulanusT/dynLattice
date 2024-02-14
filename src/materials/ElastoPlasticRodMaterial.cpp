@@ -257,25 +257,40 @@ void ElastoPlasticRodMaterial::reject_inelast_corr()
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
 {
-  if (name != "plast_strain")
+  if (name == "plast_strain")
   {
-    WARN(name + " not supported by this material");
-    return;
-  }
+    const idx_t elemCount = items.size();
+    const idx_t ipCount = curr_plastStrains_.size(1);
+    const IdxVector columns(strain_table.columnCount());
+    columns = jem::iarray(strain_table.columnCount());
 
-  const idx_t elemCount = items.size();
-  const idx_t ipCount = old_plastStrains_.size(1);
-  const IdxVector columns(strain_table.columnCount());
-  columns = jem::iarray(strain_table.columnCount());
-
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    for (idx_t ip = 0; ip < ipCount; ip++)
+    for (idx_t ie = 0; ie < elemCount; ie++)
     {
-      strain_table.addRowValues(items[ie], columns, old_plastStrains_(ALL, ip, ie));
-      weights[items[ie]] += 1.;
+      for (idx_t ip = 0; ip < ipCount; ip++)
+      {
+        strain_table.addRowValues(items[ie], columns, curr_plastStrains_(ALL, ip, ie));
+        weights[items[ie]] += 1.;
+      }
     }
   }
+  if (name == "hard_params")
+  {
+    const idx_t elemCount = items.size();
+    const idx_t ipCount = curr_hardParams_.size(1);
+    const IdxVector columns(strain_table.columnCount());
+    columns = jem::iarray(strain_table.columnCount());
+
+    for (idx_t ie = 0; ie < elemCount; ie++)
+    {
+      for (idx_t ip = 0; ip < ipCount; ip++)
+      {
+        strain_table.addRowValues(items[ie], columns, curr_hardParams_(ALL, ip, ie));
+        weights[items[ie]] += 1.;
+      }
+    }
+  }
+  else
+    WARN(name + " not supported by this material");
 }
 
 double ElastoPlasticRodMaterial::getDisspiatedEnergy() const
