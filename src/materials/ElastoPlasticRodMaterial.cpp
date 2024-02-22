@@ -19,7 +19,6 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
   precision_ = 1e-5;
   materialH_.resize(0);
   argCount_ = 0;
-  E_diss_ = 0.;
 
   configure(props, globdat);
   getConfig(conf, globdat);
@@ -107,6 +106,9 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
   curr_deltaFlow_.resize(ipCount, elemCount);
   curr_deltaFlow_ = 0.;
+
+  E_diss_.resize(ipCount, elemCount);
+  E_diss_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
@@ -234,8 +236,8 @@ void ElastoPlasticRodMaterial::apply_inelast_corr()
   {
     for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
     {
-      E_diss_ += 0.5 * dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
-                                  matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
+      E_diss_(ip, ielem) += dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
+                                       matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
     }
   }
 
@@ -293,9 +295,9 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
     WARN(name + " not supported by this material");
 }
 
-double ElastoPlasticRodMaterial::getDisspiatedEnergy() const
+double ElastoPlasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
 {
-  return E_diss_;
+  return E_diss_(ip, ielem);
 }
 
 Ref<Material> ElastoPlasticRodMaterial::makeNew

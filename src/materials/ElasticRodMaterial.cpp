@@ -209,7 +209,7 @@ void ElasticRodMaterial::reject_inelast_corr()
 {
 }
 
-double ElasticRodMaterial::getDisspiatedEnergy() const
+double ElasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
 {
   return 0.;
 }
