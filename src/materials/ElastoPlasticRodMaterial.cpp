@@ -274,7 +274,10 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
         weights[items[ie]] += 1.;
       }
     }
+
+    return;
   }
+
   if (name == "hard_params")
   {
     const idx_t elemCount = items.size();
@@ -290,9 +293,11 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
         weights[items[ie]] += 1.;
       }
     }
+
+    return;
   }
-  else
-    WARN(name + " not supported by this material");
+
+  WARN(name + " not supported by this material");
 }
 
 double ElastoPlasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
