@@ -45,3 +45,4 @@ rsync -vax $TARGET $DESTINATION
 - shape function node numbering in `$JIVEDIR/packages/geom/doc/images`
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
+- `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
