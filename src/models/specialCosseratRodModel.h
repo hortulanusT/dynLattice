@@ -249,6 +249,13 @@ private:
    */
   double calc_pot_Energy_(const Vector &disp) const;
 
+  /**
+   * @brief Calculates the dissipated energy of the material
+   *
+   * @return the dissipated energy in this rod
+   */
+  double calc_diss_Energy_() const;
+
 private:
   Assignable<ElementGroup> rodElems_;
   IdxVector rodNodes_;

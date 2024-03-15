@@ -86,7 +86,7 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
 
-  virtual double getDisspiatedEnergy() const = 0;
+  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
   virtual String getContext() const override;
 

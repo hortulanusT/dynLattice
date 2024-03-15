@@ -362,7 +362,7 @@ bool specialCosseratRodModel::takeAction
     vars.find(E_diss, "dissipatedEnergy");
 
     E_pot += calc_pot_Energy_(disp);
-    E_diss += material_->getDisspiatedEnergy();
+    E_diss += calc_diss_Energy_();
 
     vars.set("potentialEnergy", E_pot);
     vars.set("dissipatedEnergy", E_diss);
@@ -1022,7 +1022,7 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
-  double E_pot = 0;
+  double E_pot = 0.;
 
   // PER ELEMENT VALUES
   Matrix nodeU(rank, nodeCount);
@@ -1049,6 +1049,33 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
   }
 
   return E_pot;
+}
+
+double specialCosseratRodModel::calc_diss_Energy_() const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t rank = shapeK_->globalRank();
+  double E_diss = 0.;
+  // PER ELEMENT VALUES
+  Vector weights(ipCount);
+  Matrix nodePhi_0(rank, nodeCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    shapeK_->getIntegrationWeights(weights, nodePhi_0);
+
+    for (idx_t ip = 0; ip < ipCount; ip++)
+    {
+      E_diss += weights[ip] * material_->getDissipatedEnergy(ie, ip);
+    }
+  }
+
+  return E_diss;
 }
 
 //-----------------------------------------------------------------------

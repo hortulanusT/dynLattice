@@ -75,7 +75,7 @@ public:
 
   virtual void reject_inelast_corr() override;
 
-  virtual double getDisspiatedEnergy() const override;
+  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
 protected:
   ~ElasticRodMaterial();
