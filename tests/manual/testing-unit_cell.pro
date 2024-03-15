@@ -40,7 +40,7 @@ model.model.lattice.child.material.radius = "$(params.scale) * 1e-3";
 
 Input.input.verbose = true;
 Input.input.file="studies/geometries/re-entrant.geo";
-Input.input.onelab.Angle='64.471220634490691369245999339962435963006843100907948288171106356';
+Input.input.onelab.Angle='110';
 Input.input.onelab.LengthRatio='0.75';
 Input.input.onelab.Elems = '25';
 model.model.lattice.child.maximum_relative_dissipation = 0.0025;
@@ -91,7 +91,7 @@ Output.paraview.beams.shape = "Line2";
 Output.sampling.sampleWhen = true;
 Output.tangent.sampleWhen = true;
 Output.tangent.thickness = model.model.lattice.child.material.radius;
-Output.paraview.sampleWhen = "(i-1) % 10 < 1";
+Output.paraview.sampleWhen = true;
 
 // LOGGING
 log.pattern = "*";

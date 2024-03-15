@@ -81,7 +81,7 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
-  virtual double getDisspiatedEnergy() const override;
+  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
 protected:
   ~ElastoPlasticRodMaterial();
@@ -108,5 +108,5 @@ protected:
   Cubix curr_Strains_; // current load step iteration
 
   Matrix curr_deltaFlow_; // last inner converged solution
-  double E_diss_;         // dissipated energy
+  Matrix E_diss_;         // dissipated energy
 };

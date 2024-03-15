@@ -1,4 +1,8 @@
 # :arrows_counterclockwise: Workflows
+## *testing/standard studies*
+1. `jive make clean-all`
+1. `jive make tests`
+1. `jive make studies`
 ## *eqv-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
@@ -41,3 +45,4 @@ rsync -vax $TARGET $DESTINATION
 - shape function node numbering in `$JIVEDIR/packages/geom/doc/images`
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets executed always, `JEM_ASSERT` only in non-optimized mode
+- `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline

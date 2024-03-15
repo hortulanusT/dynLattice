@@ -70,17 +70,17 @@ axs[0, 2].set_title("isotropic hard plastic\n(unscaled)")
 regular = pd.read_csv(
     f"tests/manual/testing-unit_cell_kinHard.csv", skipinitialspace=True, index_col="H22")
 scaled2 = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_scaled2.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard1_scaled2.csv", skipinitialspace=True, index_col="H22")
 scaledK = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_scaledK.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard1_scaledK.csv", skipinitialspace=True, index_col="H22")
 unscaled = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_unscaled.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard1_unscaled.csv", skipinitialspace=True, index_col="H22")
 yieldUnscaled = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_yieldUnscaled.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard2_unscaled.csv", skipinitialspace=True, index_col="H22")
 yieldScaled2 = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_yieldScaled2.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard2_scaled2.csv", skipinitialspace=True, index_col="H22")
 yieldScaledK = pd.read_csv(
-    f"tests/manual/testing-unit_cell_kinHard_yieldScaledK.csv", skipinitialspace=True, index_col="H22")
+    f"tests/manual/testing-unit_cell_kinHard2_scaledK.csv", skipinitialspace=True, index_col="H22")
 
 idxs = pd.Index.union(scaled2.index, regular.index).union(scaledK.index).union(
     unscaled.index).union(yieldScaled2.index).union(yieldScaledK.index).union(yieldUnscaled.index)
@@ -107,22 +107,22 @@ error_yieldUnscaled = np.abs(
 
 axs[2, 3].plot(error_scaled2, label="rel error")
 axs[2, 3].legend()
-axs[2, 3].set_title("kinematic hard plastic\n(scaled2)")
+axs[2, 3].set_title("kinematic hard plastic 1\n(scaled -2)")
 axs[1, 3].plot(error_scaledK, label="rel error")
 axs[1, 3].legend()
-axs[1, 3].set_title("kinematic hard plastic\n(scaledK)")
+axs[1, 3].set_title("kinematic hard plastic 1\n(scaled K)")
 axs[1, 2].plot(error_yieldScaledK, label="rel error")
 axs[1, 2].legend()
-axs[1, 2].set_title("kinematic hard plastic\n(yield scaledK)")
+axs[1, 2].set_title("kinematic hard plastic 2\n(scaled K)")
 axs[2, 2].plot(error_yieldScaled2, label="rel error")
 axs[2, 2].legend()
-axs[2, 2].set_title("kinematic hard plastic\n(yield scaled2)")
+axs[2, 2].set_title("kinematic hard plastic 2\n(scaled -2)")
 axs[1, 1].plot(error_yieldUnscaled, label="rel error")
 axs[1, 1].legend()
-axs[1, 1].set_title("kinematic hard plastic\n(unscaled)")
+axs[1, 1].set_title("kinematic hard plastic 1\n(unscaled)")
 axs[1, 0].plot(error_unscaled, label="rel error")
 axs[1, 0].legend()
-axs[1, 0].set_title("kinematic hard plastic\n(yield unscaled)")
+axs[1, 0].set_title("kinematic hard plastic 2\n(unscaled)")
 
 
 for ax in axs.flatten():
