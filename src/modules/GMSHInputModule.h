@@ -15,12 +15,12 @@
 #include <filesystem>
 #include <gmsh.h>
 
-#include <jem/base/CString.h>
 #include <jem/base/Array.h>
+#include <jem/base/CString.h>
 #include <jem/base/System.h>
-#include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/HashDictionary.h>
+#include <jem/util/Properties.h>
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
@@ -50,6 +50,7 @@ using jive::Matrix;
 using jive::Properties;
 using jive::Ref;
 using jive::String;
+using jive::StringVector;
 using jive::Vector;
 
 using jive::app::Module;
@@ -88,6 +89,7 @@ public:
   static const char *ONELAB_PROPS;
   static const char *VERBOSE;
   static const char *OUT_FILE;
+  static const char *OUT_TABLES;
 
   explicit GMSHInputModule
 
@@ -187,6 +189,7 @@ private:
   Ref<Function> sampleCond_;
   String outFile_;
   String outExt_;
+  StringVector outTables_;
   idx_t nodeView_;
   idx_t elemView_;
 };

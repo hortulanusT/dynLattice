@@ -3,7 +3,7 @@
 //
 
 #include "GMSHInputModule.h"
-// #include "utils/testing.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class GMSHInputModule
@@ -23,6 +23,7 @@ const char *GMSHInputModule::ENTITY_NAMES[4] = {"point", "beam", "shell",
 const char *GMSHInputModule::ONELAB_PROPS = "onelab";
 const char *GMSHInputModule::VERBOSE = "verbose";
 const char *GMSHInputModule::OUT_FILE = "out_file";
+const char *GMSHInputModule::OUT_TABLES = "out_tables";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -36,6 +37,8 @@ GMSHInputModule::GMSHInputModule(const String &name)
 {
   verbose_ = true;
   writeOutput_ = false;
+  outTables_.resize(1);
+  outTables_[0] = "mat_stress";
 }
 
 GMSHInputModule::~GMSHInputModule()
@@ -93,6 +96,9 @@ Module::Status GMSHInputModule::init
         sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat);
     jive::util::FuncUtils::getConfig(myConf, sampleCond_,
                                      jive::app::PropNames::SAMPLE_COND);
+
+    myProps.find(outTables_, OUT_TABLES);
+    myConf.set(OUT_TABLES, outTables_);
   }
 
   // TRY GETTING THE GLOBAL ELEMENTS
@@ -464,9 +470,9 @@ void GMSHInputModule::writeOutFile_
 
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
   Properties params;
-  Ref<jive::util::XTable> stressTable =
+  Ref<jive::util::XTable> dataTable =
       newInstance<jive::util::DenseTable>("gmshOutput", elements_.getData());
-  Vector weights(stressTable->rowCount());
+  Vector weights(dataTable->rowCount());
   Vector disp;
   IdxVector jtypes = {0, 1, 2};
   IdxVector stypes = {0, 1, 2, 3, 4, 5};
@@ -496,23 +502,28 @@ void GMSHInputModule::writeOutFile_
   gmsh::view::addModelData(nodeView_, step, modelName, "NodeData", gmshNodes, gmshNodeData, time, 3);
   gmsh::view::write(nodeView_, makeCString(outFile_ + "Disp" + outExt_).addr());
 
-  // write material stress data
-  params.set(jive::model::ActionParams::TABLE_NAME, "mat_stress");
-  params.set(jive::model::ActionParams::TABLE_WEIGHTS, weights);
-  params.set(jive::model::ActionParams::TABLE, stressTable);
-  Model::get(globdat, getContext())
-      ->takeAction(jive::model::Actions::GET_TABLE, params, globdat);
-  stressTable->scaleRows(weights);
-  for (const std::pair<const std::size_t, idx_t> &elem : gmshToJiveElemMap_)
+  // write material table data
+  for (String table_name : outTables_)
   {
-    if (stressTable->findRowValues(elemData, elem.second, stypes))
+    params.set(jive::model::ActionParams::TABLE_NAME, table_name);
+    params.set(jive::model::ActionParams::TABLE_WEIGHTS, weights);
+    params.set(jive::model::ActionParams::TABLE, dataTable);
+    Model::get(globdat, getContext())
+        ->takeAction(jive::model::Actions::GET_TABLE, params, globdat);
+    dataTable->scaleRows(weights);
+    if (!dataTable->size())
+      continue;
+    for (const std::pair<const std::size_t, idx_t> &elem : gmshToJiveElemMap_)
     {
-      gmshElementData.push_back(std::vector<double>(elemData.begin(), elemData.end()));
-      gmshElements.push_back(elem.first);
+      if (dataTable->findRowValues(elemData, elem.second, stypes))
+      {
+        gmshElementData.push_back(std::vector<double>(elemData.begin(), elemData.end()));
+        gmshElements.push_back(elem.first);
+      }
     }
+    gmsh::view::addModelData(elemView_, step, modelName, "ElementData", gmshElements, gmshElementData, time, 6);
+    gmsh::view::write(elemView_, makeCString(outFile_ + table_name + outExt_).addr());
   }
-  gmsh::view::addModelData(elemView_, step, modelName, "ElementData", gmshElements, gmshElementData, time, 6);
-  gmsh::view::write(elemView_, makeCString(outFile_ + "Stress" + outExt_).addr());
 }
 
 //-----------------------------------------------------------------------
