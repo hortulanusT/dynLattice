@@ -11,6 +11,7 @@ control.runWhile = "i<=10";
 // SOLVER
 Solver.modules = [ "solver" ];
 Solver.solver.type = "Nonlin";
+Solver.solver.tiny = 1e-6;
 
 // SETTINGS
 params.rod_details.material.type = "ElasticRod";
@@ -22,11 +23,9 @@ params.rod_details.material.side_length = 0.05;
 params.force_model.type = "Dirichlet";
 
 params.force_model.dispIncr =  0.02;
-params.force_model.nodeGroups = [ "moving_left", "moving_right", "moving_left", "moving_right" ];
-params.force_model.dofs = ["dx", "dx", "dy", "dy" ];
-params.force_model.factors = [ -1e-6, 1e-6, -1., -1. ]; 
-
-// NONCONVERGENCE IS FIXED BY ADDING MINIMAL STRETCH TO BEAM!
+params.force_model.nodeGroups = [ "moving_left", "moving_right" ];
+params.force_model.dofs = [ "dy", "dy" ];
+params.force_model.factors = [ -1., -1. ]; 
 
 // include model and i/o files
 include "input.pro";
