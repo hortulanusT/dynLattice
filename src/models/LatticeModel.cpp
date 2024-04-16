@@ -21,6 +21,8 @@
 //-----------------------------------------------------------------------
 const char *LatticeModel::TYPE_NAME = "Lattice";
 const char *LatticeModel::CHILD_PROPS = "child";
+const char *LatticeModel::CONTACT_PROP = "contact";
+const char *LatticeModel::ROD_LIST_PROP = "rodList";
 const char *LatticeModel::NAME_PREFIX = "prefix";
 
 //-----------------------------------------------------------------------
@@ -80,6 +82,18 @@ LatticeModel::LatticeModel
   myConf.set(CHILD_PROPS, childConf);
 
   JEM_PRECHECK2(children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)));
+
+  // Get the contact model
+  if (myProps.contains(CONTACT_PROP))
+  {
+    StringVector rodList(ichild);
+    for (idx_t iRod = 0; iRod < ichild; iRod++)
+    {
+      rodList[iRod] = prefix + String(iRod + 1);
+    }
+    myProps.getProps(CONTACT_PROP).set(ROD_LIST_PROP, rodList);
+    contact_ = ModelFactory::newInstance(CONTACT_PROP, myConf, myProps, globdat);
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -91,9 +105,10 @@ bool LatticeModel::takeAction
      const Properties &params,
      const Properties &globdat)
 {
-  bool success = true;
+  bool actionTaken = false;
   for (Ref<Model> child : children_)
-    success = child->takeAction(action, params, globdat) && success;
+    actionTaken = child->takeAction(action, params, globdat) || actionTaken;
+  actionTaken = contact_->takeAction(action, params, globdat) || actionTaken;
 
   if (action == Actions::GET_MATRIX2)
   {
@@ -117,7 +132,7 @@ bool LatticeModel::takeAction
     calc_kin_Energy_(params, globdat);
   }
 
-  return success;
+  return actionTaken;
 }
 
 void LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &globdat) const

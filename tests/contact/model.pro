@@ -10,6 +10,7 @@ model.model.model.lattice.child.type = "specialCosseratRod";
 model.model.model.lattice.child.dofNamesTrans = ["dx", "dy", "dz"];
 model.model.model.lattice.child.dofNamesRot = ["rx", "ry", "rz"];
 model.model.model.lattice.child += params.rod_details;
+model.model.model.lattice.contact.type = "RodContact";
 
 model.model.model.diriFixed.type = "Dirichlet";
 model.model.model.diriFixed.maxDisp = 0.;
