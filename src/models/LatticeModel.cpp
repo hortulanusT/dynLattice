@@ -108,7 +108,8 @@ bool LatticeModel::takeAction
   bool actionTaken = false;
   for (Ref<Model> child : children_)
     actionTaken = child->takeAction(action, params, globdat) || actionTaken;
-  actionTaken = contact_->takeAction(action, params, globdat) || actionTaken;
+  if (contact_)
+    actionTaken = contact_->takeAction(action, params, globdat) || actionTaken;
 
   if (action == Actions::GET_MATRIX2)
   {

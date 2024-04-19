@@ -11,8 +11,10 @@
 
 #pragma once
 
+#include "misc/Line3D.h"
 #include "models/LatticeModel.h"
 #include <jem/base/Array.h>
+#include <jem/base/Error.h>
 #include <jem/base/System.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
@@ -149,10 +151,27 @@ protected:
        const IdxVector &elementsA,
        const IdxVector &elementsB,
        const Vector &disp) const;
+  /**
+   * @brief find the local coordinates of the closest points on two beams
+   *
+   * @param uA local coordinate Beam A
+   * @param uB local coordinate Beam B
+   * @param distance_vect distance vector between the contacts
+   * @param possA positions Beam A
+   * @param possB positions Beam B
+   */
+  virtual void findClosestPoints_
+
+      (double &uA,
+       double &uB,
+       const Vector &distance_vect,
+       const Matrix &possA,
+       const Matrix &possB) const;
 
 private:
   Assignable<NodeSet> allNodes_;
   Assignable<ElementSet> allElems_;
   Array<Assignable<ElementGroup>> rodList_;
   Ref<DofSpace> dofs_;
+  Ref<Line3D> shape_;
 };

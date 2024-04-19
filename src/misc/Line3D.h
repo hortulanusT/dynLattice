@@ -11,18 +11,16 @@
 
 #pragma once
 
-#include <jem/base/IllegalInputException.h>
+#include "utils/helpers.h"
+#include "utils/testing.h"
 #include <jem/base/Array.h>
-#include <jem/util/Properties.h>
-#include <jem/numeric/algebra/utilities.h>
+#include <jem/base/IllegalInputException.h>
 #include <jem/numeric/algebra/matmul.h>
-
-#include <jive/geom/StdLine.h>
+#include <jem/numeric/algebra/utilities.h>
+#include <jem/util/Properties.h>
 #include <jive/geom/ParametricLine.h>
 #include <jive/geom/ShapeFactory.h>
-
-#include "utils/testing.h"
-#include "utils/helpers.h"
+#include <jive/geom/StdLine.h>
 
 using namespace jive_helpers;
 
@@ -232,7 +230,7 @@ idx_t Line3D::localRank() const
 
 idx_t Line3D::nodeCount() const
 {
-  return intLine_->vertexCount();
+  return intLine_->nodeCount();
 }
 
 idx_t Line3D::vertexCount() const
