@@ -119,13 +119,25 @@ void RodContactModel::findContacts_
 {
   IdxVector beamsA;
   IdxVector beamsB;
+  // store the possible contact Pairs
+  ArrayBuffer<idx_t> beamAElements;
+  ArrayBuffer<idx_t> beamBElements;
 
   findPossibleBeams_(beamsA, beamsB, disp);
 
   for (idx_t i = 0; i < beamsA.size(); i++)
   {
-    findPossibleElements_(elementsA, elementsB, beamsA[i], beamsB[i], disp);
+    IdxVector contactAElements;
+    IdxVector contactBElements;
+
+    findPossibleElements_(contactAElements, contactBElements, beamsA[i], beamsB[i], disp);
+
+    beamAElements.pushBack(contactAElements.begin(), contactAElements.end());
+    beamBElements.pushBack(contactBElements.begin(), contactBElements.end());
   }
+
+  elementsA.ref(beamAElements.toArray());
+  elementsB.ref(beamBElements.toArray());
 }
 
 //-----------------------------------------------------------------------
@@ -180,7 +192,7 @@ void RodContactModel::findPossibleBeams_
       possB.reshape(shape_->globalRank(), rodList_[jRod].getNodeIndices().size());
       allNodes_.getSomeCoords(possB, rodList_[jRod].getNodeIndices());
 
-      dofsB.resize(rodList_[0].getNodeIndices().size());
+      dofsB.resize(rodList_[jRod].getNodeIndices().size());
       for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
       {
         dofs_->getDofIndices(dofsB, rodList_[jRod].getNodeIndices(), idof);
@@ -311,6 +323,9 @@ void RodContactModel::computeContacts_
   double radius = 0.025;
   // END HACK
 
+  // jem::System::out() << " > > > > Computing contacts (incl Matrix)\n"
+  //                    << "between " << elementsA << " and " << elementsB << "\n";
+
   double uA = 0;
   double uB = 0; // local coordinates between the lines
   Vector distance_vect(shape_->globalRank());
@@ -342,23 +357,31 @@ void RodContactModel::computeContacts_
 
     findClosestPoints_(uA, uB, distance_vect, possA, possB);
 
-    if (norm2(distance_vect) < 2 * radius)
+    if (!shape_->containsLocalPoint(Vector({uA})))
+      continue;
+    if (!shape_->containsLocalPoint(Vector({uB})))
+      continue;
+    if (norm2(distance_vect) >= 2 * radius)
+      continue;
+
+    penetration = 2 * radius - norm2(distance_vect);
+    contact_force = penalty * penetration * distance_vect / norm2(distance_vect);
+
+    SUBHEADER2(elementsA[iContact], uA)
+    SUBHEADER2(elementsB[iContact], uB)
+    TEST_CONTEXT(contact_force)
+
+    shape_->evalShapeFunctions(NA, Vector({uA}));
+    shape_->evalShapeFunctions(NB, Vector({uB}));
+
+    for (idx_t iNode = 0; iNode < shape_->nodeCount(); iNode++)
     {
-      penetration = 2 * radius - norm2(distance_vect);
-      contact_force = penalty * penetration * distance_vect / norm2(distance_vect);
-
-      shape_->evalShapeFunctions(NA, Vector({uA}));
-      shape_->evalShapeFunctions(NB, Vector({uB}));
-
-      for (idx_t iNode = 0; iNode < shape_->nodeCount(); iNode++)
+      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
       {
-        for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
-        {
-          fint[dofs_->getDofIndex(nodesA[iNode], idof)] -= NA[iNode] * contact_force[idof];
-          fint[dofs_->getDofIndex(nodesB[iNode], idof)] += NB[iNode] * contact_force[idof];
+        // fint[dofs_->getDofIndex(nodesA[iNode], idof)] -= NA[iNode] * contact_force[idof];
+        // fint[dofs_->getDofIndex(nodesB[iNode], idof)] += NB[iNode] * contact_force[idof];
 
-          // TODO torque from the shift of the forces
-        }
+        // TODO torque from the shift of the forces
       }
     }
 
@@ -377,8 +400,8 @@ void RodContactModel::computeContacts_
      const Vector &disp) const
 {
   // TODO Compute the contact effects
-  jem::System::out() << " > > > > Computing contacts (only Force)\n"
-                     << "between " << elementsA << " and " << elementsB << "\n";
+  // jem::System::out() << " > > > > Computing contacts (only Force)\n"
+  //                    << "between " << elementsA << " and " << elementsB << "\n";
 }
 
 //-----------------------------------------------------------------------
@@ -414,16 +437,16 @@ void RodContactModel::findClosestPoints_
 
   case 3:
     /* code */
-    WARN("Quadratic Elements not implemented yet")
+    throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
     break;
 
   case 4:
     /* code */
-    WARN("Cubic Elements not implemented yet")
+    throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
     break;
 
   default:
-    throw jem::Error(JEM_FUNC, "Invalid number of dimensions");
+    throw jem::Error(JEM_FUNC, "Invalid number of nodes in the element");
   }
 }
 
