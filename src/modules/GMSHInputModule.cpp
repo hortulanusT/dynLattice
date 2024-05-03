@@ -505,6 +505,8 @@ void GMSHInputModule::writeOutFile_
   // write material table data
   for (String table_name : outTables_)
   {
+    weights = 0.0;
+
     params.set(jive::model::ActionParams::TABLE_NAME, table_name);
     params.set(jive::model::ActionParams::TABLE_WEIGHTS, weights);
     params.set(jive::model::ActionParams::TABLE, dataTable);
