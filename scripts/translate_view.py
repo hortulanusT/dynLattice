@@ -32,7 +32,7 @@ if plast_strain:
       views[-1], load_step)
   max_plast_strain = np.sum([np.abs(a)[3] for a in plast_strain_data])
   if "honeycomb" in data_file:
-    max_plast_strain = np.max([np.abs(a)[3] for a in plast_strain_data])
+    max_plast_strain = np.max([np.linalg.norm(a) for a in plast_strain_data])
   if max_plast_strain == 0:
     max_plast_strain = 1
 else:
@@ -55,6 +55,9 @@ if plast_strain:
     plast_strain_idx = np.squeeze(np.where(plast_strain_tags == element))
     color = viridis(
         np.abs(plast_strain_data[plast_strain_idx][3])/max_plast_strain)
+    if "honeycomb" in data_file:
+      color = viridis(
+          np.abs(np.linalg.norm(plast_strain_data[plast_strain_idx])/max_plast_strain))
     tikz_str += f"\n\\draw[color={{rgb,255:red,{color[0]*255:.0f};green,{color[1]*255:.0f};blue,{color[2]*255:.0f}}}]"
 
     _, el_nodes, _, _ = gmsh.model.mesh.get_element(element)
@@ -62,8 +65,12 @@ if plast_strain:
       old_coords = new_coords
       new_coords, _, _, _ = gmsh.model.mesh.get_node(node)
       idx = np.squeeze(np.where(data_tags == node))
-      tikz_str += (' ' if j == 0 else ' -- ') + \
-          f"({(new_coords[1]+data[idx][1]*visual_fact)*fact},{(new_coords[2]+data[idx][2]*visual_fact)*fact})"
+      if "honeycomb" in data_file:
+        tikz_str += (' ' if j == 0 else ' -- ') + \
+            f"({(new_coords[0]+data[idx][0]*visual_fact)*fact},{(new_coords[1]+data[idx][1]*visual_fact)*fact})"
+      else:
+        tikz_str += (' ' if j == 0 else ' -- ') + \
+            f"({(new_coords[1]+data[idx][1]*visual_fact)*fact},{(new_coords[2]+data[idx][2]*visual_fact)*fact})"
 
     tikz_str += ";"
 else:
