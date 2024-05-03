@@ -477,7 +477,7 @@ void GMSHInputModule::writeOutFile_
   IdxVector jtypes = {0, 1, 2};
   IdxVector stypes = {0, 1, 2, 3, 4, 5};
   IdxVector idofs(3);
-  idx_t step;
+  idx_t step = 0;
   double time = 0.0;
   std::string modelName;
   std::vector<std::size_t> gmshNodes;
@@ -486,7 +486,7 @@ void GMSHInputModule::writeOutFile_
   std::vector<std::vector<double>> gmshElementData;
   Vector nodeData(3);
   Vector elemData(6);
-  globdat.get(step, Globdat::TIME_STEP);
+  globdat.find(step, Globdat::TIME_STEP);
   globdat.find(time, Globdat::TIME);
   gmsh::model::getCurrent(modelName);
 
