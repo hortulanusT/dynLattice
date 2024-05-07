@@ -6,7 +6,7 @@ import sys
 import os
 from matplotlib import colormaps
 
-viridis = colormaps["plasma"]
+viridis = colormaps["viridis"]
 
 data_file = sys.argv[1]
 load_step = int(sys.argv[2])
@@ -32,7 +32,7 @@ if plast_strain:
       views[-1], load_step)
   max_plast_strain = np.sum([np.abs(a)[3] for a in plast_strain_data])
   if "honeycomb" in data_file:
-    max_plast_strain = np.max([np.linalg.norm(a) for a in plast_strain_data])
+    max_plast_strain = np.max([np.abs(a)[4] for a in plast_strain_data])
   if max_plast_strain == 0:
     max_plast_strain = 1
 else:
@@ -54,10 +54,7 @@ if plast_strain:
   for element in elements:
     plast_strain_idx = np.squeeze(np.where(plast_strain_tags == element))
     color = viridis(
-        np.abs(plast_strain_data[plast_strain_idx][3])/max_plast_strain)
-    if "honeycomb" in data_file:
-      color = viridis(
-          np.abs(np.linalg.norm(plast_strain_data[plast_strain_idx])/max_plast_strain))
+        np.abs(plast_strain_data[plast_strain_idx][3 if "honeycomb" not in data_file else 4])/max_plast_strain)
     tikz_str += f"\n\\draw[color={{rgb,255:red,{color[0]*255:.0f};green,{color[1]*255:.0f};blue,{color[2]*255:.0f}}}]"
 
     _, el_nodes, _, _ = gmsh.model.mesh.get_element(element)
@@ -73,6 +70,8 @@ if plast_strain:
             f"({(new_coords[1]+data[idx][1]*visual_fact)*fact},{(new_coords[2]+data[idx][2]*visual_fact)*fact})"
 
     tikz_str += ";"
+  if "honeycomb" in data_file:
+    tikz_str += f"\n %% MAX STRAIN = {max_plast_strain:f}"
 else:
   new_coords = np.array([np.nan, np.nan, np.nan])
   for element in elements:
