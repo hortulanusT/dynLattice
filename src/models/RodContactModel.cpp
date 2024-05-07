@@ -323,8 +323,8 @@ void RodContactModel::computeContacts_
   double radius = 0.025;
   // END HACK
 
-  // jem::System::out() << " > > > > Computing contacts (incl Matrix)\n"
-  //                    << "between " << elementsA << " and " << elementsB << "\n";
+  jem::System::out() << " > > > > Computing contacts (incl Matrix)\n"
+                     << "between " << elementsA << " and " << elementsB << "\n";
 
   double uA = 0;
   double uB = 0; // local coordinates between the lines
@@ -417,22 +417,36 @@ void RodContactModel::findClosestPoints_
 {
   Vector eA(shape_->globalRank());
   Vector eB(shape_->globalRank());
-  double distance;
+  Vector pA(shape_->globalRank());
+  Vector pB(shape_->globalRank());
 
   switch (shape_->nodeCount())
   {
   case 2:
     // https://math.stackexchange.com/questions/2213165/find-shortest-distance-between-lines-in-3d
     // local cordinates go from  -1 to 1, thus the 0 point is in the middle of the element
-    eA = (possA(ALL, 1) - possA(ALL, 0)) / 2;
-    eB = (possB(ALL, 1) - possB(ALL, 0)) / 2;
+    eA = (possA(ALL, 1) - possA(ALL, 0)) / 2.;
+    eB = (possB(ALL, 1) - possB(ALL, 0)) / 2.;
     distance_vect = matmul(skew(eA), eB);
-    distance = dotProduct(distance_vect, possB(ALL, 0) + eB - possA(ALL, 0) - eA) / jem::numeric::norm2(distance_vect);
 
-    uA = dotProduct(matmul(skew(eB), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
-    uB = dotProduct(matmul(skew(eA), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
+    if (jem::isTiny(norm2(distance_vect))) // lines are parallel
+    {
+      uA = uB = 0.;
+    }
+    else // lines are not parallel
+    {
+      uA = dotProduct(matmul(skew(eB), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
+      uB = dotProduct(matmul(skew(eA), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
 
-    distance_vect = distance_vect / jem::numeric::norm2(distance_vect) * distance;
+      // ensure that the local coordinates are between -1 and 1
+      uA = jem::max(-1., jem::min(1., uA));
+      uB = jem::max(-1., jem::min(1., uB));
+    }
+
+    shape_->getGlobalPoint(pA, Vector({uA}), possA);
+    shape_->getGlobalPoint(pB, Vector({uB}), possB);
+
+    distance_vect = pB - pA;
     break;
 
   case 3:
