@@ -50,5 +50,9 @@ Input.groupInput.end_beam2.zval = .525;
 Input.groupInput.end_beam3.xval = 0.;
 Input.groupInput.end_beam3.zval = .475;
 
+model.model.model.lattice.contact.penalty = 1e9;
+model.model.model.lattice.contact.radius = 0.05;
+model.model.model.lattice.contact.verbose = true;
+
 Output.paraview.sampleWhen = true;
 Output.paraview.beams.shape = "Line2";

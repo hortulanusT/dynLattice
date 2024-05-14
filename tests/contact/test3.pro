@@ -52,5 +52,9 @@ Input.groupInput.moving_right.xbounds=[0.,1.];
 Input.groupInput.moving_right.ybounds=[0.,1.];
 Input.groupInput.moving_right.restrictToGroup = "points";
 
+model.model.model.lattice.contact.penalty = 1e9;
+model.model.model.lattice.contact.radius = 0.05;
+model.model.model.lattice.contact.verbose = true;
+
 Output.paraview.sampleWhen = true;
 Output.paraview.beams.shape = "Line2";

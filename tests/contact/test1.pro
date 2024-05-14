@@ -40,6 +40,7 @@ Input.groupInput.moving_right.xtype = "max";
 
 model.model.model.lattice.contact.penalty = 1e7;
 model.model.model.lattice.contact.radius = 0.1;
+model.model.model.lattice.contact.verbose = true;
 
 Output.paraview.sampleWhen = true;
 Output.paraview.beams.shape = "Line2";

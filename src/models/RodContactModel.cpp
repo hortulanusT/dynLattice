@@ -421,7 +421,7 @@ void RodContactModel::computeContacts_
 
     if (verbose_)
       jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
-                           << "between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+                           << "         between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
 
     contact_normal = (pB - pA) / distance;
     shape_->evalShapeGradGrads(N_A, dN_A, ddN_A, Vector({uA}));
@@ -505,7 +505,7 @@ void RodContactModel::computeContacts_
   const idx_t globalRank = shape_->globalRank();
 
   if (verbose_)
-    jem::System::debug() << " > > > > Computing contacts (incl Matrix)\n";
+    jem::System::debug() << " > > > > Computing contacts (only Force)\n";
 
   IdxVector nodesA(nodeCount);
   IdxVector nodesB(nodeCount);
@@ -564,7 +564,7 @@ void RodContactModel::computeContacts_
 
     if (verbose_)
       jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
-                           << "between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+                           << "         between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
 
     contact_normal = (pB - pA) / distance;
     shape_->evalShapeFunctions(N_A, Vector({uA}));
