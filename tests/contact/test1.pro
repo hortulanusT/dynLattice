@@ -1,5 +1,5 @@
 ///////////////////////////////////
-//////  Zavarise/Wriggers(2000) Example1  ///////
+//////  Zavarise/Wriggers(2000) Example 1  ///////
 ///////////////////////////////////
 
 // LOGGING
@@ -38,7 +38,7 @@ Input.groupInput.nodeGroups += [ "moving_left", "moving_right" ];
 Input.groupInput.moving_left.xtype = "min";
 Input.groupInput.moving_right.xtype = "max";
 
-model.model.model.lattice.contact.penalty = 1e9;
+model.model.model.lattice.contact.penalty = 1e7;
 model.model.model.lattice.contact.radius = 0.1;
 
 Output.paraview.sampleWhen = true;

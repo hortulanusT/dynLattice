@@ -380,16 +380,14 @@ void RodContactModel::computeContacts_
   Matrix B(2, 2 * globalRank);
   Matrix C(2, 2 * globalRank);
   Matrix D(2, 2 * nodeCount * globalRank);
-  Vector dA(2 * nodeCount * globalRank);
-  Vector dB(2 * nodeCount * globalRank);
   Matrix E(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
   // Matrix F(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
   Matrix G(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
 
   Vector f_contrib(2 * nodeCount * globalRank);
   f_contrib = 0.;
-  Matrix k_contrib(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
-  k_contrib = 0.;
+  Matrix kN_contrib(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  kN_contrib = 0.;
 
   for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
   {
@@ -467,31 +465,29 @@ void RodContactModel::computeContacts_
     C(1, SliceFrom(globalRank)) = -1. * (pB - pA);
 
     D = matmul(jem::numeric::inverse(A), Matrix(matmul(B, H_hat) + matmul(C, dH_hat)));
-    dA = D(0, ALL);
-    dB = D(1, ALL);
 
-    E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), dA);
-    E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), dB);
+    E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), D(0, ALL));
+    E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), D(1, ALL));
 
     if (norm2(ddpA) + norm2(ddpB) > 1e-12)
     {
-      throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
       // LATER Implement 'F' for higher order Elements
+      throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
     }
 
-    G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(dB, dpB) - matmul(dA, dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(dB, dpB).transpose() - matmul(dA, dpA).transpose())) / distance;
+    G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
 
     f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
-    k_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
-    k_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+    kN_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
+    kN_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
 
-    dofsAB[SliceFromTo(0, globalRank)] = dofsA[0];
-    dofsAB[SliceFromTo(globalRank, 2 * globalRank)] = dofsA[1];
+    dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[0];
+    dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[1];
     dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
     dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
 
     fint[dofsAB] += f_contrib;
-    mbld.addBlock(dofsAB, dofsAB, k_contrib);
+    mbld.addBlock(dofsAB, dofsAB, kN_contrib);
   }
 }
 
@@ -622,12 +618,12 @@ void RodContactModel::findClosestPoints_
     break;
 
   case 3:
-    /* code */
+    /* LATER */
     throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
     break;
 
   case 4:
-    /* code */
+    /* LATER */
     throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
     break;
 
