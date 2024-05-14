@@ -31,6 +31,7 @@ using jem::ALL;
 using jem::newInstance;
 using jem::Ref;
 using jive::idx_t;
+using jive::IdxMatrix;
 using jive::IdxVector;
 using jive::Matrix;
 using jive::Properties;
@@ -52,6 +53,9 @@ public:
   JEM_DECLARE_CLASS(RodContactModel, Model);
 
   static const char *TYPE_NAME;
+  static const char *PENALTY_PROP;
+  static const char *RADIUS_PROP;
+  static const char *VERBOSE_PROP;
 
   explicit RodContactModel
 
@@ -156,7 +160,6 @@ protected:
    *
    * @param uA local coordinate Beam A
    * @param uB local coordinate Beam B
-   * @param distance_vect distance vector between the contacts
    * @param possA positions Beam A
    * @param possB positions Beam B
    */
@@ -164,7 +167,6 @@ protected:
 
       (double &uA,
        double &uB,
-       const Vector &distance_vect,
        const Matrix &possA,
        const Matrix &possB) const;
 
@@ -174,4 +176,8 @@ private:
   Array<Assignable<ElementGroup>> rodList_;
   Ref<DofSpace> dofs_;
   Ref<Line3D> shape_;
+
+  double penalty_;
+  double radius_;
+  bool verbose_;
 };

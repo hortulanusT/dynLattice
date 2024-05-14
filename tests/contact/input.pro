@@ -8,6 +8,4 @@ Input.input.store_tangents = true;
 Input.groupInput.type = "GroupInput";
 Input.groupInput.nodeGroups = [ "fixed_left", "fixed_right" ];
 Input.groupInput.fixed_left.ytype = "min";
-Input.groupInput.fixed_left.xtype = "min";
 Input.groupInput.fixed_right.ytype = "max";
-Input.groupInput.fixed_right.xtype = "max";

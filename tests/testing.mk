@@ -105,7 +105,7 @@ tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv :\
 
 tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/plastic/model.pro
 
-# PLASTIC TEST RESULTS
+# CONTACT TEST RESULTS
 .PRECIOUS: tests/contact/test%/disp.csv tests/contact/test%/resp.csv
 
 contact-tests : $(addprefix tests/contact/test, $(addsuffix /result.pdf, $(contact_cases)))

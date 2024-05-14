@@ -24,6 +24,9 @@ JEM_DEFINE_CLASS(RodContactModel);
 //   static data
 //-----------------------------------------------------------------------
 const char *RodContactModel::TYPE_NAME = "RodContact";
+const char *RodContactModel::PENALTY_PROP = "penalty";
+const char *RodContactModel::RADIUS_PROP = "radius";
+const char *RodContactModel::VERBOSE_PROP = "verbose";
 
 //-----------------------------------------------------------------------
 //   constructor
@@ -58,8 +61,20 @@ RodContactModel::RodContactModel
   }
 
   // Initialize the internal shape.
-  myProps.makeProps("shape").set("numPoints", allElems_.maxElemNodeCount()); // LATER: option for different number of points in different rod elements?
+  myProps.makeProps("shape").set("numPoints", allElems_.maxElemNodeCount());
   shape_ = newInstance<Line3D>("shape", myConf, myProps);
+
+  // get the penalty parameter and rod radius
+  myProps.get(penalty_, PENALTY_PROP);
+  myProps.get(radius_, RADIUS_PROP);
+
+  myConf.set(PENALTY_PROP, penalty_);
+  myConf.set(RADIUS_PROP, radius_);
+
+  // get the verbosity
+  verbose_ = false;
+  myProps.find(verbose_, VERBOSE_PROP);
+  myConf.set(VERBOSE_PROP, verbose_);
 }
 
 //-----------------------------------------------------------------------
@@ -91,6 +106,11 @@ bool RodContactModel::takeAction
 
     // Find the contacts
     findContacts_(elemsA, elemsB, disp);
+
+    if (elemsA.size() == 0) // skip the computation if no actual contact possible
+    {
+      return true;
+    }
 
     // Compute the contact effects
     if (action == Actions::GET_MATRIX0)
@@ -150,37 +170,36 @@ void RodContactModel::findPossibleBeams_
      IdxVector &beamsB,
      const Vector &disp) const
 {
-  // HACK
-  double radius = 0.025;
-  // END HACK
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
 
   // store the possible contact Pairs
   ArrayBuffer<idx_t> beamACandidates;
   ArrayBuffer<idx_t> beamBCandidates;
 
   // Get the boxes of the rods
-  Matrix elemBoxA(shape_->globalRank(), 2);
-  Matrix elemBoxB(shape_->globalRank(), 2);
-  // IdxVector dofsA(shape_->nodeCount());
-  IdxVector dofsB(shape_->nodeCount());
-  // Matrix possA(shape_->globalRank(), 0);
-  Matrix possB(shape_->globalRank(), 0);
+  Matrix elemBoxA(globalRank, 2);
+  Matrix elemBoxB(globalRank, 2);
+  // IdxVector dofsA(nodeCount);
+  IdxVector dofsB(nodeCount);
+  // Matrix possA(globalRank, 0);
+  Matrix possB(globalRank, 0);
   bool cornerCheck = false;
 
-  possB.resize(shape_->globalRank(), rodList_[0].getNodeIndices().size());
+  possB.resize(globalRank, rodList_[0].getNodeIndices().size());
   allNodes_.getSomeCoords(possB, rodList_[0].getNodeIndices());
 
   dofsB.resize(rodList_[0].getNodeIndices().size());
-  for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+  for (idx_t idof = 0; idof < globalRank; idof++)
   {
     dofs_->getDofIndices(dofsB, rodList_[0].getNodeIndices(), idof);
     possB(idof, ALL) += disp[dofsB];
   }
 
-  for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+  for (idx_t idof = 0; idof < globalRank; idof++)
   {
-    elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius;
-    elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius;
+    elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
+    elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
   }
 
   for (idx_t iRod = 0; iRod < rodList_.size(); iRod++)
@@ -189,24 +208,24 @@ void RodContactModel::findPossibleBeams_
 
     for (idx_t jRod = rodList_.size() - 1; jRod > iRod; jRod--)
     {
-      possB.reshape(shape_->globalRank(), rodList_[jRod].getNodeIndices().size());
+      possB.reshape(globalRank, rodList_[jRod].getNodeIndices().size());
       allNodes_.getSomeCoords(possB, rodList_[jRod].getNodeIndices());
 
       dofsB.resize(rodList_[jRod].getNodeIndices().size());
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
         dofs_->getDofIndices(dofsB, rodList_[jRod].getNodeIndices(), idof);
         possB(idof, ALL) += disp[dofsB];
       }
 
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius;
-        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius;
+        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
+        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
       }
 
       cornerCheck = true;
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
         cornerCheck &= elemBoxA(idof, 1) >= elemBoxB(idof, 0) && elemBoxB(idof, 1) >= elemBoxA(idof, 0);
       }
@@ -236,23 +255,22 @@ void RodContactModel::findPossibleElements_
      const idx_t &beamB,
      const Vector &disp) const
 {
-  // HACK
-  double radius = 0.025;
-  // END HACK
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
 
   // store the possible contact Pairs
   ArrayBuffer<idx_t> beamACandidates;
   ArrayBuffer<idx_t> beamBCandidates;
 
   // Get the boxes of the rods
-  Matrix elemBoxA(shape_->globalRank(), 2);
-  Matrix elemBoxB(shape_->globalRank(), 2);
-  IdxVector nodesA(shape_->nodeCount());
-  IdxVector nodesB(shape_->nodeCount());
-  IdxVector dofsA(shape_->nodeCount());
-  IdxVector dofsB(shape_->nodeCount());
-  Matrix possA(shape_->globalRank(), shape_->nodeCount());
-  Matrix possB(shape_->globalRank(), shape_->nodeCount());
+  Matrix elemBoxA(globalRank, 2);
+  Matrix elemBoxB(globalRank, 2);
+  IdxVector nodesA(nodeCount);
+  IdxVector nodesB(nodeCount);
+  IdxVector dofsA(nodeCount);
+  IdxVector dofsB(nodeCount);
+  Matrix possA(globalRank, nodeCount);
+  Matrix possB(globalRank, nodeCount);
   bool cornerCheck = false;
 
   for (idx_t iElemA : rodList_[beamA].getIDs())
@@ -265,30 +283,30 @@ void RodContactModel::findPossibleElements_
       possA(idof, ALL) += disp[dofsA];
     }
 
-    for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+    for (idx_t idof = 0; idof < globalRank; idof++)
     {
-      elemBoxA(idof, 0) = min(possA(idof, ALL)) - radius;
-      elemBoxA(idof, 1) = max(possA(idof, ALL)) + radius;
+      elemBoxA(idof, 0) = min(possA(idof, ALL)) - radius_;
+      elemBoxA(idof, 1) = max(possA(idof, ALL)) + radius_;
     }
 
     for (idx_t iElemB : rodList_[beamB].getIDs())
     {
       allElems_.getElemNodes(nodesB, iElemB);
       allNodes_.getSomeCoords(possB, nodesB);
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
         dofs_->getDofIndices(dofsB, nodesB, idof);
         possB(idof, ALL) += disp[dofsB];
       }
 
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius;
-        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius;
+        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
+        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
       }
 
       cornerCheck = true;
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
+      for (idx_t idof = 0; idof < globalRank; idof++)
       {
         cornerCheck &= elemBoxA(idof, 1) >= elemBoxB(idof, 0) && elemBoxB(idof, 1) >= elemBoxA(idof, 0);
       }
@@ -318,28 +336,60 @@ void RodContactModel::computeContacts_
      const IdxVector &elementsB,
      const Vector &disp) const
 {
-  // HACK
-  double penalty = 1e9;
-  double radius = 0.025;
-  // END HACK
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
 
-  jem::System::out() << " > > > > Computing contacts (incl Matrix)\n"
-                     << "between " << elementsA << " and " << elementsB << "\n";
+  if (verbose_)
+    jem::System::debug() << " > > > > Computing contacts (incl Matrix)\n";
 
-  double uA = 0;
-  double uB = 0; // local coordinates between the lines
-  Vector distance_vect(shape_->globalRank());
-  double penetration = 0.;
-  Vector contact_force(shape_->globalRank());
-  Vector NA(shape_->shapeFuncCount());
-  Vector NB(shape_->shapeFuncCount());
+  IdxVector nodesA(nodeCount);
+  IdxVector nodesB(nodeCount);
+  Matrix possA(globalRank, nodeCount);
+  Matrix possB(globalRank, nodeCount);
+  IdxMatrix dofsA(globalRank, nodeCount);
+  IdxMatrix dofsB(globalRank, nodeCount);
+  IdxVector dofsAB(globalRank * nodeCount * 2);
 
-  IdxVector nodesA(shape_->nodeCount());
-  IdxVector nodesB(shape_->nodeCount());
-  IdxVector dofsA(shape_->nodeCount());
-  IdxVector dofsB(shape_->nodeCount());
-  Matrix possA(shape_->globalRank(), shape_->nodeCount());
-  Matrix possB(shape_->globalRank(), shape_->nodeCount());
+  double uA = 0; // local coordinates
+  double uB = 0;
+  Vector pA(globalRank); // positions
+  Vector pB(globalRank);
+  Vector dpA(globalRank); // positions gradients
+  Vector dpB(globalRank);
+  Vector ddpA(globalRank); // positions second gradients
+  Vector ddpB(globalRank);
+  double distance = 0;
+  Vector contact_normal(globalRank);
+
+  Vector N_A(nodeCount); // shape functions
+  Vector N_B(nodeCount);
+  Vector dN_A(nodeCount); // shape function gradients
+  Vector dN_B(nodeCount);
+  Vector ddN_A(nodeCount); // shape function second gradients
+  Vector ddN_B(nodeCount);
+  Matrix H_A(globalRank, globalRank * nodeCount); // shape function matrix
+  Matrix H_B(globalRank, globalRank * nodeCount);
+  Matrix dH_A(globalRank, globalRank * nodeCount); // shape function gradient matrix
+  Matrix dH_B(globalRank, globalRank * nodeCount);
+
+  Matrix H_tilde(globalRank, globalRank * nodeCount * 2);    // composed shape function matrix
+  Matrix H_hat(globalRank * 2, globalRank * nodeCount * 2);  // composed shape function matrix
+  Matrix dH_hat(globalRank * 2, globalRank * nodeCount * 2); // composed shape function gradient matrix
+
+  Matrix A(2, 2);
+  Matrix B(2, 2 * globalRank);
+  Matrix C(2, 2 * globalRank);
+  Matrix D(2, 2 * nodeCount * globalRank);
+  Vector dA(2 * nodeCount * globalRank);
+  Vector dB(2 * nodeCount * globalRank);
+  Matrix E(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  // Matrix F(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  Matrix G(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+
+  Vector f_contrib(2 * nodeCount * globalRank);
+  f_contrib = 0.;
+  Matrix k_contrib(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  k_contrib = 0.;
 
   for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
   {
@@ -347,45 +397,101 @@ void RodContactModel::computeContacts_
     allNodes_.getSomeCoords(possA, nodesA);
     allElems_.getElemNodes(nodesB, elementsB[iContact]);
     allNodes_.getSomeCoords(possB, nodesB);
-    for (idx_t idof = 0; idof < 3; idof++)
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
-      dofs_->getDofIndices(dofsA, nodesA, idof);
-      possA(idof, ALL) += disp[dofsA];
-      dofs_->getDofIndices(dofsB, nodesB, idof);
-      possB(idof, ALL) += disp[dofsB];
+      dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
+      possA[iNode] += disp[dofsA[iNode]];
+      dofs_->getDofIndices(dofsB[iNode], nodesB[iNode], IdxVector({0, 1, 2}));
+      possB[iNode] += disp[dofsB[iNode]];
     }
 
-    findClosestPoints_(uA, uB, distance_vect, possA, possB);
+    findClosestPoints_(uA, uB, possA, possB);
 
     if (!shape_->containsLocalPoint(Vector({uA})))
       continue;
     if (!shape_->containsLocalPoint(Vector({uB})))
       continue;
-    if (norm2(distance_vect) >= 2 * radius)
+
+    shape_->getGlobalPoint(pA, Vector({uA}), possA);
+    shape_->getGlobalPoint(pB, Vector({uB}), possB);
+
+    distance = norm2(pB - pA);
+
+    if (distance > 2. * radius_)
       continue;
 
-    penetration = 2 * radius - norm2(distance_vect);
-    contact_force = penalty * penetration * distance_vect / norm2(distance_vect);
+    if (verbose_)
+      jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
+                           << "between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
 
-    SUBHEADER2(elementsA[iContact], uA)
-    SUBHEADER2(elementsB[iContact], uB)
-    TEST_CONTEXT(contact_force)
+    contact_normal = (pB - pA) / distance;
+    shape_->evalShapeGradGrads(N_A, dN_A, ddN_A, Vector({uA}));
+    shape_->evalShapeGradGrads(N_B, dN_B, ddN_B, Vector({uB}));
 
-    shape_->evalShapeFunctions(NA, Vector({uA}));
-    shape_->evalShapeFunctions(NB, Vector({uB}));
+    dpA = matmul(possA, dN_A);
+    dpB = matmul(possB, dN_B);
+    ddpA = matmul(possA, ddN_A);
+    ddpB = matmul(possB, ddN_B);
 
-    for (idx_t iNode = 0; iNode < shape_->nodeCount(); iNode++)
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
-      for (idx_t idof = 0; idof < shape_->globalRank(); idof++)
-      {
-        // fint[dofs_->getDofIndex(nodesA[iNode], idof)] -= NA[iNode] * contact_force[idof];
-        // fint[dofs_->getDofIndex(nodesB[iNode], idof)] += NB[iNode] * contact_force[idof];
+      H_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_A[iNode] * eye(globalRank);
+      H_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_B[iNode] * eye(globalRank);
+      dH_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_A[iNode] * eye(globalRank);
+      dH_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_B[iNode] * eye(globalRank);
+    }
+    H_tilde(ALL, SliceTo(globalRank * nodeCount)) = -1. * H_A;
+    H_tilde(ALL, SliceFrom(globalRank * nodeCount)) = H_B;
 
-        // TODO torque from the shift of the forces
-      }
+    H_hat = 0.;
+    dH_hat = 0.;
+
+    H_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = H_A;
+    H_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = H_B;
+    dH_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = dH_A;
+    dH_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = dH_B;
+
+    A(0, 0) = -1. * dotProduct(dpA, dpA) + dotProduct(pB - pA, ddpA);
+    A(0, 1) = dotProduct(dpB, dpA);
+    A(1, 0) = -1. * dotProduct(dpA, dpB);
+    A(1, 1) = dotProduct(dpB, dpB) - dotProduct(pB - pA, ddpB);
+
+    B(0, SliceTo(globalRank)) = dpA;
+    B(0, SliceFrom(globalRank)) = -1. * dpA;
+    B(1, SliceTo(globalRank)) = dpB;
+    B(1, SliceFrom(globalRank)) = -1. * dpB;
+
+    C = 0.;
+    C(0, SliceTo(globalRank)) = -1. * (pB - pA);
+    C(1, SliceFrom(globalRank)) = -1. * (pB - pA);
+
+    D = matmul(jem::numeric::inverse(A), Matrix(matmul(B, H_hat) + matmul(C, dH_hat)));
+    dA = D(0, ALL);
+    dB = D(1, ALL);
+
+    E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), dA);
+    E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), dB);
+
+    if (norm2(ddpA) + norm2(ddpB) > 1e-12)
+    {
+      throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
+      // LATER Implement 'F' for higher order Elements
     }
 
-    // TODO stiffness matrix??
+    G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(dB, dpB) - matmul(dA, dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(dB, dpB).transpose() - matmul(dA, dpA).transpose())) / distance;
+
+    f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
+    k_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
+    k_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+
+    dofsAB[SliceFromTo(0, globalRank)] = dofsA[0];
+    dofsAB[SliceFromTo(globalRank, 2 * globalRank)] = dofsA[1];
+    dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
+    dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
+
+    fint[dofsAB] += f_contrib;
+    mbld.addBlock(dofsAB, dofsAB, k_contrib);
   }
 }
 
@@ -399,9 +505,92 @@ void RodContactModel::computeContacts_
      const IdxVector &elementsB,
      const Vector &disp) const
 {
-  // TODO Compute the contact effects
-  // jem::System::out() << " > > > > Computing contacts (only Force)\n"
-  //                    << "between " << elementsA << " and " << elementsB << "\n";
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
+
+  if (verbose_)
+    jem::System::debug() << " > > > > Computing contacts (incl Matrix)\n";
+
+  IdxVector nodesA(nodeCount);
+  IdxVector nodesB(nodeCount);
+  Matrix possA(globalRank, nodeCount);
+  Matrix possB(globalRank, nodeCount);
+  IdxMatrix dofsA(globalRank, nodeCount);
+  IdxMatrix dofsB(globalRank, nodeCount);
+  IdxVector dofsAB(globalRank * nodeCount * 2);
+
+  double uA = 0; // local coordinates
+  double uB = 0;
+  Vector pA(globalRank); // positions
+  Vector pB(globalRank);
+  double distance = 0;
+  Vector contact_normal(globalRank);
+
+  Vector N_A(nodeCount); // shape functions
+  Vector N_B(nodeCount);
+  Matrix H_A(globalRank, globalRank * nodeCount); // shape function matrix
+  Matrix H_B(globalRank, globalRank * nodeCount);
+
+  Matrix H_tilde(globalRank, globalRank * nodeCount * 2); // composed shape function matrix
+
+  Vector f_contrib(2 * nodeCount * globalRank);
+  f_contrib = 0.;
+
+  for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
+  {
+    allElems_.getElemNodes(nodesA, elementsA[iContact]);
+    allNodes_.getSomeCoords(possA, nodesA);
+    allElems_.getElemNodes(nodesB, elementsB[iContact]);
+    allNodes_.getSomeCoords(possB, nodesB);
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
+      possA[iNode] += disp[dofsA[iNode]];
+      dofs_->getDofIndices(dofsB[iNode], nodesB[iNode], IdxVector({0, 1, 2}));
+      possB[iNode] += disp[dofsB[iNode]];
+    }
+
+    findClosestPoints_(uA, uB, possA, possB);
+
+    if (!shape_->containsLocalPoint(Vector({uA})))
+      continue;
+    if (!shape_->containsLocalPoint(Vector({uB})))
+      continue;
+
+    shape_->getGlobalPoint(pA, Vector({uA}), possA);
+    shape_->getGlobalPoint(pB, Vector({uB}), possB);
+
+    distance = norm2(pB - pA);
+
+    if (distance > 2. * radius_)
+      continue;
+
+    if (verbose_)
+      jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
+                           << "between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+
+    contact_normal = (pB - pA) / distance;
+    shape_->evalShapeFunctions(N_A, Vector({uA}));
+    shape_->evalShapeFunctions(N_B, Vector({uB}));
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      H_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_A[iNode] * eye(globalRank);
+      H_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_B[iNode] * eye(globalRank);
+    }
+    H_tilde(ALL, SliceTo(globalRank * nodeCount)) = -1. * H_A;
+    H_tilde(ALL, SliceFrom(globalRank * nodeCount)) = H_B;
+
+    f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
+
+    dofsAB[SliceFromTo(0, globalRank)] = dofsA[0];
+    dofsAB[SliceFromTo(globalRank, 2 * globalRank)] = dofsA[1];
+    dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
+    dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
+
+    fint[dofsAB] += f_contrib;
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -411,42 +600,25 @@ void RodContactModel::findClosestPoints_
 
     (double &uA,
      double &uB,
-     const Vector &distance_vect,
      const Matrix &possA,
      const Matrix &possB) const
 {
-  Vector eA(shape_->globalRank());
-  Vector eB(shape_->globalRank());
-  Vector pA(shape_->globalRank());
-  Vector pB(shape_->globalRank());
+  Vector bA(shape_->globalRank());
+  Vector bB(shape_->globalRank());
+  Vector tA(shape_->globalRank());
+  Vector tB(shape_->globalRank());
 
   switch (shape_->nodeCount())
   {
   case 2:
-    // https://math.stackexchange.com/questions/2213165/find-shortest-distance-between-lines-in-3d
-    // local cordinates go from  -1 to 1, thus the 0 point is in the middle of the element
-    eA = (possA(ALL, 1) - possA(ALL, 0)) / 2.;
-    eB = (possB(ALL, 1) - possB(ALL, 0)) / 2.;
-    distance_vect = matmul(skew(eA), eB);
+    // Wriggers/Zavarise 1997
+    bA = possA(ALL, 1) + possA(ALL, 0);
+    bB = possB(ALL, 1) + possB(ALL, 0);
+    tA = possA(ALL, 1) - possA(ALL, 0);
+    tB = possB(ALL, 1) - possB(ALL, 0);
 
-    if (jem::isTiny(norm2(distance_vect))) // lines are parallel
-    {
-      uA = uB = 0.;
-    }
-    else // lines are not parallel
-    {
-      uA = dotProduct(matmul(skew(eB), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
-      uB = dotProduct(matmul(skew(eA), distance_vect), possB(ALL, 0) + eB - possA(ALL, 0) - eA) / dotProduct(distance_vect, distance_vect);
-
-      // ensure that the local coordinates are between -1 and 1
-      uA = jem::max(-1., jem::min(1., uA));
-      uB = jem::max(-1., jem::min(1., uB));
-    }
-
-    shape_->getGlobalPoint(pA, Vector({uA}), possA);
-    shape_->getGlobalPoint(pB, Vector({uB}), possB);
-
-    distance_vect = pB - pA;
+    uA = -1. * dotProduct(bB - bA, tB * dotProduct(tB, tA) - tA * dotProduct(tB, tB)) / (dotProduct(tB, tB) * dotProduct(tA, tA) - dotProduct(tB, tA) * dotProduct(tB, tA));
+    uB = +1. * dotProduct(bB - bA, tA * dotProduct(tB, tA) - tB * dotProduct(tA, tA)) / (dotProduct(tB, tB) * dotProduct(tA, tA) - dotProduct(tB, tA) * dotProduct(tB, tA));
     break;
 
   case 3:
