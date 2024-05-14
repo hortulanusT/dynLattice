@@ -1,6 +1,6 @@
 .PHONY: tests element-tests beam-tests transient-tests clean-tests
 
-tests: element-tests beam-tests transient-tests plastic-tests
+tests: element-tests beam-tests transient-tests plastic-tests contact-tests
 
 clean-all: clean-tests
 

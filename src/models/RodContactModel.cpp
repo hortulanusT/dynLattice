@@ -471,7 +471,7 @@ void RodContactModel::computeContacts_
 
     if (norm2(ddpA) + norm2(ddpB) > 1e-12)
     {
-      // LATER Implement 'F' for higher order Elements
+      // LATER Implement 'F' for Higher Order Elements
       throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
     }
 
@@ -618,12 +618,12 @@ void RodContactModel::findClosestPoints_
     break;
 
   case 3:
-    /* LATER */
+    /* LATER Quadratic Elements */
     throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
     break;
 
   case 4:
-    /* LATER */
+    /* LATER Cubic Elements */
     throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
     break;
 
