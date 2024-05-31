@@ -40,6 +40,7 @@ using jem::numeric::dotProduct;
 using jem::util::ArrayBuffer;
 using jive::Properties;
 using jive::String;
+using jive::StringVector;
 using jive::Vector;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::MatrixBuilder;
@@ -59,6 +60,8 @@ class LatticeModel : public Model
 public:
   static const char *TYPE_NAME;
   static const char *CHILD_PROPS;
+  static const char *CONTACT_PROP;
+  static const char *ROD_LIST_PROP;
   static const char *NAME_PREFIX;
 
   explicit LatticeModel
@@ -94,6 +97,7 @@ public:
 
 private:
   Array<Ref<Model>> children_;
+  Ref<Model> contact_;
 
   Ref<AbstractMatrix> M_;
 };
