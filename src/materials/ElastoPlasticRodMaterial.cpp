@@ -236,6 +236,8 @@ void ElastoPlasticRodMaterial::apply_inelast_corr()
   {
     for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
     {
+      WARN_ASSERT2(curr_deltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
+
       E_diss_(ip, ielem) += dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
                                        matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
     }
