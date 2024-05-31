@@ -19,6 +19,7 @@
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
+#include <jive/algebra/NullMatrixBuilder.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
@@ -38,6 +39,7 @@ using jive::Properties;
 using jive::String;
 using jive::Vector;
 using jive::algebra::MatrixBuilder;
+using jive::algebra::NullMatrixBuilder;
 using jive::fem::ElementSet;
 using jive::fem::NodeSet;
 using jive::model::ActionParams;
@@ -140,21 +142,6 @@ protected:
        const IdxVector &elementsA,
        const IdxVector &elementsB,
        const Vector &disp) const;
-
-  /**
-   * @brief compute the effects of the contact
-   *
-   * @param[out] fint internal force vector
-   * @param[in] elementsA element IDs of one side of the contact
-   * @param[in] elementsB element IDs of the other side
-   * @param[in] disp displacement vector of all elements
-   */
-  virtual void computeContacts_
-
-      (const Vector &fint,
-       const IdxVector &elementsA,
-       const IdxVector &elementsB,
-       const Vector &disp) const;
   /**
    * @brief find the local coordinates of the closest points on two beams
    *
@@ -169,6 +156,54 @@ protected:
        double &uB,
        const Matrix &possA,
        const Matrix &possB) const;
+
+  /**
+   * @brief Get the closest coordinate on the main element to the secondary point
+   *
+   * @param posS secondary point
+   * @param possM main element positions
+   * @return double coordinate on the main element
+   */
+  virtual double getClosestPoint_
+
+      (const Vector &posS,
+       const Matrix &possM) const;
+
+  /**
+   * @brief compute the force and stiffness contributions of a segment-to-segment contact
+   *
+   * @param f_contrib force contribution
+   * @param k_contrib stiffness contribution
+   * @param possA positions of Beam A
+   * @param possB positions of Beam B
+   * @param uA local coordinate Beam A
+   * @param uB local coordinate Beam B
+   */
+  virtual bool computeSTS_
+
+      (Vector &f_contrib,
+       Matrix &k_contrib,
+       const Matrix &possA,
+       const Matrix &possB,
+       const double uA,
+       const double uB) const;
+
+  /**
+   * @brief compute the force and stiffness contiributions of a node-to-segment contact
+   *
+   * @param f_contrib force contribution
+   * @param k_contrib stiffness contribution
+   * @param possS position of the secondary node
+   * @param possM positions of the main beam
+   * @param uM local coordinate of the main beam
+   */
+  virtual bool computeNTS_
+
+      (Vector &f_contrib,
+       Matrix &k_contrib,
+       const Vector &possS,
+       const Matrix &possM,
+       const double uM) const;
 
 private:
   Assignable<NodeSet> allNodes_;

@@ -99,6 +99,10 @@ bool RodContactModel::takeAction
     {
       params.get(mbld, ActionParams::MATRIX0);
     }
+    else
+    {
+      mbld = newInstance<NullMatrixBuilder>();
+    }
     params.get(fint, ActionParams::INT_VECTOR);
 
     // Get the current displacements.
@@ -113,14 +117,7 @@ bool RodContactModel::takeAction
     }
 
     // Compute the contact effects
-    if (action == Actions::GET_MATRIX0)
-    {
-      computeContacts_(*mbld, fint, elemsA, elemsB, disp);
-    }
-    else // action == Actions::GET_INT_VECTOR
-    {
-      computeContacts_(fint, elemsA, elemsB, disp);
-    }
+    computeContacts_(*mbld, fint, elemsA, elemsB, disp);
 
     return true;
   }
@@ -340,7 +337,14 @@ void RodContactModel::computeContacts_
   const idx_t globalRank = shape_->globalRank();
 
   if (verbose_)
-    jem::System::debug() << " > > > > Computing contacts (incl Matrix)\n";
+  {
+    jem::System::debug(myName_) << " > > > > Computing contacts";
+    if (mbld.getClass() == NullMatrixBuilder::getType())
+      jem::System::debug(myName_) << " without stiffness matrix";
+    else
+      jem::System::debug(myName_) << " with stiffness matrix";
+    jem::System::debug(myName_) << "\n";
+  }
 
   IdxVector nodesA(nodeCount);
   IdxVector nodesB(nodeCount);
@@ -352,42 +356,14 @@ void RodContactModel::computeContacts_
 
   double uA = 0; // local coordinates
   double uB = 0;
-  Vector pA(globalRank); // positions
-  Vector pB(globalRank);
-  Vector dpA(globalRank); // positions gradients
-  Vector dpB(globalRank);
-  Vector ddpA(globalRank); // positions second gradients
-  Vector ddpB(globalRank);
-  double distance = 0;
-  Vector contact_normal(globalRank);
 
-  Vector N_A(nodeCount); // shape functions
-  Vector N_B(nodeCount);
-  Vector dN_A(nodeCount); // shape function gradients
-  Vector dN_B(nodeCount);
-  Vector ddN_A(nodeCount); // shape function second gradients
-  Vector ddN_B(nodeCount);
-  Matrix H_A(globalRank, globalRank * nodeCount); // shape function matrix
-  Matrix H_B(globalRank, globalRank * nodeCount);
-  Matrix dH_A(globalRank, globalRank * nodeCount); // shape function gradient matrix
-  Matrix dH_B(globalRank, globalRank * nodeCount);
+  idx_t iNodeA;
+  idx_t iNodeB;
 
-  Matrix H_tilde(globalRank, globalRank * nodeCount * 2);    // composed shape function matrix
-  Matrix H_hat(globalRank * 2, globalRank * nodeCount * 2);  // composed shape function matrix
-  Matrix dH_hat(globalRank * 2, globalRank * nodeCount * 2); // composed shape function gradient matrix
+  Vector f_contrib;
+  Matrix k_contrib;
 
-  Matrix A(2, 2);
-  Matrix B(2, 2 * globalRank);
-  Matrix C(2, 2 * globalRank);
-  Matrix D(2, 2 * nodeCount * globalRank);
-  Matrix E(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
-  // Matrix F(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
-  Matrix G(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
-
-  Vector f_contrib(2 * nodeCount * globalRank);
-  f_contrib = 0.;
-  Matrix kN_contrib(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
-  kN_contrib = 0.;
+  bool contact_closed;
 
   for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
   {
@@ -406,187 +382,202 @@ void RodContactModel::computeContacts_
 
     findClosestPoints_(uA, uB, possA, possB);
 
-    if (!shape_->containsLocalPoint(Vector({uA})))
-      continue;
-    if (!shape_->containsLocalPoint(Vector({uB})))
-      continue;
-
-    shape_->getGlobalPoint(pA, Vector({uA}), possA);
-    shape_->getGlobalPoint(pB, Vector({uB}), possB);
-
-    distance = norm2(pB - pA);
-
-    if (distance > 2. * radius_)
-      continue;
-
     if (verbose_)
-      jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
-                           << "         between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+      jem::System::debug(myName_) << " > > Contact detection between elements " << elementsA[iContact] << " and " << elementsB[iContact]
+                                  << " at local coordinates " << uA << " and " << uB << " ==} ";
 
-    contact_normal = (pB - pA) / distance;
-    shape_->evalShapeGradGrads(N_A, dN_A, ddN_A, Vector({uA}));
-    shape_->evalShapeGradGrads(N_B, dN_B, ddN_B, Vector({uB}));
+    contact_closed = false;
 
-    dpA = matmul(possA, dN_A);
-    dpB = matmul(possB, dN_B);
-    ddpA = matmul(possA, ddN_A);
-    ddpB = matmul(possB, ddN_B);
-
-    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    if (shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
-      H_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_A[iNode] * eye(globalRank);
-      H_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_B[iNode] * eye(globalRank);
-      dH_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_A[iNode] * eye(globalRank);
-      dH_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_B[iNode] * eye(globalRank);
+      // LATER generalize for higher order elements
+      dofsAB.resize(globalRank * 4);
+
+      f_contrib.resize(2 * nodeCount * globalRank);
+      f_contrib = 0.;
+      k_contrib.resize(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+      k_contrib = 0.;
+
+      contact_closed = computeSTS_(f_contrib, k_contrib, possA, possB, uA, uB);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "STS contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (!contact_closed)
+        continue;
+
+      dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[0];
+      dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[1];
+      dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
+      dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
     }
-    H_tilde(ALL, SliceTo(globalRank * nodeCount)) = -1. * H_A;
-    H_tilde(ALL, SliceFrom(globalRank * nodeCount)) = H_B;
-
-    H_hat = 0.;
-    dH_hat = 0.;
-
-    H_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = H_A;
-    H_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = H_B;
-    dH_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = dH_A;
-    dH_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = dH_B;
-
-    A(0, 0) = -1. * dotProduct(dpA, dpA) + dotProduct(pB - pA, ddpA);
-    A(0, 1) = dotProduct(dpB, dpA);
-    A(1, 0) = -1. * dotProduct(dpA, dpB);
-    A(1, 1) = dotProduct(dpB, dpB) - dotProduct(pB - pA, ddpB);
-
-    B(0, SliceTo(globalRank)) = dpA;
-    B(0, SliceFrom(globalRank)) = -1. * dpA;
-    B(1, SliceTo(globalRank)) = dpB;
-    B(1, SliceFrom(globalRank)) = -1. * dpB;
-
-    C = 0.;
-    C(0, SliceTo(globalRank)) = -1. * (pB - pA);
-    C(1, SliceFrom(globalRank)) = -1. * (pB - pA);
-
-    D = matmul(jem::numeric::inverse(A), Matrix(matmul(B, H_hat) + matmul(C, dH_hat)));
-
-    E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), D(0, ALL));
-    E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), D(1, ALL));
-
-    if (norm2(ddpA) + norm2(ddpB) > 1e-12)
+    else if (!shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
-      // LATER Implement 'F' for Higher Order Elements
-      throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
+      // LATER generalize for higher order elements
+      dofsAB.resize(globalRank * 3);
+
+      f_contrib.resize((nodeCount + 1) * globalRank);
+      f_contrib = 0.;
+      k_contrib.resize((nodeCount + 1) * globalRank, (nodeCount + 1) * globalRank);
+      k_contrib = 0.;
+
+      if (uA < -1.)
+      {
+        iNodeA = 0;
+      }
+      else // uA > 1.
+      {
+        iNodeA = 1;
+      }
+
+      uB = getClosestPoint_(possB[iNodeA], possA);
+      if (!(shape_->containsLocalPoint(Vector({uB}))))
+      {
+        if (verbose_)
+          jem::System::debug(myName_) << "NO contact\n";
+        continue;
+      }
+
+      contact_closed = computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "(direct) NTS contact between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (!contact_closed)
+        continue;
+
+      dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[iNodeA];
+      dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsB[0];
+      dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[1];
     }
+    else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
+    {
+      dofsAB.resize(globalRank * 3);
 
-    G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
+      f_contrib.resize((nodeCount + 1) * globalRank);
+      f_contrib = 0.;
+      k_contrib.resize((nodeCount + 1) * globalRank, (nodeCount + 1) * globalRank);
+      k_contrib = 0.;
 
-    f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
-    kN_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
-    kN_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+      if (uB < -1.)
+      {
+        iNodeB = 0;
+      }
+      else // uB > 1.
+      {
+        iNodeB = 1;
+      }
 
-    dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[0];
-    dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[1];
-    dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
-    dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
+      uA = getClosestPoint_(possB[iNodeB], possA);
+      if (!(shape_->containsLocalPoint(Vector({uA}))))
+      {
+        if (verbose_)
+          jem::System::debug(myName_) << "NO contact\n";
+        continue;
+      }
+
+      contact_closed = computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "(direct) NTS contact between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (!contact_closed)
+        continue;
+
+      dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsB[iNodeB];
+      dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[0];
+      dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsA[1];
+    }
+    else // !shape_->containsLocalPoint(Vector({uA})) && !shape_->containsLocalPoint(Vector({uB}))
+    {
+      // LATER generalize for higher order elements
+      dofsAB.resize(globalRank * 4);
+
+      f_contrib.resize(2 * nodeCount * globalRank);
+      f_contrib = 0.;
+      k_contrib.resize(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+      k_contrib = 0.;
+
+      Vector f_contribLocal((nodeCount + 1) * globalRank);
+      Matrix k_contribLocal((nodeCount + 1) * globalRank, (nodeCount + 1) * globalRank);
+
+      // check both ends of A against B
+      for (idx_t iNodeA : {0, 1})
+      {
+        uB = getClosestPoint_(possA[iNodeA], possB);
+        if (!(shape_->containsLocalPoint(Vector({uB}))))
+          continue;
+
+        f_contribLocal = 0.;
+        k_contribLocal = 0.;
+
+        contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB);
+
+        if (contact_closed && verbose_)
+          jem::System::debug(myName_) << "(indirect) NTS contact between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
+
+        if (contact_closed)
+        {
+          f_contrib[SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
+          f_contrib[SliceFromTo(2 * globalRank, 4 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
+          k_contrib(SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank), SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceTo(globalRank));
+          k_contrib(SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank), SliceFromTo(2 * globalRank, 4 * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceFrom(globalRank));
+          k_contrib(SliceFromTo(2 * globalRank, 4 * globalRank), SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceTo(globalRank));
+          k_contrib(SliceFromTo(2 * globalRank, 4 * globalRank), SliceFromTo(2 * globalRank, 4 * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceFrom(globalRank));
+        }
+      }
+
+      // check both ends of B against A
+      for (idx_t iNodeB : {0, 1})
+      {
+        uA = getClosestPoint_(possB[iNodeB], possA);
+        if (!(shape_->containsLocalPoint(Vector({uA}))))
+          continue;
+
+        f_contribLocal = 0.;
+        k_contribLocal = 0.;
+
+        contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA);
+
+        if (contact_closed && verbose_)
+          jem::System::debug(myName_) << "(indirect) NTS contact between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
+
+        if (contact_closed)
+        {
+          f_contrib[SliceFromTo(0 * globalRank, 2 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
+          f_contrib[SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
+
+          k_contrib(SliceFromTo(0 * globalRank, 2 * globalRank), SliceFromTo(0 * globalRank, 2 * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceFrom(globalRank));
+          k_contrib(SliceFromTo(0 * globalRank, 2 * globalRank), SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceTo(globalRank));
+          k_contrib(SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank), SliceFromTo(0 * globalRank, 2 * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceFrom(globalRank));
+          k_contrib(SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank), SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceTo(globalRank));
+        }
+      }
+
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (!contact_closed)
+        continue;
+
+      dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[0];
+      dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[1];
+      dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
+      dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
+    }
 
     fint[dofsAB] += f_contrib;
-    mbld.addBlock(dofsAB, dofsAB, kN_contrib);
-  }
-}
-
-//-----------------------------------------------------------------------
-//   computeContacts
-//-----------------------------------------------------------------------
-void RodContactModel::computeContacts_
-
-    (const Vector &fint,
-     const IdxVector &elementsA,
-     const IdxVector &elementsB,
-     const Vector &disp) const
-{
-  const idx_t nodeCount = shape_->nodeCount();
-  const idx_t globalRank = shape_->globalRank();
+    mbld.addBlock(dofsAB, dofsAB, k_contrib);
+  } // end of loop over contacts
 
   if (verbose_)
-    jem::System::debug() << " > > > > Computing contacts (only Force)\n";
-
-  IdxVector nodesA(nodeCount);
-  IdxVector nodesB(nodeCount);
-  Matrix possA(globalRank, nodeCount);
-  Matrix possB(globalRank, nodeCount);
-  IdxMatrix dofsA(globalRank, nodeCount);
-  IdxMatrix dofsB(globalRank, nodeCount);
-  IdxVector dofsAB(globalRank * nodeCount * 2);
-
-  double uA = 0; // local coordinates
-  double uB = 0;
-  Vector pA(globalRank); // positions
-  Vector pB(globalRank);
-  double distance = 0;
-  Vector contact_normal(globalRank);
-
-  Vector N_A(nodeCount); // shape functions
-  Vector N_B(nodeCount);
-  Matrix H_A(globalRank, globalRank * nodeCount); // shape function matrix
-  Matrix H_B(globalRank, globalRank * nodeCount);
-
-  Matrix H_tilde(globalRank, globalRank * nodeCount * 2); // composed shape function matrix
-
-  Vector f_contrib(2 * nodeCount * globalRank);
-  f_contrib = 0.;
-
-  for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
-  {
-    allElems_.getElemNodes(nodesA, elementsA[iContact]);
-    allNodes_.getSomeCoords(possA, nodesA);
-    allElems_.getElemNodes(nodesB, elementsB[iContact]);
-    allNodes_.getSomeCoords(possB, nodesB);
-
-    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
-    {
-      dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
-      possA[iNode] += disp[dofsA[iNode]];
-      dofs_->getDofIndices(dofsB[iNode], nodesB[iNode], IdxVector({0, 1, 2}));
-      possB[iNode] += disp[dofsB[iNode]];
-    }
-
-    findClosestPoints_(uA, uB, possA, possB);
-
-    if (!shape_->containsLocalPoint(Vector({uA})))
-      continue;
-    if (!shape_->containsLocalPoint(Vector({uB})))
-      continue;
-
-    shape_->getGlobalPoint(pA, Vector({uA}), possA);
-    shape_->getGlobalPoint(pB, Vector({uB}), possB);
-
-    distance = norm2(pB - pA);
-
-    if (distance > 2. * radius_)
-      continue;
-
-    if (verbose_)
-      jem::System::debug() << " > > > > Penetration of " << distance - 2. * radius_ << " found \n"
-                           << "         between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
-
-    contact_normal = (pB - pA) / distance;
-    shape_->evalShapeFunctions(N_A, Vector({uA}));
-    shape_->evalShapeFunctions(N_B, Vector({uB}));
-
-    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
-    {
-      H_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_A[iNode] * eye(globalRank);
-      H_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_B[iNode] * eye(globalRank);
-    }
-    H_tilde(ALL, SliceTo(globalRank * nodeCount)) = -1. * H_A;
-    H_tilde(ALL, SliceFrom(globalRank * nodeCount)) = H_B;
-
-    f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
-
-    dofsAB[SliceFromTo(0, globalRank)] = dofsA[0];
-    dofsAB[SliceFromTo(globalRank, 2 * globalRank)] = dofsA[1];
-    dofsAB[SliceFromTo(2 * globalRank, 3 * globalRank)] = dofsB[0];
-    dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
-
-    fint[dofsAB] += f_contrib;
-  }
+    jem::System::debug(myName_) << " > > > > Done computing contacts\n";
 }
 
 //-----------------------------------------------------------------------
@@ -630,6 +621,207 @@ void RodContactModel::findClosestPoints_
   default:
     throw jem::Error(JEM_FUNC, "Invalid number of nodes in the element");
   }
+}
+
+//-----------------------------------------------------------------------
+//   getClosestPoint_
+//-----------------------------------------------------------------------
+double RodContactModel::getClosestPoint_
+
+    (const Vector &posS,
+     const Matrix &possM) const
+{
+  Vector bM(shape_->globalRank());
+  Vector tM(shape_->globalRank());
+
+  switch (shape_->nodeCount())
+  {
+  case 2:
+    bM = possM(ALL, 1) + possM(ALL, 0);
+    tM = possM(ALL, 1) - possM(ALL, 0);
+
+    return (2 * dotProduct(posS, tM) - dotProduct(tM, bM)) / dotProduct(tM, tM);
+    break;
+
+  case 3:
+    /* LATER Quadratic Elements */
+    throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
+    break;
+
+  case 4:
+    /* LATER Cubic Elements */
+    throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
+    break;
+
+  default:
+    throw jem::Error(JEM_FUNC, "Invalid number of nodes in the element");
+  }
+}
+
+//-----------------------------------------------------------------------
+//   computeSTS_
+//-----------------------------------------------------------------------
+bool RodContactModel::computeSTS_
+
+    (Vector &f_contrib,
+     Matrix &k_contrib,
+     const Matrix &possA,
+     const Matrix &possB,
+     const double uA,
+     const double uB) const
+{
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
+
+  Vector pA(globalRank); // positions
+  Vector pB(globalRank);
+
+  shape_->getGlobalPoint(pA, Vector({uA}), possA);
+  shape_->getGlobalPoint(pB, Vector({uB}), possB);
+
+  double distance = norm2(pB - pA);
+
+  if (distance > 2. * radius_)
+    return false;
+
+  Vector dpA(globalRank); // positions gradients
+  Vector dpB(globalRank);
+  Vector ddpA(globalRank); // positions second gradients
+  Vector ddpB(globalRank);
+  Vector contact_normal(globalRank);
+
+  Vector N_A(nodeCount); // shape functions
+  Vector N_B(nodeCount);
+  Vector dN_A(nodeCount); // shape function gradients
+  Vector dN_B(nodeCount);
+  Vector ddN_A(nodeCount); // shape function second gradients
+  Vector ddN_B(nodeCount);
+  Matrix H_A(globalRank, globalRank * nodeCount); // shape function matrix
+  Matrix H_B(globalRank, globalRank * nodeCount);
+  Matrix dH_A(globalRank, globalRank * nodeCount); // shape function gradient matrix
+  Matrix dH_B(globalRank, globalRank * nodeCount);
+
+  Matrix H_tilde(globalRank, globalRank * nodeCount * 2);    // composed shape function matrix
+  Matrix H_hat(globalRank * 2, globalRank * nodeCount * 2);  // composed shape function matrix
+  Matrix dH_hat(globalRank * 2, globalRank * nodeCount * 2); // composed shape function gradient matrix
+
+  Matrix A(2, 2);
+  Matrix B(2, 2 * globalRank);
+  Matrix C(2, 2 * globalRank);
+  Matrix D(2, 2 * nodeCount * globalRank);
+  Matrix E(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  // Matrix F(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+  Matrix G(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
+
+  contact_normal = (pB - pA) / distance;
+  shape_->evalShapeGradGrads(N_A, dN_A, ddN_A, Vector({uA}));
+  shape_->evalShapeGradGrads(N_B, dN_B, ddN_B, Vector({uB}));
+
+  dpA = matmul(possA, dN_A);
+  dpB = matmul(possB, dN_B);
+  ddpA = matmul(possA, ddN_A);
+  ddpB = matmul(possB, ddN_B);
+
+  for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+  {
+    H_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_A[iNode] * eye(globalRank);
+    H_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = N_B[iNode] * eye(globalRank);
+    dH_A(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_A[iNode] * eye(globalRank);
+    dH_B(ALL, SliceFromTo(iNode * globalRank, (iNode + 1) * globalRank)) = dN_B[iNode] * eye(globalRank);
+  }
+  H_tilde(ALL, SliceTo(globalRank * nodeCount)) = -1. * H_A;
+  H_tilde(ALL, SliceFrom(globalRank * nodeCount)) = H_B;
+
+  H_hat = 0.;
+  dH_hat = 0.;
+
+  H_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = H_A;
+  H_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = H_B;
+  dH_hat(SliceTo(globalRank), SliceTo(globalRank * nodeCount)) = dH_A;
+  dH_hat(SliceFrom(globalRank), SliceFrom(globalRank * nodeCount)) = dH_B;
+
+  A(0, 0) = -1. * dotProduct(dpA, dpA) + dotProduct(pB - pA, ddpA);
+  A(0, 1) = dotProduct(dpB, dpA);
+  A(1, 0) = -1. * dotProduct(dpA, dpB);
+  A(1, 1) = dotProduct(dpB, dpB) - dotProduct(pB - pA, ddpB);
+
+  B(0, SliceTo(globalRank)) = dpA;
+  B(0, SliceFrom(globalRank)) = -1. * dpA;
+  B(1, SliceTo(globalRank)) = dpB;
+  B(1, SliceFrom(globalRank)) = -1. * dpB;
+
+  C = 0.;
+  C(0, SliceTo(globalRank)) = -1. * (pB - pA);
+  C(1, SliceFrom(globalRank)) = -1. * (pB - pA);
+
+  D = matmul(jem::numeric::inverse(A), Matrix(matmul(B, H_hat) + matmul(C, dH_hat)));
+
+  E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), D(0, ALL));
+  E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), D(1, ALL));
+
+  if (norm2(ddpA) + norm2(ddpB) > 1e-12)
+  {
+    // LATER Implement 'F' for Higher Order Elements
+    throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
+  }
+
+  G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
+
+  f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
+  k_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
+  k_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+
+  return true;
+}
+
+//-----------------------------------------------------------------------
+//   computeNTS_
+//-----------------------------------------------------------------------
+bool RodContactModel::computeNTS_
+
+    (Vector &f_contrib,
+     Matrix &k_contrib,
+     const Vector &possS,
+     const Matrix &possM,
+     const double uM) const
+{
+  const idx_t globalRank = shape_->globalRank();
+
+  Vector pM(globalRank); // position
+
+  shape_->getGlobalPoint(pM, Vector({uM}), possM);
+
+  double distance = norm2(pM - possS);
+
+  if (distance > 2. * radius_)
+    return false;
+
+  // Wriggers/Simo 1985
+  Vector n(globalRank);
+  Vector t(globalRank);
+  n = (possS - pM) / distance;
+  t = (possM[1] - possM[0]) / norm2(possM[1] - possM[0]);
+
+  Vector Ns(3 * globalRank);
+  Vector Ts(3 * globalRank);
+  Vector N(3 * globalRank);
+
+  Ns[SliceTo(globalRank)] = n;
+  Ts[SliceTo(globalRank)] = t;
+  N[SliceTo(globalRank)] = 0.;
+
+  Ns[SliceFromTo(globalRank, 2 * globalRank)] = -.5 * (1. - uM) * n; // change since uM is in [-1,1] and not [0,1]
+  Ts[SliceFromTo(globalRank, 2 * globalRank)] = -.5 * (1. - uM) * t;
+  N[SliceFromTo(globalRank, 2 * globalRank)] = -1. * n;
+
+  Ns[SliceFrom(2 * globalRank)] = -.5 * (1. + uM) * n;
+  Ts[SliceFrom(2 * globalRank)] = -.5 * (1. + uM) * t;
+  N[SliceFrom(2 * globalRank)] = n;
+
+  f_contrib += penalty_ * (distance - 2. * radius_) * Ns;
+  k_contrib += penalty_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
+
+  return true;
 }
 
 //-----------------------------------------------------------------------
