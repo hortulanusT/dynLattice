@@ -122,6 +122,67 @@ bool RodContactModel::takeAction
     return true;
   }
 
+  if (action == Actions::GET_TABLE)
+  {
+    Ref<XTable> table;
+    Vector weights;
+    String name;
+    // Get the action-specific parameters.
+    params.get(table, ActionParams::TABLE);
+    params.get(weights, ActionParams::TABLE_WEIGHTS);
+    params.get(name, ActionParams::TABLE_NAME);
+
+    IdxVector jtypes(3);
+
+    if (name == "F_contact")
+    {
+      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::TRANS_PART]);
+    }
+    else if (name == "M_contact")
+    {
+      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::ROT_PART]);
+    }
+    else
+    {
+      return false;
+    }
+
+    // Get the current displacements.
+    Vector disp;
+    StateVector::get(disp, dofs_, globdat);
+
+    // Find the contacts
+    IdxVector elemsA;
+    IdxVector elemsB;
+    findContacts_(elemsA, elemsB, disp);
+
+    // Compute the contact effects
+    Ref<MatrixBuilder> mbld;
+    mbld = newInstance<NullMatrixBuilder>();
+
+    Vector fint(disp.size());
+    fint = 0.;
+
+    if (elemsA.size() != 0) // skip the computation if no actual contact possible
+    {
+      computeContacts_(*mbld, fint, elemsA, elemsB, disp);
+    }
+
+    // Add the contact forces to the table
+    IdxVector jdofs(jtypes.size());
+
+    // iterate through the nodes
+    for (idx_t inode : IdxVector(jem::iarray(allNodes_.size())))
+    {
+      dofs_->getDofIndices(jdofs, inode, jtypes);
+      table->addRowValues(inode, jtypes, Vector(fint[jdofs]));
+    }
+
+    weights = 1.;
+
+    return true;
+  }
+
   return false;
 }
 

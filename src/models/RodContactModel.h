@@ -13,6 +13,7 @@
 
 #include "misc/Line3D.h"
 #include "models/LatticeModel.h"
+#include "models/specialCosseratRodModel.h"
 #include <jem/base/Array.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>
@@ -27,6 +28,7 @@
 #include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/XTable.h>
 
 using jem::ALL;
 using jem::newInstance;
@@ -48,6 +50,7 @@ using jive::model::Model;
 using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
+using jive::util::XTable;
 
 class RodContactModel : public Model
 {

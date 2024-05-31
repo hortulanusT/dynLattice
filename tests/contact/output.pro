@@ -27,5 +27,5 @@ Output.paraview.output_format = "$(CASE_NAME)/visual/step%d";
 Output.paraview.groups = [ "beams" ];
 Output.paraview.beams.disps = model.model.model.lattice.child.dofNamesTrans;
 Output.paraview.beams.otherDofs = model.model.model.lattice.child.dofNamesRot;
-Output.paraview.beams.node_data = ["fint", "fext", "fres"];
+Output.paraview.beams.node_data = ["fint", "fext", "fres", "F_contact"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
