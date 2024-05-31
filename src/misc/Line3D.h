@@ -11,18 +11,16 @@
 
 #pragma once
 
-#include <jem/base/IllegalInputException.h>
+#include "utils/helpers.h"
+#include "utils/testing.h"
 #include <jem/base/Array.h>
-#include <jem/util/Properties.h>
-#include <jem/numeric/algebra/utilities.h>
+#include <jem/base/IllegalInputException.h>
 #include <jem/numeric/algebra/matmul.h>
-
-#include <jive/geom/StdLine.h>
+#include <jem/numeric/algebra/utilities.h>
+#include <jem/util/Properties.h>
 #include <jive/geom/ParametricLine.h>
 #include <jive/geom/ShapeFactory.h>
-
-#include "utils/testing.h"
-#include "utils/helpers.h"
+#include <jive/geom/StdLine.h>
 
 using namespace jive_helpers;
 
@@ -192,6 +190,15 @@ public:
   inline void evalShapeFunctions(const Vector &h,
                                  const Vector &u) const override;
 
+  inline void evalShapeGradients(const Vector &h,
+                                 const Vector &g,
+                                 const Vector &u) const;
+
+  inline void evalShapeGradGrads(const Vector &h,
+                                 const Vector &g,
+                                 const Vector &gg,
+                                 const Vector &u) const;
+
 private:
   /**
    * @brief Get the reference rotation according to Crisfield/Jelenic
@@ -232,7 +239,7 @@ idx_t Line3D::localRank() const
 
 idx_t Line3D::nodeCount() const
 {
-  return intLine_->vertexCount();
+  return intLine_->nodeCount();
 }
 
 idx_t Line3D::vertexCount() const
@@ -275,6 +282,29 @@ void Line3D::evalShapeFunctions(const Vector &h,
 {
   JEM_ASSERT2(u.size() == localRank(), "internal coordinates do not match the rank");
   intLine_->evalShapeFunctions(h, u);
+}
+
+void Line3D::evalShapeGradients(const Vector &h,
+                                const Vector &g,
+                                const Vector &u) const
+{
+  JEM_ASSERT2(u.size() == localRank(), "internal coordinates do not match the rank");
+  Matrix g_dummy(1, g.size());
+  intLine_->getSShape()->evalShapeGradients(h, g_dummy, u);
+  g = g_dummy(0, ALL);
+}
+
+void Line3D::evalShapeGradGrads(const Vector &h,
+                                const Vector &g,
+                                const Vector &gg,
+                                const Vector &u) const
+{
+  JEM_ASSERT2(u.size() == localRank(), "internal coordinates do not match the rank");
+  Matrix g_dummy(1, g.size());
+  Matrix gg_dummy(1, gg.size());
+  intLine_->getSShape()->evalShapeGradGrads(h, g_dummy, gg_dummy, u);
+  g = g_dummy(0, ALL);
+  gg = gg_dummy(0, ALL);
 }
 
 Matrix Line3D::getShapeFunctions() const

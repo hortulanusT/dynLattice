@@ -19,4 +19,5 @@ void declareModels()
   LatticeModel::declare();
   InitLoadModel::declare();
   ImpactModel::declare();
+  RodContactModel::declare();
 }
