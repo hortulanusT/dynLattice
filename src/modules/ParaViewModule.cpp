@@ -422,7 +422,6 @@ void ParaViewModule::writePiece_
 
   // iterate through all other data ( see OutputModule for more advanced
   // features )
-
   for (idx_t iPtDatum = 0; iPtDatum < info.nodeData.size(); iPtDatum++)
   {
     using jive::model::ActionParams;
@@ -512,13 +511,14 @@ void ParaViewModule::writePiece_
           ItemSet::get("nodes", globdat, getContext());
 
       Ref<XTable> datumTable =
-          newInstance<SparseTable>("paraView", pointSet);
+          newInstance<SparseTable>(info.nodeData[iPtDatum], pointSet);
       Vector weights(datumTable->rowCount());
+      Properties params("actionParams");
 
       weights = 0.;
 
-      params.set(ActionParams::TABLE, datumTable);
       params.set(ActionParams::TABLE_NAME, info.nodeData[iPtDatum]);
+      params.set(ActionParams::TABLE, datumTable);
       params.set(ActionParams::TABLE_WEIGHTS, weights);
 
       model->takeAction(Actions::GET_TABLE, params, globdat);
