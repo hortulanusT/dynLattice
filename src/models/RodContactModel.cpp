@@ -433,6 +433,13 @@ void RodContactModel::computeContacts_
     allElems_.getElemNodes(nodesB, elementsB[iContact]);
     allNodes_.getSomeCoords(possB, nodesB);
 
+    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER generalize for higher order elements
+    {
+      if (verbose_)
+        jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (same nodes)\n";
+      continue;
+    }
+
     for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
       dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
