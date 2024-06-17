@@ -59,6 +59,8 @@ public:
 
   static const char *TYPE_NAME;
   static const char *PENALTY_PROP;
+  static const char *PENALTY_STS_PROP;
+  static const char *PENALTY_NTS_PROP;
   static const char *RADIUS_PROP;
   static const char *VERBOSE_PROP;
 
@@ -215,7 +217,8 @@ private:
   Ref<DofSpace> dofs_;
   Ref<Line3D> shape_;
 
-  double penalty_;
+  double penaltySTS_;
+  double penaltyNTS_;
   double radius_;
   bool verbose_;
 };

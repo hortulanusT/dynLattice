@@ -6,7 +6,7 @@
 log.pattern = "*.info | *.debug"; //
 
 // PROGRAM_CONTROL
-control.runWhile = "i<=35";
+control.runWhile = "i<=33";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -63,7 +63,7 @@ Input.groupInput.moving_right.restrictToGroup = "points";
 Input.groupInput.moving_middle.xval = 0.;
 Input.groupInput.moving_middle.yval = 0.15;
 
-model.model.model.lattice.contact.penalty = 1e7;
+model.model.model.lattice.contact.penalty = 262.5e6;
 model.model.model.lattice.contact.radius = 0.05;
 model.model.model.lattice.contact.verbose = true;
 

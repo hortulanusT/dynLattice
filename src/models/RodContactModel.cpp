@@ -25,6 +25,8 @@ JEM_DEFINE_CLASS(RodContactModel);
 //-----------------------------------------------------------------------
 const char *RodContactModel::TYPE_NAME = "RodContact";
 const char *RodContactModel::PENALTY_PROP = "penalty";
+const char *RodContactModel::PENALTY_NTS_PROP = "penaltyNTS";
+const char *RodContactModel::PENALTY_STS_PROP = "penaltySTS";
 const char *RodContactModel::RADIUS_PROP = "radius";
 const char *RodContactModel::VERBOSE_PROP = "verbose";
 
@@ -64,11 +66,18 @@ RodContactModel::RodContactModel
   myProps.makeProps("shape").set("numPoints", allElems_.maxElemNodeCount());
   shape_ = newInstance<Line3D>("shape", myConf, myProps);
 
-  // get the penalty parameter and rod radius
-  myProps.get(penalty_, PENALTY_PROP);
-  myProps.get(radius_, RADIUS_PROP);
+  // get the penalty parameter
+  if (!(myProps.find(penaltySTS_, PENALTY_STS_PROP) && myProps.find(penaltyNTS_, PENALTY_NTS_PROP)))
+  {
+    myProps.get(penaltySTS_, PENALTY_PROP);
+    penaltyNTS_ = penaltySTS_;
+  }
 
-  myConf.set(PENALTY_PROP, penalty_);
+  myConf.set(PENALTY_STS_PROP, penaltySTS_);
+  myConf.set(PENALTY_NTS_PROP, penaltyNTS_);
+
+  // get the radius
+  myProps.get(radius_, RADIUS_PROP);
   myConf.set(RADIUS_PROP, radius_);
 
   // get the verbosity
@@ -835,9 +844,9 @@ bool RodContactModel::computeSTS_
 
   G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
 
-  f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
-  k_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
-  k_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+  f_contrib += penaltySTS_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
+  k_contrib += penaltySTS_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
+  k_contrib += penaltySTS_ * (distance - 2. * radius_) * (E + E.transpose() + G);
 
   return true;
 }
@@ -886,8 +895,8 @@ bool RodContactModel::computeNTS_
   Ts[SliceFrom(2 * globalRank)] = -.5 * (1. + uM) * t;
   N[SliceFrom(2 * globalRank)] = n;
 
-  f_contrib += penalty_ * (distance - 2. * radius_) * Ns;
-  k_contrib += penalty_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
+  f_contrib += penaltyNTS_ * (distance - 2. * radius_) * Ns;
+  k_contrib += penaltyNTS_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
 
   return true;
 }
