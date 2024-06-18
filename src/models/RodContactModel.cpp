@@ -364,9 +364,8 @@ void RodContactModel::findPossibleElements_
     allElems_.getElemNodes(nodesA, iElemA);
     allNodes_.getSomeCoords(possA, nodesA);
 
-    for (idx_t inode = 0; inode < nodesA.size(); inode++)
-      if (jem::testany(nodesA[inode] == rodList_[beamB].getNodeIndices()))
-        continue;
+    if (jem::testany(nodesA[0] == rodList_[beamB].getNodeIndices()) || jem::testany(nodesA[1] == rodList_[beamB].getNodeIndices())) // LATER higher order elements
+      continue;
 
     for (idx_t idof = 0; idof < 3; idof++)
     {
@@ -385,9 +384,8 @@ void RodContactModel::findPossibleElements_
       allElems_.getElemNodes(nodesB, iElemB);
       allNodes_.getSomeCoords(possB, nodesB);
 
-      for (idx_t inode = 0; inode < nodesB.size(); inode++)
-        if (jem::testany(nodesB[inode] == rodList_[beamA].getNodeIndices()))
-          continue;
+      if (jem::testany(nodesB[0] == rodList_[beamA].getNodeIndices()) || jem::testany(nodesB[1] == rodList_[beamA].getNodeIndices())) // LATER higher order elements
+        continue;
 
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
