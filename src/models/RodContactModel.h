@@ -147,6 +147,33 @@ protected:
        const IdxVector &elementsA,
        const IdxVector &elementsB,
        const Vector &disp) const;
+
+  /**
+   * @brief build the list of nodes initially in contact
+   *
+   * @param elementsA
+   * @param elementsB
+   * @param disp
+   */
+  virtual void computeBlacklist_
+
+      (
+          const IdxVector &elementsA,
+          const IdxVector &elementsB,
+          const Vector &disp);
+
+  /**
+   * @brief check weather a contact is on the blacklist
+   *
+   * @param elementA element ID
+   * @param elementB element ID
+   * @return true if the contact is on the blacklist
+   */
+  virtual bool filterBlacklist_
+
+      (const idx_t elementsA,
+       const idx_t elementsB) const;
+
   /**
    * @brief find the local coordinates of the closest points on two beams
    *
@@ -216,6 +243,9 @@ private:
   Array<Assignable<ElementGroup>> rodList_;
   Ref<DofSpace> dofs_;
   Ref<Line3D> shape_;
+
+  IdxVector blacklistA_;
+  IdxVector blacklistB_;
 
   double penaltySTS_;
   double penaltyNTS_;

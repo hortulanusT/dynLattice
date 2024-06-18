@@ -6,7 +6,7 @@
 log.pattern = "*.info | *.debug"; //
 
 // PROGRAM_CONTROL
-control.runWhile = "i<1500";
+control.runWhile = "i<150";
 
 // SOLVER
 Solver.modules = [ "solver" ];
@@ -23,7 +23,7 @@ params.rod_details.material.shear_correction = 1.;
 
 params.force_model.type = "Dirichlet";
 
-params.force_model.dispIncr = 0.003;
+params.force_model.dispIncr = 0.03;
 params.force_model.nodeGroups = [ "moving_right", "moving_right", "moving_right", "moving_right", "moving_right", "moving_right" ];
 params.force_model.dofs = ["dx", "dy", "dz", "rx", "ry", "rz" ];
 params.force_model.factors = [ 0.1, 0., 1., 0., 0., 0.]; 
@@ -46,5 +46,5 @@ Output.loadextent.nodeGroups = ["moving_left", "moving_right"];
 Output.disp.dataSets = [ "moving_right.disp.dx", "moving_right.disp.dy", "moving_right.disp.dz", "moving_right.disp.rx", "moving_right.disp.ry", "moving_right.disp.rz" ];
 Output.resp.dataSets = [ "moving_right.resp.dx", "moving_right.resp.dy", "moving_right.resp.dz", "moving_right.resp.rx", "moving_right.resp.ry", "moving_right.resp.rz" ];
 
-Output.paraview.sampleWhen = "i%50<1";
+Output.paraview.sampleWhen = "i%5<1";
 Output.paraview.beams.shape = "Line2";
