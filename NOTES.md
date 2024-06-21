@@ -21,9 +21,9 @@
 1. `jive scripts/running/eqv-design.py lin_init prep_runs_nonlin lin_change_master_prep`
 1. `./scripts/cluster/masterDesign.sh`
 1. `./scripts/cluster/syncBack.sh`
-<!-- 1. `jive scripts/running/eqv-design.py lin_change_master_plot` -->
-<!-- 1. `./scripts/cluster/masterFailed.sh` -->
-<!-- 1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot` -->
+1. `jive scripts/running/eqv-design.py lin_change_master_plot`
+1. `./scripts/cluster/masterFailed.sh`
+1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 <!-- 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design` -->
 <!-- 1. `rsync -vax --delete studies/results/eqv-design/ ../Latex/Paper2/results/` -->
 </br></br></br></br>
