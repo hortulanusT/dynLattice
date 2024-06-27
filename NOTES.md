@@ -22,9 +22,9 @@
 1. `./scripts/cluster/masterDesign.sh tno`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py lin_change_master_plot`
-<!-- 1. `./scripts/cluster/masterFailed.sh tno` -->
+1. <!-- `./scripts/cluster/masterFailed.sh tno` -->
 1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
-<!-- 1. `jive scripts/running/tno-design.py work_density_export prep_latex_design`-->
+1. <!-- `jive scripts/running/tno-design.py work_density_export prep_latex_design`-->
 1. `rsync -vax --exclude '*.pdf' --delete studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
