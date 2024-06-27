@@ -205,7 +205,7 @@ bool RodContactModel::takeAction
       table->addRowValues(inode, jtypes, Vector(fint[jdofs]));
     }
 
-    weights = 1.;
+    weights = -1.;
 
     return true;
   }
