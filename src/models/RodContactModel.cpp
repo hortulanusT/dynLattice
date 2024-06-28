@@ -695,6 +695,9 @@ void RodContactModel::computeContacts_
       dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
     }
 
+    if (verbose_)
+      jem::System::debug(myName_) << "       contact force " << f_contrib << " applied \n";
+
     fint[dofsAB] += f_contrib;
     mbld.addBlock(dofsAB, dofsAB, k_contrib);
   } // end of loop over contacts
@@ -1013,6 +1016,9 @@ bool RodContactModel::computeSTS_
 
   double distance = norm2(pB - pA);
 
+  if (jem::isTiny(distance))
+    return false; // HACK we should find a different solution for complete interpenetration!
+
   if (distance > 2. * radius_)
     return false;
 
@@ -1127,6 +1133,9 @@ bool RodContactModel::computeNTS_
   shape_->getGlobalPoint(pM, Vector({uM}), possM);
 
   double distance = norm2(pM - possS);
+
+  if (jem::isTiny(distance))
+    return false; // HACK we should find a different solution for complete interpenetration!
 
   if (distance > 2. * radius_)
     return false;
