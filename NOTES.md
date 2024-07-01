@@ -6,10 +6,11 @@
 ## *eqv-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
-1. `./scripts/cluster/masterDesign.sh eqv`
+1. `./scripts/cluster/masterDesign.sh`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py lin_change_master_plot get_failed`
-1. `./scripts/cluster/masterFailed.sh eqv`
+1. `./scripts/cluster/masterFailed.sh`
+1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
 1. `rsync -vax --exclude '*.pdf' --delete studies/results/eqv-design/ ../Latex/Paper0/results/`
@@ -23,16 +24,18 @@
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py lin_change_master_plot get_failed`
 1. `./scripts/cluster/masterFailed.sh tno`
+1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. <!-- `jive scripts/running/tno-design.py work_density_export prep_latex_design`-->
 1. `rsync -vax --exclude '*.pdf' --delete studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
-1. `jive scripts/running/eqv-design.py lin_init prep_runs_nonlin lin_change_master_prep`
-1. `./scripts/cluster/masterDesign.sh eqv`
+1. `jive scripts/running/eqv-design.py lin_init lin_change_master_prep prep_runs_nonlin`
+1. `./scripts/cluster/masterDesign.sh`
 <!-- 1. `./scripts/cluster/syncBack.sh` -->
 <!-- 1. `jive scripts/running/eqv-design.py lin_change_master_plot get_failed` -->
-<!-- 1. `./scripts/cluster/masterFailed.sh eqv` -->
+<!-- 1. `./scripts/cluster/masterFailed.sh` -->
+<!-- 1. `./scripts/cluster/syncBack.sh` -->
 <!-- 1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot` -->
 <!-- 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design` -->
 <!-- 1. `rsync -vax --exclude '*.pdf' --delete studies/results/eqv-design/ ../Latex/Paper2/results/` -->
