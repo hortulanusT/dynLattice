@@ -21,13 +21,16 @@
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
 #include <jive/algebra/NullMatrixBuilder.h>
+#include <jive/app/Names.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/implict/Names.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/util/XTable.h>
 
 using jem::ALL;
@@ -50,6 +53,7 @@ using jive::model::Model;
 using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
+using jive::util::FuncUtils;
 using jive::util::XTable;
 
 class RodContactModel : public Model
@@ -146,7 +150,7 @@ protected:
        const Vector &fint,
        const IdxVector &elementsA,
        const IdxVector &elementsB,
-       const Vector &disp) const;
+       const Vector &disp);
 
   /**
    * @brief build the list of nodes initially in contact
@@ -246,6 +250,11 @@ private:
 
   IdxVector blacklistA_;
   IdxVector blacklistB_;
+
+  ArrayBuffer<idx_t> contactsA_;
+  ArrayBuffer<idx_t> contactsB_;
+
+  Ref<Function> updCond_;
 
   double penaltySTS_;
   double penaltyNTS_;

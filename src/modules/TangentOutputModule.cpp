@@ -255,6 +255,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains[iPBC] += dir * .5 * perturb_;
 
       globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
+      globdat.set(PropNames::LOAD_CASE, "tangentOutput");
 
       try
       {
@@ -272,6 +273,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       stresses[iPBC] += dir * pertubStresses;
 
       globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
+      globdat.erase(PropNames::LOAD_CASE);
       StateVector::restoreNew(DofSpace::get(globdat, getContext()),
                               globdat);
     }

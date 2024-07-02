@@ -40,6 +40,8 @@ RodContactModel::RodContactModel
      const Properties &props,
      const Properties &globdat) : Model(name)
 {
+  using jive::implict::PropNames;
+
   // Get the Properties associated with this model
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
@@ -79,6 +81,17 @@ RodContactModel::RodContactModel
   // get the radius
   myProps.get(radius_, RADIUS_PROP);
   myConf.set(RADIUS_PROP, radius_);
+
+  // initialize the contact update conditions
+  if (myProps.contains(PropNames::UPDATE_COND))
+    FuncUtils::configCond(updCond_, PropNames::UPDATE_COND, myProps,
+                          globdat);
+  else
+    updCond_ = FuncUtils::newCond(true);
+  FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
+
+  contactsA_.clear();
+  contactsB_.clear();
 
   // get the verbosity
   verbose_ = false;
@@ -120,6 +133,7 @@ bool RodContactModel::takeAction
     Vector disp;
     IdxVector elemsA;
     IdxVector elemsB;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     if (action == Actions::GET_MATRIX0)
@@ -135,8 +149,22 @@ bool RodContactModel::takeAction
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
-    // Find the contacts
-    findContacts_(elemsA, elemsB, disp);
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
+
+    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase == "tangentOutput")
+    {
+      // find possible contacts if they need to be updated
+      findContacts_(elemsA, elemsB, disp);
+      contactsA_.clear();
+      contactsB_.clear();
+    }
+    else
+    {
+      // use the old contacts if no need to be updated is there
+      elemsA = contactsA_.toArray();
+      elemsB = contactsB_.toArray();
+    }
 
     if (elemsA.size() == 0) // skip the computation if no actual contact possible
     {
@@ -178,11 +206,6 @@ bool RodContactModel::takeAction
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
 
-    // Find the contacts
-    IdxVector elemsA;
-    IdxVector elemsB;
-    findContacts_(elemsA, elemsB, disp);
-
     // Compute the contact effects
     Ref<MatrixBuilder> mbld;
     mbld = newInstance<NullMatrixBuilder>();
@@ -190,9 +213,9 @@ bool RodContactModel::takeAction
     Vector fint(disp.size());
     fint = 0.;
 
-    if (elemsA.size() != 0) // skip the computation if no actual contact possible
+    if (contactsA_.toArray().size() != 0) // skip the computation if no actual contact possible
     {
-      computeContacts_(*mbld, fint, elemsA, elemsB, disp);
+      computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
     }
 
     // Add the contact forces to the table
@@ -428,7 +451,7 @@ void RodContactModel::computeContacts_
      const Vector &fint,
      const IdxVector &elementsA,
      const IdxVector &elementsB,
-     const Vector &disp) const
+     const Vector &disp)
 {
   const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
@@ -700,6 +723,9 @@ void RodContactModel::computeContacts_
 
     fint[dofsAB] += f_contrib;
     mbld.addBlock(dofsAB, dofsAB, k_contrib);
+
+    contactsA_.pushBack(elementsA[iContact]);
+    contactsB_.pushBack(elementsB[iContact]);
   } // end of loop over contacts
 
   if (verbose_)
