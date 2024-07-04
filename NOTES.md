@@ -8,22 +8,45 @@
 1. `jive scripts/running/eqv-design.py lin_init prep_runs prep_higher_runs lin_change_master_prep`
 1. `./scripts/cluster/masterDesign.sh`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/eqv-design.py lin_change_master_plot`
+1. `jive scripts/running/eqv-design.py lin_change_master_plot get_failed`
 1. `./scripts/cluster/masterFailed.sh`
+1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot work_density_higher_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
-1. `rsync -vax --delete studies/results/eqv-design/ ../Latex/Paper0/results/`
+1. `rsync -vax --exclude '*.pdf' --delete studies/results/eqv-design/ ../Latex/Paper0/results/`
 ## *plast-size* study
 1. `jive scripts/running/plast-size.py do_plast_studies_anew prep_latex_plast`
-1. `rsync -vax --delete studies/results/plast-size/ ../Latex/Paper1/results/`
+1. `rsync -vax --exclude '*.pdf' --delete studies/results/plast-size/ ../Latex/Paper1/results/`
+## *tno-design* study
+> :warning: make sure repo on cluster is updated :warning:
+1. `jive scripts/running/tno-design.py samples_init lin_change_master_prep prep_runs_all`
+1. `./scripts/cluster/masterDesign.sh tno`
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/tno-design.py lin_change_master_plot get_failed`
+1. `./scripts/cluster/masterFailed.sh tno`
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
+1. `jive scripts/running/tno-design.py work_density_export prep_latex_design`
+1. `rsync -vax --exclude '*.pdf' --delete studies/results/tno-design/ ../Latex/PaperTNO/results/` 
+## *nonlin-design* study
+> :warning: make sure repo on cluster is updated :warning:
+1. `jive scripts/running/eqv-design.py lin_init lin_change_master_prep prep_runs_nonlin`
+1. `./scripts/cluster/masterDesign.sh`
+<!-- 1. `./scripts/cluster/syncBack.sh` -->
+<!-- 1. `jive scripts/running/eqv-design.py lin_change_master_plot get_failed` -->
+<!-- 1. `./scripts/cluster/masterFailed.sh` -->
+<!-- 1. `./scripts/cluster/syncBack.sh` -->
+<!-- 1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot` -->
+<!-- 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design` -->
+<!-- 1. `rsync -vax --exclude '*.pdf' --delete studies/results/eqv-design/ ../Latex/Paper2/results/` -->
 </br></br></br></br>
 
 # :hammer_and_pick: TO DO 
 1. Models
+1. Modules
     - Explicit Solver
       - keep $M$ constant, only update $\Theta$
       - implement 'lumped' algorithm with direct 3x3 inverts
-1. Modules
     - Tangent Output Module
       - Get Matrix Condenstation to work
 1. Environment

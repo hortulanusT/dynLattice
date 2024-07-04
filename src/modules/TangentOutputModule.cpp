@@ -255,6 +255,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains[iPBC] += dir * .5 * perturb_;
 
       globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
+      globdat.set(PropNames::LOAD_CASE, "tangentOutput");
 
       try
       {
@@ -272,6 +273,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       stresses[iPBC] += dir * pertubStresses;
 
       globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
+      globdat.erase(PropNames::LOAD_CASE);
       StateVector::restoreNew(DofSpace::get(globdat, getContext()),
                               globdat);
     }
@@ -293,10 +295,23 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
   const idx_t compCount = strains.size();
   Properties myVars = Globdat::getVariables("tangent", globdat);
 
-  Matrix C = Matrix(stresses / thickness_ / perturb_);
+  Matrix C(stresses.size(0), stresses.size(1));
+  Matrix S(stresses.size(0), stresses.size(1));
   Vector C_prop(jem::product(stresses.shape()));
-  Matrix S = jem::numeric::inverse(C);
   Vector S_prop(jem::product(stresses.shape()));
+
+  try
+  {
+    C = Matrix(stresses / thickness_ / perturb_);
+    S = jem::numeric::inverse(C);
+  }
+  catch (const jem::Exception &e)
+  {
+    print(System::info(myName_),
+          "The tangent matrix non-invertible, setting everything to NaN \n\n");
+    C = NAN;
+    S = NAN;
+  }
 
   for (idx_t i = 0; i < compCount; i++)
   {

@@ -175,15 +175,18 @@ bool AdaptiveStepModule::commit
     (const Properties &globdat)
 {
   Properties params;
+  bool converged;
   bool accept;
+
+  SolverInfo::get(globdat).get(converged, SolverInfo::CONVERGED);
 
   if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
   {
     params.get(accept, ActionParams::ACCEPT);
   }
-  else // if the model doesnt care accept the solution
+  else // if the model doesnt care just look at the local convergence
   {
-    accept = true;
+    accept = converged;
   }
 
   // adapt step size

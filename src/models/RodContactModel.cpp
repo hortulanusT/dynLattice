@@ -25,6 +25,8 @@ JEM_DEFINE_CLASS(RodContactModel);
 //-----------------------------------------------------------------------
 const char *RodContactModel::TYPE_NAME = "RodContact";
 const char *RodContactModel::PENALTY_PROP = "penalty";
+const char *RodContactModel::PENALTY_NTS_PROP = "penaltyNTS";
+const char *RodContactModel::PENALTY_STS_PROP = "penaltySTS";
 const char *RodContactModel::RADIUS_PROP = "radius";
 const char *RodContactModel::VERBOSE_PROP = "verbose";
 
@@ -38,6 +40,8 @@ RodContactModel::RodContactModel
      const Properties &props,
      const Properties &globdat) : Model(name)
 {
+  using jive::implict::PropNames;
+
   // Get the Properties associated with this model
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
@@ -64,12 +68,30 @@ RodContactModel::RodContactModel
   myProps.makeProps("shape").set("numPoints", allElems_.maxElemNodeCount());
   shape_ = newInstance<Line3D>("shape", myConf, myProps);
 
-  // get the penalty parameter and rod radius
-  myProps.get(penalty_, PENALTY_PROP);
-  myProps.get(radius_, RADIUS_PROP);
+  // get the penalty parameter
+  if (!(myProps.find(penaltySTS_, PENALTY_STS_PROP) && myProps.find(penaltyNTS_, PENALTY_NTS_PROP)))
+  {
+    myProps.get(penaltySTS_, PENALTY_PROP);
+    penaltyNTS_ = penaltySTS_;
+  }
 
-  myConf.set(PENALTY_PROP, penalty_);
+  myConf.set(PENALTY_STS_PROP, penaltySTS_);
+  myConf.set(PENALTY_NTS_PROP, penaltyNTS_);
+
+  // get the radius
+  myProps.get(radius_, RADIUS_PROP);
   myConf.set(RADIUS_PROP, radius_);
+
+  // initialize the contact update conditions
+  if (myProps.contains(PropNames::UPDATE_COND))
+    FuncUtils::configCond(updCond_, PropNames::UPDATE_COND, myProps,
+                          globdat);
+  else
+    updCond_ = FuncUtils::newCond(true);
+  FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
+
+  contactsA_.clear();
+  contactsB_.clear();
 
   // get the verbosity
   verbose_ = false;
@@ -86,6 +108,24 @@ bool RodContactModel::takeAction
      const Properties &params,
      const Properties &globdat)
 {
+  if (action == Actions::INIT)
+  {
+    Vector disp;
+    IdxVector elemsA;
+    IdxVector elemsB;
+
+    // Get the current displacements.
+    StateVector::get(disp, dofs_, globdat);
+
+    // Find the contacts
+    findContacts_(elemsA, elemsB, disp);
+
+    // build the contact blacklist
+    computeBlacklist_(elemsA, elemsB, disp);
+
+    return true;
+  }
+
   if (action == Actions::GET_MATRIX0 || action == Actions::GET_INT_VECTOR)
   {
     Ref<MatrixBuilder> mbld;
@@ -93,6 +133,7 @@ bool RodContactModel::takeAction
     Vector disp;
     IdxVector elemsA;
     IdxVector elemsB;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     if (action == Actions::GET_MATRIX0)
@@ -108,8 +149,22 @@ bool RodContactModel::takeAction
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
-    // Find the contacts
-    findContacts_(elemsA, elemsB, disp);
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
+
+    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase == "tangentOutput")
+    {
+      // find possible contacts if they need to be updated
+      findContacts_(elemsA, elemsB, disp);
+      contactsA_.clear();
+      contactsB_.clear();
+    }
+    else
+    {
+      // use the old contacts if no need to be updated is there
+      elemsA = contactsA_.toArray();
+      elemsB = contactsB_.toArray();
+    }
 
     if (elemsA.size() == 0) // skip the computation if no actual contact possible
     {
@@ -151,11 +206,6 @@ bool RodContactModel::takeAction
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
 
-    // Find the contacts
-    IdxVector elemsA;
-    IdxVector elemsB;
-    findContacts_(elemsA, elemsB, disp);
-
     // Compute the contact effects
     Ref<MatrixBuilder> mbld;
     mbld = newInstance<NullMatrixBuilder>();
@@ -163,9 +213,9 @@ bool RodContactModel::takeAction
     Vector fint(disp.size());
     fint = 0.;
 
-    if (elemsA.size() != 0) // skip the computation if no actual contact possible
+    if (contactsA_.toArray().size() != 0) // skip the computation if no actual contact possible
     {
-      computeContacts_(*mbld, fint, elemsA, elemsB, disp);
+      computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
     }
 
     // Add the contact forces to the table
@@ -178,7 +228,7 @@ bool RodContactModel::takeAction
       table->addRowValues(inode, jtypes, Vector(fint[jdofs]));
     }
 
-    weights = 1.;
+    weights = -1.;
 
     return true;
   }
@@ -331,10 +381,15 @@ void RodContactModel::findPossibleElements_
   Matrix possB(globalRank, nodeCount);
   bool cornerCheck = false;
 
+  // iterate over the elements
   for (idx_t iElemA : rodList_[beamA].getIDs())
   {
     allElems_.getElemNodes(nodesA, iElemA);
     allNodes_.getSomeCoords(possA, nodesA);
+
+    if (jem::testany(nodesA[0] == rodList_[beamB].getNodeIndices()) || jem::testany(nodesA[1] == rodList_[beamB].getNodeIndices())) // LATER higher order elements
+      continue;
+
     for (idx_t idof = 0; idof < 3; idof++)
     {
       dofs_->getDofIndices(dofsA, nodesA, idof);
@@ -351,6 +406,10 @@ void RodContactModel::findPossibleElements_
     {
       allElems_.getElemNodes(nodesB, iElemB);
       allNodes_.getSomeCoords(possB, nodesB);
+
+      if (jem::testany(nodesB[0] == rodList_[beamA].getNodeIndices()) || jem::testany(nodesB[1] == rodList_[beamA].getNodeIndices())) // LATER higher order elements
+        continue;
+
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
         dofs_->getDofIndices(dofsB, nodesB, idof);
@@ -392,7 +451,7 @@ void RodContactModel::computeContacts_
      const Vector &fint,
      const IdxVector &elementsA,
      const IdxVector &elementsB,
-     const Vector &disp) const
+     const Vector &disp)
 {
   const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
@@ -433,6 +492,20 @@ void RodContactModel::computeContacts_
     allElems_.getElemNodes(nodesB, elementsB[iContact]);
     allNodes_.getSomeCoords(possB, nodesB);
 
+    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER generalize for higher order elements
+    {
+      if (verbose_)
+        jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (same nodes)\n";
+      continue;
+    }
+
+    if (filterBlacklist_(elementsA[iContact], elementsB[iContact]))
+    {
+      if (verbose_)
+        jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (blacklisted)\n";
+      continue;
+    }
+
     for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
       dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
@@ -445,12 +518,14 @@ void RodContactModel::computeContacts_
 
     if (verbose_)
       jem::System::debug(myName_) << " > > Contact detection between elements " << elementsA[iContact] << " and " << elementsB[iContact]
-                                  << " at local coordinates " << uA << " and " << uB << " ==} ";
+                                  << " at local coordinates " << uA << " and " << uB << "\n     ==} ";
 
     contact_closed = false;
 
     if (shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
+      if (verbose_)
+        jem::System::debug(myName_) << "STS contact ";
       // LATER generalize for higher order elements
       dofsAB.resize(globalRank * 4);
 
@@ -462,9 +537,9 @@ void RodContactModel::computeContacts_
       contact_closed = computeSTS_(f_contrib, k_contrib, possA, possB, uA, uB);
 
       if (contact_closed && verbose_)
-        jem::System::debug(myName_) << "STS contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << "\n";
+        jem::System::debug(myName_) << "FOUND\n";
       if (!contact_closed && verbose_)
-        jem::System::debug(myName_) << "NO contact\n";
+        jem::System::debug(myName_) << "not found\n";
 
       if (!contact_closed)
         continue;
@@ -476,6 +551,8 @@ void RodContactModel::computeContacts_
     }
     else if (!shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
+      if (verbose_)
+        jem::System::debug(myName_) << "NTS contact ";
       // LATER generalize for higher order elements
       dofsAB.resize(globalRank * 3);
 
@@ -497,16 +574,16 @@ void RodContactModel::computeContacts_
       if (!(shape_->containsLocalPoint(Vector({uB}))))
       {
         if (verbose_)
-          jem::System::debug(myName_) << "NO contact\n";
+          jem::System::debug(myName_) << "not found (node not closest in segement)\n";
         continue;
       }
 
       contact_closed = computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
 
       if (contact_closed && verbose_)
-        jem::System::debug(myName_) << "(direct) NTS contact between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
+        jem::System::debug(myName_) << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
       if (!contact_closed && verbose_)
-        jem::System::debug(myName_) << "NO contact\n";
+        jem::System::debug(myName_) << "not found between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n ";
 
       if (!contact_closed)
         continue;
@@ -517,6 +594,8 @@ void RodContactModel::computeContacts_
     }
     else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
     {
+      if (verbose_)
+        jem::System::debug(myName_) << "NTS contact ";
       dofsAB.resize(globalRank * 3);
 
       f_contrib.resize((nodeCount + 1) * globalRank);
@@ -537,16 +616,16 @@ void RodContactModel::computeContacts_
       if (!(shape_->containsLocalPoint(Vector({uA}))))
       {
         if (verbose_)
-          jem::System::debug(myName_) << "NO contact\n";
+          jem::System::debug(myName_) << "not found (node not closest in segement)\n";
         continue;
       }
 
       contact_closed = computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
 
       if (contact_closed && verbose_)
-        jem::System::debug(myName_) << "(direct) NTS contact between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
+        jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
       if (!contact_closed && verbose_)
-        jem::System::debug(myName_) << "NO contact\n";
+        jem::System::debug(myName_) << "not found between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
 
       if (!contact_closed)
         continue;
@@ -557,6 +636,8 @@ void RodContactModel::computeContacts_
     }
     else // !shape_->containsLocalPoint(Vector({uA})) && !shape_->containsLocalPoint(Vector({uB}))
     {
+      if (verbose_)
+        jem::System::debug(myName_) << "(speculative) NTS contact ";
       // LATER generalize for higher order elements
       dofsAB.resize(globalRank * 4);
 
@@ -581,12 +662,13 @@ void RodContactModel::computeContacts_
         contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB);
 
         if (contact_closed && verbose_)
-          jem::System::debug(myName_) << "(indirect) NTS contact between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
+          jem::System::debug(myName_) << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "; ";
 
         if (contact_closed)
         {
           f_contrib[SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
           f_contrib[SliceFromTo(2 * globalRank, 4 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
+
           k_contrib(SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank), SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceTo(globalRank));
           k_contrib(SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank), SliceFromTo(2 * globalRank, 4 * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceFrom(globalRank));
           k_contrib(SliceFromTo(2 * globalRank, 4 * globalRank), SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceTo(globalRank));
@@ -607,7 +689,7 @@ void RodContactModel::computeContacts_
         contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA);
 
         if (contact_closed && verbose_)
-          jem::System::debug(myName_) << "(indirect) NTS contact between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
+          jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "; ";
 
         if (contact_closed)
         {
@@ -621,8 +703,11 @@ void RodContactModel::computeContacts_
         }
       }
 
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "\n";
+
       if (!contact_closed && verbose_)
-        jem::System::debug(myName_) << "NO contact\n";
+        jem::System::debug(myName_) << "not found\n";
 
       if (!contact_closed)
         continue;
@@ -633,12 +718,227 @@ void RodContactModel::computeContacts_
       dofsAB[SliceFromTo(3 * globalRank, 4 * globalRank)] = dofsB[1];
     }
 
+    if (verbose_)
+      jem::System::debug(myName_) << "       contact force " << f_contrib << " applied \n";
+
     fint[dofsAB] += f_contrib;
     mbld.addBlock(dofsAB, dofsAB, k_contrib);
+
+    contactsA_.pushBack(elementsA[iContact]);
+    contactsB_.pushBack(elementsB[iContact]);
   } // end of loop over contacts
 
   if (verbose_)
     jem::System::debug(myName_) << " > > > > Done computing contacts\n";
+}
+
+//-----------------------------------------------------------------------
+//   computeBlacklist_
+//-----------------------------------------------------------------------
+void RodContactModel::computeBlacklist_
+
+    (const IdxVector &elementsA,
+     const IdxVector &elementsB,
+     const Vector &disp)
+
+{
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
+
+  ArrayBuffer<idx_t> blacklistA;
+  ArrayBuffer<idx_t> blacklistB;
+
+  if (verbose_)
+  {
+    jem::System::debug(myName_) << " > > > > Building contact blacklist\n";
+  }
+
+  IdxVector nodesA(nodeCount);
+  IdxVector nodesB(nodeCount);
+  Matrix possA(globalRank, nodeCount);
+  Matrix possB(globalRank, nodeCount);
+  IdxMatrix dofsA(globalRank, nodeCount);
+  IdxMatrix dofsB(globalRank, nodeCount);
+
+  double uA = 0; // local coordinates
+  double uB = 0;
+
+  idx_t iNodeA;
+  idx_t iNodeB;
+
+  Vector f_contrib(0);
+  Matrix k_contrib(0, 0);
+
+  bool contact_closed;
+
+  for (idx_t iContact = 0; iContact < elementsA.size(); iContact++)
+  {
+    allElems_.getElemNodes(nodesA, elementsA[iContact]);
+    allNodes_.getSomeCoords(possA, nodesA);
+    allElems_.getElemNodes(nodesB, elementsB[iContact]);
+    allNodes_.getSomeCoords(possB, nodesB);
+
+    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER generalize for higher order elements
+    {
+      if (verbose_)
+        jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (same nodes)\n";
+      continue;
+    }
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      dofs_->getDofIndices(dofsA[iNode], nodesA[iNode], IdxVector({0, 1, 2}));
+      possA[iNode] += disp[dofsA[iNode]];
+      dofs_->getDofIndices(dofsB[iNode], nodesB[iNode], IdxVector({0, 1, 2}));
+      possB[iNode] += disp[dofsB[iNode]];
+    }
+
+    findClosestPoints_(uA, uB, possA, possB);
+
+    if (verbose_)
+      jem::System::debug(myName_) << " > > Contact detection between elements " << elementsA[iContact] << " and " << elementsB[iContact]
+                                  << " at local coordinates " << uA << " and " << uB << " ==} ";
+
+    contact_closed = false;
+
+    if (shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
+    {
+      contact_closed = computeSTS_(f_contrib, k_contrib, possA, possB, uA, uB);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "STS CONTACT\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (contact_closed)
+      {
+        blacklistA.pushBack(elementsA[iContact]);
+        blacklistB.pushBack(elementsB[iContact]);
+      }
+    }
+    else if (!shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
+    {
+      if (uA < -1.)
+      {
+        iNodeA = 0;
+      }
+      else // uA > 1.
+      {
+        iNodeA = 1;
+      }
+
+      uB = getClosestPoint_(possB[iNodeA], possA);
+      if (!(shape_->containsLocalPoint(Vector({uB}))))
+      {
+        if (verbose_)
+          jem::System::debug(myName_) << "NO contact\n";
+        continue;
+      }
+
+      contact_closed = computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "NTS CONTACT\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (contact_closed)
+      {
+        blacklistA.pushBack(elementsA[iContact]);
+        blacklistB.pushBack(elementsB[iContact]);
+      }
+    }
+    else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
+    {
+      if (uB < -1.)
+      {
+        iNodeB = 0;
+      }
+      else // uB > 1.
+      {
+        iNodeB = 1;
+      }
+
+      uA = getClosestPoint_(possB[iNodeB], possA);
+      if (!(shape_->containsLocalPoint(Vector({uA}))))
+      {
+        if (verbose_)
+          jem::System::debug(myName_) << "NO contact\n";
+        continue;
+      }
+
+      contact_closed = computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "NTS CONTACT\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (contact_closed)
+      {
+        blacklistA.pushBack(elementsA[iContact]);
+        blacklistB.pushBack(elementsB[iContact]);
+      }
+    }
+    else // !shape_->containsLocalPoint(Vector({uA})) && !shape_->containsLocalPoint(Vector({uB}))
+    {
+      // check both ends of A against B
+      for (idx_t iNodeA : {0, 1})
+      {
+        uB = getClosestPoint_(possA[iNodeA], possB);
+        if (!(shape_->containsLocalPoint(Vector({uB}))))
+          continue;
+
+        contact_closed |= computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+      }
+
+      // check both ends of B against A
+      for (idx_t iNodeB : {0, 1})
+      {
+        uA = getClosestPoint_(possB[iNodeB], possA);
+        if (!(shape_->containsLocalPoint(Vector({uA}))))
+          continue;
+
+        contact_closed |= computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+      }
+
+      if (contact_closed && verbose_)
+        jem::System::debug(myName_) << "indirect NTS CONTACT\n";
+      if (!contact_closed && verbose_)
+        jem::System::debug(myName_) << "NO contact\n";
+
+      if (contact_closed)
+      {
+        blacklistA.pushBack(elementsA[iContact]);
+        blacklistB.pushBack(elementsB[iContact]);
+      }
+    }
+  } // end of loop over contacts
+
+  blacklistA_.resize(blacklistA.size());
+  blacklistB_.resize(blacklistB.size());
+
+  blacklistA_ = blacklistA.toArray();
+  blacklistB_ = blacklistB.toArray();
+
+  if (verbose_)
+  {
+    jem::System::debug(myName_) << " > > > > Done computing blacklist\n";
+    jem::System::debug(myName_) << " > > blacklisted elements A: " << blacklistA_ << "\n";
+    jem::System::debug(myName_) << " > > blacklisted elements B: " << blacklistB_ << "\n";
+  }
+}
+
+//-----------------------------------------------------------------------
+//   filterBlacklist_
+//-----------------------------------------------------------------------
+bool RodContactModel::filterBlacklist_
+
+    (const idx_t elementA,
+     const idx_t elementB) const
+
+{
+  return (jem::testany(blacklistA_ == elementA && blacklistB_ == elementB) || jem::testany(blacklistA_ == elementB && blacklistB_ == elementA));
 }
 
 //-----------------------------------------------------------------------
@@ -742,8 +1042,14 @@ bool RodContactModel::computeSTS_
 
   double distance = norm2(pB - pA);
 
+  if (jem::isTiny(distance))
+    return false; // HACK we should find a different solution for complete interpenetration!
+
   if (distance > 2. * radius_)
     return false;
+
+  if (f_contrib.size() == 0)
+    return true;
 
   Vector dpA(globalRank); // positions gradients
   Vector dpB(globalRank);
@@ -828,9 +1134,9 @@ bool RodContactModel::computeSTS_
 
   G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
 
-  f_contrib += penalty_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
-  k_contrib += penalty_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
-  k_contrib += penalty_ * (distance - 2. * radius_) * (E + E.transpose() + G);
+  f_contrib += penaltySTS_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
+  k_contrib += penaltySTS_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
+  k_contrib += penaltySTS_ * (distance - 2. * radius_) * (E + E.transpose() + G);
 
   return true;
 }
@@ -854,8 +1160,14 @@ bool RodContactModel::computeNTS_
 
   double distance = norm2(pM - possS);
 
+  if (jem::isTiny(distance))
+    return false; // HACK we should find a different solution for complete interpenetration!
+
   if (distance > 2. * radius_)
     return false;
+
+  if (f_contrib.size() == 0)
+    return true;
 
   // Wriggers/Simo 1985
   Vector n(globalRank);
@@ -879,8 +1191,8 @@ bool RodContactModel::computeNTS_
   Ts[SliceFrom(2 * globalRank)] = -.5 * (1. + uM) * t;
   N[SliceFrom(2 * globalRank)] = n;
 
-  f_contrib += penalty_ * (distance - 2. * radius_) * Ns;
-  k_contrib += penalty_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
+  f_contrib += penaltyNTS_ * (distance - 2. * radius_) * Ns;
+  k_contrib += penaltyNTS_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
 
   return true;
 }
