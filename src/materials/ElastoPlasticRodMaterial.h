@@ -73,7 +73,7 @@ public:
    * @param ielem The index of the element.
    * @param ip The index of the integration point.
    */
-  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip) override;
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
   virtual void apply_inelast_corr() override;
 

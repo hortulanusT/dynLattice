@@ -58,7 +58,7 @@ public:
    */
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
-  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip);
+  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
 
   /**
    * @brief get the material stiffness matrix
@@ -98,7 +98,7 @@ protected:
   virtual ~Material();
 };
 
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
   getStress(stress, strain);
 }

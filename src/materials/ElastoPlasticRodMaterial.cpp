@@ -166,7 +166,7 @@ void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector 
   hardVals = -1. * matmul(materialH_, hardParams);
 }
 
-void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
+void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
   jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   curr_Strains_(ALL, ip, ielem) = strain;
@@ -188,6 +188,12 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     ElasticRodMaterial::getStress(stress, Vector(strain - plastStrain));
     getHardVals(hardStress, hardParams);
 
+    if (!inelastic)
+    {
+      jem::System::debug(myName_) << "        elastic calculation\n";
+      break;
+    }
+
     args[stress_part_] = stress;
     args[hard_part_] = hardStress;
 
@@ -197,6 +203,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     JEM_PRECHECK2(liter < maxIter_, "Too many iterations in plasticity loop");
     if (f < precision_)
     {
+      jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
       break;
     }
     // SUBHEADER2("Step 3", liter)
@@ -222,8 +229,6 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     liter++;
   }
-
-  jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
 
   curr_plastStrains_(ALL, ip, ielem) = plastStrain;
   curr_hardParams_(ALL, ip, ielem) = hardParams;

@@ -256,11 +256,15 @@ bool specialCosseratRodModel::takeAction
     Ref<MatrixBuilder> mbld;
     Vector fint;
     Vector disp;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     params.get(mbld, ActionParams::MATRIX0);
     params.get(fint, ActionParams::INT_VECTOR);
     // TEST_CONTEXT ( fint )
+
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
@@ -268,7 +272,7 @@ bool specialCosseratRodModel::takeAction
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(*mbld, fint, disp);
+    assemble_(*mbld, fint, disp, loadCase);
 
     // // DEBUGGING
     // IdxVector dofList(fint.size());
@@ -729,7 +733,7 @@ void specialCosseratRodModel::get_strains_(
 void specialCosseratRodModel::get_stresses_(
     const Matrix &stresses, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
-    const bool spatial) const
+    const bool spatial, const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
@@ -742,7 +746,7 @@ void specialCosseratRodModel::get_stresses_(
   // TEST_CONTEXT(strains)
 
   for (idx_t ip = 0; ip < ipCount; ip++)
-    material_->getStress(stresses[ip], strains[ip], ie, ip);
+    material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "tangentOutput");
 
   // get the (spatial) stresses
   if (spatial)
@@ -782,7 +786,8 @@ void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
 
 void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &fint,
-                                        const Vector &disp) const
+                                        const Vector &disp,
+                                        const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -837,7 +842,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PSI)
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
