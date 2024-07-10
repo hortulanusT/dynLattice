@@ -50,6 +50,20 @@ To create an alias used in the recipes run `alias jive='apptainer -s exec -e /pa
     └── results         <- processed results
 ```
 
+## Notes
+In the result files the PBC's are encoded as follows:
+```
+ 0 -- uniaxial deformation
+ 1 -- planar deformation
+ 2 -- shear deformation
+```
+In the result files the Material models are encoded as follows:
+```
+ 0 -- elastic
+ 1 -- elastic + contact
+ 2 -- plastic
+ 3 -- plastic + contact
+```
 
 ## License
 [MIT License](LICENSE)
