@@ -805,7 +805,6 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Quadix XI(dofCount, dofCount, nodeCount, ipCount);
   Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
   Cubix PI(dofCount, dofCount, ipCount);
-  Matrix materialC = material_->getMaterialStiff();
   Matrix spatialC(dofCount, dofCount);
   Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
                   ipCount);
@@ -978,8 +977,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
   Cubix ipLambda(rank, rank, ipCount);
 
-  Matrix materialM = material_->getMaterialMass()(TRANS_PART, TRANS_PART);
-  Matrix materialJ(rank, rank);
   Matrix spatialInertia(dofCount, dofCount);
 
   // iterate through the elements
@@ -993,7 +990,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
     shapes = shapeM_->getShapeFunctions();
 
     l = sum(weights) / (nodeCount - 1);
-    materialJ = material_->getLumpedMass(l)(ROT_PART, ROT_PART);
 
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
@@ -1006,9 +1002,9 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
         for (idx_t ip = 0; ip < ipCount; ip++)
           spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
-                                                    mc3.matmul(ipLambda[ip], materialM, ipLambda[ip].transpose());
+                                                    mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
         if (inode == jnode)
-          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], materialJ,
+          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART),
                                                            nodeLambda[inode].transpose());
         if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
           spatialInertia(ROT_PART, ROT_PART) /= 2.;

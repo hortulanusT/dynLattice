@@ -44,6 +44,8 @@ public:
   static const char *CROSS_SECTION;
   static const char *RADIUS;
   static const char *SIDE_LENGTH;
+  static const char *N_ELEM;
+  static const char *EDGE_FACTOR;
 
   JEM_DECLARE_CLASS(ElasticRodMaterial, Material);
 
@@ -63,11 +65,19 @@ public:
 
   virtual Matrix getMaterialStiff() const override;
 
+  virtual Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const override;
+
   virtual Matrix getMaterialMass() const override;
 
-  virtual Matrix getLumpedMass(double l) const override;
+  virtual Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual Matrix getLumpedMass(const double l) const override;
+
+  virtual Matrix getLumpedMass(const double l, const idx_t &ielem) const override;
 
   virtual void getStress(const Vector &stress, const Vector &strain) override;
+
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = false) override;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
@@ -87,6 +97,9 @@ protected:
   double young_;
   double shearMod_;
   double shearParam_;
+
+  double edgeFact_;
+  idx_t nElem_;
 
   double area_;
   Vector areaMoment_;

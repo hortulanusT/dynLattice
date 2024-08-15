@@ -78,7 +78,9 @@ public:
 
   virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
 
-  virtual Matrix getLumpedMass(double l) const;
+  virtual Matrix getLumpedMass(const double l) const;
+
+  virtual inline Matrix getLumpedMass(const double l, const idx_t &ielem) const;
 
   virtual void apply_inelast_corr() = 0;
 
@@ -111,4 +113,9 @@ Matrix Material::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
 Matrix Material::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
 {
   return getMaterialMass();
+}
+
+Matrix Material::getLumpedMass(const double l, const idx_t &ielem) const
+{
+  return getLumpedMass(l);
 }

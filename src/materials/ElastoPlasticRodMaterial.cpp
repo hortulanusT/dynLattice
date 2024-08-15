@@ -185,7 +185,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
   while (true)
   {
     // SUBHEADER2("Step 2", liter)
-    ElasticRodMaterial::getStress(stress, Vector(strain - plastStrain));
+    Super::getStress(stress, Vector(strain - plastStrain), ielem, ip, false);
     getHardVals(hardStress, hardParams);
 
     if (!inelastic)
