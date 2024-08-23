@@ -218,7 +218,15 @@ Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip)
   else
   {
     if (ielem == 0 || ielem == nElem_ - 1)
-      return Matrix(edgeFact_ * getMaterialStiff());
+    {
+      Matrix stiff = getMaterialStiff();
+      stiff(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
+      stiff(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
+      stiff(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
+      stiff(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
+
+      return Matrix(stiff);
+    }
     else
       return getMaterialStiff();
   }
@@ -236,7 +244,7 @@ Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) 
   else
   {
     if (ielem == 0 || ielem == nElem_ - 1)
-      return Matrix(edgeFact_ * getMaterialMass());
+      return Matrix(edgeFact_ * edgeFact_ * getMaterialMass());
     else
       return getMaterialMass();
   }
