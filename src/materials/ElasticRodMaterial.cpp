@@ -208,7 +208,7 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) con
 
 Matrix ElasticRodMaterial::getMaterialStiff() const
 {
-  return materialK_;
+  return materialK_.clone();
 }
 
 Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
@@ -225,7 +225,7 @@ Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip)
       stiff(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
       stiff(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
 
-      return Matrix(stiff);
+      return stiff;
     }
     else
       return getMaterialStiff();
@@ -234,7 +234,7 @@ Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip)
 
 Matrix ElasticRodMaterial::getMaterialMass() const
 {
-  return materialM_;
+  return materialM_.clone();
 }
 
 Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
