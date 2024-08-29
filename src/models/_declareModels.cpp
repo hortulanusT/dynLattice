@@ -20,4 +20,5 @@ void declareModels()
   InitLoadModel::declare();
   ImpactModel::declare();
   RodContactModel::declare();
+  MassModel::declare();
 }
