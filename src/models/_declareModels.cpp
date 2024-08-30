@@ -21,4 +21,5 @@ void declareModels()
   ImpactModel::declare();
   RodContactModel::declare();
   MassModel::declare();
+  SpringMassModel::declare();
 }
