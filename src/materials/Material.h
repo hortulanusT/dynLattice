@@ -31,6 +31,8 @@ class Material : public NamedObject
 public:
   JEM_DECLARE_CLASS(Material, NamedObject);
 
+  const static char *VERBOSITY_PROP;
+
   Material(const String &name,
            const Properties &conf,
            const Properties &props,
@@ -98,6 +100,8 @@ protected:
    *
    */
   virtual ~Material();
+
+  idx_t verbosity_;
 };
 
 void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)

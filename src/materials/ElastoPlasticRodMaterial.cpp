@@ -85,9 +85,10 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     materialH_(jem::SliceFrom(1), jem::SliceFrom(1)) = kinFacts;
   }
 
-  jem::System::debug(myName_)
-      << " ...Hardening matrix of the material '" << myName_ << "':\n"
-      << materialH_ << "\n";
+  if (verbosity_ > 0)
+    jem::System::debug(myName_)
+        << " ...Hardening matrix of the material '" << myName_ << "':\n"
+        << materialH_ << "\n";
 
   old_hardParams_.resize(argCount_ - dofCount, ipCount, elemCount);
   old_hardParams_ = 0.;
@@ -168,7 +169,8 @@ void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector 
 
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
-  jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
+  if (verbosity_ > 1)
+    jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   curr_Strains_(ALL, ip, ielem) = strain;
   // REPORT("Step 1")
   idx_t liter = 0;
@@ -190,7 +192,8 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     if (!inelastic)
     {
-      jem::System::debug(myName_) << "        elastic calculation\n";
+      if (verbosity_ > 1)
+        jem::System::debug(myName_) << "        elastic calculation\n";
       break;
     }
 
@@ -199,11 +202,13 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     f = yieldCond_->getValue(args.addr());
 
-    jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f << "\n";
+    if (verbosity_ > 2)
+      jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f << "\n";
     JEM_PRECHECK2(liter < maxIter_, "Too many iterations in plasticity loop");
     if (f < precision_)
     {
-      jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
+      if (verbosity_ > 1)
+        jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
       break;
     }
     // SUBHEADER2("Step 3", liter)

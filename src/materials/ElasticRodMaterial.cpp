@@ -116,14 +116,16 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   if (myProps.find(edgeFact_, EDGE_FACTOR) && edgeFact_ != 1.)
     myProps.get(nElem_, N_ELEM);
 
-  jem::System::debug(myName_)
-      << " ...Stiffness matrix of the material '" << myName_ << "':\n"
-      << materialK_ << "\n";
+  if (verbosity_ > 0)
+    jem::System::debug(myName_)
+        << " ...Stiffness matrix of the material '" << myName_ << "':\n"
+        << materialK_ << "\n";
   if (density_ > 0.)
   {
-    jem::System::debug(myName_)
-        << " ...Inertia matrix of the material '" << myName_ << "':\n"
-        << materialM_ << "\n";
+    if (verbosity_ > 0)
+      jem::System::debug(myName_)
+          << " ...Inertia matrix of the material '" << myName_ << "':\n"
+          << materialM_ << "\n";
   }
 }
 
