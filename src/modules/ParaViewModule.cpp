@@ -167,6 +167,7 @@ Module::Status ParaViewModule::run
       pvd_printer->incrIndentLevel();
       pvd_printer->flush();
 
+      // TODO write different part files for the different parts
       for (idx_t i_out = 0; i_out < out_num_; i_out++)
       {
         *pvd_printer << "<DataSet ";
@@ -435,6 +436,7 @@ void ParaViewModule::writePiece_
       iDofs[idof] = dofs->findType(dofNames[idof]);
     }
 
+    // BUG ALL FORCES not just for the group exported
     if (info.nodeData[iPtDatum] == "fext")
     {
       Vector fext(dofs->dofCount());
