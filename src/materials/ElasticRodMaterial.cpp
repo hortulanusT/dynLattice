@@ -246,7 +246,15 @@ Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) 
   else
   {
     if (ielem == 0 || ielem == nElem_ - 1)
-      return Matrix(edgeFact_ * edgeFact_ * getMaterialMass());
+    {
+      Matrix mass = getMaterialMass();
+      mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
+      mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
+      mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
+      mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
+
+      return mass;
+    }
     else
       return getMaterialMass();
   }
