@@ -1,4 +1,5 @@
 #include "models/SpringMassModel.h"
+#include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>
 
 JEM_DEFINE_CLASS(SpringMassModel);
@@ -102,6 +103,8 @@ SpringMassModel::SpringMassModel
 
     ElementGroup elemGroup = jive::fem::newElementGroup(iElems, allElems);
     elemGroup.store(springNames[i], globdat);
+    NodeGroup nodeGroup = jive::fem::newNodeGroup(iNodes[jem::SliceFrom(pElem)], allNodes);
+    nodeGroup.store(springNames[i] + "_bot", globdat);
 
     // create the spring model
     jem::System::debug(myName_) << " ...Creating Model for Spring '" << springNames[i] << "'\n";
