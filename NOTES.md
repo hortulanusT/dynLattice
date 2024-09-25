@@ -30,6 +30,7 @@
 1. `rsync -vax --exclude '*.pdf' --delete studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
+TODO change to a proper nonlin-design
 1. `jive scripts/running/eqv-design.py lin_init lin_change_master_prep prep_runs_nonlin`
 1. `./scripts/cluster/masterDesign.sh`
 <!-- 1. `./scripts/cluster/syncBack.sh` -->
