@@ -248,10 +248,10 @@ Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) 
     if (ielem == 0 || ielem == nElem_ - 1)
     {
       Matrix mass = getMaterialMass();
-      mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
-      mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
-      mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
-      mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
+      mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
+      mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
+      mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
+      mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
 
       return mass;
     }
