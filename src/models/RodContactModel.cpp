@@ -152,7 +152,7 @@ bool RodContactModel::takeAction
     // get the load case
     globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
-    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase == "tangentOutput")
+    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase != "tangentOutput")
     {
       // find possible contacts if they need to be updated
       findContacts_(elemsA, elemsB, disp);

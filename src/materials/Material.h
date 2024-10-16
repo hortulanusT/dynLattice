@@ -31,6 +31,8 @@ class Material : public NamedObject
 public:
   JEM_DECLARE_CLASS(Material, NamedObject);
 
+  const static char *VERBOSITY_PROP;
+
   Material(const String &name,
            const Properties &conf,
            const Properties &props,
@@ -58,7 +60,7 @@ public:
    */
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
-  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip);
+  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
 
   /**
    * @brief get the material stiffness matrix
@@ -78,7 +80,9 @@ public:
 
   virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
 
-  virtual Matrix getLumpedMass(double l) const;
+  virtual Matrix getLumpedMass(const double l) const;
+
+  virtual inline Matrix getLumpedMass(const double l, const idx_t &ielem) const;
 
   virtual void apply_inelast_corr() = 0;
 
@@ -96,9 +100,11 @@ protected:
    *
    */
   virtual ~Material();
+
+  idx_t verbosity_;
 };
 
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
   getStress(stress, strain);
 }
@@ -111,4 +117,9 @@ Matrix Material::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
 Matrix Material::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
 {
   return getMaterialMass();
+}
+
+Matrix Material::getLumpedMass(const double l, const idx_t &ielem) const
+{
+  return getLumpedMass(l);
 }
