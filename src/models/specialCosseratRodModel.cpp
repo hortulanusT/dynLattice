@@ -1045,7 +1045,7 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
 
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      E_pot += weights[ip] * 0.5 * dotProduct(strain[ip], stress[ip]);
+      E_pot += weights[ip] * 0.5 * dotProduct(strain[ip], stress[ip]); // BUG this is sometimes negative???
     }
   }
 
