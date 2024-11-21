@@ -45,8 +45,9 @@
       - get spatial resolution
 1. Modules
     - Explicit Solver
-      - keep $M$ constant, only update $\Theta$
+      - keep $\bm{M}$ constant, only update $\Theta$
       - implement 'lumped' algorithm with direct 3x3 inverts
+      - Old $\bm{M}$ matrix as pre-conditioner?
     - Tangent Output Module
       - Fix plasticity issues
       - Get Matrix Condensation to work
