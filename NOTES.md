@@ -27,7 +27,7 @@
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/tno-design.py work_density_export prep_latex_design_nonlin`
-1. `rsync -vax --exclude '*.pdf' --delete studies/results/tno-design/ ../Latex/PaperTNO/results/` 
+1. `rsync -vax --exclude '*.pdf' studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/nonlin-design.py lin_init lin_change_prep_nonlin prep_runs_nonlin`
