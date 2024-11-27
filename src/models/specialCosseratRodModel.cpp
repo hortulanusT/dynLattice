@@ -102,7 +102,7 @@ specialCosseratRodModel::specialCosseratRodModel
   rodNodes_[rodElems_.getNodeIndices()] =
       jem::iarray(rodElems_.getNodeIndices().size());
 
-  // Initialize the internal shape. // TODO allow the user to input more openly
+  // Initialize the internal shape.
   myProps.makeProps("stiffShape").set("numPoints", allElems_.getElemNodeCount(rodElems_.getIndex(0)));
   shapeK_ = newInstance<Line3D>("stiffShape", myConf, myProps);
   myProps.makeProps("massShape").set("numPoints", allElems_.getElemNodeCount(rodElems_.getIndex(0)));

@@ -1043,7 +1043,7 @@ bool RodContactModel::computeSTS_
   double distance = norm2(pB - pA);
 
   if (jem::isTiny(distance))
-    return false; // HACK we should find a different solution for complete interpenetration!
+    return false; // TODO we should find a different solution for complete interpenetration!
 
   if (distance > 2. * radius_)
     return false;
@@ -1161,7 +1161,7 @@ bool RodContactModel::computeNTS_
   double distance = norm2(pM - possS);
 
   if (jem::isTiny(distance))
-    return false; // HACK we should find a different solution for complete interpenetration!
+    return false; // TODO we should find a different solution for complete interpenetration!
 
   if (distance > 2. * radius_)
     return false;

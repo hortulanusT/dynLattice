@@ -160,7 +160,7 @@ bool SpringMassModel::applyConstraints_
   // fix the boundary to the first node
   idx_t mDof;
   IdxVector bDofs(boundary_.size());
-  for (idx_t iDofType = 0; iDofType < boundary_.getNodes().rank(); iDofType++) // HACK to not fix the ROT - DOFs
+  for (idx_t iDofType = 0; iDofType < dofs->typeCount(); iDofType++)
   {
     dofs->getDofIndices(bDofs, iBoundNodes, iDofType);
     mDof = dofs->getDofIndex(edgeNodes_(0, 0), iDofType);
