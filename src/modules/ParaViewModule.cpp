@@ -167,7 +167,7 @@ Module::Status ParaViewModule::run
       pvd_printer->incrIndentLevel();
       pvd_printer->flush();
 
-      // TODO write different part files for the different parts
+      // LATER write different part files for the different parts
       for (idx_t i_out = 0; i_out < out_num_; i_out++)
       {
         *pvd_printer << "<DataSet ";
@@ -436,11 +436,10 @@ void ParaViewModule::writePiece_
       iDofs[idof] = dofs->findType(dofNames[idof]);
     }
 
-    // BUG ALL FORCES not just for the group exported
     if (info.nodeData[iPtDatum] == "fext")
     {
       Vector fext(dofs->dofCount());
-      Matrix fext_mat(points.size(), dofs->typeCount());
+      Matrix fext_mat(groupNodes.size(), dofs->typeCount());
       fext = 0.;
 
       params.set(ActionParams::EXT_VECTOR, fext);
@@ -460,7 +459,7 @@ void ParaViewModule::writePiece_
     else if (info.nodeData[iPtDatum] == "fint")
     {
       Vector fint(dofs->dofCount());
-      Matrix fint_mat(points.size(), dofs->typeCount());
+      Matrix fint_mat(groupNodes.size(), dofs->typeCount());
       fint = 0.;
 
       params.set(ActionParams::INT_VECTOR, fint);
@@ -482,7 +481,7 @@ void ParaViewModule::writePiece_
       Vector fext(dofs->dofCount());
       Vector fint(dofs->dofCount());
       Vector fres(dofs->dofCount());
-      Matrix fres_mat(points.size(), dofs->typeCount());
+      Matrix fres_mat(groupNodes.size(), dofs->typeCount());
       fext = 0.;
       fint = 0.;
       fres = 0.;
