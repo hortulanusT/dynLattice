@@ -71,6 +71,7 @@ using jive::Matrix;
 using jive::StringVector;
 using jive::Vector;
 using jive::app::Module;
+using jive::app::PropNames;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
 using jive::fem::NodeSet;
@@ -86,9 +87,11 @@ using jive::util::ItemSet;
 using jive::util::SparseTable;
 using jive::util::XTable;
 
-class ParaViewModule : public Module {
+class ParaViewModule : public Module
+{
 protected:
-  struct elInfo {
+  struct elInfo
+  {
     String name;
     String shape;
     StringVector elemData;

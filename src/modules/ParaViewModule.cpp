@@ -281,6 +281,8 @@ void ParaViewModule::writePiece_
      const elInfo &info)
 
 {
+  globdat.set(PropNames::LOAD_CASE, "output");
+
   IdxVector groupNodes = group.getNodeIndices();
   IdxVector nodeNums(max(groupNodes) + 1);
   IdxVector groupElems = group.getIndices();
@@ -582,6 +584,8 @@ void ParaViewModule::writePiece_
 
   file->decrIndentLevel();
   *file << "</Piece>" << endl;
+
+  globdat.erase(PropNames::LOAD_CASE);
 }
 
 //-----------------------------------------------------------------------
