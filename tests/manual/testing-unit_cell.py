@@ -97,10 +97,11 @@ for model in ["", "_plastic"]:
   data = translateStiffness(raw_data)
   data = data.join(uniaxialStiffness(data), rsuffix="_raw")
 
-  ax.plot(-1 * data["H22"], data["E_y"], label=f"E_y{model}")
-  ax.plot(-1 * data["H22"], data["E_y_raw"], "--", label=f"E_y{model} (raw)")
-  ax.legend()
-  # ax.set_ylim(bottom=0, top=3e9)
+  ax.plot(-100 * data["H22"], data["E_y"], label=f"E_y{model}")
+  ax.plot(-100 * data["H22"], data["E_y_raw"], "--", label=f"E_y{model} (raw)")
+  ax.legend(loc="lower left")
+  ax.set_xlim(left=0, right=0.5)
+  ax.set_ylim(bottom=0, top=2.5e9)
 
 fig.tight_layout()
 fig.savefig("tests/manual/testing-unit_cell.pdf")

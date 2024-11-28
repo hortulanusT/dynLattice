@@ -248,8 +248,6 @@ bool hingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial 
       for (idx_t idof = 0; idof < jtypes_.size(); idof++)
         deriv[idof] = yieldCond_->getDeriv(idof, critForces.addr());
 
-      TEST_CONTEXT(deriv)
-
       deltaFlow = dotProduct(deriv, intForces_[ielem] - critForces) / dotProduct(deriv, matmul(material_->getMaterialStiff(), deriv));
 
       plasticDisp_[ielem] += ell_[ielem] * deltaFlow * deriv;

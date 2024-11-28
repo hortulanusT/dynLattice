@@ -106,10 +106,6 @@ bool LatticeModel::takeAction
      const Properties &params,
      const Properties &globdat)
 {
-  String loadCase = "---";
-  globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
-  SUBHEADER2(action, loadCase)
-
   bool actionTaken = false;
   for (Ref<Model> child : children_)
     actionTaken = child->takeAction(action, params, globdat) || actionTaken;
