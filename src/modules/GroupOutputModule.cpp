@@ -74,8 +74,9 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
 
   Ref<Model> model = Model::get(globdat, getContext());
   Properties params("actionParams");
+  globdat.set(PropNames::LOAD_CASE, "output");
   allLoad = 0.;
-  if (!globdat.find(allResp, ActionParams::EXT_VECTOR))
+  if (!globdat.find(allLoad, ActionParams::EXT_VECTOR))
   {
     params.set(ActionParams::EXT_VECTOR, allLoad);
     model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
@@ -89,6 +90,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
     params.erase(ActionParams::INT_VECTOR);
   }
+  globdat.erase(PropNames::LOAD_CASE);
 
   Vector load, disp, velo, acce, resp;
 

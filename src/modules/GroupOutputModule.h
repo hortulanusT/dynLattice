@@ -17,6 +17,7 @@
 #include <jive/Array.h>
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
+#include <jive/app/Names.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/model/Actions.h>
@@ -42,6 +43,7 @@ using jive::Matrix;
 using jive::StringVector;
 using jive::Vector;
 using jive::app::Module;
+using jive::app::PropNames;
 using jive::fem::ElementGroup;
 using jive::fem::ElementSet;
 using jive::fem::NodeGroup;

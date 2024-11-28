@@ -131,7 +131,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
-  Properties myConf = conf.getProps(myName_);
+  Properties myConf = conf.makeProps(myName_);
 
   myConf.set(YOUNGS_MODULUS, young_);
   myConf.set(SHEAR_MODULUS, shearMod_);

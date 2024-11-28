@@ -323,16 +323,20 @@ bool specialCosseratRodModel::takeAction
     Vector disp;
     Vector velo;
     Ref<AbstractMatrix> mass;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     params.get(fint, ActionParams::INT_VECTOR);
+
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(fint, disp);
+    assemble_(fint, disp, loadCase);
 
     if (params.find(mass, ActionParams::MATRIX2))
     {
@@ -746,7 +750,7 @@ void specialCosseratRodModel::get_stresses_(
   // TEST_CONTEXT(strains)
 
   for (idx_t ip = 0; ip < ipCount; ip++)
-    material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "tangentOutput");
+    material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "output");
 
   // get the (spatial) stresses
   if (spatial)
@@ -884,7 +888,8 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 }
 
 void specialCosseratRodModel::assemble_(const Vector &fint,
-                                        const Vector &disp) const
+                                        const Vector &disp,
+                                        const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -919,7 +924,7 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
     // get the XI values for this
     shapeK_->getXi(XI, weights, nodeU, nodePhi_0);
     // get the (spatial) stresses
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
 
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)

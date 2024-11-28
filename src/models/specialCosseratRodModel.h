@@ -139,7 +139,7 @@ private:
    * @param[out] fint internal force Vector
    * @param[in]  disp current values for the DOFs
    */
-  void assemble_(const Vector &fint, const Vector &disp) const;
+  void assemble_(const Vector &fint, const Vector &disp, const String &loadCase = "") const;
 
   /**
    * @brief construct the gyroscopic forces (omega x Theta*omega)
