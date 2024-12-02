@@ -21,13 +21,16 @@
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
 #include <jive/algebra/NullMatrixBuilder.h>
+#include <jive/app/Names.h>
 #include <jive/fem/ElementSet.h>
+#include <jive/implict/Names.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/util/XTable.h>
 
 using jem::ALL;
@@ -50,6 +53,7 @@ using jive::model::Model;
 using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
+using jive::util::FuncUtils;
 using jive::util::XTable;
 
 class RodContactModel : public Model
@@ -59,6 +63,8 @@ public:
 
   static const char *TYPE_NAME;
   static const char *PENALTY_PROP;
+  static const char *PENALTY_STS_PROP;
+  static const char *PENALTY_NTS_PROP;
   static const char *RADIUS_PROP;
   static const char *VERBOSE_PROP;
 
@@ -144,7 +150,34 @@ protected:
        const Vector &fint,
        const IdxVector &elementsA,
        const IdxVector &elementsB,
-       const Vector &disp) const;
+       const Vector &disp);
+
+  /**
+   * @brief build the list of nodes initially in contact
+   *
+   * @param elementsA
+   * @param elementsB
+   * @param disp
+   */
+  virtual void computeBlacklist_
+
+      (
+          const IdxVector &elementsA,
+          const IdxVector &elementsB,
+          const Vector &disp);
+
+  /**
+   * @brief check weather a contact is on the blacklist
+   *
+   * @param elementA element ID
+   * @param elementB element ID
+   * @return true if the contact is on the blacklist
+   */
+  virtual bool filterBlacklist_
+
+      (const idx_t elementsA,
+       const idx_t elementsB) const;
+
   /**
    * @brief find the local coordinates of the closest points on two beams
    *
@@ -215,7 +248,16 @@ private:
   Ref<DofSpace> dofs_;
   Ref<Line3D> shape_;
 
-  double penalty_;
+  IdxVector blacklistA_;
+  IdxVector blacklistB_;
+
+  ArrayBuffer<idx_t> contactsA_;
+  ArrayBuffer<idx_t> contactsB_;
+
+  Ref<Function> updCond_;
+
+  double penaltySTS_;
+  double penaltyNTS_;
   double radius_;
   bool verbose_;
 };

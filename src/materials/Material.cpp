@@ -4,11 +4,20 @@
 
 JEM_DEFINE_CLASS(Material);
 
+const char *Material::VERBOSITY_PROP = "verbosity";
+
 Material::Material(const String &name,
                    const Properties &conf,
                    const Properties &props,
                    const Properties &globdat) : Super(name)
 {
+  verbosity_ = 1;
+
+  Properties myProps = props.findProps(name);
+  Properties myConf = conf.makeProps(name);
+
+  myProps.find(verbosity_, VERBOSITY_PROP);
+  myConf.set(VERBOSITY_PROP, verbosity_);
 }
 
 Material::~Material()

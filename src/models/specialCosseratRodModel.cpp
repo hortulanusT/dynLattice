@@ -256,11 +256,15 @@ bool specialCosseratRodModel::takeAction
     Ref<MatrixBuilder> mbld;
     Vector fint;
     Vector disp;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     params.get(mbld, ActionParams::MATRIX0);
     params.get(fint, ActionParams::INT_VECTOR);
     // TEST_CONTEXT ( fint )
+
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
@@ -268,7 +272,7 @@ bool specialCosseratRodModel::takeAction
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(*mbld, fint, disp);
+    assemble_(*mbld, fint, disp, loadCase);
 
     // // DEBUGGING
     // IdxVector dofList(fint.size());
@@ -319,16 +323,20 @@ bool specialCosseratRodModel::takeAction
     Vector disp;
     Vector velo;
     Ref<AbstractMatrix> mass;
+    String loadCase = "";
 
     // Get the action-specific parameters.
     params.get(fint, ActionParams::INT_VECTOR);
+
+    // get the load case
+    globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
     // Assemble the global stiffness matrix together with
     // the internal vector.
-    assemble_(fint, disp);
+    assemble_(fint, disp, loadCase);
 
     if (params.find(mass, ActionParams::MATRIX2))
     {
@@ -729,7 +737,7 @@ void specialCosseratRodModel::get_strains_(
 void specialCosseratRodModel::get_stresses_(
     const Matrix &stresses, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
-    const bool spatial) const
+    const bool spatial, const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
@@ -742,7 +750,7 @@ void specialCosseratRodModel::get_stresses_(
   // TEST_CONTEXT(strains)
 
   for (idx_t ip = 0; ip < ipCount; ip++)
-    material_->getStress(stresses[ip], strains[ip], ie, ip);
+    material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "output");
 
   // get the (spatial) stresses
   if (spatial)
@@ -782,7 +790,8 @@ void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
 
 void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &fint,
-                                        const Vector &disp) const
+                                        const Vector &disp,
+                                        const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -800,7 +809,6 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Quadix XI(dofCount, dofCount, nodeCount, ipCount);
   Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
   Cubix PI(dofCount, dofCount, ipCount);
-  Matrix materialC = material_->getMaterialStiff();
   Matrix spatialC(dofCount, dofCount);
   Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
                   ipCount);
@@ -837,7 +845,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // TEST_CONTEXT(PSI)
     // TEST_CONTEXT(PI)
     // get the (spatial) stresses
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
     // get the gemetric stiffness
     get_geomStiff_(geomStiff, stress, nodePhi_0, nodeU);
     // TEST_CONTEXT(geomStiff)
@@ -880,7 +888,8 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 }
 
 void specialCosseratRodModel::assemble_(const Vector &fint,
-                                        const Vector &disp) const
+                                        const Vector &disp,
+                                        const String &loadCase) const
 {
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
@@ -915,7 +924,7 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
     // get the XI values for this
     shapeK_->getXi(XI, weights, nodeU, nodePhi_0);
     // get the (spatial) stresses
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
 
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
@@ -973,8 +982,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
   Cubix ipLambda(rank, rank, ipCount);
 
-  Matrix materialM = material_->getMaterialMass()(TRANS_PART, TRANS_PART);
-  Matrix materialJ(rank, rank);
   Matrix spatialInertia(dofCount, dofCount);
 
   // iterate through the elements
@@ -988,7 +995,6 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
     shapes = shapeM_->getShapeFunctions();
 
     l = sum(weights) / (nodeCount - 1);
-    materialJ = material_->getLumpedMass(l)(ROT_PART, ROT_PART);
 
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
@@ -1001,9 +1007,9 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
         for (idx_t ip = 0; ip < ipCount; ip++)
           spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
-                                                    mc3.matmul(ipLambda[ip], materialM, ipLambda[ip].transpose());
+                                                    mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
         if (inode == jnode)
-          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], materialJ,
+          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART),
                                                            nodeLambda[inode].transpose());
         if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
           spatialInertia(ROT_PART, ROT_PART) /= 2.;

@@ -1,5 +1,4 @@
-#ifndef SOLVER_NAMES_H
-#define SOLVER_NAMES_H
+#pragma once
 
 struct SolverNames
 {
@@ -16,5 +15,3 @@ struct SolverNames
   static const char *SET_STEP_SIZE;
   static const char *CONTINUE;
 };
-
-#endif

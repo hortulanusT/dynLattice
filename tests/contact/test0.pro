@@ -42,7 +42,7 @@ model.model.model.diriFixed.nodeGroups += [ "fixed_left", "fixed_left", "fixed_l
 model.model.model.diriFixed.dofs += model.model.model.lattice.child.dofNamesRot;
 model.model.model.diriFixed.factors += [ 0., 0., 0. ]; 
 
-model.model.model.lattice.contact.penalty = 1e6;
+model.model.model.lattice.contact.penalty = 262.5e6;
 model.model.model.lattice.contact.radius = 0.05;
 model.model.model.lattice.contact.verbose = true;
 

@@ -85,7 +85,7 @@ else:
       tikz_str += ('\n' if j == 0 else ' -- ') + \
           f"({(new_coords[0]+data[idx][0]*visual_fact)*fact},{(new_coords[1]+data[idx][1]*visual_fact)*fact})"
 
-with open(f"{data_file[:-8]}_{load_step}.tikz", "w") as file:
+with open(f"{data_file.replace('output', 'results')[:-8]}_{load_step}.tikz", "w") as file:
   file.write(tikz_str + "\n")
 
 gmsh.finalize()

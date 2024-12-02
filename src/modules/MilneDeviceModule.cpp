@@ -37,10 +37,9 @@ MilneDeviceModule::~MilneDeviceModule()
 //   solve
 //-----------------------------------------------------------------------
 
-void
-MilneDeviceModule::solve
+void MilneDeviceModule::solve
 
-  (const Properties& info, const Properties& globdat)
+    (const Properties &info, const Properties &globdat)
 
 {
   const idx_t dofCount = dofs_->dofCount();

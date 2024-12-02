@@ -11,6 +11,7 @@
 
 #include "models/LatticeModel.h"
 #include "utils/testing.h"
+#include <jive/app/Names.h>
 
 //=======================================================================
 //   class LatticeModel

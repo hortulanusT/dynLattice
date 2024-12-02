@@ -1,9 +1,16 @@
 # Rod-based Lattice Simulations
 This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo/Vu-Quoc](https://dx.doi.org/10.1016/0045-7825(86)90079-4) with some minor adaptations due to [Crisfield/Jelenić](https://dx.doi.org/10.1098/rspa.1999.0352). It also contains some python scripts for easier execution, they all should be executed from the main directory.
 
-**JEM/JIVE Version: 3.0**
+## Requirements
+- **Apptainer 1.2**
+  - JEM/JIVE 3.0
+  - OpenMPI 4.1.1
+  - GMSH 4.9.5
+  - HDF5 1.12.2
 
-**C++17 used in compilation**
+To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build /path/to/jive.sif /path/to/jive.def`.
+
+To create an alias used in the recipes run `alias jive='apptainer -s exec -e /path/to/jive.sif'`.
 
 ## Organization
 ```
@@ -43,6 +50,20 @@ This repository contains JEM/JIVE code and corresponding scripts to execute a FE
     └── results         <- processed results
 ```
 
+## Notes
+In the result files the PBC's are encoded as follows:
+```
+ 0 -- uniaxial deformation
+ 1 -- planar deformation
+ 2 -- shear deformation
+```
+In the result files the Material models are encoded as follows:
+```
+ 0 -- elastic
+ 1 -- elastic + contact
+ 2 -- plastic
+ 3 -- plastic + contact
+```
 
 ## License
 [MIT License](LICENSE)

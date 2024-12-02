@@ -28,6 +28,7 @@
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/FlexMatrixBuilder.h>
 #include <jive/algebra/MatrixBuilder.h>
+#include <jive/app/Names.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeGroup.h>
@@ -131,14 +132,14 @@ private:
    * @param[in]  disp current values for the DOFs
    */
   void assemble_(MatrixBuilder &mbld, const Vector &fint,
-                 const Vector &disp) const;
+                 const Vector &disp, const String &loadCase = "") const;
 
   /**
    * @brief construct the internal force vector
    * @param[out] fint internal force Vector
    * @param[in]  disp current values for the DOFs
    */
-  void assemble_(const Vector &fint, const Vector &disp) const;
+  void assemble_(const Vector &fint, const Vector &disp, const String &loadCase = "") const;
 
   /**
    * @brief construct the gyroscopic forces (omega x Theta*omega)
@@ -232,7 +233,8 @@ private:
       const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
                                ///< orientation j-th node
       const idx_t ie,
-      const bool spatial = true) const; ///< rotational displacements
+      const bool spatial = true, ///< rotational displacements
+      const String &loadCase = "") const;
 
   /**
    * @brief format the displacements nicely
