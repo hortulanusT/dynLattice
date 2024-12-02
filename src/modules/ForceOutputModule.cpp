@@ -1,6 +1,6 @@
+#include "modules/ForceOutputModule.h"
 #include <filesystem>
 #include <jem/base/ClassTemplate.h>
-#include "modules/ForceOutputModule.h"
 
 JEM_DEFINE_CLASS(ForceOutputModule);
 
@@ -143,6 +143,7 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
       writeHeader_(time >= 0);
 
     Properties params;
+    globdat.set(PropNames::LOAD_CASE, "output");
 
     if (intOut_)
     {
@@ -170,6 +171,8 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
       writeLine_(force, step, "gyroVector", time);
       params.clear();
     }
+
+    globdat.erase(PropNames::LOAD_CASE);
   }
 
   return OK;

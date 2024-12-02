@@ -152,7 +152,7 @@ bool RodContactModel::takeAction
     // get the load case
     globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
-    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase != "tangentOutput")
+    if (FuncUtils::evalCond(*updCond_, globdat) || loadCase != "output")
     {
       // find possible contacts if they need to be updated
       findContacts_(elemsA, elemsB, disp);
@@ -231,6 +231,11 @@ bool RodContactModel::takeAction
     weights = -1.;
 
     return true;
+  }
+
+  if (action == Actions::COMMIT)
+  {
+    // TODO add contact stiffness to potential energy!!
   }
 
   return false;
@@ -492,7 +497,7 @@ void RodContactModel::computeContacts_
     allElems_.getElemNodes(nodesB, elementsB[iContact]);
     allNodes_.getSomeCoords(possB, nodesB);
 
-    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER generalize for higher order elements
+    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER higher order elements
     {
       if (verbose_)
         jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (same nodes)\n";
@@ -526,7 +531,7 @@ void RodContactModel::computeContacts_
     {
       if (verbose_)
         jem::System::debug(myName_) << "STS contact ";
-      // LATER generalize for higher order elements
+      // LATER higher order elements
       dofsAB.resize(globalRank * 4);
 
       f_contrib.resize(2 * nodeCount * globalRank);
@@ -553,7 +558,7 @@ void RodContactModel::computeContacts_
     {
       if (verbose_)
         jem::System::debug(myName_) << "NTS contact ";
-      // LATER generalize for higher order elements
+      // LATER higher order elements
       dofsAB.resize(globalRank * 3);
 
       f_contrib.resize((nodeCount + 1) * globalRank);
@@ -638,7 +643,7 @@ void RodContactModel::computeContacts_
     {
       if (verbose_)
         jem::System::debug(myName_) << "(speculative) NTS contact ";
-      // LATER generalize for higher order elements
+      // LATER higher order elements
       dofsAB.resize(globalRank * 4);
 
       f_contrib.resize(2 * nodeCount * globalRank);
@@ -778,7 +783,7 @@ void RodContactModel::computeBlacklist_
     allElems_.getElemNodes(nodesB, elementsB[iContact]);
     allNodes_.getSomeCoords(possB, nodesB);
 
-    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER generalize for higher order elements
+    if (nodesA[0] == nodesB[0] || nodesA[0] == nodesB[1] || nodesA[1] == nodesB[0] || nodesA[1] == nodesB[1]) // LATER higher order elements
     {
       if (verbose_)
         jem::System::debug(myName_) << " > > Skipping contact between elements " << elementsA[iContact] << " and " << elementsB[iContact] << " (same nodes)\n";
@@ -970,12 +975,12 @@ void RodContactModel::findClosestPoints_
     break;
 
   case 3:
-    /* LATER Quadratic Elements */
+    /* LATER quadratic Elements */
     throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
     break;
 
   case 4:
-    /* LATER Cubic Elements */
+    /* LATER cubic Elements */
     throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
     break;
 
@@ -1005,12 +1010,12 @@ double RodContactModel::getClosestPoint_
     break;
 
   case 3:
-    /* LATER Quadratic Elements */
+    /* LATER quadratic Elements */
     throw jem::Error(JEM_FUNC, "Quadratic Elements not implemented yet");
     break;
 
   case 4:
-    /* LATER Cubic Elements */
+    /* LATER cubic Elements */
     throw jem::Error(JEM_FUNC, "Cubic Elements not implemented yet");
     break;
 
@@ -1043,7 +1048,7 @@ bool RodContactModel::computeSTS_
   double distance = norm2(pB - pA);
 
   if (jem::isTiny(distance))
-    return false; // HACK we should find a different solution for complete interpenetration!
+    return false; // LATER find a different solution for complete interpenetration!
 
   if (distance > 2. * radius_)
     return false;
@@ -1128,8 +1133,8 @@ bool RodContactModel::computeSTS_
 
   if (norm2(ddpA) + norm2(ddpB) > 1e-12)
   {
-    // LATER Implement 'F' for Higher Order Elements
-    throw jem::Error(JEM_FUNC, "Higher Order Elements not implemented yet");
+    // LATER implement 'F' for higher order elements
+    throw jem::Error(JEM_FUNC, "higher order elements not implemented yet");
   }
 
   G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
@@ -1161,7 +1166,7 @@ bool RodContactModel::computeNTS_
   double distance = norm2(pM - possS);
 
   if (jem::isTiny(distance))
-    return false; // HACK we should find a different solution for complete interpenetration!
+    return false; // LATER find a different solution for complete interpenetration!
 
   if (distance > 2. * radius_)
     return false;

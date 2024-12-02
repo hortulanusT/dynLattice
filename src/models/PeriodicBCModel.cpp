@@ -110,31 +110,27 @@ bool periodicBCModel::takeAction
   if (action == Actions::GET_CONSTRAINTS &&
       (mode_ == DISP || mode_ == UPD))
   {
-    String loadCase = "reg";
-    params.find(loadCase, ActionParams::LOAD_CASE);
-    if (loadCase != "condenseMatrix")
+    double scale;
+    Vector currVec;
+    Matrix currentGrad(grad_.shape());
+
+    scale = NAN;
+    currentGrad = NAN;
+
+    // get the scale factor
+    if (!globdat.find(currVec, FIXEDGRAD_PARAM))
     {
-      double scale;
-      Vector currVec;
-      Matrix currentGrad(grad_.shape());
-
-      scale = NAN;
-      currentGrad = NAN;
-
-      // get the scale factor
-      if (!globdat.find(currVec, FIXEDGRAD_PARAM))
+      if (!params.find(scale, ActionParams::SCALE_FACTOR))
       {
-        if (!params.find(scale, ActionParams::SCALE_FACTOR))
-        {
-          Globdat::getVariables(globdat).get(scale, jive::model::RunvarNames::LOAD_SCALE);
-        }
+        Globdat::getVariables(globdat).get(scale, jive::model::RunvarNames::LOAD_SCALE);
       }
-      else
-      {
-        vec2mat(currentGrad, currVec);
-      }
-      fixCorners_(globdat, currentGrad, scale);
     }
+    else
+    {
+      vec2mat(currentGrad, currVec);
+    }
+    fixCorners_(globdat, currentGrad, scale);
+
     setConstraints_();
 
     return true;

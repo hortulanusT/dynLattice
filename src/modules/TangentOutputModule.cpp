@@ -76,9 +76,6 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
   strains_ = PBCGroupOutputModule::getDataSets(rank_, true, false, dofs);
   stresses_ = PBCGroupOutputModule::getDataSets(rank_, false, true, dofs);
-  // String dummy = stresses_[1];
-  // stresses_[1] = stresses_[2];
-  // stresses_[2] = dummy; // Transpose 1st PK stress to get nominal stress
 
   for (idx_t i = 0; i < dofs.size(); i++)
     sizes_[i] = "all.extent." + dofs[i];
@@ -181,23 +178,11 @@ void TangentOutputModule::readStrainStress_(const Vector &strains,
   stresses = 0.;
 
   groupUpdate_->run(globdat);
+
   // for (String sizeMeas : sizes_)
   //   size *= FuncUtils::evalExpr(sizeMeas, globdat);
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     strains[iComp] = FuncUtils::evalExpr(strains_[iComp], globdat);
-  for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
-    stresses[iComp] = FuncUtils::evalExpr(stresses_[iComp], globdat);
-}
-
-void TangentOutputModule::readStresses_(const Vector &stresses,
-                                        const Vector &fint,
-                                        const Properties &globdat)
-{
-  stresses = 0.;
-
-  globdat.set(ActionParams::INT_VECTOR, fint);
-  groupUpdate_->run(globdat);
-
   for (idx_t iComp = 0; iComp < rank_ * rank_; iComp++)
     stresses[iComp] = FuncUtils::evalExpr(stresses_[iComp], globdat);
 }
@@ -255,7 +240,6 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains[iPBC] += dir * .5 * perturb_;
 
       globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
-      globdat.set(PropNames::LOAD_CASE, "tangentOutput");
 
       try
       {
@@ -263,7 +247,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       }
       catch (const jem::Exception &e)
       {
-        print(System::info(myName_),
+        print(System::warn(),
               "The Newton-Raphson solver didn't converge, taking non-converged result for tangent calculation \n\n");
       }
 
@@ -273,10 +257,9 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       stresses[iPBC] += dir * pertubStresses;
 
       globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
-      globdat.erase(PropNames::LOAD_CASE);
-      StateVector::restoreNew(DofSpace::get(globdat, getContext()),
-                              globdat);
+      solver_->cancel(globdat);
     }
+    System::info() << " > > > Results from strainig along " << iPBC << " direction:\n";
     reportStrainStress_(strains[iPBC], stresses[iPBC]);
   }
 
@@ -325,50 +308,8 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
 
 void TangentOutputModule::condenseMatrix_(const Matrix &strains,
                                           const Matrix &stresses,
-                                          const Properties &globdat)
-{
-  NOT_IMPLEMENTED
-  Vector fint(cons_->dofCount());
-  Ref<FEMatrixBuilder> mB = newInstance<FEMatrixBuilder>(
-      "tangentBuilder", ElementSet::get(globdat, "tangentBuild"),
-      cons_->getDofSpace());
-  Ref<AbstractMatrix> K;
-  Properties params;
-
-  mB->setToZero();
-  params.set(ActionParams::INT_VECTOR, fint);
-  params.set(ActionParams::MATRIX0, mB);
-  params.set(ActionParams::LOAD_CASE, "condenseMatrix");
-  masterModel_->takeAction(Actions::GET_MATRIX0, params, globdat);
-  masterModel_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
-  params.clear();
-  mB->updateMatrix();
-  K = mB->getMatrix();
-
-  // reduce the stiffness matrix
-  K = newInstance<ConstrainedMatrix>(K, cons_);
-
-  // iterate over the unit strains
-  Vector u(cons_->dofCount());
-  strains = 0.;
-  for (idx_t i = 0; i < rank_; i++)
-    for (idx_t j = 0; j < rank_; j++)
-    {
-      strains(i * rank_ + j, i * rank_ + j) = 1.;
-
-      u = 0.;
-      fint = 0.;
-
-      u[strainDofs_(i, j)] = 1.;
-
-      K->matmul(fint, u);
-
-      readStresses_(stresses[i * rank_ + j], fint, globdat);
-
-      // TEST_CONTEXT(strains[i * rank_ + j])
-      // TEST_CONTEXT(stresses[i * rank_ + j])
-    }
-}
+                                          const Properties &globdat){
+    NOT_IMPLEMENTED}
 
 Ref<Module> TangentOutputModule::makeNew
 

@@ -85,8 +85,6 @@ private:
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,
                           const Properties &globdat);
 
-  void readStresses_(const Vector &stresses, const Vector &fint,
-                     const Properties &globdat);
   void condenseMatrix_(const Matrix &strains, const Matrix &stresses,
                        const Properties &globdat);
 
