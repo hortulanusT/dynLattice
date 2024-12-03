@@ -1,7 +1,3 @@
-# vs code settings
-.vscode
-.config
-
 # binary files
 OBJ*
 nonlinRod*
