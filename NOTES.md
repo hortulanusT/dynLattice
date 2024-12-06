@@ -30,7 +30,7 @@
 1. `rsync -vax --exclude '*.pdf' studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
-1. `jive scripts/running/nonlin-design.py lin_init lin_change_prep_nonlin prep_runs_nonlin`
+1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
 1. `./scripts/cluster/masterDesign.sh`
 </br></br></br></br>
 
