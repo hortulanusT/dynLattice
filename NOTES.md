@@ -31,7 +31,7 @@
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
-1. `./scripts/cluster/masterDesign.sh`
+1. `./scripts/cluster/masterDesign.sh nonlin`
 </br></br></br></br>
 
 # :hammer_and_pick: TO DO 
