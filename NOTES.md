@@ -33,12 +33,12 @@
 1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
 1. `./scripts/cluster/masterDesign.sh nonlin`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/nonlin-design.py lin_change_plot_nonlin get_failed`
-1. `./scripts/cluster/masterFailed.sh tno`
+1. `jive scripts/running/nonlin-design.py get_failed`
+1. `./scripts/cluster/masterFailed.sh nonlin`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/nonlin-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/nonlin-design.py work_density_export prep_latex_design_nonlin`
 1. `rsync -vax --exclude '*.pdf' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
+
 </br></br></br></br>
 
 # :hammer_and_pick: TO DO 
