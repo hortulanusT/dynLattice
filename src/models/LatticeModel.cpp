@@ -22,7 +22,8 @@
 //-----------------------------------------------------------------------
 const char *LatticeModel::TYPE_NAME = "Lattice";
 const char *LatticeModel::CHILD_PROPS = "child";
-const char *LatticeModel::CONTACT_PROP = "contact";
+const char *LatticeModel::ROD_CONTACT_PROP = "contact";
+const char *LatticeModel::JOINT_CONTACT_PROP = "jointContact";
 const char *LatticeModel::ROD_LIST_PROP = "rodList";
 const char *LatticeModel::NAME_PREFIX = "prefix";
 
@@ -84,16 +85,22 @@ LatticeModel::LatticeModel
 
   JEM_PRECHECK2(children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)));
 
-  // Get the contact model
-  if (myProps.contains(CONTACT_PROP))
+  // Get the rod contact model
+  if (myProps.contains(ROD_CONTACT_PROP))
   {
     StringVector rodList(ichild);
     for (idx_t iRod = 0; iRod < ichild; iRod++)
     {
       rodList[iRod] = prefix + String(iRod + 1);
     }
-    myProps.getProps(CONTACT_PROP).set(ROD_LIST_PROP, rodList);
-    contact_ = ModelFactory::newInstance(CONTACT_PROP, myConf, myProps, globdat);
+    myProps.getProps(ROD_CONTACT_PROP).set(ROD_LIST_PROP, rodList);
+    contact_ = ModelFactory::newInstance(ROD_CONTACT_PROP, myConf, myProps, globdat);
+  }
+
+  // Get the joint contact model
+  if (myProps.contains(JOINT_CONTACT_PROP))
+  {
+    jointContact_ = ModelFactory::newInstance(JOINT_CONTACT_PROP, myConf, myProps, globdat);
   }
 }
 
@@ -111,6 +118,8 @@ bool LatticeModel::takeAction
     actionTaken = child->takeAction(action, params, globdat) || actionTaken;
   if (contact_)
     actionTaken = contact_->takeAction(action, params, globdat) || actionTaken;
+  if (jointContact_)
+    actionTaken = jointContact_->takeAction(action, params, globdat) || actionTaken;
 
   if (action == Actions::GET_MATRIX2)
   {

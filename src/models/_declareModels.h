@@ -9,6 +9,7 @@
 #include "models/HingeModel.h"
 #include "models/ImpactModel.h"
 #include "models/InitLoadModel.h"
+#include "models/JointContactModel.h"
 #include "models/LatticeModel.h"
 #include "models/MassModel.h"
 #include "models/NeumannModel.h"

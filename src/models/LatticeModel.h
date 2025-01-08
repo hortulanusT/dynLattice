@@ -60,7 +60,8 @@ class LatticeModel : public Model
 public:
   static const char *TYPE_NAME;
   static const char *CHILD_PROPS;
-  static const char *CONTACT_PROP;
+  static const char *ROD_CONTACT_PROP;
+  static const char *JOINT_CONTACT_PROP;
   static const char *ROD_LIST_PROP;
   static const char *NAME_PREFIX;
 
@@ -98,6 +99,7 @@ public:
 private:
   Array<Ref<Model>> children_;
   Ref<Model> contact_;
+  Ref<Model> jointContact_;
 
   Ref<AbstractMatrix> M_;
 };
