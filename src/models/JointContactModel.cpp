@@ -125,16 +125,8 @@ bool JointContactModel::takeAction
 
     if (FuncUtils::evalCond(*updCond_, globdat) || loadCase != "output")
     {
-      contactsA_.clear();
-      contactsB_.clear();
       // find possible contacts if they need to be updated
-      findContacts_(nodesA, nodesB, disp);
-    }
-    else
-    {
-      // use the old contacts if no need to be updated is there
-      nodesA = contactsA_.toArray();
-      nodesB = contactsB_.toArray();
+      findContacts_(disp);
     }
 
     if (nodesA.size() == 0) // skip the computation if no actual contact possible
@@ -217,32 +209,45 @@ bool JointContactModel::takeAction
 //-----------------------------------------------------------------------
 void JointContactModel::findContacts_
 
-    (IdxVector &nodesA,
-     IdxVector &nodesB,
-     const Vector &disp) const
+    (const Vector &disp)
 {
-  ArrayBuffer<idx_t> contactA;
-  ArrayBuffer<idx_t> contactB;
+  contactsA_.clear();
+  contactsB_.clear();
   Vector posA(allNodes_.rank());
   Vector posB(allNodes_.rank());
+  IdxVector dofsA(allNodes_.rank());
+  IdxVector dofsB(allNodes_.rank());
 
   // iterate through the joints
   for (idx_t ijointA = 0; ijointA < jointList_.size() - 1; ijointA++)
   {
     // get the positions of the node
-    allNodes_.getNodeCoords(posA, ijointA);
+    dofs_->getDofIndices(dofsA, jointList_[ijointA], IdxVector({0, 1, 2}));
+    allNodes_.getNodeCoords(posA, jointList_[ijointA]);
+    posA += disp[dofsA];
+
     for (idx_t ijointB = ijointA + 1; ijointB < jointList_.size(); ijointB++)
     {
       // get the positions of the node
-      allNodes_.getNodeCoords(posB, ijointB);
+      dofs_->getDofIndices(dofsB, jointList_[ijointB], IdxVector({0, 1, 2}));
+      allNodes_.getNodeCoords(posB, jointList_[ijointB]);
+      posB += disp[dofsB];
 
       // check if the nodes are in contact
       if (norm2(posA - posB) <= 2 * radius_)
       {
-        contactA.pushBack(ijointA);
-        contactB.pushBack(ijointB);
+        contactsA_.pushBack(ijointA);
+        contactsB_.pushBack(ijointB);
       }
     }
+  }
+
+  if (verbose_)
+  {
+    if (contactsA_.size() > 0)
+      jem::System::debug(myName_) << " > > > Found contacts between joints " << contactsA_.toArray() << " and " << contactsB_.toArray() << "\n";
+    else
+      jem::System::debug(myName_) << " > > > No contacts found\n";
   }
 }
 
@@ -314,14 +319,14 @@ void JointContactModel::computeContact_
   force *= penalty_ * (2. * radius_ - norm2(posA - posB));
 
   // compute the contact stiffness
-  contactStiffness(jem::SliceTo(3), jem::SliceTo(3)) = penalty_ * matmul(normal, normal);
-  contactStiffness(jem::SliceFrom(3), jem::SliceFrom(3)) = -1. * penalty_ * matmul(normal, normal);
-  contactStiffness(jem::SliceTo(3), jem::SliceFrom(3)) = -1. * penalty_ * matmul(normal, normal);
-  contactStiffness(jem::SliceFrom(3), jem::SliceTo(3)) = penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceTo(3), jem::SliceTo(3)) = -penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceFrom(3), jem::SliceFrom(3)) = penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceTo(3), jem::SliceFrom(3)) = penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceFrom(3), jem::SliceTo(3)) = -penalty_ * matmul(normal, normal);
 
   // set the contact force
-  contactForce[jem::SliceTo(3)] = force;
-  contactForce[jem::SliceFrom(3)] = -force;
+  contactForce[jem::SliceTo(3)] = -force;
+  contactForce[jem::SliceFrom(3)] = force;
 }
 
 //-----------------------------------------------------------------------

@@ -83,15 +83,11 @@ protected:
   /**
    * @brief find pairs of contacts
    *
-   * @param[out] nodesA node IDs of one side of the contact
-   * @param[out] nodesB node IDs of the other side
    * @param[in] disp displacement vector of all nodes
    */
   virtual void findContacts_
 
-      (IdxVector &nodesA,
-       IdxVector &nodesB,
-       const Vector &disp) const;
+      (const Vector &disp);
 
   /**
    * @brief compute the effects of the contact
