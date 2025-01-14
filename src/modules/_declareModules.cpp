@@ -24,4 +24,5 @@ void declareModules()
   MilneDeviceModule::declare();
   EmbeddedRKModule::declare();
   AdaptiveStepModule::declare();
+  LenientNonlinModule::declare();
 }
