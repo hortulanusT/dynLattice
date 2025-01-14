@@ -36,7 +36,7 @@
 1. `jive scripts/running/nonlin-design.py get_failed`
 1. `./scripts/cluster/masterFailed.sh nonlin`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/nonlin-design.py work_density_export prep_latex_design_nonlin`
+1. `jive scripts/running/nonlin-design.py comp_force_nonlin_plot work_density_export prep_latex_design_nonlin`
 1. `rsync -vax --exclude '*.pdf' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
 
 </br></br></br></br>

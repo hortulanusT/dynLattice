@@ -102,8 +102,6 @@ bool JointContactModel::takeAction
     Ref<MatrixBuilder> mbld;
     Vector fint;
     Vector disp;
-    IdxVector nodesA;
-    IdxVector nodesB;
     String loadCase = "";
 
     // Get the action-specific parameters.
@@ -129,13 +127,13 @@ bool JointContactModel::takeAction
       findContacts_(disp);
     }
 
-    if (nodesA.size() == 0) // skip the computation if no actual contact possible
+    if (contactsA_.size() == 0) // skip the computation if no actual contact possible
     {
       return true;
     }
 
     // Compute the contact effects
-    computeContacts_(*mbld, fint, nodesA, nodesB, disp);
+    computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
 
     return true;
   }
