@@ -28,7 +28,6 @@ using jem::String;
 using jem::util::Properties;
 using jive::app::Module;
 using jive::implict::NonlinModule;
-using jive::implict::PropNames;
 using jive::model::Model;
 
 //-----------------------------------------------------------------------

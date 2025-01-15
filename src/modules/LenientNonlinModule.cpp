@@ -129,7 +129,7 @@ void LenientNonlinModule::configure
 {
   Super::configure(props, globdat);
 
-  props.getProps(myName_).get(maxIter_, PropNames::MAX_ITER);
+  props.getProps(myName_).get(maxIter_, jive::implict::PropNames::MAX_ITER);
 }
 
 //-----------------------------------------------------------------------
