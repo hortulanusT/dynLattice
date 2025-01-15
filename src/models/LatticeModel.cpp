@@ -153,7 +153,7 @@ void LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &
   vars.find(kineticEnergy, "kineticEnergy");
 
   Vector velo;
-  if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat))
+  if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat) && M_)
   {
     Vector temp(velo.size());
     M_->matmul(temp, velo);
