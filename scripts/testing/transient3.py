@@ -56,3 +56,12 @@ else:
   print(max(energy.index))
   print(max_rise)
   print(colored("TRANSIENT TEST 3 FAILED", "red", attrs=["bold"]))
+
+
+all_data = pd.merge(ellbow, tip, on="time")[::10]
+all_data.columns = ["ellbow_x", "ellbow_y",
+                    "ellbow_z", "tip_x", "tip_y", "tip_z"]
+all_data.to_csv("tests/transient/test3/all_data.csv")
+
+ref_disp.columns = ['_'.join(col).strip() for col in ref_disp.columns.values]
+ref_disp.to_csv("tests/transient/test3/ref_disp.csv", index=False)

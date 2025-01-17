@@ -1,6 +1,8 @@
 ///////////////////////////////////
-/////// SIMO/VU-QUOC EX 7.2 ///////
+/////// SIMO/VU-QUOC EX 7.2 /////// 
 ///////////////////////////////////
+
+// FOLLOWER LOAD NOT PROPERTLY IMPLEMENTED THEREFORE ONLY STEP SIZE OF 10 WORKS
 
 params.Steps = 10.;
 
