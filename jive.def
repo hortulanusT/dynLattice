@@ -53,7 +53,8 @@ From: ubuntu
     cycler \
     opencv-python \
     meshio \
-    svgpathtools
+    svgpathtools \
+    pyvista
   
   cd /home/user/
   

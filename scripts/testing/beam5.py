@@ -43,3 +43,16 @@ if test_passed:
   plt.savefig("tests/beam/test5/result.pdf")
 else:
   print(colored("STATIC TEST 5 FAILED", "red", attrs=["bold"]))
+
+
+all_data = np.concatenate((sim_resp[:, 2:3], sim_disp[:, [0, 1, 2]]), axis=1)
+np.savetxt("tests/beam/test5/beam_test5_data.csv",
+           all_data, delimiter=",", header="load,u1,u2,u3", comments='')
+
+ref_data = np.empty((60, 6))
+ref_data[:, :] = np.nan
+ref_data[:, [0, 1]] = ref_data_u1
+ref_data[0:48, [2, 3]] = ref_data_u2
+ref_data[0:51, [4, 5]] = ref_data_u3
+np.savetxt("tests/beam/test5/beam_test5_ref.csv", ref_data,
+           delimiter=",", header="load1,u1,load2,u2,load3,u3", comments='')

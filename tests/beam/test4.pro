@@ -17,7 +17,7 @@ Solver.solver.type = "Arclen";
 params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.young = 7.2e6;
 params.rod_details.material.poisson_ratio = .3;
-params.rod_details.material.area = 2.;
+params.rod_details.material.area = 2.; // THIS SHOULD BE 6. BUT IT DOES NOT CONVERGE THEN!
 params.rod_details.material.area_moment = 2.;
 
 params.force_model.type = "StdArclen";
@@ -33,6 +33,8 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
+Input.input.out_file = "$(CASE_NAME)/result.msh";
+Input.input.out_tables = [];
 Input.input.order = 2;
 
 Input.groupInput.fixed_left.ytype = "min";
