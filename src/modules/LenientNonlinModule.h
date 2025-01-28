@@ -75,7 +75,7 @@ public:
   virtual void getConfig
 
       (const Properties &conf,
-       const Properties &globdat) const;
+       const Properties &globdat);
 
 protected:
   virtual ~LenientNonlinModule();
