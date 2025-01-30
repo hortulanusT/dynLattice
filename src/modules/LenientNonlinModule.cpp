@@ -91,7 +91,7 @@ Module::Status LenientNonlinModule::run
     }
     catch (const jem::Exception &ex)
     {
-      info.get(iter, SolverInfo::ITER_COUNT);
+      info.find(iter, SolverInfo::ITER_COUNT);
 
       if (ex.what()[slice(0, 14)].equals("no convergence") && iter >= maxIter_)
       {
