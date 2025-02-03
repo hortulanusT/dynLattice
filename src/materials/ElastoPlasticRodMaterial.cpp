@@ -190,7 +190,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     Super::getStress(stress, Vector(strain - plastStrain), ielem, ip, false);
     getHardVals(hardStress, hardParams);
 
-    if (!inelastic || ((edgeFact_ != 1.) && (ielem == 0 || ielem == nElem_ - 1)))
+    if (!inelastic || ((edgeFact_ != 1.) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
     {
       if (verbosity_ > 1)
         jem::System::debug(myName_) << "        elastic calculation\n";
