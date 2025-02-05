@@ -33,6 +33,7 @@ include "input.pro";
 include "model.pro";
 include "output.pro";
 
+Input.input.out_file="$(CASE_NAME)/visual.msh";
 Input.groupInput.nodeGroups += [ "moving_left", "moving_right" ];
 Input.groupInput.moving_left.xtype = "min";
 Input.groupInput.moving_right.xtype = "max";

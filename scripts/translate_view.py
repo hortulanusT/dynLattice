@@ -39,10 +39,13 @@ else:
   _, data_tags, data, _, _ = gmsh.view.get_model_data(
       views[-1], load_step)
 
-if not data:
+if not data or len(data_tags) == 0:
   RuntimeError(f"No data for loadstep {load_step}")
 
-fact = 1e3 * 72 / 25.4  # 1m==1e3 mm  | 1 mm ~ 72/25.4 pt
+if len(sys.argv) > 4:
+  fact = float(sys.argv[4])
+else:
+  fact = 1e3 * 72 / 25.4  # 1m==1e3 mm  | 1 mm ~ 72/25.4 pt
 tikz_str = ""
 
 _, el_tags, _ = gmsh.model.mesh.get_elements(1)
@@ -58,6 +61,8 @@ if plast_strain:
     tikz_str += f"\n\\draw[color={{rgb,255:red,{color[0]*255:.0f};green,{color[1]*255:.0f};blue,{color[2]*255:.0f}}}]"
 
     _, el_nodes, _, _ = gmsh.model.mesh.get_element(element)
+    if len(el_nodes) > 2:
+      el_nodes = el_nodes[[0, -1] + range(1, len(el_nodes)-1)]
     for j, node in enumerate(el_nodes):
       old_coords = new_coords
       new_coords, _, _, _ = gmsh.model.mesh.get_node(node)
@@ -76,6 +81,8 @@ else:
   new_coords = np.array([np.nan, np.nan, np.nan])
   for element in elements:
     _, el_nodes, _, _ = gmsh.model.mesh.get_element(element)
+    if len(el_nodes) > 2:
+      el_nodes = el_nodes[[0, -1] + list(range(1, len(el_nodes)-1))]
     for j, node in enumerate(el_nodes):
       old_coords = new_coords
       new_coords, _, _, _ = gmsh.model.mesh.get_node(node)
@@ -83,7 +90,7 @@ else:
         continue
       idx = np.squeeze(np.where(data_tags == node))
       tikz_str += ('\n' if j == 0 else ' -- ') + \
-          f"({(new_coords[0]+data[idx][0]*visual_fact)*fact},{(new_coords[1]+data[idx][1]*visual_fact)*fact})"
+          f"({(new_coords[0]+data[idx][0]*visual_fact)*fact},{(new_coords[1]+data[idx][1]*visual_fact)*fact},{(new_coords[2]+data[idx][2]*visual_fact)*fact})"
 
 with open(f"{data_file.replace('output', 'results')[:-8]}_{load_step}.tikz", "w") as file:
   file.write(tikz_str + "\n")

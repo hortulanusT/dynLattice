@@ -2,6 +2,7 @@
 
 # two beams crossed in an X shape
 
+import os
 import numpy as np
 from termcolor import colored
 from matplotlib import pyplot as plt
@@ -31,5 +32,9 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/contact/test1/result.pdf")
+
+  for i in range(7):
+    os.system(
+        f"scripts/translate_view.py tests/contact/test1/visualDisp.msh {i+1} 1 1")
 else:
   print(colored("CONTACT TEST 1 FAILED", "red", attrs=["bold"]))
