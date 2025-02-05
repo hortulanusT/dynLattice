@@ -66,7 +66,6 @@
 1. Environment
     - split the repository for code and pre-/postprocessing
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
-    - make all plot outputs A4/A3
 </br></br></br></br>
 
 # :heavy_check_mark: Information
