@@ -23,4 +23,5 @@ void declareModels()
   JointContactModel::declare();
   MassModel::declare();
   SpringMassModel::declare();
+  SymBCModel::declare();
 }

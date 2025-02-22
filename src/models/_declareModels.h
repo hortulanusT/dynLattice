@@ -16,6 +16,7 @@
 #include "models/PeriodicBCModel.h"
 #include "models/RodContactModel.h"
 #include "models/SpringMassModel.h"
+#include "models/SymBCModel.h"
 #include "models/specialCosseratRodModel.h"
 
 //-----------------------------------------------------------------------

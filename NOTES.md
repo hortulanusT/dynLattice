@@ -85,3 +85,4 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets always executed, `JEM_ASSERT` only in non-optimized mode
 - `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
+- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory
