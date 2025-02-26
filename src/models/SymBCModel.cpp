@@ -31,17 +31,18 @@ SymBCModel::SymBCModel
   cons_ = Constraints::get(dofs_, globdat);
 
   // get the dof names (for opposing symmetry)
-  myProps.get(dofOppoNames_, DOF_OPPO_NAMES_PROP);
-  myConf.set(DOF_OPPO_NAMES_PROP, dofOppoNames_);
+  if (myProps.find(dofOppoNames_, DOF_OPPO_NAMES_PROP))
+    myConf.set(DOF_OPPO_NAMES_PROP, dofOppoNames_);
 
   // get the dof names (for equal symmetry)
-  myProps.get(dofEqualNames_, DOF_EQUAL_NAMES_PROP);
-  myConf.set(DOF_EQUAL_NAMES_PROP, dofEqualNames_);
+  if (myProps.find(dofEqualNames_, DOF_EQUAL_NAMES_PROP))
+    myConf.set(DOF_EQUAL_NAMES_PROP, dofEqualNames_);
 
   // get the surface names
   myProps.get(surfaceNames_, SURFACES_PROP);
   myConf.set(SURFACES_PROP, surfaceNames_);
 
+  JEM_PRECHECK2(dofOppoNames_.size() + dofEqualNames_.size() > 0, "SymBCModel: one dof needs to be given");
   JEM_PRECHECK2(surfaceNames_.size() % 2 == 0, "SymBCModel: Only even numbers of surfaces are supported");
 }
 
