@@ -11,7 +11,8 @@
 #include <jive/util/Printer.h>
 
 const char *SymBCModel::TYPE_NAME = "SymBC";
-const char *SymBCModel::DOF_NAMES_PROP = "dofs";
+const char *SymBCModel::DOF_OPPO_NAMES_PROP = "oppo_dofs";
+const char *SymBCModel::DOF_EQUAL_NAMES_PROP = "equal_dofs";
 const char *SymBCModel::SURFACES_PROP = "surfaces";
 
 SymBCModel::SymBCModel
@@ -29,9 +30,13 @@ SymBCModel::SymBCModel
   dofs_ = DofSpace::get(nodes_.getData(), globdat, getContext());
   cons_ = Constraints::get(dofs_, globdat);
 
-  // get the dof names
-  myProps.get(dofNames_, DOF_NAMES_PROP);
-  myConf.set(DOF_NAMES_PROP, dofNames_);
+  // get the dof names (for opposing symmetry)
+  myProps.get(dofOppoNames_, DOF_OPPO_NAMES_PROP);
+  myConf.set(DOF_OPPO_NAMES_PROP, dofOppoNames_);
+
+  // get the dof names (for equal symmetry)
+  myProps.get(dofEqualNames_, DOF_EQUAL_NAMES_PROP);
+  myConf.set(DOF_EQUAL_NAMES_PROP, dofEqualNames_);
 
   // get the surface names
   myProps.get(surfaceNames_, SURFACES_PROP);
@@ -70,8 +75,10 @@ void SymBCModel::init_(const Properties &globdat)
   Assignable<NodeGroup> secondaryNodes;
   IdxVector mainSurfDofs;
   IdxVector secondarySurfDofs;
-  IdxBuffer mainDofs;
-  IdxBuffer secondaryDofs;
+  IdxBuffer mainOppoDofs;
+  IdxBuffer secondaryOppoDofs;
+  IdxBuffer mainEqualDofs;
+  IdxBuffer secondaryEqualDofs;
 
   // get the nodes for the surfaces
   for (idx_t iSurf = 0; iSurf < surfaceNames_.size() / 2; iSurf++)
@@ -84,31 +91,52 @@ void SymBCModel::init_(const Properties &globdat)
     mainSurfDofs.resize(mainNodes.size());
     secondarySurfDofs.resize(secondaryNodes.size());
 
-    for (idx_t jdof = 0; jdof < dofNames_.size(); jdof++)
+    for (idx_t jdof = 0; jdof < dofOppoNames_.size(); jdof++)
     {
       // get the dof type id
-      jtype = dofs_->getTypeIndex(dofNames_[jdof]);
+      jtype = dofs_->getTypeIndex(dofOppoNames_[jdof]);
 
       // get the dofs for the nodes
       dofs_->getDofIndices(mainSurfDofs, mainNodes.getIndices(), jtype);
       dofs_->getDofIndices(secondarySurfDofs, secondaryNodes.getIndices(), jtype);
 
       // store the dofs
-      mainDofs.pushBack(mainSurfDofs.begin(), mainSurfDofs.end());
-      secondaryDofs.pushBack(secondarySurfDofs.begin(), secondarySurfDofs.end());
+      mainOppoDofs.pushBack(mainSurfDofs.begin(), mainSurfDofs.end());
+      secondaryOppoDofs.pushBack(secondarySurfDofs.begin(), secondarySurfDofs.end());
+    }
+
+    for (idx_t jdof = 0; jdof < dofEqualNames_.size(); jdof++)
+    {
+      // get the dof type id
+      jtype = dofs_->getTypeIndex(dofEqualNames_[jdof]);
+
+      // get the dofs for the nodes
+      dofs_->getDofIndices(mainSurfDofs, mainNodes.getIndices(), jtype);
+      dofs_->getDofIndices(secondarySurfDofs, secondaryNodes.getIndices(), jtype);
+
+      // store the dofs
+      mainEqualDofs.pushBack(mainSurfDofs.begin(), mainSurfDofs.end());
+      secondaryEqualDofs.pushBack(secondarySurfDofs.begin(), secondarySurfDofs.end());
     }
   }
 
   // store the dofs
-  mainDofs_.ref(mainDofs.toArray());
-  secondaryDofs_.ref(secondaryDofs.toArray());
+  mainOppoDofs_.ref(mainOppoDofs.toArray());
+  secondaryOppoDofs_.ref(secondaryOppoDofs.toArray());
+  mainEqualDofs_.ref(mainEqualDofs.toArray());
+  secondaryEqualDofs_.ref(secondaryEqualDofs.toArray());
 }
 
 void SymBCModel::setConstraints_()
 {
-  for (idx_t i = 0; i < mainDofs_.size(); i++)
+  for (idx_t i = 0; i < mainOppoDofs_.size(); i++)
   {
-    cons_->addConstraint(mainDofs_[i], secondaryDofs_[i], -1.0);
+    cons_->addConstraint(mainOppoDofs_[i], secondaryOppoDofs_[i], -1.0);
+  }
+
+  for (idx_t i = 0; i < mainEqualDofs_.size(); i++)
+  {
+    cons_->addConstraint(mainEqualDofs_[i], secondaryEqualDofs_[i], 1.0);
   }
 }
 

@@ -47,7 +47,8 @@ class SymBCModel : public Model
 {
 public:
   static const char *TYPE_NAME;
-  static const char *DOF_NAMES_PROP;
+  static const char *DOF_OPPO_NAMES_PROP;
+  static const char *DOF_EQUAL_NAMES_PROP;
   static const char *SURFACES_PROP;
 
   explicit SymBCModel
@@ -78,9 +79,12 @@ private:
   Assignable<NodeSet> nodes_;
   Ref<DofSpace> dofs_;
   Ref<Constraints> cons_;
-  StringVector dofNames_;
+  StringVector dofOppoNames_;
+  StringVector dofEqualNames_;
   StringVector surfaceNames_;
-  IdxVector mainDofs_;
-  IdxVector secondaryDofs_;
+  IdxVector mainOppoDofs_;
+  IdxVector secondaryOppoDofs_;
+  IdxVector mainEqualDofs_;
+  IdxVector secondaryEqualDofs_;
   idx_t pbcRank_;
 };
