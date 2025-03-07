@@ -9,7 +9,7 @@
 1. `./scripts/cluster/masterDesign.sh eqv`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py lin_change_plot get_failed`
-1. `./scripts/cluster/masterFailed.sh eqv`
+1. `./scripts/cluster/masterDesign.sh eqv long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
@@ -23,7 +23,7 @@
 1. `./scripts/cluster/masterDesign.sh tno`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py lin_change_plot_nonlin get_failed`
-1. `./scripts/cluster/masterFailed.sh tno`
+1. `./scripts/cluster/masterDesign.sh tno long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/tno-design.py work_density_export prep_latex_design_nonlin`
@@ -32,12 +32,13 @@
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
 1. `jive scripts/running/nonlin-design_meshTest.py prep_runs_nonlin`
-1. `./scripts/cluster/masterDesign.sh nonlin "*" "--time=5-0"`
+1. `./scripts/cluster/masterDesign.sh nonlin`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/nonlin-design.py get_failed`
-1. `./scripts/cluster/masterFailed.sh nonlin`
+1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/nonlin-design.py comp_nonlin_plot work_density_export`
+1. `jive scripts/running/nonlin-design_meshTest.py comp_nonlin_plot work_density_export`
 1. `rsync -vax --exclude '*.pdf' --exclude '*.png' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
 
 </br></br></br></br>
