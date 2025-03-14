@@ -38,6 +38,7 @@ using jem::newInstance;
 using jem::Ref;
 using jem::numeric::dotProduct;
 using jem::util::ArrayBuffer;
+using jive::IdxVector;
 using jive::Properties;
 using jive::String;
 using jive::StringVector;
@@ -85,7 +86,7 @@ public:
    * @param globdat The global data.
    * @return The kinetic energy.
    */
-  void calc_kin_Energy_(const Properties &params, const Properties &globdat) const;
+  double calc_kin_Energy_(const Properties &params, const Properties &globdat) const;
 
   static Ref<Model> makeNew
 

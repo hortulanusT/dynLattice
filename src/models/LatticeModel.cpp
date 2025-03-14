@@ -140,27 +140,45 @@ bool LatticeModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    calc_kin_Energy_(params, globdat);
+    Properties vars = Globdat::getVariables(globdat);
+    double E_kin = 0.0;
+
+    vars.find(E_kin, "kineticEnergy");
+    E_kin += calc_kin_Energy_(params, globdat);
+
+    vars.set("kineticEnergy", E_kin);
   }
 
   return actionTaken;
 }
 
-void LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &globdat) const
+double LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &globdat) const
 {
-  double kineticEnergy = 0.0;
-  Properties vars = Globdat::getVariables(globdat);
-  vars.find(kineticEnergy, "kineticEnergy");
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  Vector velo, temp;
+  IdxVector jtypes(dofs->typeCount());
+  IdxVector idofs(dofs->typeCount());
+  double E_kin = 0.0;
 
-  Vector velo;
   if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat) && M_)
   {
-    Vector temp(velo.size());
+    temp.resize(velo.size());
     M_->matmul(temp, velo);
-    kineticEnergy += 0.5 * dotProduct(velo, temp);
 
-    vars.set("kineticEnergy", kineticEnergy);
+    for (idx_t idof = 0; idof < dofs->typeCount(); idof++)
+    {
+      jtypes[idof] = dofs->getTypeIndex(dofs->getTypeNames()[idof]);
+    }
+
+    for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
+    {
+      dofs->getDofsForItem(idofs, jtypes, iNode);
+      E_kin += 0.5 * dotProduct(velo[idofs], temp[idofs]);
+    }
   }
+
+  return E_kin;
 }
 
 //-----------------------------------------------------------------------
