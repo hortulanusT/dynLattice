@@ -421,16 +421,6 @@ void ExplicitModule::updMass(const Properties &globdat)
     rdofs_.resize(SO3_dofs_.size(), dofs_->getItems()->size());
     for (idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, SO3_dofs_[idof]);
-
-    IdxVector idofs(dofs_->itemCount());
-    Vector selector(dofs_->dofCount());
-    dofs_->getDofsForType(idofs, iitems, 0);
-    selector = 0.0;
-    selector[idofs] = 1.0;
-    solver_->getMatrix()->matmul(selector, selector);
-    double total_mass = jem::sum(selector);
-
-    jem::System::info(myName_) << " ...Total mass: " << total_mass << " kg\n";
   }
 
   if (mode_ == LUMPED)

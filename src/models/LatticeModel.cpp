@@ -136,23 +136,78 @@ bool LatticeModel::takeAction
     vars.set("potentialEnergy", 0.);
     vars.set("dissipatedEnergy", 0.);
     vars.set("kineticEnergy", 0.);
+    vars.set("mass", 0.);
+  }
+
+  if (action == Actions::GET_TABLE)
+  {
+    Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+    Ref<XTable> table;
+    Vector weights;
+    String name;
+    // Get the action-specific parameters.
+    params.get(table, ActionParams::TABLE);
+    params.get(weights, ActionParams::TABLE_WEIGHTS);
+    params.get(name, ActionParams::TABLE_NAME);
+
+    if (table->getRowItems() == allNodes.getData())
+    {
+      // BUG implement this
+      if (name == "kineticEnergy")
+        calc_kin_Energy_(*table, weights, globdat);
+      if (name == "mass")
+        calc_mass_(*table, weights, globdat);
+    }
   }
 
   if (action == Actions::COMMIT)
   {
     Properties vars = Globdat::getVariables(globdat);
     double E_kin = 0.0;
+    double m = 0.0;
 
     vars.find(E_kin, "kineticEnergy");
-    E_kin += calc_kin_Energy_(params, globdat);
+    vars.find(m, "mass");
+
+    E_kin += calc_kin_Energy_(globdat);
+    m += calc_mass_(globdat);
 
     vars.set("kineticEnergy", E_kin);
+    vars.set("mass", m);
   }
 
   return actionTaken;
 }
 
-double LatticeModel::calc_kin_Energy_(const Properties &params, const Properties &globdat) const
+void LatticeModel::calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const
+{
+  const idx_t jCol = energy_table.addColumn("kineticEnergy");
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  Vector velo, temp;
+  IdxVector jtypes(dofs->typeCount());
+  IdxVector idofs(dofs->typeCount());
+
+  if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat) && M_)
+  {
+    temp.resize(velo.size());
+    M_->matmul(temp, velo);
+
+    for (idx_t idof = 0; idof < dofs->typeCount(); idof++)
+    {
+      jtypes[idof] = dofs->getTypeIndex(dofs->getTypeName(idof));
+    }
+
+    for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
+    {
+      dofs->getDofsForItem(idofs, jtypes, iNode);
+      energy_table.addValue(iNode, jCol, 0.5 * dotProduct(velo[idofs], temp[idofs]));
+      table_weights[iNode] = 1.0;
+    }
+  }
+}
+
+double LatticeModel::calc_kin_Energy_(const Properties &globdat) const
 {
   Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
   Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
@@ -168,7 +223,7 @@ double LatticeModel::calc_kin_Energy_(const Properties &params, const Properties
 
     for (idx_t idof = 0; idof < dofs->typeCount(); idof++)
     {
-      jtypes[idof] = dofs->getTypeIndex(dofs->getTypeNames()[idof]);
+      jtypes[idof] = dofs->getTypeIndex(dofs->getTypeName(idof));
     }
 
     for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
@@ -179,6 +234,73 @@ double LatticeModel::calc_kin_Energy_(const Properties &params, const Properties
   }
 
   return E_kin;
+}
+
+void LatticeModel::calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const
+{
+  const idx_t jCol = mass_table.addColumn("mass");
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  const idx_t jtype = dofs->getTypeIndex(dofs->getTypeName(0));
+
+  if (M_)
+  {
+    Vector tempA(dofs->dofCount());
+    Vector tempB(dofs->dofCount());
+    tempA = 0.;
+    tempB = 0.;
+
+    IdxVector iNodes(allNodes.size());
+    IdxVector idofs(allNodes.size());
+
+    for (idx_t iNode = 0; iNode > allNodes.size(); iNode++)
+      iNodes[iNode] = iNode;
+
+    dofs->getDofsForType(idofs, iNodes, jtype);
+
+    tempA[idofs] = 1.;
+
+    M_->matmul(tempB, tempA);
+
+    for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
+    {
+      mass_table.addValue(iNode, jCol, tempB[idofs[iNode]]);
+      table_weights[iNode] = 1.;
+    }
+  }
+}
+
+double LatticeModel::calc_mass_(const Properties &globdat) const
+{
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  const idx_t jtype = dofs->getTypeIndex(dofs->getTypeName(0));
+  double m = 0.0;
+
+  if (M_)
+  {
+    Vector tempA(dofs->dofCount());
+    Vector tempB(dofs->dofCount());
+    tempA = 0.;
+    tempB = 0.;
+
+    IdxVector iNodes(allNodes.size());
+    IdxVector idofs(allNodes.size());
+
+    for (idx_t iNode = 0; iNode > allNodes.size(); iNode++)
+      iNodes[iNode] = iNode;
+
+    dofs->getDofsForType(idofs, iNodes, jtype);
+
+    tempA[idofs] = 1.;
+
+    M_->matmul(tempB, tempA);
+
+    for (idx_t iNode = 0; iNode > allNodes.size(); iNode++)
+      m += tempB[idofs[iNode]];
+  }
+
+  return m;
 }
 
 //-----------------------------------------------------------------------

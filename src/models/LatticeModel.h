@@ -18,8 +18,10 @@
 #include <jem/numeric/algebra/utilities.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
+#include <jem/base/Array.h>
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/MatrixBuilder.h>
+#include <jive/util/XTable.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/model/Actions.h>
@@ -55,6 +57,7 @@ using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
 using jive::util::Globdat;
+using jive::util::XTable;
 
 class LatticeModel : public Model
 {
@@ -82,11 +85,20 @@ public:
   /**
    * Calculates the kinetic energy of the special Cosserat rod model.
    *
-   * @param params The parameters.
    * @param globdat The global data.
    * @return The kinetic energy.
    */
-  double calc_kin_Energy_(const Properties &params, const Properties &globdat) const;
+  double calc_kin_Energy_(const Properties &globdat) const;
+  void calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
+
+  /**
+   * Calculates the mass of the special cosserat rod model
+   *
+   * @param globdat the global data
+   * @return the total mass
+   */
+  double calc_mass_(const Properties &globdat) const;
+  void calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
 
   static Ref<Model> makeNew
 

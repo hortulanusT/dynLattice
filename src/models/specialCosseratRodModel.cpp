@@ -249,6 +249,17 @@ bool specialCosseratRodModel::takeAction
 
       return true;
     }
+
+    if (table->getRowItems() == allNodes_.getData())
+    {
+      Vector disp;
+      StateVector::get(disp, dofs_, globdat);
+
+      if (name == "potentialEnergy")
+        calc_pot_Energy_(*table, weights, disp);
+      if (name == "dissipatedEnergy")
+        calc_diss_Energy_(*table, weights, disp);
+    }
   }
 
   if (action == Actions::GET_MATRIX0)
@@ -1020,6 +1031,47 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   }
 }
 
+void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t rank = shapeK_->globalRank();
+  const idx_t dofCount = dofs_->typeCount();
+  const idx_t jCol = energy_table.addColumn("potentialEnergy");
+
+  // PER ELEMENT VALUES
+  Matrix nodeU(rank, nodeCount);
+  Matrix nodePhi_0(rank, nodeCount);
+  Cubix nodeLambda(rank, rank, nodeCount);
+  Matrix strain(dofCount, ipCount);
+  Matrix stress(dofCount, ipCount);
+  Vector weights(ipCount);
+  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
+
+    get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+
+    shapes = shapeK_->getShapeFunctions();
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      for (idx_t ip = 0; ip < ipCount; ip++)
+      {
+        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * 0.5 * dotProduct(strain[ip], stress[ip]));
+        table_weights[inodes[iNode]] = 1.;
+      }
+    }
+  }
+}
+
 double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
@@ -1060,6 +1112,33 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
   }
 
   return E_pot;
+}
+
+void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
+{
+  const idx_t elemCount = rodElems_.size();
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const idx_t jCol = energy_table.addColumn("dissipatedEnergy");
+  // PER ELEMENT VALUES
+  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
+  // DOF INDICES
+  IdxVector inodes(nodeCount);
+
+  for (idx_t ie = 0; ie < elemCount; ie++)
+  {
+    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
+    shapes = shapeK_->getShapeFunctions();
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      for (idx_t ip = 0; ip < ipCount; ip++)
+      {
+        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip));
+        table_weights[inodes[iNode]] = 1.;
+      }
+    }
+  }
 }
 
 double specialCosseratRodModel::calc_diss_Energy_(const Vector &disp) const

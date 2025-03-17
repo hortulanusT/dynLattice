@@ -250,15 +250,7 @@ private:
    * @return The potential energy in this rod
    */
   double calc_pot_Energy_(const Vector &disp) const;
-
-  /**
-   * @brief Calculates the kinetic energy of the special Cosserat rod model.
-   *
-   * @param disp The displacement vector.
-   * @param velo the velocity vector.
-   * @return the kinetic energy in this rod
-   */
-  double calc_kin_Energy_(const Vector &disp, const Vector &velo) const;
+  void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
 
   /**
    * @brief Calculates the dissipated energy of the material
@@ -267,6 +259,7 @@ private:
    * @return the dissipated energy in this rod
    */
   double calc_diss_Energy_(const Vector &disp) const;
+  void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;
