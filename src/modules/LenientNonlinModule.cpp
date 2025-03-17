@@ -58,9 +58,10 @@ Module::Status LenientNonlinModule::init
      const Properties &globdat)
 
 {
-  maxIter_ = jem::maxOf<idx_t>();
+  Module::Status status = Super::init(conf, props, globdat);
+  conf.getProps(myName_).get(maxIter_, jive::implict::PropNames::MAX_ITER);
 
-  return Super::init(conf, props, globdat);
+  return status;
 }
 
 //-----------------------------------------------------------------------
@@ -143,8 +144,6 @@ void LenientNonlinModule::getConfig
 
 {
   Super::getConfig(conf, globdat);
-
-  conf.getProps(myName_).get(maxIter_, jive::implict::PropNames::MAX_ITER);
 }
 
 //-----------------------------------------------------------------------
