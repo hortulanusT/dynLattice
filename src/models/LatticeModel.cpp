@@ -152,7 +152,6 @@ bool LatticeModel::takeAction
 
     if (table->getRowItems() == allNodes.getData())
     {
-      // BUG implement this
       if (name == "kineticEnergy")
         calc_kin_Energy_(*table, weights, globdat);
       if (name == "mass")
