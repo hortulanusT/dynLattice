@@ -45,20 +45,8 @@
 
 # :hammer_and_pick: TO DO 
 1. Models
-    - Energy Output (various models)
-      - get proper split into
-        1. Kinetic
-        1. Potential
-        1. Dissipated
-        1. Contact
-      - get spatial resolution
 1. Modules
-    - Explicit Solver
-      - keep $\bm{M}$ constant, only update $\Theta$
-      - implement 'lumped' algorithm with direct 3x3 inverts
-      - Old $\bm{M}$ matrix as pre-conditioner?
     - Tangent Output Module
-      - Fix plasticity issues
       - Get Matrix Condensation to work
 1. Application
     - get multiple input files to work

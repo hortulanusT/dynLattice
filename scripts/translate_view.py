@@ -56,9 +56,9 @@ if plast_strain:
   new_coords = np.array([np.nan, np.nan, np.nan])
   for element in elements:
     plast_strain_idx = np.squeeze(np.where(plast_strain_tags == element))
-    color = viridis(
-        np.abs(plast_strain_data[plast_strain_idx][3 if "honeycomb" not in data_file else 4])/max_plast_strain)
-    tikz_str += f"\n\\draw[color={{rgb,255:red,{color[0]*255:.0f};green,{color[1]*255:.0f};blue,{color[2]*255:.0f}}}]"
+    color_id = np.rint(
+        1000 * np.abs(plast_strain_data[plast_strain_idx][3 if "honeycomb" not in data_file else 4])/max_plast_strain).astype(int)
+    tikz_str += f"\n\\draw[color of colormap={{{color_id}}}]"
 
     _, el_nodes, _, _ = gmsh.model.mesh.get_element(element)
     if len(el_nodes) > 2:
