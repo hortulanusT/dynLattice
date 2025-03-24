@@ -14,6 +14,10 @@ if len(sys.argv) > 3:
   visual_fact = float(sys.argv[3])
 else:
   visual_fact = 1.
+if len(sys.argv) > 4:
+  fact = float(sys.argv[4])
+else:
+  fact = 1e3 * 72 / 25.4  # 1m==1e3 mm  | 1 mm ~ 72/25.4 pt
 
 gmsh.initialize()
 
@@ -42,10 +46,6 @@ else:
 if not data or len(data_tags) == 0:
   RuntimeError(f"No data for loadstep {load_step}")
 
-if len(sys.argv) > 4:
-  fact = float(sys.argv[4])
-else:
-  fact = 1e3 * 72 / 25.4  # 1m==1e3 mm  | 1 mm ~ 72/25.4 pt
 tikz_str = ""
 
 _, el_tags, _ = gmsh.model.mesh.get_elements(1)

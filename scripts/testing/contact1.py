@@ -36,5 +36,7 @@ if test_passed:
   for i in range(7):
     os.system(
         f"scripts/translate_view.py tests/contact/test1/visualDisp.msh {i+1} 1 1")
+    os.system(
+        f"mv tests/contact/test1/visual_{int(i+1)}.tikz tests/contact/test1/contact_{int(i)}.tikz")
 else:
   print(colored("CONTACT TEST 1 FAILED", "red", attrs=["bold"]))
