@@ -114,9 +114,7 @@ tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/
 
 contact-tests: $(addprefix tests/contact/test, $(addsuffix /result.pdf, $(contact_cases)))
 	@cp tests/contact/test1/resp.csv ../Latex/Chapter02/results/contact_test1_resp.csv
-	@for step in 1 2 3 4 5 6 7; do\
-		sed '3!d' tests/contact/test1/visual_$$step.tikz | perl -pe 's/,.*?,/,/g' > ../Latex/Chapter02/results/contact_test1_visual_$$step.tikz;\
-	done
+	@cp tests/contact/test1/*tikz ../Latex/Chapter02/results/
 
 tests/contact/test%/result.pdf: scripts/testing/contact%.py\
 															 tests/contact/test%/disp.csv\
