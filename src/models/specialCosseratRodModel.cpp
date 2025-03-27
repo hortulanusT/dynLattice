@@ -1142,6 +1142,8 @@ void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vect
     get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
     get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
 
+    shapes = shapeK_->getShapeFunctions();
+
     for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
