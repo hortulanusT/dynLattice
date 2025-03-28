@@ -18,6 +18,7 @@ const char *ElasticRodMaterial::RADIUS = "radius";
 const char *ElasticRodMaterial::SIDE_LENGTH = "side_length";
 const char *ElasticRodMaterial::N_ELEM = "elemCount";
 const char *ElasticRodMaterial::EDGE_FACTOR = "edge_factor";
+const char *ElasticRodMaterial::EDGE_ELEMS = "edge_elements";
 
 ElasticRodMaterial::ElasticRodMaterial(const String &name,
                                        const Properties &conf,
@@ -26,6 +27,7 @@ ElasticRodMaterial::ElasticRodMaterial(const String &name,
 {
   rodName_ = jem::util::StringUtils::split(myName_, '.')[0];
   edgeFact_ = 1.0;
+  edgeElems_ = 1;
 
   configure(props, globdat);
   getConfig(conf, globdat);
@@ -115,6 +117,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 
   if (myProps.find(edgeFact_, EDGE_FACTOR) && edgeFact_ != 1.)
     myProps.get(nElem_, N_ELEM);
+  myProps.find(edgeElems_, EDGE_ELEMS);
 
   if (verbosity_ > 0)
     jem::System::debug(myName_)
@@ -157,6 +160,7 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
   if (edgeFact_ != 1.)
   {
     myConf.set(EDGE_FACTOR, edgeFact_);
+    myConf.set(EDGE_ELEMS, edgeElems_);
     myConf.set(N_ELEM, nElem_);
   }
 }
@@ -219,7 +223,7 @@ Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip)
     return getMaterialStiff();
   else
   {
-    if (ielem == 0 || ielem == nElem_ - 1)
+    if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
     {
       Matrix stiff = getMaterialStiff();
       stiff(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
@@ -245,7 +249,7 @@ Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) 
     return getMaterialMass();
   else
   {
-    if (ielem == 0 || ielem == nElem_ - 1)
+    if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
     {
       Matrix mass = getMaterialMass();
       mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);

@@ -17,6 +17,7 @@
 #include "modules/GroupInputModule.h"
 #include "modules/GroupOutputModule.h"
 #include "modules/LeapFrogModule.h"
+#include "modules/LenientNonlinModule.h"
 #include "modules/MilneDeviceModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"

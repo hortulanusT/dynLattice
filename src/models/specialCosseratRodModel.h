@@ -247,16 +247,19 @@ private:
    * Calculates the potential energy of the special Cosserat rod model.
    *
    * @param disp The displacement vector.
-   * @return The potential energy.
+   * @return The potential energy in this rod
    */
   double calc_pot_Energy_(const Vector &disp) const;
+  void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
 
   /**
    * @brief Calculates the dissipated energy of the material
    *
+   * @param disp The displacement vector.
    * @return the dissipated energy in this rod
    */
-  double calc_diss_Energy_() const;
+  double calc_diss_Energy_(const Vector &disp) const;
+  void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_;

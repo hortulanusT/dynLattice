@@ -664,13 +664,12 @@ void RodContactModel::computeContacts_
         f_contribLocal = 0.;
         k_contribLocal = 0.;
 
-        contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB);
-
-        if (contact_closed && verbose_)
-          jem::System::debug(myName_) << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "; ";
-
-        if (contact_closed)
+        if (computeNTS_(f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB))
         {
+          if (verbose_)
+            jem::System::debug(myName_)
+                << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "; ";
+
           f_contrib[SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
           f_contrib[SliceFromTo(2 * globalRank, 4 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
 
@@ -678,6 +677,8 @@ void RodContactModel::computeContacts_
           k_contrib(SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank), SliceFromTo(2 * globalRank, 4 * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceFrom(globalRank));
           k_contrib(SliceFromTo(2 * globalRank, 4 * globalRank), SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceTo(globalRank));
           k_contrib(SliceFromTo(2 * globalRank, 4 * globalRank), SliceFromTo(2 * globalRank, 4 * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceFrom(globalRank));
+
+          contact_closed = true;
         }
       }
 
@@ -691,13 +692,11 @@ void RodContactModel::computeContacts_
         f_contribLocal = 0.;
         k_contribLocal = 0.;
 
-        contact_closed |= computeNTS_(f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA);
-
-        if (contact_closed && verbose_)
-          jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "; ";
-
-        if (contact_closed)
+        if (computeNTS_(f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA))
         {
+          if (verbose_)
+            jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "; ";
+
           f_contrib[SliceFromTo(0 * globalRank, 2 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
           f_contrib[SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
 
@@ -705,6 +704,8 @@ void RodContactModel::computeContacts_
           k_contrib(SliceFromTo(0 * globalRank, 2 * globalRank), SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)) += k_contribLocal(SliceFrom(globalRank), SliceTo(globalRank));
           k_contrib(SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank), SliceFromTo(0 * globalRank, 2 * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceFrom(globalRank));
           k_contrib(SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank), SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)) += k_contribLocal(SliceTo(globalRank), SliceTo(globalRank));
+
+          contact_closed = true;
         }
       }
 
@@ -1128,7 +1129,7 @@ bool RodContactModel::computeSTS_
 
   D = matmul(jem::numeric::inverse(A), Matrix(matmul(B, H_hat) + matmul(C, dH_hat)));
 
-  E(SliceTo(globalRank * nodeCount), ALL) = matmul(matmul(dH_A.transpose(), contact_normal), D(0, ALL));
+  E(SliceTo(globalRank * nodeCount), ALL) = -1. * matmul(matmul(dH_A.transpose(), contact_normal), D(0, ALL));
   E(SliceFrom(globalRank * nodeCount), ALL) = matmul(matmul(dH_B.transpose(), contact_normal), D(1, ALL));
 
   if (norm2(ddpA) + norm2(ddpB) > 1e-12)
@@ -1137,7 +1138,11 @@ bool RodContactModel::computeSTS_
     throw jem::Error(JEM_FUNC, "higher order elements not implemented yet");
   }
 
-  G = matmul(matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)), Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))), Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) / distance;
+  G = matmul(
+          matmul(Matrix(H_tilde.transpose() + matmul(D(1, ALL), dpB) - matmul(D(0, ALL), dpA)),
+                 Matrix(eye(globalRank) - matmul(contact_normal, contact_normal))),
+          Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) /
+      distance;
 
   f_contrib += penaltySTS_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
   k_contrib += penaltySTS_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);

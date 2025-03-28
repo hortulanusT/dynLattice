@@ -9,12 +9,14 @@
 #include "models/HingeModel.h"
 #include "models/ImpactModel.h"
 #include "models/InitLoadModel.h"
+#include "models/JointContactModel.h"
 #include "models/LatticeModel.h"
 #include "models/MassModel.h"
 #include "models/NeumannModel.h"
 #include "models/PeriodicBCModel.h"
 #include "models/RodContactModel.h"
 #include "models/SpringMassModel.h"
+#include "models/SymBCModel.h"
 #include "models/specialCosseratRodModel.h"
 
 //-----------------------------------------------------------------------

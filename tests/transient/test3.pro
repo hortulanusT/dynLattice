@@ -31,6 +31,7 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
+Input.input.out_file="$(CASE_NAME)/visual.msh";
 Input.groupInput.fixed.ytype = "max";
 Input.groupInput.free.ytype = "min";
 Input.groupInput.nodeGroups += "elbow";
@@ -51,10 +52,12 @@ Output.disp.saveWhen = "t % 0.001 < deltaTime";
 Output.modules += "enSample";
 Output.enSample.type = "Sample";
 Output.enSample.file = "$(CASE_NAME)/energy.csv";
-Output.enSample.header = "time,time_step,run_time,load,E_kin,E_pot,E_tot";
-Output.enSample.dataSets = ["t", "deltaTime", "runtime", "$(model.model.force.scaleFunc)", "kineticEnergy", "potentialEnergy", "kineticEnergy+potentialEnergy"];
+Output.enSample.header = "step,time,time_step,run_time,load,E_kin,E_pot,E_tot";
+Output.enSample.dataSets = ["i","t", "deltaTime", "runtime", "$(model.model.force.scaleFunc)", "kineticEnergy", "potentialEnergy", "kineticEnergy+potentialEnergy"];
 Output.enSample.separator = ",";
 Output.enSample.sampleWhen = Output.disp.saveWhen;
+
+Input.input.sampleWhen = "t % 0.05 < deltaTime";
 
 Output.modules += "paraview";
 Output.paraview.type = "ParaView";

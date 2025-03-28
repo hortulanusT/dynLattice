@@ -20,6 +20,8 @@ void declareModels()
   InitLoadModel::declare();
   ImpactModel::declare();
   RodContactModel::declare();
+  JointContactModel::declare();
   MassModel::declare();
   SpringMassModel::declare();
+  SymBCModel::declare();
 }

@@ -9,7 +9,7 @@
 1. `./scripts/cluster/masterDesign.sh eqv`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py lin_change_plot get_failed`
-1. `./scripts/cluster/masterFailed.sh eqv`
+1. `./scripts/cluster/masterDesign.sh eqv long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
@@ -23,39 +23,34 @@
 1. `./scripts/cluster/masterDesign.sh tno`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py lin_change_plot_nonlin get_failed`
-1. `./scripts/cluster/masterFailed.sh tno`
+1. `./scripts/cluster/masterDesign.sh tno long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/tno-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/tno-design.py work_density_export prep_latex_design_nonlin`
 1. `rsync -vax --exclude '*.pdf' studies/results/tno-design/ ../Latex/PaperTNO/results/` 
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
-1. `jive scripts/running/nonlin-design.py lin_init lin_change_prep_nonlin prep_runs_nonlin`
-1. `./scripts/cluster/masterDesign.sh`
+1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
+1. `./scripts/cluster/masterDesign.sh nonlin`
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/nonlin-design.py get_failed`
+1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0"`
+1. `./scripts/cluster/syncBack.sh`
+1. `jive scripts/running/nonlin-design.py comp_nonlin_plot work_density_export`
+1. `rsync -vax --exclude '*.pdf' --exclude '*.png' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
+
 </br></br></br></br>
 
 # :hammer_and_pick: TO DO 
 1. Models
-    - Energy Output (various models)
-      - get proper split into
-        1. Kinetic
-        1. Potential
-        1. Dissipated
-        1. Contact
-      - get spatial resolution
 1. Modules
-    - Explicit Solver
-      - keep $\bm{M}$ constant, only update $\Theta$
-      - implement 'lumped' algorithm with direct 3x3 inverts
-      - Old $\bm{M}$ matrix as pre-conditioner?
     - Tangent Output Module
-      - Fix plasticity issues
       - Get Matrix Condensation to work
 1. Application
     - get multiple input files to work
 1. Environment
+    - split the repository for code and pre-/postprocessing
     - profile the code to find areas which could be improved (e.g. valgrind --callgrind or so)
-    - make all plot outputs A4/A3
 </br></br></br></br>
 
 # :heavy_check_mark: Information
@@ -75,3 +70,4 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets always executed, `JEM_ASSERT` only in non-optimized mode
 - `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
+- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory

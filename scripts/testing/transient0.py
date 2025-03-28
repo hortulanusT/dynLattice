@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from termcolor import colored
-from matplotlib.cm import get_cmap
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import signal
 
@@ -24,7 +23,7 @@ try:
           int(name[name.find("[") + 1:name.find("]")])
       ]) for name in data.columns
   ],
-                                           names=["dof", "node"])
+      names=["dof", "node"])
   dx = data["dx"]
   dy = data["dy"]
   dz = data["dz"]
@@ -139,7 +138,7 @@ if test_passed:
     fig.tight_layout()
     pdf.savefig(fig)
 
-    coloring = get_cmap("inferno")
+    coloring = plt.get_cmap("inferno")
 
     modes = [[0.] for _ in range(5)]
 

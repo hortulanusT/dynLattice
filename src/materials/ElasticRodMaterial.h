@@ -46,6 +46,7 @@ public:
   static const char *SIDE_LENGTH;
   static const char *N_ELEM;
   static const char *EDGE_FACTOR;
+  static const char *EDGE_ELEMS;
 
   JEM_DECLARE_CLASS(ElasticRodMaterial, Material);
 
@@ -99,6 +100,7 @@ protected:
   double shearParam_;
 
   double edgeFact_;
+  idx_t edgeElems_;
   idx_t nElem_;
 
   double area_;

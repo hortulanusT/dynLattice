@@ -61,6 +61,6 @@ model.model.model.diriFixed.nodeGroups += [ "free", "free", "free", "free" ];
 model.model.model.diriFixed.dofs += ["dx","dz","rx","rz"];
 model.model.model.diriFixed.factors += [ 0., 0., 0., 0. ];
 
-Output.paraview.sampleWhen = "i%100<1";
+Output.paraview.sampleWhen = "i%5<1";
 Output.paraview.beams.shape = "Line2";
 Output.paraview.beams.el_data += "plast_strain";
