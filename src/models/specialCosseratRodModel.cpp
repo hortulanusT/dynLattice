@@ -1057,7 +1057,7 @@ void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vecto
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
     get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
 
     shapes = shapeK_->getShapeFunctions();
 
@@ -1065,8 +1065,8 @@ void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vecto
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * 0.5 * dotProduct(strain[ip], stress[ip]));
-        table_weights[inodes[iNode]] += weights[ip];
+        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * weights[ip] * 0.5 * dotProduct(strain[ip], stress[ip]));
+        table_weights[inodes[iNode]] = 1.;
       }
     }
   }
@@ -1098,7 +1098,7 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
     get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
 
     shapes = shapeK_->getShapeFunctions();
 
@@ -1140,7 +1140,7 @@ void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vect
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
     get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
 
     shapes = shapeK_->getShapeFunctions();
 
@@ -1148,8 +1148,8 @@ void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vect
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip));
-        table_weights[inodes[iNode]] += weights[ip];
+        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * weights[ip] * material_->getDissipatedEnergy(ie, ip));
+        table_weights[inodes[iNode]] = 1.;
       }
     }
   }
@@ -1181,7 +1181,7 @@ double specialCosseratRodModel::calc_diss_Energy_(const Vector &disp) const
     get_disps_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
     get_strains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
+    get_stresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
 
     shapes = shapeK_->getShapeFunctions();
 

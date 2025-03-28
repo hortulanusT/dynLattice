@@ -242,6 +242,10 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
 void ElastoPlasticRodMaterial::apply_inelast_corr()
 {
+  Vector old_stress(curr_Strains_.size(0));
+  Vector curr_stress(curr_Strains_.size(0));
+  Vector delta_plastStrain(curr_Strains_.size(0));
+
   for (idx_t ielem = 0; ielem < curr_Strains_.size(2); ielem++)
   {
     for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
@@ -250,8 +254,11 @@ void ElastoPlasticRodMaterial::apply_inelast_corr()
 
       if (curr_deltaFlow_(ip, ielem) != 0.)
       {
-        E_diss_(ip, ielem) += dotProduct(curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem),
-                                         matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem))));
+        old_stress = matmul(materialK_, Vector(old_Strains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem)));
+        curr_stress = matmul(materialK_, Vector(curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem)));
+        delta_plastStrain = curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem);
+
+        E_diss_(ip, ielem) += dotProduct((old_stress + curr_stress) / 2., delta_plastStrain);
       }
     }
   }
