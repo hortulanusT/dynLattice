@@ -17,6 +17,7 @@
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
+#include <jive/util/DofSpace.h>
 #include <jem/util/StringUtils.h>
 #include <jive/util/ObjectConverter.h>
 #include <math.h>
@@ -27,6 +28,7 @@ using jem::numeric::matmul;
 using jive::IdxVector;
 using jive::Ref;
 using jive::Vector;
+using jive::util::DofSpace;
 using jive::util::XTable;
 
 class ElasticRodMaterial : public Material
@@ -82,11 +84,15 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
-  virtual void apply_inelast_corr() override;
+  virtual void apply_deform() override;
 
-  virtual void reject_inelast_corr() override;
+  virtual void reject_deform() override;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
 
 protected:
   ~ElasticRodMaterial();
@@ -115,6 +121,10 @@ protected:
 
   Matrix materialK_;
   Matrix materialM_;
+
+  Cubix old_Strains_;  // last converged load step
+  Cubix curr_Strains_; // current load step iteration
+  Matrix E_pot_;       // potential energy
 
   String rodName_;
 };

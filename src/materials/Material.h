@@ -84,13 +84,17 @@ public:
 
   virtual inline Matrix getLumpedMass(const double l, const idx_t &ielem) const;
 
-  virtual void apply_inelast_corr() = 0;
+  virtual void apply_deform() = 0;
 
-  virtual void reject_inelast_corr() = 0;
+  virtual void reject_deform() = 0;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
+
+  virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
+
+  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const = 0;
 
   virtual String getContext() const override;
 
