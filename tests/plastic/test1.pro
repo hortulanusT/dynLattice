@@ -68,3 +68,10 @@ model.model.model.diriFixed.factors += [ 0., 0., 0., 0. ];
 Output.paraview.sampleWhen = "i%10<1";
 Output.paraview.beams.shape = "Line2";
 Output.paraview.beams.el_data += "plast_strain";
+
+Output.modules += "energy";
+Output.energy.type = "Sample";
+Output.energy.file = "$(CASE_NAME)/energy.csv";
+Output.energy.header = "E_pot, E_diss";
+Output.energy.dataSets = [ "potentialEnergy", "dissipatedEnergy" ];
+Output.energy.separator = ",";

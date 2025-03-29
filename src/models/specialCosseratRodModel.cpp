@@ -367,7 +367,7 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    material_->apply_inelast_corr();
+    material_->apply_deform();
 
     Properties vars = Globdat::getVariables(globdat);
     Vector disp;
@@ -390,7 +390,7 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::CANCEL)
   {
-    material_->reject_inelast_corr();
+    material_->reject_deform();
     return true;
   }
 
@@ -1065,7 +1065,7 @@ void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vecto
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * weights[ip] * 0.5 * dotProduct(strain[ip], stress[ip]));
+        energy_table.addValue(inodes[iNode], jCol, shapes(iNode, ip) * weights[ip] * material_->getPotentialEnergy(ie, ip));
         table_weights[inodes[iNode]] = 1.;
       }
     }
@@ -1106,7 +1106,7 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        E_pot += weights[ip] * shapes(iNode, ip) * 0.5 * dotProduct(strain[ip], stress[ip]);
+        E_pot += weights[ip] * shapes(iNode, ip) * material_->getPotentialEnergy(ie, ip);
       }
     }
   }

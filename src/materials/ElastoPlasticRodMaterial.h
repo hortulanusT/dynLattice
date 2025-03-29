@@ -75,13 +75,17 @@ public:
    */
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
-  virtual void apply_inelast_corr() override;
+  virtual void apply_deform() override;
 
-  virtual void reject_inelast_corr() override;
+  virtual void reject_deform() override;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
 protected:
   ~ElastoPlasticRodMaterial();
@@ -104,9 +108,7 @@ protected:
   Cubix old_plastStrains_;  // last converged load step
   Cubix curr_plastStrains_; // last inner converged solution
 
-  Cubix old_Strains_;  // last converged load step
-  Cubix curr_Strains_; // current load step iteration
-
   Matrix curr_deltaFlow_; // last inner converged solution
   Matrix E_diss_;         // dissipated energy
+  Matrix E_hardPot_;      // hardening potential
 };
