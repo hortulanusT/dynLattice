@@ -54,5 +54,8 @@ if test_passed:
   plt.legend()
   plt.tight_layout()
   plt.savefig('tests/plastic/test1/energy.pdf')
+
+  pd.DataFrame({"disp": disp[1], "resp": resp[1]}).to_csv(
+      "tests/plastic/test1/plastic_benchmark.csv", index=False)
 else:
   print(colored("PLASTIC TEST 1 FAILED", "red", attrs=["bold"]))

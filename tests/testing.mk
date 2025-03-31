@@ -96,6 +96,7 @@ tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro 
 .PRECIOUS: tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv
 
 plastic-tests: $(addprefix tests/plastic/test, $(addsuffix /result.pdf, $(plastic_cases)))
+	@cp tests/plastic/test1/plastic_benchmark.csv tests/plastic/ref_data/test1_ref.csv ../Latex/Paper1/results/
 
 tests/plastic/test%/result.pdf: scripts/testing/plastic%.py\
 															 tests/plastic/test%/disp.csv\
