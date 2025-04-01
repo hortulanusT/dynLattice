@@ -474,9 +474,9 @@ double
 ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
   Vector y_diff = Vector(y_pre - y_cor);
-  for (idx_t i = 0; i < rdofs_.size(1); i++)
-    y_diff[rdofs_[i]] *= lenScale_;
-  y_diff /= lenScale_;
+  for (idx_t i = 0; i < y_diff.size(); i++)
+    if (!jem::testany(rdofs_ == i))
+      y_diff[i] /= lenScale_;
   return norm2(y_diff) / sqrt((double)y_diff.size());
 }
 
