@@ -37,7 +37,7 @@
 1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/nonlin-design.py comp_nonlin_plot work_density_export_nonlin`
-1. `rsync -vax --exclude '*.pdf' --exclude '*.png' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
+1. `rsync -vax --exclude '*.pdf' --exclude '*.png' --exclude '*.mp4' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
 
 </br></br></br></br>
 
@@ -70,4 +70,4 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets always executed, `JEM_ASSERT` only in non-optimized mode
 - `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
-- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory
+- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory (do on the local mounts to prevent load on the cluster)
