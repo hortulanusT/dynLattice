@@ -217,6 +217,7 @@ private:
   StringVector elemSets_;
   Array<elInfo> setInfo_;
   Ref<Function> sampleCond_;
+  Ref<Function> sampleInfo_;
   idx_t out_num_;
   bool pvd_print_;
   String pvd_name_;

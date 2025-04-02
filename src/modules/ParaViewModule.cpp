@@ -54,6 +54,7 @@ Module::Status ParaViewModule::init
 {
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);
+  Properties myVars = Globdat::getVariables(myName_, globdat);
 
   myProps.find(nameFormat_, "output_format");
   myConf.set("output_format", nameFormat_);
@@ -66,6 +67,16 @@ Module::Status ParaViewModule::init
       sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat);
   jive::util::FuncUtils::getConfig(myConf, sampleCond_,
                                    jive::app::PropNames::SAMPLE_COND);
+
+  sampleInfo_ = jive::util::FuncUtils::newFunc();
+  jive::util::FuncUtils::configFunc(
+      sampleInfo_, "sampleInfo", myProps, globdat);
+  jive::util::FuncUtils::getConfig(myConf, sampleInfo_, "sampleInfo");
+
+  double sampleInfo;
+  sampleInfo = jive::util::FuncUtils::evalFunc(*sampleInfo_, globdat);
+  myVars.set("sampleInfo", sampleInfo);
+  myVars.set("oldSampleInfo", sampleInfo);
 
   myProps.get(elemSets_, "groups");
   myConf.set("groups", elemSets_);
@@ -129,15 +140,22 @@ Module::Status ParaViewModule::run
 
 {
   idx_t currentStep;
+  double sampleInfo;
   double currentTime;
   String currentFile;
   idx_t folder_sep;
+
+  Properties myVars = Globdat::getVariables(myName_, globdat);
+
+  sampleInfo = jive::util::FuncUtils::evalFunc(*sampleInfo_, globdat);
+  myVars.set("sampleInfo", sampleInfo);
 
   // write everything to file
   bool cond = jive::util::FuncUtils::evalCond(*sampleCond_, globdat);
 
   if (cond)
   {
+    myVars.set("oldSampleInfo", sampleInfo);
     // get the current timeStep and format the given format accordingly
     currentFile = String::format(makeCString(nameFormat_).addr(), out_num_++);
     currentFile = currentFile + "." + fileType_;
