@@ -71,3 +71,4 @@ rsync -vax $TARGET $DESTINATION
 - `JEM_PRECHECK` gets always executed, `JEM_ASSERT` only in non-optimized mode
 - `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
 - `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory (do on the local mounts to prevent load on the cluster)
+- `tar cf - myFolder | pv -s $(du -sb myFolder | awk '{print $1}') | gzip > myFolder.tar.gz` to tarball a folder (`myFolder`) and show the progress
