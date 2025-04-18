@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <jem/base/Array.h>
 #include <jem/base/CString.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
@@ -18,10 +19,8 @@
 #include <jem/numeric/algebra/utilities.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
-#include <jem/base/Array.h>
 #include <jive/algebra/AbstractMatrix.h>
 #include <jive/algebra/MatrixBuilder.h>
-#include <jive/util/XTable.h>
 #include <jive/fem/ElementGroup.h>
 #include <jive/fem/ElementSet.h>
 #include <jive/model/Actions.h>
@@ -32,6 +31,7 @@
 #include <jive/util/DofSpace.h>
 #include <jive/util/Globdat.h>
 #include <jive/util/ObjectConverter.h>
+#include <jive/util/XTable.h>
 #include <jive/util/utilities.h>
 
 using jem::Array;

@@ -152,6 +152,14 @@ bool LatticeModel::takeAction
 
     if (table->getRowItems() == allNodes.getData())
     {
+      if (M_ == nullptr)
+      {
+        Ref<Model> supermodel = Model::get(globdat, getContext());
+        Properties newMatrixParams;
+        supermodel->takeAction(Actions::NEW_MATRIX2, newMatrixParams, globdat);
+        supermodel->takeAction(Actions::UPD_MATRIX2, newMatrixParams, globdat);
+      }
+
       if (name == "kineticEnergy")
         calc_kin_Energy_(*table, weights, globdat);
       if (name == "mass")
@@ -161,6 +169,14 @@ bool LatticeModel::takeAction
 
   if (action == Actions::COMMIT)
   {
+    if (M_ == nullptr)
+    {
+      Ref<Model> supermodel = Model::get(globdat, getContext());
+      Properties newMatrixParams;
+      supermodel->takeAction(Actions::NEW_MATRIX2, newMatrixParams, globdat);
+      supermodel->takeAction(Actions::UPD_MATRIX2, newMatrixParams, globdat);
+    }
+
     Properties vars = Globdat::getVariables(globdat);
     double E_kin = 0.0;
     double m = 0.0;
@@ -295,8 +311,7 @@ double LatticeModel::calc_mass_(const Properties &globdat) const
 
     M_->matmul(tempB, tempA);
 
-    for (idx_t iNode = 0; iNode > allNodes.size(); iNode++)
-      m += tempB[idofs[iNode]];
+    m += jem::sum(tempB[idofs]);
   }
 
   return m;
