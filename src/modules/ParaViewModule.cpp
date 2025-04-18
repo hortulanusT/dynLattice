@@ -260,13 +260,11 @@ void ParaViewModule::writeFile_
     StateVector::get(disp, jive::model::STATE0, dofs, globdat);
     if (!StateVector::find(velo, jive::model::STATE1, dofs, globdat))
     {
-      velo.resize(disp.shape());
-      velo = 0.0;
+      velo.resize(0);
     }
     if (!StateVector::find(acce, jive::model::STATE2, dofs, globdat))
     {
-      acce.resize(disp.shape());
-      acce = 0.0;
+      acce.resize(0);
     }
 
     // get the current model
@@ -406,13 +404,17 @@ void ParaViewModule::writePiece_
   {
     dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
     disp_mat(ipoint, ALL) = disp[iDisps];
-    velo_mat(ipoint, ALL) = velo[iDisps];
-    acce_mat(ipoint, ALL) = acce[iDisps];
+    if (velo.size() > 0)
+      velo_mat(ipoint, ALL) = velo[iDisps];
+    if (acce.size() > 0)
+      acce_mat(ipoint, ALL) = acce[iDisps];
   }
 
   writeDataArray_(file, disp_mat, "Float32", "Displacement");
-  writeDataArray_(file, velo_mat, "Float32", "Velocity");
-  writeDataArray_(file, acce_mat, "Float32", "Acceleration");
+  if (velo.size() > 0)
+    writeDataArray_(file, velo_mat, "Float32", "Velocity");
+  if (acce.size() > 0)
+    writeDataArray_(file, acce_mat, "Float32", "Acceleration");
 
   // Next write other Dofs
   if (info.dofData.size() > 0)
@@ -432,13 +434,17 @@ void ParaViewModule::writePiece_
     {
       dofs->getDofIndices(iDisps, groupNodes[ipoint], iDofs);
       disp_mat(ipoint, ALL) = disp[iDisps];
-      velo_mat(ipoint, ALL) = velo[iDisps];
-      acce_mat(ipoint, ALL) = acce[iDisps];
+      if (velo.size() > 0)
+        velo_mat(ipoint, ALL) = velo[iDisps];
+      if (acce.size() > 0)
+        acce_mat(ipoint, ALL) = acce[iDisps];
     }
 
     writeDataArray_(file, disp_mat, "Float32", "otherDofsDisp");
-    writeDataArray_(file, velo_mat, "Float32", "otherDofsVelo");
-    writeDataArray_(file, acce_mat, "Float32", "otherDofsAcc");
+    if (velo.size() > 0)
+      writeDataArray_(file, velo_mat, "Float32", "otherDofsVelo");
+    if (acce.size() > 0)
+      writeDataArray_(file, acce_mat, "Float32", "otherDofsAcc");
   }
 
   // iterate through all other data ( see OutputModule for more advanced
