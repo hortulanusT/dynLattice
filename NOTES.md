@@ -36,7 +36,7 @@
 1. `jive scripts/running/nonlin-design.py get_failed`
 1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0 --mem-per-cpu=512M"`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/nonlin-design.py comp_nonlin_plot work_density_export_nonlin`
+1. `jive scripts/running/nonlin-design.py work_density_export_nonlin comp_nonlin_plot`
 1. `rsync -vax --exclude '*.pdf' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
 
 </br></br></br></br>
