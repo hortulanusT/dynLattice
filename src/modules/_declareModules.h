@@ -13,6 +13,7 @@
 #include "modules/CSVOutputModule.h"
 #include "modules/EmbeddedRKModule.h"
 #include "modules/ForceOutputModule.h"
+#include "modules/GMSHInputModule.h"
 #include "modules/GitReportModule.h"
 #include "modules/GroupInputModule.h"
 #include "modules/GroupOutputModule.h"
@@ -21,9 +22,8 @@
 #include "modules/MilneDeviceModule.h"
 #include "modules/PBCGroupInputModule.h"
 #include "modules/PBCGroupOutputModule.h"
+#include "modules/ParaViewModule.h"
 #include "modules/TangentOutputModule.h"
-#include "modules/gmshInput/GMSHInputModule.h"
-#include "modules/paraview/ParaViewModule.h"
 
 //-----------------------------------------------------------------------
 //   declareModules

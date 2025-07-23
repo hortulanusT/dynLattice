@@ -1,28 +1,9 @@
 # binary files
 OBJ*
-nonlinRod*
+dynLattice*
 __pycache__/
 
-# reference data
-/ref_data
-
-# scribbling script
-scripts/scribbling.*
-
 # results
-*.log
-*.info
-*.msh22
-*.vtu
-*.pvd
-*.pvsm
-*.tar
-*.pdf
-*.avi
-
-studies/output/*
-studies/results/*
-
 tests/element/runs/
 tests/element/*.txt
 tests/*/test*/
