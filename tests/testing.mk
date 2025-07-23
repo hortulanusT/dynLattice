@@ -27,7 +27,7 @@ contact_cases = 0 1 2
 
 element-tests: $(element_results)
 
-tests/element/result_%.txt: scripts/testing/element.py $(load_results) $(disp_results) $(resp_results)
+tests/element/result_%.txt: tests/element/processing.py $(load_results) $(disp_results) $(resp_results)
 	@$< $*
 
 tests/element/runs/%-load.csv tests/element/runs/%-disp.csv tests/element/runs/%-resp.csv: $(program) tests/element/test.pro
@@ -53,16 +53,15 @@ tests/element/test.pro: tests/element/input.pro tests/element/output.pro tests/e
 .PRECIOUS: tests/beam/test%/disp.csv tests/beam/test%/resp.csv
 
 beam-tests: $(addprefix tests/beam/test, $(addsuffix /result.pdf, $(beam_cases)))
-	@cp tests/beam/test5/beam_test5_data.csv tests/beam/test5/beam_test5_ref.csv ../Latex/Chapter02/results/
 
-tests/beam/test0/result.pdf: scripts/testing/beam0.py\
+tests/beam/test0/result.pdf: tests/beam/test0.py\
 															 tests/beam/test0/disp.csv\
 															 tests/beam/test0/resp.csv\
 															 tests/beam/test0_ref/disp.csv\
 															 tests/beam/test0_ref/resp.csv
 	@$<
 
-tests/beam/test%/result.pdf: scripts/testing/beam%.py\
+tests/beam/test%/result.pdf: tests/beam/test%.py\
 															 tests/beam/test%/disp.csv\
 															 tests/beam/test%/resp.csv
 	@$<
@@ -78,11 +77,8 @@ tests/beam/test%.pro: tests/beam/input.pro tests/beam/output.pro tests/beam/mode
 .PRECIOUS: tests/transient/test%/disp.gz
 
 transient-tests: $(addprefix tests/transient/test, $(addsuffix /result.pdf, $(transient_cases)))
-	@cp tests/transient/test3/all_data.csv ../Latex/Chapter02/results/transient_test3_all_data.csv
-	@cp tests/transient/test3/ref_disp.csv ../Latex/Chapter02/results/transient_test3_ref_disp.csv
-	@cp tests/transient/test3/*tikz ../Latex/Chapter02/results/
 
-tests/transient/test%/result.pdf: scripts/testing/transient%.py\
+tests/transient/test%/result.pdf: tests/transient/test%.py\
 																	 tests/transient/test%/disp.gz
 	@$<
 
@@ -96,9 +92,8 @@ tests/transient/test%.pro: tests/transient/input.pro tests/transient/output.pro 
 .PRECIOUS: tests/plastic/test%/disp.csv tests/plastic/test%/resp.csv
 
 plastic-tests: $(addprefix tests/plastic/test, $(addsuffix /result.pdf, $(plastic_cases)))
-	@cp tests/plastic/test1/plastic_benchmark.csv tests/plastic/ref_data/test1_ref.csv ../Latex/Paper1/results/
 
-tests/plastic/test%/result.pdf: scripts/testing/plastic%.py\
+tests/plastic/test%/result.pdf: tests/plastic/test%.py\
 															 tests/plastic/test%/disp.csv\
 															 tests/plastic/test%/resp.csv
 	@$<
@@ -114,10 +109,8 @@ tests/plastic/test%.pro: tests/plastic/input.pro tests/plastic/output.pro tests/
 .PRECIOUS: tests/contact/test%/disp.csv tests/contact/test%/resp.csv
 
 contact-tests: $(addprefix tests/contact/test, $(addsuffix /result.pdf, $(contact_cases)))
-	@cp tests/contact/test1/resp.csv ../Latex/Chapter02/results/contact_test1_resp.csv
-	@cp tests/contact/test1/*tikz ../Latex/Chapter02/results/
 
-tests/contact/test%/result.pdf: scripts/testing/contact%.py\
+tests/contact/test%/result.pdf: tests/contact/test%.py\
 															 tests/contact/test%/disp.csv\
 															 tests/contact/test%/resp.csv
 	@$<

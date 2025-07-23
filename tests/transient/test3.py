@@ -53,20 +53,6 @@ with PdfPages("tests/transient/test3/result.pdf") as file:
 
 if (max(energy.index) > 0.9) & (max_rise < 1e-5):
   print(colored("TRANSIENT TEST 3 RUN THROUGH", "green"))
-
-  all_data = pd.merge(ellbow, tip, on="time")[::10]
-  all_data.columns = ["ellbow_x", "ellbow_y",
-                      "ellbow_z", "tip_x", "tip_y", "tip_z"]
-  all_data.to_csv("tests/transient/test3/all_data.csv")
-
-  ref_disp.columns = ['_'.join(col).strip() for col in ref_disp.columns.values]
-  ref_disp.to_csv("tests/transient/test3/ref_disp.csv", index=False)
-
-  for i, step in enumerate([0, 2.45080000e+04, 4.90070000e+04, 7.35040000e+04, 9.80020000e+04, 1.22495000e+05, 1.46993000e+05]):
-    os.system(
-        f"scripts/translate_view.py tests/transient/test3/visualDisp.msh {int(step)} 1 1")
-    os.system(
-        f"mv tests/transient/test3/visual_{int(step)}.tikz tests/transient/test3/transient_{int(i*5)}s.tikz")
 else:
   print(max(energy.index))
   print(max_rise)
