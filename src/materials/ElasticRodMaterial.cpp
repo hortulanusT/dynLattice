@@ -39,8 +39,17 @@ ElasticRodMaterial::~ElasticRodMaterial()
 
 void ElasticRodMaterial::configure(const Properties &props, const Properties &globdat)
 {
+  Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
+
   Properties myProps = props.getProps(myName_);
   myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
+
+  idx_t ipCount;
+  idx_t elemCount;
+  idx_t dofCount;
+  myProps.find(ipCount, "ipCount");
+  myProps.find(elemCount, "elemCount");
+  dofCount = dofs->typeCount();
 
   myProps.get(young_, YOUNGS_MODULUS);
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
@@ -130,6 +139,14 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
           << " ...Inertia matrix of the material '" << myName_ << "':\n"
           << materialM_ << "\n";
   }
+
+  old_Strains_.resize(dofCount, ipCount, elemCount);
+  old_Strains_ = 0.;
+  curr_Strains_.resize(dofCount, ipCount, elemCount);
+  curr_Strains_ = 0.;
+
+  E_pot_.resize(ipCount, elemCount);
+  E_pot_ = 0.;
 }
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -271,6 +288,7 @@ void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
+  curr_Strains_(ALL, ip, ielem) = strain;
   stress = matmul(getMaterialStiff(ielem, ip), strain);
 }
 
@@ -279,15 +297,36 @@ void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, cons
   WARN(name + " not supported by this material");
 }
 
-void ElasticRodMaterial::apply_inelast_corr()
+void ElasticRodMaterial::apply_deform()
 {
+
+  for (idx_t ielem = 0; ielem < curr_Strains_.size(2); ielem++)
+  {
+    for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
+    {
+      E_pot_(ip, ielem) = 0.5 * dotProduct(curr_Strains_(ALL, ip, ielem), matmul(getMaterialStiff(ielem, ip), curr_Strains_(ALL, ip, ielem)));
+    }
+  }
+
+  old_Strains_ = curr_Strains_;
 }
 
-void ElasticRodMaterial::reject_inelast_corr()
+void ElasticRodMaterial::reject_deform()
 {
+  curr_Strains_ = old_Strains_;
+}
+
+double ElasticRodMaterial::getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const
+{
+  return E_pot_(ip, ielem);
 }
 
 double ElasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
+{
+  return 0.;
+}
+
+double ElasticRodMaterial::getHardeningPotential(const idx_t &ielem, const idx_t &ip) const
 {
   return 0.;
 }

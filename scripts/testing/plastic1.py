@@ -4,6 +4,8 @@
 import numpy as np
 from termcolor import colored
 from matplotlib import pyplot as plt
+import pandas as pd
+from scipy.integrate import cumulative_trapezoid
 
 test_passed = False
 
@@ -34,5 +36,26 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test1/result.pdf")
+
+  energy = pd.read_csv('tests/plastic/test1/energy.csv', skipinitialspace=True)
+  disp = pd.read_csv('tests/plastic/test1/disp.csv',
+                     header=None, skipinitialspace=True)
+  resp = pd.read_csv('tests/plastic/test1/resp.csv',
+                     header=None, skipinitialspace=True)
+
+  input_energy = cumulative_trapezoid(
+      resp[1], disp[1], initial=0) + cumulative_trapezoid(resp[4], disp[4], initial=0) + 0.5 * resp[4][0] * disp[4][0]
+
+  plt.plot(input_energy, label='integration')
+  plt.plot(energy['E_pot']+energy['E_diss'], '--', label='sim tot')
+  plt.plot(energy['E_pot'], label='sim pot')
+  plt.plot(energy['E_diss'], label='sim diss')
+  plt.plot(input_energy-energy['E_pot'], '--', label='calc diss')
+  plt.legend()
+  plt.tight_layout()
+  plt.savefig('tests/plastic/test1/energy.pdf')
+
+  pd.DataFrame({"disp": disp[1], "resp": resp[1]}).to_csv(
+      "tests/plastic/test1/plastic_benchmark.csv", index=False)
 else:
   print(colored("PLASTIC TEST 1 FAILED", "red", attrs=["bold"]))

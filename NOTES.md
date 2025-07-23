@@ -13,10 +13,10 @@
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/eqv-design.py work_density_plot stress_plot comp_speeds_locale_plot`
 1. `jive scripts/running/eqv-design.py work_density_export prep_latex_design`
-1. `rsync -vax --exclude '*.pdf' --delete studies/results/eqv-design/ ../Latex/Paper0/results/`
+1. `rsync -vax --exclude '*.pdf' studies/results/eqv-design/ ../Latex/Paper0/results/`
 ## *plast-size* study
 1. `jive scripts/running/plast-size.py do_plast_studies_anew prep_latex_plast`
-1. `rsync -vax --exclude '*.pdf' --delete studies/results/plast-size/ ../Latex/Paper1/results/`
+1. `rsync -vax --exclude '*.pdf' studies/results/plast-size/ ../Latex/Paper1/results/`
 ## *tno-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/tno-design.py samples_init prep_runs_nonlin lin_change_prep_nonlin`
@@ -31,13 +31,13 @@
 ## *nonlin-design* study
 > :warning: make sure repo on cluster is updated :warning:
 1. `jive scripts/running/nonlin-design.py lin_init prep_runs_nonlin`
-1. `./scripts/cluster/masterDesign.sh nonlin`
+1. `./scripts/cluster/masterDesign.sh nonlin * "--mem-per-cpu=512M"`
 1. `./scripts/cluster/syncBack.sh`
 1. `jive scripts/running/nonlin-design.py get_failed`
-1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0"`
+1. `./scripts/cluster/masterDesign.sh nonlin long "--time=5-0 --mem-per-cpu=512M"`
 1. `./scripts/cluster/syncBack.sh`
-1. `jive scripts/running/nonlin-design.py comp_nonlin_plot work_density_export`
-1. `rsync -vax --exclude '*.pdf' --exclude '*.png' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
+1. `jive scripts/running/nonlin-design.py work_density_export_nonlin comp_nonlin_plot`
+1. `rsync -vax --exclude '*.pdf' studies/results/nonlin-design/ ../Latex/Paper2/results/` 
 
 </br></br></br></br>
 
@@ -70,4 +70,5 @@ rsync -vax $TARGET $DESTINATION
 - `StdShape` for local coordinates and `Shape` for global coordinates
 - `JEM_PRECHECK` gets always executed, `JEM_ASSERT` only in non-optimized mode
 - `for f in $(git grep --cached -Il ''); do tail -c1 $f | read -r _ || echo >> $f; done` ensures all git files end with a newline
-- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory
+- `for i in */; do zip -r "${i%/}.zip" "$i" && rm -vr "$i"; done` will zip and delete all folders in a directory (do on the local mounts to prevent load on the cluster)
+- `tar cf - myFolder | pv -s $(du -sb myFolder | awk '{print $1}') | gzip > myFolder.tar.gz` to tarball a folder (`myFolder`) and show the progress
