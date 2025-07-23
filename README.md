@@ -1,68 +1,40 @@
 # Rod-based Lattice Simulations
-This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo/Vu-Quoc](https://dx.doi.org/10.1016/0045-7825(86)90079-4) with some minor adaptations due to [Crisfield/Jelenić](https://dx.doi.org/10.1098/rspa.1999.0352). It also contains some python scripts for easier execution, they all should be executed from the main directory.
+This repository contains JEM/JIVE code to simulate lattices undergoing high strain-rate dynamic deformation based on nonlinear beam elements. It also contains some test files to verify the correctness of the implementation.
 
 ## Requirements
-- **Apptainer 1.2**
-  - JEM/JIVE 3.0
-  - OpenMPI 4.1.1
-  - GMSH 4.9.5
-  - HDF5 1.12.2
+- **Apptainer**
+  - [JEM/JIVE 3.0](https://dynaflow.com/software/jive/jive-downloads/)
+  - [OpenMPI 4.1.1](https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz)
+  - [GMSH 4.9.5](https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz)
+  - [HDF5 1.12.2](https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz)
 
-To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build /path/to/jive.sif /path/to/jive.def`.
+To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build jive.sif jive.def`.
+You can subsequently move the `jive.sif` to any location you prefer.
 
-To create an alias used in the recipes run `alias jive='apptainer -s exec -e /path/to/jive.sif'`.
+To create an alias for easier executing use `alias jive='apptainer -s exec -e </full/path/to/>jive.sif'`.
+The test-cases can subsequently be run using `jive make tests`.
 
 ## Organization
 ```
 .
-├── .gitignore
-├── .gitmodules
-├── LICENSE
-├── README.md
-├── NOTES.md
-├── Makefile
-├── jive.def
-├── bin                 <- Compiled and external code, ignored by git
+├── jive.def            ← apptainer definition file needed to run everything
+├── README.md           ← this README
+├── Makefile            ← makefile for the project
+├── bin                 ← compiled and external code, ignored by git
+├── doc                 ← output folder for the documentation, ignored by git
 ├── src
-│   ├── main.cpp        <- origin file for the JEM/JIVE program
-│   ├── models          <- custom JIVE models
-│   ├── modules         <- custom JIVE modules
-│   ├── modules         <- custom JIVE materials
-│   ├── misc            <- other custom JIVE files
-│   └── utils           <- utility functions and macros
-├── scripts
-│   ├── testing         <- ptyhon scripts for some testing runs
-│   ├── running         <- ptyhon scripts for the real runs
-│   └── cluster         <- bash scripts for running on the clusters
-├── tests
-│   ├── testing.mk      <- makefile for testing setup
-│   ├── element         <- test setups for single elments
-│   ├── beam            <- test setups for static beam (networks)
-│   ├── transient       <- test setups for dynamic computations
-│   ├── plastic         <- test setups for dynamic beam (networkds)
-│   └── manual          <- test setup for manual test runs
-└── studies
-    ├── running*.mk     <- makefiles for running studies
-    ├── configs         <- folder containing some standard settings
-    ├── geometries      <- folder containing the different geometries
-    ├── programs        <- folder containing different studies to conducts
-    ├── output          <- raw data output
-    └── results         <- processed results
-```
-
-## Notes
-In the result files the PBC's are encoded as follows:
-```
- 0 -- uniaxial deformation
- 1 -- planar deformation
- 2 -- shear deformation
-```
-In the result files the Material models are encoded as follows:
-```
- 0 -- elastic
- 1 -- elastic + contact
- 2 -- plastic
- 3 -- plastic + contact
+│   ├── main.cpp        ← origin file for the JEM/JIVE program
+│   ├── models          ← custom JIVE models
+│   ├── modules         ← custom JIVE modules
+│   ├── modules         ← custom JIVE materials
+│   ├── misc            ← other custom JIVE files
+│   └── utils           ← utility functions and macros
+└── tests
+    ├── testing.mk      ← makefile for testing setup
+    ├── element         ← test setups for single elements
+    ├── beam            ← test setups for static beam (networks)
+    ├── transient       ← test setups for dynamic computations
+    └── plastic         ← test setups for inelastic beam (networks)
 ```
 
 ## License

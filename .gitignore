@@ -1,7 +1,7 @@
 # binary files
-OBJ*
-dynLattice*
-__pycache__/
+bin/
+# documentation files
+doc/
 
 # results
 tests/element/runs/
