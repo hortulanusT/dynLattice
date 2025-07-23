@@ -3,6 +3,7 @@
 //
 
 #include "GMSHInputModule.h"
+#include "utils/testing.h"
 
 //=======================================================================
 //   class GMSHInputModule
@@ -21,6 +22,8 @@ const char *GMSHInputModule::ENTITY_NAMES[4] = {"point", "beam", "shell",
                                                 "body"};
 const char *GMSHInputModule::ONELAB_PROPS = "onelab";
 const char *GMSHInputModule::VERBOSE = "verbose";
+const char *GMSHInputModule::OUT_FILE = "out_file";
+const char *GMSHInputModule::OUT_TABLES = "out_tables";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -33,6 +36,9 @@ GMSHInputModule::GMSHInputModule(const String &name)
 
 {
   verbose_ = true;
+  writeOutput_ = false;
+  outTables_.resize(1);
+  outTables_[0] = "mat_stress";
 }
 
 GMSHInputModule::~GMSHInputModule()
@@ -77,6 +83,24 @@ Module::Status GMSHInputModule::init
   myProps.find(verbose_, VERBOSE);
   myConf.set(VERBOSE, verbose_);
 
+  writeOutput_ = myProps.find(outFile_, OUT_FILE);
+  if (writeOutput_)
+  {
+    idx_t pos = outFile_.rfind('.');
+    outExt_ = outFile_[jem::SliceFrom(pos)];
+    outFile_ = outFile_[jem::SliceTo(pos)];
+
+    myConf.set(OUT_FILE, outFile_ + "<>" + outExt_);
+    sampleCond_ = jive::util::FuncUtils::newCond();
+    jive::util::FuncUtils::configCond(
+        sampleCond_, jive::app::PropNames::SAMPLE_COND, myProps, globdat);
+    jive::util::FuncUtils::getConfig(myConf, sampleCond_,
+                                     jive::app::PropNames::SAMPLE_COND);
+
+    myProps.find(outTables_, OUT_TABLES);
+    myConf.set(OUT_TABLES, outTables_);
+  }
+
   // TRY GETTING THE GLOBAL ELEMENTS
   nodes_ = XNodeSet::find(globdat);
   elements_ = XElementSet::find(globdat);
@@ -99,11 +123,14 @@ Module::Status GMSHInputModule::init
 
   if (geoFile.size())
   {
+    std::filesystem::path geoPath = std::filesystem::path(jem::makeCString(geoFile).addr());
+    JEM_PRECHECK2(std::filesystem::exists(geoPath), std::filesystem::absolute(geoPath).c_str());
     prepareOnelab_(onelab);
     openMesh_(geoFile, order);
   }
   else
   {
+    // NOT_IMPLEMENTED
     // LATER Leon's function
   }
 
@@ -121,9 +148,17 @@ Module::Status GMSHInputModule::init
   if (storeTan)
     storeTangents_(globdat);
 
-  gmsh::finalize();
-
-  return DONE;
+  if (writeOutput_)
+  {
+    nodeView_ = gmsh::view::add("nodeView");
+    elemView_ = gmsh::view::add("elemView");
+    return OK;
+  }
+  else
+  {
+    gmsh::finalize();
+    return DONE;
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -132,7 +167,17 @@ Module::Status GMSHInputModule::init
 
 Module::Status GMSHInputModule::run(const Properties &globdat)
 {
-  return OK;
+  if (writeOutput_)
+  {
+    if (jive::util::FuncUtils::evalCond(*sampleCond_, globdat))
+      writeOutFile_(globdat);
+    return OK;
+  }
+  else
+  {
+    gmsh::finalize();
+    return DONE;
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -141,6 +186,13 @@ Module::Status GMSHInputModule::run(const Properties &globdat)
 
 void GMSHInputModule::shutdown(const Properties &globdat)
 {
+  if (writeOutput_)
+  {
+    JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+    if (jive::util::FuncUtils::evalCond(*sampleCond_, globdat))
+      writeOutFile_(globdat);
+    gmsh::finalize();
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -213,25 +265,24 @@ void GMSHInputModule::createNodes_
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
 
-  std::vector<std::size_t> gmsh_tags;
+  std::vector<std::size_t> gmshNodeTags;
   std::vector<double> gmsh_coords;
   std::vector<double> gmsh_paraCoords;
 
   Vector coords(dim);
 
-  gmsh::model::mesh::getNodes(gmsh_tags, gmsh_coords, gmsh_paraCoords);
+  gmsh::model::mesh::getNodes(gmshNodeTags, gmsh_coords, gmsh_paraCoords);
 
-  for (size_t inode = 0; inode < gmsh_tags.size(); inode++)
+  for (idx_t inode = 0; inode < (idx_t)gmshNodeTags.size(); inode++)
   {
     for (idx_t icoord = 0; icoord < dim; icoord++)
       coords[icoord] = gmsh_coords[inode * dim + icoord];
 
+    gmshToJiveNodeMap_[gmshNodeTags[inode]] = nodes_.addNode(coords);
+
     if (verbose_)
       jem::System::info(myName_)
-          << " ...Created node " << nodes_.addNode(coords)
-          << " at coordinates " << coords << "\n";
-    else
-      nodes_.addNode(coords);
+          << " ...Created node " << gmshToJiveNodeMap_[gmshNodeTags[inode]] << " at coordinates " << coords << "\n";
   }
   if (verbose_)
     jem::System::info(myName_) << "\n";
@@ -243,7 +294,7 @@ void GMSHInputModule::createNodes_
 
 void GMSHInputModule::createElems_
 
-    (const Properties &globdat, const idx_t offset)
+    (const Properties &globdat)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -255,8 +306,6 @@ void GMSHInputModule::createElems_
   std::string elemName;
   int dim, order, numNodes, numPrimaryNodes;
   std::vector<double> localCoords;
-
-  idx_t addedElem;
 
   IdxBuffer groupElems;
   IdxVector elemNodes;
@@ -294,26 +343,24 @@ void GMSHInputModule::createElems_
 
         for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
         {
-          elemNodes[inode * order] =
-              nodeTags[itype][ielem * numNodes + inode] - offset;
+          elemNodes[inode * order] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + inode]];
 
           if (inode * order + 1 == numNodes)
             break;
           for (idx_t jnode = 1; jnode < order; jnode++)
-            elemNodes[inode * order + jnode] =
-                nodeTags[itype][ielem * numNodes + numPrimaryNodes +
-                                inode * (order - 1) + jnode - 1] -
-                offset;
+          {
+            elemNodes[inode * order + jnode] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1]];
+          }
         }
 
-        addedElem = elements_.addElement(elemNodes);
+        gmshToJiveElemMap_[elemTags[itype][ielem]] = elements_.addElement(elemNodes);
         if (verbose_)
           jem::System::info(myName_)
-              << " ...Created element " << addedElem << " with nodes "
+              << " ...Created element " << gmshToJiveElemMap_[elemTags[itype][ielem]] << " with nodes "
               << elemNodes << "\n";
 
-        groupElems.pushBack(addedElem);
-        entityBuffer[entities_[ientity][0]].pushBack(addedElem);
+        groupElems.pushBack(gmshToJiveElemMap_[elemTags[itype][ielem]]);
+        entityBuffer[entities_[ientity][0]].pushBack(gmshToJiveElemMap_[elemTags[itype][ielem]]);
       }
     }
 
@@ -353,7 +400,7 @@ void GMSHInputModule::createElems_
 
 void GMSHInputModule::storeTangents_
 
-    (const Properties &globdat, const idx_t offset)
+    (const Properties &globdat)
 
 {
   JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
@@ -395,7 +442,8 @@ void GMSHInputModule::storeTangents_
 
     for (idx_t inode = 0; inode < (idx_t)gmsh_tags.size(); inode++)
     {
-      jive_tags[inode] = gmsh_tags[inode] - offset;
+      jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[inode]];
+
       for (idx_t icoord = 0; icoord < 3; icoord++)
         jive_derivatives[inode * 3 + icoord] =
             gmsh_derivatives[inode * 3 + icoord];
@@ -407,6 +455,76 @@ void GMSHInputModule::storeTangents_
     if (verbose_)
       jem::System::info(myName_) << " ...Stored derivatives in '"
                                  << entityVars.getName() << "'\n";
+  }
+}
+
+//-----------------------------------------------------------------------
+//   writeOutFile_
+//-----------------------------------------------------------------------
+
+void GMSHInputModule::writeOutFile_
+
+    (const Properties &globdat) const
+{
+  JEM_PRECHECK2(gmsh::isInitialized(), "GMSH was not initialized");
+
+  Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
+  Properties params;
+  Ref<jive::util::XTable> dataTable =
+      newInstance<jive::util::DenseTable>("gmshOutput", elements_.getData());
+  Vector weights(dataTable->rowCount());
+  Vector disp;
+  IdxVector jtypes = {0, 1, 2};
+  IdxVector stypes = {0, 1, 2, 3, 4, 5};
+  IdxVector idofs(3);
+  idx_t step = 0;
+  double time = 0.0;
+  std::string modelName;
+  std::vector<std::size_t> gmshNodes;
+  std::vector<std::size_t> gmshElements;
+  std::vector<std::vector<double>> gmshNodeData;
+  std::vector<std::vector<double>> gmshElementData;
+  Vector nodeData(3);
+  Vector elemData(6);
+  globdat.find(step, Globdat::TIME_STEP);
+  globdat.find(time, Globdat::TIME);
+  gmsh::model::getCurrent(modelName);
+
+  // write displacements
+  StateVector::get(disp, dofs, globdat);
+  for (const std::pair<const std::size_t, idx_t> &node : gmshToJiveNodeMap_)
+  {
+    dofs->getDofIndices(idofs, node.second, jtypes);
+    nodeData = disp[idofs];
+    gmshNodeData.push_back(std::vector<double>(nodeData.begin(), nodeData.end()));
+    gmshNodes.push_back(node.first);
+  }
+  gmsh::view::addModelData(nodeView_, step, modelName, "NodeData", gmshNodes, gmshNodeData, time, 3);
+  gmsh::view::write(nodeView_, makeCString(outFile_ + "Disp" + outExt_).addr());
+
+  // write material table data
+  for (String table_name : outTables_)
+  {
+    weights = 0.0;
+
+    params.set(jive::model::ActionParams::TABLE_NAME, table_name);
+    params.set(jive::model::ActionParams::TABLE_WEIGHTS, weights);
+    params.set(jive::model::ActionParams::TABLE, dataTable);
+    Model::get(globdat, getContext())
+        ->takeAction(jive::model::Actions::GET_TABLE, params, globdat);
+    dataTable->scaleRows(weights);
+    if (!dataTable->size())
+      continue;
+    for (const std::pair<const std::size_t, idx_t> &elem : gmshToJiveElemMap_)
+    {
+      if (dataTable->findRowValues(elemData, elem.second, stypes))
+      {
+        gmshElementData.push_back(std::vector<double>(elemData.begin(), elemData.end()));
+        gmshElements.push_back(elem.first);
+      }
+    }
+    gmsh::view::addModelData(elemView_, step, modelName, "ElementData", gmshElements, gmshElementData, time, 6);
+    gmsh::view::write(elemView_, makeCString(outFile_ + table_name + outExt_).addr());
   }
 }
 

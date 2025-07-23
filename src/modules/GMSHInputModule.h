@@ -12,26 +12,35 @@
 
 #pragma once
 
+#include <filesystem>
 #include <gmsh.h>
 
-#include <jem/base/CString.h>
 #include <jem/base/Array.h>
+#include <jem/base/CString.h>
 #include <jem/base/System.h>
-#include <jem/util/Properties.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/HashDictionary.h>
+#include <jem/util/Properties.h>
 
 #include <jive/app/Module.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/app/Names.h>
-#include <jive/fem/XNodeSet.h>
-#include <jive/fem/XElementSet.h>
 #include <jive/fem/ElementGroup.h>
+#include <jive/fem/XElementSet.h>
+#include <jive/fem/XNodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/StateVector.h>
 #include <jive/util/Assignable.h>
+#include <jive/util/DenseTable.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/FuncUtils.h>
 #include <jive/util/Globdat.h>
+#include <jive/util/XTable.h>
 
 using jem::Array;
 using jem::max;
+using jem::newInstance;
 
 using jive::ALL;
 using jive::idx_t;
@@ -41,13 +50,19 @@ using jive::Matrix;
 using jive::Properties;
 using jive::Ref;
 using jive::String;
+using jive::StringVector;
 using jive::Vector;
 
 using jive::app::Module;
 using jive::fem::ElementGroup;
 using jive::fem::XElementSet;
 using jive::fem::XNodeSet;
+using jive::model::Model;
+using jive::model::StateVector;
 using jive::util::Assignable;
+using jive::util::DofSpace;
+using jive::util::Function;
+using jive::util::Globdat;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
@@ -73,6 +88,8 @@ public:
   static const char *ENTITY_NAMES[4];
   static const char *ONELAB_PROPS;
   static const char *VERBOSE;
+  static const char *OUT_FILE;
+  static const char *OUT_TABLES;
 
   explicit GMSHInputModule
 
@@ -137,22 +154,42 @@ protected:
    * @brief populates the elements stored in the global database
    *
    * @param globdat global database
-   * @param offset offset for the numbering, e.g. between the JIVE and the GMSH lists
    */
   void createElems_
 
-      (const Properties &globdat,
-       const idx_t offset = 1);
+      (const Properties &globdat);
 
+  /**
+   * @brief store tangents in the global database for later use
+   *
+   * @param globdat global database
+   */
   void storeTangents_
 
-      (const Properties &globdat,
-       const idx_t offset = 1);
+      (const Properties &globdat);
+
+  /**
+   * @brief write the output file for GMSH to be read in for post processing
+   *
+   * @param globdat global database
+   */
+  void writeOutFile_
+
+      (const Properties &globdat) const;
 
 private:
   Assignable<XNodeSet> nodes_;
-  IdxVector nodeIDs_;
+  std::unordered_map<std::size_t, idx_t> gmshToJiveNodeMap_;
   Assignable<XElementSet> elements_;
+  std::unordered_map<std::size_t, idx_t> gmshToJiveElemMap_;
   IdxMatrix entities_;
+
   bool verbose_;
+  bool writeOutput_;
+  Ref<Function> sampleCond_;
+  String outFile_;
+  String outExt_;
+  StringVector outTables_;
+  idx_t nodeView_;
+  idx_t elemView_;
 };
