@@ -1,12 +1,9 @@
 /**
  * @file GMSHInputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @author Leon Riccius (l.riccius@tudelff.nl)
  * @brief A Module to import Geometry using the GMSH C++ API
- * @version 0.1
- * @date 2022-04-01
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

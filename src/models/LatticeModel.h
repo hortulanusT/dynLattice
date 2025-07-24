@@ -1,11 +1,8 @@
 /**
  * @file LatticeModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief LatticeModel for collection of rods
- * @version 0.1
- * @date 2022-04-26
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 
@@ -86,7 +83,7 @@ public:
    * Calculates the kinetic energy of the special Cosserat rod model.
    *
    * @param globdat The global data.
-   * @return The kinetic energy.
+   * @returns The kinetic energy.
    */
   double calc_kin_Energy_(const Properties &globdat) const;
   void calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
@@ -95,7 +92,7 @@ public:
    * Calculates the mass of the special cosserat rod model
    *
    * @param globdat the global data
-   * @return the total mass
+   * @returns the total mass
    */
   double calc_mass_(const Properties &globdat) const;
   void calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;

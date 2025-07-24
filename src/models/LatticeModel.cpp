@@ -1,11 +1,8 @@
 /**
  * @file LatticeModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief LatticeModel for collection of rods
- * @version 0.1
- * @date 2022-04-26
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

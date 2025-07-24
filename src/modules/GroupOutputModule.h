@@ -1,11 +1,8 @@
 /**
  * @file GroupOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief module that writes information into globdat
- * @version 0.1
- * @date 2021-10-25
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  *
  */
 
@@ -79,7 +76,7 @@ public:
    * @param conf configuration properties, that will be reported
    * @param props configuration properteis, that will be applied
    * @param globdat global database
-   * @return status code
+   * @returns status code
    */
   virtual Status init(const Properties &conf, const Properties &props,
                       const Properties &globdat);

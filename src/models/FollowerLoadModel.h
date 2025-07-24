@@ -4,7 +4,7 @@
  * This class implements a way to make a certain of of
  * Node-groups equal
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: July 21
  *
  */
@@ -13,17 +13,17 @@
 #include <jem/util/Properties.h>
 
 #include <jive/Array.h>
+#include <jive/fem/NodeGroup.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
-#include <jive/model/Actions.h>
 #include <jive/model/StateVector.h>
-#include <jive/util/DofSpace.h>
 #include <jive/util/Assignable.h>
-#include <jive/fem/NodeSet.h>
-#include <jive/fem/NodeGroup.h>
+#include <jive/util/DofSpace.h>
 
-#include "utils/testing.h"
 #include "utils/helpers.h"
+#include "utils/testing.h"
 
 using jem::newInstance;
 using jem::Ref;

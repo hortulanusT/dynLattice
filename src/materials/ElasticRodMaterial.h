@@ -1,11 +1,8 @@
 /**
  * @file ElasticRodMaterial.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief simple implementation of the linear elastic material laws
- * @version 0.1
- * @date 2023-05-31
  *
- * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
  *
  */
 
@@ -17,8 +14,8 @@
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
-#include <jive/util/DofSpace.h>
 #include <jem/util/StringUtils.h>
+#include <jive/util/DofSpace.h>
 #include <jive/util/ObjectConverter.h>
 #include <math.h>
 

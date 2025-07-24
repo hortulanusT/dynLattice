@@ -5,7 +5,7 @@
  * (also called Simo Reissner Rod or nonlinear
  * Timoshenko Rod)
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: July 21
  *
  */
@@ -247,7 +247,7 @@ private:
    * Calculates the potential energy of the special Cosserat rod model.
    *
    * @param disp The displacement vector.
-   * @return The potential energy in this rod
+   * @returns The potential energy in this rod
    */
   double calc_pot_Energy_(const Vector &disp) const;
   void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
@@ -256,7 +256,7 @@ private:
    * @brief Calculates the dissipated energy of the material
    *
    * @param disp The displacement vector.
-   * @return the dissipated energy in this rod
+   * @returns the dissipated energy in this rod
    */
   double calc_diss_Energy_(const Vector &disp) const;
   void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;

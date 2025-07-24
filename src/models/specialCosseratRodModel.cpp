@@ -5,7 +5,7 @@
  * (also called Simo Reissner Rod or nonlinear
  * Timoshenko Rod)
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: July 21
  *
  */

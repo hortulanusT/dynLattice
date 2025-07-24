@@ -1,5 +1,10 @@
+/**
+ * @file Material.h
+ * @author Til Gärtner
+ * @brief Material class for representing different materials in the simulation.
+ *
+ */
 #include "materials/Material.h"
-#include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>
 
 JEM_DEFINE_CLASS(Material);

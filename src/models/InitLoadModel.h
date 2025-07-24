@@ -1,11 +1,8 @@
 /**
  * @file InitLoadModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief InitLoadModel for initial loads
- * @version 0.1
- * @date 2022-04-26
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 
@@ -13,13 +10,13 @@
 
 #include <jem/util/Properties.h>
 
+#include <jive/fem/NodeGroup.h>
+#include <jive/model/Actions.h>
 #include <jive/model/Model.h>
 #include <jive/model/ModelFactory.h>
 #include <jive/model/StateVector.h>
-#include <jive/model/Actions.h>
-#include <jive/util/DofSpace.h>
 #include <jive/util/Assignable.h>
-#include <jive/fem/NodeGroup.h>
+#include <jive/util/DofSpace.h>
 
 using jem::idx_t;
 using jem::newInstance;

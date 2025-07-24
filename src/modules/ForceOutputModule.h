@@ -1,11 +1,8 @@
 /**
  * @file ForceOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Simple Module to write the force vectors to some Output file
- * @version 0.1
- * @date 2022-06-03
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

@@ -1,11 +1,8 @@
 /**
  * @file ParaViewModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Implements the export of mesh data to ParaView
- * @version 0.1
- * @date 2021-10-25
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  *
  */
 
@@ -135,7 +132,7 @@ public:
    * @brief converts a Shape-Name to a VTK compatible number
    *
    * @param name Shape-Name
-   * @return VTK Cell Number
+   * @returns VTK Cell Number
    */
   static idx_t nameToVTKNum
 
@@ -146,7 +143,7 @@ public:
    *
    * @param elNodes Vector with the jive indizes
    * @param name Shape-Name
-   * @return correctly ordered Vector for ParaView Purposes
+   * @returns correctly ordered Vector for ParaView Purposes
    */
   static IdxVector gmsh2ParaNodeOrder
 

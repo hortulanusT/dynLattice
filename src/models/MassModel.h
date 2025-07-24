@@ -1,11 +1,8 @@
 /**
  * @file MassModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief adding mass to node groups
- * @version 0.1
- * @date 2024-08-29
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
  *
  */
 

@@ -1,3 +1,9 @@
+/**
+ * @file SolverNames.cpp
+ * @author Frans van der Meer
+ * @brief file containing the names of the solver parameters and actions
+ *
+ */
 #include "SolverNames.h"
 
 // params

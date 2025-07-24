@@ -1,3 +1,9 @@
+/**
+ * @file SolverNames.h
+ * @author Frans van der Meer
+ * @brief file containing the names of the solver parameters and actions
+ *
+ */
 #pragma once
 
 struct SolverNames

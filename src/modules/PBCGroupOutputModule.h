@@ -1,11 +1,8 @@
 /**
  * @file PBCGroupOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Wrapper Class for some default PBC Outputs
- * @version 0.1
- * @date 2021-12-06
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  *
  */
 #pragma once
@@ -60,7 +57,7 @@ public:
    * @param strains whether to return strain measures
    * @param stresses whether to return stress measures
    * @param dofNames names of the dofs to use
-   * @return Vector with strings for the expressions
+   * @returns Vector with strings for the expressions
    */
   static StringVector getDataSets(const idx_t dim,
                                   const bool strains = false,

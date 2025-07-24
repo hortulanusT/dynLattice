@@ -1,5 +1,6 @@
 # Rod-based Lattice Simulations
 This repository contains JEM/JIVE code to simulate lattices undergoing high strain-rate dynamic deformation based on nonlinear beam elements. It also contains some test files to verify the correctness of the implementation.
+The documentation for JEM/JIVE, on which most of the classes used in this project are based, can be found [here](https://jive-manual.dynaflow.com/index.html).
 
 ## Requirements
 - **Apptainer**
@@ -11,7 +12,7 @@ This repository contains JEM/JIVE code to simulate lattices undergoing high stra
 To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build jive.sif jive.def`.
 You can subsequently move the `jive.sif` to any location you prefer.
 
-To create an alias for easier executing use `alias jive='apptainer -s exec -e </full/path/to/>jive.sif'`.
+To create an alias for easier executing use `alias jive="apptainer -s exec -e </full/path/to/>jive.sif"`.
 The test-cases can subsequently be run using `jive make tests`.
 
 ## Organization
@@ -38,4 +39,4 @@ The test-cases can subsequently be run using `jive make tests`.
 ```
 
 ## License
-[MIT License](LICENSE)
+[MIT License](https://opensource.org/license/mit)

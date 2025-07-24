@@ -1,11 +1,8 @@
 /**
  * @file RodContactModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief implementation of contact model for rods
- * @version 0.1
- * @date 2024-04-16
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
  *
  */
 

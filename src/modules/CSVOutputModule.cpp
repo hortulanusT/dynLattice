@@ -1,18 +1,15 @@
 /**
  * @file CSVOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Module to enable the Standard Output Module to Output CSV Files
- * @version 0.1
- * @date 2022-06-22
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 
 #include <jem/base/ClassTemplate.h>
 
-#include "modules/CSVOutputModule.h"
 #include "misc/CSVDataPrinter.h"
+#include "modules/CSVOutputModule.h"
 
 JEM_DEFINE_CLASS(CSVOutputModule);
 

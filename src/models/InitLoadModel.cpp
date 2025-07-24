@@ -1,11 +1,8 @@
 /**
  * @file InitLoadModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief InitLoadModel for initial loads
- * @version 0.1
- * @date 2022-04-26
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

@@ -1,12 +1,9 @@
 /**
  * @file MilneDeviceModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief class that implements a leap frog algorithm for the explicit
  * solver
- * @version 0.1
- * @date 2023-01-27
  *
- * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
  *
  */
 #pragma once
@@ -26,7 +23,7 @@ public:
 
   virtual void solve
 
-    (const Properties& info, const Properties& globdat);
+      (const Properties &info, const Properties &globdat);
 
   static Ref<Module> makeNew
 
@@ -39,7 +36,7 @@ public:
 
 protected:
   /// @brief updated the forces (in the corrector step only the internal forces change)
-  /// @return resulting forces = external - internal
+  /// @returns resulting forces = external - internal
   Vector updForce(const Vector &fint,
                   const Vector &fext,
                   const Properties &globdat);
@@ -55,13 +52,13 @@ private:
 };
 
 inline void MilneDeviceModule::AMupdate_(const Vector &delta_y,
-                                            const Vector &f_pre,
-                                            const Vector &f_cur) const
+                                         const Vector &f_pre,
+                                         const Vector &f_cur) const
 {
   delta_y = dtime_ / 2. * (1. * f_pre + 1. * f_cur);
 }
 inline void MilneDeviceModule::AMupdate_(const Vector &delta_y,
-                                            const Vector &f_pre) const
+                                         const Vector &f_pre) const
 {
   delta_y = dtime_ * f_pre;
 }

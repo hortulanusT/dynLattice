@@ -1,11 +1,8 @@
 /**
  * @file SpringMassModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Emulate singular beams at boundaries to model spring-mass systems
- * @version 0.1
- * @date 2024-08-29
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
  *
  */
 

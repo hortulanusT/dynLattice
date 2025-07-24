@@ -1,11 +1,8 @@
 /**
  * @file ImpactModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Model that updates accelleration based on response forces and impactor weights
- * @version 0.1
- * @date 2022-06-28
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 #pragma once
@@ -13,15 +10,15 @@
 #include <jem/base/System.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
-#include <jive/model/Model.h>
-#include <jive/model/Actions.h>
-#include <jive/model/ModelFactory.h>
-#include <jive/fem/NodeSet.h>
 #include <jive/fem/NodeGroup.h>
-#include <jive/util/Globdat.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/ModelFactory.h>
 #include <jive/util/Assignable.h>
-#include <jive/util/DofSpace.h>
 #include <jive/util/Constraints.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 
 using jem::idx_t;
 using jem::newInstance;

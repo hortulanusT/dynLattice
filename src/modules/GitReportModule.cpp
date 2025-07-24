@@ -1,11 +1,8 @@
 /**
  * @file GitReportModule.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief see GitReportModule.h
- * @version 0.1
- * @date 2022-10-11
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

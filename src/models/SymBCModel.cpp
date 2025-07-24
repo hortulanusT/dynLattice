@@ -3,7 +3,7 @@
  *
  * This class implements a symmetric BC Model
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: Feburary 2025
  *
  */

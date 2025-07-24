@@ -1,11 +1,8 @@
 /**
  * @file ElasticRodMaterial.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief simple implementation of a elaso-plastic rod
- * @version 0.1
- * @date 2023-05-31
  *
- * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
  *
  */
 

@@ -1,11 +1,8 @@
 /**
  * @file AdaptiveStepModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief class that implements adaptive time stepping with a NonlinModule for adapting to explicit plasicity stepping
- * @version 0.1
- * @date 2023-01-27
  *
- * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
  *
  * Heaviliy influence by the module of the same name by F.P. van der Meer
  *

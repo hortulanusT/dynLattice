@@ -1,12 +1,9 @@
 /**
  * @file TangentOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Module, that calculates the tangent linear elastic equivalent
  * properties for the material
- * @version 0.1
- * @date 2022-11-21
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

@@ -1,11 +1,8 @@
 /**
  * @file GitReportModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Print the Git Status to the start of the log-file
- * @version 0.1
- * @date 2022-10-11
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 

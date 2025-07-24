@@ -1,11 +1,8 @@
 /**
  * @file JointContactModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief contact model for joints (assumed to be two spheres)
- * @version 0.1
- * @date 2025-01-07
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
  *
  */
 

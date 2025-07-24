@@ -1,25 +1,22 @@
 /**
  * @file CSVDataPrinter.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Expands the standard Data Printer with the capabiltiy to write CSV data
- * @version 0.1
- * @date 2022-06-22
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
  *
  */
 #pragma once
 
-#include <jem/base/System.h>
 #include <jem/base/Array.h>
+#include <jem/base/System.h>
 #include <jem/mp/GatherPrinter.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jive/app/DataPrinter.h>
-#include <jive/util/Table.h>
-#include <jive/util/Globdat.h>
-#include <jive/util/ItemSet.h>
-#include <jive/util/ItemMap.h>
 #include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
+#include <jive/util/ItemMap.h>
+#include <jive/util/ItemSet.h>
+#include <jive/util/Table.h>
 #include <jive/util/TableException.h>
 
 using jive::idx_t;

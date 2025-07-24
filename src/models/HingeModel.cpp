@@ -3,7 +3,7 @@
  *
  * This class implements hinges for geometrically nonlinear rods
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: July 21
  *
  */

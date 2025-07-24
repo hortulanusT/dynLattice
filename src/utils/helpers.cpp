@@ -1,3 +1,9 @@
+/**
+ * @file helpers.cpp
+ * @author Til Gärtner
+ * @brief file containing some basic helper functions
+ *
+ */
 #include "utils/helpers.h"
 
 namespace jive_helpers
@@ -188,64 +194,6 @@ namespace jive_helpers
     ExpP += (1 - cos(theta)) * matmul(K, KP);
     ExpP += (1 - cos(theta)) * matmul(KP, K);
     // TEST_NO_CONTEXT(ExpP)
-  }
-
-  // void getTangentOp
-  //   ( const Matrix& T,
-  //     const Vector& psi )
-  // {
-  //   const double theta    = norm2(psi);
-  //   const Matrix K        = skew (psi);
-
-  //   T = eye() + 0.5*K;
-
-  //   if (theta < TINY) return;
-
-  //   T += (1. - theta*sin(theta)/2/(1-cos(theta))) / pow(theta, 2) *
-  //   matmul(K, K);
-
-  //   // const Matrix K        ( psi.size(), psi.size() );
-  //   // K       = skew ( psi );
-
-  //   // double a = sin(theta) / theta;
-  //   // double b = (1 - a) / pow(theta, 2);
-
-  //   // T      -= 0.5 * K;
-  //   // T      += (1 - a / 2 / b) / pow(theta, 2) * matmul(K, K);
-  // }
-
-  void rotMat2Quat(const Vector &q, const Matrix &Q)
-  {
-    double tr = trace(Q) <= 3. ? trace(Q) : 3.; // trace of the matrix;
-
-    if (Q(0, 0) > tr)
-    {
-      q[1] = sqrt(1. / 2. * Q(0, 0) + 1. / 4. * (1. - tr));
-      q[0] = 1. / 4. * (Q(2, 1) - Q(1, 2)) / q[1];
-      q[2] = 1. / 4. * (Q(1, 0) + Q(0, 1)) / q[1];
-      q[3] = 1. / 4. * (Q(2, 0) + Q(0, 2)) / q[1];
-    }
-    else if (Q(1, 1) > tr)
-    {
-      q[2] = sqrt(1. / 2. * Q(1, 1) + 1. / 4. * (1. - tr));
-      q[0] = 1. / 4. * (Q(0, 2) - Q(2, 0)) / q[2];
-      q[1] = 1. / 4. * (Q(0, 1) + Q(1, 0)) / q[2];
-      q[3] = 1. / 4. * (Q(2, 1) + Q(1, 2)) / q[2];
-    }
-    else if (Q(2, 2) > tr)
-    {
-      q[3] = sqrt(1. / 2. * Q(2, 2) + 1. / 4. * (1. - tr));
-      q[0] = 1. / 4. * (Q(1, 0) - Q(0, 1)) / q[3];
-      q[1] = 1. / 4. * (Q(0, 2) + Q(2, 0)) / q[3];
-      q[2] = 1. / 4. * (Q(1, 2) + Q(2, 1)) / q[3];
-    }
-    else
-    {
-      q[0] = 1. / 2. * sqrt(1. + tr);
-      q[1] = 1. / 4. * (Q(2, 1) - Q(1, 2)) / q[0];
-      q[2] = 1. / 4. * (Q(0, 2) - Q(2, 0)) / q[0];
-      q[3] = 1. / 4. * (Q(1, 0) - Q(0, 1)) / q[0];
-    }
   }
 
   double trace(const Matrix &mat)

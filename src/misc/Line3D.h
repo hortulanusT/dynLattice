@@ -1,11 +1,8 @@
 /**
  * @file Line3D.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief shape function for implementing a 1D line function in a 3D space
- * @version 0.1
- * @date 2021-10-28
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  *
  */
 
@@ -87,7 +84,7 @@ public:
 
   /**
    * @brief get the values of the shape functions at the integration points
-   * @return a matrix h(i,j), where i is the shape function index and j the integration points
+   * @returns a matrix h(i,j), where i is the shape function index and j the integration points
    */
   inline Matrix getShapeFunctions() const override;
 

@@ -3,7 +3,7 @@
  *
  * This class implements a periodic BC Model
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: September 21
  *
  * ONLY WORKS FOR RECTANGULAR UNIT CELLS

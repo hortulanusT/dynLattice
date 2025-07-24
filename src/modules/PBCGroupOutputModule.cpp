@@ -1,11 +1,8 @@
 /**
  * @file PBCGroupOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief Wrapper Class for some default PBC Outputs
- * @version 0.1
- * @date 2021-12-06
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
  *
  */
 

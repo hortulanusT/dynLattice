@@ -1,12 +1,9 @@
 /**
  * @file EmbeddedRKModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief class that implements a leap frog algorithm for the explicit
  * solver
- * @version 0.1
- * @date 2023-01-27
  *
- * @copyright Copyright (C) 2023 TU Delft. All rights reserved.
  *
  */
 #pragma once
@@ -31,7 +28,7 @@ public:
 
   virtual void solve
 
-    (const Properties& info, const Properties& globdat) override;
+      (const Properties &info, const Properties &globdat) override;
 
   static Ref<Module> makeNew
 

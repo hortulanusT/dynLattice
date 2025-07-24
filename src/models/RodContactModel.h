@@ -1,11 +1,8 @@
 /**
  * @file RodContactModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
+ * @author Til Gärtner
  * @brief contact model for rods
- * @version 0.1
- * @date 2024-04-16
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
  *
  */
 
@@ -171,7 +168,7 @@ protected:
    *
    * @param elementA element ID
    * @param elementB element ID
-   * @return true if the contact is on the blacklist
+   * @returns true if the contact is on the blacklist
    */
   virtual bool filterBlacklist_
 
@@ -198,7 +195,7 @@ protected:
    *
    * @param posS secondary point
    * @param possM main element positions
-   * @return double coordinate on the main element
+   * @returns double coordinate on the main element
    */
   virtual double getClosestPoint_
 

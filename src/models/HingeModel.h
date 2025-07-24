@@ -4,7 +4,7 @@
  * This class implements a joint for several rods
  * (should be used with the specialCosseratRodModel)
  *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
+ * Author: T. Gaertner
  * Date: July 21
  *
  */
@@ -96,7 +96,7 @@ private:
    * @param elementName name of the Element group
    * @param globdat global database
    *
-   * @return created element Group
+   * @returns created element Group
    */
   ElementGroup createHinges_(const String &elementName, const Properties &globdat);
 
@@ -110,8 +110,8 @@ private:
   /**
    * @brief evaluate the plastic development in the beams
    *
-   * @return true if not new plasticity was discovered
-   * @return false if some plastic movement is discovered
+   * @returns true if not new plasticity was discovered
+   * @returns false if some plastic movement is discovered
    */
   bool evalPlastic_(const Vector &disp);
 

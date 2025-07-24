@@ -1,3 +1,10 @@
+/**
+ * @file main.cpp
+ * @author Til Gärtner
+ * @brief Main entry point for the application.
+ *
+ */
+
 #include <jive/app/Application.h>
 #include <jive/app/ChainModule.h>
 #include <jive/app/ControlModule.h>

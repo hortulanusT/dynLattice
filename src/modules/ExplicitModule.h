@@ -122,7 +122,7 @@ public:
       (const Properties &globdat) override;
 
   /// @brief comupte the next step size
-  /// @return whether this step can be accepted
+  /// @returns whether this step can be accepted
   virtual bool commit
 
       (const Properties &globdat) override;
@@ -170,7 +170,7 @@ protected:
                const Properties &globdat);
 
   /// @brief get the forces
-  /// @return resulting forces = external - internal
+  /// @returns resulting forces = external - internal
   Vector getForce(const Vector &fint,
                   const Vector &fext,
                   const Properties &globdat);
