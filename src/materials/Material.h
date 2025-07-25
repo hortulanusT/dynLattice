@@ -23,27 +23,18 @@ using jive::Vector;
 using jive::util::XTable;
 
 /**
- * @brief Abstract base class for all material models in the simulation.
+ * @brief Abstract base class for material models.
  *
- * The Material class provides the fundamental interface for material behavior
- * in the simulations. It defines the contract that all concrete
- * material implementations must follow, including stress-strain relationships,
- * stiffness matrices, and energy calculations.
+ * Defines interface for material behavior including stress-strain relationships,
+ * stiffness matrices, and energy calculations. Materials are created via
+ * MaterialFactory and support multiple integration points per element.
  *
- * @section material_hierarchy Material Hierarchy
- * The material hierarchy includes:
- * - ElasticRodMaterial: Linear elastic material for rod elements
- * - ElastoPlasticRodMaterial: Elasto-plastic material with yield behavior
- *
- * @section material_usage Usage
- * Materials are typically instantiated through the MaterialFactory and
- * configured via Properties objects. Each material can handle multiple
- * integration points and elements.
+ * @section Material Hierarchy
+ * - ElasticRodMaterial: Linear elastic material
+ * - ElastoPlasticRodMaterial: Elasto-plastic with hardening
  *
  * @author Til Gärtner
- * @see ElasticRodMaterial
- * @see ElastoPlasticRodMaterial
- * @see MaterialFactory
+ * @see ElasticRodMaterial, ElastoPlasticRodMaterial, MaterialFactory
  */
 class Material : public NamedObject
 {
@@ -69,9 +60,6 @@ public:
   /**
    * @brief Configure the material with given properties.
    *
-   * This method allows runtime configuration of material parameters.
-   * Derived classes should override this to handle specific material properties.
-   *
    * @param props Properties containing configuration parameters
    * @param globdat Global data container with simulation context
    */
@@ -79,9 +67,6 @@ public:
 
   /**
    * @brief Retrieve current material configuration.
-   *
-   * Outputs the current material configuration to the provided properties object.
-   * Used for saving state and debugging purposes.
    *
    * @param conf Properties object to store configuration in
    * @param globdat Global data container with simulation context
@@ -91,32 +76,27 @@ public:
   /**
    * @brief Compute stress vector from strain vector.
    *
-   * This is the fundamental constitutive relationship that defines how the
-   * material responds to deformation. All derived material classes must
-   * implement this method to provide their specific stress-strain behavior.
+   * Fundamental constitutive relationship defining material response to deformation.
+   * All derived material classes must implement this method.
    *
-   * @param[out] stress Computed stress vector at the current state
-   * @param[in] strain Input strain vector used for stress computation
+   * @param[out] stress Computed stress vector at current state
+   * @param[in] strain Input strain vector for stress computation
    *
-   * @note For rod elements both vectors are 6-dimensional, representing
-   *       the axial, shear, bending, and torsional components.
+   * @note For rod elements: 6-dimensional vectors (axial, shear, bending, torsion)
    */
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
   /**
-   * @brief Compute stress vector with element and integration point context.
+   * @brief Compute stress with element and integration point context.
    *
-   * Enhanced version of getStress that provides additional context about the
-   * specific element and integration point. This allows materials to maintain
-   * state-dependent behavior across different locations in the mesh.
-   *
-   * @param[out] stress Computed stress vector at the current state
-   * @param[in] strain Input strain vector used for stress computation
+   * @param[out] stress Computed stress vector
+   * @param[in] strain Input strain vector
    * @param[in] ielem Element index for state tracking
-   * @param[in] ip Integration point index within the element
-   * @param[in] inelastic Flag to enable/disable inelastic behavior (default: true)
+   * @param[in] ip Integration point index
+   * @param[in] inelastic Enable inelastic behavior (default: true)
    *
-   * @note Default implementation delegates to getStress(stress, strain)
+   * @note Default delegates to getStress(stress, strain)
+   * ElastoPlasticRodMaterial overrides for plastic state management
    */
   virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
 
@@ -147,7 +127,7 @@ public:
    * @brief Get the material mass matrix per unit length.
    *
    * Computes the material mass density matrix used in dynamic analysis.
-   * The matrix is typically diagonal with density values.
+   * The translational part of the mass matrix is typically diagonal with density values.
    *
    * @returns Mass matrix per unit length
    */
@@ -236,6 +216,7 @@ public:
    * @param ielem Element index
    * @param ip Integration point index within the element
    * @returns Elastic potential energy at the specified location
+   * @note 0 for purely elastic materials
    */
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
@@ -255,6 +236,7 @@ public:
    * @brief Get the context string for error reporting and debugging.
    *
    * @returns Context string identifying this material instance
+   * @note 0 for purely elastic materials
    */
   virtual String getContext() const override;
 
@@ -271,29 +253,25 @@ protected:
   idx_t verbosity_;
 };
 
-/// @brief Default implementation of element-specific stress computation
-/// @details Delegates to the basic getStress method when no element-specific behavior is needed
+/// @brief Default element-specific stress computation
 void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
   getStress(stress, strain);
 }
 
-/// @brief Default implementation of element-specific stiffness matrix
-/// @details Returns the basic material stiffness when no element-specific behavior is needed
+/// @brief Default element-specific stiffness matrix
 Matrix Material::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
 {
   return getMaterialStiff();
 }
 
-/// @brief Default implementation of element-specific mass matrix
-/// @details Returns the basic material mass matrix when no element-specific behavior is needed
+/// @brief Default element-specific mass matrix
 Matrix Material::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
 {
   return getMaterialMass();
 }
 
-/// @brief Default implementation of element-specific lumped mass
-/// @details Returns the basic lumped mass when no element-specific behavior is needed
+/// @brief Default element-specific lumped mass
 Matrix Material::getLumpedMass(const double l, const idx_t &ielem) const
 {
   return getLumpedMass(l);

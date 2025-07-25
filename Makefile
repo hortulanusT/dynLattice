@@ -63,3 +63,30 @@ srcfiles := $(shell find $(SRCDIR) -type f -name '*.cpp')
 $(OBJDIR)/GitReportModule.o: $(srcfiles)
 $(OBJDIR_OPT)/GitReportModule.o: $(srcfiles)
 $(OBJDIR_DBG)/GitReportModule.o: $(srcfiles)
+
+#######################################################################
+##   Documentation targets                                           ##
+#######################################################################
+
+# Generate documentation
+docs:
+	@echo "Generating documentation..."
+	doxygen doxygen.conf
+
+# Clean and regenerate documentation
+docs-clean:
+	@echo "Cleaning documentation directory..."
+	rm -rf doc/*
+	@echo "Generating fresh documentation..."
+	doxygen doxygen.conf
+
+# Clean documentation only
+docs-clean-only:
+	@echo "Cleaning documentation directory..."
+	rm -rf doc/*
+
+# Clean all including documentation
+clean-all: docs-clean-only
+
+# Phony targets
+.PHONY: docs docs-clean docs-clean-only

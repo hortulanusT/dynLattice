@@ -1,9 +1,7 @@
 /**
- * @file ElasticRodMaterial.h
+ * @file ElastoPlasticRodMaterial.h
  * @author Til Gärtner
- * @brief simple implementation of a elaso-plastic rod
- *
- *
+ * @brief Elasto-plastic rod material with yield conditions and hardening
  */
 
 #pragma once
@@ -34,42 +32,47 @@ using jive::util::FuncUtils;
 using jive::util::joinNames;
 using jive::util::XTable;
 
+/// @brief Elasto-plastic rod material implementing yield conditions with isotropic and kinematic hardening
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
 {
 public:
+  /// @name Plasticity property identifiers
+  /// @{
   static const char *TYPE_NAME;
-  static const char *YIELD_PROP;
-  static const char *YIELD_DERIV_PROP;
-  static const char *ISO_HARD_PROP;
-  static const char *KIN_HARD_PROP;
+  static const char *YIELD_PROP;       ///< Yield condition function
+  static const char *YIELD_DERIV_PROP; ///< Yield condition derivatives
+  static const char *ISO_HARD_PROP;    ///< Isotropic hardening parameters
+  static const char *KIN_HARD_PROP;    ///< Kinematic hardening parameters
+  /// @}
 
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
 
+  /// @brief Constructor with plasticity configuration
   ElastoPlasticRodMaterial(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
 
+  /// @brief Factory method for plastic material creation
   static Ref<Material> makeNew(const String &name, const Properties &conf,
                                const Properties &props, const Properties &globdat);
 
+  /// @brief Register plastic material type with factory
   static void declare();
 
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
+  /// @brief Get hardening values from hardening parameters
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
-  /**
-   * Calculates the stress for a given strain using the convex cutting plane algorithm.
-   * Compare Simo/Hughes Computational Inelasticity Box 3.6
-   *
-   * @param stress The calculated stress will be stored in this vector.
-   * @param strain The strain vector for which the stress needs to be calculated.
-   * @param ielem The index of the element.
-   * @param ip The index of the integration point.
-   */
+  /// @brief Plastic stress computation using convex cutting plane algorithm
+  /// @param stress Calculated stress vector (output)
+  /// @param strain Input strain vector
+  /// @param ielem Element index
+  /// @param ip Integration point index
+  /// @see [Computational Inelasticity](https://doi.org/10.1007/b98904) Box 3.6
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
   virtual void apply_deform() override;
@@ -88,24 +91,33 @@ protected:
   ~ElastoPlasticRodMaterial();
 
 protected:
-  Ref<Function> yieldCond_;         // yield condition
-  FuncUtils::FuncArray yieldDeriv_; // derivative of the yield condition
-  idx_t maxIter_;                   // maximum iterations in the stress update
-  double precision_;                // tolerance for the stress update
+  /// @name Plasticity algorithm components
+  /// @{
+  Ref<Function> yieldCond_;         ///< Yield condition function
+  FuncUtils::FuncArray yieldDeriv_; ///< Derivatives of yield condition
+  idx_t maxIter_;                   ///< Max iterations for stress update
+  double precision_;                ///< Convergence tolerance for stress update
+  /// @}
 
-  idx_t argCount_;         // number of arguments to yield condition
-  jem::Slice stress_part_; // slice for the stress part of the arguments
-  jem::Slice hard_part_;   // slice for the hardening part of the arguments
+  /// @name Function argument organization
+  /// @{
+  idx_t argCount_;         ///< Total arguments to yield condition
+  jem::Slice stress_part_; ///< Stress portion of arguments
+  jem::Slice hard_part_;   ///< Hardening portion of arguments
+  /// @}
 
-  Matrix materialH_; // hardening factors
+  /// @name Hardening and plastic state
+  /// @{
+  Matrix materialH_; ///< Hardening matrix
 
-  Cubix old_hardParams_;  // last converged load step
-  Cubix curr_hardParams_; // last inner converged solution
+  Cubix old_hardParams_;  ///< Hardening parameters from last converged step
+  Cubix curr_hardParams_; ///< Current hardening parameters
 
-  Cubix old_plastStrains_;  // last converged load step
-  Cubix curr_plastStrains_; // last inner converged solution
+  Cubix old_plastStrains_;  ///< Plastic strains from last converged step
+  Cubix curr_plastStrains_; ///< Current plastic strains
 
-  Matrix curr_deltaFlow_; // last inner converged solution
-  Matrix E_diss_;         // dissipated energy
-  Matrix E_hardPot_;      // hardening potential
+  Matrix curr_deltaFlow_; ///< Current plastic flow increment
+  Matrix E_diss_;         ///< Dissipated energy storage
+  Matrix E_hardPot_;      ///< Hardening potential energy storage
+  /// @}
 };
