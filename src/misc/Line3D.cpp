@@ -1,13 +1,33 @@
 /**
  * @file Line3D.cpp
  * @author Til Gärtner
- * @brief shape function for implementing a 1D line function in a 3D space
- *
+ * @brief Implementation of shape functions for 1D line elements in 3D space.
  *
  */
 
 #include "Line3D.h"
+#include "utils/testing.h"
+#include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalInputException.h>
+#include <jem/numeric/algebra/matmul.h>
+#include <jem/numeric/algebra/utilities.h>
+#include <jive/geom/ShapeFactory.h>
+#include <jive/geom/StdLine.h>
+
+using namespace jive_helpers;
+
+using jem::ALL;
+using jem::newInstance;
+using jem::SliceFrom;
+using jem::SliceTo;
+using jem::numeric::matmul;
+using jem::numeric::MatmulChain;
+using jem::numeric::norm2;
+using jive::geom::StdLine;
+using jive::geom::StdLine2;
+using jive::geom::StdLine3;
+using jive::geom::StdLine4;
 
 const String Line3D::PROP_NODES = "numPoints";
 const String Line3D::PROP_INT = "intScheme";

@@ -44,6 +44,8 @@
 #include <jive/util/XDofSpace.h>
 #include <jive/util/XTable.h>
 #include <jive/util/utilities.h>
+#include <jive/geom/ShapeFactory.h>
+#include <jive/geom/StdShape.h>
 
 #include <math.h>
 
@@ -90,206 +92,206 @@ using namespace jive_helpers;
 class specialCosseratRodModel : public Model
 {
 public:
-  static const char *TYPE_NAME;
-  static const char *TRANS_DOF_DEFAULT;
-  static const char *ROT_DOF_DEFAULT;
-  static const char *TRANS_DOF_NAMES;
-  static const char *ROT_DOF_NAMES;
-  static const char *SYMMETRIC_ONLY;
-  static const char *MATERIAL_Y_DIR;
-  static const char *GIVEN_NODES;
-  static const char *GIVEN_DIRS;
-  static const char *THICKENING_FACTOR;
-  static const char *LUMPED_MASS;
-  static const char *HINGES;
-  static const idx_t TRANS_DOF_COUNT;
-  static const idx_t ROT_DOF_COUNT;
-  static const Slice TRANS_PART;
-  static const Slice ROT_PART;
+    static const char *TYPE_NAME;
+    static const char *TRANS_DOF_DEFAULT;
+    static const char *ROT_DOF_DEFAULT;
+    static const char *TRANS_DOF_NAMES;
+    static const char *ROT_DOF_NAMES;
+    static const char *SYMMETRIC_ONLY;
+    static const char *MATERIAL_Y_DIR;
+    static const char *GIVEN_NODES;
+    static const char *GIVEN_DIRS;
+    static const char *THICKENING_FACTOR;
+    static const char *LUMPED_MASS;
+    static const char *HINGES;
+    static const idx_t TRANS_DOF_COUNT;
+    static const idx_t ROT_DOF_COUNT;
+    static const Slice TRANS_PART;
+    static const Slice ROT_PART;
 
-  explicit specialCosseratRodModel
+    explicit specialCosseratRodModel
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
+        (const String &name, const Properties &conf,
+         const Properties &props, const Properties &globdat);
 
-  virtual bool takeAction
+    virtual bool takeAction
 
-      (const String &action, const Properties &params,
-       const Properties &globdat);
+        (const String &action, const Properties &params,
+         const Properties &globdat);
 
-  static Ref<Model> makeNew
+    static Ref<Model> makeNew
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
+        (const String &name, const Properties &conf,
+         const Properties &props, const Properties &globdat);
 
-  static void declare();
-
-private:
-  /**
-   * @brief assemble the stiffness matrix
-   * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
-   * @param[out] fint internal force Vector
-   * @param[in]  disp current values for the DOFs
-   */
-  void assemble_(MatrixBuilder &mbld, const Vector &fint,
-                 const Vector &disp, const String &loadCase = "") const;
-
-  /**
-   * @brief construct the internal force vector
-   * @param[out] fint internal force Vector
-   * @param[in]  disp current values for the DOFs
-   */
-  void assemble_(const Vector &fint, const Vector &disp, const String &loadCase = "") const;
-
-  /**
-   * @brief construct the gyroscopic forces (omega x Theta*omega)
-   * @param[out] fgyro gyroscopic force Vector
-   * @param[in]  velo current values for the DOF - velocities
-   * @param[in]  mass current mass matrix
-   */
-  void assembleGyro_(const Vector &fint,
-                     const Vector &velo,
-                     const Ref<AbstractMatrix> mass) const;
-
-  /**
-   * @brief assemble the mass matrix
-   * @param[out] mbld mass matrix
-   * @param[in]  disp current values for the DOFs
-   */
-  void assembleM_(MatrixBuilder &mbld, Vector &disp) const;
-
-  /**
-   * @brief fill the table with the strain values per element
-   */
-  void get_strain_table_
-
-      (XTable &strain_table, const Vector &weights, const Vector &disp,
-       const bool mat_vals = false);
-
-  /**
-   * @brief fill the table with the plastic strain values per element
-   */
-  void get_mat_table_
-
-      (XTable &mat_table, const Vector &weights, const String &name);
-
-  /**
-   * @brief fill the table with the stress values per element
-   */
-  void get_stress_table_
-
-      (XTable &stress_table, const Vector &weights, const Vector &disp,
-       const bool mat_vals = false);
-
-  /**
-   * @brief initializes the rotation of the elements
-   */
-  void init_rot_();
-
-  /**
-   * @brief initializes the initial strain of the elements
-   */
-  void init_strain_();
-
-  /**
-   * @brief Get the geometric stiffness matrix
-   */
-  void get_geomStiff_(
-      const Cubix &B,          ///< B(.,.,i), where it refers to the B-matrix at
-                               ///< the i-th integration point
-      const Matrix &stresses,  ///< spatial stress(i,j), stress component i
-                               ///< at the j-th integration points
-      const Matrix &nodePhi_0, ///< location of the nodes
-      const Matrix &nodeU)
-      const; ///< nodeU(.,j), translational displacement j-th node
-
-  /**
-   * @brief Get the strains in the integration points of an element
-   */
-  void get_strains_(
-      const Matrix &strains, ///< strains(i,j), stress component i at the
-                             ///< j-th integration points
-      const Vector &w,       ///< integration point weights
-      const Matrix
-          &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-      const Matrix
-          &nodeU,              ///< nodeU(.,j), translational displacement j-th node
-      const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
-                               ///< orientation j-th node
-      const idx_t ie,
-      const bool spatial = true) const; ///< rotational displacements
-
-  /**
-   * @brief Get the stresses in the integration points of an element
-   */
-  void get_stresses_(
-      const Matrix &stresses, ///< stress(i,j), stress component i at the
-                              ///< j-th integration points
-      const Vector &w,        ///< integration point weights
-      const Matrix
-          &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-      const Matrix
-          &nodeU,              ///< nodeU(.,j), translational displacement j-th node
-      const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
-                               ///< orientation j-th node
-      const idx_t ie,
-      const bool spatial = true, ///< rotational displacements
-      const String &loadCase = "") const;
-
-  /**
-   * @brief format the displacements nicely
-   */
-  void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
-                  const Cubix &nodeLambda, const Vector &disp,
-                  const IdxVector &inodes) const;
-
-  /**
-   * Calculates the potential energy of the special Cosserat rod model.
-   *
-   * @param disp The displacement vector.
-   * @returns The potential energy in this rod
-   */
-  double calc_pot_Energy_(const Vector &disp) const;
-  void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
-
-  /**
-   * @brief Calculates the dissipated energy of the material
-   *
-   * @param disp The displacement vector.
-   * @returns the dissipated energy in this rod
-   */
-  double calc_diss_Energy_(const Vector &disp) const;
-  void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
+    static void declare();
 
 private:
-  Assignable<ElementGroup> rodElems_;
-  IdxVector rodNodes_;
-  Assignable<ElementSet> allElems_;
-  Assignable<NodeSet> allNodes_;
+    /**
+     * @brief assemble the stiffness matrix
+     * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
+     * @param[out] fint internal force Vector
+     * @param[in]  disp current values for the DOFs
+     */
+    void assemble_(MatrixBuilder &mbld, const Vector &fint,
+                   const Vector &disp, const String &loadCase = "") const;
 
-  Ref<DofSpace> dofs_;
-  Ref<Line3D> shapeK_;
-  Ref<Line3D> shapeM_;
-  Ref<Material> material_;
-  Ref<Model> hinges_;
+    /**
+     * @brief construct the internal force vector
+     * @param[out] fint internal force Vector
+     * @param[in]  disp current values for the DOFs
+     */
+    void assemble_(const Vector &fint, const Vector &disp, const String &loadCase = "") const;
 
-  IdxVector trans_types_;
-  IdxVector rot_types_;
-  IdxVector jtypes_;
+    /**
+     * @brief construct the gyroscopic forces (omega x Theta*omega)
+     * @param[out] fgyro gyroscopic force Vector
+     * @param[in]  velo current values for the DOF - velocities
+     * @param[in]  mass current mass matrix
+     */
+    void assembleGyro_(const Vector &fint,
+                       const Vector &velo,
+                       const Ref<AbstractMatrix> mass) const;
 
-  bool symmetric_only_;
-  Vector thickFact_;
-  Vector material_ey_;
+    /**
+     * @brief assemble the mass matrix
+     * @param[out] mbld mass matrix
+     * @param[in]  disp current values for the DOFs
+     */
+    void assembleM_(MatrixBuilder &mbld, Vector &disp) const;
 
-  IdxVector
-      givenNodes_; ///< given directions for nodes (especially end-nodes)
-  Matrix
-      givenDirs_; ///< given directions for nodes (especially end-nodes)
+    /**
+     * @brief fill the table with the strain values per element
+     */
+    void get_strain_table_
 
-  Cubix LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is
-                  ///< for the j-th node
-  Cubix
-      mat_strain0_; ///< strains for the undeformed configuration;
-                    ///< mat_strain0_(i,j,k) refers to the i-th strain in
-                    ///< the k-th element on the j-th integration point
+        (XTable &strain_table, const Vector &weights, const Vector &disp,
+         const bool mat_vals = false);
+
+    /**
+     * @brief fill the table with the plastic strain values per element
+     */
+    void get_mat_table_
+
+        (XTable &mat_table, const Vector &weights, const String &name);
+
+    /**
+     * @brief fill the table with the stress values per element
+     */
+    void get_stress_table_
+
+        (XTable &stress_table, const Vector &weights, const Vector &disp,
+         const bool mat_vals = false);
+
+    /**
+     * @brief initializes the rotation of the elements
+     */
+    void init_rot_();
+
+    /**
+     * @brief initializes the initial strain of the elements
+     */
+    void init_strain_();
+
+    /**
+     * @brief Get the geometric stiffness matrix
+     */
+    void get_geomStiff_(
+        const Cubix &B,          ///< B(.,.,i), where it refers to the B-matrix at
+                                 ///< the i-th integration point
+        const Matrix &stresses,  ///< spatial stress(i,j), stress component i
+                                 ///< at the j-th integration points
+        const Matrix &nodePhi_0, ///< location of the nodes
+        const Matrix &nodeU)
+        const; ///< nodeU(.,j), translational displacement j-th node
+
+    /**
+     * @brief Get the strains in the integration points of an element
+     */
+    void get_strains_(
+        const Matrix &strains, ///< strains(i,j), stress component i at the
+                               ///< j-th integration points
+        const Vector &w,       ///< integration point weights
+        const Matrix
+            &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
+        const Matrix
+            &nodeU,              ///< nodeU(.,j), translational displacement j-th node
+        const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
+                                 ///< orientation j-th node
+        const idx_t ie,
+        const bool spatial = true) const; ///< rotational displacements
+
+    /**
+     * @brief Get the stresses in the integration points of an element
+     */
+    void get_stresses_(
+        const Matrix &stresses, ///< stress(i,j), stress component i at the
+                                ///< j-th integration points
+        const Vector &w,        ///< integration point weights
+        const Matrix
+            &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
+        const Matrix
+            &nodeU,              ///< nodeU(.,j), translational displacement j-th node
+        const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
+                                 ///< orientation j-th node
+        const idx_t ie,
+        const bool spatial = true, ///< rotational displacements
+        const String &loadCase = "") const;
+
+    /**
+     * @brief format the displacements nicely
+     */
+    void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
+                    const Cubix &nodeLambda, const Vector &disp,
+                    const IdxVector &inodes) const;
+
+    /**
+     * Calculates the potential energy of the special Cosserat rod model.
+     *
+     * @param disp The displacement vector.
+     * @returns The potential energy in this rod
+     */
+    double calc_pot_Energy_(const Vector &disp) const;
+    void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
+
+    /**
+     * @brief Calculates the dissipated energy of the material
+     *
+     * @param disp The displacement vector.
+     * @returns the dissipated energy in this rod
+     */
+    double calc_diss_Energy_(const Vector &disp) const;
+    void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
+
+private:
+    Assignable<ElementGroup> rodElems_;
+    IdxVector rodNodes_;
+    Assignable<ElementSet> allElems_;
+    Assignable<NodeSet> allNodes_;
+
+    Ref<DofSpace> dofs_;
+    Ref<Line3D> shapeK_;
+    Ref<Line3D> shapeM_;
+    Ref<Material> material_;
+    Ref<Model> hinges_;
+
+    IdxVector trans_types_;
+    IdxVector rot_types_;
+    IdxVector jtypes_;
+
+    bool symmetric_only_;
+    Vector thickFact_;
+    Vector material_ey_;
+
+    IdxVector
+        givenNodes_; ///< given directions for nodes (especially end-nodes)
+    Matrix
+        givenDirs_; ///< given directions for nodes (especially end-nodes)
+
+    Cubix LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is
+                    ///< for the j-th node
+    Cubix
+        mat_strain0_; ///< strains for the undeformed configuration;
+                      ///< mat_strain0_(i,j,k) refers to the i-th strain in
+                      ///< the k-th element on the j-th integration point
 };

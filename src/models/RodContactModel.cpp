@@ -11,6 +11,8 @@
 
 #include "utils/testing.h"
 
+using jem::SliceTo;
+
 JEM_DEFINE_CLASS(RodContactModel);
 
 //=======================================================================

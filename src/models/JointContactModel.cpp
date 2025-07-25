@@ -11,6 +11,8 @@
 
 #include "utils/testing.h"
 
+using jem::newInstance;
+
 JEM_DEFINE_CLASS(JointContactModel);
 
 //=======================================================================
