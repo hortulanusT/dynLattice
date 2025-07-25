@@ -1,3 +1,8 @@
+/**
+ * @file ElasticRodMaterial.cpp
+ * @author Til Gärtner
+ * @brief Implementation of linear elastic rod material with cross-sectional properties
+ */
 #include "materials/ElasticRodMaterial.h"
 #include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>

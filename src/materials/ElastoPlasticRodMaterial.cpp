@@ -1,3 +1,8 @@
+/**
+ * @file ElastoPlasticRodMaterial.cpp
+ * @author Til Gärtner
+ * @brief Implementation of elasto-plastic rod material with yield conditions and hardening
+ */
 #include "materials/ElastoPlasticRodMaterial.h"
 #include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>

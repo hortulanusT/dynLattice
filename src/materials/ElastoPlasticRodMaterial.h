@@ -60,6 +60,7 @@ public:
   /// @brief Register plastic material type with factory
   static void declare();
 
+  /// @brief Configure plasticity parameters and yield conditions
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
@@ -68,6 +69,7 @@ public:
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
   /// @brief Plastic stress computation using convex cutting plane algorithm
+  /// @details Implements iterative return mapping with yield condition evaluation
   /// @param stress Calculated stress vector (output)
   /// @param strain Input strain vector
   /// @param ielem Element index

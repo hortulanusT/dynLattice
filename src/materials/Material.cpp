@@ -1,5 +1,5 @@
 /**
- * @file Material.h
+ * @file Material.cpp
  * @author Til Gärtner
  * @brief Material class for representing different materials in the simulation.
  *

@@ -1,5 +1,5 @@
 /**
- * @file MaterialFactory.h
+ * @file MaterialFactory.cpp
  * @author Til Gärtner
  * @brief Factory to register all the materials with
  *
