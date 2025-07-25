@@ -6,31 +6,17 @@
 
 #pragma once
 #include "materials/ElasticRodMaterial.h"
-#include "materials/MaterialFactory.h"
-#include "utils/helpers.h"
 #include <jem/numeric/algebra/utilities.h>
-#include <jem/util/PropertyException.h>
-#include <jem/util/StringUtils.h>
-#include <jive/fem/ElementGroup.h>
-#include <jive/fem/ElementSet.h>
-#include <jive/implict/Names.h>
-#include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
-#include <jive/util/utilities.h>
+
+// Forward declarations
+class MaterialFactory;
 
 using jem::idx_t;
-using jem::newInstance;
-using jem::numeric::dotProduct;
 using jem::numeric::Function;
-using jive::Cubix;
 using jive::Ref;
-using jive::Vector;
-using jive::fem::ElementGroup;
-using jive::fem::ElementSet;
-using jive::util::DofSpace;
+using jive::String;
 using jive::util::FuncUtils;
-using jive::util::joinNames;
-using jive::util::XTable;
 
 /// @brief Elasto-plastic rod material implementing yield conditions with isotropic and kinematic hardening
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
@@ -77,9 +63,9 @@ public:
   /// @see [Computational Inelasticity](https://doi.org/10.1007/b98904) Box 3.6
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
-  virtual void apply_deform() override;
+  virtual void applyDeform() override;
 
-  virtual void reject_deform() override;
+  virtual void rejectDeform() override;
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
@@ -103,23 +89,23 @@ protected:
 
   /// @name Function argument organization
   /// @{
-  idx_t argCount_;         ///< Total arguments to yield condition
-  jem::Slice stress_part_; ///< Stress portion of arguments
-  jem::Slice hard_part_;   ///< Hardening portion of arguments
+  idx_t argCount_;        ///< Total arguments to yield condition
+  jem::Slice stressPart_; ///< Stress portion of arguments
+  jem::Slice hardPart_;   ///< Hardening portion of arguments
   /// @}
 
   /// @name Hardening and plastic state
   /// @{
   Matrix materialH_; ///< Hardening matrix
 
-  Cubix old_hardParams_;  ///< Hardening parameters from last converged step
-  Cubix curr_hardParams_; ///< Current hardening parameters
+  Cubix oldHardParams_;  ///< Hardening parameters from last converged step
+  Cubix currHardParams_; ///< Current hardening parameters
 
-  Cubix old_plastStrains_;  ///< Plastic strains from last converged step
-  Cubix curr_plastStrains_; ///< Current plastic strains
+  Cubix oldPlastStrains_;  ///< Plastic strains from last converged step
+  Cubix currPlastStrains_; ///< Current plastic strains
 
-  Matrix curr_deltaFlow_; ///< Current plastic flow increment
-  Matrix E_diss_;         ///< Dissipated energy storage
-  Matrix E_hardPot_;      ///< Hardening potential energy storage
+  Matrix currDeltaFlow_; ///< Current plastic flow increment
+  Matrix energyDiss_;    ///< Dissipated energy storage
+  Matrix energyHardPot_; ///< Hardening potential energy storage
   /// @}
 };

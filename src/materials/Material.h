@@ -14,7 +14,6 @@
 
 using jem::NamedObject;
 using jem::util::Properties;
-using jive::Cubix;
 using jive::idx_t;
 using jive::IdxVector;
 using jive::Matrix;
@@ -172,7 +171,7 @@ public:
    * variables. It's typically called at the end of a successful load step to
    * update the material's permanent state.
    */
-  virtual void apply_deform() = 0;
+  virtual void applyDeform() = 0;
 
   /**
    * @brief Reject the current deformation and revert to previous state.
@@ -180,7 +179,7 @@ public:
    * This method reverts the material to its state before the current load step.
    * It's called when a load step fails to converge or needs to be repeated.
    */
-  virtual void reject_deform() = 0;
+  virtual void rejectDeform() = 0;
 
   /**
    * @brief Populate strain table with material-specific data.

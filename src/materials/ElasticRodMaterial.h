@@ -6,25 +6,14 @@
 
 #pragma once
 #include "materials/Material.h"
-#include "materials/MaterialFactory.h"
-#include "utils/helpers.h"
-#include <jem/base/Array.h>
-#include <jem/base/IllegalInputException.h>
-#include <jem/base/System.h>
-#include <jem/numeric/algebra/matmul.h>
-#include <jem/util/StringUtils.h>
-#include <jive/util/DofSpace.h>
-#include <jive/util/ObjectConverter.h>
-#include <math.h>
+
+// Forward declarations
+class MaterialFactory;
 
 using jem::idx_t;
-using jem::newInstance;
-using jem::numeric::matmul;
-using jive::IdxVector;
+using jive::Cubix;
 using jive::Ref;
-using jive::Vector;
-using jive::util::DofSpace;
-using jive::util::XTable;
+using jive::String;
 
 /// @brief Linear elastic rod material with configurable cross-sectional properties
 class ElasticRodMaterial : public Material
@@ -90,9 +79,9 @@ public:
 
   virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
 
-  virtual void apply_deform() override;
+  virtual void applyDeform() override;
 
-  virtual void reject_deform() override;
+  virtual void rejectDeform() override;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
@@ -123,9 +112,9 @@ protected:
   Vector areaMoment_;  ///< Area moments of inertia
   double polarMoment_; ///< Polar moment of inertia
 
-  String cross_section_; ///< Cross-section type identifier
-  double radius_;        ///< Radius for circular sections
-  Vector side_length_;   ///< Side lengths for rectangular sections
+  String crossSection_; ///< Cross-section type identifier
+  double radius_;       ///< Radius for circular sections
+  Vector sideLength_;   ///< Side lengths for rectangular sections
 
   double density_; ///< Material density
   /// @}
@@ -135,9 +124,9 @@ protected:
   Matrix materialK_; ///< Material stiffness matrix
   Matrix materialM_; ///< Material mass matrix
 
-  Cubix old_Strains_;  ///< Strains from last converged step
-  Cubix curr_Strains_; ///< Strains from current iteration
-  Matrix E_pot_;       ///< Potential energy storage
+  Cubix oldStrains_;  ///< Strains from last converged step
+  Cubix currStrains_; ///< Strains from current iteration
+  Matrix energyPot_;  ///< Potential energy storage
 
   String rodName_; ///< Material instance name
   /// @}

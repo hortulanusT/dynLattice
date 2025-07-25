@@ -4,8 +4,22 @@
  * @brief Implementation of elasto-plastic rod material with yield conditions and hardening
  */
 #include "materials/ElastoPlasticRodMaterial.h"
+#include "materials/MaterialFactory.h"
+#include "utils/helpers.h"
 #include "utils/testing.h"
 #include <jem/base/ClassTemplate.h>
+#include <jem/util/PropertyException.h>
+#include <jem/util/StringUtils.h>
+#include <jive/implict/Names.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/ObjectConverter.h>
+#include <jive/util/utilities.h>
+
+using jem::newInstance;
+using jem::numeric::dotProduct;
+using jive::Cubix;
+using jive::Ref;
+using jive::Vector;
 
 JEM_DEFINE_CLASS(ElastoPlasticRodMaterial);
 
@@ -36,6 +50,7 @@ ElastoPlasticRodMaterial::~ElastoPlasticRodMaterial()
 void ElastoPlasticRodMaterial::configure(const Properties &props, const Properties &globdat)
 {
   using jem::util::StringUtils;
+  using jive::util::DofSpace;
 
   Properties myProps = props.findProps(myName_);
   myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
@@ -71,8 +86,8 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
     }
   }
 
-  stress_part_ = jem::SliceTo(dofCount);
-  hard_part_ = jem::SliceFromTo(dofCount, argCount_);
+  stressPart_ = jem::SliceTo(dofCount);
+  hardPart_ = jem::SliceFromTo(dofCount, argCount_);
 
   materialH_.resize(argCount_ - dofCount, argCount_ - dofCount);
   if (argCount_ == 7)
@@ -95,23 +110,23 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
         << " ...Hardening matrix of the material '" << myName_ << "':\n"
         << materialH_ << "\n";
 
-  old_hardParams_.resize(argCount_ - dofCount, ipCount, elemCount);
-  old_hardParams_ = 0.;
-  curr_hardParams_.resize(argCount_ - dofCount, ipCount, elemCount);
-  curr_hardParams_ = 0.;
+  oldHardParams_.resize(argCount_ - dofCount, ipCount, elemCount);
+  oldHardParams_ = 0.;
+  currHardParams_.resize(argCount_ - dofCount, ipCount, elemCount);
+  currHardParams_ = 0.;
 
-  old_plastStrains_.resize(dofCount, ipCount, elemCount);
-  old_plastStrains_ = 0.;
-  curr_plastStrains_.resize(dofCount, ipCount, elemCount);
-  curr_plastStrains_ = 0.;
+  oldPlastStrains_.resize(dofCount, ipCount, elemCount);
+  oldPlastStrains_ = 0.;
+  currPlastStrains_.resize(dofCount, ipCount, elemCount);
+  currPlastStrains_ = 0.;
 
-  curr_deltaFlow_.resize(ipCount, elemCount);
-  curr_deltaFlow_ = 0.;
+  currDeltaFlow_.resize(ipCount, elemCount);
+  currDeltaFlow_ = 0.;
 
-  E_diss_.resize(ipCount, elemCount);
-  E_diss_ = 0.;
-  E_hardPot_.resize(ipCount, elemCount);
-  E_hardPot_ = 0.;
+  energyDiss_.resize(ipCount, elemCount);
+  energyDiss_ = 0.;
+  energyHardPot_.resize(ipCount, elemCount);
+  energyHardPot_ = 0.;
 
   if (!myProps.contains(YIELD_PROP))
     throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
@@ -175,14 +190,14 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   // REPORT("Step 1")
   idx_t liter = 0;
-  Vector plastStrain = old_plastStrains_(ALL, ip, ielem).clone();
-  Vector hardParams = old_hardParams_(ALL, ip, ielem).clone();
+  Vector plastStrain = oldPlastStrains_(ALL, ip, ielem).clone();
+  Vector hardParams = oldHardParams_(ALL, ip, ielem).clone();
   double deltaFlow = 0.;
 
   Vector hardStress(argCount_ - stress.size());
   Vector args(argCount_);
-  double f = 0.;
-  Vector f_deriv(argCount_);
+  double yieldValue = 0.;
+  Vector yieldGrad(argCount_);
   double deltaDeltaFlow = 0.;
 
   while (true)
@@ -198,15 +213,15 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
       break;
     }
 
-    args[stress_part_] = stress;
-    args[hard_part_] = hardStress;
+    args[stressPart_] = stress;
+    args[hardPart_] = hardStress;
 
-    f = yieldCond_->getValue(args.addr());
+    yieldValue = yieldCond_->getValue(args.addr());
 
     if (verbosity_ > 2)
-      jem::System::debug(myName_) << "        iter = " << liter << ", f = " << f << "\n";
+      jem::System::debug(myName_) << "        iter = " << liter << ", f = " << yieldValue << "\n";
     JEM_PRECHECK2(liter < maxIter_, "Too many iterations in plasticity loop");
-    if (f < precision_)
+    if (yieldValue < precision_)
     {
       if (verbosity_ > 1)
         jem::System::debug(myName_) << "        converged after " << liter << " iterations\n";
@@ -216,85 +231,88 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     if (yieldDeriv_.size() > 0)
     {
-      f_deriv = jive_helpers::evalFuncs(yieldDeriv_, args);
+      yieldGrad = jive_helpers::evalFuncs(yieldDeriv_, args);
     }
     else
     {
-      f_deriv = jive_helpers::funcGrad(yieldCond_, args);
+      yieldGrad = jive_helpers::funcGrad(yieldCond_, args);
       for (idx_t i = 0; i < strain.size(); i++)
         if (args[i] == 0.)
-          f_deriv[i] = 0.;
+          yieldGrad[i] = 0.;
     }
 
-    deltaDeltaFlow = f / (dotProduct(f_deriv[stress_part_], matmul(materialK_, f_deriv[stress_part_])) + dotProduct(f_deriv[hard_part_], matmul(materialH_, f_deriv[hard_part_])));
+    deltaDeltaFlow = yieldValue / (dotProduct(yieldGrad[stressPart_], matmul(materialK_, yieldGrad[stressPart_])) + dotProduct(yieldGrad[hardPart_], matmul(materialH_, yieldGrad[hardPart_])));
 
     // SUBHEADER2("Step 4", liter)
-    plastStrain += deltaDeltaFlow * f_deriv[stress_part_];
-    hardParams += deltaDeltaFlow * f_deriv[hard_part_];
+    plastStrain += deltaDeltaFlow * yieldGrad[stressPart_];
+    hardParams += deltaDeltaFlow * yieldGrad[hardPart_];
     deltaFlow += deltaDeltaFlow;
 
     liter++;
   }
 
-  curr_Strains_(ALL, ip, ielem) = strain;
-  curr_plastStrains_(ALL, ip, ielem) = plastStrain;
-  curr_hardParams_(ALL, ip, ielem) = hardParams;
-  curr_deltaFlow_(ip, ielem) = deltaFlow;
+  currStrains_(ALL, ip, ielem) = strain;
+  currPlastStrains_(ALL, ip, ielem) = plastStrain;
+  currHardParams_(ALL, ip, ielem) = hardParams;
+  currDeltaFlow_(ip, ielem) = deltaFlow;
 }
 
-void ElastoPlasticRodMaterial::apply_deform()
+void ElastoPlasticRodMaterial::applyDeform()
 {
-  Vector old_elastStrain(curr_Strains_.size(0));
-  Vector curr_elastStrain(curr_Strains_.size(0));
-  Vector old_stress(curr_Strains_.size(0));
-  Vector curr_stress(curr_Strains_.size(0));
-  Vector delta_plastStrain(curr_Strains_.size(0));
-  Vector curr_hardParams(curr_hardParams_.size(0));
+  Vector oldElastStrain(currStrains_.size(0));
+  Vector currElastStrain(currStrains_.size(0));
+  Vector oldStress(currStrains_.size(0));
+  Vector currStress(currStrains_.size(0));
+  Vector deltaPlastStrain(currStrains_.size(0));
+  Vector currHardParams(currHardParams_.size(0));
 
-  for (idx_t ielem = 0; ielem < curr_Strains_.size(2); ielem++)
+  for (idx_t ielem = 0; ielem < currStrains_.size(2); ielem++)
   {
-    for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
+    for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      old_elastStrain = old_Strains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem);
-      curr_elastStrain = curr_Strains_(ALL, ip, ielem) - curr_plastStrains_(ALL, ip, ielem);
-      delta_plastStrain = curr_plastStrains_(ALL, ip, ielem) - old_plastStrains_(ALL, ip, ielem);
-      curr_hardParams = curr_hardParams_(ALL, ip, ielem);
-      Super::getStress(old_stress, old_elastStrain);
-      Super::getStress(curr_stress, curr_elastStrain);
+      oldElastStrain = oldStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
+      currElastStrain = currStrains_(ALL, ip, ielem) - currPlastStrains_(ALL, ip, ielem);
+      deltaPlastStrain = currPlastStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
+      currHardParams = currHardParams_(ALL, ip, ielem);
+      Super::getStress(oldStress, oldElastStrain);
+      Super::getStress(currStress, currElastStrain);
 
-      E_hardPot_(ip, ielem) = 0.5 * dotProduct(curr_hardParams, matmul(materialH_, curr_hardParams));
-      E_pot_(ip, ielem) = 0.5 * dotProduct(curr_elastStrain, curr_stress);
+      energyHardPot_(ip, ielem) = 0.5 * dotProduct(currHardParams, matmul(materialH_, currHardParams));
+      energyPot_(ip, ielem) = 0.5 * dotProduct(currElastStrain, currStress);
 
-      WARN_ASSERT2(curr_deltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
-      if (curr_deltaFlow_(ip, ielem) != 0.)
+      WARN_ASSERT2(currDeltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
+      if (currDeltaFlow_(ip, ielem) != 0.)
       {
-        E_diss_(ip, ielem) += dotProduct((old_stress + curr_stress) / 2., delta_plastStrain);
+        energyDiss_(ip, ielem) += dotProduct((oldStress + currStress) / 2., deltaPlastStrain);
       }
     }
   }
 
-  old_hardParams_ = curr_hardParams_;
-  old_plastStrains_ = curr_plastStrains_;
-  old_Strains_ = curr_Strains_;
+  oldHardParams_ = currHardParams_;
+  oldPlastStrains_ = currPlastStrains_;
+  oldStrains_ = currStrains_;
 
-  curr_deltaFlow_ = 0.;
+  currDeltaFlow_ = 0.;
 }
 
-void ElastoPlasticRodMaterial::reject_deform()
+void ElastoPlasticRodMaterial::rejectDeform()
 {
-  curr_hardParams_ = old_hardParams_;
-  curr_plastStrains_ = old_plastStrains_;
-  curr_Strains_ = old_Strains_;
+  currHardParams_ = oldHardParams_;
+  currPlastStrains_ = oldPlastStrains_;
+  currStrains_ = oldStrains_;
 
-  curr_deltaFlow_ = 0.;
+  currDeltaFlow_ = 0.;
 }
 
 void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
 {
+  using jive::IdxVector;
+  using jive::util::XTable;
+
   if (name == "plast_strain")
   {
     const idx_t elemCount = items.size();
-    const idx_t ipCount = curr_plastStrains_.size(1);
+    const idx_t ipCount = currPlastStrains_.size(1);
     const IdxVector columns(strain_table.columnCount());
     columns = jem::iarray(strain_table.columnCount());
 
@@ -302,7 +320,7 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        strain_table.addRowValues(items[ie], columns, curr_plastStrains_(ALL, ip, ie));
+        strain_table.addRowValues(items[ie], columns, currPlastStrains_(ALL, ip, ie));
         weights[items[ie]] += 1.;
       }
     }
@@ -313,7 +331,7 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
   if (name == "hard_params")
   {
     const idx_t elemCount = items.size();
-    const idx_t ipCount = curr_hardParams_.size(1);
+    const idx_t ipCount = currHardParams_.size(1);
     const IdxVector columns(strain_table.columnCount());
     columns = jem::iarray(strain_table.columnCount());
 
@@ -321,7 +339,7 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
-        strain_table.addRowValues(items[ie], columns, curr_hardParams_(ALL, ip, ie));
+        strain_table.addRowValues(items[ie], columns, currHardParams_(ALL, ip, ie));
         weights[items[ie]] += 1.;
       }
     }
@@ -334,17 +352,17 @@ void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table
 
 double ElastoPlasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
 {
-  return E_diss_(ip, ielem);
+  return energyDiss_(ip, ielem);
 }
 
 double ElastoPlasticRodMaterial::getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const
 {
-  return E_pot_(ip, ielem);
+  return energyPot_(ip, ielem);
 }
 
 double ElastoPlasticRodMaterial::getHardeningPotential(const idx_t &ielem, const idx_t &ip) const
 {
-  return E_hardPot_(ip, ielem);
+  return energyHardPot_(ip, ielem);
 }
 
 Ref<Material> ElastoPlasticRodMaterial::makeNew

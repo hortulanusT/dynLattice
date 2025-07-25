@@ -367,7 +367,7 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    material_->apply_deform();
+    material_->applyDeform();
 
     Properties vars = Globdat::getVariables(globdat);
     Vector disp;
@@ -390,7 +390,7 @@ bool specialCosseratRodModel::takeAction
 
   if (action == Actions::CANCEL)
   {
-    material_->reject_deform();
+    material_->rejectDeform();
     return true;
   }
 
