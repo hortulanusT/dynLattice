@@ -6,16 +6,18 @@
  *
  */
 
+#include "misc/CSVDataPrinter.h"
+
 #include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/System.h>
 #include <jem/mp/GatherPrinter.h>
 #include <jem/util/ArrayBuffer.h>
+
 #include <jive/util/Globdat.h>
 #include <jive/util/ItemMap.h>
 #include <jive/util/ItemSet.h>
 #include <jive/util/TableException.h>
-#include "misc/CSVDataPrinter.h"
 
 using jive::idx_t;
 using jive::StringVector;

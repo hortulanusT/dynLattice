@@ -5,13 +5,16 @@
  *
  */
 
-#include "Line3D.h"
+#include "misc/Line3D.h"
+
 #include "utils/testing.h"
+
 #include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/numeric/algebra/utilities.h>
+
 #include <jive/geom/ShapeFactory.h>
 #include <jive/geom/StdLine.h>
 

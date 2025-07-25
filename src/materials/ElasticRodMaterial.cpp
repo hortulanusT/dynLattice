@@ -4,17 +4,21 @@
  * @brief Implementation of linear elastic rod material with cross-sectional properties
  */
 #include "materials/ElasticRodMaterial.h"
+
 #include "materials/MaterialFactory.h"
 #include "utils/helpers.h"
 #include "utils/testing.h"
+
 #include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/util/StringUtils.h>
+
 #include <jive/util/DofSpace.h>
 #include <jive/util/ObjectConverter.h>
+
 #include <math.h>
 
 using jem::newInstance;

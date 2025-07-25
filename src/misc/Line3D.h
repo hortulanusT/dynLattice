@@ -52,6 +52,7 @@ public:
    * @param[in] name Shape instance name for identification
    * @param[out] conf Configuration properties container for output
    * @param[in] props Input properties containing shape parameters
+   * @throws jem::IllegalInputException if unsupported number of nodes is specified
    */
   explicit Line3D(const String &name,
                   const Properties &conf,

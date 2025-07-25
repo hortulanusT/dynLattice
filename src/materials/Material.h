@@ -61,6 +61,7 @@ public:
    *
    * @param props Properties containing configuration parameters
    * @param globdat Global data container with simulation context
+   * @throws Derived classes may throw exceptions for invalid parameters
    */
   virtual void configure(const Properties &props, const Properties &globdat);
 

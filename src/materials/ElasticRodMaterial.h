@@ -56,7 +56,13 @@ public:
   /// @brief Register material type with factory
   static void declare();
 
-  /// @brief Configure material properties including cross-sectional geometry
+  /**
+   * @brief Configure material properties including cross-sectional geometry
+   *
+   * @param props Properties containing configuration parameters
+   * @param globdat Global data container with simulation context
+   * @throws jem::IllegalInputException if negative material properties are provided
+   */
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;

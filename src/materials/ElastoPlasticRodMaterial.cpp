@@ -4,12 +4,15 @@
  * @brief Implementation of elasto-plastic rod material with yield conditions and hardening
  */
 #include "materials/ElastoPlasticRodMaterial.h"
+
 #include "materials/MaterialFactory.h"
 #include "utils/helpers.h"
 #include "utils/testing.h"
+
 #include <jem/base/ClassTemplate.h>
 #include <jem/util/PropertyException.h>
 #include <jem/util/StringUtils.h>
+
 #include <jive/implict/Names.h>
 #include <jive/util/DofSpace.h>
 #include <jive/util/ObjectConverter.h>
