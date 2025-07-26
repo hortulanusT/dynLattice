@@ -6,15 +6,16 @@
  */
 #pragma once
 
+#include "utils/testing.h"
+
 #include <jem/base/Array.h>
 #include <jem/base/CString.h>
 #include <jem/numeric/Quaternion.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/func/Function.h>
+
 #include <jive/Array.h>
 #include <jive/util/FuncUtils.h>
-
-#include "utils/testing.h"
 
 #define WARN(key) jem::System::warn() << key << "\n";
 #define ERR(key) jem::System::err() << key << "\n";

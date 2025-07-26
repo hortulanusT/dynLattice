@@ -5,6 +5,10 @@
  *
  */
 
+#include "materials/_declareMaterials.h"
+#include "models/_declareModels.h"
+#include "modules/_declareModules.h"
+
 #include <jive/app/Application.h>
 #include <jive/app/ChainModule.h>
 #include <jive/app/ControlModule.h>
@@ -15,17 +19,13 @@
 #include <jive/fem/InputModule.h>
 #include <jive/fem/ShapeModule.h>
 
-#include "materials/_declareMaterials.h"
-#include "models/_declareModels.h"
-#include "modules/_declareModules.h"
+using jem::newInstance;
+using jem::Ref;
+using jive::app::Module;
 
 //-----------------------------------------------------------------------
 //   mainModule
 //-----------------------------------------------------------------------
-
-using jem::newInstance;
-using jem::Ref;
-using jive::app::Module;
 
 Ref<Module> mainModule()
 {
@@ -61,10 +61,10 @@ Ref<Module> mainModule()
   // UserConf: reads user input
   chain->pushBack(newInstance<UserconfModule>("Input"));
 
-  // Shepe Module: Stores all the shapes needed by other modules
+  // Shape Module: Stores all the shapes needed by other modules
   chain->pushBack(newInstance<ShapeModule>());
 
-  // Init Module: creates the main model and initilazies it
+  // Init Module: creates the main model and initializes it
   chain->pushBack(newInstance<InitModule>());
 
   ///// RUNNING /////
