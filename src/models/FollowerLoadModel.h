@@ -41,7 +41,8 @@ using jive::model::StateVector;
 using jive::util::Assignable;
 using jive::util::DofSpace;
 
-using namespace jive_helpers;
+using jive_helpers::expVec;
+using jive_helpers::eye;
 
 class FollowerLoadModel : public Model
 {

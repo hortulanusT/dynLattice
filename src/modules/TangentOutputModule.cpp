@@ -11,6 +11,8 @@
 
 #include <jem/base/ClassTemplate.h>
 
+using jive_helpers::eye;
+
 JEM_DEFINE_CLASS(TangentOutputModule);
 
 const char *TangentOutputModule::TYPE_NAME = "TangentOutput";

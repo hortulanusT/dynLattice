@@ -59,8 +59,6 @@ using jive::util::FuncUtils;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
-using namespace jive_helpers;
-
 class hingeModel : public Model
 {
 public:

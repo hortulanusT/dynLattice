@@ -18,7 +18,10 @@
 #include <jive/geom/ShapeFactory.h>
 #include <jive/geom/StdLine.h>
 
-using namespace jive_helpers;
+using jive_helpers::expVec;
+using jive_helpers::expVecP;
+using jive_helpers::logMat;
+using jive_helpers::skew;
 
 using jem::ALL;
 using jem::newInstance;

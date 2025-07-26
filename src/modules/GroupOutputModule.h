@@ -26,8 +26,6 @@
 #include "utils/helpers.h"
 #include "utils/testing.h"
 
-using namespace jive_helpers;
-
 using jem::idx_t;
 using jem::newInstance;
 using jem::Ref;

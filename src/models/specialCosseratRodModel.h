@@ -80,7 +80,12 @@ using jive::util::joinNames;
 using jive::util::XDofSpace;
 using jive::util::XTable;
 
-using namespace jive_helpers;
+using jive_helpers::e3;
+using jive_helpers::expVec;
+using jive_helpers::eye;
+using jive_helpers::skew;
+using jive_helpers::unskew;
+using jive_helpers::vec2mat;
 
 /**
  * @brief class, that implements a special cosserat Rod model

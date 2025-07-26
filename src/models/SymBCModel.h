@@ -39,8 +39,6 @@ using jive::util::Constraints;
 using jive::util::DofSpace;
 using jive::util::Globdat;
 
-using namespace jive_helpers;
-
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
 class SymBCModel : public Model

@@ -47,7 +47,8 @@ using jive::util::Constraints;
 using jive::util::DofSpace;
 using jive::util::Globdat;
 
-using namespace jive_helpers;
+using jive_helpers::IdxVectorMatrix;
+using jive_helpers::vec2mat;
 
 class periodicBCModel : public Model
 {
