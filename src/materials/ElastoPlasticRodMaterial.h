@@ -19,6 +19,7 @@ using jive::String;
 using jive::util::FuncUtils;
 
 /// @brief Elasto-plastic rod material implementing yield conditions with isotropic and kinematic hardening
+/// @see [Corresponding Paper](https://doi.org/10.1007/s00466-024-02572-3)
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
 {
 public:

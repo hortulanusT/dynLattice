@@ -1,24 +1,24 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
+/**
+ * @file specialCosseratRodModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of specialCosseratRodModel class
  *
- * This class implements a special Cosserat Rod model
- * (also called Simo Reissner Rod or nonlinear
- * Timoshenko Rod)
- *
- * Author: T. Gaertner
- * Date: July 21
- *
+ * Implementation of the special Cosserat rod finite element model with
+ * geometrically exact kinematics.
  */
 
 #include "specialCosseratRodModel.h"
 
+#include <jem/base/ClassTemplate.h>
 #include <math.h>
 
 using jem::newInstance;
 
 //=======================================================================
-//    class specialCosseratRodModel -- implementation
+//   class specialCosseratRodModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(specialCosseratRodModel);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -29,8 +29,7 @@ const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
 const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
 const char *specialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
 const char *specialCosseratRodModel::ROT_DOF_NAMES = "dofNamesRot";
-const char *specialCosseratRodModel::SYMMETRIC_ONLY =
-    "symmetric_tanget_stiffness";
+const char *specialCosseratRodModel::SYMMETRIC_ONLY = "symmetric_tanget_stiffness";
 const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
@@ -38,10 +37,8 @@ const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const char *specialCosseratRodModel::HINGES = "hinges";
 const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
-const Slice specialCosseratRodModel::TRANS_PART =
-    jem::SliceFromTo(0, TRANS_DOF_COUNT);
-const Slice specialCosseratRodModel::ROT_PART =
-    jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
+const Slice specialCosseratRodModel::TRANS_PART = jem::SliceFromTo(0, TRANS_DOF_COUNT);
+const Slice specialCosseratRodModel::ROT_PART = jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
 
 //-----------------------------------------------------------------------
 //   constructor

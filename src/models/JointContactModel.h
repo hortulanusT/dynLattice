@@ -1,12 +1,12 @@
 /**
  * @file JointContactModel.h
  * @author Til Gärtner
- * @brief contact model for joints (assumed to be two spheres)
- *
- *
+ * @brief Contact model for spherical joint interactions
  */
 
 #pragma once
+
+#include <jem/base/Class.h>
 
 #include "models/specialCosseratRodModel.h"
 #include <jem/base/ClassTemplate.h>
@@ -44,16 +44,30 @@ using jive::util::Assignable;
 using jive::util::DofSpace;
 using jive::util::FuncUtils;
 
+/// @brief Contact model for spherical joint interactions
+/// @details Implements contact mechanics between joints modeled as spheres using
+/// penalty methods. Detects contact pairs and computes contact forces and stiffness
+/// contributions for joint-to-joint interactions.
 class JointContactModel : public Model
 {
 public:
   JEM_DECLARE_CLASS(JointContactModel, Model);
 
-  static const char *TYPE_NAME;
-  static const char *PENALTY_PROP;
-  static const char *RADIUS_PROP;
-  static const char *VERBOSE_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;    ///< Model type name
+  static const char *PENALTY_PROP; ///< Penalty parameter
+  static const char *RADIUS_PROP;  ///< Joint radius
+  static const char *VERBOSE_PROP; ///< Verbose output flag
+  /// @}
 
+  /// @}
+
+  /// @brief Constructor with configuration and properties
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
   explicit JointContactModel
 
       (const String &name,
@@ -61,12 +75,23 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Handle model actions for contact mechanics
+  /// @param action Action name to execute
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
   virtual bool takeAction
 
       (const String &action,
        const Properties &params,
        const Properties &globdat) override;
 
+  /// @brief Factory method for creating new JointContactModel instances
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return Reference to new JointContactModel instance
   static Ref<Model> makeNew
 
       (const String &name,
@@ -74,27 +99,22 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Register JointContactModel type with ModelFactory
   static void declare();
 
 protected:
-  /**
-   * @brief find pairs of contacts
-   *
-   * @param[in] disp displacement vector of all nodes
-   */
+  /// @brief Find pairs of joints in contact
+  /// @param disp Displacement vector of all nodes
   virtual void findContacts_
 
       (const Vector &disp);
 
-  /**
-   * @brief compute the effects of the contact
-   *
-   * @param[out] mbld stiffness matrix builder
-   * @param[out] fint internal force vector
-   * @param[in] nodesA node IDs of one side of the contact
-   * @param[in] nodesB node IDs of the other side
-   * @param[in] disp displacement vector of all elements
-   */
+  /// @brief Compute contact effects for detected contact pairs
+  /// @param mbld Stiffness matrix builder
+  /// @param fint Internal force vector
+  /// @param nodesA Node IDs of first contact side
+  /// @param nodesB Node IDs of second contact side
+  /// @param disp Displacement vector of all elements
   virtual void computeContacts_
 
       (MatrixBuilder &mbld,
@@ -103,15 +123,11 @@ protected:
        const IdxVector &nodesB,
        const Vector &disp);
 
-  /**
-   * @brief commpute a single contact
-   *
-   * @param contactStiffness stiffness matrix of the contact
-   * @param contactForce force vector of the contact
-   * @param posA position of the first node
-   * @param posB position of the second node
-   *
-   */
+  /// @brief Compute single contact interaction
+  /// @param contactStiffness Contact stiffness matrix (output)
+  /// @param contactForce Contact force vector (output)
+  /// @param posA Position of first joint
+  /// @param posB Position of second joint
   virtual void computeContact_
 
       (Matrix contactStiffness,
@@ -120,17 +136,25 @@ protected:
        Vector posB);
 
 private:
-  Assignable<NodeSet> allNodes_;
-  Assignable<ElementSet> allElems_;
-  IdxVector jointList_;
-  Ref<DofSpace> dofs_;
+  /// @name System components
+  /// @{
+  Assignable<NodeSet> allNodes_;    ///< All nodes in the system
+  Assignable<ElementSet> allElems_; ///< All elements in the system
+  IdxVector jointList_;             ///< List of joint node indices
+  Ref<DofSpace> dofs_;              ///< Degree of freedom space
+  /// @}
 
-  ArrayBuffer<idx_t> contactsA_;
-  ArrayBuffer<idx_t> contactsB_;
+  /// @name Contact detection
+  /// @{
+  ArrayBuffer<idx_t> contactsA_; ///< First nodes in contact pairs
+  ArrayBuffer<idx_t> contactsB_; ///< Second nodes in contact pairs
+  Ref<Function> updCond_;        ///< Update condition function
+  /// @}
 
-  Ref<Function> updCond_;
-
-  double penalty_;
-  double radius_;
-  bool verbose_;
+  /// @name Contact parameters
+  /// @{
+  double penalty_; ///< Penalty parameter for contact forces
+  double radius_;  ///< Joint radius for contact detection
+  bool verbose_;   ///< Enable verbose output
+  /// @}
 };

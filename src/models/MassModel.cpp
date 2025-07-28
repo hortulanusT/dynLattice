@@ -1,3 +1,9 @@
+/**
+ * @file MassModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of mass model for concentrated masses on node groups
+ */
+
 #include "models/MassModel.h"
 #include <jem/base/ClassTemplate.h>
 

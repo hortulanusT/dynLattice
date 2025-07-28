@@ -1,17 +1,18 @@
 /**
  * @file InitLoadModel.cpp
  * @author Til Gärtner
- * @brief InitLoadModel for initial loads
- *
- *
+ * @brief Implementation of initial loading model for displacement and velocity conditions
  */
 
+#include <jem/base/ClassTemplate.h>
 #include "models/InitLoadModel.h"
 #include "utils/testing.h"
 
 //=======================================================================
 //   class InitLoadModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(InitLoadModel);
 
 //-----------------------------------------------------------------------
 //   static data

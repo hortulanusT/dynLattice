@@ -1,19 +1,35 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
+/**
+ * @file SymBCModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of SymBCModel class
  *
- * This class implements a symmetric BC Model
- *
- * Author: T. Gaertner
- * Date: Feburary 2025
- *
+ * Implementation of plane symmetry boundary conditions with support
+ * for both opposing and equal DOF constraints between surface pairs.
  */
+
 #include "SymBCModel.h"
 #include <jive/util/Printer.h>
+
+#include <jem/base/ClassTemplate.h>
+
+//=======================================================================
+//   class SymBCModel
+//=======================================================================
+
+JEM_DEFINE_CLASS(SymBCModel);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *SymBCModel::TYPE_NAME = "SymBC";
 const char *SymBCModel::DOF_OPPO_NAMES_PROP = "oppo_dofs";
 const char *SymBCModel::DOF_EQUAL_NAMES_PROP = "equal_dofs";
 const char *SymBCModel::SURFACES_PROP = "surfaces";
+
+//-----------------------------------------------------------------------
+//   constructor
+//-----------------------------------------------------------------------
 
 SymBCModel::SymBCModel
 

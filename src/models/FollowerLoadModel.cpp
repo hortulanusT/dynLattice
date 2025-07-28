@@ -1,19 +1,17 @@
-/*
- *
- *  Copyright (C) 2010 TU Delft. All rights reserved.
- *
- *  This class implements a model for a follower load
- *
- *  Author:  T. Gärtner t.gartner@tudelft.nl
- *  Date:    September 2021
- *
+/**
+ * @file FollowerLoadModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of follower load model for direction-dependent loading
  */
 
 #include "FollowerLoadModel.h"
+#include <jem/base/ClassTemplate.h>
 
 //=======================================================================
 //   class FollowerLoadModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(FollowerLoadModel);
 
 //-----------------------------------------------------------------------
 //   static data

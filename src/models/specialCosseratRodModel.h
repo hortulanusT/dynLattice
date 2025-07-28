@@ -1,16 +1,17 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
+/**
+ * @file specialCosseratRodModel.h
+ * @author Til Gärtner
+ * @brief Special Cosserat rod model implementation
  *
- * This class implements a special Cosserat Rod model
- * (also called Simo Reissner Rod or nonlinear
- * Timoshenko Rod)
- *
- * Author: T. Gaertner
- * Date: July 21
- *
+ * This model implements a special Cosserat rod finite element formulation
+ * (also called Simo-Reissner rod or nonlinear Timoshenko beam).
+ * It provides geometrically exact rod kinematics with rotational and
+ * translational degrees of freedom.
  */
 
 #pragma once
+
+#include <jem/base/Object.h>
 
 #include <materials/Material.h>
 #include <materials/MaterialFactory.h>
@@ -33,6 +34,8 @@
 #include <jive/fem/ElementSet.h>
 #include <jive/fem/NodeGroup.h>
 #include <jive/fem/NodeSet.h>
+#include <jive/geom/ShapeFactory.h>
+#include <jive/geom/StdShape.h>
 #include <jive/implict/SolverInfo.h>
 #include <jive/model/Actions.h>
 #include <jive/model/Model.h>
@@ -44,8 +47,6 @@
 #include <jive/util/XDofSpace.h>
 #include <jive/util/XTable.h>
 #include <jive/util/utilities.h>
-#include <jive/geom/ShapeFactory.h>
-#include <jive/geom/StdShape.h>
 
 #include <math.h>
 
@@ -87,216 +88,272 @@ using jive_helpers::skew;
 using jive_helpers::unskew;
 using jive_helpers::vec2mat;
 
+//-----------------------------------------------------------------------
+//   class specialCosseratRodModel
+//-----------------------------------------------------------------------
+
 /**
- * @brief class, that implements a special cosserat Rod model
+ * @class specialCosseratRodModel
+ * @brief Special Cosserat rod finite element model with geometrically exact kinematics
  *
- * This class implements a special cosserat rod finite element class
- * strongly inspired by Simo/Vu-Quoc '85
+ * The specialCosseratRodModel implements a geometrically exact rod formulation
+ * based on the Cosserat theory (Simo-Reissner rod). It features 6 DOF per node
+ * (3 translational + 3 rotational) and supports large deformations, rotations,
+ * and complex material behavior including plasticity.
  *
+ * Features:
+ * - Geometrically exact rod kinematics with 6 DOF per node
+ * - Large deformation and rotation capabilities
+ * - Material integration with plasticity support
+ * - Hinge connection modeling
+ * - Gyroscopic effects for dynamic analysis
+ * - Initial strain and rotation specification
+ * - Energy calculation (potential and dissipated)
+ * - Strain and stress output tables
+ *
+ * @see [Reissner (1981)](https://doi.org/10.1007/BF00946983)
+ * @see [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4)
+ * @see [Crisfield, Jelenić (1999)](https://doi.org/10.1098/rspa.1999.0352)
+ * @see [Antman (2005)](https://doi.org/10.1007/0-387-27649-1)
+ * @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
  */
 class specialCosseratRodModel : public Model
 {
 public:
-    static const char *TYPE_NAME;
-    static const char *TRANS_DOF_DEFAULT;
-    static const char *ROT_DOF_DEFAULT;
-    static const char *TRANS_DOF_NAMES;
-    static const char *ROT_DOF_NAMES;
-    static const char *SYMMETRIC_ONLY;
-    static const char *MATERIAL_Y_DIR;
-    static const char *GIVEN_NODES;
-    static const char *GIVEN_DIRS;
-    static const char *THICKENING_FACTOR;
-    static const char *LUMPED_MASS;
-    static const char *HINGES;
-    static const idx_t TRANS_DOF_COUNT;
-    static const idx_t ROT_DOF_COUNT;
-    static const Slice TRANS_PART;
-    static const Slice ROT_PART;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;         ///< Model type name
+  static const char *TRANS_DOF_DEFAULT; ///< Default translational DOF prefix
+  static const char *ROT_DOF_DEFAULT;   ///< Default rotational DOF prefix
+  static const char *TRANS_DOF_NAMES;   ///< Translational DOF names property
+  static const char *ROT_DOF_NAMES;     ///< Rotational DOF names property
+  static const char *SYMMETRIC_ONLY;    ///< Symmetric tangent stiffness property
+  static const char *MATERIAL_Y_DIR;    ///< Material y-direction property
+  static const char *GIVEN_NODES;       ///< Given direction nodes property
+  static const char *GIVEN_DIRS;        ///< Given directions property
+  static const char *LUMPED_MASS;       ///< Lumped mass property
+  static const char *HINGES;            ///< Hinges property
+  /// @}
 
-    explicit specialCosseratRodModel
+  /// @name DOF constants
+  /// @{
+  static const idx_t TRANS_DOF_COUNT; ///< Number of translational DOFs
+  static const idx_t ROT_DOF_COUNT;   ///< Number of rotational DOFs
+  static const Slice TRANS_PART;      ///< Translational DOF slice
+  static const Slice ROT_PART;        ///< Rotational DOF slice
+  /// @}
 
-        (const String &name, const Properties &conf,
-         const Properties &props, const Properties &globdat);
+  JEM_DECLARE_CLASS(specialCosseratRodModel, Model);
 
-    virtual bool takeAction
+  /// @brief Constructor
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  explicit specialCosseratRodModel(const String &name,
+                                   const Properties &conf,
+                                   const Properties &props,
+                                   const Properties &globdat);
 
-        (const String &action, const Properties &params,
-         const Properties &globdat);
+  /// @brief Handle model actions
+  /// @param action Action name
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
+  virtual bool takeAction(const String &action,
+                          const Properties &params,
+                          const Properties &globdat) override;
 
-    static Ref<Model> makeNew
+  /// @brief Create new specialCosseratRodModel instance
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return New model instance
+  static Ref<Model> makeNew(const String &name,
+                            const Properties &conf,
+                            const Properties &props,
+                            const Properties &globdat);
 
-        (const String &name, const Properties &conf,
-         const Properties &props, const Properties &globdat);
-
-    static void declare();
-
-private:
-    /**
-     * @brief assemble the stiffness matrix
-     * @param[out] mbld tanget stiffness matrix (via MatrixBuilder object)
-     * @param[out] fint internal force Vector
-     * @param[in]  disp current values for the DOFs
-     */
-    void assemble_(MatrixBuilder &mbld, const Vector &fint,
-                   const Vector &disp, const String &loadCase = "") const;
-
-    /**
-     * @brief construct the internal force vector
-     * @param[out] fint internal force Vector
-     * @param[in]  disp current values for the DOFs
-     */
-    void assemble_(const Vector &fint, const Vector &disp, const String &loadCase = "") const;
-
-    /**
-     * @brief construct the gyroscopic forces (omega x Theta*omega)
-     * @param[out] fgyro gyroscopic force Vector
-     * @param[in]  velo current values for the DOF - velocities
-     * @param[in]  mass current mass matrix
-     */
-    void assembleGyro_(const Vector &fint,
-                       const Vector &velo,
-                       const Ref<AbstractMatrix> mass) const;
-
-    /**
-     * @brief assemble the mass matrix
-     * @param[out] mbld mass matrix
-     * @param[in]  disp current values for the DOFs
-     */
-    void assembleM_(MatrixBuilder &mbld, Vector &disp) const;
-
-    /**
-     * @brief fill the table with the strain values per element
-     */
-    void get_strain_table_
-
-        (XTable &strain_table, const Vector &weights, const Vector &disp,
-         const bool mat_vals = false);
-
-    /**
-     * @brief fill the table with the plastic strain values per element
-     */
-    void get_mat_table_
-
-        (XTable &mat_table, const Vector &weights, const String &name);
-
-    /**
-     * @brief fill the table with the stress values per element
-     */
-    void get_stress_table_
-
-        (XTable &stress_table, const Vector &weights, const Vector &disp,
-         const bool mat_vals = false);
-
-    /**
-     * @brief initializes the rotation of the elements
-     */
-    void init_rot_();
-
-    /**
-     * @brief initializes the initial strain of the elements
-     */
-    void init_strain_();
-
-    /**
-     * @brief Get the geometric stiffness matrix
-     */
-    void get_geomStiff_(
-        const Cubix &B,          ///< B(.,.,i), where it refers to the B-matrix at
-                                 ///< the i-th integration point
-        const Matrix &stresses,  ///< spatial stress(i,j), stress component i
-                                 ///< at the j-th integration points
-        const Matrix &nodePhi_0, ///< location of the nodes
-        const Matrix &nodeU)
-        const; ///< nodeU(.,j), translational displacement j-th node
-
-    /**
-     * @brief Get the strains in the integration points of an element
-     */
-    void get_strains_(
-        const Matrix &strains, ///< strains(i,j), stress component i at the
-                               ///< j-th integration points
-        const Vector &w,       ///< integration point weights
-        const Matrix
-            &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-        const Matrix
-            &nodeU,              ///< nodeU(.,j), translational displacement j-th node
-        const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
-                                 ///< orientation j-th node
-        const idx_t ie,
-        const bool spatial = true) const; ///< rotational displacements
-
-    /**
-     * @brief Get the stresses in the integration points of an element
-     */
-    void get_stresses_(
-        const Matrix &stresses, ///< stress(i,j), stress component i at the
-                                ///< j-th integration points
-        const Vector &w,        ///< integration point weights
-        const Matrix
-            &nodePhi_0, ///< nodePhi_0(.,j), location of the j-th node
-        const Matrix
-            &nodeU,              ///< nodeU(.,j), translational displacement j-th node
-        const Cubix &nodeLambda, ///< nodeLambda(.,.,j), rotational
-                                 ///< orientation j-th node
-        const idx_t ie,
-        const bool spatial = true, ///< rotational displacements
-        const String &loadCase = "") const;
-
-    /**
-     * @brief format the displacements nicely
-     */
-    void get_disps_(const Matrix &nodePhi_0, const Matrix &nodeU,
-                    const Cubix &nodeLambda, const Vector &disp,
-                    const IdxVector &inodes) const;
-
-    /**
-     * Calculates the potential energy of the special Cosserat rod model.
-     *
-     * @param disp The displacement vector.
-     * @returns The potential energy in this rod
-     */
-    double calc_pot_Energy_(const Vector &disp) const;
-    void calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
-
-    /**
-     * @brief Calculates the dissipated energy of the material
-     *
-     * @param disp The displacement vector.
-     * @returns the dissipated energy in this rod
-     */
-    double calc_diss_Energy_(const Vector &disp) const;
-    void calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const;
+  /// @brief Declare model type to factory
+  static void declare();
 
 private:
-    Assignable<ElementGroup> rodElems_;
-    IdxVector rodNodes_;
-    Assignable<ElementSet> allElems_;
-    Assignable<NodeSet> allNodes_;
+  /// @brief Assemble stiffness matrix and internal forces
+  /// @param mbld Tangent stiffness matrix builder
+  /// @param fint Internal force vector
+  /// @param disp Current DOF values
+  /// @param loadCase Load case identifier
+  void assemble_(MatrixBuilder &mbld,
+                 const Vector &fint,
+                 const Vector &disp,
+                 const String &loadCase = "") const;
 
-    Ref<DofSpace> dofs_;
-    Ref<Line3D> shapeK_;
-    Ref<Line3D> shapeM_;
-    Ref<Material> material_;
-    Ref<Model> hinges_;
+  /// @brief Construct internal force vector only
+  /// @param fint Internal force vector
+  /// @param disp Current DOF values
+  /// @param loadCase Load case identifier
+  void assemble_(const Vector &fint,
+                 const Vector &disp,
+                 const String &loadCase = "") const;
 
-    IdxVector trans_types_;
-    IdxVector rot_types_;
-    IdxVector jtypes_;
+  /// @brief Construct gyroscopic forces (omega x Theta*omega)
+  /// @param fint Gyroscopic force vector
+  /// @param velo Current DOF velocities
+  /// @param mass Current mass matrix
+  void assembleGyro_(const Vector &fint,
+                     const Vector &velo,
+                     const Ref<AbstractMatrix> mass) const;
 
-    bool symmetric_only_;
-    Vector thickFact_;
-    Vector material_ey_;
+  /// @brief Assemble mass matrix
+  /// @param mbld Mass matrix builder
+  /// @param disp Current DOF values
+  void assembleM_(MatrixBuilder &mbld,
+                  Vector &disp) const;
 
-    IdxVector
-        givenNodes_; ///< given directions for nodes (especially end-nodes)
-    Matrix
-        givenDirs_; ///< given directions for nodes (especially end-nodes)
+  /// @brief Fill table with strain values per element
+  /// @param strain_table Output strain table
+  /// @param weights Table weights
+  /// @param disp Current displacements
+  /// @param mat_vals flag for the material frame of reference
+  /// @note If mat_vals is true, the strain values are in the material frame of
+  /// reference, otherwise in the spatial frame of reference
+  void get_strain_table_(XTable &strain_table,
+                         const Vector &weights,
+                         const Vector &disp,
+                         const bool mat_vals = false);
 
-    Cubix LambdaN_; ///< reference rotations per node; LambdaN_(.,.,j) is
-                    ///< for the j-th node
-    Cubix
-        mat_strain0_; ///< strains for the undeformed configuration;
-                      ///< mat_strain0_(i,j,k) refers to the i-th strain in
-                      ///< the k-th element on the j-th integration point
+  /// @brief Fill table with material/plastic strain values per element
+  /// @param mat_table Output material table
+  /// @param weights Table weights
+  /// @param name Table name
+  void get_mat_table_(XTable &mat_table,
+                      const Vector &weights,
+                      const String &name);
+
+  /// @brief Fill table with stress values per element
+  /// @param stress_table Output stress table
+  /// @param weights Table weights
+  /// @param disp Current displacements
+  /// @param mat_vals flag for the material frame of reference
+  /// @note If mat_vals is true, the strain values are in the material frame of
+  /// reference, otherwise in the spatial frame of reference
+  void get_stress_table_(XTable &stress_table,
+                         const Vector &weights,
+                         const Vector &disp,
+                         const bool mat_vals = false);
+
+  /// @brief Initialize rotation of elements
+  void init_rot_();
+
+  /// @brief Initialize initial strain of elements
+  void init_strain_();
+
+  /// @brief Get the geometric stiffness matrix
+  /// @param B B-matrix at integration points
+  /// @param stresses Spatial stress components at integration points
+  /// @param nodePhi_0 Location of the nodes
+  /// @param nodeU Translational displacement of nodes
+  void get_geomStiff_(const Cubix &B,
+                      const Matrix &stresses,
+                      const Matrix &nodePhi_0,
+                      const Matrix &nodeU) const;
+
+  /// @brief Get the strains in the integration points of an element
+  /// @param strains Strain components at integration points
+  /// @param w Integration point weights
+  /// @param nodePhi_0 Location of the nodes
+  /// @param nodeU Translational displacement of nodes
+  /// @param nodeLambda Rotational orientation of nodes
+  /// @param ie Element index
+  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
+  void get_strains_(const Matrix &strains,
+                    const Vector &w,
+                    const Matrix &nodePhi_0,
+                    const Matrix &nodeU,
+                    const Cubix &nodeLambda,
+                    const idx_t ie,
+                    const bool spatial = true) const;
+
+  /// @brief Get the stresses in the integration points of an element
+  /// @param stresses Stress components at integration points
+  /// @param w Integration point weights
+  /// @param nodePhi_0 Location of the nodes
+  /// @param nodeU Translational displacement of nodes
+  /// @param nodeLambda Rotational orientation of nodes
+  /// @param ie Element index
+  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
+  /// @param loadCase Load case identifier
+  void get_stresses_(const Matrix &stresses,
+                     const Vector &w,
+                     const Matrix &nodePhi_0,
+                     const Matrix &nodeU,
+                     const Cubix &nodeLambda,
+                     const idx_t ie,
+                     const bool spatial = true,
+                     const String &loadCase = "") const;
+
+  /// @brief Format the displacements nicely
+  /// @param nodePhi_0 Node positions
+  /// @param nodeU Node displacements
+  /// @param nodeLambda Node rotations
+  /// @param disp Displacement vector
+  /// @param inodes Node indices
+  void get_disps_(const Matrix &nodePhi_0,
+                  const Matrix &nodeU,
+                  const Cubix &nodeLambda,
+                  const Vector &disp,
+                  const IdxVector &inodes) const;
+
+  /// @brief Calculate potential energy of the rod
+  /// @param disp Displacement vector
+  /// @return Potential energy value
+  double calc_pot_Energy_(const Vector &disp) const;
+
+  /// @brief Calculate potential energy and fill table
+  /// @param energy_table Output energy table
+  /// @param table_weights Table weights
+  /// @param disp Displacement vector
+  void calc_pot_Energy_(XTable &energy_table,
+                        const Vector &table_weights,
+                        const Vector &disp) const;
+
+  /// @brief Calculate dissipated energy of the material
+  /// @param disp Displacement vector
+  /// @return Dissipated energy value
+  double calc_diss_Energy_(const Vector &disp) const;
+
+  /// @brief Calculate dissipated energy and fill table
+  /// @param energy_table Output energy table
+  /// @param table_weights Table weights
+  /// @param disp Displacement vector
+  void calc_diss_Energy_(XTable &energy_table,
+                         const Vector &table_weights,
+                         const Vector &disp) const;
+
+private:
+  Assignable<ElementGroup> rodElems_; ///< Rod element group
+  IdxVector rodNodes_;                ///< Rod node indices
+  Assignable<ElementSet> allElems_;   ///< All elements
+  Assignable<NodeSet> allNodes_;      ///< All nodes
+
+  Ref<DofSpace> dofs_;     ///< DOF space
+  Ref<Line3D> shapeK_;     ///< Shape functions for stiffness
+  Ref<Line3D> shapeM_;     ///< Shape functions for mass
+  Ref<Material> material_; ///< Material model
+  Ref<Model> hinges_;      ///< Hinge model
+
+  IdxVector trans_types_; ///< Translational DOF types
+  IdxVector rot_types_;   ///< Rotational DOF types
+  IdxVector jtypes_;      ///< Joint DOF types
+
+  bool symmetric_only_; ///< Symmetric tangent stiffness flag
+  Vector thickFact_;    ///< Thickening factors
+  Vector material_ey_;  ///< Material y-direction
+
+  IdxVector givenNodes_; ///< Nodes with given directions
+  Matrix givenDirs_;     ///< Given directions for nodes
+
+  Cubix LambdaN_;     ///< Reference rotations per node
+  Cubix mat_strain0_; ///< Initial strain configuration
 };

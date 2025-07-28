@@ -1,5 +1,11 @@
-#include <jem/base/ClassTemplate.h>
+/**
+ * @file ImpactModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of impact model
+ */
+
 #include "models/ImpactModel.h"
+#include <jem/base/ClassTemplate.h>
 
 JEM_DEFINE_CLASS(ImpactModel);
 

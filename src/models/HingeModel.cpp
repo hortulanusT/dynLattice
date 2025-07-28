@@ -1,17 +1,17 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements hinges for geometrically nonlinear rods
- *
- * Author: T. Gaertner
- * Date: July 21
- *
+/**
+ * @file HingeModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of hinge model for rigid joints between Cosserat rod elements
  */
 
 #include "HingeModel.h"
+#include <jem/base/ClassTemplate.h>
+
 //=======================================================================
-//    class specialCosseratRodModel -- implementation
+//   class hingeModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(hingeModel);
 
 //-----------------------------------------------------------------------
 //   static data

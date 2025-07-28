@@ -1,16 +1,27 @@
+/**
+ * @file SpringMassModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of SpringMassModel class
+ *
+ * Spring-mass system implementation for boundary condition modeling
+ * using equivalent spring elements at domain boundaries.
+ */
+
 #include "models/SpringMassModel.h"
 #include "utils/testing.h"
-#include <jem/base/ClassTemplate.h>
 
-JEM_DEFINE_CLASS(SpringMassModel);
+#include <jem/base/ClassTemplate.h>
 
 //=======================================================================
 //   class SpringMassModel
 //=======================================================================
 
+JEM_DEFINE_CLASS(SpringMassModel);
+
 //-----------------------------------------------------------------------
 //   static data
 //-----------------------------------------------------------------------
+
 const char *SpringMassModel::TYPE_NAME = "SpringMass";
 const char *SpringMassModel::BOUNDARY_PROP = "boundary";
 const char *SpringMassModel::SPRING_NAMES = "springs";
@@ -19,7 +30,7 @@ const char *SpringMassModel::N_ELEM_PROP = "nElem";
 const char *SpringMassModel::P_ELEM_PROP = "pElem";
 
 //-----------------------------------------------------------------------
-//   constructors & destructor
+//   constructor & destructor
 //-----------------------------------------------------------------------
 SpringMassModel::SpringMassModel
 

@@ -1,18 +1,19 @@
 /**
  * @file LatticeModel.cpp
  * @author Til Gärtner
- * @brief LatticeModel for collection of rods
- *
- *
+ * @brief Implementation of lattice model for managing collections of rod elements
  */
 
 #include "models/LatticeModel.h"
 #include "utils/testing.h"
+#include <jem/base/ClassTemplate.h>
 #include <jive/app/Names.h>
 
 //=======================================================================
 //   class LatticeModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(LatticeModel);
 
 //-----------------------------------------------------------------------
 //   static data

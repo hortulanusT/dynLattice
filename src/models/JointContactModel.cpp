@@ -1,9 +1,7 @@
 /**
  * @file JointContactModel.cpp
  * @author Til Gärtner
- * @brief contact model for joints (assumed to be two spheres)
- *
- *
+ * @brief Implementation of contact model for spherical joint interactions
  */
 
 #include "models/JointContactModel.h"

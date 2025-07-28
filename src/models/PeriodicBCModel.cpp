@@ -1,22 +1,34 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements a periodic BC Model
- *
- * Author: T. Gaertner
- * Date: September 21
- *
- * ONLY WORKS FOR RECTANGULAR UNIT CELLS
- *
+/**
+ * @file PeriodicBCModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of periodicBCModel class
  */
+
 #include "PeriodicBCModel.h"
 #include <jive/util/Printer.h>
 
+#include <jem/base/ClassTemplate.h>
+
+//=======================================================================
+//   class periodicBCModel
+//=======================================================================
+
+JEM_DEFINE_CLASS(periodicBCModel);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
+
 const char *periodicBCModel::TYPE_NAME = "PeriodicBC";
 const char *periodicBCModel::MODE_PROP = "mode";
+const char *periodicBCModel::GRAD_PROP = "grad";
 const char *periodicBCModel::DOF_NAMES_PROP = "dofs";
 const char *periodicBCModel::ROT_NAMES_PROP = "rotDofs";
 const char *periodicBCModel::FIXEDGRAD_PARAM = "fixedGrad";
+
+//-----------------------------------------------------------------------
+//   constructor
+//-----------------------------------------------------------------------
 
 periodicBCModel::periodicBCModel
 
@@ -61,6 +73,7 @@ periodicBCModel::periodicBCModel
   {
     gradName_ = "P";
     mode_ = LOAD;
+    NOT_IMPLEMENTED
   }
   else
     throw jem::IllegalInputException("Unknown mode");

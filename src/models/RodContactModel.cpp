@@ -1,15 +1,13 @@
 /**
  * @file RodContactModel.cpp
  * @author Til Gärtner
- * @brief implementation of contact model for rods
- *
- *
+ * @brief Implementation of RodContactModel class
  */
 
 #include "models/RodContactModel.h"
-#include <jem/base/ClassTemplate.h>
-
 #include "utils/testing.h"
+
+#include <jem/base/ClassTemplate.h>
 
 using jem::SliceTo;
 
@@ -22,6 +20,7 @@ JEM_DEFINE_CLASS(RodContactModel);
 //-----------------------------------------------------------------------
 //   static data
 //-----------------------------------------------------------------------
+
 const char *RodContactModel::TYPE_NAME = "RodContact";
 const char *RodContactModel::PENALTY_PROP = "penalty";
 const char *RodContactModel::PENALTY_NTS_PROP = "penaltyNTS";
