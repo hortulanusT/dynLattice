@@ -57,8 +57,8 @@ namespace jive_helpers
   /**
    * @brief gets the gradient of a multivariate function.
    *
-   * @param func function of which to evaluat the gradient
-   * @param args point to evaluat the gradient
+   * @param func function of which to evaluate the gradient
+   * @param args point to evaluate the gradient
    * @returns gradient
    */
   Vector funcGrad(const Ref<Function> func, const Vector &args);
@@ -67,7 +67,7 @@ namespace jive_helpers
    * @brief evaluates an array of multivariate functions.
    *
    * @param funcs array of functions to evaluate
-   * @param args point to evaluat at
+   * @param args point to evaluate at
    * @returns results of the evaluation
    */
   Vector evalFuncs(const FuncUtils::FuncArray funcs, const Vector &args);
@@ -75,8 +75,8 @@ namespace jive_helpers
   /**
    * @brief gets the Hessian of a multivariate function.
    *
-   * @param func function of which to evaluat the Hessian
-   * @param args point to evaluat the Hessian
+   * @param func function of which to evaluate the Hessian
+   * @param args point to evaluate the Hessian
    * @returns Hessian
    */
   Matrix funcHessian(const Ref<Function> func, const Vector &args);
@@ -84,8 +84,8 @@ namespace jive_helpers
   /**
    * @brief gets the gradients of an array of multivariate functions.
    *
-   * @param funcs array of functions of which to evaluat the gradient
-   * @param args point to evaluat the gradient
+   * @param funcs array of functions of which to evaluate the gradient
+   * @param args point to evaluate the gradient
    * @returns Matrix of the gradients
    */
   Matrix gradFuncs(const FuncUtils::FuncArray funcs, const Vector &args);
