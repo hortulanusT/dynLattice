@@ -1,6 +1,9 @@
 # Rod-based Lattice Simulations
 This repository contains JEM/JIVE code to simulate lattices undergoing high strain-rate dynamic deformation based on nonlinear beam elements. It also contains some test files to verify the correctness of the implementation.
+
 The documentation for JEM/JIVE, on which most of the classes used in this project are based, can be found [here](https://jive-manual.dynaflow.com/index.html).
+
+**📋 [Test Documentation](tests/TestDocumentation.md)** - Comprehensive guide to validation test cases and scientific verification methods.
 
 ## Requirements
 - **Apptainer**
