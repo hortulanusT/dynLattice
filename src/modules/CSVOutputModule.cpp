@@ -1,9 +1,7 @@
 /**
- * @file CSVOutputModule.h
+ * @file CSVOutputModule.cpp
  * @author Til Gärtner
- * @brief Module to enable the Standard Output Module to Output CSV Files
- *
- *
+ * @brief Implementation of CSVOutputModule class
  */
 
 #include <jem/base/ClassTemplate.h>
@@ -11,11 +9,11 @@
 #include "misc/CSVDataPrinter.h"
 #include "modules/CSVOutputModule.h"
 
-JEM_DEFINE_CLASS(CSVOutputModule);
-
 //=======================================================================
 //   class CSVOutputModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(CSVOutputModule);
 
 //-----------------------------------------------------------------------
 //   static data

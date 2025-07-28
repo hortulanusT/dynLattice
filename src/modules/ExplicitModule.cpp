@@ -1,12 +1,24 @@
 
+/**
+ * @file ExplicitModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of ExplicitModule class
+ */
+
 #include "modules/ExplicitModule.h"
 #include "utils/testing.h"
+
+#include <jem/base/ClassTemplate.h>
 
 //=======================================================================
 //   class ExplicitModule
 //=======================================================================
 
 JEM_DEFINE_CLASS(ExplicitModule);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";

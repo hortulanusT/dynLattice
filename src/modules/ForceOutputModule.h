@@ -1,15 +1,14 @@
 /**
  * @file ForceOutputModule.h
  * @author Til Gärtner
- * @brief Simple Module to write the force vectors to some Output file
- *
- *
+ * @brief Module for writing force vectors to output files
  */
 
 #pragma once
 
 #include <jem/base/Array.h>
 #include <jem/base/CString.h>
+#include <jem/base/Class.h>
 #include <jem/io/FileWriter.h>
 #include <jem/io/GzipFileWriter.h>
 #include <jem/io/PrintWriter.h>
@@ -55,68 +54,98 @@ using jive::util::Assignable;
 using jive::util::DofSpace;
 using jive::util::FuncUtils;
 
+/// @brief Module for outputting internal, external, and gyroscopic forces
+/// @details Writes force vectors to output files during simulation for post-processing
+/// and analysis. Supports selective output of internal forces, external forces,
+/// and gyroscopic forces with configurable sampling conditions.
 class ForceOutputModule : public Module
 {
 public:
   JEM_DECLARE_CLASS(ForceOutputModule, Module);
 
-  static const char *TYPE_NAME;
-  static const char *INT_PROP;
-  static const char *EXT_PROP;
-  static const char *GYRO_PROP;
-  static const char *NODE_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME; ///< Module type name
+  static const char *INT_PROP;  ///< Internal force output property
+  static const char *EXT_PROP;  ///< External force output property
+  static const char *GYRO_PROP; ///< Gyroscopic force output property
+  static const char *NODE_PROP; ///< Node set property
+  /// @}
 
-  explicit ForceOutputModule
+  /// @brief Constructor
+  /// @param name Module name
+  explicit ForceOutputModule(const String &name = "ForceOutput");
 
-      (const String &name = "ForceOutput");
+  /// @brief Initialize the module
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Module status
+  virtual Status init(const Properties &conf,
+                      const Properties &props,
+                      const Properties &globdat) override;
 
-  virtual Status init
+  /// @brief Run the force output operation
+  /// @param globdat Global data container
+  /// @return Module status
+  virtual Status run(const Properties &globdat) override;
 
-      (const Properties &conf,
-       const Properties &props,
-       const Properties &globdat) override;
+  /// @brief Shutdown the module and close output files
+  /// @param globdat Global data container
+  virtual void shutdown(const Properties &globdat) override;
 
-  virtual Status run
+  /// @brief Factory method for creating new ForceOutputModule instances
+  /// @param name Module name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Reference to new ForceOutputModule instance
+  static Ref<Module> makeNew(const String &name,
+                             const Properties &conf,
+                             const Properties &props,
+                             const Properties &globdat);
 
-      (const Properties &globdat) override;
-
-  virtual void shutdown
-
-      (const Properties &globdat) override;
-
-  static Ref<Module> makeNew
-
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
-
+  /// @brief Register ForceOutputModule type with ModuleFactory
   static void declare();
 
 protected:
+  /// @brief Protected destructor
   virtual ~ForceOutputModule();
 
 private:
-  void writeHeader_
+  /// @brief Write file header with column names
+  /// @param time Include time column flag
+  void writeHeader_(const bool time = false);
 
-      (const bool time = false);
-
-  void writeLine_
-
-      (const Vector &data,
-       const idx_t step,
-       const String type,
-       const double time = -1.) const;
+  /// @brief Write data line to output file
+  /// @param data Force data vector
+  /// @param step Time step number
+  /// @param type Force type identifier
+  /// @param time Current simulation time
+  void writeLine_(const Vector &data,
+                  const idx_t step,
+                  const String type,
+                  const double time = -1.) const;
 
 private:
-  Ref<DofSpace> dofs_;
-  Ref<Model> model_;
-  IdxVector dofsOut_;
-  bool intOut_;
-  bool extOut_;
-  bool gyroOut_;
+  /// @name System components
+  /// @{
+  Ref<DofSpace> dofs_; ///< Degree of freedom space
+  Ref<Model> model_;   ///< Root of the model tree
+  /// @}
 
-  bool started_;
-  Ref<PrintWriter> output_;
-  Ref<Function> sampleCond_;
+  /// @name Output configuration
+  /// @{
+  IdxVector dofsOut_; ///< DOF indices for output
+  bool intOut_;       ///< Output internal forces flag
+  bool extOut_;       ///< Output external forces flag
+  bool gyroOut_;      ///< Output gyroscopic forces flag
+  /// @}
+
+  /// @name Output management
+  /// @{
+  bool started_;             ///< Output started flag
+  Ref<PrintWriter> output_;  ///< Output writer
+  Ref<Function> sampleCond_; ///< Sampling condition function
+  /// @}
 };

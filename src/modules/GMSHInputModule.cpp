@@ -1,13 +1,21 @@
-// Possible Issues:
-// - Conversion of node numbering between GMSH and JIVE
-//
+/**
+ * @file GMSHInputModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of GMSHInputModule class
+ *
+ * Note: Possible issues with node numbering conversion between GMSH and JIVE
+ */
 
 #include "GMSHInputModule.h"
 #include "utils/testing.h"
 
+#include <jem/base/ClassTemplate.h>
+
 //=======================================================================
 //   class GMSHInputModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(GMSHInputModule);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -130,8 +138,7 @@ Module::Status GMSHInputModule::init
   }
   else
   {
-    // NOT_IMPLEMENTED
-    // LATER Leon's function
+    NOT_IMPLEMENTED
   }
 
   if (myProps.find(saveMsh, SAVE_MSH))

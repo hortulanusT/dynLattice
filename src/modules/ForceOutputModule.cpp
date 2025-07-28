@@ -1,12 +1,18 @@
+/**
+ * @file ForceOutputModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of ForceOutputModule class
+ */
+
 #include "modules/ForceOutputModule.h"
 #include <filesystem>
 #include <jem/base/ClassTemplate.h>
 
-JEM_DEFINE_CLASS(ForceOutputModule);
-
 //=======================================================================
 //   class ForceOutputModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(ForceOutputModule);
 
 //-----------------------------------------------------------------------
 //   static data

@@ -1,10 +1,11 @@
 /**
- * @file TangentOutputModule.h
+ * @file TangentOutputModule.cpp
  * @author Til Gärtner
- * @brief Module, that calculates the tangent linear elastic equivalent
- * properties for the material
+ * @brief Implementation of tangent elastic property calculation module
  *
- *
+ * Computes effective elastic properties of heterogeneous materials using
+ * periodic boundary conditions and either finite differences or matrix
+ * condensation. Performs homogenization analysis for multi-scale modeling.
  */
 
 #include "modules/TangentOutputModule.h"

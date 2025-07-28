@@ -1,11 +1,11 @@
-/*
- *  Copyright (C) 2015 TU Delft. All rights reserved.
+/**
+ * @file PBCGroupInputModule.cpp
+ * @author Frans van der Meer
+ * @brief Implementation of periodic boundary condition node group generator
  *
- *  Frans van der Meer, January 2015
- *
- *  Module to generate default NodeGroups for periodic boundary conditions
- *  It basically runs the GroupInputModule with some predefined input
- *
+ * Automatically creates node groups for periodic boundary conditions by
+ * analyzing domain geometry and identifying boundary nodes on faces, edges,
+ * and corners. Extends GroupInputModule with predefined PBC configurations.
  */
 
 #include <jem/base/Error.h>

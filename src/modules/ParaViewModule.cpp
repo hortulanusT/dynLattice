@@ -1,3 +1,14 @@
+/**
+ * @file ParaViewModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of ParaView export module
+ *
+ * This module implements functionality to export finite element simulation
+ * results to VTK/VTU format files for visualization in ParaView. It handles
+ * mesh data, displacement fields, and other simulation results with support
+ * for time series output and multiple element groups.
+ */
+
 #include "ParaViewModule.h"
 #include "utils/testing.h"
 

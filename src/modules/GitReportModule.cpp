@@ -1,16 +1,22 @@
 /**
  * @file GitReportModule.cpp
  * @author Til Gärtner
- * @brief see GitReportModule.h
- *
- *
+ * @brief Implementation of GitReportModule class
  */
 
 #include "modules/GitReportModule.h"
 
 #include <jem/base/ClassTemplate.h>
 
+//=======================================================================
+//   class GitReportModule
+//=======================================================================
+
 JEM_DEFINE_CLASS(GitReportModule);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *GitReportModule::TYPE_NAME = "GitReport";
 

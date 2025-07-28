@@ -1,15 +1,17 @@
 /**
  * @file AdaptiveStepModule.h
  * @author Til Gärtner
- * @brief class that implements adaptive time stepping with a NonlinModule for adapting to explicit plasicity stepping
+ * @author Frans P. van der Meer
+ * @brief Adaptive time stepping module for nonlinear analysis with plasticity
  *
- *
- * Heaviliy influence by the module of the same name by F.P. van der Meer
- *
+ * This module implements adaptive time stepping with a NonlinModule for
+ * adapting to explicit plasticity stepping.
  */
 
 #pragma once
+
 #include <cmath>
+#include <jem/base/Class.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/StringObject.h>
 #include <jem/util/Properties.h>
@@ -49,89 +51,125 @@ using jive::util::Globdat;
 //   class AdaptiveStepModule
 //-----------------------------------------------------------------------
 
+/// @brief Module for adaptive time stepping in nonlinear analysis
+/// @details Implements adaptive time step control by monitoring convergence behavior
+/// and adjusting load increments automatically. Particularly useful for problems
+/// with plasticity where step size needs to adapt to material nonlinearity.
 class AdaptiveStepModule : public SolverModule
 {
 public:
   JEM_DECLARE_CLASS(AdaptiveStepModule, SolverModule);
 
-  static const char *TYPE_NAME;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME; ///< Module type name
+  /// @}
 
-  explicit AdaptiveStepModule
+  /// @brief Constructor with optional nonlinear solver
+  /// @param name Module name
+  /// @param solver Nonlinear solver module
+  explicit AdaptiveStepModule(const String &name = "AdaptiveStep",
+                              Ref<NonlinModule> solver = nullptr);
 
-      (const String &name = "AdaptiveStep",
-       Ref<NonlinModule> solver = nullptr);
+  /// @brief Initialize the module
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Module status
+  virtual Status init(const Properties &conf,
+                      const Properties &props,
+                      const Properties &globdat) override;
 
-  virtual Status init
+  /// @brief Configure the module from properties
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  virtual void configure(const Properties &props,
+                         const Properties &globdat) override;
 
-      (const Properties &conf,
-       const Properties &props,
-       const Properties &globdat) override;
+  /// @brief Get current module configuration
+  /// @param props Actually used configuration properties (output)
+  /// @param globdat Global data container
+  virtual void getConfig(const Properties &props,
+                         const Properties &globdat) const override;
 
-  virtual void configure
+  /// @brief Advance to next time step
+  /// @param globdat Global data container
+  virtual void advance(const Properties &globdat) override;
 
-      (const Properties &props,
-       const Properties &globdat) override;
+  /// @brief Solve the current step with adaptive control
+  /// @param info Solver information
+  /// @param globdat Global data container
+  virtual void solve(const Properties &info,
+                     const Properties &globdat) override;
 
-  virtual void getConfig
+  /// @brief Cancel current solution attempt
+  /// @param globdat Global data container
+  virtual void cancel(const Properties &globdat) override;
 
-      (const Properties &props,
-       const Properties &globdat) const override;
+  /// @brief Commit current solution
+  /// @param globdat Global data container
+  /// @return true if commit was successful
+  virtual bool commit(const Properties &globdat) override;
 
-  virtual void advance
+  /// @brief Set convergence precision
+  /// @param eps Convergence tolerance
+  virtual inline void setPrecision(double eps) override;
 
-      (const Properties &globdat) override;
-
-  virtual void solve
-
-      (const Properties &info,
-       const Properties &globdat) override;
-
-  virtual void cancel
-
-      (const Properties &globdat) override;
-
-  virtual bool commit
-
-      (const Properties &globdat) override;
-
-  virtual inline void setPrecision
-
-      (double eps) override;
-
+  /// @brief Get current convergence precision
+  /// @return Current convergence tolerance
   virtual inline double getPrecision() const override;
 
-  static Ref<Module> makeNew
+  /// @brief Factory method for creating new AdaptiveStepModule instances
+  /// @param name Module name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Reference to new AdaptiveStepModule instance
+  static Ref<Module> makeNew(const String &name,
+                             const Properties &conf,
+                             const Properties &props,
+                             const Properties &globdat);
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
-
+  /// @brief Register AdaptiveStepModule type with ModuleFactory
   static void declare();
 
 protected:
+  /// @brief Protected destructor
   virtual ~AdaptiveStepModule();
 
 private:
-  Ref<NonlinModule> solver_;
-  Ref<Model> model_;
-  Ref<DofSpace> dofs_;
+  /// @name Solver components
+  /// @{
+  Ref<NonlinModule> solver_; ///< Nonlinear solver module
+  Ref<Model> model_;         ///< Root of the model tree
+  Ref<DofSpace> dofs_;       ///< Degree of freedom space
+  /// @}
 
-  double oldLoadScale_;
-  double loadScale_;
-  double incr_;
-  double minIncr_;
-  double maxIncr_;
-  double incrFact_;
-  double decrFact_;
+  /// @name Load control parameters
+  /// @{
+  double oldLoadScale_; ///< Previous load scale factor
+  double loadScale_;    ///< Current load scale factor
+  double incr_;         ///< Current load increment
+  double minIncr_;      ///< Minimum allowed increment
+  double maxIncr_;      ///< Maximum allowed increment
+  double incrFact_;     ///< Increment increase factor
+  double decrFact_;     ///< Increment decrease factor
+  /// @}
 };
 
 //-----------------------------------------------------------------------
 //   inline definitions
 //-----------------------------------------------------------------------
+
+/// @brief Set convergence precision for the underlying solver
+/// @param eps Convergence tolerance
 void AdaptiveStepModule::setPrecision(double eps)
 {
   solver_->setPrecision(eps);
 }
 
+/// @brief Get current convergence precision from the underlying solver
+/// @return Current convergence tolerance
 double AdaptiveStepModule::getPrecision() const
 {
   return solver_->getPrecision();

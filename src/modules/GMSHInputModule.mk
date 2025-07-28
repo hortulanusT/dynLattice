@@ -1,5 +1,7 @@
 #######################################################################
-##   Adding GMSH Library                                             ##
+##   GMSHInputModule build configuration                             ##
+##   Author: Til Gärtner                                             ##
+##   Purpose: Add GMSH library dependencies for mesh import          ##
 #######################################################################
 MY_INCDIRS	+= $(GMSHDIR)/include
 MY_LIBDIRS	+= $(GMSHDIR)/lib
