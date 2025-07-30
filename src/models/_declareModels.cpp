@@ -18,9 +18,9 @@ void declareModels()
   jive::implict ::declareModels();
 
   // Declare dynLattice-specific models
-  specialCosseratRodModel::declare(); // Geometrically nonlinear rod elements
-  hingeModel::declare();              // Rigid hinge joints
-  periodicBCModel::declare();         // Periodic boundary conditions
+  SpecialCosseratRodModel::declare(); // Geometrically nonlinear rod elements
+  HingeModel::declare();              // Rigid hinge joints
+  PeriodicBCModel::declare();         // Periodic boundary conditions
   FollowerLoadModel::declare();       // Direction-dependent loading
   DirichletModel::declare();          // Displacement boundary conditions
   NeumannModel::declare();            // Force boundary conditions

@@ -305,7 +305,7 @@ void ParaViewModule::writePiece_
      const Assignable<ElementGroup> &group, const Vector &disp,
      const Vector &velo, const Vector &acce, const Ref<DofSpace> &dofs,
      const Ref<Model> &model, const Properties &globdat,
-     const elInfo &info)
+     const ElementInfo &info)
 
 {
   globdat.set(PropNames::LOAD_CASE, "output");

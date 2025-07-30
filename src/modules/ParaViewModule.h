@@ -113,7 +113,7 @@ protected:
   /// @brief Structure containing element group export information
   /// @details Stores configuration for each element group to be exported,
   /// including shape information and data field specifications
-  struct elInfo
+  struct ElementInfo
   {
     String name;           ///< Name of the element group
     String shape;          ///< Element shape identifier
@@ -213,7 +213,7 @@ private:
                    const Assignable<ElementGroup> &group, const Vector &disp,
                    const Vector &velo, const Vector &acce, const Ref<DofSpace> &dofs,
                    const Ref<Model> &model, const Properties &globdat,
-                   const elInfo &info);
+                   const ElementInfo &info);
 
   /// @brief Write data array from matrix
   /// @param file Output file writer
@@ -247,12 +247,12 @@ private:
 private:
   /// @name Configuration parameters
   /// @{
-  String nameFormat_;        ///< Output file name format string
-  String fileType_;          ///< Output file type (e.g., "vtu")
-  StringVector elemSets_;    ///< Names of element groups to export
-  Array<elInfo> setInfo_;    ///< Configuration for each element group
-  Ref<Function> sampleCond_; ///< Condition function for output sampling
-  Ref<Function> sampleInfo_; ///< Information function for sampling
+  String nameFormat_;          ///< Output file name format string
+  String fileType_;            ///< Output file type (e.g., "vtu")
+  StringVector elemSets_;      ///< Names of element groups to export
+  Array<ElementInfo> setInfo_; ///< Configuration for each element group
+  Ref<Function> sampleCond_;   ///< Condition function for output sampling
+  Ref<Function> sampleInfo_;   ///< Information function for sampling
   /// @}
 
   /// @name Output tracking

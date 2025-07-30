@@ -56,14 +56,14 @@ using jive_helpers::IdxVectorMatrix;
 using jive_helpers::vec2mat;
 
 //-----------------------------------------------------------------------
-//   class periodicBCModel
+//   class PeriodicBCModel
 //-----------------------------------------------------------------------
 
 /**
- * @class periodicBCModel
+ * @class PeriodicBCModel
  * @brief Model for applying periodic boundary conditions on rectangular unit cells
  *
- * The periodicBCModel implements periodic boundary conditions specifically
+ * The PeriodicBCModel implements periodic boundary conditions specifically
  * designed for rectangular unit cells. It supports multiple operation modes
  * including load control, displacement control, and gradient updates.
  *
@@ -76,7 +76,7 @@ using jive_helpers::vec2mat;
  *
  * @note Only works for rectangular unit cells
  */
-class periodicBCModel : public Model
+class PeriodicBCModel : public Model
 {
 public:
   /// @name Property identifiers
@@ -89,7 +89,7 @@ public:
   static const char *FIXEDGRAD_PARAM; ///< Fixed gradient parameter
   /// @}
 
-  JEM_DECLARE_CLASS(periodicBCModel, Model);
+  JEM_DECLARE_CLASS(PeriodicBCModel, Model);
 
   /// @brief Operation modes
   enum Mode
@@ -104,7 +104,7 @@ public:
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties
   /// @param globdat Global data container
-  explicit periodicBCModel(const String &name,
+  explicit PeriodicBCModel(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
@@ -118,7 +118,7 @@ public:
                           const Properties &params,
                           const Properties &globdat) override;
 
-  /// @brief Create new periodicBCModel instance
+  /// @brief Create new PeriodicBCModel instance
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties

@@ -239,7 +239,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains = strains0;
       applStrains[iPBC] += dir * .5 * perturb_;
 
-      globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
+      globdat.set(PeriodicBCModel::FIXEDGRAD_PARAM, applStrains);
 
       try
       {
@@ -256,7 +256,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       strains[iPBC] += dir * pertubStrains;
       stresses[iPBC] += dir * pertubStresses;
 
-      globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
+      globdat.erase(PeriodicBCModel::FIXEDGRAD_PARAM);
       solver_->cancel(globdat);
     }
     System::info() << " > > > Results from strainig along " << iPBC << " direction:\n";

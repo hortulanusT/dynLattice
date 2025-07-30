@@ -14,7 +14,7 @@
 
 #include "misc/Line3D.h"
 #include "models/LatticeModel.h"
-#include "models/specialCosseratRodModel.h"
+#include "models/SpecialCosseratRodModel.h"
 #include <jem/base/Array.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>

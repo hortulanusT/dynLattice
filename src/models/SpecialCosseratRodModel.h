@@ -89,14 +89,14 @@ using jive_helpers::unskew;
 using jive_helpers::vec2mat;
 
 //-----------------------------------------------------------------------
-//   class specialCosseratRodModel
+//   class SpecialCosseratRodModel
 //-----------------------------------------------------------------------
 
 /**
- * @class specialCosseratRodModel
+ * @class SpecialCosseratRodModel
  * @brief Special Cosserat rod finite element model with geometrically exact kinematics
  *
- * The specialCosseratRodModel implements a geometrically exact rod formulation
+ * The SpecialCosseratRodModel implements a geometrically exact rod formulation
  * based on the Cosserat theory (Simo-Reissner rod). It features 6 DOF per node
  * (3 translational + 3 rotational) and supports large deformations, rotations,
  * and complex material behavior including plasticity.
@@ -117,7 +117,7 @@ using jive_helpers::vec2mat;
  * @see [Antman (2005)](https://doi.org/10.1007/0-387-27649-1)
  * @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
  */
-class specialCosseratRodModel : public Model
+class SpecialCosseratRodModel : public Model
 {
 public:
   /// @name Property identifiers
@@ -143,14 +143,14 @@ public:
   static const Slice ROT_PART;        ///< Rotational DOF slice
   /// @}
 
-  JEM_DECLARE_CLASS(specialCosseratRodModel, Model);
+  JEM_DECLARE_CLASS(SpecialCosseratRodModel, Model);
 
   /// @brief Constructor
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties
   /// @param globdat Global data container
-  explicit specialCosseratRodModel(const String &name,
+  explicit SpecialCosseratRodModel(const String &name,
                                    const Properties &conf,
                                    const Properties &props,
                                    const Properties &globdat);
@@ -164,7 +164,7 @@ public:
                           const Properties &params,
                           const Properties &globdat) override;
 
-  /// @brief Create new specialCosseratRodModel instance
+  /// @brief Create new SpecialCosseratRodModel instance
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties

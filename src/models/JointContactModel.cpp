@@ -149,11 +149,11 @@ bool JointContactModel::takeAction
 
     if (name == "F_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::TRANS_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::TRANS_PART]);
     }
     else if (name == "M_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::ROT_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::ROT_PART]);
     }
     else
     {

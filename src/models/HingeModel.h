@@ -29,7 +29,7 @@
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 
-#include "models/specialCosseratRodModel.h"
+#include "models/SpecialCosseratRodModel.h"
 #include "utils/helpers.h"
 #include "utils/testing.h"
 
@@ -57,9 +57,9 @@ typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
 /// @brief Model for plastic hinges connecting multiple Cosserat rod elements
 /// @details Implements plastic hinge behavior for geometrically nonlinear rod elements.
-/// Should be used with specialCosseratRodModel to create joints between rods with
+/// Should be used with SpecialCosseratRodModel to create joints between rods with
 /// yield condition evaluation and plastic constraint enforcement.
-class hingeModel : public Model
+class HingeModel : public Model
 {
 public:
   /// @name Property identifiers
@@ -68,14 +68,14 @@ public:
   static const char *YIELD_PROP; ///< Yield condition property
   /// @}
 
-  JEM_DECLARE_CLASS(hingeModel, Model);
+  JEM_DECLARE_CLASS(HingeModel, Model);
 
   /// @brief Constructor with configuration and properties
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties
   /// @param globdat Global data container
-  explicit hingeModel
+  explicit HingeModel
 
       (const String &name,
        const Properties &conf,
@@ -93,12 +93,12 @@ public:
        const Properties &params,
        const Properties &globdat);
 
-  /// @brief Factory method for creating new hingeModel instances
+  /// @brief Factory method for creating new HingeModel instances
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)
   /// @param props User-specified model properties
   /// @param globdat Global data container
-  /// @return Reference to new hingeModel instance
+  /// @return Reference to new HingeModel instance
   static Ref<Model> makeNew
 
       (const String &name,
@@ -106,7 +106,7 @@ public:
        const Properties &props,
        const Properties &globdat);
 
-  /// @brief Register hingeModel type with ModelFactory
+  /// @brief Register HingeModel type with ModelFactory
   static void declare();
 
 private:

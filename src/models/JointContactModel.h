@@ -8,7 +8,7 @@
 
 #include <jem/base/Class.h>
 
-#include "models/specialCosseratRodModel.h"
+#include "models/SpecialCosseratRodModel.h"
 #include <jem/base/ClassTemplate.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>

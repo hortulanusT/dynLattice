@@ -21,9 +21,9 @@
 #include "models/NeumannModel.h"
 #include "models/PeriodicBCModel.h"
 #include "models/RodContactModel.h"
+#include "models/SpecialCosseratRodModel.h"
 #include "models/SpringMassModel.h"
 #include "models/SymBCModel.h"
-#include "models/specialCosseratRodModel.h"
 
 //-----------------------------------------------------------------------
 //   declareModels

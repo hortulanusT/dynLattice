@@ -1,13 +1,13 @@
 /**
- * @file specialCosseratRodModel.cpp
+ * @file SpecialCosseratRodModel.cpp
  * @author Til Gärtner
- * @brief Implementation of specialCosseratRodModel class
+ * @brief Implementation of SpecialCosseratRodModel class
  *
  * Implementation of the special Cosserat rod finite element model with
  * geometrically exact kinematics.
  */
 
-#include "specialCosseratRodModel.h"
+#include "models/SpecialCosseratRodModel.h"
 
 #include <jem/base/ClassTemplate.h>
 #include <math.h>
@@ -15,36 +15,36 @@
 using jem::newInstance;
 
 //=======================================================================
-//   class specialCosseratRodModel
+//   class SpecialCosseratRodModel
 //=======================================================================
 
-JEM_DEFINE_CLASS(specialCosseratRodModel);
+JEM_DEFINE_CLASS(SpecialCosseratRodModel);
 
 //-----------------------------------------------------------------------
 //   static data
 //-----------------------------------------------------------------------
 
-const char *specialCosseratRodModel::TYPE_NAME = "specialCosseratRod";
-const char *specialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
-const char *specialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
-const char *specialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
-const char *specialCosseratRodModel::ROT_DOF_NAMES = "dofNamesRot";
-const char *specialCosseratRodModel::SYMMETRIC_ONLY = "symmetric_tanget_stiffness";
-const char *specialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
-const char *specialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
-const char *specialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
-const char *specialCosseratRodModel::LUMPED_MASS = "lumpedMass";
-const char *specialCosseratRodModel::HINGES = "hinges";
-const idx_t specialCosseratRodModel::TRANS_DOF_COUNT = 3;
-const idx_t specialCosseratRodModel::ROT_DOF_COUNT = 3;
-const Slice specialCosseratRodModel::TRANS_PART = jem::SliceFromTo(0, TRANS_DOF_COUNT);
-const Slice specialCosseratRodModel::ROT_PART = jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
+const char *SpecialCosseratRodModel::TYPE_NAME = "specialCosseratRod";
+const char *SpecialCosseratRodModel::TRANS_DOF_DEFAULT = "trans_";
+const char *SpecialCosseratRodModel::ROT_DOF_DEFAULT = "rot_";
+const char *SpecialCosseratRodModel::TRANS_DOF_NAMES = "dofNamesTrans";
+const char *SpecialCosseratRodModel::ROT_DOF_NAMES = "dofNamesRot";
+const char *SpecialCosseratRodModel::SYMMETRIC_ONLY = "symmetric_tanget_stiffness";
+const char *SpecialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
+const char *SpecialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
+const char *SpecialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
+const char *SpecialCosseratRodModel::LUMPED_MASS = "lumpedMass";
+const char *SpecialCosseratRodModel::HINGES = "hinges";
+const idx_t SpecialCosseratRodModel::TRANS_DOF_COUNT = 3;
+const idx_t SpecialCosseratRodModel::ROT_DOF_COUNT = 3;
+const Slice SpecialCosseratRodModel::TRANS_PART = jem::SliceFromTo(0, TRANS_DOF_COUNT);
+const Slice SpecialCosseratRodModel::ROT_PART = jem::SliceFromTo(TRANS_DOF_COUNT, TRANS_DOF_COUNT + ROT_DOF_COUNT);
 
 //-----------------------------------------------------------------------
 //   constructor
 //-----------------------------------------------------------------------
 
-specialCosseratRodModel::specialCosseratRodModel
+SpecialCosseratRodModel::SpecialCosseratRodModel
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
@@ -193,7 +193,7 @@ specialCosseratRodModel::specialCosseratRodModel
 
 // Performs an action requested by a module or a parent model.
 
-bool specialCosseratRodModel::takeAction
+bool SpecialCosseratRodModel::takeAction
 
     (const String &action, const Properties &params,
      const Properties &globdat)
@@ -401,7 +401,7 @@ bool specialCosseratRodModel::takeAction
 //-----------------------------------------------------------------------
 //   get_mat_table_ (plastic version)
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::get_mat_table_
+void SpecialCosseratRodModel::get_mat_table_
 
     (XTable &mat_table, const Vector &weights, const String &name)
 {
@@ -425,7 +425,7 @@ void specialCosseratRodModel::get_mat_table_
 //-----------------------------------------------------------------------
 //   get_strain_table_
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::get_strain_table_
+void SpecialCosseratRodModel::get_strain_table_
 
     (XTable &strain_table, const Vector &weights, const Vector &disp,
      const bool mat_vals)
@@ -479,7 +479,7 @@ void specialCosseratRodModel::get_strain_table_
 //-----------------------------------------------------------------------
 //   get_stress_table_
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::get_stress_table_
+void SpecialCosseratRodModel::get_stress_table_
 
     (XTable &stress_table, const Vector &weights, const Vector &disp,
      const bool mat_vals)
@@ -533,7 +533,7 @@ void specialCosseratRodModel::get_stress_table_
 //-----------------------------------------------------------------------
 //  init_strain_
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::init_strain_()
+void SpecialCosseratRodModel::init_strain_()
 {
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
@@ -571,7 +571,7 @@ void specialCosseratRodModel::init_strain_()
 //-----------------------------------------------------------------------
 //   init_rot_
 //-----------------------------------------------------------------------
-void specialCosseratRodModel::init_rot_()
+void SpecialCosseratRodModel::init_rot_()
 {
   const idx_t nodeCount = rodElems_.getNodeIndices().size();
   const idx_t elemCount = rodElems_.size();
@@ -657,7 +657,7 @@ void specialCosseratRodModel::init_rot_()
   }
 }
 
-void specialCosseratRodModel::get_geomStiff_(const Cubix &B,
+void SpecialCosseratRodModel::get_geomStiff_(const Cubix &B,
                                              const Matrix &stresses,
                                              const Matrix &nodePhi_0,
                                              const Matrix &nodeU) const
@@ -691,7 +691,7 @@ void specialCosseratRodModel::get_geomStiff_(const Cubix &B,
   }
 }
 
-void specialCosseratRodModel::get_strains_(
+void SpecialCosseratRodModel::get_strains_(
     const Matrix &strains, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
     const bool spatial) const
@@ -743,7 +743,7 @@ void specialCosseratRodModel::get_strains_(
   // TEST_CONTEXT(strains)
 }
 
-void specialCosseratRodModel::get_stresses_(
+void SpecialCosseratRodModel::get_stresses_(
     const Matrix &stresses, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
     const bool spatial, const String &loadCase) const
@@ -770,7 +770,7 @@ void specialCosseratRodModel::get_stresses_(
   }
 }
 
-void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
+void SpecialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
                                          const Matrix &nodeU,
                                          const Cubix &nodeLambda,
                                          const Vector &disp,
@@ -797,7 +797,7 @@ void specialCosseratRodModel::get_disps_(const Matrix &nodePhi_0,
   }
 }
 
-void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
+void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &fint,
                                         const Vector &disp,
                                         const String &loadCase) const
@@ -896,7 +896,7 @@ void specialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   }
 }
 
-void specialCosseratRodModel::assemble_(const Vector &fint,
+void SpecialCosseratRodModel::assemble_(const Vector &fint,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
@@ -948,7 +948,7 @@ void specialCosseratRodModel::assemble_(const Vector &fint,
   }
 }
 
-void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
+void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
                                             const Vector &velo,
                                             const Ref<AbstractMatrix> mass) const
 {
@@ -966,7 +966,7 @@ void specialCosseratRodModel::assembleGyro_(const Vector &fgyro,
   }
 }
 
-void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
+void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
 {
   // REPORT(JEM_FUNC)
   MatmulChain<double, 3> mc3;
@@ -1030,7 +1030,7 @@ void specialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   }
 }
 
-void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
+void SpecialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
@@ -1071,7 +1071,7 @@ void specialCosseratRodModel::calc_pot_Energy_(XTable &energy_table, const Vecto
   }
 }
 
-double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
+double SpecialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
@@ -1113,7 +1113,7 @@ double specialCosseratRodModel::calc_pot_Energy_(const Vector &disp) const
   return E_pot;
 }
 
-void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
+void SpecialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
@@ -1154,7 +1154,7 @@ void specialCosseratRodModel::calc_diss_Energy_(XTable &energy_table, const Vect
   }
 }
 
-double specialCosseratRodModel::calc_diss_Energy_(const Vector &disp) const
+double SpecialCosseratRodModel::calc_diss_Energy_(const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
@@ -1200,22 +1200,22 @@ double specialCosseratRodModel::calc_diss_Energy_(const Vector &disp) const
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Model> specialCosseratRodModel::makeNew
+Ref<Model> SpecialCosseratRodModel::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 
 {
-  return newInstance<specialCosseratRodModel>(name, conf, props, globdat);
+  return newInstance<SpecialCosseratRodModel>(name, conf, props, globdat);
 }
 
 //-----------------------------------------------------------------------
-//   declarespecialCosseratRodModel
+//   declareSpecialCosseratRodModel
 //-----------------------------------------------------------------------
 
-// Registers the specialCosseratRodModel class with the ModelFactory.
+// Registers the SpecialCosseratRodModel class with the ModelFactory.
 
-void specialCosseratRodModel::declare()
+void SpecialCosseratRodModel::declare()
 {
   using jive::model::ModelFactory;
 
