@@ -129,14 +129,14 @@ Module::Status ParaViewModule::init
 
   // write the pvd file
   idx_t format_pos = nameFormat_.rfind("%i");
-  pvd_print_ = format_pos > 0;
-  pvd_time_buffer_.resize(0);
-  pvd_name_buffer_.resize(0);
-  if (pvd_print_)
-    pvd_name_ = nameFormat_[SliceTo(format_pos)] +
-                nameFormat_[SliceFrom(format_pos + 2)] + ".pvd";
+  pvdPrint_ = format_pos > 0;
+  pvdTimeBuffer_.resize(0);
+  pvdNameBuffer_.resize(0);
+  if (pvdPrint_)
+    pvdName_ = nameFormat_[SliceTo(format_pos)] +
+               nameFormat_[SliceFrom(format_pos + 2)] + ".pvd";
 
-  out_num_ = 0;
+  outNum_ = 0;
 
   return OK;
 }
@@ -168,7 +168,7 @@ Module::Status ParaViewModule::run
   {
     myVars.set("oldSampleInfo", sampleInfo);
     // get the current timeStep and format the given format accordingly
-    currentFile = String::format(makeCString(nameFormat_).addr(), out_num_++);
+    currentFile = String::format(makeCString(nameFormat_).addr(), outNum_++);
     currentFile = currentFile + "." + fileType_;
     writeFile_(currentFile, globdat);
 
@@ -179,12 +179,12 @@ Module::Status ParaViewModule::run
     folder_sep =
         currentFile.rfind(std::filesystem::path::preferred_separator) + 1;
 
-    if (pvd_print_)
+    if (pvdPrint_)
     {
-      pvd_time_buffer_.pushBack(currentTime);
-      pvd_name_buffer_.pushBack(currentFile[SliceFrom(folder_sep)]);
+      pvdTimeBuffer_.pushBack(currentTime);
+      pvdNameBuffer_.pushBack(currentFile[SliceFrom(folder_sep)]);
 
-      Ref<Writer> pvd_raw = newInstance<FileWriter>(pvd_name_);
+      Ref<Writer> pvd_raw = newInstance<FileWriter>(pvdName_);
       Ref<PrintWriter> pvd_printer = newInstance<PrintWriter>(pvd_raw);
 
       *pvd_printer << "<?xml version=\"1.0\"?>" << endl;
@@ -197,12 +197,12 @@ Module::Status ParaViewModule::run
       pvd_printer->flush();
 
       // LATER write different part files for the different parts
-      for (idx_t i_out = 0; i_out < out_num_; i_out++)
+      for (idx_t i_out = 0; i_out < outNum_; i_out++)
       {
         *pvd_printer << "<DataSet ";
-        *pvd_printer << "timestep=\"" << pvd_time_buffer_[i_out] << "\" ";
+        *pvd_printer << "timestep=\"" << pvdTimeBuffer_[i_out] << "\" ";
         *pvd_printer << "group=\"\" part=\"0\" ";
-        *pvd_printer << "file=\"" << pvd_name_buffer_[i_out] << "\" ";
+        *pvd_printer << "file=\"" << pvdNameBuffer_[i_out] << "\" ";
         *pvd_printer << "/>" << endl;
         pvd_printer->flush();
       }

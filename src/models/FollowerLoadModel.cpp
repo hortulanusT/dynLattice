@@ -45,14 +45,14 @@ FollowerLoadModel::FollowerLoadModel
   myProps.get(nameGroup_, NODES_PROP);
   myConf.set(NODES_PROP, nameGroup_);
 
-  myProps.get(org_dir_, START_PROP);
-  myConf.set(START_PROP, org_dir_);
+  myProps.get(orgDir_, START_PROP);
+  myConf.set(START_PROP, orgDir_);
 
-  myProps.get(force_dofs_, DOF_PROP);
-  myConf.set(DOF_PROP, force_dofs_);
+  myProps.get(forceDOFs_, DOF_PROP);
+  myConf.set(DOF_PROP, forceDOFs_);
 
-  myProps.get(rot_dofs_, ROT_DOF_PROP);
-  myConf.set(ROT_DOF_PROP, rot_dofs_);
+  myProps.get(rotDOFs_, ROT_DOF_PROP);
+  myConf.set(ROT_DOF_PROP, rotDOFs_);
 }
 
 //-----------------------------------------------------------------------
@@ -70,16 +70,16 @@ bool FollowerLoadModel::takeAction
     group_ = NodeGroup::get(nameGroup_, nodes_, globdat, getContext());
     dofs_ = DofSpace::get(nodes_.getData(), globdat, getContext());
 
-    idofs_f_.resize(force_dofs_.size());
-    idofs_r_.resize(rot_dofs_.size());
-    rot_Mats_.resize(force_dofs_.size(), force_dofs_.size(), group_.size());
+    iForceDOFs_.resize(forceDOFs_.size());
+    iRotDOFs_.resize(rotDOFs_.size());
+    rotMats_.resize(forceDOFs_.size(), forceDOFs_.size(), group_.size());
 
-    for (idx_t i = 0; i < idofs_f_.size(); i++)
-      idofs_f_[i] = dofs_->getTypeIndex(force_dofs_[i]);
-    for (idx_t i = 0; i < idofs_r_.size(); i++)
-      idofs_r_[i] = dofs_->getTypeIndex(rot_dofs_[i]);
+    for (idx_t i = 0; i < iForceDOFs_.size(); i++)
+      iForceDOFs_[i] = dofs_->getTypeIndex(forceDOFs_[i]);
+    for (idx_t i = 0; i < iRotDOFs_.size(); i++)
+      iRotDOFs_[i] = dofs_->getTypeIndex(rotDOFs_[i]);
     for (idx_t i = 0; i < group_.size(); i++)
-      rot_Mats_[i] = eye();
+      rotMats_[i] = eye();
 
     return true;
   }
@@ -124,18 +124,18 @@ void FollowerLoadModel::get_ext_vec_(const Vector &fext,
                                      const Properties &globdat) const
 {
   IdxVector inodes(group_.size());
-  IdxVector if_dofs(idofs_f_.size());
+  IdxVector if_dofs(iForceDOFs_.size());
 
-  Matrix Lambda(idofs_f_.size(), idofs_f_.size());
+  Matrix Lambda(iForceDOFs_.size(), iForceDOFs_.size());
 
   // get the node group indices
   inodes = group_.getIndices();
 
   for (idx_t inode = 0; inode < inodes.size(); inode++)
   {
-    dofs_->getDofIndices(if_dofs, inodes[inode], idofs_f_);
+    dofs_->getDofIndices(if_dofs, inodes[inode], iForceDOFs_);
 
-    fext[if_dofs] += scale * matmul(rot_Mats_[inode], org_dir_);
+    fext[if_dofs] += scale * matmul(rotMats_[inode], orgDir_);
   }
 }
 
@@ -145,9 +145,9 @@ void FollowerLoadModel::get_ext_vec_(const Vector &fext,
 void FollowerLoadModel::advance_rots_(const Vector &d) const
 {
   IdxVector inodes(group_.size());
-  IdxVector ir_dofs(idofs_r_.size());
+  IdxVector ir_dofs(iRotDOFs_.size());
 
-  Matrix Lambda(idofs_f_.size(), idofs_f_.size());
+  Matrix Lambda(iForceDOFs_.size(), iForceDOFs_.size());
 
   // get the node group indices
   inodes = group_.getIndices();
@@ -155,12 +155,12 @@ void FollowerLoadModel::advance_rots_(const Vector &d) const
   // update the rotations
   for (idx_t inode = 0; inode < inodes.size(); inode++)
   {
-    dofs_->getDofIndices(ir_dofs, inodes[inode], idofs_r_);
+    dofs_->getDofIndices(ir_dofs, inodes[inode], iRotDOFs_);
 
     // TEST_CONTEXT(d[ir_dofs])
-    expVec(rot_Mats_[inode], (Vector)d[ir_dofs]);
+    expVec(rotMats_[inode], (Vector)d[ir_dofs]);
   }
-  // TEST_CONTEXT(rot_Mats_)
+  // TEST_CONTEXT(rotMats_)
 }
 
 //-----------------------------------------------------------------------

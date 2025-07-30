@@ -257,10 +257,10 @@ private:
 
   /// @name Output tracking
   /// @{
-  idx_t out_num_;                       ///< Current output file number
-  bool pvd_print_;                      ///< Flag for PVD collection file generation
-  String pvd_name_;                     ///< Name of PVD collection file
-  ArrayBuffer<double> pvd_time_buffer_; ///< Time values for PVD collection
-  ArrayBuffer<String> pvd_name_buffer_; ///< File names for PVD collection
+  idx_t outNum_;                      ///< Current output file number
+  bool pvdPrint_;                     ///< Flag for PVD collection file generation
+  String pvdName_;                    ///< Name of PVD collection file
+  ArrayBuffer<double> pvdTimeBuffer_; ///< Time values for PVD collection
+  ArrayBuffer<String> pvdNameBuffer_; ///< File names for PVD collection
   /// @}
 };

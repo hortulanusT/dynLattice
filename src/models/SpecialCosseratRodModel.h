@@ -218,18 +218,18 @@ private:
   /// @param mat_vals flag for the material frame of reference
   /// @note If mat_vals is true, the strain values are in the material frame of
   /// reference, otherwise in the spatial frame of reference
-  void get_strain_table_(XTable &strain_table,
-                         const Vector &weights,
-                         const Vector &disp,
-                         const bool mat_vals = false);
+  void getStrainTable_(XTable &strain_table,
+                       const Vector &weights,
+                       const Vector &disp,
+                       const bool mat_vals = false);
 
   /// @brief Fill table with material/plastic strain values per element
   /// @param mat_table Output material table
   /// @param weights Table weights
   /// @param name Table name
-  void get_mat_table_(XTable &mat_table,
-                      const Vector &weights,
-                      const String &name);
+  void getMaterialTable_(XTable &mat_table,
+                         const Vector &weights,
+                         const String &name);
 
   /// @brief Fill table with stress values per element
   /// @param stress_table Output stress table
@@ -238,26 +238,26 @@ private:
   /// @param mat_vals flag for the material frame of reference
   /// @note If mat_vals is true, the strain values are in the material frame of
   /// reference, otherwise in the spatial frame of reference
-  void get_stress_table_(XTable &stress_table,
-                         const Vector &weights,
-                         const Vector &disp,
-                         const bool mat_vals = false);
+  void getStressTable_(XTable &stress_table,
+                       const Vector &weights,
+                       const Vector &disp,
+                       const bool mat_vals = false);
 
   /// @brief Initialize rotation of elements
-  void init_rot_();
+  void initRotation_();
 
   /// @brief Initialize initial strain of elements
-  void init_strain_();
+  void initStrain_();
 
   /// @brief Get the geometric stiffness matrix
   /// @param B B-matrix at integration points
   /// @param stresses Spatial stress components at integration points
   /// @param nodePhi_0 Location of the nodes
   /// @param nodeU Translational displacement of nodes
-  void get_geomStiff_(const Cubix &B,
-                      const Matrix &stresses,
-                      const Matrix &nodePhi_0,
-                      const Matrix &nodeU) const;
+  void getGeomtericStiffness_(const Cubix &B,
+                              const Matrix &stresses,
+                              const Matrix &nodePhi_0,
+                              const Matrix &nodeU) const;
 
   /// @brief Get the strains in the integration points of an element
   /// @param strains Strain components at integration points
@@ -267,13 +267,13 @@ private:
   /// @param nodeLambda Rotational orientation of nodes
   /// @param ie Element index
   /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
-  void get_strains_(const Matrix &strains,
-                    const Vector &w,
-                    const Matrix &nodePhi_0,
-                    const Matrix &nodeU,
-                    const Cubix &nodeLambda,
-                    const idx_t ie,
-                    const bool spatial = true) const;
+  void getStrains_(const Matrix &strains,
+                   const Vector &w,
+                   const Matrix &nodePhi_0,
+                   const Matrix &nodeU,
+                   const Cubix &nodeLambda,
+                   const idx_t ie,
+                   const bool spatial = true) const;
 
   /// @brief Get the stresses in the integration points of an element
   /// @param stresses Stress components at integration points
@@ -284,14 +284,14 @@ private:
   /// @param ie Element index
   /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
   /// @param loadCase Load case identifier
-  void get_stresses_(const Matrix &stresses,
-                     const Vector &w,
-                     const Matrix &nodePhi_0,
-                     const Matrix &nodeU,
-                     const Cubix &nodeLambda,
-                     const idx_t ie,
-                     const bool spatial = true,
-                     const String &loadCase = "") const;
+  void getStresses_(const Matrix &stresses,
+                    const Vector &w,
+                    const Matrix &nodePhi_0,
+                    const Matrix &nodeU,
+                    const Cubix &nodeLambda,
+                    const idx_t ie,
+                    const bool spatial = true,
+                    const String &loadCase = "") const;
 
   /// @brief Format the displacements nicely
   /// @param nodePhi_0 Node positions
@@ -299,37 +299,37 @@ private:
   /// @param nodeLambda Node rotations
   /// @param disp Displacement vector
   /// @param inodes Node indices
-  void get_disps_(const Matrix &nodePhi_0,
-                  const Matrix &nodeU,
-                  const Cubix &nodeLambda,
-                  const Vector &disp,
-                  const IdxVector &inodes) const;
+  void getDisplacments_(const Matrix &nodePhi_0,
+                        const Matrix &nodeU,
+                        const Cubix &nodeLambda,
+                        const Vector &disp,
+                        const IdxVector &inodes) const;
 
   /// @brief Calculate potential energy of the rod
   /// @param disp Displacement vector
   /// @return Potential energy value
-  double calc_pot_Energy_(const Vector &disp) const;
+  double getPotentialEnergy_(const Vector &disp) const;
 
   /// @brief Calculate potential energy and fill table
   /// @param energy_table Output energy table
   /// @param table_weights Table weights
   /// @param disp Displacement vector
-  void calc_pot_Energy_(XTable &energy_table,
-                        const Vector &table_weights,
-                        const Vector &disp) const;
+  void getPotentialEnergy_(XTable &energy_table,
+                           const Vector &table_weights,
+                           const Vector &disp) const;
 
   /// @brief Calculate dissipated energy of the material
   /// @param disp Displacement vector
   /// @return Dissipated energy value
-  double calc_diss_Energy_(const Vector &disp) const;
+  double getDissipatedEnergy_(const Vector &disp) const;
 
   /// @brief Calculate dissipated energy and fill table
   /// @param energy_table Output energy table
   /// @param table_weights Table weights
   /// @param disp Displacement vector
-  void calc_diss_Energy_(XTable &energy_table,
-                         const Vector &table_weights,
-                         const Vector &disp) const;
+  void getDissipatedEnergy_(XTable &energy_table,
+                            const Vector &table_weights,
+                            const Vector &disp) const;
 
 private:
   Assignable<ElementGroup> rodElems_; ///< Rod element group
@@ -343,17 +343,17 @@ private:
   Ref<Material> material_; ///< Material model
   Ref<Model> hinges_;      ///< Hinge model
 
-  IdxVector trans_types_; ///< Translational DOF types
-  IdxVector rot_types_;   ///< Rotational DOF types
-  IdxVector jtypes_;      ///< Joint DOF types
+  IdxVector transTypes_; ///< Translational DOF types
+  IdxVector rotTypes_;   ///< Rotational DOF types
+  IdxVector jtypes_;     ///< Joint DOF types
 
-  bool symmetric_only_; ///< Symmetric tangent stiffness flag
+  bool symOnly_;        ///< Symmetric tangent stiffness flag
   Vector thickFact_;    ///< Thickening factors
-  Vector material_ey_;  ///< Material y-direction
+  Vector materialYDir_; ///< Material y-direction
 
   IdxVector givenNodes_; ///< Nodes with given directions
   Matrix givenDirs_;     ///< Given directions for nodes
 
-  Cubix LambdaN_;     ///< Reference rotations per node
-  Cubix mat_strain0_; ///< Initial strain configuration
+  Cubix LambdaN_;    ///< Reference rotations per node
+  Cubix matStrain0_; ///< Initial strain configuration
 };

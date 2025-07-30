@@ -122,15 +122,15 @@ private:
 
   /// @name DOF management
   /// @{
-  StringVector force_dofs_; ///< Force DOF type names
-  IdxVector idofs_f_;       ///< Force DOF type indices
-  StringVector rot_dofs_;   ///< Rotational DOF type names
-  IdxVector idofs_r_;       ///< Rotational DOF type indices
+  StringVector forceDOFs_; ///< Force DOF type names
+  IdxVector iForceDOFs_;   ///< Force DOF type indices
+  StringVector rotDOFs_;   ///< Rotational DOF type names
+  IdxVector iRotDOFs_;     ///< Rotational DOF type indices
   /// @}
 
   /// @name Load parameters
   /// @{
-  Vector org_dir_; ///< Original force direction vector
-  Cubix rot_Mats_; ///< Rotation matrices for each node
+  Vector orgDir_; ///< Original force direction vector
+  Cubix rotMats_; ///< Rotation matrices for each node
   /// @}
 };

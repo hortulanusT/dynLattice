@@ -178,10 +178,10 @@ protected:
 
   /// @brief Update mass matrix
   /// @param globdat Global data container
-  void updMass(const Properties &globdat);
+  void updateMass_(const Properties &globdat);
 
-  /// @brief Invalidate current state
-  void invalidate();
+  /// @brief invalidate_ current state
+  void invalidate_();
 
   /// @brief Adams-Bashforth 2-step update
   /// @param delta_y Displacement increment
@@ -261,7 +261,7 @@ protected:
   /// @{
   Ref<Function> updCond_; ///< Update condition function
   Vector massInv_;        ///< Inverse mass matrix
-  IdxVector SO3_dofs_;    ///< SO(3) DOF type indices
+  IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping
   /// @}
 

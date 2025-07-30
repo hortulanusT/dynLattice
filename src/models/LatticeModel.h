@@ -100,24 +100,24 @@ public:
   /// @brief Calculate total kinetic energy of the lattice
   /// @param globdat Global data container
   /// @return Total kinetic energy
-  double calc_kin_Energy_(const Properties &globdat) const;
+  double getKineticEnergy(const Properties &globdat) const;
 
   /// @brief Calculate kinetic energy and store in table
   /// @param energy_table Output energy table
   /// @param table_weights Table weights
   /// @param globdat Global data container
-  void calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
+  void getKineticEnergy(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
 
   /// @brief Calculate total mass of the lattice
   /// @param globdat Global data container
   /// @return Total mass
-  double calc_mass_(const Properties &globdat) const;
+  double getMass(const Properties &globdat) const;
 
   /// @brief Calculate mass and store in table
   /// @param mass_table Output mass table
   /// @param table_weights Table weights
   /// @param globdat Global data container
-  void calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
+  void getMass(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
 
   /// @brief Factory method for creating new LatticeModel instances
   /// @param name Model name
