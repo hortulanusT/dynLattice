@@ -23,8 +23,8 @@ try:
   ref_conv = [8*np.pi, .425e2, .441e-13]
 
   plt.figure(figsize=(16/3, 6))
-  plt.semilogy(sim_conv, 'x', label="custom_implementation")
-  plt.semilogy(ref_conv, '+', label="Simo/Vu-Quoc")
+  plt.semilogy(sim_conv, 'x', label="custom implementation")
+  plt.semilogy(ref_conv, '+', label="Simo, Vu-Quoc (1986)")
   plt.legend()
   plt.xlabel("iteration")
   plt.ylabel("normed residual")
@@ -43,5 +43,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/beam/test1/result.pdf")
+  plt.savefig("tests/beam1_result.png")
 else:
   print(colored("STATIC TEST 1 FAILED", "red", attrs=["bold"]))

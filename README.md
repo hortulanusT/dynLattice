@@ -3,7 +3,7 @@ This repository contains JEM/JIVE code to simulate lattices undergoing high stra
 
 The documentation for JEM/JIVE, on which most of the classes used in this project are based, can be found [here](https://jive-manual.dynaflow.com/index.html).
 
-**📋 [Test Documentation](tests/TestDocumentation.md)** - Comprehensive guide to validation test cases and scientific verification methods.
+**📋 [Benchmarks](tests/Benchmarks.md)** - List of all the numerical benchmarks implemented as test cases for this repository. These are provided as an example for how to use the code.
 
 ## Requirements
 - **Apptainer**

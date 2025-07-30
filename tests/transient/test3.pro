@@ -31,7 +31,6 @@ include "output.pro";
 // more settings
 Input.input.order = 2;
 
-Input.input.out_file="$(CASE_NAME)/visual.msh";
 Input.groupInput.fixed.ytype = "max";
 Input.groupInput.free.ytype = "min";
 Input.groupInput.nodeGroups += "elbow";

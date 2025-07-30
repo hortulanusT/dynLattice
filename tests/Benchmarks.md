@@ -1,18 +1,17 @@
-# Test Documentation {#tests}
+# Benchmarks {#benchmarks}
 
 ## Overview
 
-This page provides comprehensive documentation for the scientific validation test cases in the dynLattice project. These tests validate the physical correctness and numerical accuracy of the rod-based lattice simulation implementation.
+This page provides comprehensive documentation for the benchmark cases in the dynLattice project. These tests compare the implementation with the results from literature or ensure the correctness of the implementation in other ways.
 
 ## Test Categories
 
 The test suite is organized into scientific categories, each targeting specific physical phenomena:
 
-- [Element Tests](element/ElementTests.md) - Single element validation against analytical solutions
-- [Beam Tests](beam/BeamTests.md) - Static beam network validation  
-- [Transient Tests](transient/TransientTests.md) - Dynamic response validation
-- [Plastic Tests](plastic/PlasticTests.md) - Inelastic material validation
-- [Contact Tests](contact/ContactTests.md) - Contact mechanics validation
+- [Beam Benchmarks](BeamBenchmarks.md) - Static, elastic beam benchmarks  
+- [Transient Benchmarks](TransientBenchmarks.md) - Dynamic beam benchmarks
+- [Plastic Benchmarks](PlasticBenchmarks.md) - Inelastic material benchmarks
+- [Contact Benchmarks](ContactBenchmarks.md) - Contact benchmarks
 
 ## Test Execution
 
@@ -20,7 +19,6 @@ Execute tests using the Makefile system:
 
 ```bash
 make tests              # Run all tests
-make element-tests      # Single element validation
 make beam-tests         # Static beam networks
 make transient-tests    # Dynamic simulations
 make plastic-tests      # Inelastic materials  

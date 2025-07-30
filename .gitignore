@@ -4,9 +4,8 @@ bin/
 doc/
 
 # results
-tests/element/runs/
-tests/element/*.txt
 tests/*/test*/
+tests/*.png
 
 # save the folder structure
 !.gitkeep

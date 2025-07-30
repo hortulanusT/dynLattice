@@ -22,22 +22,22 @@ ellbow = disp[["dx[1]", "dy[1]", "dz[1]"]]
 tip = disp[["dx[2]", "dy[2]", "dz[2]"]]
 
 with PdfPages("tests/transient/test3/result.pdf") as file:
-  plt.plot(ellbow["dz[1]"], label="ellbow")
+  plt.plot(ellbow["dz[1]"], label="ellbow (custom implementation)")
   plt.plot(ref_disp["Ellbow"]["X"],
            ref_disp["Ellbow"]["Y"],
            "--",
-           label="ellbow (Simo et al. 1988)")
-  plt.plot(tip["dz[2]"], label="tip")
+           label="ellbow (Simo, Vu-Quoc 1988)")
+  plt.plot(tip["dz[2]"], label="tip (custom implementation)")
   plt.plot(ref_disp["Tip"]["X"],
            ref_disp["Tip"]["Y"],
            "--",
-           label="tip (Simo et al. 1988)")
+           label="tip (Simo, Vu-Quoc 1988)")
   plt.xlim(0, 30)
   plt.ylim(-10, 10)
   plt.legend()
   plt.tight_layout()
-
   file.savefig()
+  plt.savefig("tests/transient3_result.png")
   plt.clf()
 
   plt.plot(energy["E_tot"], label="total")

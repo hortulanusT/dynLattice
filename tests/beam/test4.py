@@ -21,9 +21,9 @@ try:
   plt.plot(-1*sim_disp[:, 1], -1*sim_resp[:, 1],
            label="vertical (custom implementation)")
   plt.plot(ref_data_vertical[:, 0], ref_data_vertical[:, 1]
-           * 1e3, ":", label="vertical (Simo/Vu-Quoc)")
+           * 1e3, ":", label="vertical (Simo, Vu-Quoc (1986))")
   plt.plot(ref_data_horizontal[:, 0], ref_data_horizontal[:, 1]
-           * 1e3, ":", label="horizontal (Simo/Vu-Quoc)")
+           * 1e3, ":", label="horizontal (Simo, Vu-Quoc (1986))")
   plt.legend()
   plt.xlabel("displacment [m]")
   plt.ylabel("load [N]")
@@ -38,5 +38,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/beam/test4/result.pdf")
+  plt.savefig("tests/beam4_result.png")
 else:
   print(colored("STATIC TEST 4 FAILED", "red", attrs=["bold"]))

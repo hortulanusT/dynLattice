@@ -21,9 +21,9 @@ try:
   plt.plot(sim_resp[:, -1]/1e3, -1*sim_disp[:, 1],
            label="horizontal (custom implementation)")
   plt.plot(ref_data_vertical[:, 0], ref_data_vertical[:,
-           1], ":", label="vertical (Simo/Vu-Quoc)")
+           1], ":", label="vertical (Simo, Vu-Quoc (1986))")
   plt.plot(ref_data_horizontal[:, 0], ref_data_horizontal[:,
-           1], ":", label="horizontal (Simo/Vu-Quoc)")
+           1], ":", label="horizontal (Simo, Vu-Quoc (1986))")
   plt.legend()
   plt.xlabel("Tip Load [kN]")
   plt.ylabel("Displacement [m] ")
@@ -40,5 +40,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/beam/test2/result.pdf")
+  plt.savefig("tests/beam2_result.png")
 else:
   print(colored("STATIC TEST 2 FAILED", "red", attrs=["bold"]))

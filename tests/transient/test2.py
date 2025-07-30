@@ -17,7 +17,7 @@ data.columns = pd.MultiIndex.from_tuples([
         int(name[name.find("[") + 1:name.find("]")])
     ]) for name in data.columns
 ],
-                                         names=["dof", "node"])
+    names=["dof", "node"])
 
 dx = data.xs("dx", axis=1, level="dof")
 dz = data.xs("dz", axis=1, level="dof")
@@ -39,7 +39,7 @@ for time in ref_data.columns.unique(0):
   t_ref = ref_data.loc[:, time]
   t_ref['dist'] = t_ref[['X', 'Y']].apply(lambda row: np.linalg.norm(
       (row.X, row.Y)),
-                                          axis=1)
+      axis=1)
   t_ref.sort_values('dist', ignore_index=True, inplace=True)
 
   t_val = float(time[1:])
@@ -53,16 +53,18 @@ for time in ref_data.columns.unique(0):
     dz.loc[t_val] = np.nan
     dz = dz.sort_index().interpolate()
 
-  plt.plot(t_ref["X"], t_ref["Y"], label=time + " ref")
+  plt.plot(t_ref["X"], t_ref["Y"], label="t = " +
+           time[1:] + " (Lang et al. 2011)")
   plt.plot(dx.loc[t_val] + 1 /
            (len(dx.columns) - 1) * dx.columns.unique(),
            dz.loc[t_val],
            "--",
-           label=time + " sim")
+           label="t = " + time[1:] + " (custom implementation)")
 
-plt.legend()
+plt.legend(ncol=2)
 plt.tight_layout()
 plt.savefig("tests/transient/test2/result.pdf")
+plt.savefig("tests/transient2_result.png")
 
 if max(data.index) > 0.9:
   print(colored("TRANSIENT TEST 2 RUN THROUGH", "green"))

@@ -44,8 +44,8 @@ else:
 
 if test_passed:
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
-    plt.plot(BC_ref[:, 0], BC_ref[:, 1], label="Simo et al. 1988")
-    plt.plot(t, psi, "--", label="Simulation")
+    plt.plot(BC_ref[:, 0], BC_ref[:, 1], label="Simo, Vu-Quoc 1988")
+    plt.plot(t, psi, "--", label="custom implementation")
     plt.legend(loc="upper left")
     plt.xlabel("time [s]")
     plt.ylabel("rotation [rad]")
@@ -55,8 +55,8 @@ if test_passed:
     pdf.savefig()
     plt.close()
 
-    plt.plot(angle_ref[:, 0], angle_ref[:, 1], label="Simo et al. 1988")
-    plt.plot(t, dev_rz, "--", label="orientation of the tip")
+    plt.plot(angle_ref[:, 0], angle_ref[:, 1], label="Simo, Vu-Quoc 1988")
+    plt.plot(t, dev_rz, "--", label="custom implementation")
     plt.legend(loc="upper right")
     plt.xlabel("time [s]")
     plt.ylabel("rotational deviation [deg]")
@@ -64,10 +64,11 @@ if test_passed:
     plt.axhline(alpha=0.5, c="k", lw=0.5)
     plt.tight_layout()
     pdf.savefig()
+    plt.savefig("tests/transient1_resultA.png")
     plt.close()
 
-    plt.plot(u1_ref[:, 0], u1_ref[:, 1], label="Simo et al. 1988")
-    plt.plot(t, dev_u1, "--", label="Simulation")
+    plt.plot(u1_ref[:, 0], u1_ref[:, 1], label="Simo, Vu-Quoc 1988")
+    plt.plot(t, dev_u1, "--", label="custom implementation")
     plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u1 deviation [m]")
@@ -75,10 +76,11 @@ if test_passed:
     plt.axhline(alpha=0.5, c="k", lw=0.5)
     plt.tight_layout()
     pdf.savefig()
+    plt.savefig("tests/transient1_resultB.png")
     plt.close()
 
-    plt.plot(u2_ref[:, 0], u2_ref[:, 1], label="Simo et al. 1988")
-    plt.plot(t, dev_u2, "--", label="Simulation")
+    plt.plot(u2_ref[:, 0], u2_ref[:, 1], label="Simo, Vu-Quoc 1988")
+    plt.plot(t, dev_u2, "--", label="custom implementation")
     plt.legend(loc="lower left")
     plt.xlabel("time [s]")
     plt.ylabel("u2 deviation [m]")
@@ -86,6 +88,7 @@ if test_passed:
     plt.axhline(alpha=0.5, c="k", lw=0.5)
     plt.tight_layout()
     pdf.savefig()
+    plt.savefig("tests/transient1_resultC.png")
     plt.close()
 
   print(colored("TRANSIENT TEST 1 RUN THROUGH", "green"))

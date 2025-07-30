@@ -22,11 +22,11 @@ try:
   plt.plot(sim_resp[:, 2], sim_disp[:, 1], label="u_2 (custom_implementation)")
   plt.plot(sim_resp[:, 2], sim_disp[:, 2], label="u_3 (custom_implementation)")
   plt.plot(ref_data_u1[:, 0], ref_data_u1[:, 1],
-           ":", label="u_1 (Simo/Vu-Quoc)")
+           ":", label="u_1 (Simo, Vu-Quoc (1986))")
   plt.plot(ref_data_u2[:, 0], ref_data_u2[:, 1],
-           ":", label="u_2 (Simo/Vu-Quoc)")
+           ":", label="u_2 (Simo, Vu-Quoc (1986))")
   plt.plot(ref_data_u3[:, 0], ref_data_u3[:, 1],
-           ":", label="u_3 (Simo/Vu-Quoc)")
+           ":", label="u_3 (Simo, Vu-Quoc (1986))")
   plt.legend(loc="upper left")
   plt.xlabel("load [N]")
   plt.ylabel("displacment [m]")
@@ -41,18 +41,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/beam/test5/result.pdf")
+  plt.savefig("tests/beam5_result.png")
 else:
   print(colored("STATIC TEST 5 FAILED", "red", attrs=["bold"]))
-
-
-all_data = np.concatenate((sim_resp[:, 2:3], sim_disp[:, [0, 1, 2]]), axis=1)
-np.savetxt("tests/beam/test5/beam_test5_data.csv",
-           all_data, delimiter=",", header="load,u1,u2,u3", comments='')
-
-ref_data = np.empty((60, 6))
-ref_data[:, :] = np.nan
-ref_data[:, [0, 1]] = ref_data_u1
-ref_data[0:48, [2, 3]] = ref_data_u2
-ref_data[0:51, [4, 5]] = ref_data_u3
-np.savetxt("tests/beam/test5/beam_test5_ref.csv", ref_data,
-           delimiter=",", header="load1,u1,load2,u2,load3,u3", comments='')

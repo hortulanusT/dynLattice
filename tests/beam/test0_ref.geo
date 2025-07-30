@@ -1,1 +1,0 @@
-Include "test0.geo";
