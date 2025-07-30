@@ -25,8 +25,8 @@ try:
   plt.plot(ref_data_horizontal[:, 0], ref_data_horizontal[:,
            1], ":", label="horizontal (Simo, Vu-Quoc (1986))")
   plt.legend()
-  plt.xlabel("Tip Load [kN]")
-  plt.ylabel("Displacement [m] ")
+  plt.xlabel("tip load (kN)")
+  plt.ylabel("displacement (m)")
   plt.xlim([0, 140])
   plt.axhline(y=0, color="grey")
   plt.xlim(left=0)

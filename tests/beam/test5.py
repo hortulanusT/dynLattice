@@ -28,8 +28,8 @@ try:
   plt.plot(ref_data_u3[:, 0], ref_data_u3[:, 1],
            ":", label="u_3 (Simo, Vu-Quoc (1986))")
   plt.legend(loc="upper left")
-  plt.xlabel("load [N]")
-  plt.ylabel("displacment [m]")
+  plt.xlabel("load (N)")
+  plt.ylabel("displacement (m)")
   plt.xlim(left=0, right=3000)
 except Exception as e:
   print(e)

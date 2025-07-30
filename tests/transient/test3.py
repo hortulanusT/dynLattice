@@ -35,6 +35,8 @@ with PdfPages("tests/transient/test3/result.pdf") as file:
   plt.xlim(0, 30)
   plt.ylim(-10, 10)
   plt.legend()
+  plt.xlabel("time (s)")
+  plt.ylabel("out-of-plane displacement (m)")
   plt.tight_layout()
   file.savefig()
   plt.savefig("tests/transient3_result.png")

@@ -1,11 +1,11 @@
 # binary files
-bin/
+bin/*
 # documentation files
-doc/
+doc/*
 
 # results
 tests/*/test*/
 tests/*.png
 
-# save the folder structure
-!.gitkeep
+# save documentation makefile
+!doc/doc.mk

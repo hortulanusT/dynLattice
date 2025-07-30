@@ -54,14 +54,16 @@ for time in ref_data.columns.unique(0):
     dz = dz.sort_index().interpolate()
 
   plt.plot(t_ref["X"], t_ref["Y"], label="t = " +
-           time[1:] + " (Lang et al. 2011)")
+           time[1:] + "s (Lang et al. 2011)")
   plt.plot(dx.loc[t_val] + 1 /
            (len(dx.columns) - 1) * dx.columns.unique(),
            dz.loc[t_val],
            "--",
-           label="t = " + time[1:] + " (custom implementation)")
+           label="t = " + time[1:] + "s (custom implementation)")
 
 plt.legend(ncol=2)
+plt.xticks(None)
+plt.yticks(None)
 plt.tight_layout()
 plt.savefig("tests/transient/test2/result.pdf")
 plt.savefig("tests/transient2_result.png")

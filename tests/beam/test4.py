@@ -25,8 +25,8 @@ try:
   plt.plot(ref_data_horizontal[:, 0], ref_data_horizontal[:, 1]
            * 1e3, ":", label="horizontal (Simo, Vu-Quoc (1986))")
   plt.legend()
-  plt.xlabel("displacment [m]")
-  plt.ylabel("load [N]")
+  plt.xlabel("displacement (m)")
+  plt.ylabel("load (N)")
   plt.xlim(left=0)
 except Exception as e:
   print(e)

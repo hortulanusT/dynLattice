@@ -144,7 +144,7 @@ void LenientNonlinModule::configure
 void LenientNonlinModule::getConfig
 
     (const Properties &conf,
-     const Properties &globdat)
+     const Properties &globdat) const
 
 {
   Super::getConfig(conf, globdat);

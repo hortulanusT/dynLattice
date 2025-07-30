@@ -21,6 +21,9 @@ try:
            ** 2 + sim_resp[:, 2]**2), label="custom implementation")
   plt.plot(ref_disp, label="Zavarise et al. (2000)", linestyle="--")
 
+  plt.xlabel("iteration")
+  plt.ylabel("contact force (N)")
+
   plt.legend()
 except Exception as e:
   print(e)

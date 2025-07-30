@@ -3,6 +3,7 @@
 ## Overview
 
 This page provides comprehensive documentation for the benchmark cases in the dynLattice project. These tests compare the implementation with the results from literature or ensure the correctness of the implementation in other ways.
+For a deeper explanation please refer to the cited publications.
 
 ## Test Categories
 

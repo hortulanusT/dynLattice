@@ -4,6 +4,15 @@ This repository contains JEM/JIVE code to simulate lattices undergoing high stra
 The documentation for JEM/JIVE, on which most of the classes used in this project are based, can be found [here](https://jive-manual.dynaflow.com/index.html).
 
 **📋 [Benchmarks](tests/Benchmarks.md)** - List of all the numerical benchmarks implemented as test cases for this repository. These are provided as an example for how to use the code.
+ 
+
+## Related Publications
+The following publications are using the code in this repository:
+
+- [Geometric effects on impact mitigation in architected auxetic metamaterials](https://doi.org/10.1016/j.mechmat.2024.104952)
+- [A strategy for scaling the hardening behavior in finite element modelling of geometrically exact beams](https://doi.org/10.1007/s00466-024-02572-3)
+- [(In)efficacy of architected auxetic materials for impact mitigation](https://doi.org/10.1016/j.ijimpeng.2025.105402)
+
 
 ## Requirements
 - **Apptainer**
@@ -15,7 +24,7 @@ The documentation for JEM/JIVE, on which most of the classes used in this projec
 To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build jive.sif jive.def`.
 You can subsequently move the `jive.sif` to any location you prefer.
 
-To create an alias for easier executing use `alias jive="apptainer -s exec -e </full/path/to/>jive.sif"`.
+To create an alias for easier executing use `alias jive="apptainer -s exec -e --env DISPLAY=$DISPLAY </full/path/to/>jive.sif"`.
 The test-cases can subsequently be run using `jive make tests`.
 
 ## Organization
@@ -35,8 +44,8 @@ The test-cases can subsequently be run using `jive make tests`.
 │   └── utils           ← utility functions and macros
 └── tests
     ├── testing.mk      ← makefile for testing setup
-    ├── element         ← test setups for single elements
     ├── beam            ← test setups for static beam (networks)
+    ├── contact         ← test setups for contact problems
     ├── transient       ← test setups for dynamic computations
     └── plastic         ← test setups for inelastic beam (networks)
 ```

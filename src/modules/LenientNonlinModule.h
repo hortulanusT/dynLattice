@@ -101,7 +101,7 @@ public:
   /// @param globdat Global data container
   /// @details Delegates to base class configuration retrieval
   virtual void getConfig(const Properties &conf,
-                         const Properties &globdat);
+                         const Properties &globdat) const;
 
 protected:
   /// @brief Protected destructor

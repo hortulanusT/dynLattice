@@ -88,10 +88,8 @@ tests/contact/test%.pro: tests/contact/input.pro tests/contact/output.pro tests/
 
 # CLEAN UP THE TESTS
 clean-tests:
-	@$(RM_R) tests/element/runs
-	@$(RM) tests/element/result_*.txt
-
 	@$(RM_R) tests/beam/test*/	
 	@$(RM_R) tests/transient/test*/
 	@$(RM_R) tests/plastic/test*/
 	@$(RM_R) tests/contact/test*/
+	@$(RM) tests/*.png

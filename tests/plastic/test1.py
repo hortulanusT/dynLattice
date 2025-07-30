@@ -19,8 +19,8 @@ try:
   plt.plot(ref_data[:, 0]*1e-3, ref_data[:, 1],
            ":", label="Smriti et al. (2021)")
   plt.legend(loc="lower right")
-  plt.xlabel("Axial strain")
-  plt.ylabel("Axial load (per yield limit)")
+  plt.xlabel("axial strain")
+  plt.ylabel("axial load (per yield limit)")
   plt.axhline(0, alpha=.2, color="k", lw=.5)
   plt.axhline(1, alpha=.2, color="k", lw=.5)
   plt.axhline(-1, alpha=.2, color="k", lw=.5)
