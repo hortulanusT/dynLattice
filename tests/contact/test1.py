@@ -18,8 +18,8 @@ try:
   plt.figure(figsize=(16/3, 6))
 
   plt.plot(np.sqrt(sim_resp[:, 0]**2 + sim_resp[:, 1]
-           ** 2 + sim_resp[:, 2]**2), label="F_N (sim)")
-  plt.plot(ref_disp, label="F_N (ref)", linestyle="--")
+           ** 2 + sim_resp[:, 2]**2), label="custom implementation")
+  plt.plot(ref_disp, label="Zavarise et al. (2000)", linestyle="--")
 
   plt.legend()
 except Exception as e:
@@ -32,5 +32,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/contact/test1/result.pdf")
+  plt.savefig("tests/contact1_result.png")
 else:
   print(colored("CONTACT TEST 1 FAILED", "red", attrs=["bold"]))
