@@ -38,13 +38,13 @@ try:
 
   for i in range(3):
     axs[0].plot(scale,
-                sim_resp[:, i], label=f"n{i+1} (custom)")
+                sim_resp[:, i], label=f"n{i+1} (custom implementation)")
     axs[0].plot(ref_n[i][:, 0], ref_n[i][:, 1],
-                ":", label=f"n{i+1} (Herrnböck et al.)")
+                ":", label=f"n{i+1} (Herrnböck et al. (2023))")
     axs[1].plot(scale,
-                sim_resp[:, i+3], label=f"m{i+1} (custom)")
+                sim_resp[:, i+3], label=f"m{i+1} (custom implementation)")
     axs[1].plot(ref_m[i][:, 0], ref_m[i][:, 1]*1e-3,
-                ":", label=f"m{i+1} (Herrnböck et al.)")
+                ":", label=f"m{i+1} (Herrnböck et al. (2023))")
   axs[0].legend()
   axs[1].legend()
   axs[0].set_ylabel("n [N]")
@@ -65,5 +65,6 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test3/result.pdf")
+  plt.savefig("tests/plastic3_result.png")
 else:
   print(colored("PLASTIC TEST 3 FAILED", "red", attrs=["bold"]))

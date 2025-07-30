@@ -15,8 +15,9 @@ try:
   ref_data = np.loadtxt("tests/plastic/ref_data/test1_ref.csv", delimiter=',')
 
   plt.figure(figsize=(16/3, 6))
-  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="(custom)")
-  plt.plot(ref_data[:, 0]*1e-3, ref_data[:, 1], ":", label="(Smriti et al.)")
+  plt.plot(sim_disp[:, 1], sim_resp[:, 1]/10, label="custom implementation")
+  plt.plot(ref_data[:, 0]*1e-3, ref_data[:, 1],
+           ":", label="Smriti et al. (2021)")
   plt.legend(loc="lower right")
   plt.xlabel("Axial strain")
   plt.ylabel("Axial load (per yield limit)")
@@ -36,6 +37,8 @@ if test_passed:
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test1/result.pdf")
+  plt.savefig("tests/plastic1_result.png")
+  plt.clf()
 
   energy = pd.read_csv('tests/plastic/test1/energy.csv', skipinitialspace=True)
   disp = pd.read_csv('tests/plastic/test1/disp.csv',
