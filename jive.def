@@ -42,7 +42,8 @@ From: ubuntu
     python3-pip \
     python-is-python3 \
     git \
-    doxygen
+    doxygen \
+    graphviz
   pip install \
     numpy \
     pandas \

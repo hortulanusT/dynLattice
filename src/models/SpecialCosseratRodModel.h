@@ -1,5 +1,5 @@
 /**
- * @file specialCosseratRodModel.h
+ * @file SpecialCosseratRodModel.h
  * @author Til Gärtner
  * @brief Special Cosserat rod model implementation
  *
