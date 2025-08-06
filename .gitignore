@@ -1,11 +1,7 @@
 # binary files
 bin/*
 # documentation files
-doc/*
-
+doc/*/
 # results
 tests/*/test*/
 tests/*.png
-
-# save documentation makefile
-!doc/doc.mk

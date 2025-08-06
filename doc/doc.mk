@@ -5,13 +5,12 @@ clean-all: docs-clean-only
 
 # Generate documentation
 docs: tests
-	doxygen doxygen.conf
+	doxygen doc/doxygen.conf
 
 # Clean and regenerate documentation
-docs-clean: tests
-	@find doc ! -name 'doc*' -exec rm -rf {} \;
-	doxygen doxygen.conf
+docs-clean: tests docs-clean-only
+	doxygen doc/doxygen.conf
 
 # Clean documentation only
 docs-clean-only:
-	@find doc ! -name 'doc*' -exec rm -rf {} \;
+	@rm -rf doc/html
