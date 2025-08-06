@@ -1,4 +1,8 @@
-- name: Open Journals PDF Generator
-
-  uses: openjournals/openjournals-draft-action@v1.0
-  
+name: Generate PDF
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open Journals PDF Generator
+        uses: openjournals/openjournals-draft-action@v1.0
