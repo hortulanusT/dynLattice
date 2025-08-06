@@ -193,7 +193,7 @@ bool JointContactModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    // TODO add contact stiffness to potential energy!!
+    // LATER add contact stiffness to potential energy!!
   }
 
   return false;

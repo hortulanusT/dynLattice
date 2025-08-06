@@ -193,7 +193,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
       load = allLoad[dofIndices];
 
       // Note: Element group processing currently extracts data but doesn't store it
-      // TODO: Add storage of element group aggregated data if needed
+      // LATER: Add storage of element group aggregated data if needed
     }
   }
 
