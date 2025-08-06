@@ -1,20 +1,19 @@
-# Benchmarks {#benchmarks}
+\page benchmark Benchmarks
 
-## Overview
 
 This page provides comprehensive documentation for the benchmark cases in the dynLattice project. These tests compare the implementation with the results from literature or ensure the correctness of the implementation in other ways.
 For a deeper explanation please refer to the cited publications.
 
-## Test Categories
+# Test Categories
 
 The test suite is organized into scientific categories, each targeting specific physical phenomena:
 
-- [Beam Benchmarks](BeamBenchmarks.md) - Static, elastic beam benchmarks  
-- [Transient Benchmarks](TransientBenchmarks.md) - Dynamic beam benchmarks
-- [Plastic Benchmarks](PlasticBenchmarks.md) - Inelastic material benchmarks
-- [Contact Benchmarks](ContactBenchmarks.md) - Contact benchmarks
+- \subpage beambenchmarks - Static, elastic beam benchmarks  
+- \subpage transientbenchmarks - Dynamic beam benchmarks
+- \subpage plasticbenchmarks - Inelastic material benchmarks
+- \subpage contactbenchmarks - Contact benchmarks
 
-## Test Execution
+# Test Execution
 
 Execute tests using the Makefile system:
 
@@ -26,7 +25,7 @@ make plastic-tests      # Inelastic materials
 make contact-tests      # Contact mechanics
 ```
 
-## Test Structure
+# Test Structure
 
 Each test category follows a consistent structure:
 - **Configuration files** (`.pro`) - Test parameters and solver settings
