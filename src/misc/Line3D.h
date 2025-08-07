@@ -9,8 +9,8 @@
 #include "utils/helpers.h"
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
-#include <jive/geom/Shape.h>
 #include <jive/geom/ParametricLine.h>
+#include <jive/geom/Shape.h>
 #include <jive/geom/StdShape.h>
 
 using jem::idx_t;
@@ -30,7 +30,7 @@ using jive_helpers::Quadix;
  * in 3D space. Supports 2, 3, and 4-node line elements with configurable
  * integration schemes and rotational control functions.
  *
- * @section Supported Elements
+ * @section SupportedElements Supported Elements
  * - 2-node linear line (StdLine2)
  * - 3-node quadratic line (StdLine3)
  * - 4-node cubic line (StdLine4)

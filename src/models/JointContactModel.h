@@ -61,8 +61,6 @@ public:
   static const char *VERBOSE_PROP; ///< Verbose output flag
   /// @}
 
-  /// @}
-
   /// @brief Constructor with configuration and properties
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)

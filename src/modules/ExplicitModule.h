@@ -278,10 +278,6 @@ protected:
 //   inline definitions
 //-----------------------------------------------------------------------
 
-/// @brief Adams-Bashforth 2-step update formula
-/// @param delta_y Displacement increment (output)
-/// @param f_cur Current force vector
-/// @param f_old Previous force vector
 inline void ExplicitModule::ABupdate(const Vector &delta_y,
                                      const Vector &f_cur,
                                      const Vector &f_old) const
@@ -289,9 +285,6 @@ inline void ExplicitModule::ABupdate(const Vector &delta_y,
   delta_y = dtime_ / 2. * (3. * f_cur - 1. * f_old);
 }
 
-/// @brief Adams-Bashforth 1-step update formula (explicit Euler)
-/// @param delta_y Displacement increment (output)
-/// @param f_cur Current force vector
 inline void ExplicitModule::ABupdate(const Vector &delta_y,
                                      const Vector &f_cur) const
 {

@@ -52,8 +52,6 @@ public:
   static const char *DOFS_PROP;        ///< DOF type names
   /// @}
 
-  /// @}
-
   /// @brief Constructor with configuration and properties
   /// @param name Model name
   /// @param conf Actually used configuration properties (output)

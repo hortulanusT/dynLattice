@@ -67,6 +67,7 @@ public:
   /// @param strain Input strain vector
   /// @param ielem Element index
   /// @param ip Integration point index
+  /// @param inelastic Whether to compute the inelastic stress update
   /// @see [Computational Inelasticity](https://doi.org/10.1007/b98904) Box 3.6
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
