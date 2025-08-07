@@ -42,6 +42,19 @@ In the present addition to the `JIVE` framework, the _models_ are split into a p
 This separation allows both the easy and user-friendly extension of the frameworks by simple inheritance of the provided classes as well as usability by structuring the inputs needed for the program flow and the problem description.
 [dynLattice]{.sc} additionally uses `GMSH` [@geuzaine09] to mesh the imported geometries efficiently.  
 
+There is a wide plethora of existing finite element toolkits available in the market, such as MOOSE [@moose], FEniCS [@fenics], or deal.II [@dealii], to name just the most prominent ones.
+The usage of these libraries for explicit dynamics with inelastic beams however, would require substantial alteration of their code, as for example in FEniCS explicit dynamics is only available using lumped mass matrices, which would be nonphysical for the rotational inertia contributions of the beams, in deal.II neither beam elements nor explicit solves are available and in MOOSE only a limited Timoshenko-Ehrenfest beam is implemented with only elastic behavior.
+Other finite element toolkits having built in beam-elements and explicit dynamics include Kratos [@kratos; @Dadvand2010] and Akantu [@Richart2024].
+For Kratos similar problems as for MOOSE can be seen in only a limited set of beam elements being available and none supporting inelastic behavior in the cross-sectional strain measures.
+Akantu, focusing on fracture mechanics and providing a solid representation of contact, on the other hand only provides Euler-Bernoulli beam elements, neglecting all shear deformation whithin the elements
+
+# Background
+The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software.
+A more detailed description can be found in [@gärtner_diss]
+
+TODO (~400 words)
+
+# Publications
 [dynLattice]{.sc} has already been used in a series of publications [@gärtner24; @gärtner25; @gärtner_TNO] and laid the foundation for several student theses [@niessen22; @ijzendoorn24; @smit24].
 During these efforts it was used both on big computational clusters [@DHPC2024] and on various local machines using the provided `apptainer`. 
 
