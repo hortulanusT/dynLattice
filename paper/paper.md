@@ -14,6 +14,7 @@ authors:
     dropping-particle: van der
     surname: Meer
     orcid: 0000-0002-6691-1259
+    affiliation: 1
 affiliations:
   - name: Delft University of Technology, The Netherlands
     index: 1
