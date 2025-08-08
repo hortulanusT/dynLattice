@@ -2,7 +2,7 @@
 The transient tests validate the capabilities of the implementation to perform dynamic simulations. These tests verify the assembly of individual elements into complex structural systems and validate the behavior of interconnected rod networks.
 
 # Test Cases
-## Test 1
+\subsection transient1 Test 1
 Test 1 implements Example 5.1 from [Simo, Vu-Quoc (1988)](https://doi.org/10.1016/0045-7825(88)90073-4). This example shows the spin-up of a flexible beam and the subsequent elongation under centrifugal load as well as the fluttering of the tip. The results obtained by the custom implementation agree well with the results reported in literature. 
 
 ![Test 1 results A](transient1_resultA.png)
