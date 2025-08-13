@@ -54,10 +54,10 @@ The following is a short description of the beam kinematics and cross-sectional 
 ![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="70%"}
 
 In \autoref{fig:label}, a beam undergoing large deformation is shown. 
-A beam is described with the centerline $\bm{x}(s)$, where $s\in[s_0,s_1]$ is the measure along the length of the beam, with two orthonormal directors attached to it $\bm{d}_1(s),\bm{d}_2(s)$.
-Together with a third orthonormal director $\bm{d}_3(s)=\bm{d}_1(s)\times\bm{d}_2(s)$, these are the column vectors of the rotation matrix between the global reference frame and the local coordinate frame of the beam:
+A beam is described with the centerline $\mathbf{x}(s)$, where $s\in[s_0,s_1]$ is the measure along the length of the beam, with two orthonormal directors attached to it $\mathbf{d}_1(s),\mathbf{d}_2(s)$.
+Together with a third orthonormal director $\mathbf{d}_3(s)=\mathbf{d}_1(s)\times\mathbf{d}_2(s)$, these are the column vectors of the rotation matrix between the global reference frame and the local coordinate frame of the beam:
 $$
-  \bm{\Lambda}(s)=\bm{d}_i(s)\otimes\bm{e}_i=\begin{bmatrix}\bm{d}_1(s)&\bm{d}_2(s)&\bm{d}_3(s)\end{bmatrix}.
+  \mathbf{\Lambda}(s)=\mathbf{d}_i(s)\otimes\mathbf{e}_i=\begin{bmatrix}\mathbf{d}_1(s)&\mathbf{d}_2(s)&\mathbf{d}_3(s)\end{bmatrix}.
 $$
 From these measures, strain prescriptors, describing stretching, shearing, bending, and twisting of the beam can be derived. 
 These strain prescriptors are then used together with the material model of the beam, be it elastic (cf. [@simo86; @eugster15]) or elasto-plastic (cf. [@smriti20; @herrnböck22; @gärtner25]), to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
