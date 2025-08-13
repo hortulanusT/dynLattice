@@ -1,5 +1,11 @@
 name: Build Docs
-on: [push]
+on:
+  push: 
+    paths:
+      - src/**
+      - doc/**
+      - tests/*.md
+      - .github/workflows/build-docs.yml
 
 jobs:
   paper:

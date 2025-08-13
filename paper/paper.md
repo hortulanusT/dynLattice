@@ -10,9 +10,7 @@ authors:
   - name: Til Gärtner
     orcid: 0000-0002-5088-855X
     affiliation: "1, 2"
-  - names: Frans P.
-    non-dropping-particle: van der
-    surname: Meer
+  - name: Frans P. van der Meer
     orcid: 0000-0002-6691-1259
     affiliation: 1
 affiliations:
@@ -51,7 +49,8 @@ Akantu, focusing on fracture mechanics and providing a solid representation of c
 
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
-![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="70%"}
+
+![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="100%"}
 
 In \autoref{fig:beam}, a beam undergoing large deformation is shown. 
 A beam is described with the centerline $\mathbf{x}(s)$, where $s\in[s_0,s_1]$ is the measure along the length of the beam, with two orthonormal directors attached to it $\mathbf{d}_1(s),\mathbf{d}_2(s)$.
