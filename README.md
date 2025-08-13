@@ -1,5 +1,5 @@
 # Rod-based Lattice Simulations
-This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo/Vu-Quoc](https://dx.doi.org/10.1016/0045-7825(86)90079-4) as well as some documentation.
+This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) as well as some documentation.
 
 ## Requirements
 You can use the code in this repository with the provided Apptainer container. To run the code, you need to have [Apptainer](https://apptainer.org/) installed on your system. The code is built using the `Makefile` in the root directory. Using the provided container, you can build also build the documentation using `<apptainer exec jive.sif> make doc`.
@@ -27,7 +27,7 @@ You can use the code in this repository with the provided Apptainer container. T
 │   ├── main.md           <- Main documentation content
 │   ├── usage.md          <- Usage instructions
 │   └── html/             <- Generated HTML documentation, ignored by git
-├── paper/                <- Research paper and related materials
+├── paper/                <- JOSS paper and related materials
 │   ├── paper.md          <- Main paper content in Markdown
 │   ├── paper.bib         <- Bibliography file
 │   └── beam_concept.pdf  <- Beam concept illustration
