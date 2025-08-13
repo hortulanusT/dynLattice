@@ -14,7 +14,7 @@ params.rod_details.material.type = "ElasticRod";
 params.rod_details.material.cross_section = "circle";
 params.rod_details.material.radius = 5e-3;
 params.rod_details.material.young = 5e6;
-params.rod_details.material.poisson_ratio = 0.5;
+params.rod_details.material.poisson_ratio = 0.4999999;
 params.rod_details.material.shear_correction = 1.;
 params.rod_details.material.density = 1.1e3;
 

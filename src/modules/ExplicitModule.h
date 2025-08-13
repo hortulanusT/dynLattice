@@ -1,8 +1,18 @@
+/**
+ * @file ExplicitModule.h
+ * @author Til Gärtner
+ * @brief Base class for explicit time integration methods
+ *
+ * This module provides the foundation for explicit time integration schemes
+ * with support for rotational degrees of freedom and adaptive time stepping.
+ */
+
 #pragma once
 
 #include "utils/helpers.h"
 #include <jem/base/ArithmeticException.h>
 #include <jem/base/Array.h>
+#include <jem/base/Class.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/System.h>
 #include <jem/base/array/operators.h>
@@ -75,62 +85,80 @@ using jive_helpers::logMat;
 //   class ExplicitModule
 //-----------------------------------------------------------------------
 
+/// @brief Base class for explicit time integration schemes
+/// @details Provides foundation for explicit solvers with support for rotational DOFs,
+/// adaptive time stepping, and both lumped and consistent mass matrices. Handles
+/// special integration of SO(3) rotational degrees of freedom using exponential maps.
 class ExplicitModule : public SolverModule
 {
 public:
+  /// @brief Mass matrix formulation modes
   enum MassMode
   {
-    LUMPED,
-    CONSISTENT
+    LUMPED,    ///< Lumped mass matrix
+    CONSISTENT ///< Consistent mass matrix
   };
 
   JEM_DECLARE_CLASS(ExplicitModule, SolverModule);
 
-  static const char *TYPE_NAME;
-  static const char *STEP_COUNT;
-  static const char *SO3_DOFS;
-  static const char *LEN_SCALE;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;  ///< Module type name
+  static const char *STEP_COUNT; ///< Step count property
+  static const char *SO3_DOFS;   ///< SO(3) DOF types property
+  static const char *LEN_SCALE;  ///< Length scale property
+  /// @}
 
-  virtual Status init
+  /// @brief Initialize the module
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Module status
+  virtual Status init(const Properties &conf,
+                      const Properties &props,
+                      const Properties &globdat) override;
 
-      (const Properties &conf,
-       const Properties &props,
-       const Properties &globdat) override;
+  /// @brief Shutdown the module
+  /// @param globdat Global data container
+  virtual void shutdown(const Properties &globdat);
 
-  virtual void shutdown
+  /// @brief Configure the module from properties
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  virtual void configure(const Properties &props,
+                         const Properties &globdat) override;
 
-      (const Properties &globdat);
+  /// @brief Get current module configuration
+  /// @param props Actually used configuration properties (output)
+  /// @param globdat Global data container
+  virtual void getConfig(const Properties &props,
+                         const Properties &globdat) const override;
 
-  virtual void configure
+  /// @brief Advance to next time step
+  /// @param globdat Global data container
+  virtual void advance(const Properties &globdat) override;
 
-      (const Properties &props, const Properties &globdat) override;
+  /// @brief Solve current time step (pure virtual)
+  /// @param info Solver information
+  /// @param globdat Global data container
+  virtual void solve(const Properties &info,
+                     const Properties &globdat) = 0;
 
-  virtual void getConfig
+  /// @brief Cancel current solution attempt
+  /// @param globdat Global data container
+  virtual void cancel(const Properties &globdat) override;
 
-      (const Properties &props, const Properties &globdat) const override;
+  /// @brief Compute next step size and commit solution
+  /// @param globdat Global data container
+  /// @return true if step can be accepted
+  virtual bool commit(const Properties &globdat) override;
 
-  virtual void advance
+  /// @brief Set convergence precision
+  /// @param eps Convergence tolerance
+  virtual void setPrecision(double eps) override;
 
-      (const Properties &globdat) override;
-
-  virtual void solve
-
-      (const Properties &info, const Properties &globdat) = 0;
-
-  virtual void cancel
-
-      (const Properties &globdat) override;
-
-  /// @brief comupte the next step size
-  /// @return whether this step can be accepted
-  virtual bool commit
-
-      (const Properties &globdat) override;
-
-  virtual void setPrecision
-
-      (double eps) override;
-
+  /// @brief Get current convergence precision
+  /// @return Current convergence tolerance
   virtual double getPrecision() const override;
 
   // static Ref<Module> makeNew
@@ -141,78 +169,124 @@ public:
   // static void declare();
 
 protected:
+  /// @brief Protected constructor
+  /// @param name Module name
   explicit ExplicitModule(const String &name = "");
 
+  /// @brief Protected destructor
   virtual ~ExplicitModule();
 
-  void updMass(const Properties &globdat);
+  /// @brief Update mass matrix
+  /// @param globdat Global data container
+  void updateMass_(const Properties &globdat);
 
-  void invalidate();
+  /// @brief invalidate_ current state
+  void invalidate_();
 
-  /// @brief Adams Bashforth 2 step update
+  /// @brief Adams-Bashforth 2-step update
+  /// @param delta_y Displacement increment
+  /// @param f_cur Current force vector
+  /// @param f_old Previous force vector
   inline void ABupdate(const Vector &delta_y,
                        const Vector &f_cur,
                        const Vector &f_old) const;
-  /// @brief Adams Bashforth 1 step update (Euler Explicit)
-  inline void ABupdate(const Vector &delta_y, const Vector &f_cur) const;
 
-  /// @brief update of the displacement vectors optionally taking SO(3)
-  /// into account
+  /// @brief Adams-Bashforth 1-step update (explicit Euler)
+  /// @param delta_y Displacement increment
+  /// @param f_cur Current force vector
+  inline void ABupdate(const Vector &delta_y,
+                       const Vector &f_cur) const;
+
+  /// @brief Update displacement vectors with optional SO(3) handling
+  /// @param y_new New displacement vector
+  /// @param y_old Old displacement vector
+  /// @param delta_y Displacement increment
+  /// @param rot Flag for rotational DOFs
   void updateVec(const Vector &y_new,
                  const Vector &y_old,
                  const Vector &delta_y,
                  const bool rot = false);
 
-  /// @brief get the accelration (and return the resulting force Vector)
+  /// @brief Get acceleration and return resulting force vector
+  /// @param a Acceleration vector (output)
+  /// @param cons Constraint manager
+  /// @param fres Resulting force vector
+  /// @param globdat Global data container
   void getAcce(const Vector &a,
                const Ref<Constraints> &cons,
                const Vector &fres,
                const Properties &globdat);
 
-  /// @brief get the forces
-  /// @return resulting forces = external - internal
+  /// @brief Get force vector
+  /// @param fint Internal force vector
+  /// @param fext External force vector
+  /// @param globdat Global data container
+  /// @return Resulting force vector (external - internal)
   Vector getForce(const Vector &fint,
                   const Vector &fext,
                   const Properties &globdat);
 
-  double getQuality(const Vector &y_pre, const Vector &y_cor);
+  /// @brief Get solution quality measure
+  /// @param y_pre Predicted solution
+  /// @param y_cor Corrected solution
+  /// @return Quality measure
+  double getQuality(const Vector &y_pre,
+                    const Vector &y_cor);
 
 protected:
-  bool valid_;
+  /// @name Module state
+  /// @{
+  bool valid_; ///< State validity flag
+  /// @}
 
-  double dtime_;
-  double prec_;
-  double minDtime_;
-  double maxDtime_;
-  double saftey_;
-  double incrFact_;
-  double decrFact_;
+  /// @name Time stepping parameters
+  /// @{
+  double dtime_;    ///< Current time step size
+  double prec_;     ///< Precision tolerance
+  double minDtime_; ///< Minimum time step size
+  double maxDtime_; ///< Maximum time step size
+  double saftey_;   ///< Safety factor for step size control
+  double incrFact_; ///< Step size increase factor
+  double decrFact_; ///< Step size decrease factor
+  /// @}
 
-  MassMode mode_;
-  idx_t order_;
-  double lenScale_;
+  /// @name Integration parameters
+  /// @{
+  MassMode mode_;   ///< Mass matrix mode
+  idx_t order_;     ///< Integration order
+  double lenScale_; ///< Characteristic length scale
+  /// @}
 
-  Ref<Function> updCond_;
-  Vector massInv_;
-  IdxVector SO3_dofs_;
-  IdxMatrix rdofs_;
+  /// @name DOF management
+  /// @{
+  Ref<Function> updCond_; ///< Update condition function
+  Vector massInv_;        ///< Inverse mass matrix
+  IdxVector dofsSO3_;     ///< SO(3) DOF type indices
+  IdxMatrix rdofs_;       ///< Rotational DOF mapping
+  /// @}
 
-  Ref<Model> model_;
-  Ref<DofSpace> dofs_;
-  Ref<Constraints> cons_;
-  Ref<Solver> solver_;
+  /// @name System components
+  /// @{
+  Ref<Model> model_;      ///< Root of the model tree
+  Ref<DofSpace> dofs_;    ///< Degree of freedom space
+  Ref<Constraints> cons_; ///< Constraint manager
+  Ref<Solver> solver_;    ///< Linear solver
+  /// @}
 };
 
-inline void
-ExplicitModule::ABupdate(const Vector &delta_y,
-                         const Vector &f_cur,
-                         const Vector &f_old) const
+//-----------------------------------------------------------------------
+//   inline definitions
+//-----------------------------------------------------------------------
+
+inline void ExplicitModule::ABupdate(const Vector &delta_y,
+                                     const Vector &f_cur,
+                                     const Vector &f_old) const
 {
   delta_y = dtime_ / 2. * (3. * f_cur - 1. * f_old);
 }
 
-inline void
-ExplicitModule::ABupdate(const Vector &delta_y, const Vector &f_cur) const
+inline void ExplicitModule::ABupdate(const Vector &delta_y,
+                                     const Vector &f_cur) const
 {
   delta_y = dtime_ * f_cur;
 }

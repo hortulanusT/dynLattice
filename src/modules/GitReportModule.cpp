@@ -1,19 +1,22 @@
 /**
  * @file GitReportModule.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief see GitReportModule.h
- * @version 0.1
- * @date 2022-10-11
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Implementation of GitReportModule class
  */
 
 #include "modules/GitReportModule.h"
 
 #include <jem/base/ClassTemplate.h>
 
+//=======================================================================
+//   class GitReportModule
+//=======================================================================
+
 JEM_DEFINE_CLASS(GitReportModule);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *GitReportModule::TYPE_NAME = "GitReport";
 

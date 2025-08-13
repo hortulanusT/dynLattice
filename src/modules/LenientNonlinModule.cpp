@@ -1,17 +1,19 @@
-/*
+/**
+ * @file LenientNonlinModule.cpp
+ * @author F.P. van der Meer, T. Gärtner
+ * @brief Implementation of lenient nonlinear solver module
  *
- *  Copyright (C) 2014 TU Delft. All rights reserved.
+ * This module implements a nonlinear solver that can accept non-converged
+ * solutions when a maximum iteration limit is reached. It extends the standard
+ * nonlinear solver with relaxed convergence criteria for difficult problems.
  *
- *  F.P. van der Meer, April 2014
- *
- *  Iterative solver that optionally continues with non-converged solution
- *
- *  Changes January 2025: (T. Gärtner)
- *  - just accept the solution if its not converged directly
- *  - check if the maximum amount of iterations have been reached
- *
+ * Original implementation: F.P. van der Meer, April 2014
+ * Modified: T. Gärtner, January 2025
+ * - Accept solution if not converged directly
+ * - Check maximum iteration limit before accepting
  */
 
+#include <jem/base/ClassTemplate.h>
 #include <jem/base/Exception.h>
 #include <jem/base/System.h>
 #include <jive/app/ModuleFactory.h>
@@ -26,6 +28,8 @@ using jive::implict::SolverInfo;
 //=======================================================================
 //   class LenientNonlinModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(LenientNonlinModule);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -140,7 +144,7 @@ void LenientNonlinModule::configure
 void LenientNonlinModule::getConfig
 
     (const Properties &conf,
-     const Properties &globdat)
+     const Properties &globdat) const
 
 {
   Super::getConfig(conf, globdat);

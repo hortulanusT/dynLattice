@@ -1,3 +1,9 @@
+/**
+ * @file MilneDeviceModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of Milne device predictor-corrector method
+ */
+
 #include "modules/MilneDeviceModule.h"
 #include "utils/testing.h"
 
@@ -6,7 +12,7 @@
 JEM_DEFINE_CLASS(MilneDeviceModule);
 
 //=======================================================================
-//   class CSVOutputModule
+//   class MilneDeviceModule
 //=======================================================================
 
 //-----------------------------------------------------------------------
@@ -14,17 +20,12 @@ JEM_DEFINE_CLASS(MilneDeviceModule);
 //-----------------------------------------------------------------------
 
 const char *MilneDeviceModule::TYPE_NAME = "MilneDevice";
+
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-MilneDeviceModule::MilneDeviceModule
-
-    (const String &name)
-    :
-
-      Super(name)
-
+MilneDeviceModule::MilneDeviceModule(const String &name) : Super(name)
 {
   order_ = 1;
 }
@@ -37,9 +38,7 @@ MilneDeviceModule::~MilneDeviceModule()
 //   solve
 //-----------------------------------------------------------------------
 
-void MilneDeviceModule::solve
-
-    (const Properties &info, const Properties &globdat)
+void MilneDeviceModule::solve(const Properties &info, const Properties &globdat)
 
 {
   const idx_t dofCount = dofs_->dofCount();
@@ -144,10 +143,8 @@ MilneDeviceModule::updForce(const Vector &fint,
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Module> MilneDeviceModule::makeNew
-
-    (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat)
+Ref<Module> MilneDeviceModule::makeNew(const String &name, const Properties &conf,
+                                       const Properties &props, const Properties &globdat)
 
 {
   return newInstance<Self>(name);

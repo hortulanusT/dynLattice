@@ -1,15 +1,16 @@
 /**
  * @file SpringMassModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Emulate singular beams at boundaries to model spring-mass systems
- * @version 0.1
- * @date 2024-08-29
+ * @author Til Gärtner
+ * @brief Spring-mass system model for boundary conditions
  *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
- *
+ * This model emulates singular beams at boundaries to create spring-mass
+ * systems. It provides a way to model boundary conditions through equivalent
+ * spring-mass representations with configurable spring elements.
  */
 
 #pragma once
+
+#include <jem/base/Object.h>
 
 #include <jem/base/Array.h>
 #include <jem/base/System.h>
@@ -49,45 +50,86 @@ using jive::util::Assignable;
 using jive::util::Constraints;
 using jive::util::DofSpace;
 
+//-----------------------------------------------------------------------
+//   class SpringMassModel
+//-----------------------------------------------------------------------
+
+/**
+ * @class SpringMassModel
+ * @brief Model for spring-mass systems at domain boundaries
+ *
+ * The SpringMassModel emulates singular beams at boundaries to create
+ * spring-mass systems for boundary condition modeling. It automatically
+ * generates spring elements along specified boundaries and manages
+ * child model instances for the spring elements.
+ *
+ * Features:
+ * - Automatic spring element generation at boundaries
+ * - Configurable spring properties and element counts
+ * - Edge node constraint management
+ * - Child model integration for spring behavior
+ * - Extent vector specification for spring placement
+ */
 class SpringMassModel : public Model
 {
+
 public:
   JEM_DECLARE_CLASS(SpringMassModel, Model);
 
-  static const char *TYPE_NAME;
-  static const char *BOUNDARY_PROP;
-  static const char *SPRING_NAMES;
-  static const char *EXTENT_VECTOR_PROP;
-  static const char *N_ELEM_PROP;
-  static const char *P_ELEM_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;          ///< Model type name
+  static const char *BOUNDARY_PROP;      ///< Boundary specification property
+  static const char *SPRING_NAMES;       ///< Spring names property
+  static const char *EXTENT_VECTOR_PROP; ///< Extent vector property
+  static const char *N_ELEM_PROP;        ///< Number of elements property
+  static const char *P_ELEM_PROP;        ///< Element parameter property
+  /// @}
 
-  explicit SpringMassModel(
-      const String &name,
-      const Properties &conf,
-      const Properties &props,
-      const Properties &globdat);
+  /// @brief Constructor
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  explicit SpringMassModel(const String &name,
+                           const Properties &conf,
+                           const Properties &props,
+                           const Properties &globdat);
 
-  virtual bool takeAction(
-      const String &action,
-      const Properties &params,
-      const Properties &globdat);
+  /// @brief Handle model actions
+  /// @param action Action name
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
+  virtual bool takeAction(const String &action,
+                          const Properties &params,
+                          const Properties &globdat) override;
 
-  static Ref<Model> makeNew(
-      const String &name,
-      const Properties &conf,
-      const Properties &props,
-      const Properties &globdat);
+  /// @brief Create new SpringMassModel instance
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return New model instance
+  static Ref<Model> makeNew(const String &name,
+                            const Properties &conf,
+                            const Properties &props,
+                            const Properties &globdat);
 
+  /// @brief Declare model type to factory
   static void declare();
 
 protected:
+  /// @brief Protected destructor
   virtual ~SpringMassModel();
 
-  virtual bool applyConstraints_(
-      const Properties &globdat) const;
+  /// @brief Apply constraints to the spring-mass system
+  /// @param globdat Global data container
+  /// @return true if constraints were applied successfully
+  virtual bool applyConstraints_(const Properties &globdat) const;
 
 private:
-  Array<Ref<Model>> children_;
-  Assignable<NodeGroup> boundary_;
-  IdxMatrix edgeNodes_;
+  Array<Ref<Model>> children_;     ///< Child model instances
+  Assignable<NodeGroup> boundary_; ///< Boundary node group
+  IdxMatrix edgeNodes_;            ///< Edge node connectivity
 };

@@ -1,12 +1,11 @@
-/*
- *  Copyright (C) 2014 TU Delft. All rights reserved.
- *
- *  Frans van der Meer, September 2014
- *
- *  Module to generate NodeGroups and ElementGroups from input file
- *
- */
+/// @file GroupInputModule.cpp
+/// @brief Implementation of GroupInputModule for generating node and element groups
+/// @author Frans P. van der Meer
+///
+/// This module creates NodeGroups and ElementGroups from input specifications
+/// based on geometric criteria such as coordinate ranges and element restrictions.
 
+#include <jem/base/ClassTemplate.h>
 #include <jem/base/array/operators.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>
@@ -33,6 +32,8 @@ using jive::util::makeUnique;
 //=======================================================================
 //   class GroupInputModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(GroupInputModule);
 
 //-----------------------------------------------------------------------
 //   static data

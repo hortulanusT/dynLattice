@@ -1,18 +1,15 @@
 /**
  * @file JointContactModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief contact model for joints (assumed to be two spheres)
- * @version 0.1
- * @date 2025-01-07
- *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Implementation of contact model for spherical joint interactions
  */
 
 #include "models/JointContactModel.h"
 #include <jem/base/ClassTemplate.h>
 
 #include "utils/testing.h"
+
+using jem::newInstance;
 
 JEM_DEFINE_CLASS(JointContactModel);
 
@@ -152,11 +149,11 @@ bool JointContactModel::takeAction
 
     if (name == "F_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::TRANS_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::TRANS_PART]);
     }
     else if (name == "M_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::ROT_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::ROT_PART]);
     }
     else
     {
@@ -196,7 +193,7 @@ bool JointContactModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    // TODO add contact stiffness to potential energy!!
+    // LATER add contact stiffness to potential energy!!
   }
 
   return false;

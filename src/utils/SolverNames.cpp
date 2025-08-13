@@ -1,4 +1,10 @@
-#include "SolverNames.h"
+/**
+ * @file SolverNames.cpp
+ * @author Frans van der Meer
+ * @brief file containing the names of the solver parameters and actions
+ *
+ */
+#include "utils/SolverNames.h"
 
 // params
 const char *SolverNames::ACCEPT = "Accept";

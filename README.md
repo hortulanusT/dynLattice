@@ -1,68 +1,55 @@
 # Rod-based Lattice Simulations
-This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo/Vu-Quoc](https://dx.doi.org/10.1016/0045-7825(86)90079-4) with some minor adaptations due to [Crisfield/Jelenić](https://dx.doi.org/10.1098/rspa.1999.0352). It also contains some python scripts for easier execution, they all should be executed from the main directory.
+This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) as well as some documentation.
 
 ## Requirements
-- **Apptainer 1.2**
-  - JEM/JIVE 3.0
-  - OpenMPI 4.1.1
-  - GMSH 4.9.5
-  - HDF5 1.12.2
-
-To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build /path/to/jive.sif /path/to/jive.def`.
-
-To create an alias used in the recipes run `alias jive='apptainer -s exec -e /path/to/jive.sif'`.
+You can use the code in this repository with the provided Apptainer container. To run the code, you need to have [Apptainer](https://apptainer.org/) installed on your system. The code is built using the `Makefile` in the root directory. Using the provided container, you can build also build the documentation using `<apptainer exec jive.sif> make doc`.
 
 ## Organization
 ```
 .
-├── .gitignore
-├── .gitmodules
-├── LICENSE
-├── README.md
-├── NOTES.md
-├── Makefile
-├── jive.def
-├── bin                 <- Compiled and external code, ignored by git
-├── src
-│   ├── main.cpp        <- origin file for the JEM/JIVE program
-│   ├── models          <- custom JIVE models
-│   ├── modules         <- custom JIVE modules
-│   ├── modules         <- custom JIVE materials
-│   ├── misc            <- other custom JIVE files
-│   └── utils           <- utility functions and macros
-├── scripts
-│   ├── testing         <- ptyhon scripts for some testing runs
-│   ├── running         <- ptyhon scripts for the real runs
-│   └── cluster         <- bash scripts for running on the clusters
-├── tests
-│   ├── testing.mk      <- makefile for testing setup
-│   ├── element         <- test setups for single elments
-│   ├── beam            <- test setups for static beam (networks)
-│   ├── transient       <- test setups for dynamic computations
-│   ├── plastic         <- test setups for dynamic beam (networkds)
-│   └── manual          <- test setup for manual test runs
-└── studies
-    ├── running*.mk     <- makefiles for running studies
-    ├── configs         <- folder containing some standard settings
-    ├── geometries      <- folder containing the different geometries
-    ├── programs        <- folder containing different studies to conducts
-    ├── output          <- raw data output
-    └── results         <- processed results
-```
-
-## Notes
-In the result files the PBC's are encoded as follows:
-```
- 0 -- uniaxial deformation
- 1 -- planar deformation
- 2 -- shear deformation
-```
-In the result files the Material models are encoded as follows:
-```
- 0 -- elastic
- 1 -- elastic + contact
- 2 -- plastic
- 3 -- plastic + contact
+├── .gitignore            <- gitignore file to ignore compiled files and other artifacts
+├── .gitattributes        <- git attributes file
+├── .github/              <- GitHub workflows and configuration
+├── .vscode/              <- VS Code workspace configuration
+├── LICENSE               <- license file
+├── README                <- this file
+├── Makefile              <- makefile for building the code and documentation
+├── jive.def              <- Apptainer definition file for building the container
+├── jive.sif              <- Apptainer container for running the code
+├── bin/                  <- Compiled code, ignored by git
+│   ├── dynLattice        <- main executable for the program
+│   ├── dynLattice-opt    <- optimized executable for the program
+│   └── dynLattice-debug  <- executable with debug symbols
+├── doc/                  <- Documentation files
+│   ├── Documentation.html <- Main documentation file
+│   ├── doxygen.conf      <- Doxygen configuration for API documentation
+│   ├── install.md        <- Installation instructions
+│   ├── main.md           <- Main documentation content
+│   ├── usage.md          <- Usage instructions
+│   └── html/             <- Generated HTML documentation, ignored by git
+├── paper/                <- JOSS paper and related materials
+│   ├── paper.md          <- Main paper content in Markdown
+│   ├── paper.bib         <- Bibliography file
+│   └── beam_concept.pdf  <- Beam concept illustration
+├── src/                  <- Source code
+│   ├── main.cpp          <- Main file for the program
+│   ├── models/           <- Custom JIVE models
+│   ├── modules/          <- Custom JIVE modules
+│   ├── materials/        <- Custom JIVE materials
+│   ├── misc/             <- Other custom files
+│   └── utils/            <- Utility functions and macros
+└── tests/                <- Test cases and benchmarks
+    ├── testing.mk        <- Makefile for running tests
+    ├── Benchmarks.md     <- Overview of all benchmarks
+    ├── BeamBenchmarks.md <- Beam element benchmarks
+    ├── ContactBenchmarks.md <- Contact mechanics benchmarks
+    ├── PlasticBenchmarks.md <- Plasticity benchmarks
+    ├── TransientBenchmarks.md <- Transient analysis benchmarks
+    ├── beam/             <- Beam test cases
+    ├── contact/          <- Contact test cases
+    ├── plastic/          <- Plasticity test cases
+    ├── transient/        <- Transient analysis test cases
+    └── *.png             <- Result images from benchmark tests, ignored by git
 ```
 
 ## License

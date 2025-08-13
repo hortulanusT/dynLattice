@@ -1,15 +1,12 @@
 /**
  * @file CSVOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Module to enable the Standard Output Module to Output CSV Files
- * @version 0.1
- * @date 2022-06-22
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief CSV output module for data export in comma-separated values format
  */
+
 #pragma once
 
+#include <jem/base/Class.h>
 #include <jive/app/ModuleFactory.h>
 #include <jive/app/OutputModule.h>
 #include <jive/util/utilities.h>
@@ -23,27 +20,42 @@ using jive::app::DataPrinter;
 using jive::app::Module;
 using jive::app::OutputModule;
 
+/// @brief Module for outputting data in CSV format
+/// @details Extends the standard OutputModule to enable CSV file output using
+/// a CSVDataPrinter. Provides comma-separated values format for data analysis
+/// and post-processing in external tools like Excel, MATLAB, or Python.
+/// @see CSVDataPrinter
 class CSVOutputModule : public OutputModule
 {
 public:
   JEM_DECLARE_CLASS(CSVOutputModule, OutputModule);
 
-  static const char *TYPE_NAME;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME; ///< Module type name
+  /// @}
 
-  explicit CSVOutputModule
+  /// @brief Constructor
+  /// @param name Module name
+  /// @param printer Data printer for CSV output (will be always a new CSVDataPrinter Instance)
+  explicit CSVOutputModule(const String &name = "csvOutput",
+                           const Ref<DataPrinter> printer = nullptr);
 
-      (const String &name = "csvOutput",
-       const Ref<DataPrinter> printer = nullptr);
+  /// @brief Factory method for creating new CSVOutputModule instances
+  /// @param name Module name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Reference to new CSVOutputModule instance
+  static Ref<Module> makeNew(const String &name,
+                             const Properties &conf,
+                             const Properties &props,
+                             const Properties &globdat);
 
-  static Ref<Module> makeNew
-
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
-
+  /// @brief Register CSVOutputModule type with ModuleFactory
   static void declare();
 
 protected:
+  /// @brief Protected destructor
   virtual ~CSVOutputModule();
 };

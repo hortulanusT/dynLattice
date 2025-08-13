@@ -1,13 +1,19 @@
+/**
+ * @file EmbeddedRKModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of EmbeddedRKModule class
+ */
+
 #include "modules/EmbeddedRKModule.h"
 #include "utils/testing.h"
 
 #include <jem/base/ClassTemplate.h>
 
-JEM_DEFINE_CLASS(EmbeddedRKModule);
+//=======================================================================
+//   class EmbeddedRKModule
+//=======================================================================
 
-//=======================================================================
-//   class CSVOutputModule
-//=======================================================================
+JEM_DEFINE_CLASS(EmbeddedRKModule);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -143,10 +149,9 @@ void EmbeddedRKModule::initODE23_()
 //   solve
 //-----------------------------------------------------------------------
 
-void
-EmbeddedRKModule::solve
+void EmbeddedRKModule::solve
 
-  (const Properties& info, const Properties& globdat)
+    (const Properties &info, const Properties &globdat)
 
 {
   const idx_t dofCount = dofs_->dofCount();

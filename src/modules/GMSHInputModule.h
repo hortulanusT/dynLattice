@@ -1,13 +1,10 @@
 /**
  * @file GMSHInputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @author Leon Riccius (l.riccius@tudelff.nl)
- * @brief A Module to import Geometry using the GMSH C++ API
- * @version 0.1
- * @date 2022-04-01
+ * @author Til Gärtner
+ * @brief Module for importing geometry using the GMSH C++ API
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * This module provides geometry import capabilities using GMSH mesh generator
+ * with support for various element types and mesh orders.
  */
 
 #pragma once
@@ -17,6 +14,7 @@
 
 #include <jem/base/Array.h>
 #include <jem/base/CString.h>
+#include <jem/base/Class.h>
 #include <jem/base/System.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/HashDictionary.h>
@@ -70,126 +68,113 @@ static_assert(GMSH_API_VERSION_MAJOR == 4, "Wrong GMSH API version, please use 4
 static_assert(GMSH_API_VERSION_MINOR == 9, "Wrong GMSH API version, please use 4.9.5");
 static_assert(GMSH_API_VERSION_PATCH == 5, "Wrong GMSH API version, please use 4.9.5");
 
-/**
- * @brief Class GMSHInputModule to translate GMSH Geometry to JIVE-Data
- *
- */
+/// @brief Module for importing geometry and mesh data using GMSH API
+/// @details Translates GMSH geometry files to JIVE data structures with support
+/// for various element orders, mesh dimensions, and output formats. Requires
+/// GMSH API version 4.9.5 for compatibility.
 class GMSHInputModule : public Module
 {
 public:
-  typedef GMSHInputModule Self;
-  typedef Module Super;
+  JEM_DECLARE_CLASS(GMSHInputModule, Module);
 
-  static const char *TYPE_NAME;
-  static const char *ORDER;
-  static const char *MESH_DIM;
-  static const char *SAVE_MSH;
-  static const char *STORE_TANGENTS;
-  static const char *ENTITY_NAMES[4];
-  static const char *ONELAB_PROPS;
-  static const char *VERBOSE;
-  static const char *OUT_FILE;
-  static const char *OUT_TABLES;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;       ///< Module type name
+  static const char *ORDER;           ///< Mesh order property
+  static const char *MESH_DIM;        ///< Mesh dimension property
+  static const char *SAVE_MSH;        ///< Save MSH file property
+  static const char *STORE_TANGENTS;  ///< Store tangents property
+  static const char *ENTITY_NAMES[4]; ///< Entity names array
+  static const char *ONELAB_PROPS;    ///< ONELAB properties
+  static const char *VERBOSE;         ///< Verbose output property
+  static const char *OUT_FILE;        ///< Output file property
+  static const char *OUT_TABLES;      ///< Output tables property
+  /// @}
 
-  explicit GMSHInputModule
+  /// @brief Constructor
+  /// @param name Module name
+  explicit GMSHInputModule(const String &name = "GMSHInput");
 
-      (const String &name = "GMSHInput");
+  /// @brief Initialize the module
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Module status
+  Status init(const Properties &conf,
+              const Properties &props,
+              const Properties &globdat) override;
 
-  Status init
+  /// @brief Run mesh import process
+  /// @param globdat Global data container
+  /// @return Module status
+  Status run(const Properties &globdat) override;
 
-      (const Properties &conf,
-       const Properties &props,
-       const Properties &globdat) override;
+  /// @brief Shutdown the module
+  /// @param globdat Global data container
+  void shutdown(const Properties &globdat) override;
 
-  Status run
+  /// @brief Factory method for creating new GMSHInputModule instances
+  /// @param name Module name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified module properties
+  /// @param globdat Global data container
+  /// @return Reference to new GMSHInputModule instance
+  static Ref<Module> makeNew(const String &name,
+                             const Properties &conf,
+                             const Properties &props,
+                             const Properties &globdat);
 
-      (const Properties &globdat) override;
-
-  void shutdown
-
-      (const Properties &globdat) override;
-
-  static Ref<Module> makeNew
-
-      (const String &name,
-       const Properties &conf,
-       const Properties &props,
-       const Properties &globdat);
-
+  /// @brief Register GMSHInputModule type with ModuleFactory
   static void declare();
 
 protected:
+  /// @brief Protected destructor
   ~GMSHInputModule();
 
-  /**
-   * @brief opens a file, reads in the geometry and generates a mesh from it
-   *
-   * @param geoFile name of the .geo file
-   * @param order order of the mesh (1=linear elements, 2=quadratic elements, ...)
-   */
-  void openMesh_
+  /// @brief Open geometry file and generate mesh
+  /// @param geoFile Name of the .geo file
+  /// @param order Mesh order (1=linear, 2=quadratic, etc.)
+  void openMesh_(const String &geoFile, const idx_t order);
 
-      (const String &geoFile,
-       const idx_t order);
+  /// @brief Prepare ONELAB properties for mesh generation
+  /// @param onelabProps ONELAB properties to set
+  void prepareOnelab_(const Properties &onelabProps);
 
-  /**
-   * @brief prepares the onllab properties for the mesh, that are given in the settings
-   *
-   * @param onelabProps Onelab Properties to set
-   */
-  void prepareOnelab_
+  /// @brief Populate nodes in global database
+  /// @param dim Embedding space dimension (coordinates per node)
+  void createNodes_(const idx_t dim);
 
-      (const Properties &onelabProps);
+  /// @brief Populate elements in global database
+  /// @param globdat Global database
+  void createElems_(const Properties &globdat);
 
-  /**
-   * @brief poplulates the nodes stored in the global databse
-   *
-   * @param dim dimension of the embedding space (i.e. number of coordinates per node)
-   */
-  void createNodes_
+  /// @brief Store tangent vectors in global database
+  /// @param globdat Global database
+  void storeTangents_(const Properties &globdat);
 
-      (const idx_t dim);
-
-  /**
-   * @brief populates the elements stored in the global database
-   *
-   * @param globdat global database
-   */
-  void createElems_
-
-      (const Properties &globdat);
-
-  /**
-   * @brief store tangents in the global database for later use
-   *
-   * @param globdat global database
-   */
-  void storeTangents_
-
-      (const Properties &globdat);
-
-  /**
-   * @brief write the output file for GMSH to be read in for post processing
-   *
-   * @param globdat global database
-   */
-  void writeOutFile_
-
-      (const Properties &globdat) const;
+  /// @brief Write output file for GMSH post-processing
+  /// @param globdat Global database
+  void writeOutFile_(const Properties &globdat) const;
 
 private:
-  Assignable<XNodeSet> nodes_;
-  std::unordered_map<std::size_t, idx_t> gmshToJiveNodeMap_;
-  Assignable<XElementSet> elements_;
-  std::unordered_map<std::size_t, idx_t> gmshToJiveElemMap_;
-  IdxMatrix entities_;
+  /// @name GMSH-JIVE mapping
+  /// @{
+  Assignable<XNodeSet> nodes_;                               ///< Node set
+  std::unordered_map<std::size_t, idx_t> gmshToJiveNodeMap_; ///< GMSH to JIVE node mapping
+  Assignable<XElementSet> elements_;                         ///< Element set
+  std::unordered_map<std::size_t, idx_t> gmshToJiveElemMap_; ///< GMSH to JIVE element mapping
+  IdxMatrix entities_;                                       ///< Entity matrix
+  /// @}
 
-  bool verbose_;
-  bool writeOutput_;
-  Ref<Function> sampleCond_;
-  String outFile_;
-  String outExt_;
-  StringVector outTables_;
-  idx_t nodeView_;
-  idx_t elemView_;
+  /// @name Output configuration
+  /// @{
+  bool verbose_;             ///< Verbose output flag
+  bool writeOutput_;         ///< Write output flag
+  Ref<Function> sampleCond_; ///< Sampling condition function
+  String outFile_;           ///< Output file name
+  String outExt_;            ///< Output file extension
+  StringVector outTables_;   ///< Output table names
+  idx_t nodeView_;           ///< Node view index
+  idx_t elemView_;           ///< Element view index
+  /// @}
 };

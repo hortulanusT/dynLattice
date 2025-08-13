@@ -1,24 +1,36 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements a periodic BC Model
- *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
- * Date: September 21
- *
- * ONLY WORKS FOR RECTANGULAR UNIT CELLS
- *
+/**
+ * @file PeriodicBCModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of PeriodicBCModel class
  */
+
 #include "PeriodicBCModel.h"
 #include <jive/util/Printer.h>
 
-const char *periodicBCModel::TYPE_NAME = "PeriodicBC";
-const char *periodicBCModel::MODE_PROP = "mode";
-const char *periodicBCModel::DOF_NAMES_PROP = "dofs";
-const char *periodicBCModel::ROT_NAMES_PROP = "rotDofs";
-const char *periodicBCModel::FIXEDGRAD_PARAM = "fixedGrad";
+#include <jem/base/ClassTemplate.h>
 
-periodicBCModel::periodicBCModel
+//=======================================================================
+//   class PeriodicBCModel
+//=======================================================================
+
+JEM_DEFINE_CLASS(PeriodicBCModel);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
+
+const char *PeriodicBCModel::TYPE_NAME = "PeriodicBC";
+const char *PeriodicBCModel::MODE_PROP = "mode";
+const char *PeriodicBCModel::GRAD_PROP = "grad";
+const char *PeriodicBCModel::DOF_NAMES_PROP = "dofs";
+const char *PeriodicBCModel::ROT_NAMES_PROP = "rotDofs";
+const char *PeriodicBCModel::FIXEDGRAD_PARAM = "fixedGrad";
+
+//-----------------------------------------------------------------------
+//   constructor
+//-----------------------------------------------------------------------
+
+PeriodicBCModel::PeriodicBCModel
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
@@ -61,6 +73,7 @@ periodicBCModel::periodicBCModel
   {
     gradName_ = "P";
     mode_ = LOAD;
+    NOT_IMPLEMENTED
   }
   else
     throw jem::IllegalInputException("Unknown mode");
@@ -94,7 +107,7 @@ periodicBCModel::periodicBCModel
   myConf.set("ghostCorners", ghostCorners_);
 }
 
-bool periodicBCModel::takeAction
+bool PeriodicBCModel::takeAction
 
     (const String &action, const Properties &params,
      const Properties &globdat)
@@ -155,7 +168,7 @@ bool periodicBCModel::takeAction
   return false;
 }
 
-void periodicBCModel::init_(const Properties &globdat)
+void PeriodicBCModel::init_(const Properties &globdat)
 {
   IdxVector rdofs(rotNames_.size());
   for (idx_t iDof = 0; iDof < rdofs.size(); iDof++)
@@ -238,7 +251,7 @@ void periodicBCModel::init_(const Properties &globdat)
   // TEST_PRINTER((*cons_))
 }
 
-void periodicBCModel::fixCorners_(const Properties &globdat,
+void PeriodicBCModel::fixCorners_(const Properties &globdat,
                                   const Matrix &currentGrad,
                                   const double scale)
 {
@@ -280,7 +293,7 @@ void periodicBCModel::fixCorners_(const Properties &globdat,
   }
 }
 
-void periodicBCModel::setConstraints_()
+void PeriodicBCModel::setConstraints_()
 {
   // iterate over the far field edges (right, top, behind)
   for (idx_t iEdge = 0; iEdge < pbcRank_; iEdge++)
@@ -301,7 +314,7 @@ void periodicBCModel::setConstraints_()
   // TEST_PRINTER((*cons_))
 }
 
-void periodicBCModel::getExtVec_(const Vector &f,
+void PeriodicBCModel::getExtVec_(const Vector &f,
                                  const Properties &globdat,
                                  const double scale)
 {
@@ -361,15 +374,15 @@ void periodicBCModel::getExtVec_(const Vector &f,
     }
 }
 
-Ref<Model> periodicBCModel::makeNew
+Ref<Model> PeriodicBCModel::makeNew
 
     (const String &name, const Properties &conf, const Properties &props,
      const Properties &globdat)
 {
-  return newInstance<periodicBCModel>(name, conf, props, globdat);
+  return newInstance<PeriodicBCModel>(name, conf, props, globdat);
 }
 
-void periodicBCModel::declare()
+void PeriodicBCModel::declare()
 {
   using jive::model::ModelFactory;
 

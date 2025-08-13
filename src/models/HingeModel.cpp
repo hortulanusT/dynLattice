@@ -1,30 +1,30 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements hinges for geometrically nonlinear rods
- *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
- * Date: July 21
- *
+/**
+ * @file HingeModel.cpp
+ * @author Til Gärtner
+ * @brief Implementation of hinge model for rigid joints between Cosserat rod elements
  */
 
 #include "HingeModel.h"
+#include <jem/base/ClassTemplate.h>
+
 //=======================================================================
-//    class specialCosseratRodModel -- implementation
+//   class HingeModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(HingeModel);
 
 //-----------------------------------------------------------------------
 //   static data
 //-----------------------------------------------------------------------
 
-const char *hingeModel::TYPE_NAME = "rigidHinge";
-const char *hingeModel::YIELD_PROP = "yieldCond";
+const char *HingeModel::TYPE_NAME = "rigidHinge";
+const char *HingeModel::YIELD_PROP = "yieldCond";
 
 //-----------------------------------------------------------------------
 //   constructor
 //-----------------------------------------------------------------------
 
-hingeModel::hingeModel
+HingeModel::HingeModel
 
     (const String &name,
      const Properties &conf,
@@ -50,10 +50,10 @@ hingeModel::hingeModel
 
   myConf.set("elements", elName_);
 
-  StringVector namesT(specialCosseratRodModel::TRANS_DOF_COUNT);
-  StringVector namesR(specialCosseratRodModel::ROT_DOF_COUNT);
-  conf.get(namesT, specialCosseratRodModel::TRANS_DOF_NAMES);
-  conf.get(namesR, specialCosseratRodModel::ROT_DOF_NAMES);
+  StringVector namesT(SpecialCosseratRodModel::TRANS_DOF_COUNT);
+  StringVector namesR(SpecialCosseratRodModel::ROT_DOF_COUNT);
+  conf.get(namesT, SpecialCosseratRodModel::TRANS_DOF_NAMES);
+  conf.get(namesR, SpecialCosseratRodModel::ROT_DOF_NAMES);
   String args = jem::util::StringUtils::join(namesT, ", ") + ", " + jem::util::StringUtils::join(namesR, ", ");
 
   // get the limit loads
@@ -81,7 +81,7 @@ hingeModel::hingeModel
 
 // Performs an action requested by a module or a parent model.
 
-bool hingeModel::takeAction
+bool HingeModel::takeAction
 
     (const String &action,
      const Properties &params,
@@ -145,7 +145,7 @@ bool hingeModel::takeAction
 //   init_
 //-----------------------------------------------------------------------
 
-void hingeModel::init_(const Properties &globdat)
+void HingeModel::init_(const Properties &globdat)
 {
   dofs_ = DofSpace::get(globdat, getContext()); // all the dofs
   cons_ = Constraints::get(dofs_, globdat);     // all the constraints
@@ -169,7 +169,7 @@ void hingeModel::init_(const Properties &globdat)
 //   getCons_
 //-----------------------------------------------------------------------
 
-void hingeModel::getCons_()
+void HingeModel::getCons_()
 {
   IdxVector dofsA(jtypes_.size());
   IdxVector dofsB(jtypes_.size());
@@ -200,7 +200,7 @@ void hingeModel::getCons_()
 //   updForces_
 //-----------------------------------------------------------------------
 
-void hingeModel::updForces_(const Vector &fint)
+void HingeModel::updForces_(const Vector &fint)
 {
   IdxVector inodes(2);
   idx_t jdofA, jdofB;
@@ -226,7 +226,7 @@ void hingeModel::updForces_(const Vector &fint)
 //   evalPlastic_
 //-----------------------------------------------------------------------
 
-bool hingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial coordinates
+bool HingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial coordinates
 {
   bool checked = true;
   double f_old, f_trial;
@@ -262,7 +262,7 @@ bool hingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial 
 //   createHinges_
 //-----------------------------------------------------------------------
 
-ElementGroup hingeModel::createHinges_(const String &elementName, const Properties &globdat)
+ElementGroup HingeModel::createHinges_(const String &elementName, const Properties &globdat)
 {
   IdxVector inodesA, inodesB, inodesNew;
   Matrix coordsA, coordsB;
@@ -351,7 +351,7 @@ ElementGroup hingeModel::createHinges_(const String &elementName, const Properti
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Model> hingeModel::makeNew
+Ref<Model> HingeModel::makeNew
 
     (const String &name,
      const Properties &conf,
@@ -359,16 +359,16 @@ Ref<Model> hingeModel::makeNew
      const Properties &globdat)
 
 {
-  return newInstance<hingeModel>(name, conf, props, globdat);
+  return newInstance<HingeModel>(name, conf, props, globdat);
 }
 
 //-----------------------------------------------------------------------
-//   declare hingeModel
+//   declare HingeModel
 //-----------------------------------------------------------------------
 
-// Registers the hingeModel class with the ModelFactory.
+// Registers the HingeModel class with the ModelFactory.
 
-void hingeModel::declare()
+void HingeModel::declare()
 {
   using jive::model::ModelFactory;
 

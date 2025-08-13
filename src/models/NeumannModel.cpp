@@ -1,35 +1,29 @@
-/*
- *
- *  Copyright (C) 2010 TU Delft. All rights reserved.
- *
- *  This class implements a model for neumann boundary conditions.
- *  As opposed to the PointLoadModel, this can apply loads on changing
- *  NodeGroups
- *
- *  Author:  F.P. van der Meer, F.P.vanderMeer@tudelft.nl
- *  Date:    April 2011
- *
+/**
+ * @file NeumannModel.cpp
+ * @author Frans P. van der Meer
+ * @brief Implementation of NeumannModel class
  */
 
+#include "NeumannModel.h"
+#include "utils/testing.h"
+
+#include <jem/base/ClassTemplate.h>
+#include <jem/base/Float.h>
+#include <jem/base/System.h>
 #include <jem/base/array/operators.h>
 #include <jem/base/array/select.h>
-#include <jem/base/System.h>
-#include <jem/base/Float.h>
 #include <jem/numeric/algebra/utilities.h>
 #include <jem/numeric/utilities.h>
 #include <jem/util/Event.h>
 #include <jem/util/StringUtils.h>
+#include <jive/algebra/VectorSpace.h>
+#include <jive/implict/SolverInfo.h>
+#include <jive/model/Actions.h>
+#include <jive/model/ModelFactory.h>
+#include <jive/model/StateVector.h>
+#include <jive/util/Globdat.h>
 #include <jive/util/error.h>
 #include <jive/util/utilities.h>
-#include <jive/util/Globdat.h>
-#include <jive/algebra/VectorSpace.h>
-#include <jive/model/Actions.h>
-#include <jive/model/StateVector.h>
-#include <jive/model/ModelFactory.h>
-#include <jive/implict/SolverInfo.h>
-
-#include "NeumannModel.h"
-#include "utils/testing.h"
 
 using jem::io::endl;
 using jem::util::StringUtils;
@@ -42,6 +36,8 @@ using jive::model::StateVector;
 //=======================================================================
 //   class NeumannModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(NeumannModel);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -248,6 +244,27 @@ Ref<Model> NeumannModel::makeNew
 }
 
 //-----------------------------------------------------------------------
+//   setLoadIncr
+//-----------------------------------------------------------------------
+
+void NeumannModel::setLoadIncr
+
+    (double incr)
+
+{
+  loadIncr_ = incr;
+}
+
+//-----------------------------------------------------------------------
+//   getLoadIncr
+//-----------------------------------------------------------------------
+
+double NeumannModel::getLoadIncr() const
+{
+  return loadIncr_;
+}
+
+//-----------------------------------------------------------------------
 //   init_
 //-----------------------------------------------------------------------
 
@@ -387,6 +404,9 @@ void NeumannModel::increaseStep_
      const Properties &globdat)
 
 {
+  loadIncr_ /= reduction_;
+
+  loadScale_ = loadScale0_ + loadIncr_;
 }
 
 //-----------------------------------------------------------------------

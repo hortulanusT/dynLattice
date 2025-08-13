@@ -1,13 +1,16 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
+/**
+ * @file SymBCModel.h
+ * @author Til Gärtner
+ * @brief Symmetry boundary conditions model for plane symmetry constraints
  *
- * This class implements (plane) symmetry BC Model
- *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
- * Date: Feburary 2025
- *
+ * This model implements plane symmetry boundary conditions that can enforce
+ * both opposing and equal DOF constraints between symmetric surfaces. It
+ * supports multiple surface pairs with configurable symmetry types.
  */
+
 #pragma once
+
+#include <jem/base/Object.h>
 
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
@@ -39,52 +42,92 @@ using jive::util::Constraints;
 using jive::util::DofSpace;
 using jive::util::Globdat;
 
-using namespace jive_helpers;
-
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
+//-----------------------------------------------------------------------
+//   class SymBCModel
+//-----------------------------------------------------------------------
+
+/**
+ * @class SymBCModel
+ * @brief Model for symmetry boundary conditions on plane symmetric domains
+ *
+ * The SymBCModel implements plane symmetry boundary conditions that enforce
+ * constraints between symmetric surfaces. It supports two types of symmetry:
+ * opposing DOFs (antisymmetric) and equal DOFs (symmetric). Surface pairs
+ * are automatically constrained based on the specified symmetry type.
+ *
+ * Features:
+ * - Opposing DOF constraints for antisymmetric behavior
+ * - Equal DOF constraints for symmetric behavior
+ * - Multiple surface pair support
+ * - Automatic constraint generation between symmetric surfaces
+ * - Configurable DOF type specification
+ */
 class SymBCModel : public Model
 {
 public:
-  static const char *TYPE_NAME;
-  static const char *DOF_OPPO_NAMES_PROP;
-  static const char *DOF_EQUAL_NAMES_PROP;
-  static const char *SURFACES_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;            ///< Model type name
+  static const char *DOF_OPPO_NAMES_PROP;  ///< Opposing DOF names property
+  static const char *DOF_EQUAL_NAMES_PROP; ///< Equal DOF names property
+  static const char *SURFACES_PROP;        ///< Surface pairs property
+  /// @}
 
-  explicit SymBCModel
+  JEM_DECLARE_CLASS(SymBCModel, Model);
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
+  /// @brief Constructor
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  explicit SymBCModel(const String &name,
+                      const Properties &conf,
+                      const Properties &props,
+                      const Properties &globdat);
 
-  virtual bool takeAction
+  /// @brief Handle model actions
+  /// @param action Action name
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
+  virtual bool takeAction(const String &action,
+                          const Properties &params,
+                          const Properties &globdat) override;
 
-      (const String &action, const Properties &params,
-       const Properties &globdat);
+  /// @brief Create new SymBCModel instance
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return New model instance
+  static Ref<Model> makeNew(const String &name,
+                            const Properties &conf,
+                            const Properties &props,
+                            const Properties &globdat);
 
-  static Ref<Model> makeNew
-
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
-
+  /// @brief Declare model type to factory
   static void declare();
 
 private:
-  void init_
+  /// @brief Initialize model
+  /// @param globdat Global data container
+  void init_(const Properties &globdat);
 
-      (const Properties &globdat);
-
+  /// @brief Set symmetry constraints
   void setConstraints_();
 
 private:
-  Assignable<NodeSet> nodes_;
-  Ref<DofSpace> dofs_;
-  Ref<Constraints> cons_;
-  StringVector dofOppoNames_;
-  StringVector dofEqualNames_;
-  StringVector surfaceNames_;
-  IdxVector mainOppoDofs_;
-  IdxVector secondaryOppoDofs_;
-  IdxVector mainEqualDofs_;
-  IdxVector secondaryEqualDofs_;
-  idx_t pbcRank_;
+  Assignable<NodeSet> nodes_;    ///< Node set
+  Ref<DofSpace> dofs_;           ///< DOF space
+  Ref<Constraints> cons_;        ///< Constraints
+  StringVector dofOppoNames_;    ///< Opposing DOF names
+  StringVector dofEqualNames_;   ///< Equal DOF names
+  StringVector surfaceNames_;    ///< Surface pair names
+  IdxVector mainOppoDofs_;       ///< Main opposing DOFs
+  IdxVector secondaryOppoDofs_;  ///< Secondary opposing DOFs
+  IdxVector mainEqualDofs_;      ///< Main equal DOFs
+  IdxVector secondaryEqualDofs_; ///< Secondary equal DOFs
+  idx_t pbcRank_;                ///< PBC rank
 };

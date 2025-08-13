@@ -1,20 +1,18 @@
 /**
  * @file InitLoadModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief InitLoadModel for initial loads
- * @version 0.1
- * @date 2022-04-26
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Implementation of initial loading model for displacement and velocity conditions
  */
 
+#include <jem/base/ClassTemplate.h>
 #include "models/InitLoadModel.h"
 #include "utils/testing.h"
 
 //=======================================================================
 //   class InitLoadModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(InitLoadModel);
 
 //-----------------------------------------------------------------------
 //   static data

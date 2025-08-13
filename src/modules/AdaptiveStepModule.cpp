@@ -1,11 +1,24 @@
+/**
+ * @file AdaptiveStepModule.cpp
+ * @author Til Gärtner
+ * @author Frans P. van der Meer
+ * @brief Implementation of AdaptiveStepModule class
+ */
+
 #include "modules/AdaptiveStepModule.h"
 #include "utils/testing.h"
 
-JEM_DEFINE_CLASS(AdaptiveStepModule);
+#include <jem/base/ClassTemplate.h>
 
 //=======================================================================
 //   class AdaptiveStepModule
 //=======================================================================
+
+JEM_DEFINE_CLASS(AdaptiveStepModule);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *AdaptiveStepModule::TYPE_NAME = "AdaptiveStep";
 

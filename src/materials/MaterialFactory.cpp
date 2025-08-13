@@ -1,12 +1,10 @@
+/**
+ * @file MaterialFactory.cpp
+ * @author Til Gärtner
+ * @brief Factory to register all the materials with
+ *
+ */
 #include "materials/MaterialFactory.h"
-
-//=======================================================================
-//   class MaterialFactory::CtorMap_
-//=======================================================================
-
-class MaterialFactory::CtorMap_ : public jive::util::CtorMap<Constructor>
-{
-};
 
 //=======================================================================
 //   class MaterialFactory

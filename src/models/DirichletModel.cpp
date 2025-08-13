@@ -1,14 +1,10 @@
-/*
- *
- *  Copyright (C) 2010 TU Delft. All rights reserved.
- *
- *  This class implements a model for dirichlet boundary conditions.
- *
- *  Author:  F.P. van der Meer, F.P.vanderMeer@tudelft.nl
- *  Date:    May 2010
- *
+/**
+ * @file DirichletModel.cpp
+ * @author Frans P. van der Meer
+ * @brief Implementation of Dirichlet boundary condition model for displacement control
  */
 
+#include <jem/base/ClassTemplate.h>
 #include <jem/base/Float.h>
 #include <jem/base/System.h>
 #include <jem/io/PrintWriter.h>
@@ -32,6 +28,8 @@ using jive::util::XDofSpace;
 //=======================================================================
 //   class DirichletModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(DirichletModel);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -396,7 +394,6 @@ void DirichletModel::commit_
 
   dispScale0_ = dispScale_;
 }
-
 //-----------------------------------------------------------------------
 //   setDT_
 //-----------------------------------------------------------------------

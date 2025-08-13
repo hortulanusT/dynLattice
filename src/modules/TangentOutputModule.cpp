@@ -1,18 +1,18 @@
 /**
- * @file TangentOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Module, that calculates the tangent linear elastic equivalent
- * properties for the material
- * @version 0.1
- * @date 2022-11-21
+ * @file TangentOutputModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of tangent elastic property calculation module
  *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * Computes effective elastic properties of heterogeneous materials using
+ * periodic boundary conditions and either finite differences or matrix
+ * condensation. Performs homogenization analysis for multi-scale modeling.
  */
 
 #include "modules/TangentOutputModule.h"
 
 #include <jem/base/ClassTemplate.h>
+
+using jive_helpers::eye;
 
 JEM_DEFINE_CLASS(TangentOutputModule);
 
@@ -239,7 +239,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       applStrains = strains0;
       applStrains[iPBC] += dir * .5 * perturb_;
 
-      globdat.set(periodicBCModel::FIXEDGRAD_PARAM, applStrains);
+      globdat.set(PeriodicBCModel::FIXEDGRAD_PARAM, applStrains);
 
       try
       {
@@ -256,7 +256,7 @@ void TangentOutputModule::getStrainStress_(const Matrix &strains,
       strains[iPBC] += dir * pertubStrains;
       stresses[iPBC] += dir * pertubStresses;
 
-      globdat.erase(periodicBCModel::FIXEDGRAD_PARAM);
+      globdat.erase(PeriodicBCModel::FIXEDGRAD_PARAM);
       solver_->cancel(globdat);
     }
     System::info() << " > > > Results from strainig along " << iPBC << " direction:\n";

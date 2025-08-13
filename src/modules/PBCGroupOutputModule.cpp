@@ -1,12 +1,11 @@
 /**
- * @file PBCGroupOutputModule.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Wrapper Class for some default PBC Outputs
- * @version 0.1
- * @date 2021-12-06
+ * @file PBCGroupOutputModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of PBC-specialized output module
  *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
- *
+ * Extends GroupOutputModule to automatically configure strain and stress
+ * output for periodic boundary condition simulations. Provides predefined
+ * node groups and data extraction expressions for homogenization analysis.
  */
 
 #include "PBCGroupOutputModule.h"

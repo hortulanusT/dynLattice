@@ -1,13 +1,7 @@
 # binary files
-OBJ*
-dynLattice*
-__pycache__/
-
+bin/*
+# documentation files
+doc/*/
 # results
-tests/element/runs/
-tests/element/*.txt
 tests/*/test*/
-tests/manual/*.csv
-
-# save the folder structure
-!.gitkeep
+tests/*.png

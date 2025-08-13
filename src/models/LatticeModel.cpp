@@ -1,21 +1,19 @@
 /**
  * @file LatticeModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief LatticeModel for collection of rods
- * @version 0.1
- * @date 2022-04-26
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Implementation of lattice model for managing collections of rod elements
  */
 
 #include "models/LatticeModel.h"
 #include "utils/testing.h"
+#include <jem/base/ClassTemplate.h>
 #include <jive/app/Names.h>
 
 //=======================================================================
 //   class LatticeModel
 //=======================================================================
+
+JEM_DEFINE_CLASS(LatticeModel);
 
 //-----------------------------------------------------------------------
 //   static data
@@ -161,9 +159,9 @@ bool LatticeModel::takeAction
       }
 
       if (name == "kineticEnergy")
-        calc_kin_Energy_(*table, weights, globdat);
+        getKineticEnergy(*table, weights, globdat);
       if (name == "mass")
-        calc_mass_(*table, weights, globdat);
+        getMass(*table, weights, globdat);
     }
   }
 
@@ -184,8 +182,8 @@ bool LatticeModel::takeAction
     vars.find(E_kin, "kineticEnergy");
     vars.find(m, "mass");
 
-    E_kin += calc_kin_Energy_(globdat);
-    m += calc_mass_(globdat);
+    E_kin += getKineticEnergy(globdat);
+    m += getMass(globdat);
 
     vars.set("kineticEnergy", E_kin);
     vars.set("mass", m);
@@ -194,7 +192,7 @@ bool LatticeModel::takeAction
   return actionTaken;
 }
 
-void LatticeModel::calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const
+void LatticeModel::getKineticEnergy(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const
 {
   const idx_t jCol = energy_table.addColumn("kineticEnergy");
   Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
@@ -222,7 +220,7 @@ void LatticeModel::calc_kin_Energy_(XTable &energy_table, const Vector &table_we
   }
 }
 
-double LatticeModel::calc_kin_Energy_(const Properties &globdat) const
+double LatticeModel::getKineticEnergy(const Properties &globdat) const
 {
   Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
   Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
@@ -251,7 +249,7 @@ double LatticeModel::calc_kin_Energy_(const Properties &globdat) const
   return E_kin;
 }
 
-void LatticeModel::calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const
+void LatticeModel::getMass(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const
 {
   const idx_t jCol = mass_table.addColumn("mass");
   Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
@@ -285,7 +283,7 @@ void LatticeModel::calc_mass_(XTable &mass_table, const Vector &table_weights, c
   }
 }
 
-double LatticeModel::calc_mass_(const Properties &globdat) const
+double LatticeModel::getMass(const Properties &globdat) const
 {
   Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
   Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());

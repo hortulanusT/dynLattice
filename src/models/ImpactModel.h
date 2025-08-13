@@ -1,27 +1,25 @@
 /**
  * @file ImpactModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief Model that updates accelleration based on response forces and impactor weights
- * @version 0.1
- * @date 2022-06-28
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Impact model for updating acceleration based on response forces and impactor weights
  */
+
 #pragma once
+
+#include <jem/base/Class.h>
 
 #include <jem/base/System.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
-#include <jive/model/Model.h>
-#include <jive/model/Actions.h>
-#include <jive/model/ModelFactory.h>
-#include <jive/fem/NodeSet.h>
 #include <jive/fem/NodeGroup.h>
-#include <jive/util/Globdat.h>
+#include <jive/fem/NodeSet.h>
+#include <jive/model/Actions.h>
+#include <jive/model/Model.h>
+#include <jive/model/ModelFactory.h>
 #include <jive/util/Assignable.h>
-#include <jive/util/DofSpace.h>
 #include <jive/util/Constraints.h>
+#include <jive/util/DofSpace.h>
+#include <jive/util/Globdat.h>
 
 using jem::idx_t;
 using jem::newInstance;
@@ -40,16 +38,27 @@ using jive::util::Constraints;
 using jive::util::DofSpace;
 using jive::util::Globdat;
 
+/// @brief Model for impact boundary conditions with weighted acceleration updates
+/// @details Implements impact loading by updating acceleration based on response forces
+/// and specified impactor weights for different node groups and DOF types.
 class ImpactModel : public Model
 {
 public:
   JEM_DECLARE_CLASS(ImpactModel, Model);
 
-  static const char *TYPE_NAME;
-  static const char *NODES_PROP;
-  static const char *DOF_PROP;
-  static const char *WEIGHTS_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;    ///< Model type name
+  static const char *NODES_PROP;   ///< Node groups property
+  static const char *DOF_PROP;     ///< DOF types property
+  static const char *WEIGHTS_PROP; ///< Impactor weights property
+  /// @}
 
+  /// @brief Constructor with configuration and properties
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
   explicit ImpactModel
 
       (const String &name,
@@ -57,12 +66,23 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Handle model actions for impact boundary conditions
+  /// @param action Action name to execute
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
   virtual bool takeAction
 
       (const String &action,
        const Properties &params,
        const Properties &globdat) override;
 
+  /// @brief Factory method for creating new ImpactModel instances
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return Reference to new ImpactModel instance
   static Ref<Model> makeNew
 
       (const String &name,
@@ -70,14 +90,21 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Register ImpactModel type with ModelFactory
   static void declare();
 
 private:
-  Ref<DofSpace> dofs_;
-  Ref<Constraints> cons_;
-  Assignable<NodeSet> nodes_;
+  /// @name System components
+  /// @{
+  Ref<DofSpace> dofs_;        ///< Degree of freedom space
+  Ref<Constraints> cons_;     ///< Constraint manager
+  Assignable<NodeSet> nodes_; ///< Node set
+  /// @}
 
-  StringVector nodeGroups_;
-  StringVector dofNames_;
-  Vector weights_;
+  /// @name Impact configuration
+  /// @{
+  StringVector nodeGroups_; ///< Node group names
+  StringVector dofNames_;   ///< DOF type names
+  Vector weights_;          ///< Impactor weights for each group/DOF
+  /// @}
 };

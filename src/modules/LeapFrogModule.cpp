@@ -1,3 +1,13 @@
+/**
+ * @file LeapFrogModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of leap-frog time integration algorithm
+ *
+ * This module implements the leap-frog time integration scheme for explicit
+ * dynamic analysis. The method uses staggered time stepping with second-order
+ * accuracy and symplectic properties for energy conservation.
+ */
+
 #include "modules/LeapFrogModule.h"
 #include "utils/testing.h"
 
@@ -6,7 +16,7 @@
 JEM_DEFINE_CLASS(LeapFrogModule);
 
 //=======================================================================
-//   class CSVOutputModule
+//   class LeapFrogModule
 //=======================================================================
 
 //-----------------------------------------------------------------------
@@ -14,17 +24,12 @@ JEM_DEFINE_CLASS(LeapFrogModule);
 //-----------------------------------------------------------------------
 
 const char *LeapFrogModule::TYPE_NAME = "LeapFrog";
+
 //-----------------------------------------------------------------------
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-LeapFrogModule::LeapFrogModule
-
-    (const String &name)
-    :
-
-      Super(name)
-
+LeapFrogModule::LeapFrogModule(const String &name) : Super(name)
 {
 }
 
@@ -33,13 +38,10 @@ LeapFrogModule::~LeapFrogModule()
 }
 
 //-----------------------------------------------------------------------
-//   run
+//   solve
 //-----------------------------------------------------------------------
 
-void
-LeapFrogModule::solve
-
-  (const Properties& info, const Properties& globdat)
+void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
 
 {
   using jive::model::STATE;
@@ -85,10 +87,8 @@ LeapFrogModule::solve
 //   makeNew
 //-----------------------------------------------------------------------
 
-Ref<Module> LeapFrogModule::makeNew
-
-    (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat)
+Ref<Module> LeapFrogModule::makeNew(const String &name, const Properties &conf,
+                                    const Properties &props, const Properties &globdat)
 
 {
   return newInstance<Self>(name);

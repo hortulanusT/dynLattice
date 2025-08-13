@@ -26,6 +26,14 @@ MY_INCDIRS 	:= $(SRCDIR)
 MY_CXX_STD_FLAGS := '-std=c++17'
 
 #######################################################################
+##   Include Jive package and create executable                      ##
+#######################################################################
+include $(JIVEDIR)/makefiles/packages/*.mk
+include $(JIVEDIR)/makefiles/prog.mk
+
+MKDIR_P	= mkdir -p --
+
+#######################################################################
 ##   Include submodules specifics                                    ##
 #######################################################################
 include ${shell find $(SRCDIR) -name *.mk}
@@ -36,30 +44,11 @@ include ${shell find $(SRCDIR) -name *.mk}
 export LD_RUN_PATH := $(MPIDIR)/lib:$(LD_RUN_PATH)
 
 #######################################################################
-##   Include Jive package and create executable                      ##
-#######################################################################
-include $(JIVEDIR)/makefiles/packages/*.mk
-include $(JIVEDIR)/makefiles/prog.mk
-
-MKDIR_P	= mkdir -p --
-
-#######################################################################
-##   Include Test Cases													                     ##
+##   Include Test targets 											                     ##
 #######################################################################
 include tests/testing.mk
 
 #######################################################################
-##   report git hash                                                 ##
+##   Include Documentation targets                                   ##
 #######################################################################
-GIT_COMMIT := $(shell git rev-parse HEAD)
-GIT_DIRTY := $(shell git status --porcelain | wc -l)
-ifeq ($(GIT_DIRTY), 0)
-	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT)"'
-else
-	MY_CXX_STD_FLAGS += '-DGIT_HASH="$(GIT_COMMIT) !!! $(GIT_DIRTY) UNCOMITTED !!!"'
-endif
-
-srcfiles := $(shell find $(SRCDIR) -type f -name '*.cpp')
-$(OBJDIR)/GitReportModule.o: $(srcfiles)
-$(OBJDIR_OPT)/GitReportModule.o: $(srcfiles)
-$(OBJDIR_DBG)/GitReportModule.o: $(srcfiles)
+include doc/doc.mk

@@ -1,16 +1,12 @@
-/*
- * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements a joint for several rods
- * (should be used with the specialCosseratRodModel)
- *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
- * Date: July 21
- *
+/**
+ * @file HingeModel.h
+ * @author Til Gärtner
+ * @brief Hinge model for rigid joints between Cosserat rod elements
  */
 
 #pragma once
 
+#include <jem/base/Class.h>
 #include <jem/util/ArrayBuffer.h>
 #include <jem/util/Properties.h>
 #include <jem/util/StringUtils.h>
@@ -33,7 +29,7 @@
 #include <jive/util/DofSpace.h>
 #include <jive/util/FuncUtils.h>
 
-#include "models/specialCosseratRodModel.h"
+#include "models/SpecialCosseratRodModel.h"
 #include "utils/helpers.h"
 #include "utils/testing.h"
 
@@ -59,27 +55,50 @@ using jive::util::FuncUtils;
 
 typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 
-using namespace jive_helpers;
-
-class hingeModel : public Model
+/// @brief Model for plastic hinges connecting multiple Cosserat rod elements
+/// @details Implements plastic hinge behavior for geometrically nonlinear rod elements.
+/// Should be used with SpecialCosseratRodModel to create joints between rods with
+/// yield condition evaluation and plastic constraint enforcement.
+class HingeModel : public Model
 {
 public:
-  static const char *TYPE_NAME;
-  static const char *YIELD_PROP;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;  ///< Model type name
+  static const char *YIELD_PROP; ///< Yield condition property
+  /// @}
 
-  explicit hingeModel
+  JEM_DECLARE_CLASS(HingeModel, Model);
+
+  /// @brief Constructor with configuration and properties
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  explicit HingeModel
 
       (const String &name,
        const Properties &conf,
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Handle model actions (INIT, GET_MATRIX, GET_INT_VECTOR, etc.)
+  /// @param action Action name to execute
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
   virtual bool takeAction
 
       (const String &action,
        const Properties &params,
        const Properties &globdat);
 
+  /// @brief Factory method for creating new HingeModel instances
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return Reference to new HingeModel instance
   static Ref<Model> makeNew
 
       (const String &name,
@@ -87,57 +106,63 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Register HingeModel type with ModelFactory
   static void declare();
 
 private:
-  /**
-   * @brief creates the elements for the hinges
-   *
-   * @param elementName name of the Element group
-   * @param globdat global database
-   *
-   * @return created element Group
-   */
+  /// @brief Create hinge elements for specified element group
+  /// @param elementName Name of the element group
+  /// @param globdat Global database
+  /// @return Created element group
   ElementGroup createHinges_(const String &elementName, const Properties &globdat);
 
-  /**
-   * @brief stores the forces relevant for the existing hinges
-   *
-   * @param fint global internal force vector
-   */
+  /// @brief Store forces relevant for existing hinges
+  /// @param fint Global internal force vector
   void updForces_(const Vector &fint);
 
-  /**
-   * @brief evaluate the plastic development in the beams
-   *
-   * @return true if not new plasticity was discovered
-   * @return false if some plastic movement is discovered
-   */
+  /// @brief Evaluate plastic development in the hinges
+  /// @return true if no new plasticity was discovered, false if plastic movement is detected
   bool evalPlastic_(const Vector &disp);
 
+  /// @brief Initialize model state and DOF mappings
+  /// @param globdat Global data container
   void init_(const Properties &globdat);
 
+  /// @brief Get constraint information
+  /// @brief Get constraint information
   void getCons_();
 
 private:
-  Assignable<ElementGroup> egroup_;
-  Assignable<NodeSet> nodes_;
-  Assignable<ElementSet> elems_;
+  /// @name System components
+  /// @{
+  Assignable<ElementGroup> egroup_; ///< Hinge element group
+  Assignable<NodeSet> nodes_;       ///< Node set
+  Assignable<ElementSet> elems_;    ///< Element set
+  Ref<DofSpace> dofs_;              ///< Degree of freedom space
+  Ref<Constraints> cons_;           ///< Constraint manager
+  /// @}
 
-  Ref<DofSpace> dofs_;
-  Ref<Constraints> cons_;
-  IdxVector jtypes_;
-  StringVector jnames_;
+  /// @name DOF and element management
+  /// @{
+  IdxVector jtypes_;    ///< Joint type indices
+  StringVector jnames_; ///< Joint type names
+  String elName_;       ///< Element group name
+  /// @}
 
-  String elName_;
-  double prec_;
-  idx_t maxIter_;
-  idx_t iiter_;
+  /// @name Iteration control
+  /// @{
+  double prec_;   ///< Convergence precision
+  idx_t maxIter_; ///< Maximum iterations
+  idx_t iiter_;   ///< Current iteration counter
+  /// @}
 
-  Ref<Material> material_;
-  Ref<Function> yieldCond_;
-  Vector ell_;
-  Matrix intForces_;
-  Matrix intForcesOld_;
-  Matrix plasticDisp_;
+  /// @name Material and yield behavior
+  /// @{
+  Ref<Material> material_;  ///< Material reference
+  Ref<Function> yieldCond_; ///< Yield condition function
+  Vector ell_;              ///< Element lengths
+  Matrix intForces_;        ///< Current internal forces
+  Matrix intForcesOld_;     ///< Previous internal forces
+  Matrix plasticDisp_;      ///< Plastic displacements
+  /// @}
 };

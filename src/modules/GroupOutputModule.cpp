@@ -1,12 +1,31 @@
+/**
+ * @file GroupOutputModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of group-based output data extraction module
+ *
+ * This module extracts displacement, velocity, acceleration, load, and response
+ * data from specified node and element groups and stores them in the global
+ * database for post-processing and analysis. For node groups, it computes sums
+ * for loads/responses and averages for displacements. Element group processing
+ * extracts data from all associated nodes.
+ */
+
 #include "GroupOutputModule.h"
+#include <jem/base/ClassTemplate.h>
+
+JEM_DEFINE_CLASS(GroupOutputModule);
 
 const char *GroupOutputModule::TYPE_NAME = "GroupOutput";
 
 GroupOutputModule::GroupOutputModule(const String &name) : Module(name)
 {
-  // per default extract composite values for all elements
+  // Default configuration: extract composite values for all elements
   elemGroups_.resize(1);
   elemGroups_[0] = "all";
+}
+
+GroupOutputModule::~GroupOutputModule()
+{
 }
 
 Module::Status GroupOutputModule::init(const Properties &conf,
@@ -34,7 +53,7 @@ Module::Status GroupOutputModule::init(const Properties &conf,
     elemDofNames_.ref(nodeDofNames_);
   myConf.set("dimensions", elemDofNames_);
 
-  // translate the DOF Names to IDs
+  // Translate DOF names to indices
   elemDofs_.resize(elemDofNames_.size());
   nodeDofs_.resize(nodeDofNames_.size());
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
@@ -44,12 +63,14 @@ Module::Status GroupOutputModule::init(const Properties &conf,
   for (idx_t idof = 0; idof < nodeDofNames_.size(); idof++)
     nodeDofs_[idof] = dofs->getTypeIndex(nodeDofNames_[idof]);
 
+  // Perform initial data extraction if any DOFs are configured
   return elemDofs_.size() + nodeDofs_.size() > 0 ? run(globdat)
                                                  : Status::DONE;
 }
 
 Module::Status GroupOutputModule::run(const Properties &globdat)
 {
+  // Initialize data structures and retrieve global state
   Properties myVars = Globdat::getVariables(globdat);
   Properties currentVars, loadVars, respVars, dispVars, veloVars,
       acceVars;
@@ -60,6 +81,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
   IdxVector dofIndices;
 
+  // Retrieve all state vectors
   Vector allLoad(dofs->dofCount());
   Vector allResp(dofs->dofCount());
   Vector allDisp(dofs->dofCount());
@@ -72,6 +94,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
   bool doAcce =
       StateVector::find(allAcce, jive::model::STATE2, dofs, globdat);
 
+  // Retrieve load and response vectors from model
   Ref<Model> model = Model::get(globdat, getContext());
   Properties params("actionParams");
   globdat.set(PropNames::LOAD_CASE, "output");
@@ -94,7 +117,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
 
   Vector load, disp, velo, acce, resp;
 
-  // iterate through the node groups
+  // Process node groups: compute sums for loads/responses, averages for displacements
   for (idx_t iNodeGroup = 0; iNodeGroup < nodeGroups_.size();
        iNodeGroup++)
   {
@@ -118,13 +141,13 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     acce.resize(nodeGroup.size());
     nodeIndices = nodeGroup.getIndices();
 
-    // iterate through all the dofs to report
+    // Extract and aggregate DOF data for current node group
     for (idx_t iDof = 0; iDof < nodeDofs_.size(); iDof++)
     {
-      // get the indices of the dofs at those nodes
+      // Get DOF indices for all nodes in the group
       dofs->getDofIndices(dofIndices, nodeIndices, nodeDofs_[iDof]);
 
-      // get the displacements and loads for those dofs
+      // Extract state variables for these DOFs
       disp = allDisp[dofIndices];
       if (doVelo)
         velo = allVelo[dofIndices];
@@ -134,7 +157,7 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
       load = allLoad[dofIndices];
       resp = allResp[dofIndices];
 
-      // report it back (sum for load/resp and avg for disp)
+      // Store aggregated results: sum for forces, average for displacements
       loadVars.set(nodeDofNames_[iDof], sum(load));
       respVars.set(nodeDofNames_[iDof], sum(resp));
       dispVars.set(nodeDofNames_[iDof], sum(disp) / disp.size());
@@ -144,11 +167,12 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
         acceVars.set(nodeDofNames_[iDof], sum(acce) / acce.size());
     }
   }
-  // iterate through the element groups
+
+  // Process element groups: extract data from all nodes in the element group
   for (idx_t iElemGroup = 0; iElemGroup < elemGroups_.size();
        iElemGroup++)
   {
-    // get the nodes associated with this element group
+    // Get all nodes associated with this element group
     currentVars = myVars.makeProps(elemGroups_[iElemGroup]);
     ElementGroup elemGroup = ElementGroup::get(
         elemGroups_[iElemGroup], elems, globdat, getContext());
@@ -158,15 +182,18 @@ Module::Status GroupOutputModule::run(const Properties &globdat)
     disp.resize(nodeIndices.size());
     nodeIndices = elemGroup.getNodeIndices();
 
-    // iterate through the dimensions
+    // Extract data for each specified DOF dimension
     for (idx_t iDof = 0; iDof < elemDofs_.size(); iDof++)
     {
-      // get the indices of the dofs at those nodes
+      // Get DOF indices for all nodes in the element group
       dofs->getDofIndices(dofIndices, nodeIndices, elemDofs_[iDof]);
 
-      // get the displacements and loads for those dofs
+      // Extract state variables for these DOFs
       disp = allDisp[dofIndices];
       load = allLoad[dofIndices];
+
+      // Note: Element group processing currently extracts data but doesn't store it
+      // LATER: Add storage of element group aggregated data if needed
     }
   }
 

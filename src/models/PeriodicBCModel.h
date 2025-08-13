@@ -1,13 +1,18 @@
-/*
+/**
+ * @file PeriodicBCModel.h
+ * @author Til Gärtner
+ * @brief Periodic boundary conditions model for rectangular unit cells
+ *
+ * This model implements periodic boundary conditions that work only for
+ * rectangular unit cells. It provides load, displacement, and update modes
+ * for applying periodic constraints on lattice structures.
+ *
  * Copyright (C) 2021 TU Delft. All rights reserved.
- *
- * This class implements a periodic BC Model
- *
- * Author: T. Gaertner (t.gartner@tudelft.nl)
- * Date: September 21
- *
  */
+
 #pragma once
+
+#include <jem/base/Object.h>
 
 #include <cmath>
 
@@ -47,73 +52,124 @@ using jive::util::Constraints;
 using jive::util::DofSpace;
 using jive::util::Globdat;
 
-using namespace jive_helpers;
+using jive_helpers::IdxVectorMatrix;
+using jive_helpers::vec2mat;
 
-class periodicBCModel : public Model
+//-----------------------------------------------------------------------
+//   class PeriodicBCModel
+//-----------------------------------------------------------------------
+
+/**
+ * @class PeriodicBCModel
+ * @brief Model for applying periodic boundary conditions on rectangular unit cells
+ *
+ * The PeriodicBCModel implements periodic boundary conditions specifically
+ * designed for rectangular unit cells. It supports multiple operation modes
+ * including load control, displacement control, and gradient updates.
+ *
+ * Features:
+ * - Three operation modes: LOAD, UPD (update), and DISP (displacement)
+ * - Automatic corner constraint handling
+ * - Master-slave edge DOF pairing for periodicity
+ * - Gradient-based deformation control
+ * - Support for rotational DOFs
+ *
+ * @note Only works for rectangular unit cells
+ */
+class PeriodicBCModel : public Model
 {
 public:
-  static const char *TYPE_NAME;
-  static const char *MODE_PROP;
-  static const char *GRAD_PROP;
-  static const char *DOF_NAMES_PROP;
-  static const char *ROT_NAMES_PROP;
-  static const char *FIXEDGRAD_PARAM;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;       ///< Model type name
+  static const char *MODE_PROP;       ///< Operation mode property
+  static const char *GRAD_PROP;       ///< Gradient property
+  static const char *DOF_NAMES_PROP;  ///< DOF names property
+  static const char *ROT_NAMES_PROP;  ///< Rotation DOF names property
+  static const char *FIXEDGRAD_PARAM; ///< Fixed gradient parameter
+  /// @}
 
+  JEM_DECLARE_CLASS(PeriodicBCModel, Model);
+
+  /// @brief Operation modes
   enum Mode
   {
-    LOAD,
-    UPD,
-    DISP
+    LOAD, ///< Load control mode (NOT IMPLEMENTED)
+    UPD,  ///< Update mode
+    DISP  ///< Displacement control mode
   };
 
-  explicit periodicBCModel
+  /// @brief Constructor
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  explicit PeriodicBCModel(const String &name,
+                           const Properties &conf,
+                           const Properties &props,
+                           const Properties &globdat);
 
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
+  /// @brief Handle model actions
+  /// @param action Action name
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
+  virtual bool takeAction(const String &action,
+                          const Properties &params,
+                          const Properties &globdat) override;
 
-  virtual bool takeAction
+  /// @brief Create new PeriodicBCModel instance
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return New model instance
+  static Ref<Model> makeNew(const String &name,
+                            const Properties &conf,
+                            const Properties &props,
+                            const Properties &globdat);
 
-      (const String &action, const Properties &params,
-       const Properties &globdat);
-
-  static Ref<Model> makeNew
-
-      (const String &name, const Properties &conf,
-       const Properties &props, const Properties &globdat);
-
+  /// @brief Declare model type to factory
   static void declare();
 
 private:
-  void init_
+  /// @brief Initialize model
+  /// @param globdat Global data container
+  void init_(const Properties &globdat);
 
-      (const Properties &globdat);
+  /// @brief Fix corner constraints
+  /// @param globdat Global data container
+  /// @param currentGrad Current gradient matrix
+  /// @param scale Scaling factor
+  void fixCorners_(const Properties &globdat,
+                   const Matrix &currentGrad,
+                   const double scale = NAN);
 
-  void fixCorners_
-
-      (const Properties &globdat, const Matrix &currentGrad,
-       const double scale = NAN);
-
+  /// @brief Set periodic constraints
   void setConstraints_();
 
-  void getExtVec_
-
-      (const Vector &f, const Properties &globdat,
-       const double scale = 1.);
+  /// @brief Get external force vector
+  /// @param f External force vector
+  /// @param globdat Global data container
+  /// @param scale Scaling factor
+  void getExtVec_(const Vector &f,
+                  const Properties &globdat,
+                  const double scale = 1.);
 
 private:
-  Assignable<NodeSet> nodes_;
-  Ref<DofSpace> dofs_;
-  Ref<Constraints> cons_;
-  String gradName_;
-  Matrix grad_;
-  StringVector dofNames_;
-  StringVector rotNames_;
-  IdxVector jdofs_;
-  IdxVectorMatrix masterEdgeDofs_;
-  IdxVectorMatrix slaveEdgeDofs_;
-  IdxMatrix cornerDofs_;
-  IdxVector corner0Dofs_;
-  idx_t pbcRank_;
-  Mode mode_;
-  bool ghostCorners_;
+  Assignable<NodeSet> nodes_;      ///< Node set
+  Ref<DofSpace> dofs_;             ///< DOF space
+  Ref<Constraints> cons_;          ///< Constraints
+  String gradName_;                ///< Gradient name
+  Matrix grad_;                    ///< Gradient matrix
+  StringVector dofNames_;          ///< DOF names
+  StringVector rotNames_;          ///< Rotation DOF names
+  IdxVector jdofs_;                ///< J DOFs
+  IdxVectorMatrix masterEdgeDofs_; ///< Master edge DOFs
+  IdxVectorMatrix slaveEdgeDofs_;  ///< Slave edge DOFs
+  IdxMatrix cornerDofs_;           ///< Corner DOFs
+  IdxVector corner0Dofs_;          ///< Corner 0 DOFs
+  idx_t pbcRank_;                  ///< PBC rank
+  Mode mode_;                      ///< Operation mode
+  bool ghostCorners_;              ///< Ghost corners flag
 };

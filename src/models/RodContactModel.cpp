@@ -1,18 +1,15 @@
 /**
  * @file RodContactModel.cpp
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief implementation of contact model for rods
- * @version 0.1
- * @date 2024-04-16
- *
- * @copyright Copyright (C) 2024 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Implementation of RodContactModel class
  */
 
 #include "models/RodContactModel.h"
+#include "utils/testing.h"
+
 #include <jem/base/ClassTemplate.h>
 
-#include "utils/testing.h"
+using jem::SliceTo;
 
 JEM_DEFINE_CLASS(RodContactModel);
 
@@ -23,6 +20,7 @@ JEM_DEFINE_CLASS(RodContactModel);
 //-----------------------------------------------------------------------
 //   static data
 //-----------------------------------------------------------------------
+
 const char *RodContactModel::TYPE_NAME = "RodContact";
 const char *RodContactModel::PENALTY_PROP = "penalty";
 const char *RodContactModel::PENALTY_NTS_PROP = "penaltyNTS";
@@ -191,11 +189,11 @@ bool RodContactModel::takeAction
 
     if (name == "F_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::TRANS_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::TRANS_PART]);
     }
     else if (name == "M_contact")
     {
-      jtypes = table->addColumns(dofs_->getTypeNames()[specialCosseratRodModel::ROT_PART]);
+      jtypes = table->addColumns(dofs_->getTypeNames()[SpecialCosseratRodModel::ROT_PART]);
     }
     else
     {
@@ -235,7 +233,7 @@ bool RodContactModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    // TODO add contact stiffness to potential energy!!
+    // LATER add contact stiffness to potential energy!!
   }
 
   return false;

@@ -1,73 +1,67 @@
 /**
  * @file Line3D.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief shape function for implementing a 1D line function in a 3D space
- * @version 0.1
- * @date 2021-10-28
- *
- * @copyright Copyright (C) 2021 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Shape function for 1D line elements in 3D space.
  */
 
 #pragma once
 
 #include "utils/helpers.h"
-#include "utils/testing.h"
-#include <jem/base/Array.h>
-#include <jem/base/IllegalInputException.h>
-#include <jem/numeric/algebra/matmul.h>
-#include <jem/numeric/algebra/utilities.h>
 #include <jem/util/Properties.h>
+#include <jive/Array.h>
 #include <jive/geom/ParametricLine.h>
-#include <jive/geom/ShapeFactory.h>
-#include <jive/geom/StdLine.h>
+#include <jive/geom/Shape.h>
+#include <jive/geom/StdShape.h>
 
-using namespace jive_helpers;
-
-using jem::ALL;
-using jem::BEGIN;
-using jem::END;
 using jem::idx_t;
-using jem::newInstance;
-using jem::Ref;
-using jem::SliceFrom;
-using jem::SliceTo;
 using jem::String;
-using jem::numeric::matmul;
-using jem::numeric::MatmulChain;
-using jem::numeric::norm2;
 using jem::util::Properties;
-
 using jive::Cubix;
 using jive::Matrix;
 using jive::Vector;
 using jive::geom::ParametricLine;
 using jive::geom::Shape;
-using jive::geom::StdLine;
-using jive::geom::StdLine2;
-using jive::geom::StdLine3;
-using jive::geom::StdLine4;
+using jive_helpers::Quadix;
 
 /**
- * @brief shape class for a line element in a 3D space
+ * @brief Shape function for 1D line elements in 3D space.
  *
- * This class provides the shape opportunities needed for a line element in a 3D space,
- * it also provides some functions in order to better control rotational functions
- * along the line.
+ * Provides shape functions and geometric operations for line elements embedded
+ * in 3D space. Supports 2, 3, and 4-node line elements with configurable
+ * integration schemes and rotational control functions.
  *
+ * @section SupportedElements Supported Elements
+ * - 2-node linear line (StdLine2)
+ * - 3-node quadratic line (StdLine3)
+ * - 4-node cubic line (StdLine4)
+ *
+ * @author Til Gärtner
+ * @see [Line Shapes](https://jive-manual.dynaflow.com/group__LineShapes.html)
  */
 class Line3D : public Shape
 {
 public:
-  static const String PROP_NODES;
-  static const String PROP_INT;
-  static const String PROP_LOCAL;
-  static const idx_t GLOB_RANK;
+  static const String PROP_NODES; ///< Property name for number of nodes
+  static const String PROP_INT;   ///< Property name for integration scheme
+  static const String PROP_LOCAL; ///< Property name for local coordinates
+  static const idx_t GLOB_RANK;   ///< Global rank (always 3 for 3D space)
 
+  /**
+   * @brief Constructs a new Line3D shape object.
+   *
+   * @param[in] name Shape instance name for identification
+   * @param[out] conf Configuration properties container for output
+   * @param[in] props Input properties containing shape parameters
+   * @throws jem::IllegalInputException if unsupported number of nodes is specified
+   */
   explicit Line3D(const String &name,
                   const Properties &conf,
                   const Properties &props);
 
+  /**
+   * @brief Get the global rank (spatial dimension).
+   * @return Global rank (always 3 for 3D space)
+   */
   inline idx_t globalRank() const override;
   inline idx_t localRank() const override;
   inline idx_t nodeCount() const override;
@@ -80,17 +74,26 @@ public:
 
   inline bool containsLocalPoint(const Vector &u) const override;
 
+  /**
+   * @brief Compute integration weights for numerical integration.
+   *
+   * @param[out] w Integration weights at quadrature points
+   * @param[in] c Node coordinates matrix
+   */
   void getIntegrationWeights(const Vector &w,
                              const Matrix &c) const override;
 
   inline Matrix getVertexFunctions() const override;
 
-  /**
-   * @brief get the values of the shape functions at the integration points
-   * @return a matrix h(i,j), where i is the shape function index and j the integration points
-   */
   inline Matrix getShapeFunctions() const override;
 
+  /**
+   * @brief Transform local coordinates to global coordinates.
+   *
+   * @param[out] x Global coordinates vector
+   * @param[in] u Local coordinates vector
+   * @param[in] c Node coordinates matrix
+   */
   void getGlobalPoint(const Vector &x,
                       const Vector &u,
                       const Matrix &c) const override;
@@ -187,13 +190,31 @@ public:
   //------------------------------------------------
   // local location functions
   //------------------------------------------------
+  /**
+   * @brief Evaluate shape functions at given local coordinates.
+   * @param[out] h Shape function values
+   * @param[in] u Local coordinates
+   */
   inline void evalShapeFunctions(const Vector &h,
                                  const Vector &u) const override;
 
+  /**
+   * @brief Evaluate shape functions and their gradients at local coordinates.
+   * @param[out] h Shape function values
+   * @param[out] g Shape function gradients
+   * @param[in] u Local coordinates
+   */
   inline void evalShapeGradients(const Vector &h,
                                  const Vector &g,
                                  const Vector &u) const;
 
+  /**
+   * @brief Evaluate shape functions, gradients, and second derivatives.
+   * @param[out] h Shape function values
+   * @param[out] g Shape function gradients
+   * @param[out] gg Shape function second derivatives
+   * @param[in] u Local coordinates
+   */
   inline void evalShapeGradGrads(const Vector &h,
                                  const Vector &g,
                                  const Vector &gg,
@@ -203,8 +224,8 @@ private:
   /**
    * @brief Get the reference rotation according to Crisfield/Jelenic
    *
-   * @param[out] Lambda_r reference rotation matrix
-   * @param[in] Rn rotation matrices at the nodes
+   * @param[out] Lambda_r Reference rotation matrix
+   * @param[in] Rn Rotation matrices at the nodes
    */
   void getRefRot_(const Matrix Lambda_r,
                   const Cubix Rn) const;
@@ -212,16 +233,16 @@ private:
   /**
    * @brief Get the local node rotation vectors according to Crisfield/Jelenic
    *
-   * @param[out] psi node rotation vectors
-   * @param[out] Lambda_r reference rotation matrix
-   * @param[in] Rn rotation matrices at the nodes
+   * @param[out] psi Node rotation vectors
+   * @param[out] Lambda_r Reference rotation matrix
+   * @param[in] Rn Rotation matrices at the nodes
    */
   void getNodeRotVecs_(const Matrix psi,
                        const Matrix Lambda_r,
                        const Cubix Rn) const;
 
 protected:
-  Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
+  jem::Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
 };
 
 //=====================================================================

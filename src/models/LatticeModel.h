@@ -1,18 +1,14 @@
 /**
  * @file LatticeModel.h
- * @author Til Gärtner (t.gartner@tudelft.nl)
- * @brief LatticeModel for collection of rods
- * @version 0.1
- * @date 2022-04-26
- *
- * @copyright Copyright (C) 2022 TU Delft. All rights reserved.
- *
+ * @author Til Gärtner
+ * @brief Lattice model for managing collections of rod elements
  */
 
 #pragma once
 
 #include <jem/base/Array.h>
 #include <jem/base/CString.h>
+#include <jem/base/Class.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
 #include <jem/base/array/Array.h>
@@ -59,16 +55,30 @@ using jive::util::DofSpace;
 using jive::util::Globdat;
 using jive::util::XTable;
 
+/// @brief Model for managing lattice structures composed of rod elements
+/// @details Coordinates multiple child models representing rod elements and handles
+/// contact interactions between rods and joints. Provides utilities for computing
+/// global properties like kinetic energy and total mass.
 class LatticeModel : public Model
 {
 public:
-  static const char *TYPE_NAME;
-  static const char *CHILD_PROPS;
-  static const char *ROD_CONTACT_PROP;
-  static const char *JOINT_CONTACT_PROP;
-  static const char *ROD_LIST_PROP;
-  static const char *NAME_PREFIX;
+  /// @name Property identifiers
+  /// @{
+  static const char *TYPE_NAME;          ///< Model type name
+  static const char *CHILD_PROPS;        ///< Child model properties
+  static const char *ROD_CONTACT_PROP;   ///< Rod contact model property
+  static const char *JOINT_CONTACT_PROP; ///< Joint contact model property
+  static const char *ROD_LIST_PROP;      ///< Rod list property
+  static const char *NAME_PREFIX;        ///< Child name prefix
+  /// @}
 
+  JEM_DECLARE_CLASS(LatticeModel, Model);
+
+  /// @brief Constructor with configuration and properties
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
   explicit LatticeModel
 
       (const String &name,
@@ -76,30 +86,45 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Handle model actions for lattice coordination
+  /// @param action Action name to execute
+  /// @param params Action parameters
+  /// @param globdat Global data container
+  /// @return true if action was handled
   virtual bool takeAction
 
       (const String &action,
        const Properties &params,
        const Properties &globdat);
 
-  /**
-   * Calculates the kinetic energy of the special Cosserat rod model.
-   *
-   * @param globdat The global data.
-   * @return The kinetic energy.
-   */
-  double calc_kin_Energy_(const Properties &globdat) const;
-  void calc_kin_Energy_(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
+  /// @brief Calculate total kinetic energy of the lattice
+  /// @param globdat Global data container
+  /// @return Total kinetic energy
+  double getKineticEnergy(const Properties &globdat) const;
 
-  /**
-   * Calculates the mass of the special cosserat rod model
-   *
-   * @param globdat the global data
-   * @return the total mass
-   */
-  double calc_mass_(const Properties &globdat) const;
-  void calc_mass_(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
+  /// @brief Calculate kinetic energy and store in table
+  /// @param energy_table Output energy table
+  /// @param table_weights Table weights
+  /// @param globdat Global data container
+  void getKineticEnergy(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
 
+  /// @brief Calculate total mass of the lattice
+  /// @param globdat Global data container
+  /// @return Total mass
+  double getMass(const Properties &globdat) const;
+
+  /// @brief Calculate mass and store in table
+  /// @param mass_table Output mass table
+  /// @param table_weights Table weights
+  /// @param globdat Global data container
+  void getMass(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
+
+  /// @brief Factory method for creating new LatticeModel instances
+  /// @param name Model name
+  /// @param conf Actually used configuration properties (output)
+  /// @param props User-specified model properties
+  /// @param globdat Global data container
+  /// @return Reference to new LatticeModel instance
   static Ref<Model> makeNew
 
       (const String &name,
@@ -107,12 +132,19 @@ public:
        const Properties &props,
        const Properties &globdat);
 
+  /// @brief Register LatticeModel type with ModelFactory
   static void declare();
 
 private:
-  Array<Ref<Model>> children_;
-  Ref<Model> contact_;
-  Ref<Model> jointContact_;
+  /// @name Child models
+  /// @{
+  Array<Ref<Model>> children_; ///< Array of child rod models
+  Ref<Model> contact_;         ///< Rod contact model
+  Ref<Model> jointContact_;    ///< Joint contact model
+  /// @}
 
-  Ref<AbstractMatrix> M_;
+  /// @name System matrices
+  /// @{
+  Ref<AbstractMatrix> M_; ///< Mass matrix
+  /// @}
 };

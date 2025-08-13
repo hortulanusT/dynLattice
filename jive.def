@@ -34,6 +34,7 @@ From: ubuntu
     g++ zlib1g-dev \
     libreadline-dev \
     freeglut3-dev \
+    gdb \
     ssh \
     libxrender-dev \
     libxcursor-dev \
@@ -41,7 +42,9 @@ From: ubuntu
     libxinerama-dev \
     python3-pip \
     python-is-python3 \
-    git
+    git \
+    doxygen \
+    graphviz
   pip install \
     numpy \
     pandas \
@@ -54,7 +57,8 @@ From: ubuntu
     opencv-python \
     meshio \
     svgpathtools \
-    pyvista
+    pyvista \
+    --break-system-packages
   
   cd /home/user/
   

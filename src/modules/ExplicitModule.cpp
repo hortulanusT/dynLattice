@@ -1,12 +1,24 @@
 
+/**
+ * @file ExplicitModule.cpp
+ * @author Til Gärtner
+ * @brief Implementation of ExplicitModule class
+ */
+
 #include "modules/ExplicitModule.h"
 #include "utils/testing.h"
+
+#include <jem/base/ClassTemplate.h>
 
 //=======================================================================
 //   class ExplicitModule
 //=======================================================================
 
 JEM_DEFINE_CLASS(ExplicitModule);
+
+//-----------------------------------------------------------------------
+//   static data
+//-----------------------------------------------------------------------
 
 const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
@@ -26,7 +38,7 @@ ExplicitModule::ExplicitModule
   dtime_ = 1.0;
   valid_ = false;
   lenScale_ = 1e-3;
-  SO3_dofs_.resize(0);
+  dofsSO3_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
   saftey_ = 0.9;
@@ -73,23 +85,23 @@ Module::Status ExplicitModule::init
   dofs_ = DofSpace::get(globdat, getContext());
   cons_ = Constraints::find(dofs_, globdat);
 
-  // Invalidate the state of this module when the DofSpace changes.
+  // invalidate_ the state of this module when the DofSpace changes.
 
-  connect(dofs_->newSizeEvent, this, &Self::invalidate);
-  connect(dofs_->newOrderEvent, this, &Self::invalidate);
+  connect(dofs_->newSizeEvent, this, &Self::invalidate_);
+  connect(dofs_->newOrderEvent, this, &Self::invalidate_);
 
   // get the SO3 dof names
 
   if (myProps.find(SO3_dof_names, SO3_DOFS))
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
-    SO3_dofs_.resize(SO3_dof_names.size());
+    dofsSO3_.resize(SO3_dof_names.size());
     rdofs_.resize(SO3_dof_names.size(), dofs_->dofCount() / dofs_->typeCount());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
     {
       IdxVector nodes;
-      SO3_dofs_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
-      dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, SO3_dofs_[i]);
+      dofsSO3_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
+      dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, dofsSO3_[i]);
     }
     myConf.set(SO3_DOFS, SO3_dof_names);
 
@@ -178,7 +190,7 @@ Module::Status ExplicitModule::init
   Globdat::initTime(globdat);
   Globdat::initStep(globdat);
   model_->takeAction(Actions::INIT, params, globdat);
-  updMass(globdat);
+  updateMass_(globdat);
 
   return OK;
 }
@@ -245,7 +257,7 @@ void ExplicitModule::advance(const Properties &globdat)
   // check if mass needs to be updated
   valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
   if (!valid_)
-    updMass(globdat);
+    updateMass_(globdat);
 
   // update time in models and boundary conditions
   Globdat::advanceTime(dtime_, globdat);
@@ -348,7 +360,7 @@ void ExplicitModule::updateVec(const Vector &y_new,
 
   if (rot)
   {
-    const idx_t rotCount = SO3_dofs_.size();
+    const idx_t rotCount = dofsSO3_.size();
     Vector r_node(rotCount);
     Vector d_r(rotCount);
     Matrix R_old(rotCount, rotCount);
@@ -399,10 +411,10 @@ ExplicitModule::getForce(const Vector &fint,
 }
 
 //-----------------------------------------------------------------------
-//   updMass
+//   updateMass_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::updMass(const Properties &globdat)
+void ExplicitModule::updateMass_(const Properties &globdat)
 {
   Properties params;
 
@@ -410,7 +422,7 @@ void ExplicitModule::updMass(const Properties &globdat)
       << " ...Updating mass information for explicit solver\n";
   model_->takeAction(Actions::UPD_MATRIX2, params, globdat);
 
-  if (SO3_dofs_.size())
+  if (dofsSO3_.size())
   {
     IdxVector iitems(dofs_->getItems()->size());
     iitems = jem::iarray(dofs_->getItems()->size());
@@ -418,9 +430,9 @@ void ExplicitModule::updMass(const Properties &globdat)
     jem::System::info(myName_)
         << " ...Updating SO(3) dof indices for explicit solver\n";
 
-    rdofs_.resize(SO3_dofs_.size(), dofs_->getItems()->size());
-    for (idx_t idof = 0; idof < SO3_dofs_.size(); idof++)
-      dofs_->getDofsForType(rdofs_(idof, ALL), iitems, SO3_dofs_[idof]);
+    rdofs_.resize(dofsSO3_.size(), dofs_->getItems()->size());
+    for (idx_t idof = 0; idof < dofsSO3_.size(); idof++)
+      dofs_->getDofsForType(rdofs_(idof, ALL), iitems, dofsSO3_[idof]);
   }
 
   if (mode_ == LUMPED)
@@ -439,10 +451,10 @@ void ExplicitModule::updMass(const Properties &globdat)
 }
 
 //-----------------------------------------------------------------------
-//   invalidate
+//   invalidate_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::invalidate()
+void ExplicitModule::invalidate_()
 {
   valid_ = false;
 }

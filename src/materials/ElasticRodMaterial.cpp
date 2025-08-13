@@ -1,6 +1,30 @@
+/**
+ * @file ElasticRodMaterial.cpp
+ * @author Til Gärtner
+ * @brief Implementation of linear elastic rod material with cross-sectional properties
+ */
 #include "materials/ElasticRodMaterial.h"
+
+#include "materials/MaterialFactory.h"
+#include "utils/helpers.h"
 #include "utils/testing.h"
+
+#include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalInputException.h>
+#include <jem/base/System.h>
+#include <jem/numeric/algebra/matmul.h>
+#include <jem/util/StringUtils.h>
+
+#include <jive/util/DofSpace.h>
+#include <jive/util/ObjectConverter.h>
+
+#include <math.h>
+
+using jem::newInstance;
+using jem::numeric::matmul;
+using jive::Ref;
+using jive::Vector;
 
 JEM_DEFINE_CLASS(ElasticRodMaterial);
 
@@ -39,6 +63,8 @@ ElasticRodMaterial::~ElasticRodMaterial()
 
 void ElasticRodMaterial::configure(const Properties &props, const Properties &globdat)
 {
+  using jive::util::DofSpace;
+
   Ref<DofSpace> dofs = DofSpace::get(globdat, getContext());
 
   Properties myProps = props.getProps(myName_);
@@ -52,55 +78,99 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   dofCount = dofs->typeCount();
 
   myProps.get(young_, YOUNGS_MODULUS);
+
+  // Validate Young's modulus
+  if (young_ <= 0.0)
+  {
+    throw jem::IllegalInputException(
+        getContext() + ": Young's modulus must be positive, got " + String(young_));
+  }
+
   if (!myProps.find(shearMod_, SHEAR_MODULUS))
   {
     double nu;
     myProps.get(nu, POISSON_RATIO);
+
+    // Validate Poisson's ratio
+    if (nu <= -1.0 || nu >= 0.5)
+    {
+      throw jem::IllegalInputException(
+          getContext() + ": Poisson's ratio must be in range (-1, 0.5), got " + String(nu));
+    }
+
     shearMod_ = young_ / 2. / (nu + 1.);
+  }
+  else
+  {
+    // Validate shear modulus
+    if (shearMod_ <= 0.0)
+    {
+      throw jem::IllegalInputException(
+          getContext() + ": Shear modulus must be positive, got " + String(shearMod_));
+    }
   }
 
   areaMoment_.resize(2);
 
-  if (!myProps.find(cross_section_, CROSS_SECTION))
+  if (!myProps.find(crossSection_, CROSS_SECTION))
   {
     myProps.get(area_, AREA);
     myProps.get(areaMoment_, AREA_MOMENT);
+
+    // Validate geometric properties
+    if (area_ <= 0.0)
+    {
+      throw jem::IllegalInputException(
+          getContext() + ": Cross-sectional area must be positive, got " + String(area_));
+    }
+
     if (areaMoment_.size() == 1)
     {
       areaMoment_.reshape(2);
       areaMoment_[1] = areaMoment_[0];
     }
-    shearParam_ = 5. / 6.; // assume standard square cross-section
-  }
-  else if (cross_section_ == "square")
-  {
-    myProps.get(side_length_, SIDE_LENGTH);
-    JEM_ASSERT2(side_length_.size() == 1, "A square has only one side!");
-    side_length_.reshape(2);
-    side_length_[1] = side_length_[0];
 
-    area_ = pow(side_length_[0], 2);
-    areaMoment_[0] = areaMoment_[1] = pow(side_length_[0], 4) / 12.;
+    // Validate area moments
+    for (idx_t i = 0; i < areaMoment_.size(); ++i)
+    {
+      if (areaMoment_[i] <= 0.0)
+      {
+        throw jem::IllegalInputException(
+            getContext() + ": Area moment of inertia must be positive, got " + String(areaMoment_[i]));
+      }
+    }
+
+    shearParam_ = 5. / 6.; // standard square cross-section
+  }
+  else if (crossSection_ == "square")
+  {
+    myProps.get(sideLength_, SIDE_LENGTH);
+    JEM_ASSERT2(sideLength_.size() == 1, "A square has only one side!");
+    sideLength_.reshape(2);
+    sideLength_[1] = sideLength_[0];
+
+    area_ = pow(sideLength_[0], 2);
+    areaMoment_[0] = areaMoment_[1] = pow(sideLength_[0], 4) / 12.;
     shearParam_ = 5. / 6.;
 
-    cross_section_ = "rectangle";
+    crossSection_ = "rectangle";
   }
-  else if (cross_section_ == "circle")
+  else if (crossSection_ == "circle")
   {
     myProps.get(radius_, RADIUS);
     area_ = M_PI * pow(radius_, 2);
     areaMoment_ = M_PI * pow(radius_, 4) / 4.;
     shearParam_ = 9. / 10.;
   }
-  else if (cross_section_ == "rectangle")
+  else if (crossSection_ == "rectangle")
   {
-    myProps.get(side_length_, SIDE_LENGTH);
-    JEM_ASSERT2(side_length_.size() == 2,
+    myProps.get(sideLength_, SIDE_LENGTH);
+    JEM_ASSERT2(sideLength_.size() == 2,
                 "A rectangle has only two sides!");
-    area_ = jem::product(side_length_);
+    area_ = jem::product(sideLength_);
 
-    areaMoment_[0] = pow(side_length_[1], 3) * side_length_[0] / 12.;
-    areaMoment_[1] = pow(side_length_[0], 3) * side_length_[1] / 12.;
+    areaMoment_[0] = pow(sideLength_[1], 3) * sideLength_[0] / 12.;
+    areaMoment_[1] = pow(sideLength_[0], 3) * sideLength_[1] / 12.;
 
     shearParam_ = 5. / 6.;
   }
@@ -115,6 +185,13 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 
   density_ = 0.;
   myProps.find(density_, DENSITY);
+
+  // Validate density
+  if (density_ < 0.0)
+  {
+    throw jem::IllegalInputException(
+        getContext() + ": Density cannot be negative, got " + String(density_));
+  }
 
   calcMaterialStiff_();
   calcMaterialMass_();
@@ -140,13 +217,13 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
           << materialM_ << "\n";
   }
 
-  old_Strains_.resize(dofCount, ipCount, elemCount);
-  old_Strains_ = 0.;
-  curr_Strains_.resize(dofCount, ipCount, elemCount);
-  curr_Strains_ = 0.;
+  oldStrains_.resize(dofCount, ipCount, elemCount);
+  oldStrains_ = 0.;
+  currStrains_.resize(dofCount, ipCount, elemCount);
+  currStrains_ = 0.;
 
-  E_pot_.resize(ipCount, elemCount);
-  E_pot_ = 0.;
+  energyPot_.resize(ipCount, elemCount);
+  energyPot_ = 0.;
 }
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -161,14 +238,14 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
   myConf.set(AREA_MOMENT, areaMoment_);
   myConf.set(POLAR_MOMENT, polarMoment_);
 
-  if (cross_section_ == "rectangle")
+  if (crossSection_ == "rectangle")
   {
-    myConf.set(CROSS_SECTION, cross_section_);
-    myConf.set(SIDE_LENGTH, side_length_);
+    myConf.set(CROSS_SECTION, crossSection_);
+    myConf.set(SIDE_LENGTH, sideLength_);
   }
-  else if (cross_section_ == "circle")
+  else if (crossSection_ == "circle")
   {
-    myConf.set(CROSS_SECTION, cross_section_);
+    myConf.set(CROSS_SECTION, crossSection_);
     myConf.set(RADIUS, radius_);
   }
 
@@ -288,37 +365,40 @@ void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
 {
-  curr_Strains_(ALL, ip, ielem) = strain;
+  currStrains_(ALL, ip, ielem) = strain;
   stress = matmul(getMaterialStiff(ielem, ip), strain);
 }
 
 void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
 {
+  using jive::IdxVector;
+  using jive::util::XTable;
+
   WARN(name + " not supported by this material");
 }
 
-void ElasticRodMaterial::apply_deform()
+void ElasticRodMaterial::applyDeform()
 {
 
-  for (idx_t ielem = 0; ielem < curr_Strains_.size(2); ielem++)
+  for (idx_t ielem = 0; ielem < currStrains_.size(2); ielem++)
   {
-    for (idx_t ip = 0; ip < curr_Strains_.size(1); ip++)
+    for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      E_pot_(ip, ielem) = 0.5 * dotProduct(curr_Strains_(ALL, ip, ielem), matmul(getMaterialStiff(ielem, ip), curr_Strains_(ALL, ip, ielem)));
+      energyPot_(ip, ielem) = 0.5 * dotProduct(currStrains_(ALL, ip, ielem), matmul(getMaterialStiff(ielem, ip), currStrains_(ALL, ip, ielem)));
     }
   }
 
-  old_Strains_ = curr_Strains_;
+  oldStrains_ = currStrains_;
 }
 
-void ElasticRodMaterial::reject_deform()
+void ElasticRodMaterial::rejectDeform()
 {
-  curr_Strains_ = old_Strains_;
+  currStrains_ = oldStrains_;
 }
 
 double ElasticRodMaterial::getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const
 {
-  return E_pot_(ip, ielem);
+  return energyPot_(ip, ielem);
 }
 
 double ElasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
