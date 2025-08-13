@@ -9,8 +9,8 @@
 
 # 1. Install `apptainer` and get the `.sif` file
 1. Install `apptainer` following the [quick start guide](https://apptainer.org/get-started/).
-2. Download the pre-built `.sif` from [TODO] or build it yourself.
-3. (Optional) define an alias for easier executing, e.g. `alias jive="apptainer -s exec -e --env DISPLAY=$DISPLAY </full/path/to/>jive.sif"`
+2. Download the pre-built `.sif` from the repository or build it yourself.
+3. Define an alias for easier executing, e.g. `alias jive="apptainer -s exec -e --env DISPLAY=$DISPLAY </full/path/to/>jive.sif"` 
 
 # (Optional) build the `.sif` file yourself
 A `.def` file is provided to build the container yourself.

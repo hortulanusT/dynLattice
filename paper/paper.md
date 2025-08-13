@@ -47,13 +47,20 @@ There is a wide plethora of existing finite element toolkits available in the ma
 The usage of these libraries for explicit dynamics with inelastic beams however, would require substantial alteration of their code, as for example in FEniCS explicit dynamics is only available using lumped mass matrices, which would be nonphysical for the rotational inertia contributions of the beams, in deal.II neither beam elements nor explicit solves are available and in MOOSE only a limited Timoshenko-Ehrenfest beam is implemented with only elastic behavior.
 Other finite element toolkits having built in beam-elements and explicit dynamics include Kratos [@kratos; @Dadvand2010] and Akantu [@Richart2024].
 For Kratos similar problems as for MOOSE can be seen in only a limited set of beam elements being available and none supporting inelastic behavior in the cross-sectional strain measures.
-Akantu, focusing on fracture mechanics and providing a solid representation of contact, on the other hand only provides Euler-Bernoulli beam elements, neglecting all shear deformation whithin the elements
+Akantu, focusing on fracture mechanics and providing a solid representation of contact, on the other hand only provides Euler-Bernoulli beam elements, neglecting all shear deformation within the elements.
 
 # Background
-The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software.
-A more detailed description can be found in [@gärtner_diss]
+The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
+![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="70%"}
 
-TODO (~400 words)
+In \autoref{fig:label}, a beam undergoing large deformation is shown. 
+A beam is described with the centerline \f$\bm{x}(s)\f$, where \f$s\in[s_0,s_1]\f$ is the measure along the length of the beam, with two orthonormal directors attached to it \f$\bm{d}_1(s),\bm{d}_2(s)\f$.
+Together with a third orthonormal director \f$\bm{d}_3(s)=\bm{d}_1(s)\times\bm{d}_2(s)\f$, these are the column vectors of the rotation matrix between the global reference frame and the local coordinate frame of the beam:
+\begin{equation}
+  \bm{\Lambda}(s)=\bm{d}_i(s)\otimes\bm{e}_i=\begin{bmatrix}\bm{d}_1(s)&\bm{d}_2(s)&\bm{d}_3(s)\end{bmatrix}.
+\end{equation}
+From these measures, strain prescriptors, describing stretching, shearing, bending, and twisting of the beam can be derived. 
+These strain prescriptors are then used together with the material model of the beam, be it elastic (cf. [@simo86; @eugster15]) or elasto-plastic (cf. [@smriti20; @herrnböck22; @gärtner25]), to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
 
 # Publications
 [dynLattice]{.sc} has already been used in a series of publications [@gärtner24; @gärtner25; @gärtner_TNO] and laid the foundation for several student theses [@niessen22; @ijzendoorn24; @smit24].
