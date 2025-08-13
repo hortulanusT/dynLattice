@@ -1,5 +1,5 @@
 ---
-title: 'dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials'
+title: '[dynLattice]{.sc}: A finite element environment for dynamic simulation of beam networks and lattice metamaterials'
 tags:
   - finite elements
   - geometrically exact beams
@@ -10,8 +10,8 @@ authors:
   - name: Til Gärtner
     orcid: 0000-0002-5088-855X
     affiliation: "1, 2"
-  - given-names: Frans P.
-    dropping-particle: van der
+  - names: Frans P.
+    non-dropping-particle: van der
     surname: Meer
     orcid: 0000-0002-6691-1259
     affiliation: 1
