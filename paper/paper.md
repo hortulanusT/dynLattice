@@ -62,7 +62,7 @@ From these measures, strain prescriptors, describing stretching, shearing, bendi
 These strain prescriptors are then used together with the material model of the beam, be it elastic (cf. [@simo86; @eugster15]) or elasto-plastic (cf. [@smriti20; @herrnböck22; @gärtner25]), to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
 
 # Publications
-[dynLattice]{.sc} has already been used in a series of publications [@gärtner24; @gärtner25; @gärtner_TNO] and laid the foundation for several student theses [@niessen22; @ijzendoorn24; @smit24].
+[dynLattice]{.sc} has already been used in a series of publications [@gärtner24; @gärtner25; @gärtner_TNO; @gärtner25b] and laid the foundation for several student theses [@niessen22; @ijzendoorn24; @smit24].
 During these efforts it was used both on big computational clusters [@DHPC2024] and on various local machines using the provided `apptainer`. 
 
 # Acknowledgements
