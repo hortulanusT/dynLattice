@@ -1,7 +1,7 @@
 # dynLattice
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Static Badge](https://img.shields.io/badge/Docs-online-00a6d6)](https://hortulanust.github.io/dynLattice/)
+[![Static Badge](https://img.shields.io/badge/Docs-v1.11-00a6d6)](https://hortulanust.github.io/dynLattice/)
 
 dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the [Simo & Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) formulation with support for inelastic materials, explicit time marching, and contact mechanics.
 
