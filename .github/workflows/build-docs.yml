@@ -8,13 +8,15 @@ on:
       - .github/workflows/build-docs.yml
 
 jobs:
-  paper:
+  documentation:
     runs-on: ubuntu-latest
     name: Doxygen Documentation
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Apptainer provider
+        uses: actions/checkout@v5
+        with:
+          lfs: true
+      - name: Apptainer
         uses: eWaterCycle/setup-apptainer@v2
         with:
           apptainer-version: 1.4.2
