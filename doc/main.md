@@ -19,4 +19,5 @@ The following publications are using the code in this repository:
 - [Geometric effects on impact mitigation in architected auxetic metamaterials](https://doi.org/10.1016/j.mechmat.2024.104952)
 - [A strategy for scaling the hardening behavior in finite element modelling of geometrically exact beams](https://doi.org/10.1007/s00466-024-02572-3)
 - [(In)efficacy of architected auxetic materials for impact mitigation](https://doi.org/10.1016/j.ijimpeng.2025.105402)
+- [Force transmission and dissipation in dynamic compression of architected metamaterials](https://doi.org/10.31224/5224)
 
