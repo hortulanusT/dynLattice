@@ -1,7 +1,7 @@
 # dynLattice
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Static Badge](https://img.shields.io/badge/Docs-v1.11-00a6d6)](https://hortulanust.github.io/dynLattice/)
+[![Docs: v1.11](https://img.shields.io/badge/Docs-v1.11-00a6d6)](https://hortulanust.github.io/dynLattice/)
 
 dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the [Simo & Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) formulation with support for inelastic materials, explicit time marching, and contact mechanics.
 
@@ -14,6 +14,15 @@ dynLattice is a finite element environment for dynamic simulation of beam networ
 - **GMSH integration** for mesh generation
 - **Containerized environment** with Apptainer for reproducible simulations
 - **Comprehensive test suite** with validation benchmarks
+
+## Publications
+<!-- Journal Articles -->
+[![Article: Mech. Mater.](https://img.shields.io/badge/Article-Mech.%20Mater.%20(2024)-orange?logo=DOI)](https://doi.org/10.1016/j.mechmat.2024.104952)
+[![Article: Comput. Mech.](https://img.shields.io/badge/Article-Comput.%20Mech.%20(2025)-orange?logo=DOI)](https://doi.org/10.1007/s00466-024-02572-3)
+[![Article: Int. J. Impact Eng.](https://img.shields.io/badge/Article-Int.%20J.%20Impact%20Eng.%20(2025)-orange?logo=DOI)](https://doi.org/10.1016/j.ijimpeng.2025.105402)
+<!-- Other Publications -->
+[![Preprint: engrXiv](https://img.shields.io/badge/Preprint-engrXiv%20(2025)-orange?logo=DOI)](https://doi.org/10.31224/5224)
+[![Dissertation: TU Delft](https://img.shields.io/badge/Dissertation-TU%20Delft%20(2025)-00a6d6?logo=DOI)](https://doi.org/10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f)
 
 ## Quick Start
 
