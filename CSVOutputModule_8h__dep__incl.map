@@ -1,0 +1,11 @@
+<map id="src/modules/CSVOutputModule.h" name="src/modules/CSVOutputModule.h">
+<area shape="rect" id="Node000001" title="CSV output module for data export in comma&#45;separated values format." alt="" coords="144,5,379,31"/>
+<area shape="rect" id="Node000002" href="$CSVOutputModule_8cpp.html" title="Implementation of CSVOutputModule class." alt="" coords="5,79,256,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,40,153,81,151,76,227,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="280,79,507,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,35,373,76,370,81,293,39"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="241,152,346,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="368,114,311,154,308,150,365,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="371,152,613,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="422,110,477,150,474,154,418,114"/>
+</map>

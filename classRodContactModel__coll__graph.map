@@ -1,0 +1,5 @@
+<map id="RodContactModel" name="RodContactModel">
+<area shape="rect" id="Node000001" title="Model for rod&#45;to&#45;rod contact interactions using penalty methods." alt="" coords="5,79,143,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="43,5,105,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,44,77,79,71,79,71,44"/>
+</map>

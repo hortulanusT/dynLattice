@@ -1,0 +1,11 @@
+<map id="src/modules/MilneDeviceModule.h" name="src/modules/MilneDeviceModule.h">
+<area shape="rect" id="Node000001" title="Milne device predictor&#45;corrector method for explicit time integration." alt="" coords="146,5,393,31"/>
+<area shape="rect" id="Node000002" href="$MilneDeviceModule_8cpp.html" title="Implementation of Milne device predictor&#45;corrector method." alt="" coords="5,79,267,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,39,159,81,157,76,235,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="291,79,517,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="304,35,383,76,381,81,302,39"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="251,152,357,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,114,322,154,319,150,375,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="381,152,624,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="432,110,488,150,485,154,429,114"/>
+</map>

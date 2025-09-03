@@ -1,0 +1,25 @@
+<map id="src/modules/ExplicitModule.h" name="src/modules/ExplicitModule.h">
+<area shape="rect" id="Node000001" title="Base class for explicit time integration methods." alt="" coords="560,5,773,31"/>
+<area shape="rect" id="Node000002" href="$EmbeddedRKModule_8h.html" title="Embedded Runge&#45;Kutta methods for explicit time integration." alt="" coords="149,79,401,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="591,36,339,81,338,76,590,30"/>
+<area shape="rect" id="Node000007" href="$ExplicitModule_8cpp.html" title="Implementation of ExplicitModule class." alt="" coords="943,79,1171,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="743,30,995,76,994,81,742,36"/>
+<area shape="rect" id="Node000008" href="$LeapFrogModule_8h.html" title="Leap&#45;frog time integration algorithm for explicit dynamics." alt="" coords="425,79,649,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="635,40,560,81,557,76,632,35"/>
+<area shape="rect" id="Node000010" href="$MilneDeviceModule_8h.html" title="Milne device predictor&#45;corrector method for explicit time integration." alt="" coords="673,79,919,104"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="701,35,776,76,774,81,698,40"/>
+<area shape="rect" id="Node000003" href="$EmbeddedRKModule_8cpp.html" title="Implementation of EmbeddedRKModule class." alt="" coords="5,152,272,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="242,113,162,154,160,149,240,108"/>
+<area shape="rect" id="Node000004" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="296,152,523,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="310,108,389,149,386,154,307,113"/>
+<area shape="rect" id="Node000005" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="258,225,363,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="384,187,328,227,325,223,381,183"/>
+<area shape="rect" id="Node000006" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="388,225,631,251"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="438,183,495,223,491,227,435,187"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="506,113,432,154,429,149,503,108"/>
+<area shape="rect" id="Node000009" href="$LeapFrogModule_8cpp.html" title="Implementation of leap&#45;frog time integration algorithm." alt="" coords="547,152,786,177"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="572,108,647,149,644,154,569,113"/>
+<area shape="poly" id="edge12_Node000010_Node000004" title=" " alt="" coords="721,109,472,155,471,149,720,104"/>
+<area shape="rect" id="Node000011" href="$MilneDeviceModule_8cpp.html" title="Implementation of Milne device predictor&#45;corrector method." alt="" coords="811,152,1072,177"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="833,108,919,149,916,154,830,112"/>
+</map>

@@ -1,0 +1,31 @@
+<map id="src/misc/Line3D.h" name="src/misc/Line3D.h">
+<area shape="rect" id="Node000001" title="Shape function for 1D line elements in 3D space." alt="" coords="126,5,263,31"/>
+<area shape="rect" id="Node000002" href="$Line3D_8cpp.html" title="Implementation of shape functions for 1D line elements in 3D space." alt="" coords="5,86,157,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,41,100,88,97,84,165,36"/>
+<area shape="rect" id="Node000003" href="$RodContactModel_8h.html" title="Contact model for rod&#45;to&#45;rod interactions." alt="" coords="33,174,257,199"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,45,172,119,152,175,147,173,167,118,186,44"/>
+<area shape="rect" id="Node000008" href="$SpecialCosseratRodModel_8h.html" title="Special Cosserat rod model implementation." alt="" coords="401,79,602,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="253,31,428,76,427,81,252,37"/>
+<area shape="rect" id="Node000004" href="$RodContactModel_8cpp.html" title="Implementation of RodContactModel class." alt="" coords="26,255,265,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="148,213,148,254,143,254,143,213"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="617,255,828,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="233,199,270,204,632,252,632,257,269,209,232,204"/>
+<area shape="rect" id="Node000006" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="574,328,679,353"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="698,290,644,330,641,326,695,286"/>
+<area shape="rect" id="Node000007" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="704,328,931,353"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="750,286,803,326,800,330,747,290"/>
+<area shape="poly" id="edge14_Node000008_Node000003" title=" " alt="" coords="411,124,193,177,192,171,409,119"/>
+<area shape="poly" id="edge16_Node000008_Node000005" title=" " alt="" coords="616,115,697,135,729,149,750,165,759,188,755,214,745,237,734,256,729,253,740,235,750,212,753,189,746,168,727,154,696,140,615,120"/>
+<area shape="rect" id="Node000009" href="$HingeModel_8h.html" title="Hinge model for rigid joints between Cosserat rod elements." alt="" coords="811,174,997,199"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="604,119,851,171,850,177,603,124"/>
+<area shape="rect" id="Node000011" href="$JointContactModel_8h.html" title="Contact model for spherical joint interactions." alt="" coords="507,174,735,199"/>
+<area shape="poly" id="edge11_Node000008_Node000011" title=" " alt="" coords="541,125,607,172,604,176,538,129"/>
+<area shape="rect" id="Node000013" href="$SpecialCosseratRodModel_8cpp.html" title="Implementation of SpecialCosseratRodModel class." alt="" coords="282,167,483,207"/>
+<area shape="poly" id="edge15_Node000008_Node000013" title=" " alt="" coords="465,129,410,169,407,164,462,125"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="866,207,750,257,748,252,864,202"/>
+<area shape="rect" id="Node000010" href="$HingeModel_8cpp.html" title="Implementation of hinge model for rigid joints between Cosserat rod elements." alt="" coords="852,255,1055,280"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="921,210,948,253,944,256,916,212"/>
+<area shape="poly" id="edge13_Node000011_Node000005" title=" " alt="" coords="649,206,709,252,706,257,646,210"/>
+<area shape="rect" id="Node000012" href="$JointContactModel_8cpp.html" title="Implementation of contact model for spherical joint interactions." alt="" coords="351,255,593,280"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="589,208,495,257,493,252,586,203"/>
+</map>

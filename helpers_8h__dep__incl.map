@@ -1,0 +1,95 @@
+<map id="src/utils/helpers.h" name="src/utils/helpers.h">
+<area shape="rect" id="Node000001" title="file containing some basic helper functions" alt="" coords="1007,5,1145,31"/>
+<area shape="rect" id="Node000002" href="$ElasticRodMaterial_8cpp.html" title="Implementation of linear elastic rod material with cross&#45;sectional properties." alt="" coords="5,79,184,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="994,24,646,41,422,58,196,81,184,83,184,78,196,76,422,52,646,36,994,19"/>
+<area shape="rect" id="Node000003" href="$ElastoPlasticRodMaterial_8cpp.html" title="Implementation of elasto&#45;plastic rod material with yield conditions and hardening." alt="" coords="208,79,403,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="994,27,735,47,415,81,403,83,403,78,414,76,735,42,993,22"/>
+<area shape="rect" id="Node000004" href="$Line3D_8h.html" title="Shape function for 1D line elements in 3D space." alt="" coords="427,86,565,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="994,33,565,91,564,85,993,28"/>
+<area shape="rect" id="Node000011" href="$SpecialCosseratRodModel_8h.html" title="Special Cosserat rod model implementation." alt="" coords="369,167,570,207"/>
+<area shape="poly" id="edge32_Node000001_Node000011" title=" " alt="" coords="994,29,858,47,782,62,707,81,650,101,595,125,504,169,502,164,592,120,648,96,706,76,781,57,857,42,993,24"/>
+<area shape="rect" id="Node000012" href="$HingeModel_8h.html" title="Hinge model for rigid joints between Cosserat rod elements." alt="" coords="971,262,1157,287"/>
+<area shape="poly" id="edge23_Node000001_Node000012" title=" " alt="" coords="1132,34,1163,51,1189,77,1207,111,1215,142,1212,174,1196,208,1179,228,1159,244,1114,264,1112,259,1156,239,1176,224,1191,205,1207,172,1210,143,1203,113,1185,80,1160,55,1130,38"/>
+<area shape="rect" id="Node000017" href="$FollowerLoadModel_8h.html" title="Follower load model for direction&#45;dependent loading." alt="" coords="719,86,953,111"/>
+<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="1029,37,872,89,870,83,1027,32"/>
+<area shape="rect" id="Node000019" href="$PeriodicBCModel_8h.html" title="Periodic boundary conditions model for rectangular unit cells." alt="" coords="1256,174,1475,199"/>
+<area shape="poly" id="edge24_Node000001_Node000019" title=" " alt="" coords="1133,32,1185,51,1239,76,1275,100,1308,127,1356,172,1353,176,1304,131,1271,104,1236,81,1183,56,1131,37"/>
+<area shape="rect" id="Node000025" href="$SymBCModel_8h.html" title="Symmetry boundary conditions model for plane symmetry constraints." alt="" coords="978,86,1174,111"/>
+<area shape="poly" id="edge33_Node000001_Node000025" title=" " alt="" coords="1079,44,1079,86,1073,86,1073,44"/>
+<area shape="rect" id="Node000027" href="$ExplicitModule_8h.html" title="Base class for explicit time integration methods." alt="" coords="1768,174,1981,199"/>
+<area shape="poly" id="edge36_Node000001_Node000027" title=" " alt="" coords="1145,31,1820,171,1819,177,1144,36"/>
+<area shape="rect" id="Node000035" href="$GroupOutputModule_8h.html" title="Module for extracting and storing group&#45;based output data." alt="" coords="2428,86,2676,111"/>
+<area shape="poly" id="edge47_Node000001_Node000035" title=" " alt="" coords="1158,21,2428,88,2428,93,1158,26"/>
+<area shape="rect" id="Node000039" href="$helpers_8cpp.html" title="file containing some basic helper functions" alt="" coords="2700,86,2852,111"/>
+<area shape="poly" id="edge54_Node000001_Node000039" title=" " alt="" coords="1159,18,1918,35,2362,52,2548,63,2688,76,2730,83,2729,89,2688,81,2547,68,2362,57,1917,40,1158,23"/>
+<area shape="rect" id="Node000005" href="$Line3D_8cpp.html" title="Implementation of shape functions for 1D line elements in 3D space." alt="" coords="192,174,344,199"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="454,119,300,176,298,171,452,114"/>
+<area shape="rect" id="Node000006" href="$RodContactModel_8h.html" title="Contact model for rod&#45;to&#45;rod interactions." alt="" coords="92,262,316,287"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="435,117,415,121,378,126,344,127,284,123,257,124,231,130,207,144,182,168,176,179,173,191,177,216,187,241,198,261,194,263,182,243,172,218,168,190,171,177,178,165,204,140,229,125,256,119,284,118,344,121,377,121,414,116,434,112"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="491,125,478,167,473,165,486,124"/>
+<area shape="rect" id="Node000007" href="$RodContactModel_8cpp.html" title="Implementation of RodContactModel class." alt="" coords="85,350,323,375"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="207,301,207,349,201,349,201,301"/>
+<area shape="rect" id="Node000008" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="801,350,1012,375"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="290,287,328,292,559,316,790,340,840,347,839,353,789,345,558,321,328,297,289,292"/>
+<area shape="rect" id="Node000009" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="1685,431,1790,456"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="987,375,1024,380,1215,400,1402,417,1685,436,1684,442,1402,422,1214,406,1024,385,986,380"/>
+<area shape="rect" id="Node000010" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="793,431,1020,456"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="909,389,909,430,904,430,904,389"/>
+<area shape="poly" id="edge17_Node000011_Node000006" title=" " alt="" coords="399,213,240,265,238,259,398,208"/>
+<area shape="poly" id="edge19_Node000011_Node000008" title=" " alt="" coords="584,205,721,230,776,242,807,252,838,274,865,301,901,348,897,351,861,305,835,279,804,257,774,247,720,235,583,210"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="584,204,977,259,977,265,583,209"/>
+<area shape="rect" id="Node000014" href="$JointContactModel_8h.html" title="Contact model for spherical joint interactions." alt="" coords="566,262,794,287"/>
+<area shape="poly" id="edge14_Node000011_Node000014" title=" " alt="" coords="529,209,653,260,651,264,527,214"/>
+<area shape="rect" id="Node000016" href="$SpecialCosseratRodModel_8cpp.html" title="Implementation of SpecialCosseratRodModel class." alt="" coords="341,255,542,295"/>
+<area shape="poly" id="edge18_Node000011_Node000016" title=" " alt="" coords="461,221,450,255,445,254,456,219"/>
+<area shape="poly" id="edge13_Node000012_Node000008" title=" " alt="" coords="1032,296,929,352,927,347,1030,292"/>
+<area shape="rect" id="Node000013" href="$HingeModel_8cpp.html" title="Implementation of hinge model for rigid joints between Cosserat rod elements." alt="" coords="1036,350,1239,375"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1085,296,1129,348,1125,351,1081,300"/>
+<area shape="poly" id="edge16_Node000014_Node000008" title=" " alt="" coords="724,290,877,347,875,352,722,295"/>
+<area shape="rect" id="Node000015" href="$JointContactModel_8cpp.html" title="Implementation of contact model for spherical joint interactions." alt="" coords="535,350,777,375"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="676,301,662,350,657,349,670,300"/>
+<area shape="poly" id="edge22_Node000017_Node000008" title=" " alt="" coords="847,124,860,166,907,349,901,351,855,167,842,125"/>
+<area shape="rect" id="Node000018" href="$FollowerLoadModel_8cpp.html" title="Implementation of follower load model for direction&#45;dependent loading." alt="" coords="595,174,845,199"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="811,122,737,176,734,172,808,117"/>
+<area shape="poly" id="edge26_Node000019_Node000008" title=" " alt="" coords="1323,207,1273,229,1221,257,1197,278,1171,297,1125,316,1078,332,988,352,987,347,1076,327,1123,311,1168,292,1193,273,1219,252,1271,224,1321,202"/>
+<area shape="rect" id="Node000020" href="$PeriodicBCModel_8cpp.html" title="Implementation of PeriodicBCModel class." alt="" coords="1232,262,1467,287"/>
+<area shape="poly" id="edge25_Node000019_Node000020" title=" " alt="" coords="1363,213,1354,262,1349,261,1358,212"/>
+<area shape="rect" id="Node000021" href="$TangentOutputModule_8h.html" title="Module for calculating tangent elastic properties via homogenization." alt="" coords="2640,255,2840,295"/>
+<area shape="poly" id="edge27_Node000019_Node000021" title=" " alt="" coords="1488,191,1945,215,2527,252,2640,261,2639,267,2526,257,1945,221,1488,197"/>
+<area shape="rect" id="Node000022" href="$TangentOutputModule_8cpp.html" title="Implementation of tangent elastic property calculation module." alt="" coords="2664,343,2864,383"/>
+<area shape="poly" id="edge28_Node000021_Node000022" title=" " alt="" coords="2752,307,2761,342,2756,343,2746,309"/>
+<area shape="rect" id="Node000023" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="2413,350,2640,375"/>
+<area shape="poly" id="edge29_Node000021_Node000023" title=" " alt="" coords="2681,302,2556,352,2554,348,2679,297"/>
+<area shape="poly" id="edge30_Node000023_Node000009" title=" " alt="" coords="2442,380,2402,385,2053,420,1791,441,1790,436,2053,415,2401,380,2441,375"/>
+<area shape="rect" id="Node000024" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="2405,431,2648,456"/>
+<area shape="poly" id="edge31_Node000023_Node000024" title=" " alt="" coords="2529,389,2529,430,2524,430,2524,389"/>
+<area shape="poly" id="edge35_Node000025_Node000008" title=" " alt="" coords="1030,119,993,139,961,168,946,191,934,216,919,268,912,316,909,350,904,350,906,316,914,267,929,214,941,189,957,165,990,135,1027,114"/>
+<area shape="rect" id="Node000026" href="$SymBCModel_8cpp.html" title="Implementation of SymBCModel class." alt="" coords="971,174,1181,199"/>
+<area shape="poly" id="edge34_Node000025_Node000026" title=" " alt="" coords="1079,125,1079,173,1073,173,1073,125"/>
+<area shape="rect" id="Node000028" href="$EmbeddedRKModule_8h.html" title="Embedded Runge&#45;Kutta methods for explicit time integration." alt="" coords="2262,262,2514,287"/>
+<area shape="poly" id="edge37_Node000027_Node000028" title=" " alt="" coords="1958,199,2320,259,2319,265,1957,204"/>
+<area shape="rect" id="Node000030" href="$ExplicitModule_8cpp.html" title="Implementation of ExplicitModule class." alt="" coords="1761,262,1989,287"/>
+<area shape="poly" id="edge40_Node000027_Node000030" title=" " alt="" coords="1877,213,1877,261,1872,261,1872,213"/>
+<area shape="rect" id="Node000031" href="$LeapFrogModule_8h.html" title="Leap&#45;frog time integration algorithm for explicit dynamics." alt="" coords="2013,262,2237,287"/>
+<area shape="poly" id="edge41_Node000027_Node000031" title=" " alt="" coords="1923,201,2093,259,2091,264,1921,207"/>
+<area shape="rect" id="Node000033" href="$MilneDeviceModule_8h.html" title="Milne device predictor&#45;corrector method for explicit time integration." alt="" coords="1490,262,1737,287"/>
+<area shape="poly" id="edge44_Node000027_Node000033" title=" " alt="" coords="1827,206,1649,264,1648,259,1826,201"/>
+<area shape="poly" id="edge39_Node000028_Node000023" title=" " alt="" coords="2420,292,2509,347,2506,352,2417,297"/>
+<area shape="rect" id="Node000029" href="$EmbeddedRKModule_8cpp.html" title="Implementation of EmbeddedRKModule class." alt="" coords="2123,350,2389,375"/>
+<area shape="poly" id="edge38_Node000028_Node000029" title=" " alt="" coords="2360,297,2275,352,2272,347,2357,293"/>
+<area shape="poly" id="edge43_Node000031_Node000023" title=" " alt="" coords="2193,288,2474,347,2473,353,2192,293"/>
+<area shape="rect" id="Node000032" href="$LeapFrogModule_8cpp.html" title="Implementation of leap&#45;frog time integration algorithm." alt="" coords="1859,350,2098,375"/>
+<area shape="poly" id="edge42_Node000031_Node000032" title=" " alt="" coords="2095,297,2000,352,1997,347,2092,292"/>
+<area shape="poly" id="edge46_Node000033_Node000023" title=" " alt="" coords="1704,286,1750,292,1933,308,2076,315,2218,323,2402,340,2457,347,2456,353,2401,345,2218,329,2075,321,1932,313,1749,297,1703,292"/>
+<area shape="rect" id="Node000034" href="$MilneDeviceModule_8cpp.html" title="Implementation of Milne device predictor&#45;corrector method." alt="" coords="1483,350,1744,375"/>
+<area shape="poly" id="edge45_Node000033_Node000034" title=" " alt="" coords="1616,301,1616,349,1611,349,1611,301"/>
+<area shape="poly" id="edge53_Node000035_Node000023" title=" " alt="" coords="2552,125,2530,350,2525,350,2547,125"/>
+<area shape="rect" id="Node000036" href="$GroupOutputModule_8cpp.html" title="Implementation of group&#45;based output data extraction module." alt="" coords="2829,174,3091,199"/>
+<area shape="poly" id="edge48_Node000035_Node000036" title=" " alt="" coords="2621,112,2906,171,2905,177,2619,117"/>
+<area shape="rect" id="Node000037" href="$PBCGroupOutputModule_8h.html" title="Specialized output module for periodic boundary condition analysis." alt="" coords="2590,167,2805,207"/>
+<area shape="poly" id="edge49_Node000035_Node000037" title=" " alt="" coords="2585,116,2667,164,2664,169,2582,121"/>
+<area shape="poly" id="edge51_Node000037_Node000021" title=" " alt="" coords="2715,218,2733,253,2728,256,2710,220"/>
+<area shape="poly" id="edge52_Node000037_Node000023" title=" " alt="" coords="2669,218,2630,257,2539,352,2535,348,2626,253,2665,214"/>
+<area shape="rect" id="Node000038" href="$PBCGroupOutputModule_8cpp.html" title="Implementation of PBC&#45;specialized output module." alt="" coords="2865,255,3079,295"/>
+<area shape="poly" id="edge50_Node000037_Node000038" title=" " alt="" coords="2772,208,2913,252,2911,257,2770,213"/>
+</map>

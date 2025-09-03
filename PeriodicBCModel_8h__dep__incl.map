@@ -1,0 +1,20 @@
+<map id="src/models/PeriodicBCModel.h" name="src/models/PeriodicBCModel.h">
+<area shape="rect" id="Node000001" title="Periodic boundary conditions model for rectangular unit cells." alt="" coords="260,5,479,31"/>
+<area shape="rect" id="Node000002" href="$PeriodicBCModel_8cpp.html" title="Implementation of PeriodicBCModel class." alt="" coords="5,86,240,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="321,37,159,89,158,83,320,32"/>
+<area shape="rect" id="Node000003" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="264,86,475,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="372,44,372,86,367,86,367,44"/>
+<area shape="rect" id="Node000006" href="$TangentOutputModule_8h.html" title="Module for calculating tangent elastic properties via homogenization." alt="" coords="507,79,707,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="418,32,550,76,549,81,416,37"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="379,255,485,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="312,119,275,138,259,152,246,168,239,187,246,205,273,231,307,248,344,258,379,263,379,268,343,263,305,253,270,235,242,208,234,187,242,165,255,148,272,134,309,114"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="256,174,483,199"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="372,125,372,173,367,173,367,125"/>
+<area shape="rect" id="Node000007" href="$TangentOutputModule_8cpp.html" title="Implementation of tangent elastic property calculation module." alt="" coords="507,167,707,207"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="609,133,609,166,604,166,604,133"/>
+<area shape="rect" id="Node000008" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="731,174,957,199"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="673,121,813,171,812,176,671,126"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="771,204,485,259,484,253,770,199"/>
+<area shape="rect" id="Node000009" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="723,255,965,280"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="847,213,847,254,841,254,841,213"/>
+</map>

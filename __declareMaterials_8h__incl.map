@@ -1,0 +1,24 @@
+<map id="src/materials/_declareMaterials.h" name="src/materials/_declareMaterials.h">
+<area shape="rect" id="Node000001" title="Material registration utility for factory initialization." alt="" coords="435,5,674,31"/>
+<area shape="rect" id="Node000002" href="$ElasticRodMaterial_8h.html" title="Linear elastic rod material implementation with cross&#45;sectional properties." alt="" coords="337,174,559,199"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="550,32,465,164,460,161,545,29"/>
+<area shape="rect" id="Node000009" href="$ElastoPlasticRodMaterial_8h.html" title="Elasto&#45;plastic rod material with yield conditions and hardening." alt="" coords="545,79,741,119"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="569,29,613,68,610,72,566,33"/>
+<area shape="rect" id="Node000003" href="$Material_8h.html" title="Material class for representing different materials in the simulation." alt="" coords="371,255,525,280"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="451,200,451,241,445,241,445,200"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,328,136,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="388,283,146,328,145,323,387,277"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="160,328,347,353"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="418,283,299,326,297,321,416,278"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="371,328,525,353"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="451,280,451,314,445,314,445,280"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="550,328,645,353"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="473,278,562,320,559,324,471,282"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="669,328,800,353"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="495,277,676,322,674,327,493,283"/>
+<area shape="poly" id="edge9_Node000009_Node000002" title=" " alt="" coords="601,121,488,171,485,166,599,116"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="584,167,741,207"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="650,118,658,153,653,154,645,120"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="765,174,912,199"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="687,116,801,166,799,171,685,121"/>
+</map>

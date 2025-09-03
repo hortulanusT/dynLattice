@@ -1,0 +1,7 @@
+<map id="PBCGroupInputModule" name="PBCGroupInputModule">
+<area shape="rect" id="Node000001" title="Module for automatic periodic boundary condition node group generation." alt="" coords="5,152,173,177"/>
+<area shape="rect" id="Node000002" href="$classGroupInputModule.html" title="Module for generating node and element groups from input specifications." alt="" coords="18,79,161,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,118,92,152,87,152,87,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="54,5,125,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,44,92,79,87,79,87,44"/>
+</map>

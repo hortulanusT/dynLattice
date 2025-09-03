@@ -1,0 +1,11 @@
+<map id="src/modules/LeapFrogModule.h" name="src/modules/LeapFrogModule.h">
+<area shape="rect" id="Node000001" title="Leap&#45;frog time integration algorithm for explicit dynamics." alt="" coords="141,5,365,31"/>
+<area shape="rect" id="Node000002" href="$LeapFrogModule_8cpp.html" title="Implementation of leap&#45;frog time integration algorithm." alt="" coords="5,79,244,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,40,147,81,144,76,219,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="269,79,495,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="287,35,362,76,360,81,284,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="229,152,335,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="356,114,300,154,297,150,353,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="359,152,602,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="410,110,466,150,463,154,407,114"/>
+</map>

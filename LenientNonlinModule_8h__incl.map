@@ -1,0 +1,11 @@
+<map id="src/modules/LenientNonlinModule.h" name="src/modules/LenientNonlinModule.h">
+<area shape="rect" id="Node000001" title="Lenient nonlinear solver module with relaxed convergence criteria." alt="" coords="267,5,461,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,160,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,48,137,92,136,87,296,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="184,93,341,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="341,48,290,87,287,82,338,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="366,93,567,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="390,43,442,83,439,87,387,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="592,93,739,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="437,43,609,87,607,92,436,48"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="ExplicitModule" name="ExplicitModule">
+<area shape="rect" id="Node000001" title="Base class for explicit time integration schemes." alt="" coords="193,79,311,104"/>
+<area shape="rect" id="Node000003" href="$classEmbeddedRKModule.html" title="Module for embedded Runge&#45;Kutta time integration methods." alt="" coords="5,152,163,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,112,113,154,110,149,211,107"/>
+<area shape="rect" id="Node000004" href="$classLeapFrogModule.html" title="Module for leap&#45;frog time integration." alt="" coords="187,152,317,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="255,118,255,152,249,152,249,118"/>
+<area shape="rect" id="Node000005" href="$classMilneDeviceModule.html" title="Module implementing Milne&#39;s device predictor&#45;corrector method." alt="" coords="341,152,491,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="292,107,390,149,388,154,290,112"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="197,5,307,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="255,44,255,79,249,79,249,44"/>
+</map>

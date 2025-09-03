@@ -1,0 +1,11 @@
+<map id="src/models/SymBCModel.h" name="src/models/SymBCModel.h">
+<area shape="rect" id="Node000001" title="Symmetry boundary conditions model for plane symmetry constraints." alt="" coords="130,5,326,31"/>
+<area shape="rect" id="Node000002" href="$SymBCModel_8cpp.html" title="Implementation of SymBCModel class." alt="" coords="5,79,216,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,40,131,81,128,76,196,35"/>
+<area shape="rect" id="Node000003" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="240,79,451,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,35,328,76,325,81,257,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="197,152,302,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="320,114,267,154,263,150,317,110"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="327,152,553,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="373,110,426,150,423,154,370,114"/>
+</map>

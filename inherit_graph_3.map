@@ -1,0 +1,31 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,327,68,352"/>
+<area shape="rect" id="Node000001" href="$classDirichletModel.html" title="Model for applying Dirichlet boundary conditions with displacement control." alt="" coords="153,5,270,31"/>
+<area shape="poly" id="edge4_Node000000_Node000001" title=" " alt="" coords="39,313,49,248,65,167,87,91,100,61,114,40,132,28,151,20,153,25,134,32,118,44,104,63,92,92,70,168,54,249,44,314"/>
+<area shape="rect" id="Node000002" href="$classFollowerLoadModel.html" title="Model for applying follower loads that rotate with nodal rotations." alt="" coords="137,55,285,80"/>
+<area shape="poly" id="edge5_Node000000_Node000002" title=" " alt="" coords="36,312,40,265,52,205,75,143,92,114,114,89,136,75,139,80,118,93,97,118,80,145,57,206,45,265,41,313"/>
+<area shape="rect" id="Node000003" href="$classHingeModel.html" title="Model for plastic hinges connecting multiple Cosserat rod elements." alt="" coords="161,104,261,129"/>
+<area shape="poly" id="edge6_Node000000_Node000003" title=" " alt="" coords="38,312,45,273,59,227,81,179,96,158,114,139,136,125,160,118,162,123,138,130,118,143,100,161,86,182,64,229,50,275,43,313"/>
+<area shape="rect" id="Node000004" href="$classImpactModel.html" title="Model for impact boundary conditions with weighted acceleration updates." alt="" coords="158,153,265,179"/>
+<area shape="poly" id="edge7_Node000000_Node000004" title=" " alt="" coords="42,312,67,250,87,216,114,188,135,176,157,169,159,174,137,181,118,192,91,219,71,252,47,314"/>
+<area shape="rect" id="Node000005" href="$classInitLoadModel.html" title="Model for setting initial displacement and velocity conditions." alt="" coords="154,203,269,228"/>
+<area shape="poly" id="edge8_Node000000_Node000005" title=" " alt="" coords="49,313,76,274,94,254,115,237,153,221,155,226,117,242,97,258,80,277,53,316"/>
+<area shape="rect" id="Node000006" href="$classJointContactModel.html" title="Contact model for spherical joint interactions." alt="" coords="141,252,282,277"/>
+<area shape="poly" id="edge9_Node000000_Node000006" title=" " alt="" coords="64,316,115,286,147,275,149,280,117,291,67,321"/>
+<area shape="rect" id="Node000007" href="$classLatticeModel.html" title="Model for managing lattice structures composed of rod elements." alt="" coords="158,301,265,327"/>
+<area shape="poly" id="edge10_Node000000_Node000007" title=" " alt="" coords="82,330,157,319,158,324,82,335"/>
+<area shape="rect" id="Node000008" href="$classMassModel.html" title="Model for adding concentrated masses to specified node groups." alt="" coords="163,351,259,376"/>
+<area shape="poly" id="edge11_Node000000_Node000008" title=" " alt="" coords="82,343,163,354,163,359,81,348"/>
+<area shape="rect" id="Node000009" href="$classNeumannModel.html" title="Model for applying Neumann boundary conditions on node groups." alt="" coords="149,400,274,425"/>
+<area shape="poly" id="edge12_Node000000_Node000009" title=" " alt="" coords="68,358,117,385,153,397,152,402,115,390,66,362"/>
+<area shape="rect" id="Node000010" href="$classPeriodicBCModel.html" title="Model for applying periodic boundary conditions on rectangular unit cells." alt="" coords="145,449,277,475"/>
+<area shape="poly" id="edge13_Node000000_Node000010" title=" " alt="" coords="54,363,80,400,98,419,117,434,146,448,144,453,115,439,94,423,76,403,49,366"/>
+<area shape="rect" id="Node000011" href="$classRodContactModel.html" title="Model for rod&#45;to&#45;rod contact interactions using penalty methods." alt="" coords="143,499,280,524"/>
+<area shape="poly" id="edge14_Node000000_Node000011" title=" " alt="" coords="47,364,72,425,92,457,118,484,144,498,141,503,114,488,88,460,67,427,42,366"/>
+<area shape="rect" id="Node000012" href="$classSpecialCosseratRodModel.html" title="Special Cosserat rod finite element model with geometrically exact kinematics." alt="" coords="116,548,307,573"/>
+<area shape="poly" id="edge15_Node000000_Node000012" title=" " alt="" coords="44,365,51,403,64,448,86,494,101,515,118,533,137,546,134,550,114,537,96,518,81,497,59,450,46,404,38,366"/>
+<area shape="rect" id="Node000013" href="$classSpringMassModel.html" title="Model for spring&#45;mass systems at domain boundaries." alt="" coords="143,597,280,623"/>
+<area shape="poly" id="edge16_Node000000_Node000013" title=" " alt="" coords="41,365,46,412,57,471,80,531,97,559,118,583,144,598,141,603,114,587,93,562,76,534,52,472,40,413,36,366"/>
+<area shape="rect" id="Node000014" href="$classSymBCModel.html" title="Model for symmetry boundary conditions on plane symmetric domains." alt="" coords="157,647,266,672"/>
+<area shape="poly" id="edge17_Node000000_Node000014" title=" " alt="" coords="39,366,41,421,51,493,61,531,75,568,93,602,118,632,136,645,157,652,155,657,133,649,114,636,89,605,70,570,56,532,46,494,36,422,34,366"/>
+</map>

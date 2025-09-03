@@ -1,0 +1,11 @@
+<map id="src/models/JointContactModel.h" name="src/models/JointContactModel.h">
+<area shape="rect" id="Node000001" title="Contact model for spherical joint interactions." alt="" coords="138,5,366,31"/>
+<area shape="rect" id="Node000002" href="$JointContactModel_8cpp.html" title="Implementation of contact model for spherical joint interactions." alt="" coords="5,79,248,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,40,148,81,146,76,219,35"/>
+<area shape="rect" id="Node000003" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="272,79,483,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="285,35,358,76,356,81,283,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="229,152,334,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="352,114,299,154,295,150,349,110"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="359,152,585,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="405,110,458,150,455,154,402,114"/>
+</map>

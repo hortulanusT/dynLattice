@@ -1,0 +1,21 @@
+<map id="src/modules/GroupInputModule.h" name="src/modules/GroupInputModule.h">
+<area shape="rect" id="Node000001" title="Module for generating node and element groups from input files." alt="" coords="681,5,919,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,139,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="682,31,442,51,152,81,152,76,441,46,681,26"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="163,79,301,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="703,33,315,81,315,76,702,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="326,79,511,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="739,33,494,79,493,73,738,28"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="535,79,702,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="772,33,662,76,660,71,770,28"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="727,79,873,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="803,31,803,65,797,65,797,31"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="898,79,1057,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="829,28,937,71,935,76,828,33"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="1081,79,1242,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="859,28,1090,73,1089,79,858,33"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1267,79,1405,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="889,28,1253,76,1253,81,889,33"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1430,79,1589,104"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="919,27,1416,76,1416,81,919,32"/>
+</map>

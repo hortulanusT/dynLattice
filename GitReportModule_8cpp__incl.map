@@ -1,0 +1,15 @@
+<map id="src/modules/GitReportModule.cpp" name="src/modules/GitReportModule.cpp">
+<area shape="rect" id="Node000001" title="Implementation of GitReportModule class." alt="" coords="308,5,551,31"/>
+<area shape="rect" id="Node000002" href="$GitReportModule_8h.html" title="Module for reporting Git version information to log files." alt="" coords="217,79,421,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="413,33,350,73,347,69,410,28"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="445,79,638,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="449,28,513,69,510,73,446,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,139,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="280,107,126,151,124,146,278,101"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="163,152,309,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="307,106,262,145,258,141,304,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="333,152,472,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="334,102,380,141,377,145,330,106"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="497,152,679,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="363,101,532,146,531,151,361,107"/>
+</map>

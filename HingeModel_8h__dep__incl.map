@@ -1,0 +1,11 @@
+<map id="src/models/HingeModel.h" name="src/models/HingeModel.h">
+<area shape="rect" id="Node000001" title="Hinge model for rigid joints between Cosserat rod elements." alt="" coords="128,5,315,31"/>
+<area shape="rect" id="Node000002" href="$HingeModel_8cpp.html" title="Implementation of hinge model for rigid joints between Cosserat rod elements." alt="" coords="5,79,208,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,40,127,81,124,76,190,35"/>
+<area shape="rect" id="Node000003" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="232,79,443,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="253,35,320,76,317,81,250,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="189,152,294,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="312,114,259,154,255,150,309,110"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="319,152,545,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="365,110,418,150,415,154,362,114"/>
+</map>

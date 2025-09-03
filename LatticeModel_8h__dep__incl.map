@@ -1,0 +1,16 @@
+<map id="src/models/LatticeModel.h" name="src/models/LatticeModel.h">
+<area shape="rect" id="Node000001" title="Lattice model for managing collections of rod elements." alt="" coords="253,5,446,31"/>
+<area shape="rect" id="Node000002" href="$LatticeModel_8cpp.html" title="Implementation of lattice model for managing collections of rod elements." alt="" coords="5,79,213,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,37,149,81,147,76,297,32"/>
+<area shape="rect" id="Node000003" href="$RodContactModel_8h.html" title="Contact model for rod&#45;to&#45;rod interactions." alt="" coords="237,79,461,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="352,44,352,79,347,79,347,44"/>
+<area shape="rect" id="Node000005" href="$__declareModels_8h.html" title="Model factory registration declarations." alt="" coords="393,152,604,177"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="408,33,444,51,475,77,487,95,495,116,501,151,495,152,489,117,482,98,471,80,441,55,406,38"/>
+<area shape="rect" id="Node000004" href="$RodContactModel_8cpp.html" title="Implementation of RodContactModel class." alt="" coords="130,152,369,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="324,114,267,154,264,150,321,110"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="387,107,475,149,473,154,384,112"/>
+<area shape="rect" id="Node000006" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="351,225,457,251"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="474,188,421,227,418,223,471,183"/>
+<area shape="rect" id="Node000007" href="$__declareModels_8cpp.html" title="Implementation of model factory registration." alt="" coords="481,225,708,251"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="527,183,581,223,577,227,524,188"/>
+</map>

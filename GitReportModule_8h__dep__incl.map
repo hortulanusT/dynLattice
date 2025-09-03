@@ -1,0 +1,11 @@
+<map id="src/modules/GitReportModule.h" name="src/modules/GitReportModule.h">
+<area shape="rect" id="Node000001" title="Module for reporting Git version information to log files." alt="" coords="143,5,369,31"/>
+<area shape="rect" id="Node000002" href="$GitReportModule_8cpp.html" title="Implementation of GitReportModule class." alt="" coords="5,79,248,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,40,149,81,147,76,222,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="272,79,499,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="290,35,365,76,363,81,288,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="233,152,338,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="360,114,303,154,300,150,357,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="363,152,605,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="414,110,469,150,466,154,410,114"/>
+</map>

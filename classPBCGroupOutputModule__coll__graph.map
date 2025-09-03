@@ -1,0 +1,13 @@
+<map id="PBCGroupOutputModule" name="PBCGroupOutputModule">
+<area shape="rect" id="Node000001" title="Specialized output module for periodic boundary condition analysis." alt="" coords="155,225,334,251"/>
+<area shape="rect" id="Node000002" href="$classGroupOutputModule.html" title="Module for extracting and storing group&#45;based output data." alt="" coords="75,137,228,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,170,233,223,230,227,172,174"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,76,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="61,39,143,135,139,139,57,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="101,5,202,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="154,44,154,137,149,137,149,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="254,5,337,31"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="296,45,288,81,280,99,268,115,249,130,227,140,225,135,246,125,264,111,275,96,283,79,291,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="253,137,423,163"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="317,174,259,227,256,223,313,170"/>
+</map>

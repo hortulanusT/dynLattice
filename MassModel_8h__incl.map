@@ -1,0 +1,25 @@
+<map id="src/models/MassModel.h" name="src/models/MassModel.h">
+<area shape="rect" id="Node000001" title="Mass model for adding concentrated masses to node groups." alt="" coords="859,5,1042,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,139,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="859,27,550,46,153,81,152,76,550,41,859,21"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="163,79,317,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="859,30,331,81,331,76,859,25"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="342,79,437,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="859,31,675,51,451,81,450,76,674,46,859,26"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="461,79,664,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="889,33,639,79,638,74,888,28"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="688,79,853,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="923,33,814,76,812,71,921,28"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="877,79,1024,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="953,31,953,65,948,65,948,31"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="1048,79,1203,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="980,28,1085,71,1083,76,978,33"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1227,79,1373,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1007,28,1231,73,1230,79,1006,33"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1397,79,1589,104"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1038,28,1393,74,1392,80,1038,33"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1614,79,1773,104"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1043,24,1290,46,1600,76,1600,81,1289,51,1042,29"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1797,79,1947,104"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1042,21,1366,41,1783,76,1783,81,1365,47,1042,27"/>
+</map>

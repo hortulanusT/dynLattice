@@ -1,0 +1,9 @@
+<map id="SpecialCosseratRodModel" name="SpecialCosseratRodModel">
+<area shape="rect" id="Node000001" title="Special Cosserat rod finite element model with geometrically exact kinematics." alt="" coords="24,108,215,133"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,68,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,39,112,106,108,110,53,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="92,5,147,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="122,45,122,108,117,108,117,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="257,5,310,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="280,45,271,66,256,86,234,101,209,110,207,106,231,96,252,82,267,64,275,43"/>
+</map>

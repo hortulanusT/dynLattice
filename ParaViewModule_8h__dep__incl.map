@@ -1,0 +1,11 @@
+<map id="src/modules/ParaViewModule.h" name="src/modules/ParaViewModule.h">
+<area shape="rect" id="Node000001" title="Module for exporting simulation data to ParaView format." alt="" coords="141,5,366,31"/>
+<area shape="rect" id="Node000002" href="$ParaViewModule_8cpp.html" title="Implementation of ParaView export module." alt="" coords="5,79,245,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,40,148,81,145,76,219,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="269,79,496,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="288,35,363,76,360,81,285,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="230,152,335,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="357,114,301,154,297,150,354,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="360,152,603,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="411,110,467,150,464,154,408,114"/>
+</map>

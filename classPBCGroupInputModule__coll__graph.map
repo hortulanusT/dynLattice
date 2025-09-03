@@ -1,0 +1,13 @@
+<map id="PBCGroupInputModule" name="PBCGroupInputModule">
+<area shape="rect" id="Node000001" title="Module for automatic periodic boundary condition node group generation." alt="" coords="157,168,325,193"/>
+<area shape="rect" id="Node000002" href="$classGroupInputModule.html" title="Module for generating node and element groups from input specifications." alt="" coords="5,80,148,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,109,220,165,217,170,110,114"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="41,5,112,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,45,79,80,74,80,74,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="172,80,227,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="206,118,215,143,232,166,227,169,210,145,201,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="251,80,339,105"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="283,118,251,169,246,166,278,115"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="385,80,445,105"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="404,119,393,133,378,146,351,161,321,170,319,165,348,156,375,142,389,130,400,115"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="src/modules/GMSHInputModule.h" name="src/modules/GMSHInputModule.h">
+<area shape="rect" id="Node000001" title="Module for importing geometry using the GMSH C++ API." alt="" coords="145,5,383,31"/>
+<area shape="rect" id="Node000002" href="$GMSHInputModule_8cpp.html" title="Implementation of GMSHInputModule class." alt="" coords="5,79,259,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,39,155,81,152,76,230,35"/>
+<area shape="rect" id="Node000003" href="$__declareModules_8h.html" title="Module registration declarations for dynLattice." alt="" coords="283,79,509,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="298,35,376,76,373,81,296,39"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html" title="Main entry point for the application." alt="" coords="243,152,349,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="370,114,314,154,311,150,367,110"/>
+<area shape="rect" id="Node000005" href="$__declareModules_8cpp.html" title="Implementation of module registration for dynLattice." alt="" coords="373,152,616,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="424,110,480,150,477,154,421,114"/>
+</map>
