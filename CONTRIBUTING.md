@@ -1,88 +1,151 @@
 # Contributing to dynLattice
 
-## Quick Start
+Thank you for your interest in contributing to dynLattice! This guide will help you get started with development.
 
-1. **Setup:**
+## Development Setup
+
+1. **Fork and clone** the repository from GitHub
+2. **Set up the development environment:**
    ```bash
-   git clone https://github.com/hortulanusT/dynLattice.git
    cd dynLattice
    alias jive="apptainer exec $(pwd)/jive.sif"
    ```
-
-2. **Build and test:**
+3. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+4. **Build and test:**
    ```bash
    jive make tests
    ```
 
-3. **Create feature branch and submit PR when ready**
+## Development Workflow
 
-## Code Organization
+- Create feature branches
+- Make atomic commits with clear messages
+- Update documentation as needed
+- Submit pull requests
 
-- **Materials:** `src/materials/` - Rod material models
-- **Models:** `src/models/` - Boundary conditions, contacts, etc.
-- **Modules:** `src/modules/` - Time integration, I/O, etc.
-- **Tests:** `tests/` - Validation cases with `.geo`, `.pro` files
+## Coding Standards
 
-## Coding Style
+### Style Guidelines
 
 - Use `#pragma once` for headers
-- Follow existing naming: `PascalCase` classes, `camelCase` functions
-- Document with [Doxygen](https://doxygen.nl/) style comments 
-- Example from codebase:
-  ```cpp
-  /// @brief Handle model actions for impact boundary conditions
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
-  /// @return true if action was handled
-  virtual bool takeAction
-      (const String &action,
-       const Properties &params,
-       const Properties &globdat) override;
-  ```
+- Follow existing naming conventions:
+  - `PascalCase` for classes and types
+  - `camelCase` for functions and variables
+  - `UPPER_CASE` for constants
+- Document public interfaces with [Doxygen](https://doxygen.nl/) style comments
+
+### Documentation Example
+
+```cpp
+/// @brief Handle model actions for impact boundary conditions
+/// @param action Action name to execute
+/// @param params Action parameters
+/// @param globdat Global data container
+/// @return true if action was handled
+virtual bool takeAction
+    (const String &action,
+     const Properties &params,
+     const Properties &globdat) override;
+```
 
 ## Adding New Components
 
-**New Material:**
-1. Create `src/materials/YourMaterial.h/.cpp`
-2. Inherit from `Material` (in `src/materials/Material.h`)
-3. Register in material factory (`_declareMaterials.cpp`)
+### Materials (Rod Constitutive Models)
 
-**New Model (boundary conditions, constraints, etc.):**
-1. Create `src/models/YourModel.h/.cpp`
+1. Create `src/materials/YourMaterial.h` and `src/materials/YourMaterial.cpp`
+2. Inherit from the `Material` base class (`src/materials/Material.h`)
+3. Implement required virtual methods for stress-strain relationships
+4. Register in `_declareMaterials.cpp`
+
+### Models (Boundary Conditions, Constraints, etc.)
+
+1. Create `src/models/YourModel.h` and `src/models/YourModel.cpp`
 2. Inherit from `jive::model::Model`
-3. Register in model factory (`_declareModels.cpp`)
+3. Implement `takeAction()` for relevant solver actions
+4. Register in `_declareModels.cpp`
 
-**New Module (time integration, I/O, etc.):**
-1. Create `src/modules/YourModule.h/.cpp`
+### Modules (Time Integration, I/O, etc.)
+
+1. Create `src/modules/YourModule.h` and `src/modules/YourModule.cpp`
 2. Inherit from `jive::app::Module`
-3. Register in module factory (`_declareModules.cpp`)
+3. Implement required module interface methods
+4. Register in `_declareModules.cpp`
 
-**New Test:**
-1. Create `tests/your_test/` directory
-2. Add `.geo` (geometry), `.pro` (program), input/model/output configs
-3. Update `tests/testing.mk`
+### Validation Tests
 
-## Common Commands
+1. Create a new directory in `tests/` (e.g., `tests/your_test/`)
+2. Add required files:
+   - `.geo` file for geometry definition (GMSH format)
+   - `.pro` file for problem configuration
+   - Input/model/output configuration files
+   - `.py` for the post-processing
+3. Update `tests/testing.mk` to include your test
+4. Document expected behavior and reference solutions
+
+## Build Commands
+
+### Development Builds
 
 ```bash
-# Development build
-jive make debug                   # Debug with symbols
-jive gdb bin/dynLattice-debug     # Debug with GDB
-(gdb) call dprint(&...)           # print JEM/JIVE variable types
+# Debug build with symbols
+jive make debug
 
-# "normal" build
+# Standard build  
 jive make
 
-# optimized build
+# Optimized build
 jive make opt
 
-# Documentation
-jive make docs
+# Clean build artifacts
+jive make clean
 ```
 
-## Issues/Questions
+### Testing
 
-- Check existing issues first
-- Provide minimal test case for bugs
-- Include error messages and environment info
+```bash
+# Run all validation tests
+jive make tests
+
+# Run specific test category
+jive make beam-tests
+jive make contact-tests
+jive make plastic-tests
+jive make transient-tests
+```
+
+### Documentation
+
+```bash
+# Generate API documentation
+jive make doc
+
+# Open documentation in browser
+firefox doc/html/index.html
+```
+
+### Debugging
+
+```bash
+# Debug with GDB
+jive gdb bin/dynLattice-debug
+
+# Within GDB, print JEM/JIVE variables
+(gdb) call dprint(&variable_name)
+```
+
+## Submitting Changes
+
+1. Push your feature branch to your fork
+2. Create a pull request
+3. Provide a clear description of changes
+4. Include relevant publications
+
+## Getting Help
+
+- **Issues**: Check [existing issues](https://github.com/hortulanusT/dynLattice/issues) first
+- **Bugs**: Provide minimal test case and environment details
+- **Questions**: Open a discussion or issue with your question
+- **Documentation**: See `doc/` directory for technical details
