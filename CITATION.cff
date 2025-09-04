@@ -1,0 +1,125 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials"
+version: "1.11"
+date-released: "2025"
+url: "https://github.com/hortulanusT/dynLattice"
+repository-code: "https://github.com/hortulanusT/dynLattice"
+license: MIT
+abstract: "dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on Simo & Vu-Quoc (1986) formulation with support for inelastic materials, explicit time marching, and contact mechanics. The software is designed for analyzing beam structures undergoing fast deformation with large strains and nonlinear material behavior."
+
+authors:
+  - given-names: "Til"
+    family-names: "Gärtner"
+    email: "t.gartner@tudelft.nl"
+    orcid: "https://orcid.org/0000-0002-5088-855X"
+    affiliation:
+      - "Delft University of Technology"
+      - "Netherlands Organization for Applied Scientific Research (TNO)"
+  - given-names: "Frans P."
+    family-names: "van der Meer"
+    email: "f.p.vandermeer@tudelft.nl"
+    orcid: "https://orcid.org/0000-0002-6691-1259"
+    affiliation: "Delft University of Technology"
+
+keywords:
+  - "finite elements"
+  - "geometrically exact beams"
+  - "inelastic materials"
+  - "explicit time marching"
+  - "metamaterials"
+  - "beam networks"
+  - "transient simulation"
+  - "geometric nonlinearity"
+  - "material nonlinearity"
+  - "contact mechanics"
+
+
+references:
+  - type: article
+    title: "A strategy for scaling the hardening behavior in finite element modelling of geometrically exact beams"
+    authors:
+      - given-names: "Til"
+        family-names: "Gärtner"
+        orcid: "https://orcid.org/0000-0002-5088-855X"
+      - given-names: "Sanne J."
+        family-names: "van den Boom"
+        orcid: "https://orcid.org/0000-0002-5547-2596"
+      - given-names: "J."
+        family-names: "Weerheijm"
+      - given-names: "L. J."
+        family-names: "Sluys"
+        orcid: "https://orcid.org/0000-0002-0880-1473"
+    journal: "Computational Mechanics"
+    volume: 75
+    pages: "1471--1482"
+    year: 2025
+    doi: "10.1007/s00466-024-02572-3"
+  - type: article
+    title: "Geometric effects on impact mitigation in architected auxetic metamaterials"
+    authors:
+      - given-names: "Til"
+        family-names: "Gärtner"
+        orcid: "https://orcid.org/0000-0002-5088-855X"
+      - given-names: "Sanne J."
+        family-names: "van den Boom"
+        orcid: "https://orcid.org/0000-0002-5547-2596"
+      - given-names: "J."
+        family-names: "Weerheijm"
+      - given-names: "L. J."
+        family-names: "Sluys"
+        orcid: "https://orcid.org/0000-0002-0880-1473"
+    journal: "Mechanics of Materials"
+    volume: 191
+    year: 2024
+    doi: "10.1016/j.mechmat.2024.104952"
+  - type: article
+    title: "(In)efficacy of auxetic metamaterials for impact mitigation"
+    authors:
+      - given-names: "Til"
+        family-names: "Gärtner"
+        orcid: "https://orcid.org/0000-0002-5088-855X"
+      - given-names: "Richard"
+        family-names: "Dekker"
+        orcid: "https://orcid.org/0000-0002-0054-1400"
+      - given-names: "Dennis"
+        family-names: "van Veen"
+      - given-names: "Sanne J."
+        family-names: "van den Boom"
+        orcid: "https://orcid.org/0000-0002-5547-2596"
+      - given-names: "Lucas"
+        family-names: "Amaral"
+        orcid: "https://orcid.org/0009-0006-5160-4500"
+    journal: "International Journal of Impact Engineering"
+    volume: 206
+    year: 2025
+    doi: "10.1016/j.ijimpeng.2025.105402"
+  - type: article
+    title: "Force transmission and dissipation in dynamic compression of architected metamaterials"
+    authors:
+      - given-names: "Til"
+        family-names: "Gärtner"
+        orcid: "https://orcid.org/0000-0002-5088-855X"
+      - given-names: "Sanne J."
+        family-names: "van den Boom"
+        orcid: "https://orcid.org/0000-0002-5547-2596"
+      - given-names: "J."
+        family-names: "Weerheijm"
+      - given-names: "L. J."
+        family-names: "Sluys"
+        orcid: "https://orcid.org/0000-0002-0880-1473"
+    journal: "engrXiv"
+    year: 2025
+    doi: "10.31224/5224"
+    notes: "Preprint"
+  - type: thesis
+    title: "Are Auxetics Better for Protection? On the Behaviour of Architected Metamaterials under High-Rate Loading Conditions"
+    authors:
+      - given-names: "Til"
+        family-names: "Gärtner"
+        orcid: "https://orcid.org/0000-0002-5088-855X"
+    institution: "Technische Universiteit Delft"
+    thesis-type: "PhD thesis"
+    year: 2025
+    doi: "10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f"

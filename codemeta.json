@@ -1,0 +1,64 @@
+{
+  "@context": "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
+  "@type": "SoftwareSourceCode",
+  "author": [
+    {
+      "@id": "https://orcid.org/0000-0002-5088-855X",
+      "@type": "Person",
+      "email": "t.gartner@tudelft.nl",
+      "name": "Til Gärtner",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "Delft University of Technology"
+        },
+        {
+          "@type": "Organization",
+          "name": "Netherlands Organisation for Applied Scientific Research (TNO)"
+        }
+      ]
+    }
+  ],
+  "contributor": [
+    {
+      "@id": "https://orcid.org/0000-0002-6691-1259",
+      "@type": "Person",
+      "email": "f.p.vandermeer@tudelft.nl",
+      "name": "Frans P. van der Meer",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "Delft University of Technology"
+        }
+      ]
+    }
+  ],
+  "identifier": "",
+  "codeRepository": "https://github.com/hortulanusT/dynLattice",
+  "description": "dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on Simo & Vu-Quoc (1986) formulation with support for inelastic materials, explicit time marching, and contact mechanics. The software is designed for analyzing beam structures undergoing fast deformation with large strains and nonlinear material behavior.",
+  "keywords": [
+    "finite elements",
+    "geometrically exact beams",
+    "inelastic materials",
+    "explicit time marching",
+    "metamaterials",
+    "beam networks",
+    "transient simulation",
+    "geometric nonlinearity",
+    "material nonlinearity",
+    "contact mechanics",
+    "JEM/JIVE"
+  ],
+  "license": "https://spdx.org/licenses/MIT",
+  "name": "dynLattice",
+  "title": "dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials",
+  "version": "1.11",
+  "applicationCategory": "Scientific Software",
+  "readme": "https://github.com/hortulanusT/dynLattice/blob/main/README.md",
+  "issueTracker": "https://github.com/hortulanusT/dynLattice/issues",
+  "downloadUrl": "https://github.com/hortulanusT/dynLattice/releases",
+  "buildInstructions": "https://github.com/hortulanusT/dynLattice/blob/main/doc/install.md",
+  "softwareRequirements": [
+    "Apptainer"
+  ]
+}
