@@ -89,6 +89,7 @@ The documentation is also available as [GitHub Pages](https://hortulanust.github
 ├── .gitattributes        ← git attributes file
 ├── .github/              ← GitHub workflows and configuration
 ├── .vscode/              ← VS Code workspace configuration
+├── CITATION.cff          ← Citation metadata file
 ├── LICENSE               ← MIT license file
 ├── README.md             ← this file
 ├── CONTRIBUTING.md       ← contribution guidelines
@@ -101,7 +102,7 @@ The documentation is also available as [GitHub Pages](https://hortulanust.github
 │   ├── dynLattice-opt    ← optimized executable for the program
 │   └── dynLattice-debug  ← executable with debug symbols
 ├── doc/                  ← Documentation files
-│   ├── Documentation.html ← Main documentation file
+│   ├── doc.mk            ← Makefile for documentation
 │   ├── doxygen.conf      ← Doxygen configuration for API documentation
 │   ├── install.md        ← Installation instructions
 │   ├── main.md           ← Main documentation content
