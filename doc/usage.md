@@ -115,7 +115,7 @@ The `model.pro` file defines the physical model and boundary conditions. Here ar
 | `model.model.force.factors = [ 0. ];` | set force scaling factor to 0 (no force applied) |
 | `model.model.force.dofs = [ "dx" ];` | specify that force is applied in x-direction |
 | **Displacement Boundary Conditions** | |
-| `model.model.disp.type = "Dirichlet";` | specify the prescribed displacements to sue the DirichletModel |
+| `model.model.disp.type = "Dirichlet";` | specify the prescribed displacements to use the DirichletModel |
 | `model.model.disp.initDisp = 0.;` | set initial displacement to 0 |
 | `model.model.disp.dispIncr = 0.;` | set displacement increment to 0 (no prescribed displacement by default) |
 | `model.model.disp.nodeGroups = [ "fixed" ];` | apply displacement boundary condition to "fixed" node group |
@@ -130,7 +130,7 @@ The `output.pro` file defines the output modules for data collection and logging
 | **Output Module Configuration** | |
 | `Output.modules = [ "loadextent", "disp" ];` | define two output modules: "loadextent" for force tracking and "disp" for displacement data |
 | **Load Extent Output** | |
-| `Output.loadextent.type = "GroupOutput";` | use the GroupOutputModule to extreact data from the output groups |
+| `Output.loadextent.type = "GroupOutput";` | use the GroupOutputModule to extract data from the output groups |
 | `Output.loadextent.nodeGroups = [ "fixed", "free" ];` | track data for both "fixed" and "free" node groups |
 | `Output.loadextent.dofs = model.model.rodMesh.child.dofNamesTrans;` | include translational degrees of freedom (dx, dy, dz) in output |
 | `Output.loadextent.dofs += model.model.rodMesh.child.dofNamesRot;` | add rotational degrees of freedom (rx, ry, rz) to output |
