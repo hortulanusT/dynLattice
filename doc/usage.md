@@ -7,7 +7,7 @@ As a first step, we need to compile the program using `jive make`. This will cre
 
 The next step is to create the needed files, starting with the geometry file, in this case `tests/transient/test1.geo`. The `GMSH` syntax can be found on their [documentation](https://gmsh.info/doc/texinfo/gmsh.html#Gmsh-scripting-language).
 
-Now, we need to create our program file. For our case, it can be found in `tests/transient/test1.pro` and will be explained line-by-line in the following.
+Now, we need to create our property file with model inputs. For our case, it can be found in `tests/transient/test1.pro` and will be explained line-by-line in the following.
 
 | Command | Explanation |
 | ------- | ----------- |
