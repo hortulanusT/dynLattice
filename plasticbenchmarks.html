@@ -84,20 +84,20 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The plastic tests validate the correct implementation of the inelastic material behavior of the beam, as well as the explicit return mapping scheme.</p>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<h1><a class="anchor" id="autotoc_md58"></a>
 Test Cases</h1>
-<h2><a class="anchor" id="autotoc_md38"></a>
+<h2><a class="anchor" id="autotoc_md59"></a>
 Test 1</h2>
 <p>Test 1 implements Example 5.1 from <a href="https://doi.org/10.1002/nme.6566">Smriti, Kumar, Steinmann (2011)</a>. This example shows the plastic behavior of a cantilever beam under a constant twist, being subjected to axial tension and compression. The hardening observed is a result of the multi-axial loading condition and can be viewed as <em>geometric hardening</em>, as no hardening is present in the considered material parameters. The custom implementation shows an excellent agreement with the results from literature</p>
 <div class="image">
 <img src="plastic1_result.png" alt=""/>
 <div class="caption">
 Test 1 Results</div></div>
-    <h2><a class="anchor" id="autotoc_md39"></a>
+    <h2><a class="anchor" id="autotoc_md60"></a>
 Test 2</h2>
 <p>Test 2 implements Example 5.2 from <a href="https://doi.org/10.1002/nme.6566">Smriti, Kumar, Steinmann (2011)</a>. This example shows the plastic behavior of a cantilever beam subjected to axial tension and compression with the effects of either isotropic or kinematic hardening present in the material model. Both, case a) <em>isotropic hardening</em> and case b) <em>kinematic hardening</em> show an excellent agreement with the results from literature.</p>
 <p><img src="plastic2a_result.png" alt="" class="inline" title="Test 2a Results"/>     <img src="plastic2b_result.png" alt="" class="inline" title="Test 2b Results"/>    </p>
-<h2><a class="anchor" id="autotoc_md40"></a>
+<h2><a class="anchor" id="autotoc_md61"></a>
 Test 3</h2>
 <p>Test 3 implements Example 5.4 from <a href="https://doi.org/10.1007/s00466-022-02204-8">Herrnböck, Kumar, Steinmann (2023)</a>. This example shows the complex elasto-plastic deformation of a beam under three-dimensional loading conditions. The custom implementation shows good agreement with the reported results from an \(FE^2\) approach. The differences are similar to the ones reported in the referenced publication.</p>
 <div class="image">

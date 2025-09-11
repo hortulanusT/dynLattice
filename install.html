@@ -83,7 +83,7 @@ $(function() {
   <div class="headertitle"><div class="title">Installation</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md7"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md18"></a>
 Requirements</h1>
 <ul>
 <li><b><a href="https://apptainer.org/">Apptainer</a></b></li>
@@ -92,35 +92,34 @@ Requirements</h1>
 <li><a href="https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz">GMSH 4.9.5</a></li>
 <li><a href="https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz">HDF5 1.12.2</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md19"></a>
 1. Install &lt;tt&gt;apptainer&lt;/tt&gt; and get the &lt;tt&gt;.sif&lt;/tt&gt; file</h1>
 <ol type="1">
 <li>Install <code>apptainer</code> following the <a href="https://apptainer.org/get-started/">quick start guide</a>.</li>
-<li>Download the pre-built <code>.sif</code> from the repository or build it yourself.</li>
-<li>Define an alias for easier executing, e.g. <code>alias jive="apptainer -s exec -e --env DISPLAY=$DISPLAY &lt;/full/path/to/&gt;jive.sif"</code></li>
 </ol>
-<h1><a class="anchor" id="autotoc_md9"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 (Optional) build the &lt;tt&gt;.sif&lt;/tt&gt; file yourself</h1>
-<p>A <code>.def</code> file is provided to build the container yourself. To build the container put all the required archives into a folder called <code>zip</code> and run the command <code>sudo apptainer build jive.sif jive.def</code>. You can subsequently move the <code>jive.sif</code> to any location you prefer.</p>
-<h1><a class="anchor" id="autotoc_md10"></a>
-2. Get this repository and build the documentation</h1>
+<ul>
+<li>A <code>.def</code> file is provided to build the container yourself.</li>
+</ul>
 <ol type="1">
-<li>Get the repository via <code>git clone git@github.com:hortulanusT/dynLattice.git</code></li>
+<li>Put all the required archives (listed above) into a directory called <code>zip</code>.</li>
+<li>Run the command <code>sudo apptainer build jive.sif jive.def</code>.</li>
 </ol>
+<h1><a class="anchor" id="autotoc_md21"></a>
+2. Get the repository and build the documentation</h1>
 <ol type="1">
+<li>Get <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a> of the repository.</li>
+<li>Define an appropriate alias for running inside the apptainer <code>alias jive="apptainer exec $(pwd)/jive.sif"</code></li>
 <li>Build the documentation via <code>jive make docs</code> (this will execute the test cases as well)</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md22"></a>
 3. Using the code</h1>
 <ol type="1">
-<li>You can build the code via <code>jive make</code> and then execute any program via <code>bin/dynLattice path/to/program.pro</code></li>
-</ol>
-<ol type="1">
-<li>Once you are done with your setup and sure everything works, build the optimized version via <code>jive make opt</code> and then run <code>bin/dynLattice-opt path/to/program.pro</code></li>
-</ol>
-<ol type="1">
+<li>You can build the code via <code>jive make</code> and then execute any test via <code>jive bin/dynLattice path/to/inputs.pro</code></li>
+<li>Once you are done with your setup and sure everything works, build the optimized version via <code>jive make opt</code> and then run <code>bin/dynLattice-opt path/to/inputs.pro</code></li>
 <li>If you want to debug your own additions using the GNU Project debugger build <code>jive make debug</code> and then run <code>jive gdb bin/dynLattice-dbg</code><ul>
-<li>proceed with <code>(gdb) run path/to/program.pro</code></li>
+<li>proceed with <code>(gdb) run path/to/inputs.pro</code></li>
 <li>use <code>(gdb) call dprint(&amp;variable)</code> to get the variable printed if it is a Vector or a Matrix </li>
 </ul>
 </li>

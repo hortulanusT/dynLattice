@@ -79,82 +79,147 @@ $(function() {
   <div class="headertitle"><div class="title">Contributing to dynLattice</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a> </p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a> Thank you for your interest in contributing to dynLattice! This guide will help you get started with development.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
-Quick Start</h1>
+Development Setup</h1>
 <ol type="1">
-<li><b>Setup:</b> <div class="fragment"><div class="line">git clone https://github.com/hortulanusT/dynLattice.git</div>
-<div class="line">cd dynLattice</div>
-<div class="line">alias jive=&quot;apptainer exec $(pwd)/jive.sif&quot;</div>
+<li><b>Fork and clone</b> the repository from GitHub<ul>
+<li>set up LFS to download the <code>.sif</code> file with the repository</li>
+<li>otherwise simply download the <code>.sif</code> file directly from the <a href="https://github.com/hortulanusT/dynLattice/blob/main/jive.sif">original repository</a></li>
+<li>alternatively build the <code>.sif</code> file yourself using the <code>.def</code> file and the additional dependencies listed in the documentation</li>
+</ul>
+</li>
+<li><b>Set up the container alias</b> <div class="fragment"><div class="line">alias jive=&quot;apptainer exec -e --env DISPLAY=$DISPLAY $(pwd)/jive.sif&quot;</div>
+</div><!-- fragment --></li>
+<li><b>Create a feature branch:</b> <div class="fragment"><div class="line">git checkout -b feature/your-feature-name</div>
 </div><!-- fragment --></li>
 <li><b>Build and test:</b> <div class="fragment"><div class="line">jive make tests</div>
 </div><!-- fragment --></li>
-<li><b>Create feature branch and submit PR when ready</b></li>
 </ol>
 <h1><a class="anchor" id="autotoc_md2"></a>
-Code Organization</h1>
+Development Workflow</h1>
 <ul>
-<li><b>Materials:</b> <code>src/materials/</code> - Rod material models</li>
-<li><b>Models:</b> <code>src/models/</code> - Boundary conditions, contacts, etc.</li>
-<li><b>Modules:</b> <code>src/modules/</code> - Time integration, I/O, etc.</li>
-<li><b>Tests:</b> <code>tests/</code> - Validation cases with <code>.geo</code>, <code>.pro</code> files</li>
+<li>Create feature branches</li>
+<li>Make atomic commits with clear messages</li>
+<li>Update documentation as needed</li>
+<li>Submit pull requests</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md3"></a>
-Coding Style</h1>
+Coding Standards</h1>
+<h2><a class="anchor" id="autotoc_md4"></a>
+Style Guidelines</h2>
 <ul>
 <li>Use <code>#pragma once</code> for headers</li>
-<li>Follow existing naming: <code>PascalCase</code> classes, <code>camelCase</code> functions</li>
-<li>Document with <a href="https://doxygen.nl/">Doxygen</a> style comments</li>
-<li>Example from codebase: <div class="fragment"><div class="line"> </div>
+<li>Follow existing naming conventions:<ul>
+<li><code>PascalCase</code> for classes and types</li>
+<li><code>camelCase</code> for functions and variables</li>
+<li><code>camelCase_</code> for private/protected functions and variables</li>
+<li><code>UPPER_CASE</code> for constants</li>
+</ul>
+</li>
+<li>Document public interfaces with <a href="https://doxygen.nl/">Doxygen</a> style comments</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Documentation Example</h2>
+<div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">virtual</span> <span class="keywordtype">bool</span> takeAction</div>
 <div class="line">    (<span class="keyword">const</span> String &amp;action,</div>
 <div class="line">     <span class="keyword">const</span> Properties &amp;params,</div>
 <div class="line">     <span class="keyword">const</span> Properties &amp;globdat) <span class="keyword">override</span>;</div>
-</div><!-- fragment --></li>
-</ul>
-<h1><a class="anchor" id="autotoc_md4"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
 Adding New Components</h1>
-<p><b>New <a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a>:</b></p><ol type="1">
-<li>Create <code>src/materials/YourMaterial.h/.cpp</code></li>
-<li>Inherit from <code><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a></code> (in <code><a class="el" href="Material_8h.html" title="Material class for representing different materials in the simulation.">src/materials/Material.h</a></code>)</li>
-<li>Register in material factory (<code><a class="el" href="__declareMaterials_8cpp.html" title="Implementation of material registration utility for factory initialization.">_declareMaterials.cpp</a></code>)</li>
+<h2><a class="anchor" id="autotoc_md7"></a>
+Materials (Rod Constitutive Models)</h2>
+<ol type="1">
+<li>Create <code>src/materials/YourMaterial.h</code> and <code>src/materials/YourMaterial.cpp</code></li>
+<li>Inherit from the <code><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a></code> base class (<code><a class="el" href="Material_8h.html" title="Material class for representing different materials in the simulation.">src/materials/Material.h</a></code>)</li>
+<li>Implement required virtual methods for stress-strain relationships</li>
+<li>Register in <code><a class="el" href="__declareMaterials_8cpp.html" title="Implementation of material registration utility for factory initialization.">_declareMaterials.cpp</a></code></li>
 </ol>
-<p><b>New Model (boundary conditions, constraints, etc.):</b></p><ol type="1">
-<li>Create <code>src/models/YourModel.h/.cpp</code></li>
+<h2><a class="anchor" id="autotoc_md8"></a>
+Models (Boundary Conditions, Constraints, etc.)</h2>
+<ol type="1">
+<li>Create <code>src/models/YourModel.h</code> and <code>src/models/YourModel.cpp</code></li>
 <li>Inherit from <code>jive::model::Model</code></li>
-<li>Register in model factory (<code><a class="el" href="__declareModels_8cpp.html" title="Implementation of model factory registration.">_declareModels.cpp</a></code>)</li>
+<li>Implement <code>takeAction()</code> for relevant solver actions</li>
+<li>Register in <code><a class="el" href="__declareModels_8cpp.html" title="Implementation of model factory registration.">_declareModels.cpp</a></code></li>
 </ol>
-<p><b>New Module (time integration, I/O, etc.):</b></p><ol type="1">
-<li>Create <code>src/modules/YourModule.h/.cpp</code></li>
+<h2><a class="anchor" id="autotoc_md9"></a>
+Modules (Time Integration, I/O, etc.)</h2>
+<ol type="1">
+<li>Create <code>src/modules/YourModule.h</code> and <code>src/modules/YourModule.cpp</code></li>
 <li>Inherit from <code>jive::app::Module</code></li>
-<li>Register in module factory (<code><a class="el" href="__declareModules_8cpp.html" title="Implementation of module registration for dynLattice.">_declareModules.cpp</a></code>)</li>
+<li>Implement required module interface methods</li>
+<li>Register in <code><a class="el" href="__declareModules_8cpp.html" title="Implementation of module registration for dynLattice.">_declareModules.cpp</a></code></li>
 </ol>
-<p><b>New Test:</b></p><ol type="1">
-<li>Create <code>tests/your_test/</code> directory</li>
-<li>Add <code>.geo</code> (geometry), <code>.pro</code> (program), input/model/output configs</li>
-<li>Update <code>tests/testing.mk</code></li>
+<h2><a class="anchor" id="autotoc_md10"></a>
+Validation Tests</h2>
+<ol type="1">
+<li>Create a new directory in <code>tests/</code> (e.g., <code>tests/your_test/</code>)</li>
+<li>Add required files:<ul>
+<li><code>.geo</code> file for geometry definition (GMSH format)</li>
+<li><code>.pro</code> file for problem configuration</li>
+<li>Input/model/output configuration files</li>
+<li><code>.py</code> for the post-processing</li>
+</ul>
+</li>
+<li>Update <code>tests/testing.mk</code> to include your test</li>
+<li>Document expected behavior and reference solutions</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md5"></a>
-Common Commands</h1>
-<div class="fragment"><div class="line"># Development build</div>
-<div class="line">jive make debug                   # Debug with symbols</div>
-<div class="line">jive gdb bin/dynLattice-debug     # Debug with GDB</div>
-<div class="line">(gdb) call dprint(&amp;...)           # print JEM/JIVE variable types</div>
+<h1><a class="anchor" id="autotoc_md11"></a>
+Build Commands</h1>
+<h2><a class="anchor" id="autotoc_md12"></a>
+Development Builds</h2>
+<div class="fragment"><div class="line"># Debug build with symbols</div>
+<div class="line">jive make debug</div>
 <div class="line"> </div>
-<div class="line"># &quot;normal&quot; build</div>
+<div class="line"># Standard build  </div>
 <div class="line">jive make</div>
 <div class="line"> </div>
-<div class="line"># optimized build</div>
+<div class="line"># Optimized build</div>
 <div class="line">jive make opt</div>
 <div class="line"> </div>
-<div class="line"># Documentation</div>
-<div class="line">jive make docs</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
-Issues/Questions</h1>
+<div class="line"># Clean build artifacts</div>
+<div class="line">jive make clean</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md13"></a>
+Testing</h2>
+<div class="fragment"><div class="line"># Run all validation tests</div>
+<div class="line">jive make tests</div>
+<div class="line"> </div>
+<div class="line"># Run specific test category</div>
+<div class="line">jive make beam-tests</div>
+<div class="line">jive make contact-tests</div>
+<div class="line">jive make plastic-tests</div>
+<div class="line">jive make transient-tests</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md14"></a>
+Documentation</h2>
+<div class="fragment"><div class="line"># Generate API documentation</div>
+<div class="line">jive make doc</div>
+<div class="line"> </div>
+<div class="line"># Open documentation in browser</div>
+<div class="line">firefox doc/html/index.html</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md15"></a>
+Debugging</h2>
+<div class="fragment"><div class="line"># Debug with GDB</div>
+<div class="line">jive gdb bin/dynLattice-debug</div>
+<div class="line"> </div>
+<div class="line"># Within GDB, print JEM/JIVE variables</div>
+<div class="line">(gdb) call dprint(&amp;variable_name)</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md16"></a>
+Submitting Changes</h1>
+<ol type="1">
+<li>Push your feature branch to your fork</li>
+<li>Create a pull request</li>
+<li>Provide a clear description of changes</li>
+<li>Include relevant publications</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md17"></a>
+Getting Help</h1>
 <ul>
-<li>Check existing issues first</li>
-<li>Provide minimal test case for bugs</li>
-<li>Include error messages and environment info </li>
+<li><b>Issues</b>: Check <a href="https://github.com/hortulanusT/dynLattice/issues">existing issues</a> first</li>
+<li><b>Bugs</b>: Provide minimal test case and environment details</li>
+<li><b>Questions</b>: Open a discussion or issue with your question</li>
+<li><b>Documentation</b>: See <code>doc/</code> directory for technical details </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

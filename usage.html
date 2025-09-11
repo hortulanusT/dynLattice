@@ -84,11 +84,11 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>As an example use-case, the transient <a class="el" href="transientbenchmarks.html#transient1">Test 1</a> is laid out and explained.</p>
-<h1><a class="anchor" id="autotoc_md14"></a>
+<h1><a class="anchor" id="autotoc_md25"></a>
 Setup</h1>
 <p>As a first step, we need to compile the program using <code>jive make</code>. This will create the executable <code>bin/dynLattice</code> we can use to run the simulation.</p>
 <p>The next step is to create the needed files, starting with the geometry file, in this case <code>tests/transient/test1.geo</code>. The <code>GMSH</code> syntax can be found on their <a href="https://gmsh.info/doc/texinfo/gmsh.html#Gmsh-scripting-language">documentation</a>.</p>
-<p>Now, we need to create our program file. For our case, it can be found in <code>tests/transient/test1.pro</code> and will be explained line-by-line in the following.</p>
+<p>Now, we need to create our property file with model inputs. For our case, it can be found in <code>tests/transient/test1.pro</code> and will be explained line-by-line in the following. Note that the file contains include statements for three other input files: <code>input.pro</code>, <code>model.pro</code> and <code>output.pro</code>. Some of the contents of these included files are overwritten in <code>test1.pro</code> after the <code>include</code> statements.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Command   </th><th class="markdownTableHeadNone">Explanation    </th></tr>
@@ -289,7 +289,7 @@ model.pro</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Displacement Boundary Conditions</b>   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>model.model.disp.type = "Dirichlet";</code>   </td><td class="markdownTableBodyNone">specify the prescribed displacements to sue the <a class="el" href="classDirichletModel.html" title="Model for applying Dirichlet boundary conditions with displacement control.">DirichletModel</a>    </td></tr>
+<td class="markdownTableBodyNone"><code>model.model.disp.type = "Dirichlet";</code>   </td><td class="markdownTableBodyNone">specify the prescribed displacements to use the <a class="el" href="classDirichletModel.html" title="Model for applying Dirichlet boundary conditions with displacement control.">DirichletModel</a>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>model.model.disp.initDisp = 0.;</code>   </td><td class="markdownTableBodyNone">set initial displacement to 0    </td></tr>
 <tr class="markdownTableRowEven">
@@ -314,7 +314,7 @@ output.pro</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Load Extent Output</b>   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>Output.loadextent.type = "GroupOutput";</code>   </td><td class="markdownTableBodyNone">use the <a class="el" href="classGroupOutputModule.html" title="Module for extracting and storing group-based output data.">GroupOutputModule</a> to extreact data from the output groups    </td></tr>
+<td class="markdownTableBodyNone"><code>Output.loadextent.type = "GroupOutput";</code>   </td><td class="markdownTableBodyNone">use the <a class="el" href="classGroupOutputModule.html" title="Module for extracting and storing group-based output data.">GroupOutputModule</a> to extract data from the output groups    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Output.loadextent.nodeGroups = [ "fixed", "free" ];</code>   </td><td class="markdownTableBodyNone">track data for both "fixed" and "free" node groups    </td></tr>
 <tr class="markdownTableRowEven">

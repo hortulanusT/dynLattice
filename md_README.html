@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>dynLattice: Rod-based Lattice Simulations</title>
+<title>dynLattice: dynLattice</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -76,62 +76,131 @@ $(function() {
 
 </div><!-- top -->
 <div><div class="header">
-  <div class="headertitle"><div class="title">Rod-based Lattice Simulations</div></div>
+  <div class="headertitle"><div class="title">dynLattice</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md23"></a>This repository contains JEM/JIVE code and corresponding scripts to execute a FEA based on nonlinear Beam elements implemented after <a href="https://doi.org/10.1016/0045-7825(86)90079-4">Simo, Vu-Quoc (1986)</a> as well as some documentation.</p>
-<h1><a class="anchor" id="autotoc_md24"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md35"></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="pointer-events: none;" class="inline"/></a> <a href="https://hortulanust.github.io/dynLattice/"><img src="https://img.shields.io/badge/Docs-1.11-00a6d6" alt="Docs: 1.11" class="inline"/></a></p>
+<p>dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the <a href="https://doi.org/10.1016/0045-7825(86)90079-4">Simo &amp; Vu-Quoc (1986)</a> formulation with support for inelastic materials, explicit time marching, and contact mechanics.</p>
+<h1><a class="anchor" id="autotoc_md36"></a>
+Features</h1>
+<ul>
+<li><b>Geometrically exact beam elements</b> with support for large deformations</li>
+<li><b>Inelastic material models</b> for rod elements including elastoplastic behavior</li>
+<li><b>Explicit time integration</b> for dynamic simulations</li>
+<li><b>Contact mechanics</b> between beam elements</li>
+<li><b>GMSH integration</b> for mesh generation</li>
+<li><b>Containerized environment</b> with Apptainer for reproducible simulations</li>
+<li><b>Comprehensive test suite</b> with validation benchmarks</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md37"></a>
+Publications</h1>
+<p><a href="https://doi.org/10.1016/j.mechmat.2024.104952"><img src="https://img.shields.io/badge/Article-Mech.%20Mater.%20(2024)-orange?logo=DOI" alt="Article: Mech. Mater." class="inline"/></a> <a href="https://doi.org/10.1007/s00466-024-02572-3"><img src="https://img.shields.io/badge/Article-Comput.%20Mech.%20(2025)-orange?logo=DOI" alt="Article: Comput. Mech." class="inline"/></a> <a href="https://doi.org/10.1016/j.ijimpeng.2025.105402"><img src="https://img.shields.io/badge/Article-Int.%20J.%20Impact%20Eng.%20(2025)-orange?logo=DOI" alt="Article: Int. J. Impact Eng." class="inline"/></a></p>
+<p><a href="https://doi.org/10.31224/5224"><img src="https://img.shields.io/badge/Preprint-engrXiv%20(2025)-orange?logo=DOI" alt="Preprint: engrXiv" class="inline"/></a> <a href="https://doi.org/10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f"><img src="https://img.shields.io/badge/Dissertation-TU%20Delft%20(2025)-00a6d6?logo=DOI" alt="Dissertation: TU Delft" class="inline"/></a></p>
+<h1><a class="anchor" id="autotoc_md38"></a>
+Quick Start</h1>
+<h2><a class="anchor" id="autotoc_md39"></a>
+Prerequisites</h2>
+<ul>
+<li><a href="https://apptainer.org/">Apptainer</a> installed on your system</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md40"></a>
+Installation</h2>
+<ol type="1">
+<li>Download the <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a></li>
+<li>Set up the container alias <code>alias jive="apptainer exec $(pwd)/jive.sif"</code></li>
+<li>Build the code <code>jive make</code></li>
+<li>Run tests to verify installation: <code>jive make tests</code></li>
+</ol>
+<h2><a class="anchor" id="autotoc_md41"></a>
+Basic Usage</h2>
+<p>After building, the main executable <code>dynLattice</code> will be available in the <code>bin/</code> directory. Run simulations using:</p>
+<div class="fragment"><div class="line">jive bin/dynLattice input_file.pro</div>
+</div><!-- fragment --><p>Example input files can be found in the <code>tests/</code> directory.</p>
+<h1><a class="anchor" id="autotoc_md42"></a>
+Documentation</h1>
+<ul>
+<li><b>API Documentation</b>: Build with <code>jive make doc</code> and open <code>doc/html/index.html</code></li>
+<li><b>Installation Guide</b>: <a class="el" href="install_8md.html">doc/install.md</a></li>
+<li><b>Usage Instructions</b>: <a class="el" href="usage_8md.html">doc/usage.md</a></li>
+<li><b>Benchmarks</b>: <a class="el" href="Benchmarks_8md.html">tests/Benchmarks.md</a></li>
+</ul>
+<h1><a class="anchor" id="autotoc_md43"></a>
 Requirements</h1>
-<p>You can use the code in this repository with the provided Apptainer container. To run the code, you need to have <a href="https://apptainer.org/">Apptainer</a> installed on your system. The code is built using the <code>Makefile</code> in the root directory. Using the provided container, you can build also build the documentation using <code>&lt;apptainer exec jive.sif&gt; make doc</code>.</p>
-<h1><a class="anchor" id="autotoc_md25"></a>
-Organization</h1>
+<p>The code requires the JIVE finite element toolkit and its dependencies. All requirements are provided through the included Apptainer container (<code>jive.sif</code>). To build the documentation, use:</p>
+<div class="fragment"><div class="line">jive make doc</div>
+</div><!-- fragment --><p>The documentation is also available as <a href="https://hortulanust.github.io/dynLattice/">GitHub Pages</a></p>
+<h1><a class="anchor" id="autotoc_md44"></a>
+Project Structure</h1>
 <div class="fragment"><div class="line">.</div>
-<div class="line">├── .gitignore            &lt;- gitignore file to ignore compiled files and other artifacts</div>
-<div class="line">├── .gitattributes        &lt;- git attributes file</div>
-<div class="line">├── .github/              &lt;- GitHub workflows and configuration</div>
-<div class="line">├── .vscode/              &lt;- VS Code workspace configuration</div>
-<div class="line">├── LICENSE               &lt;- license file</div>
-<div class="line">├── README                &lt;- this file</div>
-<div class="line">├── Makefile              &lt;- makefile for building the code and documentation</div>
-<div class="line">├── jive.def              &lt;- Apptainer definition file for building the container</div>
-<div class="line">├── jive.sif              &lt;- Apptainer container for running the code</div>
-<div class="line">├── bin/                  &lt;- Compiled code, ignored by git</div>
-<div class="line">│   ├── dynLattice        &lt;- main executable for the program</div>
-<div class="line">│   ├── dynLattice-opt    &lt;- optimized executable for the program</div>
-<div class="line">│   └── dynLattice-debug  &lt;- executable with debug symbols</div>
-<div class="line">├── doc/                  &lt;- Documentation files</div>
-<div class="line">│   ├── Documentation.html &lt;- Main documentation file</div>
-<div class="line">│   ├── doxygen.conf      &lt;- Doxygen configuration for API documentation</div>
-<div class="line">│   ├── install.md        &lt;- Installation instructions</div>
-<div class="line">│   ├── main.md           &lt;- Main documentation content</div>
-<div class="line">│   ├── usage.md          &lt;- Usage instructions</div>
-<div class="line">│   └── html/             &lt;- Generated HTML documentation, ignored by git</div>
-<div class="line">├── paper/                &lt;- JOSS paper and related materials</div>
-<div class="line">│   ├── paper.md          &lt;- Main paper content in Markdown</div>
-<div class="line">│   ├── paper.bib         &lt;- Bibliography file</div>
-<div class="line">│   └── beam_concept.pdf  &lt;- Beam concept illustration</div>
-<div class="line">├── src/                  &lt;- Source code</div>
-<div class="line">│   ├── main.cpp          &lt;- Main file for the program</div>
-<div class="line">│   ├── models/           &lt;- Custom JIVE models</div>
-<div class="line">│   ├── modules/          &lt;- Custom JIVE modules</div>
-<div class="line">│   ├── materials/        &lt;- Custom JIVE materials</div>
-<div class="line">│   ├── misc/             &lt;- Other custom files</div>
-<div class="line">│   └── utils/            &lt;- Utility functions and macros</div>
-<div class="line">└── tests/                &lt;- Test cases and benchmarks</div>
-<div class="line">    ├── testing.mk        &lt;- Makefile for running tests</div>
-<div class="line">    ├── Benchmarks.md     &lt;- Overview of all benchmarks</div>
-<div class="line">    ├── BeamBenchmarks.md &lt;- Beam element benchmarks</div>
-<div class="line">    ├── ContactBenchmarks.md &lt;- Contact mechanics benchmarks</div>
-<div class="line">    ├── PlasticBenchmarks.md &lt;- Plasticity benchmarks</div>
-<div class="line">    ├── TransientBenchmarks.md &lt;- Transient analysis benchmarks</div>
-<div class="line">    ├── beam/             &lt;- Beam test cases</div>
-<div class="line">    ├── contact/          &lt;- Contact test cases</div>
-<div class="line">    ├── plastic/          &lt;- Plasticity test cases</div>
-<div class="line">    ├── transient/        &lt;- Transient analysis test cases</div>
-<div class="line">    └── *.png             &lt;- Result images from benchmark tests, ignored by git</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md26"></a>
+<div class="line">├── .gitignore            ← gitignore file to ignore compiled files and other artifacts</div>
+<div class="line">├── .gitattributes        ← git attributes file</div>
+<div class="line">├── .github/              ← GitHub workflows and configuration</div>
+<div class="line">├── .vscode/              ← VS Code workspace configuration</div>
+<div class="line">├── CITATION.cff          ← Citation metadata file</div>
+<div class="line">├── LICENSE               ← MIT license file</div>
+<div class="line">├── README.md             ← this file</div>
+<div class="line">├── CONTRIBUTING.md       ← contribution guidelines</div>
+<div class="line">├── codemeta.json         ← software metadata</div>
+<div class="line">├── Makefile              ← makefile for building the code and documentation</div>
+<div class="line">├── jive.def              ← Apptainer definition file for building the container</div>
+<div class="line">├── jive.sif              ← Apptainer container for running the code</div>
+<div class="line">├── bin/                  ← Compiled code (ignored by git)</div>
+<div class="line">│   ├── dynLattice        ← main executable for the program</div>
+<div class="line">│   ├── dynLattice-opt    ← optimized executable for the program</div>
+<div class="line">│   └── dynLattice-debug  ← executable with debug symbols</div>
+<div class="line">├── doc/                  ← Documentation files</div>
+<div class="line">│   ├── doc.mk            ← Makefile for documentation</div>
+<div class="line">│   ├── doxygen.conf      ← Doxygen configuration for API documentation</div>
+<div class="line">│   ├── install.md        ← Installation instructions</div>
+<div class="line">│   ├── main.md           ← Main documentation content</div>
+<div class="line">│   ├── usage.md          ← Usage instructions</div>
+<div class="line">│   └── html/             ← Generated HTML documentation (ignored by git)</div>
+<div class="line">├── paper/                ← JOSS paper and related materials</div>
+<div class="line">│   ├── paper.md          ← Main paper content in Markdown</div>
+<div class="line">│   ├── paper.bib         ← Bibliography file</div>
+<div class="line">│   └── beam_concept.pdf  ← Beam concept illustration</div>
+<div class="line">├── src/                  ← Source code</div>
+<div class="line">│   ├── main.cpp          ← Main file for the program</div>
+<div class="line">│   ├── models/           ← Custom JIVE models</div>
+<div class="line">│   ├── modules/          ← Custom JIVE modules</div>
+<div class="line">│   ├── materials/        ← Custom JIVE materials</div>
+<div class="line">│   ├── misc/             ← Other custom files</div>
+<div class="line">│   └── utils/            ← Utility functions and macros</div>
+<div class="line">└── tests/                ← Test cases and benchmarks</div>
+<div class="line">    ├── testing.mk        ← Makefile for running tests</div>
+<div class="line">    ├── Benchmarks.md     ← Overview of all benchmarks</div>
+<div class="line">    ├── BeamBenchmarks.md ← Beam element benchmarks</div>
+<div class="line">    ├── ContactBenchmarks.md ← Contact mechanics benchmarks</div>
+<div class="line">    ├── PlasticBenchmarks.md ← Plasticity benchmarks</div>
+<div class="line">    ├── TransientBenchmarks.md ← Transient analysis benchmarks</div>
+<div class="line">    ├── beam/             ← Beam test cases</div>
+<div class="line">    ├── contact/          ← Contact test cases</div>
+<div class="line">    ├── plastic/          ← Plasticity test cases</div>
+<div class="line">    ├── transient/        ← Transient analysis test cases</div>
+<div class="line">    └── *.png             ← Result images from benchmark tests (ignored by git)</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md45"></a>
+Contributing</h1>
+<p>We welcome contributions to dynLattice! Please see <a class="el" href="md_CONTRIBUTING.html">CONTRIBUTING.md</a> for guidelines on:</p>
+<ul>
+<li>Setting up the development environment</li>
+<li>Code organization and style</li>
+<li>Submitting pull requests</li>
+<li>Running tests</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md46"></a>
+Examples and Validation</h1>
+<p>The <code>tests/</code> directory contains numerous validation cases and benchmarks:</p>
+<ul>
+<li><b>Beam Benchmarks</b>: Validation of beam element formulation</li>
+<li><b>Contact Benchmarks</b>: Contact mechanics validation</li>
+<li><b>Plasticity Benchmarks</b>: <a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> nonlinearity validation <br  />
+</li>
+<li><b>Transient Benchmarks</b>: Dynamic analysis validation</li>
+</ul>
+<p>Each benchmark includes input files (<code>.pro</code>, <code>.geo</code>) and reference results.</p>
+<h1><a class="anchor" id="autotoc_md47"></a>
 License</h1>
-<p>[MIT License](LICENSE) </p>
+<p>This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

@@ -6,7 +6,7 @@ var searchData=
   ['updatevec_3',['updateVec',['../classExplicitModule.html#abaa87ce7952935afa9f9b81a2ade8ecd',1,'ExplicitModule']]],
   ['updcond_5f_4',['updCond_',['../classExplicitModule.html#a1bee631eb7f516825cfa42ad9dc6876f',1,'ExplicitModule']]],
   ['updforce_5',['updForce',['../classMilneDeviceModule.html#a595eaa4a15a66117fff5ee7e5f4148fb',1,'MilneDeviceModule']]],
-  ['usage_6',['Usage',['../usage.html',1,'index']]],
+  ['usage_6',['usage',['../md_README.html#autotoc_md41',1,'Basic Usage'],['../usage.html',1,'Usage']]],
   ['usage_2emd_7',['usage.md',['../usage_8md.html',1,'']]],
-  ['using_20the_20code_8',['3. Using the code',['../install.html#autotoc_md11',1,'']]]
+  ['using_20the_20code_8',['3. Using the code',['../install.html#autotoc_md22',1,'']]]
 ];
