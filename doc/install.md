@@ -8,7 +8,7 @@
 
 # (Optional) build the *.sif* file yourself
 A `.def` file is provided to build the container yourself.
-1. Put all the required archives into a directory called `zip`.
+1. Put all the required archives into a directory called `zips`.
     - [JEM/JIVE 3.0](https://dynaflow.com/software/jive/jive-downloads/)
     - [OpenMPI 4.1.1](https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz)
     - [GMSH 4.9.5](https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz)
