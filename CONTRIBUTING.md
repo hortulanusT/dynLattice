@@ -7,7 +7,7 @@ Thank you for your interest in contributing to dynLattice! This guide will help 
 1. **Fork and clone** the repository from GitHub
   - set up LFS to download the `.sif` file with the repository
   - otherwise simply download the `.sif` file directly from the [original repository](https://github.com/hortulanusT/dynLattice/blob/main/jive.sif)
-  - alternatively build the `.sif` file yourself using the `.def` file and the additional dependencies listed in the [documentation](docs/install.md)
+  - alternatively build the `.sif` file yourself using the `.def` file and the additional dependencies listed in the [documentation](doc/install.md)
 2. **Set up the container alias**
    ```bash
    alias jive="apptainer exec -e --env DISPLAY=$DISPLAY $(pwd)/jive.sif"
