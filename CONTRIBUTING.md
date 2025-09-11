@@ -5,10 +5,12 @@ Thank you for your interest in contributing to dynLattice! This guide will help 
 ## Development Setup
 
 1. **Fork and clone** the repository from GitHub
-2. **Set up the development environment:**
+  - set up LFS to download the `.sif` file with the repository
+  - otherwise simply download the `.sif` file directly from the [original repository](https://github.com/hortulanusT/dynLattice/blob/main/jive.sif)
+  - alternatively build the `.sif` file yourself using the `.def` file and the additional dependencies listed in the [documentation](docs/install.md)
+2. **Set up the container alias**
    ```bash
-   cd dynLattice
-   alias jive="apptainer exec $(pwd)/jive.sif"
+   alias jive="apptainer exec -e --env DISPLAY=$DISPLAY $(pwd)/jive.sif"
    ```
 3. **Create a feature branch:**
    ```bash
@@ -34,6 +36,7 @@ Thank you for your interest in contributing to dynLattice! This guide will help 
 - Follow existing naming conventions:
   - `PascalCase` for classes and types
   - `camelCase` for functions and variables
+  - `camelCase_` for private/protected functions and variables
   - `UPPER_CASE` for constants
 - Document public interfaces with [Doxygen](https://doxygen.nl/) style comments
 

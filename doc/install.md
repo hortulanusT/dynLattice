@@ -9,20 +9,19 @@
 
 # 1. Install `apptainer` and get the `.sif` file
 1. Install `apptainer` following the [quick start guide](https://apptainer.org/get-started/).
-2. Download the pre-built `.sif` from the repository or build it yourself.
-3. Define an alias for easier executing, e.g. `alias jive="apptainer -s exec -e --env DISPLAY=$DISPLAY </full/path/to/>jive.sif"` 
 
 # (Optional) build the `.sif` file yourself
-A `.def` file is provided to build the container yourself.
-To build the container put all the required archives into a folder called `zip` and run the command `sudo apptainer build jive.sif jive.def`.
-You can subsequently move the `jive.sif` to any location you prefer.
+- A `.def` file is provided to build the container yourself.
+1. Put all the required archives (listed above) into a directory called `zip`.
+2. Run the command `sudo apptainer build jive.sif jive.def`.
 
-# 2. Get this repository and build the documentation
-1. Get the repository via `git clone git@github.com:hortulanusT/dynLattice.git`
-2. Build the documentation via `jive make docs` (this will execute the test cases as well)
+# 2. Get the repository and build the documentation
+1. Get [latest release](https://github.com/hortulanusT/dynLattice/releases/latest) of the repository.
+2. Define an appropriate alias for running inside the apptainer `alias jive="apptainer exec $(pwd)/jive.sif"`
+3. Build the documentation via `jive make docs` (this will execute the test cases as well)
 
 # 3. Using the code
-1. You can build the code via `jive make` and then execute any test via `bin/dynLattice path/to/inputs.pro`
+1. You can build the code via `jive make` and then execute any test via `jive bin/dynLattice path/to/inputs.pro`
 2. Once you are done with your setup and sure everything works, build the optimized version via `jive make opt` and then run `bin/dynLattice-opt path/to/inputs.pro`
 3. If you want to debug your own additions using the GNU Project debugger build `jive make debug` and then run `jive gdb bin/dynLattice-dbg`
     - proceed with `(gdb) run path/to/inputs.pro`
