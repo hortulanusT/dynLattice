@@ -14,12 +14,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          lfs: true
       - name: Apptainer
         uses: eWaterCycle/setup-apptainer@v2
         with:
           apptainer-version: 1.4.2
+      - name: Download jive.sif
+        run: |
+          echo "Downloading jive.sif for commit ${GITHUB_SHA}"
+          wget -O jive.sif "https://github.com/hortulanusT/dynLattice/raw/${GITHUB_SHA}/jive.sif"
       - name: Build documentation
         run: apptainer exec jive.sif make docs
       - name: Upload documentation
