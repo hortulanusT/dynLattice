@@ -19,9 +19,7 @@ jobs:
         with:
           apptainer-version: 1.4.2
       - name: Download jive.sif
-        run: |
-          echo "Downloading jive.sif for commit ${GITHUB_SHA}"
-          wget -O jive.sif "https://github.com/hortulanusT/dynLattice/raw/${GITHUB_SHA}/jive.sif"
+        run: wget -O jive.sif "https://github.com/hortulanusT/dynLattice/raw/${GITHUB_SHA}/jive.sif" && echo "Downloaded jive.sif for commit ${GITHUB_SHA}"
       - name: Build documentation
         run: apptainer exec jive.sif make docs
       - name: Upload documentation
@@ -32,6 +30,7 @@ jobs:
 
   gh-pages:
     runs-on: ubuntu-latest
+    name: Deploy to GitHub Pages
     needs: documentation
     if: github.ref == 'refs/heads/main'
     steps:
