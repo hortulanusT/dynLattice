@@ -2,17 +2,17 @@
 
 # Requirements
 - **[Apptainer](https://apptainer.org/)**
-- [JEM/JIVE 3.0](https://dynaflow.com/software/jive/jive-downloads/)
-- [OpenMPI 4.1.1](https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz)
-- [GMSH 4.9.5](https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz)
-- [HDF5 1.12.2](https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz)
 
-# 1. Install `apptainer` and get the `.sif` file
+# 1. Install *apptainer*
 1. Install `apptainer` following the [quick start guide](https://apptainer.org/get-started/).
 
-# (Optional) build the `.sif` file yourself
-- A `.def` file is provided to build the container yourself.
-1. Put all the required archives (listed above) into a directory called `zip`.
+# (Optional) build the *.sif* file yourself
+A `.def` file is provided to build the container yourself.
+1. Put all the required archives into a directory called `zips`.
+    - [JEM/JIVE 3.0](https://dynaflow.com/software/jive/jive-downloads/)
+    - [OpenMPI 4.1.1](https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz)
+    - [GMSH 4.9.5](https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz)
+    - [HDF5 1.12.2](https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz)
 2. Run the command `sudo apptainer build jive.sif jive.def`.
 
 # 2. Get the repository and build the documentation
