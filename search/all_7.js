@@ -13,6 +13,6 @@ var searchData=
   ['boundary_5fprop_10',['BOUNDARY_PROP',['../classSpringMassModel.html#a9a3872854bfa762d333a9fb4c4af3927',1,'SpringMassModel']]],
   ['build_20commands_11',['Build Commands',['../md_CONTRIBUTING.html#autotoc_md11',1,'']]],
   ['build_20the_20documentation_12',['2. Get the repository and build the documentation',['../install.html#autotoc_md21',1,'']]],
-  ['build_20the_20tt_20sif_20tt_20file_20yourself_13',['(Optional) build the &lt;tt&gt;.sif&lt;/tt&gt; file yourself',['../install.html#autotoc_md20',1,'']]],
+  ['build_20the_20sif_20file_20yourself_13',['(Optional) build the *.sif* file yourself',['../install.html#autotoc_md20',1,'']]],
   ['builds_14',['Development Builds',['../md_CONTRIBUTING.html#autotoc_md12',1,'']]]
 ];

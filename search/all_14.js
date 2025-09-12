@@ -7,7 +7,7 @@ var searchData=
   ['oldstrains_5f_4',['oldStrains_',['../classElasticRodMaterial.html#ac5ce5b8b51a456d36c6b938520898140',1,'ElasticRodMaterial']]],
   ['onelab_5fprops_5',['ONELAB_PROPS',['../classGMSHInputModule.html#a7ad458be232a165468ad7029206dd937',1,'GMSHInputModule']]],
   ['openmesh_5f_6',['openMesh_',['../classGMSHInputModule.html#a0134c85695222116d91f40990a13a026',1,'GMSHInputModule']]],
-  ['optional_20build_20the_20tt_20sif_20tt_20file_20yourself_7',['(Optional) build the &lt;tt&gt;.sif&lt;/tt&gt; file yourself',['../install.html#autotoc_md20',1,'']]],
+  ['optional_20build_20the_20sif_20file_20yourself_7',['(Optional) build the *.sif* file yourself',['../install.html#autotoc_md20',1,'']]],
   ['order_8',['ORDER',['../classGMSHInputModule.html#a7b4370cef9cfede1e70a6b9a9ad5b12a',1,'GMSHInputModule']]],
   ['order_5f_9',['order_',['../classExplicitModule.html#a694b23cfde4e207a3076dc78ead60557',1,'ExplicitModule']]],
   ['out_5ffile_10',['OUT_FILE',['../classGMSHInputModule.html#a409056a39fbec76eb2c053687fd1d416',1,'GMSHInputModule']]],

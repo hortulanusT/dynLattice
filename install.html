@@ -87,23 +87,22 @@ $(function() {
 Requirements</h1>
 <ul>
 <li><b><a href="https://apptainer.org/">Apptainer</a></b></li>
+</ul>
+<h1><a class="anchor" id="autotoc_md19"></a>
+1. Install &lt;em&gt;apptainer&lt;/em&gt;</h1>
+<ol type="1">
+<li>Install <code>apptainer</code> following the <a href="https://apptainer.org/get-started/">quick start guide</a>.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md20"></a>
+(Optional) build the *.sif* file yourself</h1>
+<p>A <code>.def</code> file is provided to build the container yourself.</p><ol type="1">
+<li>Put all the required archives into a directory called <code>zips</code>.<ul>
 <li><a href="https://dynaflow.com/software/jive/jive-downloads/">JEM/JIVE 3.0</a></li>
 <li><a href="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz">OpenMPI 4.1.1</a></li>
 <li><a href="https://gmsh.info/bin/Linux/gmsh-4.9.5-Linux64-sdk.tgz">GMSH 4.9.5</a></li>
 <li><a href="https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz">HDF5 1.12.2</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md19"></a>
-1. Install &lt;tt&gt;apptainer&lt;/tt&gt; and get the &lt;tt&gt;.sif&lt;/tt&gt; file</h1>
-<ol type="1">
-<li>Install <code>apptainer</code> following the <a href="https://apptainer.org/get-started/">quick start guide</a>.</li>
-</ol>
-<h1><a class="anchor" id="autotoc_md20"></a>
-(Optional) build the &lt;tt&gt;.sif&lt;/tt&gt; file yourself</h1>
-<ul>
-<li>A <code>.def</code> file is provided to build the container yourself.</li>
-</ul>
-<ol type="1">
-<li>Put all the required archives (listed above) into a directory called <code>zip</code>.</li>
+</li>
 <li>Run the command <code>sudo apptainer build jive.sif jive.def</code>.</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md21"></a>
