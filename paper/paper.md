@@ -47,6 +47,8 @@ The usage of these libraries for explicit dynamics with inelastic beams however,
 Other finite element toolkits having built in beam-elements and explicit dynamics include Kratos [@kratos; @Dadvand2010] and Akantu [@Richart2024].
 For Kratos similar problems as for MOOSE can be seen in only a limited set of beam elements being available and none supporting inelastic behavior in the cross-sectional strain measures.
 Akantu, focusing on fracture mechanics and providing a solid representation of contact, on the other hand only provides Euler-Bernoulli beam elements, neglecting all shear deformation within the elements.
+Next to general finite element toolkits, there are specialized beam toolkits, most prominently for shear-deformable beams, GXBeam [@GXBeam]. 
+Here, the same beam theory employed in this contribution is used, however due to its focus on composite beams, it is limited to (anisotropic) elastic material behavior and does not model contact.
 
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
