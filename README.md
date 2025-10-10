@@ -1,5 +1,6 @@
 # dynLattice
 
+[![JOSS status](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4/status.svg)](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docs: 1.11](https://img.shields.io/badge/Docs-1.11-00a6d6)](https://hortulanust.github.io/dynLattice/)
 
