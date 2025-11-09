@@ -21,8 +21,8 @@ dynLattice is a finite element environment for dynamic simulation of beam networ
 [![Article: Mech. Mater.](https://img.shields.io/badge/Article-Mech.%20Mater.%20(2024)-orange?logo=DOI)](https://doi.org/10.1016/j.mechmat.2024.104952)
 [![Article: Comput. Mech.](https://img.shields.io/badge/Article-Comput.%20Mech.%20(2025)-orange?logo=DOI)](https://doi.org/10.1007/s00466-024-02572-3)
 [![Article: Int. J. Impact Eng.](https://img.shields.io/badge/Article-Int.%20J.%20Impact%20Eng.%20(2025)-orange?logo=DOI)](https://doi.org/10.1016/j.ijimpeng.2025.105402)
+[![Preprint: Mater. Today Adv.](https://img.shields.io/badge/Article-Mater.%20Today%20Adv.%20(2025)-orange?logo=DOI)](https://doi.org/10.1016/j.mtadv.2025.100656)
 <!-- Other Publications -->
-[![Preprint: engrXiv](https://img.shields.io/badge/Preprint-engrXiv%20(2025)-orange?logo=DOI)](https://doi.org/10.31224/5224)
 [![Dissertation: TU Delft](https://img.shields.io/badge/Dissertation-TU%20Delft%20(2025)-00a6d6?logo=DOI)](https://doi.org/10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f)
 
 ## Quick Start
