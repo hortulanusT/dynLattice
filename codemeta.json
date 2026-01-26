@@ -5,7 +5,7 @@
     {
       "@id": "https://orcid.org/0000-0002-5088-855X",
       "@type": "Person",
-      "email": "t.gartner@tudelft.nl",
+      "email": "til.gaertner@ibnm.uni-hannover.de",
       "name": "Til Gärtner",
       "affiliation": [
         {
@@ -15,6 +15,10 @@
         {
           "@type": "Organization",
           "name": "Netherlands Organisation for Applied Scientific Research (TNO)"
+        },
+        {
+          "@type": "Organization",
+          "name": "Leibniz University Hannover"
         }
       ]
     }

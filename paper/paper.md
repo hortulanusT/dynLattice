@@ -20,6 +20,9 @@ affiliations:
   - name: Netherlands Organisation for Applied Scientific Research, The Netherlands
     index: 2
     ror: 01bnjb948
+  - name: Leibniz University Hannover, Germany
+    index: 3
+    ror: 0304hq317
 date: 14 August 2025
 bibliography: paper.bib
 ---
