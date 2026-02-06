@@ -73,12 +73,12 @@ In addition to investigating lattice materials, it has been used to study the be
 Collaborating researchers could easily install and run the software using the provided documentation and `apptainer`. 
 
 In addition to external collaboration, [dynLattice]{.sc} was also used as a ready-made software package by multiple student theses [@niessen22; @ijzendoorn24; @smit24].
-During these projects, dynLattice was used on large computational clusters [@DHPC2024] and on various local machines using the provided `apptainer`. 
+During these projects, dynLattice was used on a large cluster [@DHPC2024] and on various local machines using the provided `apptainer`. 
 This demonstrates its availability and usability as stand-alone software without the need for further modifications.
 
 Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in \autoref{design}.
 The provided documentation, available in the source and on the [project website](https://hortulanust.github.io/dynLattice/), facilitates quick and straightforward adoption by third parties.
-The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple programs.
+The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple problems.
 
 # AI Usage Disclosure
 During the creation of this software, GitHub Copilot (using different versions of Claude Sonnet) was used to enhance the documentation of the source code. In particular, it helped streamline all documentation efforts into Doxygen compatible comments. All generated documentation strings were read and approved by the author.
