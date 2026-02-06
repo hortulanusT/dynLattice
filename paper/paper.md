@@ -45,7 +45,7 @@ Akantu, focusing on fracture mechanics and providing a solid representation of c
 Next to general finite element toolkits, there are specialized beam toolkits, most prominently for shear-deformable beams, GXBeam [@GXBeam]. 
 Here, the same beam theory employed in this contribution is used, however due to its focus on composite beams, it is limited to (anisotropic) elastic material behavior and does not model contact.
 
-# Software Design \label{design}
+# Software Design
 In order to design metamaterials undergoing large deformations at high rates, [dynLattice]{.sc} provides both researchers and engineers in the field a toolkit for numerical experiments.
 [dynLattice]{.sc} is built on top of the openly available C++ `JIVE` finite element toolkit [@jive21; @nguyenthanh20] and follows in its design the object-oriented framework of `JIVE` to describe the partial differential equations and corresponding solution procedures.
 The toolkit allows for the implementation of original methods through the development of custom _modules_, for parts of the program flow in the simulation framework, and of custom _models_, for anything related to the numerical representation of the system of partial differential equations.
@@ -76,7 +76,7 @@ In addition to external collaboration, [dynLattice]{.sc} was also used as a read
 During these projects, dynLattice was used on a large cluster [@DHPC2024] and on various local machines using the provided `apptainer`. 
 This demonstrates its availability and usability as stand-alone software without the need for further modifications.
 
-Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in \autoref{design}.
+Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in [Software Design](#software-design).
 The provided documentation, available in the source and on the [project website](https://hortulanust.github.io/dynLattice/), facilitates quick and straightforward adoption by third parties.
 The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple problems.
 
