@@ -2,7 +2,7 @@ var searchData=
 [
   ['factorial_0',['factorial',['../namespacejive__helpers.html#a47fec286d4247765e780775af6005893',1,'jive_helpers']]],
   ['factors_5fprop_1',['factors_prop',['../classDirichletModel.html#a1bf169630663c97bb56ed14d882b1d05',1,'DirichletModel::FACTORS_PROP'],['../classNeumannModel.html#a3041b2990a5787e0a41b28de7a7da6ed',1,'NeumannModel::FACTORS_PROP']]],
-  ['features_2',['Features',['../md_README.html#autotoc_md36',1,'']]],
+  ['features_2',['Features',['../md_README.html#autotoc_md37',1,'']]],
   ['file_20yourself_3',['(Optional) build the *.sif* file yourself',['../install.html#autotoc_md20',1,'']]],
   ['filterblacklist_5f_4',['filterBlacklist_',['../classRodContactModel.html#a6234609d1886d13bc4b0485d5be763c7',1,'RodContactModel']]],
   ['findclosestpoints_5f_5',['findClosestPoints_',['../classRodContactModel.html#aaca2fa75e21f9546a277bc807fb152ec',1,'RodContactModel']]],

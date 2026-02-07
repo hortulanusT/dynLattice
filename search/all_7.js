@@ -1,7 +1,7 @@
 var searchData=
 [
   ['background_0',['Background',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md31',1,'']]],
-  ['basic_20usage_1',['Basic Usage',['../md_README.html#autotoc_md41',1,'']]],
+  ['basic_20usage_1',['Basic Usage',['../md_README.html#autotoc_md42',1,'']]],
   ['beam_20benchmarks_2',['Beam Benchmarks',['../beambenchmarks.html',1,'benchmark']]],
   ['beambenchmarks_2emd_3',['BeamBenchmarks.md',['../BeamBenchmarks_8md.html',1,'']]],
   ['benchmarks_4',['benchmarks',['../beambenchmarks.html',1,'Beam Benchmarks'],['../benchmark.html',1,'Benchmarks'],['../contactbenchmarks.html',1,'Contact Benchmarks'],['../plasticbenchmarks.html',1,'Plastic Benchmarks'],['../transientbenchmarks.html',1,'Transient Benchmarks']]],

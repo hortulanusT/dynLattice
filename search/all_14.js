@@ -1,7 +1,7 @@
 var searchData=
 [
   ['o_20etc_0',['Modules (Time Integration, I/O, etc.)',['../md_CONTRIBUTING.html#autotoc_md9',1,'']]],
-  ['of_20need_1',['Statement of need',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md30',1,'']]],
+  ['of_20need_1',['Statement of need',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md29',1,'']]],
   ['oldhardparams_5f_2',['oldHardParams_',['../classElastoPlasticRodMaterial.html#a110aa5f96338e78a055ff423a58a4af0',1,'ElastoPlasticRodMaterial']]],
   ['oldplaststrains_5f_3',['oldPlastStrains_',['../classElastoPlasticRodMaterial.html#a95ca1b66927018df991193315833fd6f',1,'ElastoPlasticRodMaterial']]],
   ['oldstrains_5f_4',['oldStrains_',['../classElasticRodMaterial.html#ac5ce5b8b51a456d36c6b938520898140',1,'ElasticRodMaterial']]],
