@@ -9,7 +9,7 @@ tags:
 authors:
   - name: Til Gärtner
     orcid: 0000-0002-5088-855X
-    affiliation: "1, 2"
+    affiliation: "1, 2, 3"
   - name: Frans P. van der Meer
     orcid: 0000-0002-6691-1259
     affiliation: 1
@@ -20,6 +20,9 @@ affiliations:
   - name: Netherlands Organisation for Applied Scientific Research, The Netherlands
     index: 2
     ror: 01bnjb948
+  - name: Leibniz University Hannover, Germany
+    index: 3
+    ror: 0304hq317
 date: 14 August 2025
 bibliography: paper.bib
 ---
@@ -33,14 +36,6 @@ In order to enable engineers to design mechanical metamaterials, the relation be
 For large deformations at high rates, this usually requires destructive testing, limiting the speed of developments.
 This limitation can be overcome using efficient numerical tools, allowing for both the accurate and fast description of the inelastic deformation at high rates [@bonfanti24].
 
-# Software Description
-In order to design metamaterials undergoing large deformations at high rates, [dynLattice]{.sc} provides both researchers and engineers in the field a toolkit for numerical experiments.
-[dynLattice]{.sc} is built on top of the openly available C++ `JIVE` finite element toolkit [@jive21; @nguyenthanh20]. 
-This toolkit allows for the implementation of original methods through the development of custom _modules_, for parts of the program flow in the simulation framework, and of custom _models_, for anything related to the numerical representation of the system of partial differential equations.
-In the present addition to the `JIVE` framework, the _models_ further contain a separate _materials_ class, representing the constitutive models considered in the problem.
-This separation allows both the easy and user-friendly extension of the frameworks by simple inheritance of the provided classes as well as usability by structuring the inputs needed for the program flow and the problem description.
-[dynLattice]{.sc} additionally uses `GMSH` [@geuzaine09] to mesh the imported geometries efficiently.
-
 # Statement of need
 There is a wide plethora of existing finite element toolkits available in the market, such as MOOSE [@moose], FEniCS [@fenics], or deal.II [@dealii], to name several prominent ones.
 The usage of these libraries for explicit dynamics with inelastic beams however, would require substantial alteration of their code, as for example in FEniCS explicit dynamics is only available using lumped mass matrices, which would be nonphysical for the rotational inertia contributions of the beams, in deal.II neither beam elements nor explicit solves are available and in MOOSE only a limited Timoshenko-Ehrenfest beam is implemented with only elastic behavior.
@@ -49,6 +44,14 @@ For Kratos similar problems as for MOOSE can be seen in only a limited set of be
 Akantu, focusing on fracture mechanics and providing a solid representation of contact, on the other hand only provides Euler-Bernoulli beam elements, neglecting all shear deformation within the elements.
 Next to general finite element toolkits, there are specialized beam toolkits, most prominently for shear-deformable beams, GXBeam [@GXBeam]. 
 Here, the same beam theory employed in this contribution is used, however due to its focus on composite beams, it is limited to (anisotropic) elastic material behavior and does not model contact.
+
+# Software Design
+In order to design metamaterials undergoing large deformations at high rates, [dynLattice]{.sc} provides both researchers and engineers in the field a toolkit for numerical experiments.
+[dynLattice]{.sc} is built on top of the openly available C++ `JIVE` finite element toolkit [@jive21; @nguyenthanh20] and follows in its design the object-oriented framework of `JIVE` to describe the partial differential equations and corresponding solution procedures.
+The toolkit allows for the implementation of original methods through the development of custom _modules_, for parts of the program flow in the simulation framework, and of custom _models_, for anything related to the numerical representation of the system of partial differential equations.
+In the present addition to the `JIVE` framework, the _models_ further contain a separate _materials_ class, representing the constitutive models considered in the problem, sparating the .
+This separation allows both the easy and user-friendly extension of the frameworks by simple inheritance of the provided classes as well as usability by structuring the inputs needed for the program flow and the problem description.
+[dynLattice]{.sc} additionally uses `GMSH` [@geuzaine09] to mesh the imported geometries efficiently.
 
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
@@ -64,9 +67,21 @@ $$
 From these measures, strain prescriptors, describing stretching, shearing, bending, and twisting of the beam can be derived. 
 These strain prescriptors are then used together with the material model of the beam, be it elastic (cf. [@simo86; @eugster15]) or elasto-plastic (cf. [@smriti20; @herrnböck22; @gärtner25]), to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
 
-# Publications
-[dynLattice]{.sc} has already been used in a series of publications [@gärtner24; @gärtner25; @gärtner_TNO; @gärtner25b] and laid the foundation for several student theses [@niessen22; @ijzendoorn24; @smit24].
-During these efforts it was used both on big computational clusters [@DHPC2024] and on various local machines using the provided `apptainer`. 
+# Resarch Impact Statement
+[dynLattice]{.sc} has enabled a series of research efforts investigating lattice metamaterials [@gärtner24, @gärtner25b, @gärtner_diss].
+In addition to investigating lattice materials, it has been used to study the behavior of beams as a multiscale problem [@gärtner25] and has undergone a thorough comparison with experimental data and results from commercial tools [@gärtner_TNO].
+Collaborating researchers could easily install and run the software using the provided documentation and `apptainer`. 
+
+In addition to external collaboration, [dynLattice]{.sc} was also used as a ready-made software package by multiple student theses [@niessen22; @ijzendoorn24; @smit24].
+During these projects, dynLattice was used on a large cluster [@DHPC2024] and on various local machines using the provided `apptainer`. 
+This demonstrates its availability and usability as stand-alone software without the need for further modifications.
+
+Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in [Software Design](#software-design).
+The provided documentation, available in the source and on the [project website](https://hortulanust.github.io/dynLattice/), facilitates quick and straightforward adoption by third parties.
+The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple problems.
+
+# AI Usage Disclosure
+During the creation of this software, GitHub Copilot (using different versions of Claude Sonnet) was used to enhance the documentation of the source code. In particular, it helped streamline all documentation efforts into Doxygen compatible comments. All generated documentation strings were read and approved by the author.
 
 # Acknowledgements
 The research of Til Gärtner is financed by TNO through the PhD program of the Dutch Ministry of Defence.

@@ -229,7 +229,8 @@ void JointContactModel::findContacts_
       posB += disp[dofsB];
 
       // check if the nodes are in contact
-      if (norm2(posA - posB) <= 2 * radius_)
+      // only consider nodes that were not in contact in the undeformed configuration
+      if (norm2(posA - posB) <= 2 * radius_ && norm2(posA - disp[dofsA] - (posB - disp[dofsB])) > 2 * radius_)
       {
         contactsA_.pushBack(ijointA);
         contactsB_.pushBack(ijointB);

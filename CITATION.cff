@@ -12,11 +12,12 @@ abstract: "dynLattice is a finite element environment for dynamic simulation of 
 authors:
   - given-names: "Til"
     family-names: "Gärtner"
-    email: "t.gartner@tudelft.nl"
+    email: "til.gaertner@ibnm.uni-hannover.de"
     orcid: "https://orcid.org/0000-0002-5088-855X"
     affiliation:
       - "Delft University of Technology"
       - "Netherlands Organization for Applied Scientific Research (TNO)"
+      - "Leibniz University Hannover"
   - given-names: "Frans P."
     family-names: "van der Meer"
     email: "f.p.vandermeer@tudelft.nl"
