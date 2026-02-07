@@ -54,9 +54,9 @@ These strain prescriptors are then used together with the material model of the 
 Research on the dynamic behaviour of mechanical metamaterials, especially beam lattices, relies on numerical tools that can capture large deformations, inelastic behaviour, and contact while remaining efficient and flexible enough for parameter studies [@bonfanti24].
 General-purpose finite element frameworks, e.g. [@kratos; @Dadvand2010; @Richart2024], provide broad capabilities but often lack a complete combination of nonlinear Timoshenko-Ehrenfest beam formulations, robust explicit time integration, and inelastic constitutive behavior.
 Here, a specialized lattice framework, e.g. [@GXBeam], typically delivers high-fidelity beam kinematics but only focuses on elastic deformations or omits contact between the consituting beams of the lattice.
-Resulting from this many researchers rely on their own implementation of Simo-Reissner beams, which are usually not available to the community and only consider a subset of the requirements needed for a general toolkit.
+Resulting from this, many researchers rely on their own implementation of Simo-Reissner beams, which are usually not available to the community and only consider a subset of the requirements needed for a general toolkit.
 An open and extensible environment that unifies geometrically exact beams, explicit dynamics, inelasticity, and contact is therefore central to advancing simulation-driven design of lattice metamaterials for high-rate and large deformation applications.
-Here, [dynLattice]{.sc} takes a first step by building upon the `JIVE` framework [@jive21; @nguyenthanh20], keeping the extensible object-orientent design philosophy, and providing extensive documentation in the style of ther underlying framework.
+Here, [dynLattice]{.sc} takes a first step by building upon the `JIVE` framework [@jive21; @nguyenthanh20], keeping the extensible object-orientent design philosophy, and providing extensive documentation in the style of the underlying framework.
 
 # State of the field
 There is a wide plethora of existing finite element toolkits available in the market, such as MOOSE [@moose], FEniCS [@fenics], or deal.II [@dealii], to name several prominent ones.
@@ -84,7 +84,7 @@ In addition to external collaboration, [dynLattice]{.sc} was also used as a read
 During these projects, dynLattice was used on a large cluster [@DHPC2024] and on various local machines using the provided `apptainer`. 
 This demonstrates its availability and usability as stand-alone software without the need for further modifications.
 
-Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in [Software Design](#software-design).
+Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in [Software design](#software-design).
 The provided documentation, available in the source and on the [project website](https://hortulanust.github.io/dynLattice/), facilitates quick and straightforward adoption by third parties.
 The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple problems.
 
