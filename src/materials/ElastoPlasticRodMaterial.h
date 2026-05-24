@@ -101,9 +101,8 @@ protected:
 
   /// @name Function argument organization
   /// @{
-  idx_t argCount_;        ///< Total arguments to yield condition
-  jem::Slice stressPart_; ///< Stress portion of arguments
-  jem::Slice hardPart_;   ///< Hardening portion of arguments
+  idx_t dofCount_; ///< Degrees of freedom in stress/strain vectors
+  idx_t argCount_; ///< Total arguments to yield condition
   /// @}
 
   /// @name Hardening and plastic state
