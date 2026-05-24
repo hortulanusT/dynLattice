@@ -21,10 +21,30 @@ subdirs		 	:= ${shell find $(SRCDIR) -type d}
 MY_INCDIRS 	:= $(SRCDIR)
 
 #######################################################################
-##   Defining C++ Standard                                           ##
+##   Defining C++ Standard & stricter warnings                       ##
 #######################################################################
-MY_CXX_STD_FLAGS := '-std=c++17'
+# Add warnings one by one by uncommenting lines.
+MY_WARN_FLAGS :=
 
+### UNCOMMENT THE LINES BELOW FOR STRICTER WARNING HYGIENE
+# MY_WARN_FLAGS += '-Wextra'
+# MY_WARN_FLAGS += '-Wpedantic'
+# MY_WARN_FLAGS += '-Wshadow'
+# MY_WARN_FLAGS += '-Wsuggest-override'
+# MY_WARN_FLAGS += '-Wold-style-cast'
+# MY_WARN_FLAGS += '-Woverloaded-virtual'
+# MY_WARN_FLAGS += '-Wdouble-promotion'
+
+# MY_WARN_FLAGS += '-Wundef'
+# MY_WARN_FLAGS += '-Wnon-virtual-dtor'
+# MY_WARN_FLAGS += '-Wundef'
+# MY_WARN_FLAGS += '-Winit-self'
+
+# MY_WARN_FLAGS += '-Wconversion'
+# MY_WARN_FLAGS += '-Wsign-conversion'
+# MY_WARN_FLAGS += '-Wfloat-equal'
+
+MY_CXX_STD_FLAGS := '-std=c++17' $(MY_WARN_FLAGS)
 #######################################################################
 ##   Include Jive package and create executable                      ##
 #######################################################################
