@@ -217,9 +217,13 @@ void GMSHInputModule::openMesh_
   gmsh::open(makeCString(geoFile).addr());
   gmsh::model::getEntities(gmsh_entities);
 
-  entities_.resize(2, gmsh_entities.size());
-  for (idx_t i = 0; i < entities_.size(1); i++)
-    entities_[i] = {gmsh_entities[i].first, gmsh_entities[i].second};
+  entities_.resize(2, static_cast<idx_t>(gmsh_entities.size()));
+
+  for (size_t i = 0; i < gmsh_entities.size(); i++)
+  {
+    const idx_t ii = static_cast<idx_t>(i);
+    entities_[ii] = {gmsh_entities[i].first, gmsh_entities[i].second};
+  }
 
   gmsh::model::mesh::generate(max(entities_(0, ALL)));
   gmsh::model::mesh::setOrder(order);
@@ -280,10 +284,12 @@ void GMSHInputModule::createNodes_
 
   gmsh::model::mesh::getNodes(gmshNodeTags, gmsh_coords, gmsh_paraCoords);
 
-  for (idx_t inode = 0; inode < static_cast<idx_t>(gmshNodeTags.size()); inode++)
+  for (size_t inode = 0; inode < gmshNodeTags.size(); inode++)
   {
-    for (idx_t icoord = 0; icoord < dim; icoord++)
-      coords[icoord] = gmsh_coords[inode * dim + icoord];
+    for (size_t icoord = 0; icoord < static_cast<size_t>(dim); icoord++)
+    {
+      coords[static_cast<idx_t>(icoord)] = gmsh_coords[inode * static_cast<size_t>(dim) + icoord];
+    }
 
     gmshToJiveNodeMap_[gmshNodeTags[inode]] = nodes_.addNode(coords);
 
@@ -344,19 +350,26 @@ void GMSHInputModule::createElems_
           types[itype], elemName, dim, order, numNodes, localCoords,
           numPrimaryNodes);
 
+      const size_t nNodes = static_cast<size_t>(numNodes);
+      const size_t nPrimary = static_cast<size_t>(numPrimaryNodes);
+      const size_t ord = static_cast<size_t>(order);
+
       for (size_t ielem = 0; ielem < elemTags[itype].size(); ielem++)
       {
         elemNodes.resize(numNodes);
 
-        for (idx_t inode = 0; inode < numPrimaryNodes; inode++)
+        for (size_t inode = 0; inode < nPrimary; inode++)
         {
-          elemNodes[inode * order] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + inode]];
+          const size_t base = ielem * nNodes;
+          elemNodes[static_cast<idx_t>(inode * ord)] = gmshToJiveNodeMap_[nodeTags[itype][base + inode]];
 
-          if (inode * order + 1 == numNodes)
+          if (inode * ord + 1 == nNodes)
             break;
-          for (idx_t jnode = 1; jnode < order; jnode++)
+
+          for (size_t jnode = 1; jnode < ord; jnode++)
           {
-            elemNodes[inode * order + jnode] = gmshToJiveNodeMap_[nodeTags[itype][ielem * numNodes + numPrimaryNodes + inode * (order - 1) + jnode - 1]];
+            const size_t idx = base + nPrimary + inode * (ord - 1) + jnode - 1;
+            elemNodes[static_cast<idx_t>(inode * ord + jnode)] = gmshToJiveNodeMap_[nodeTags[itype][idx]];
           }
         }
 
@@ -444,14 +457,14 @@ void GMSHInputModule::storeTangents_
                                entities_[ientity][1], gmsh_paras,
                                gmsh_derivatives);
 
-    jive_tags.resize(gmsh_tags.size());
-    jive_derivatives.resize(3 * gmsh_tags.size());
+    jive_tags.resize(static_cast<idx_t>(gmsh_tags.size()));
+    jive_derivatives.resize(static_cast<idx_t>(3 * gmsh_tags.size()));
 
-    for (idx_t inode = 0; inode < static_cast<idx_t>(gmsh_tags.size()); inode++)
+    for (size_t inode = 0; inode < gmsh_tags.size(); inode++)
     {
       jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[inode]];
 
-      for (idx_t icoord = 0; icoord < 3; icoord++)
+      for (size_t icoord = 0; icoord < 3; icoord++)
         jive_derivatives[inode * 3 + icoord] =
             gmsh_derivatives[inode * 3 + icoord];
     }
