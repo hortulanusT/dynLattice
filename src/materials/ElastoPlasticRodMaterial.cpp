@@ -9,6 +9,7 @@
 #include "utils/helpers.h"
 #include "utils/testing.h"
 
+#include <jem/base/Exception.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/util/PropertyException.h>
 #include <jem/util/StringUtils.h>
@@ -185,6 +186,14 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector &hardParams) const
 {
   hardVals = -1. * matmul(materialH_, hardParams);
+}
+
+void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
+{
+  throw jem::Exception(
+      JEM_FUNC,
+      "ElastoPlasticRodMaterial requires element and integration-point indices; "
+      "use getStress(stress, strain, ielem, ip, inelastic)");
 }
 
 void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
