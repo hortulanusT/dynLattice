@@ -201,7 +201,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     for (idx_t i = 3; i < 6; i++)
       materialM_(i, i) *= inertiaCorrect;
 
-  if (myProps.find(edgeFact_, EDGE_FACTOR) && edgeFact_ != 1.)
+  if (myProps.find(edgeFact_, EDGE_FACTOR) && jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON)
     myProps.get(nElem_, N_ELEM);
   myProps.find(edgeElems_, EDGE_ELEMS);
 
@@ -253,7 +253,7 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
 
   myConf.set(DENSITY, density_);
 
-  if (edgeFact_ != 1.)
+  if (jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON)
   {
     myConf.set(EDGE_FACTOR, edgeFact_);
     myConf.set(EDGE_ELEMS, edgeElems_);
@@ -297,15 +297,13 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l) const
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const
 {
-  if (edgeFact_ == 1.)
+  if (jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON;)
     return getLumpedMass(l);
-  else
-  {
-    if (ielem == 0 || ielem == nElem_ - 1)
-      return Matrix(edgeFact_ * getLumpedMass(l));
-    else
-      return getLumpedMass(l);
-  }
+
+  if (ielem == 0 || ielem == nElem_ - 1)
+    return Matrix(edgeFact_ * getLumpedMass(l));
+
+  return getLumpedMass(l);
 }
 
 Matrix ElasticRodMaterial::getMaterialStiff() const
@@ -315,23 +313,21 @@ Matrix ElasticRodMaterial::getMaterialStiff() const
 
 Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &) const
 {
-  if (edgeFact_ == 1.)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < Float::EPSILON)
     return getMaterialStiff();
-  else
-  {
-    if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
-    {
-      Matrix stiff = getMaterialStiff();
-      stiff(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
-      stiff(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
-      stiff(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
-      stiff(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
 
-      return stiff;
-    }
-    else
-      return getMaterialStiff();
+  if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
+  {
+    Matrix stiff = getMaterialStiff();
+    stiff(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
+    stiff(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
+    stiff(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
+    stiff(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
+
+    return stiff;
   }
+
+  return getMaterialStiff();
 }
 
 Matrix ElasticRodMaterial::getMaterialMass() const
@@ -341,23 +337,21 @@ Matrix ElasticRodMaterial::getMaterialMass() const
 
 Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &) const
 {
-  if (edgeFact_ == 1.)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < Float::EPSILON)
     return getMaterialMass();
-  else
-  {
-    if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
-    {
-      Matrix mass = getMaterialMass();
-      mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
-      mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
-      mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
-      mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
 
-      return mass;
-    }
-    else
-      return getMaterialMass();
+  if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
+  {
+    Matrix mass = getMaterialMass();
+    mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
+    mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
+
+    return mass;
   }
+
+  return getMaterialMass();
 }
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)

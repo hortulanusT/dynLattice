@@ -207,7 +207,7 @@ bool AdaptiveStepModule::commit
   {
     incr_ = jem::min(maxIncr_, incr_ * incrFact_);
   }
-  else if (incr_ == minIncr_) // if the step size is already minimal accept the current solution
+  else if (incr_ <= minIncr_) // if the step size is already minimal accept the current solution
   {
     jem::System::warn() << " ...Continuing with smallest possible step size\n";
     accept = true;
@@ -226,9 +226,9 @@ bool AdaptiveStepModule::commit
   }
 
   jem::System::info(myName_) << " ...Adapting load step size to " << incr_ << "\n";
-  if (incr_ == maxIncr_ && incr_ > minIncr_)
+  if (incr_ >= maxIncr_ && incr_ > minIncr_)
     jem::System::info(myName_) << " !!! Largest allowed load step !!!\n";
-  if (incr_ == minIncr_ && incr_ < maxIncr_)
+  if (incr_ <= minIncr_ && incr_ < maxIncr_)
     jem::System::info(myName_) << " !!! Smallest allowed load step !!!\n";
 
   return accept;

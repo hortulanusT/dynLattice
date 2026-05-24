@@ -107,14 +107,14 @@ bool DirichletModel::takeAction
       if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
         System::info() << " ...Applying displacment factor " << dispScale_
                        << endl;
-      else if (dispScale0_ != 1. && dispScale_ != 1.)
+      else if (jem::numeric::abs(dispScale0_ - 1.0) > Float::EPSILON && jem::numeric::abs(dispScale_ - 1.0) > Float::EPSILON)
       {
         System::warn() << "no displacement factor given, applying unit displacement" << endl;
         dispScale_ = 1.;
       }
     }
 
-    if (dispScale0_ != dispScale_)
+    if (jem::numeric::abs(dispScale0_ - dispScale_) > Float::EPSILON)
       applyConstraints_(params, globdat);
 
     return true;
@@ -313,7 +313,7 @@ void DirichletModel::advance_
 
   dispScale_ = dispScale0_ + dispIncr_;
 
-  if (dispIncr_ != 0.)
+  if (jem::numeric::abs(dispIncr_) > Float::EPSILON)
     System::info() << " ...New displacement factor " << dispScale_
                    << endl;
   globdat.set(varName_, dispScale_);

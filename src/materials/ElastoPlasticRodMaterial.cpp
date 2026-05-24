@@ -216,7 +216,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     Super::getStress(stress, Vector(strain - plastStrain), ielem, ip, false);
     getHardVals(hardStress, hardParams);
 
-    if (!inelastic || ((edgeFact_ != 1.) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
+    if (!inelastic || ((jem::numeric::abs(jem::edgeFact_ - 1.0) > Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
     {
       if (verbosity_ > 1)
         jem::System::debug(myName_) << "        elastic calculation\n";
@@ -247,7 +247,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     {
       yieldGrad = jive_helpers::funcGrad(yieldCond_, args);
       for (idx_t i = 0; i < dofCount_; i++)
-        if (args[i] == 0.)
+        if (jem::numeric::abs(args[i]) < Float::EPSILON)
           yieldGrad[i] = 0.;
     }
 
@@ -291,7 +291,7 @@ void ElastoPlasticRodMaterial::applyDeform()
       energyPot_(ip, ielem) = 0.5 * dotProduct(currElastStrain, currStress);
 
       WARN_ASSERT2(currDeltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
-      if (currDeltaFlow_(ip, ielem) != 0.)
+      if (jem::numeric::abs(currDeltaFlow_(ip, ielem)) > Float::EPSILON)
       {
         energyDiss_(ip, ielem) += dotProduct((oldStress + currStress) / 2., deltaPlastStrain);
       }
