@@ -76,7 +76,7 @@ This separation allows both the easy and user-friendly extension of the framewor
 [dynLattice]{.sc} additionally uses `GMSH` [@geuzaine09] to mesh the imported geometries efficiently.
 
 # Research impact statement
-[dynLattice]{.sc} has enabled a series of research efforts investigating lattice metamaterials [@gärtner24, @gärtner25b, @gärtner_diss].
+[dynLattice]{.sc} has enabled a series of research efforts investigating lattice metamaterials [@gärtner24; @gärtner25b; @gärtner_diss].
 In addition to investigating lattice materials, it has been used to study the behaviour of beams as a multi-scale problem [@gärtner25] and has undergone a thorough comparison with experimental data and results from commercial tools [@gärtner_TNO].
 Collaborating researchers could easily install and run the software using the provided documentation and `apptainer`. 
 
