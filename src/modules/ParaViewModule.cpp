@@ -639,7 +639,7 @@ void ParaViewModule::writeDataArray_
   {
     for (idx_t iColumn = 0; iColumn < data.shape()[1]; iColumn++)
     {
-      *file << (float)data(iRow, iColumn)
+      *file << static_cast<float>(data(iRow, iColumn))
             << SPACING; // float since ParaView can only read single
                         // precision floats
     }

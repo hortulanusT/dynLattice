@@ -280,7 +280,7 @@ void GMSHInputModule::createNodes_
 
   gmsh::model::mesh::getNodes(gmshNodeTags, gmsh_coords, gmsh_paraCoords);
 
-  for (idx_t inode = 0; inode < (idx_t)gmshNodeTags.size(); inode++)
+  for (idx_t inode = 0; inode < static_cast<idx_t>(gmshNodeTags.size()); inode++)
   {
     for (idx_t icoord = 0; icoord < dim; icoord++)
       coords[icoord] = gmsh_coords[inode * dim + icoord];
@@ -447,7 +447,7 @@ void GMSHInputModule::storeTangents_
     jive_tags.resize(gmsh_tags.size());
     jive_derivatives.resize(3 * gmsh_tags.size());
 
-    for (idx_t inode = 0; inode < (idx_t)gmsh_tags.size(); inode++)
+    for (idx_t inode = 0; inode < static_cast<idx_t>(gmsh_tags.size()); inode++)
     {
       jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[inode]];
 

@@ -69,7 +69,7 @@ void CSVDataPrinter::printTable
 
   double val;
   IdxVector rows(table.rowCount());
-  table.getRowItems()->getItemMap()->getItemIDs(rows, (IdxVector)jem::iarray(table.rowCount()));
+  table.getRowItems()->getItemMap()->getItemIDs(rows, IdxVector(jem::iarray(table.rowCount())));
 
   for (idx_t row : rows)
     for (idx_t column = 0; column < table.columnCount(); column++)
@@ -127,7 +127,7 @@ void CSVDataPrinter::printSparseVector
   JEM_PRECHECK2(mode_ == SPARSEVECTORS, "Cannot Output Tables and Vectors in the same csv, try using seperate modules!");
 
   writePrefix_(out, globdat, label);
-  writeVector_(out, (Vector)vec[idofs]);
+  writeVector_(out, Vector(vec[idofs]));
 }
 
 //-----------------------------------------------------------------------
@@ -144,7 +144,7 @@ void CSVDataPrinter::startTables_
 {
   double val;
   IdxVector rows(table.rowCount());
-  table.getRowItems()->getItemMap()->getItemIDs(rows, (IdxVector)jem::iarray(table.rowCount()));
+  table.getRowItems()->getItemMap()->getItemIDs(rows, IdxVector(jem::iarray(table.rowCount())));
 
   for (idx_t row : rows)
     for (idx_t column = 0; column < table.columnCount(); column++)
@@ -168,7 +168,7 @@ void CSVDataPrinter::startVectors_
      const IdxVector &idofs)
 
 {
-  IdxVector reportDofs = idofs.size() ? idofs : (IdxVector)jem::iarray(dofs.dofCount());
+  IdxVector reportDofs = idofs.size() ? idofs : IdxVector(jem::iarray(dofs.dofCount()));
 
   for (idx_t dof : reportDofs)
     print(out, ",", dofs.getDofName(dof));

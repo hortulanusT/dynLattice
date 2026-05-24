@@ -290,7 +290,7 @@ bool ExplicitModule::commit(const Properties &globdat)
 
   SolverInfo::get(globdat).get(error, SolverInfo::RESIDUAL);
 
-  double dtime_opt = dtime_ * pow(prec_ / error, 1. / ((double)order_ + 1.));
+  double dtime_opt = dtime_ * pow(prec_ / error, 1. / (static_cast<double>(order_) + 1.));
 
   accept = true;
   if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
@@ -489,7 +489,7 @@ ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (!jem::testany(rdofs_ == i))
       y_diff[i] /= lenScale_;
-  return norm2(y_diff) / sqrt((double)y_diff.size());
+  return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }
 
 // //-----------------------------------------------------------------------

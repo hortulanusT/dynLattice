@@ -158,7 +158,7 @@ void FollowerLoadModel::advance_rots_(const Vector &d) const
     dofs_->getDofIndices(ir_dofs, inodes[inode], iRotDOFs_);
 
     // TEST_CONTEXT(d[ir_dofs])
-    expVec(rotMats_[inode], (Vector)d[ir_dofs]);
+    expVec(rotMats_[inode], Vector(d[ir_dofs]));
   }
   // TEST_CONTEXT(rotMats_)
 }

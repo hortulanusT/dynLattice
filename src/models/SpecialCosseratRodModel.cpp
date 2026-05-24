@@ -563,7 +563,7 @@ void SpecialCosseratRodModel::initStrain_()
     inodes = rodNodes_[ins];
     // TEST_CONTEXT((Cubix(LambdaN_[inodes])))
     getStrains_(strains, weights, coords, null_mat,
-                (Cubix)LambdaN_[inodes], ie, false);
+                Cubix(LambdaN_[inodes]), ie, false);
     matStrain0_[ie] = strains;
   }
 }
@@ -673,7 +673,7 @@ void SpecialCosseratRodModel::getGeomtericStiffness_(const Cubix &B,
 
   // get phi_prime
   shapeK_->getShapeGradients(shapeGrads, w, nodePhi_0);
-  phiP = matmul((Matrix)(nodePhi_0 + nodeU), shapeGrads);
+  phiP = matmul(Matrix(nodePhi_0 + nodeU), shapeGrads);
 
   // for every iPoint assemble the B-Matrix
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -718,8 +718,8 @@ void SpecialCosseratRodModel::getStrains_(
   // TEST_CONTEXT(shapes)
   // TEST_CONTEXT(grads)
 
-  ipPhi = matmul((Matrix)(nodePhi_0 + nodeU), shapes);
-  ipPhiP = matmul((Matrix)(nodePhi_0 + nodeU), grads);
+  ipPhi = matmul(Matrix(nodePhi_0 + nodeU), shapes);
+  ipPhiP = matmul(Matrix(nodePhi_0 + nodeU), grads);
   shapeK_->getPi(ipPI, ipLambda, nodeLambda);
   shapeK_->getRotationGradients(ipLambdaP, w, nodePhi_0, nodeLambda);
 
@@ -791,7 +791,7 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
     dofs_->getDofIndices(idofs_rot, inodes[inode], rotTypes_);
 
     nodeU[inode] = disp[idofs_trans];
-    expVec(nodeLambda[inode], (Vector)disp[idofs_rot]);
+    expVec(nodeLambda[inode], Vector(disp[idofs_rot]));
     nodeLambda[inode] =
         matmul(nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
   }
@@ -962,7 +962,7 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
   {
     dofs_->getDofIndices(idofs, inode, rotTypes_);
 
-    fgyro[idofs] += matmul(skew((Vector)velo[idofs]), (Vector)temp[idofs]);
+    fgyro[idofs] += matmul(skew(Vector(velo[idofs])), Vector(temp[idofs]));
   }
 }
 
