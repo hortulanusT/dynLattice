@@ -460,13 +460,13 @@ void GMSHInputModule::storeTangents_
     jive_tags.resize(static_cast<idx_t>(gmsh_tags.size()));
     jive_derivatives.resize(static_cast<idx_t>(3 * gmsh_tags.size()));
 
-    for (size_t inode = 0; inode < gmsh_tags.size(); inode++)
+    for (idx_t inode = 0; inode < static_cast<idx_t>(gmsh_tags.size()); inode++)
     {
-      jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[inode]];
+      jive_tags[inode] = gmshToJiveNodeMap_[gmsh_tags[static_cast<size_t>(inode)]];
 
-      for (size_t icoord = 0; icoord < 3; icoord++)
+      for (idx_t icoord = 0; icoord < 3; icoord++)
         jive_derivatives[inode * 3 + icoord] =
-            gmsh_derivatives[inode * 3 + icoord];
+            gmsh_derivatives[static_cast<size_t>(inode * 3 + icoord)];
     }
 
     entityVars.set("given_dir_nodes", jive_tags.clone());

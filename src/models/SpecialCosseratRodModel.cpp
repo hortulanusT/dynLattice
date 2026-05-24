@@ -153,7 +153,7 @@ SpecialCosseratRodModel::SpecialCosseratRodModel
   if (myProps.find(materialYDir_, MATERIAL_Y_DIR))
   {
     JEM_ASSERT(materialYDir_.size() == allNodes_.rank());
-    JEM_ASSERT(jem::numeric::abs(norm2(materialYDir_) - 1.) < Float::EPSILON);
+    JEM_ASSERT(jem::numeric::abs(norm2(materialYDir_) - 1.) < jem::Float::EPSILON);
     myConf.set(MATERIAL_Y_DIR, materialYDir_);
   }
 
@@ -648,7 +648,7 @@ void SpecialCosseratRodModel::initRotation_()
       c = dotProduct(node_dirs[in], e3);
 
       rotMat = eye();
-      if (jem::numeric::abs(c + 1.0) > Float::EPSILON) // 180 deg turn == point mirroring
+      if (jem::numeric::abs(c + 1.0) > jem::Float::EPSILON) // 180 deg turn == point mirroring
         rotMat += skew(v) + 1 / (1 + c) * matmul(skew(v), skew(v));
       else
         rotMat *= -1.;

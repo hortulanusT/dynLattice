@@ -10,6 +10,7 @@
 #include "utils/testing.h"
 
 #include <jem/base/Array.h>
+#include <jem/base/Float.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
@@ -201,7 +202,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     for (idx_t i = 3; i < 6; i++)
       materialM_(i, i) *= inertiaCorrect;
 
-  if (myProps.find(edgeFact_, EDGE_FACTOR) && jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON)
+  if (myProps.find(edgeFact_, EDGE_FACTOR) && jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON)
     myProps.get(nElem_, N_ELEM);
   myProps.find(edgeElems_, EDGE_ELEMS);
 
@@ -253,7 +254,7 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
 
   myConf.set(DENSITY, density_);
 
-  if (jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON)
+  if (jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON)
   {
     myConf.set(EDGE_FACTOR, edgeFact_);
     myConf.set(EDGE_ELEMS, edgeElems_);
@@ -297,7 +298,7 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l) const
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const
 {
-  if (jem::numeric::abs(edgeFact_ - 1.0) > Float::EPSILON;)
+  if (jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON)
     return getLumpedMass(l);
 
   if (ielem == 0 || ielem == nElem_ - 1)
@@ -313,7 +314,7 @@ Matrix ElasticRodMaterial::getMaterialStiff() const
 
 Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &) const
 {
-  if (jem::numeric::abs(edgeFact_ - 1.0) < Float::EPSILON)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
     return getMaterialStiff();
 
   if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
@@ -337,7 +338,7 @@ Matrix ElasticRodMaterial::getMaterialMass() const
 
 Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &) const
 {
-  if (jem::numeric::abs(edgeFact_ - 1.0) < Float::EPSILON)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
     return getMaterialMass();
 
   if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)

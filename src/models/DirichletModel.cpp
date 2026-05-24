@@ -107,14 +107,14 @@ bool DirichletModel::takeAction
       if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
         System::info() << " ...Applying displacment factor " << dispScale_
                        << endl;
-      else if (jem::numeric::abs(dispScale0_ - 1.0) > Float::EPSILON && jem::numeric::abs(dispScale_ - 1.0) > Float::EPSILON)
+      else if (jem::numeric::abs(dispScale0_ - 1.0) > jem::Float::EPSILON && jem::numeric::abs(dispScale_ - 1.0) > jem::Float::EPSILON)
       {
         System::warn() << "no displacement factor given, applying unit displacement" << endl;
         dispScale_ = 1.;
       }
     }
 
-    if (jem::numeric::abs(dispScale0_ - dispScale_) > Float::EPSILON)
+    if (jem::numeric::abs(dispScale0_ - dispScale_) > jem::Float::EPSILON)
       applyConstraints_(params, globdat);
 
     return true;
@@ -304,7 +304,7 @@ void DirichletModel::advance_
     (const Properties &globdat)
 
 {
-  if (method_ == RATE && jem::numeric::abs(dispIncr_) < Float::EPSILON)
+  if (method_ == RATE && jem::numeric::abs(dispIncr_) < jem::Float::EPSILON)
   {
     System::warn() << myName_ << " zero increment in RATE mode."
                    << " It seems the time increment has not been set."
@@ -313,7 +313,7 @@ void DirichletModel::advance_
 
   dispScale_ = dispScale0_ + dispIncr_;
 
-  if (jem::numeric::abs(dispIncr_) > Float::EPSILON)
+  if (jem::numeric::abs(dispIncr_) > jem::Float::EPSILON)
     System::info() << " ...New displacement factor " << dispScale_
                    << endl;
   globdat.set(varName_, dispScale_);

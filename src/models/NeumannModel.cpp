@@ -120,7 +120,7 @@ bool NeumannModel::takeAction
     if (extScale_)
     {
       params.get(scale, ActionParams::SCALE_FACTOR);
-      if (jem::numeric::abs(scale) > Float::EPSILON)
+      if (jem::numeric::abs(scale) > jem::Float::EPSILON)
       {
         System::info(myName_) << " ...Applying load with factor " << scale << endl;
         getExtVector_(f, globdat, scale);
@@ -363,7 +363,7 @@ void NeumannModel::advance_
   if (accepted)
   {
     loadScale_ = loadScale0_ + loadIncr_;
-    if (jem::numeric::abs(loadIncr_) > Float::EPSILON)
+    if (jem::numeric::abs(loadIncr_) > jem::Float::EPSILON)
       System::info() << " ...New load factor " << loadScale_ << endl;
     globdat.set(varName_, loadScale_);
   }
