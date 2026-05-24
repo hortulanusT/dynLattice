@@ -74,7 +74,7 @@ public:
 
       (const String &action,
        const Properties &params,
-       const Properties &globdat);
+       const Properties &globdat) override;
 
   /// @brief Factory method for creating new InitLoadModel instances
   /// @param name Model name

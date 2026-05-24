@@ -52,7 +52,7 @@ public:
   /// @param globdat Global data container
   /// @return Module status
   virtual Status init(const Properties &conf, const Properties &props,
-                      const Properties &globdat);
+                      const Properties &globdat) override;
 
   /// @brief Factory method for creating new instances
   /// @param name Module name

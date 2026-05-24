@@ -85,14 +85,14 @@ public:
   /// @param globdat Global data container
   virtual void configure
 
-      (const Properties &props, const Properties &globdat);
+      (const Properties &props, const Properties &globdat) override;
 
   /// @brief Get current configuration
   /// @param conf Actually used configuration properties (output)
   /// @param globdat Global data container
   virtual void getConfig
 
-      (const Properties &conf, const Properties &globdat) const;
+      (const Properties &conf, const Properties &globdat) const override;
 
   /// @brief Handle model actions (INIT, GET_CONSTRAINTS, ADVANCE, etc.)
   /// @param action Action name to execute
@@ -102,7 +102,7 @@ public:
   virtual bool takeAction
 
       (const String &action, const Properties &params,
-       const Properties &globdat);
+       const Properties &globdat) override;
 
   /// @brief Factory method for creating new DirichletModel instances
   /// @param name Model name

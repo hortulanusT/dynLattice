@@ -74,7 +74,7 @@ public:
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
-                      const Properties &globdat);
+                      const Properties &globdat) override;
 
   /// @brief Factory method for creating new GroupInputModule instances
   /// @param name Module name
