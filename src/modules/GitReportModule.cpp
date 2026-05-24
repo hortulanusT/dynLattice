@@ -37,17 +37,24 @@ Module::Status GitReportModule::init
     (const Properties &conf, const Properties &props,
      const Properties &globdat)
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   jem::System::info() << "Built with git hash " << GIT_HASH << "\n\n";
   return DONE;
 }
 
 Module::Status GitReportModule::run(const Properties &globdat)
 {
+  (void)globdat; // unused
+
   return DONE;
 }
 
 void GitReportModule::shutdown(const Properties &globdat)
 {
+  (void)globdat; // unused
 }
 
 Ref<Module> GitReportModule::makeNew
@@ -56,6 +63,10 @@ Ref<Module> GitReportModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return jem::newInstance<Self>(name);
 }
 

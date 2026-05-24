@@ -135,6 +135,10 @@ Ref<Module> GroupInputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 

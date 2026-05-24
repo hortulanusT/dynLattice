@@ -73,12 +73,11 @@ public:
 
   JEM_DECLARE_CLASS(DirichletModel, Model);
 
-  /// @brief Constructor with optional child model
-  /// @param name Model name (default: "arclen")
-  /// @param child Optional child model reference
+  /// @brief Constructor
+  /// @param name Model name (default: "dirichlet")
   explicit DirichletModel
 
-      (const String &name = "arclen", const Ref<Model> &child = NIL);
+      (const String &name = "dirichlet");
 
   /// @brief Configure Dirichlet boundary conditions from properties
   /// @param props User-specified configuration properties
@@ -203,5 +202,5 @@ private:
   double initDisp_;     ///< Initial displacement value
   Properties lbcProps_; ///< Boundary condition properties
   String varName_;      ///< Variable name for load factor
-  /// @}
+                        /// @}
 };

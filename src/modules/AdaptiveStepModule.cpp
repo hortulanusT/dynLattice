@@ -244,6 +244,10 @@ Ref<Module> AdaptiveStepModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   Ref<NonlinModule> solver = newInstance<NonlinModule>(jive::util::joinNames(name, "nonlin"));
 
   return newInstance<Self>(name, solver);

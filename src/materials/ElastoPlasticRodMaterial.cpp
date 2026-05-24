@@ -147,6 +147,8 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
 void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
+  (void)globdat; // unused
+
   Properties myConf = conf.makeProps(myName_);
 
   FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
@@ -184,7 +186,7 @@ void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector 
   hardVals = -1. * matmul(materialH_, hardParams);
 }
 
-void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
+void ElastoPlasticRodMaterial::getStress(const Vector &, const Vector &)
 {
   throw jem::Exception(
       JEM_FUNC,

@@ -201,6 +201,8 @@ Module::Status ExplicitModule::init
 
 void ExplicitModule::shutdown(const Properties &globdat)
 {
+  (void)globdat; // unused
+
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -216,6 +218,8 @@ void ExplicitModule::configure
     (const Properties &props, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   using jive::implict::PropNames;
   Properties myProps = props.findProps(myName_);
 
@@ -238,6 +242,8 @@ void ExplicitModule::getConfig
     (const Properties &conf, const Properties &globdat) const
 
 {
+  (void)globdat; // unused
+
   using jive::implict::PropNames;
   Properties myConf = conf.makeProps(myName_);
 
@@ -335,6 +341,8 @@ void ExplicitModule::getAcce(const Vector &a,
                              const Vector &fres,
                              const Properties &globdat)
 {
+  (void)globdat; // unused
+
   // Compute acceleration
   if (mode_ == CONSISTENT)
   {

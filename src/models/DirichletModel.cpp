@@ -52,10 +52,9 @@ const char *DirichletModel::LOADED_PROP = "loaded";
 
 DirichletModel::DirichletModel
 
-    (const String &name, const Ref<Model> &child)
-    :
+    (const String &name) :
 
-      Super(name)
+                           Super(name)
 
 {
   dispScale_ = 0.;
@@ -172,6 +171,8 @@ void DirichletModel::configure
     (const Properties &props, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   Properties myProps = props.findProps(myName_);
 
   double maxD = Float::MAX_VALUE;
@@ -242,6 +243,8 @@ void DirichletModel::getConfig
     (const Properties &conf, const Properties &globdat) const
 
 {
+  (void)globdat; // unused
+
   Properties myConf = conf.makeProps(myName_);
 
   switch (method_)
@@ -272,8 +275,8 @@ void DirichletModel::getConfig
 
 Ref<Model> DirichletModel::makeNew
 
-    (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat)
+    (const String &name, const Properties &, const Properties &,
+     const Properties &)
 
 {
   return newInstance<Self>(name);
@@ -325,6 +328,8 @@ void DirichletModel::applyConstraints_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)params; // unused
+
   idx_t nn;
   Assignable<NodeGroup> group;
   IdxVector inodes;
@@ -369,6 +374,8 @@ void DirichletModel::checkCommit_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   // terminate the computation if displacement exceeds maximum.
   // be careful with this!
 
@@ -390,6 +397,9 @@ void DirichletModel::commit_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)params;  // unused
+  (void)globdat; // unused
+
   // store converged boundary quantities
 
   dispScale0_ = dispScale_;

@@ -69,6 +69,8 @@ bool ImpactModel::takeAction
      const Properties &globdat)
 
 {
+  (void)params; // unused
+
   if (action == Actions::GET_CONSTRAINTS)
   {
     String varName;

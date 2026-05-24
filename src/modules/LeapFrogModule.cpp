@@ -91,6 +91,10 @@ Ref<Module> LeapFrogModule::makeNew(const String &name, const Properties &conf,
                                     const Properties &props, const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 

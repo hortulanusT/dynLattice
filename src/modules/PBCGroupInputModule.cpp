@@ -361,6 +361,10 @@ Ref<Module> PBCGroupInputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 //-----------------------------------------------------------------------

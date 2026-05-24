@@ -27,9 +27,9 @@ const char *CSVOutputModule::TYPE_NAME = "CSVOutput";
 
 CSVOutputModule::CSVOutputModule(
     const String &name,
-    const Ref<DataPrinter> printer) :
+    const Ref<DataPrinter>) :
 
-                                      Super(name, newInstance<CSVDataPrinter>(jive::util::joinNames(name, "printer")))
+                              Super(name, newInstance<CSVDataPrinter>(jive::util::joinNames(name, "printer")))
 
 {
 }
@@ -50,6 +50,10 @@ Ref<Module> CSVOutputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return jem::newInstance<Self>(name);
 }
 

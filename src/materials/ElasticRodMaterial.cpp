@@ -228,6 +228,8 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
+  (void)globdat; // unused
+
   Properties myConf = conf.makeProps(myName_);
 
   myConf.set(YOUNGS_MODULUS, young_);
@@ -311,7 +313,7 @@ Matrix ElasticRodMaterial::getMaterialStiff() const
   return materialK_.clone();
 }
 
-Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
+Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &) const
 {
   if (edgeFact_ == 1.)
     return getMaterialStiff();
@@ -337,7 +339,7 @@ Matrix ElasticRodMaterial::getMaterialMass() const
   return materialM_.clone();
 }
 
-Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
+Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &) const
 {
   if (edgeFact_ == 1.)
     return getMaterialMass();
@@ -363,13 +365,13 @@ void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
   stress = matmul(getMaterialStiff(), strain);
 }
 
-void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
+void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool)
 {
   currStrains_(ALL, ip, ielem) = strain;
   stress = matmul(getMaterialStiff(ielem, ip), strain);
 }
 
-void ElasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
+void ElasticRodMaterial::getTable(const String &name, XTable &, const IdxVector &, const Vector &) const
 {
   using jive::IdxVector;
   using jive::util::XTable;
@@ -401,12 +403,12 @@ double ElasticRodMaterial::getPotentialEnergy(const idx_t &ielem, const idx_t &i
   return energyPot_(ip, ielem);
 }
 
-double ElasticRodMaterial::getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const
+double ElasticRodMaterial::getDissipatedEnergy(const idx_t &, const idx_t &) const
 {
   return 0.;
 }
 
-double ElasticRodMaterial::getHardeningPotential(const idx_t &ielem, const idx_t &ip) const
+double ElasticRodMaterial::getHardeningPotential(const idx_t &, const idx_t &) const
 {
   return 0.;
 }

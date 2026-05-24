@@ -35,6 +35,8 @@ InitLoadModel::InitLoadModel
      const Properties &props,
      const Properties &globdat) : Model(name)
 {
+  (void)globdat; // unused
+
   Properties myProps = props.getProps(myName_);
   Properties myConf = conf.makeProps(myName_);
 
@@ -76,6 +78,8 @@ bool InitLoadModel::takeAction
      const Properties &globdat)
 
 {
+  (void)params; // unused
+
   if (action == Actions::INIT)
   {
     init_(globdat);

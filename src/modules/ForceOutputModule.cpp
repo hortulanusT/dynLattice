@@ -190,6 +190,8 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
 
 void ForceOutputModule::shutdown(const Properties &globdat)
 {
+  (void)globdat; // unused
+
   output_->close();
   output_ = nullptr;
 }
@@ -250,6 +252,10 @@ Ref<Module> ForceOutputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return jem::newInstance<Self>(name);
 }
 

@@ -123,6 +123,8 @@ void FollowerLoadModel::get_ext_vec_(const Vector &fext,
                                      const double scale,
                                      const Properties &globdat) const
 {
+  (void)globdat; // unused
+
   IdxVector inodes(group_.size());
   IdxVector if_dofs(iForceDOFs_.size());
 
