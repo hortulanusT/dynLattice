@@ -256,7 +256,7 @@ namespace jive_helpers
 
   Vector unskew(const Matrix &mat)
   {
-#ifndef _NDEBUG
+#ifndef NDEBUG
     if (fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) > TINY * matrixNorm2(mat) && fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) > TINY)
       TEST_NO_CONTEXT(mat)
 #endif
