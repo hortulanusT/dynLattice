@@ -551,7 +551,6 @@ void ParaViewModule::writePiece_
       Ref<XTable> datumTable =
           newInstance<SparseTable>(info.nodeData[iPtDatum], pointSet);
       Vector weights(datumTable->rowCount());
-      Properties params("actionParams");
 
       weights = 0.;
 

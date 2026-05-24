@@ -210,7 +210,6 @@ void GroupInputModule::NGroup_::configure
   rank_ = 3;
   all_ = false;
 
-  String xtypename;
   Vector bounds;
 
   // get properties
@@ -663,7 +662,6 @@ void GroupInputModule::EGroup_::configure
   rank_ = 3;
   all_ = false;
 
-  String xtypename;
   Vector bounds;
 
   // get properties
