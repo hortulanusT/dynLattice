@@ -5,9 +5,9 @@ Describe what was changed
 ## Validation
 
 - [ ] relevant benchmarks were added (if applicable) 
-- [ ] all tests/benchmarks run succesfully 
-- [ ] documentation is added to all files
-- [ ] the code compiles without project related warnings
+- [ ] all tests/benchmarks run successfully 
+- [ ] documentation is added to new files
+- [ ] the code compiles without project-related warnings
 
 ## Scientific context
 
