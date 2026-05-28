@@ -119,6 +119,35 @@ jive make plastic-tests
 jive make transient-tests
 ```
 
+### Hygienic Build
+
+During the CI on Github a *hygienic build* is checked. New code in `src/` __should__ compile without warnings here. The enabled flags are:
+
+| Flag | What it catches |
+| ---- | --------------- |
+| `-Wextra` | Additional warnings beyond `-Wall` |
+| `-Wpedantic` | Deviations from ISO specifications |
+| `-Wshadow` | Local variables that hide an outer-scope variable |
+| `-Wsuggest-override` | Virtual overrides missing the `override` keyword |
+| `-Wold-style-cast` | old, C-style casts (`(Type)expr`) |
+| `-Woverloaded-virtual` | Derived-class functions that accidentally hide a base virtual |
+| `-Wdouble-promotion` | Implicit `float` → `double` conversions |
+| `-Wundef` | Macros used in `#if` that are not defined |
+| `-Wnon-virtual-dtor` | Classes with virtual functions but a non-virtual destructor |
+| `-Winit-self` | Variables initialised with themselves (`int x = x`) |
+| `-Wconversion` | Implicit narrowing conversions |
+| `-Wsign-conversion` | Implicit signed/unsigned conversions |
+| `-Wfloat-equal` | Direct `==` / `!=` comparisons of floating-point values |
+
+You can run it locally by enabling the HYGIENE option for the make:
+
+```bash
+# Build with stricter warning flags
+jive make HYGIENE=1
+```
+
+The CI will fail if any warning originates from project sources (`src/`). Third-party or library headers are not checked.
+
 ### Documentation
 
 ```bash
