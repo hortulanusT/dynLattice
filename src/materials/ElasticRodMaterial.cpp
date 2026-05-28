@@ -229,7 +229,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
 
 void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
-  // (void)globdat; // unused
+  (void)globdat; // unused
 
   Properties myConf = conf.makeProps(myName_);
 
