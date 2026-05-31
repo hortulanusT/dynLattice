@@ -1,11 +1,18 @@
 #!/usr/bin/python3
 
 # TEST 1 from Smirit et al. (axial stretch under twist, no hardening)
+import sys
 import numpy as np
+from pathlib import Path
 from termcolor import colored
 from matplotlib import pyplot as plt
 import pandas as pd
 from scipy.integrate import cumulative_trapezoid
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import envelope_error
+
+TOL = 0.05
 
 test_passed = False
 
@@ -27,13 +34,18 @@ try:
   plt.axvline(0, alpha=.2, color="k", lw=.5)
   plt.xlim(-6e-3, 6e-3)
   plt.ylim(-1.1, 1.1)
+
+  # Single elastoplastic rod under cyclic axial loading.  The response is
+  # a hysteresis loop, so we compare envelopes.
+  sim_force = sim_resp[:, 1] / 10.0
+  err = envelope_error(sim_force, ref_data[:, 1])
+  test_passed = err <= TOL
+
 except Exception as e:
   print(e)
-else:
-  test_passed = True
 
 if test_passed:
-  print(colored("PLASTIC TEST 1 RUN THROUGH", "green"))
+  print(colored("PLASTIC TEST 1 PASSED", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test1/result.pdf")
@@ -62,3 +74,4 @@ if test_passed:
       "tests/plastic/test1/plastic_benchmark.csv", index=False)
 else:
   print(colored("PLASTIC TEST 1 FAILED", "red", attrs=["bold"]))
+  sys.exit(1)
