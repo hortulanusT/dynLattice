@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 
 # TEST 2 aka Follower Load
+import sys
 import numpy as np
+from pathlib import Path
 from termcolor import colored
 from matplotlib import pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import interp_on_reference, relative_L2
+
+TOL = 0.05
 
 test_passed = False
 
@@ -30,16 +37,23 @@ try:
   plt.xlim([0, 140])
   plt.axhline(y=0, color="grey")
   plt.xlim(left=0)
+
+  load_kN = sim_resp[:, -1] / 1.0e3
+  tip_vert = interp_on_reference(load_kN, sim_disp[:, 2], ref_data_vertical[:, 0])
+  tip_horz = interp_on_reference(load_kN, -1*sim_disp[:, 1], ref_data_horizontal[:, 0])
+  err_vert = relative_L2(tip_vert, ref_data_vertical[:, 1])
+  err_horz = relative_L2(tip_horz, ref_data_horizontal[:, 1])
+  test_passed = (err_vert <= TOL) and (err_horz <= TOL)
+
 except Exception as e:
   print(e)
-else:
-  test_passed = True
 
 if test_passed:
-  print(colored("STATIC TEST 2 RUN THROUGH", "green"))
+  print(colored("STATIC TEST 2 PASSED", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/beam/test2/result.pdf")
   plt.savefig("tests/beam2_result.png")
 else:
   print(colored("STATIC TEST 2 FAILED", "red", attrs=["bold"]))
+  sys.exit(1)
