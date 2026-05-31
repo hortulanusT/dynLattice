@@ -10,6 +10,9 @@ jobs:
   fetch-container:
     runs-on: ubuntu-latest
     name: Fetch container
+    concurrency:
+      group: fetch-container
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v6
       - id: jive-hash
