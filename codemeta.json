@@ -37,7 +37,7 @@
       ]
     }
   ],
-  "identifier": "",
+  "identifier": "https://doi.org/10.5281/zenodo.20474969",
   "codeRepository": "https://github.com/hortulanusT/dynLattice",
   "description": "dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on Simo & Vu-Quoc (1986) formulation with support for inelastic materials, explicit time marching, and contact mechanics. The software is designed for analyzing beam structures undergoing fast deformation with large strains and nonlinear material behavior.",
   "keywords": [
