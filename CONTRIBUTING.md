@@ -119,9 +119,13 @@ jive make plastic-tests
 jive make transient-tests
 ```
 
-### Hygienic Build
+## CI Checks
 
-During the CI on Github a *hygienic build* is checked. New code in `src/` __should__ compile without warnings here. The enabled flags are:
+On every push and every pull request targeting `main`, two checks run in CI:
+
+**Numerical regression tests** — `make tests` runs validation benchmarks. For the single benchmarks, the output is compared against reference data stored in `tests\<...>\ref_data`.
+
+**Hygienic build** — New code in `src/` __should__ compile without warnings with additional flags enabled:
 
 | Flag | What it catches |
 | ---- | --------------- |
@@ -139,20 +143,23 @@ During the CI on Github a *hygienic build* is checked. New code in `src/` __shou
 | `-Wsign-conversion` | Implicit signed/unsigned conversions |
 | `-Wfloat-equal` | Direct `==` / `!=` comparisons of floating-point values |
 
-You can run it locally by enabling the HYGIENE option for the make:
+You can run both checks locally:
 
 ```bash
+# Run all regression tests
+jive make tests
+
 # Build with stricter warning flags
 jive make HYGIENE=1
 ```
 
-The CI will fail if any warning originates from project sources (`src/`). Third-party or library headers are not checked.
+CI fails if any benchmark exits non-zero, or if any warning originates from project sources (`src/`). Third-party or library headers are not checked.
 
 ### Documentation
 
 ```bash
 # Generate API documentation
-jive make doc
+jive make docs
 
 # Open documentation in browser
 firefox doc/html/index.html

@@ -54,7 +54,7 @@ Example input files can be found in the `tests/` directory.
 
 ## Documentation
 
-- **API Documentation**: Build with `jive make doc` and open `doc/html/index.html`
+- **API Documentation**: Build with `jive make docs` and open `doc/html/index.html`
 - **Installation Guide**: [doc/install.md](doc/install.md)
 - **Usage Instructions**: [doc/usage.md](doc/usage.md)
 - **Benchmarks**: [tests/Benchmarks.md](tests/Benchmarks.md)
@@ -64,7 +64,7 @@ Example input files can be found in the `tests/` directory.
 The code requires the JIVE finite element toolkit and its dependencies. All requirements are provided through the included Apptainer container (`jive.sif`). To build the documentation, use:
 
 ```bash
-jive make doc
+jive make docs
 ```
 
 The documentation is also available as [GitHub Pages](https://hortulanust.github.io/dynLattice/)
@@ -139,7 +139,7 @@ The `tests/` directory contains numerous validation cases and benchmarks:
 - **Plasticity Benchmarks**: Material nonlinearity validation  
 - **Transient Benchmarks**: Dynamic analysis validation
 
-Each benchmark includes input files (`.pro`, `.geo`) and reference results.
+Each benchmark includes input files (`.pro`, `.geo`), reference results, and a post-processing script that asserts numerical agreement.
 
 ## License
 
