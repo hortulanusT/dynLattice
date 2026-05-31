@@ -61,7 +61,7 @@ else:
   test_passed = True
 
 if test_passed:
-  print(colored("PLASTIC TEST 3 RUN THROUGH", "green"))
+  print(colored("PLASTIC TEST 3 RUN THROUGH", "yellow"))
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test3/result.pdf")
