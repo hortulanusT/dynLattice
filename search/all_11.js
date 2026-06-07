@@ -11,7 +11,7 @@ var searchData=
   ['lenientnonlinmodule_2ecpp_8',['LenientNonlinModule.cpp',['../LenientNonlinModule_8cpp.html',1,'']]],
   ['lenientnonlinmodule_2eh_9',['LenientNonlinModule.h',['../LenientNonlinModule_8h.html',1,'']]],
   ['lenscale_5f_10',['lenScale_',['../classExplicitModule.html#a20c8ecb989f39b709da95b1417291003',1,'ExplicitModule']]],
-  ['license_11',['License',['../md_README.html#autotoc_md48',1,'']]],
+  ['license_11',['License',['../md_README.html#autotoc_md51',1,'']]],
   ['line3d_12',['line3d',['../classLine3D.html',1,'Line3D'],['../classLine3D.html#af5213d2104696b568477f72c0fb51cb8',1,'Line3D::Line3D()']]],
   ['line3d_2ecpp_13',['Line3D.cpp',['../Line3D_8cpp.html',1,'']]],
   ['line3d_2eh_14',['Line3D.h',['../Line3D_8h.html',1,'']]],

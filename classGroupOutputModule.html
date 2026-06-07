@@ -121,12 +121,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1cec52ce56bed538424a641b66661b09" id="r_a1cec52ce56bed538424a641b66661b09"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupOutputModule.html#a1cec52ce56bed538424a641b66661b09">GroupOutputModule</a> (const String &amp;name=&quot;groupOutput&quot;)</td></tr>
 <tr class="memdesc:a1cec52ce56bed538424a641b66661b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a1cec52ce56bed538424a641b66661b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b726d73e6cf9a4bec83c3456bf08bc9" id="r_a7b726d73e6cf9a4bec83c3456bf08bc9"><td class="memItemLeft" align="right" valign="top">virtual Status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupOutputModule.html#a7b726d73e6cf9a4bec83c3456bf08bc9">init</a> (const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat)</td></tr>
-<tr class="memdesc:a7b726d73e6cf9a4bec83c3456bf08bc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the module.  <br /></td></tr>
-<tr class="separator:a7b726d73e6cf9a4bec83c3456bf08bc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8c657b17f692ca96c6d7995454afb22" id="r_ab8c657b17f692ca96c6d7995454afb22"><td class="memItemLeft" align="right" valign="top">virtual Status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupOutputModule.html#ab8c657b17f692ca96c6d7995454afb22">run</a> (const Properties &amp;globdat)</td></tr>
-<tr class="memdesc:ab8c657b17f692ca96c6d7995454afb22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract and store group-based output data.  <br /></td></tr>
-<tr class="separator:ab8c657b17f692ca96c6d7995454afb22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9a7bfb4e6a6952ccd5389841be1b14c" id="r_aa9a7bfb4e6a6952ccd5389841be1b14c"><td class="memItemLeft" align="right" valign="top">virtual Status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupOutputModule.html#aa9a7bfb4e6a6952ccd5389841be1b14c">init</a> (const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat) override</td></tr>
+<tr class="memdesc:aa9a7bfb4e6a6952ccd5389841be1b14c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the module.  <br /></td></tr>
+<tr class="separator:aa9a7bfb4e6a6952ccd5389841be1b14c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c5660be7d4ce6eb7dc43dc93650b08f" id="r_a4c5660be7d4ce6eb7dc43dc93650b08f"><td class="memItemLeft" align="right" valign="top">virtual Status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupOutputModule.html#a4c5660be7d4ce6eb7dc43dc93650b08f">run</a> (const Properties &amp;globdat) override</td></tr>
+<tr class="memdesc:a4c5660be7d4ce6eb7dc43dc93650b08f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extract and store group-based output data.  <br /></td></tr>
+<tr class="separator:a4c5660be7d4ce6eb7dc43dc93650b08f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -264,8 +264,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a7b726d73e6cf9a4bec83c3456bf08bc9" name="a7b726d73e6cf9a4bec83c3456bf08bc9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b726d73e6cf9a4bec83c3456bf08bc9">&#9670;&#160;</a></span>init()</h2>
+<a id="aa9a7bfb4e6a6952ccd5389841be1b14c" name="aa9a7bfb4e6a6952ccd5389841be1b14c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9a7bfb4e6a6952ccd5389841be1b14c">&#9670;&#160;</a></span>init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -299,7 +299,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -314,7 +314,7 @@ Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Module status</dd></dl>
 <p>Configures node and element groups, DOF specifications, and translates DOF names to indices. Performs initial data extraction. </p>
 
-<p>Reimplemented in <a class="el" href="classPBCGroupOutputModule.html#a39d72f8e8a5a24dfe4e0b2c126d99c12">PBCGroupOutputModule</a>.</p>
+<p>Reimplemented in <a class="el" href="classPBCGroupOutputModule.html#a502c00a82f8acb3871d5288bcec9ee20">PBCGroupOutputModule</a>.</p>
 
 </div>
 </div>
@@ -376,8 +376,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ab8c657b17f692ca96c6d7995454afb22" name="ab8c657b17f692ca96c6d7995454afb22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8c657b17f692ca96c6d7995454afb22">&#9670;&#160;</a></span>run()</h2>
+<a id="a4c5660be7d4ce6eb7dc43dc93650b08f" name="a4c5660be7d4ce6eb7dc43dc93650b08f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c5660be7d4ce6eb7dc43dc93650b08f">&#9670;&#160;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -395,7 +395,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -408,7 +408,7 @@ Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Module status</dd></dl>
 <p>Extracts state variables from all configured node and element groups and stores aggregated results in the global variables database </p>
 
-<p>Reimplemented in <a class="el" href="classPBCGroupOutputModule.html#a4ffb6c48c47843f997074b38b83387f5">PBCGroupOutputModule</a>.</p>
+<p>Reimplemented in <a class="el" href="classPBCGroupOutputModule.html#af209d901e4de0c59793e0332c5bd6dfb">PBCGroupOutputModule</a>.</p>
 
 </div>
 </div>

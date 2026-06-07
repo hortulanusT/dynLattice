@@ -147,9 +147,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a62d013386ef30765de35e7936cdabe3c" id="r_a62d013386ef30765de35e7936cdabe3c"><td class="memItemLeft" align="right" valign="top">virtual Status&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a62d013386ef30765de35e7936cdabe3c">init</a> (const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat) override</td></tr>
 <tr class="memdesc:a62d013386ef30765de35e7936cdabe3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the module.  <br /></td></tr>
 <tr class="separator:a62d013386ef30765de35e7936cdabe3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ae0499f6056935d0221864be4847fbb" id="r_a8ae0499f6056935d0221864be4847fbb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a8ae0499f6056935d0221864be4847fbb">shutdown</a> (const Properties &amp;globdat)</td></tr>
-<tr class="memdesc:a8ae0499f6056935d0221864be4847fbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the module.  <br /></td></tr>
-<tr class="separator:a8ae0499f6056935d0221864be4847fbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8985c86c715e71a85d415f2cb6726603" id="r_a8985c86c715e71a85d415f2cb6726603"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a8985c86c715e71a85d415f2cb6726603">shutdown</a> (const Properties &amp;globdat) override</td></tr>
+<tr class="memdesc:a8985c86c715e71a85d415f2cb6726603"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the module.  <br /></td></tr>
+<tr class="separator:a8985c86c715e71a85d415f2cb6726603"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d89ca9470df98f879f4e4c9d870b3f6" id="r_a7d89ca9470df98f879f4e4c9d870b3f6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a7d89ca9470df98f879f4e4c9d870b3f6">configure</a> (const Properties &amp;props, const Properties &amp;globdat) override</td></tr>
 <tr class="memdesc:a7d89ca9470df98f879f4e4c9d870b3f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the module from properties.  <br /></td></tr>
 <tr class="separator:a7d89ca9470df98f879f4e4c9d870b3f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -159,9 +159,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8af6667d866af19248bec4e2f318bdf3" id="r_a8af6667d866af19248bec4e2f318bdf3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a8af6667d866af19248bec4e2f318bdf3">advance</a> (const Properties &amp;globdat) override</td></tr>
 <tr class="memdesc:a8af6667d866af19248bec4e2f318bdf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance to next time step.  <br /></td></tr>
 <tr class="separator:a8af6667d866af19248bec4e2f318bdf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad27b8272f139206ce4038b224a086b67" id="r_ad27b8272f139206ce4038b224a086b67"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#ad27b8272f139206ce4038b224a086b67">solve</a> (const Properties &amp;info, const Properties &amp;globdat)=0</td></tr>
-<tr class="memdesc:ad27b8272f139206ce4038b224a086b67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve current time step (pure virtual)  <br /></td></tr>
-<tr class="separator:ad27b8272f139206ce4038b224a086b67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a115b3e45ff6b2e988ff5afd604d97577" id="r_a115b3e45ff6b2e988ff5afd604d97577"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#a115b3e45ff6b2e988ff5afd604d97577">solve</a> (const Properties &amp;info, const Properties &amp;globdat) override=0</td></tr>
+<tr class="memdesc:a115b3e45ff6b2e988ff5afd604d97577"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve current time step (pure virtual)  <br /></td></tr>
+<tr class="separator:a115b3e45ff6b2e988ff5afd604d97577"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab2a356503cad0101933fedeb93fbb87" id="r_aab2a356503cad0101933fedeb93fbb87"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExplicitModule.html#aab2a356503cad0101933fedeb93fbb87">cancel</a> (const Properties &amp;globdat) override</td></tr>
 <tr class="memdesc:aab2a356503cad0101933fedeb93fbb87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cancel current solution attempt.  <br /></td></tr>
 <tr class="separator:aab2a356503cad0101933fedeb93fbb87"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -935,8 +935,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a8ae0499f6056935d0221864be4847fbb" name="a8ae0499f6056935d0221864be4847fbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ae0499f6056935d0221864be4847fbb">&#9670;&#160;</a></span>shutdown()</h2>
+<a id="a8985c86c715e71a85d415f2cb6726603" name="a8985c86c715e71a85d415f2cb6726603"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8985c86c715e71a85d415f2cb6726603">&#9670;&#160;</a></span>shutdown()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -954,7 +954,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -967,8 +967,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ad27b8272f139206ce4038b224a086b67" name="ad27b8272f139206ce4038b224a086b67"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad27b8272f139206ce4038b224a086b67">&#9670;&#160;</a></span>solve()</h2>
+<a id="a115b3e45ff6b2e988ff5afd604d97577" name="a115b3e45ff6b2e988ff5afd604d97577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a115b3e45ff6b2e988ff5afd604d97577">&#9670;&#160;</a></span>solve()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -996,7 +996,7 @@ Protected Attributes</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1008,7 +1008,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classMilneDeviceModule.html#ae735eb7fcb3bf993452b46f65b23ad6d">MilneDeviceModule</a>, <a class="el" href="classEmbeddedRKModule.html#a9b032ed4ea836f609d01f5a19e5d1143">EmbeddedRKModule</a>, and <a class="el" href="classLeapFrogModule.html#a7a46479adaa0cd3e40efb5830213b7a2">LeapFrogModule</a>.</p>
+<p>Implemented in <a class="el" href="classEmbeddedRKModule.html#a9b032ed4ea836f609d01f5a19e5d1143">EmbeddedRKModule</a>, <a class="el" href="classLeapFrogModule.html#a7a46479adaa0cd3e40efb5830213b7a2">LeapFrogModule</a>, and <a class="el" href="classMilneDeviceModule.html#af570d4ac32dee4a319fba86b8a48a5cf">MilneDeviceModule</a>.</p>
 
 </div>
 </div>

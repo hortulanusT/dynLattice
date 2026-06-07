@@ -14,11 +14,12 @@ var searchData=
   ['dof_5fnames_5fprop_11',['DOF_NAMES_PROP',['../classPeriodicBCModel.html#a1cf8839214ff55364feb6172387015e4',1,'PeriodicBCModel']]],
   ['dof_5foppo_5fnames_5fprop_12',['DOF_OPPO_NAMES_PROP',['../classSymBCModel.html#aec929e9d841a0749bc98eb0522f326c5',1,'SymBCModel']]],
   ['dof_5fprop_13',['dof_prop',['../classDirichletModel.html#ad1cdf5ab37f0f5e127298e06bd7e3ba6',1,'DirichletModel::DOF_PROP'],['../classFollowerLoadModel.html#a8207ededce12b4b83674ab36f1178886',1,'FollowerLoadModel::DOF_PROP'],['../classImpactModel.html#acfac96aaaebe042d17e97189e845f207',1,'ImpactModel::DOF_PROP'],['../classNeumannModel.html#a290b434ba4186fa516f958d033371822',1,'NeumannModel::DOF_PROP']]],
-  ['dofdata_14',['dofData',['../structParaViewModule_1_1ElementInfo.html#ae27ac3fc3bdf98ee4756bf9d2c73217d',1,'ParaViewModule::ElementInfo']]],
-  ['dofs_5f_15',['dofs_',['../classExplicitModule.html#ad5c51e721a7902238885e414e9b67710',1,'ExplicitModule']]],
-  ['dofs_5fprop_16',['DOFS_PROP',['../classMassModel.html#abae741bb880c6b2ab4a26bffd592170e',1,'MassModel']]],
-  ['dofsso3_5f_17',['dofsSO3_',['../classExplicitModule.html#a594b56d7ec94b39f723d80dbbec9d2d3',1,'ExplicitModule']]],
-  ['dtime_5f_18',['dtime_',['../classExplicitModule.html#a4fb36d7ab21afbdd400077ad1b3c3364',1,'ExplicitModule']]],
-  ['dupednodegroup_5f_19',['dupedNodeGroup_',['../classPBCGroupInputModule.html#a36cd142f0ef057dd428671dd6e4e4686',1,'PBCGroupInputModule']]],
-  ['dupednodes_5fprop_20',['DUPEDNODES_PROP',['../classPBCGroupInputModule.html#aed47e9cf536e196e7a99868a2768b44d',1,'PBCGroupInputModule']]]
+  ['dofcount_5f_14',['dofCount_',['../classElastoPlasticRodMaterial.html#a269a798fb4d265b8fbe206ef4537dda8',1,'ElastoPlasticRodMaterial']]],
+  ['dofdata_15',['dofData',['../structParaViewModule_1_1ElementInfo.html#ae27ac3fc3bdf98ee4756bf9d2c73217d',1,'ParaViewModule::ElementInfo']]],
+  ['dofs_5f_16',['dofs_',['../classExplicitModule.html#ad5c51e721a7902238885e414e9b67710',1,'ExplicitModule']]],
+  ['dofs_5fprop_17',['DOFS_PROP',['../classMassModel.html#abae741bb880c6b2ab4a26bffd592170e',1,'MassModel']]],
+  ['dofsso3_5f_18',['dofsSO3_',['../classExplicitModule.html#a594b56d7ec94b39f723d80dbbec9d2d3',1,'ExplicitModule']]],
+  ['dtime_5f_19',['dtime_',['../classExplicitModule.html#a4fb36d7ab21afbdd400077ad1b3c3364',1,'ExplicitModule']]],
+  ['dupednodegroup_5f_20',['dupedNodeGroup_',['../classPBCGroupInputModule.html#a36cd142f0ef057dd428671dd6e4e4686',1,'PBCGroupInputModule']]],
+  ['dupednodes_5fprop_21',['DUPEDNODES_PROP',['../classPBCGroupInputModule.html#aed47e9cf536e196e7a99868a2768b44d',1,'PBCGroupInputModule']]]
 ];

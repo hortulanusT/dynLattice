@@ -83,17 +83,17 @@ $(function() {
   <div class="headertitle"><div class="title">Installation</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md18"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md20"></a>
 Requirements</h1>
 <ul>
 <li><b><a href="https://apptainer.org/">Apptainer</a></b></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md19"></a>
+<h1><a class="anchor" id="autotoc_md21"></a>
 1. Install &lt;em&gt;apptainer&lt;/em&gt;</h1>
 <ol type="1">
 <li>Install <code>apptainer</code> following the <a href="https://apptainer.org/get-started/">quick start guide</a>.</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md20"></a>
+<h1><a class="anchor" id="autotoc_md22"></a>
 (Optional) build the *.sif* file yourself</h1>
 <p>A <code>.def</code> file is provided to build the container yourself.</p><ol type="1">
 <li>Put all the required archives into a directory called <code>zips</code>.<ul>
@@ -105,14 +105,14 @@ Requirements</h1>
 </li>
 <li>Run the command <code>sudo apptainer build jive.sif jive.def</code>.</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md23"></a>
 2. Get the repository and build the documentation</h1>
 <ol type="1">
 <li>Get <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a> of the repository.</li>
 <li>Define an appropriate alias for running inside the apptainer <code>alias jive="apptainer exec $(pwd)/jive.sif"</code></li>
 <li>Build the documentation via <code>jive make docs</code> (this will execute the test cases as well)</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md24"></a>
 3. Using the code</h1>
 <ol type="1">
 <li>You can build the code via <code>jive make</code> and then execute any test via <code>jive bin/dynLattice path/to/inputs.pro</code></li>

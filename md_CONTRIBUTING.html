@@ -79,8 +79,8 @@ $(function() {
   <div class="headertitle"><div class="title">Contributing to dynLattice</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a> Thank you for your interest in contributing to dynLattice! This guide will help you get started with development.</p>
-<h1><a class="anchor" id="autotoc_md1"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md1"></a> Thank you for your interest in contributing to dynLattice! This guide will help you get started with development.</p>
+<h1><a class="anchor" id="autotoc_md2"></a>
 Development Setup</h1>
 <ol type="1">
 <li><b>Fork and clone</b> the repository from GitHub<ul>
@@ -96,7 +96,7 @@ Development Setup</h1>
 <li><b>Build and test:</b> <div class="fragment"><div class="line">jive make tests</div>
 </div><!-- fragment --></li>
 </ol>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md3"></a>
 Development Workflow</h1>
 <ul>
 <li>Create feature branches</li>
@@ -104,9 +104,9 @@ Development Workflow</h1>
 <li>Update documentation as needed</li>
 <li>Submit pull requests</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="autotoc_md4"></a>
 Coding Standards</h1>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md5"></a>
 Style Guidelines</h2>
 <ul>
 <li>Use <code>#pragma once</code> for headers</li>
@@ -119,16 +119,16 @@ Style Guidelines</h2>
 </li>
 <li>Document public interfaces with <a href="https://doxygen.nl/">Doxygen</a> style comments</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md5"></a>
+<h2><a class="anchor" id="autotoc_md6"></a>
 Documentation Example</h2>
 <div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">virtual</span> <span class="keywordtype">bool</span> takeAction</div>
 <div class="line">    (<span class="keyword">const</span> String &amp;action,</div>
 <div class="line">     <span class="keyword">const</span> Properties &amp;params,</div>
 <div class="line">     <span class="keyword">const</span> Properties &amp;globdat) <span class="keyword">override</span>;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md6"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md7"></a>
 Adding New Components</h1>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Materials (Rod Constitutive Models)</h2>
 <ol type="1">
 <li>Create <code>src/materials/YourMaterial.h</code> and <code>src/materials/YourMaterial.cpp</code></li>
@@ -136,7 +136,7 @@ Materials (Rod Constitutive Models)</h2>
 <li>Implement required virtual methods for stress-strain relationships</li>
 <li>Register in <code><a class="el" href="__declareMaterials_8cpp.html" title="Implementation of material registration utility for factory initialization.">_declareMaterials.cpp</a></code></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Models (Boundary Conditions, Constraints, etc.)</h2>
 <ol type="1">
 <li>Create <code>src/models/YourModel.h</code> and <code>src/models/YourModel.cpp</code></li>
@@ -144,7 +144,7 @@ Models (Boundary Conditions, Constraints, etc.)</h2>
 <li>Implement <code>takeAction()</code> for relevant solver actions</li>
 <li>Register in <code><a class="el" href="__declareModels_8cpp.html" title="Implementation of model factory registration.">_declareModels.cpp</a></code></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 Modules (Time Integration, I/O, etc.)</h2>
 <ol type="1">
 <li>Create <code>src/modules/YourModule.h</code> and <code>src/modules/YourModule.cpp</code></li>
@@ -152,7 +152,7 @@ Modules (Time Integration, I/O, etc.)</h2>
 <li>Implement required module interface methods</li>
 <li>Register in <code><a class="el" href="__declareModules_8cpp.html" title="Implementation of module registration for dynLattice.">_declareModules.cpp</a></code></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 Validation Tests</h2>
 <ol type="1">
 <li>Create a new directory in <code>tests/</code> (e.g., <code>tests/your_test/</code>)</li>
@@ -166,9 +166,9 @@ Validation Tests</h2>
 <li>Update <code>tests/testing.mk</code> to include your test</li>
 <li>Document expected behavior and reference solutions</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md12"></a>
 Build Commands</h1>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 Development Builds</h2>
 <div class="fragment"><div class="line"># Debug build with symbols</div>
 <div class="line">jive make debug</div>
@@ -181,7 +181,7 @@ Development Builds</h2>
 <div class="line"> </div>
 <div class="line"># Clean build artifacts</div>
 <div class="line">jive make clean</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md13"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md14"></a>
 Testing</h2>
 <div class="fragment"><div class="line"># Run all validation tests</div>
 <div class="line">jive make tests</div>
@@ -191,21 +191,63 @@ Testing</h2>
 <div class="line">jive make contact-tests</div>
 <div class="line">jive make plastic-tests</div>
 <div class="line">jive make transient-tests</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md14"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md15"></a>
+CI Checks</h1>
+<p>On every push and every pull request targeting <code>main</code>, two checks run in CI:</p>
+<p><b>Numerical regression tests</b> — <code>make tests</code> runs validation benchmarks. For the single benchmarks, the output is compared against reference data stored in <code>tests\&lt;...&gt;\ref_data</code>.</p>
+<p><b>Hygienic build</b> — New code in <code>src/</code> <b>should</b> compile without warnings with additional flags enabled:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Flag   </th><th class="markdownTableHeadNone">What it catches    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wextra</code>   </td><td class="markdownTableBodyNone">Additional warnings beyond <code>-Wall</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Wpedantic</code>   </td><td class="markdownTableBodyNone">Deviations from ISO specifications    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wshadow</code>   </td><td class="markdownTableBodyNone">Local variables that hide an outer-scope variable    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Wsuggest-override</code>   </td><td class="markdownTableBodyNone">Virtual overrides missing the <code>override</code> keyword    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wold-style-cast</code>   </td><td class="markdownTableBodyNone">old, C-style casts (<code>(Type)expr</code>)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Woverloaded-virtual</code>   </td><td class="markdownTableBodyNone">Derived-class functions that accidentally hide a base virtual    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wdouble-promotion</code>   </td><td class="markdownTableBodyNone">Implicit <code>float</code> → <code>double</code> conversions    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Wundef</code>   </td><td class="markdownTableBodyNone">Macros used in <code>#if</code> that are not defined    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wnon-virtual-dtor</code>   </td><td class="markdownTableBodyNone">Classes with virtual functions but a non-virtual destructor    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Winit-self</code>   </td><td class="markdownTableBodyNone">Variables initialised with themselves (<code>int x = x</code>)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wconversion</code>   </td><td class="markdownTableBodyNone">Implicit narrowing conversions    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>-Wsign-conversion</code>   </td><td class="markdownTableBodyNone">Implicit signed/unsigned conversions    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>-Wfloat-equal</code>   </td><td class="markdownTableBodyNone">Direct <code>==</code> / <code>!=</code> comparisons of floating-point values   </td></tr>
+</table>
+<p>You can run both checks locally:</p>
+<div class="fragment"><div class="line"># Run all regression tests</div>
+<div class="line">jive make tests</div>
+<div class="line"> </div>
+<div class="line"># Build with stricter warning flags</div>
+<div class="line">jive make HYGIENE=1</div>
+</div><!-- fragment --><p>CI fails if any benchmark exits non-zero, or if any warning originates from project sources (<code>src/</code>). Third-party or library headers are not checked.</p>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Documentation</h2>
 <div class="fragment"><div class="line"># Generate API documentation</div>
-<div class="line">jive make doc</div>
+<div class="line">jive make docs</div>
 <div class="line"> </div>
 <div class="line"># Open documentation in browser</div>
 <div class="line">firefox doc/html/index.html</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md15"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
 Debugging</h2>
 <div class="fragment"><div class="line"># Debug with GDB</div>
 <div class="line">jive gdb bin/dynLattice-debug</div>
 <div class="line"> </div>
 <div class="line"># Within GDB, print JEM/JIVE variables</div>
 <div class="line">(gdb) call dprint(&amp;variable_name)</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md16"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md18"></a>
 Submitting Changes</h1>
 <ol type="1">
 <li>Push your feature branch to your fork</li>
@@ -213,7 +255,7 @@ Submitting Changes</h1>
 <li>Provide a clear description of changes</li>
 <li>Include relevant publications</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md17"></a>
+<h1><a class="anchor" id="autotoc_md19"></a>
 Getting Help</h1>
 <ul>
 <li><b>Issues</b>: Check <a href="https://github.com/hortulanusT/dynLattice/issues">existing issues</a> first</li>

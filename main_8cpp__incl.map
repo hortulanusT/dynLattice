@@ -45,20 +45,20 @@
 <area shape="poly" id="edge12_Node000013_Node000043" title=" " alt="" coords="1758,97,1084,117,700,133,541,143,420,155,390,159,389,154,420,149,541,138,700,128,1083,111,1758,92"/>
 <area shape="rect" id="Node000053" href="$SpecialCosseratRodModel_8h.html" title="Special Cosserat rod model implementation." alt="" coords="660,240,863,280"/>
 <area shape="poly" id="edge28_Node000013_Node000053" title=" " alt="" coords="1758,100,1531,119,1421,134,1377,144,1344,154,1329,163,1319,174,1309,185,1293,194,1216,215,1107,232,877,254,876,249,1106,227,1215,210,1291,190,1306,181,1315,170,1326,159,1342,150,1376,139,1420,129,1530,114,1758,95"/>
-<area shape="rect" id="Node000072" href="$ImpactModel_8h.html" title="Impact model for updating acceleration based on response forces and impactor weights." alt="" coords="1580,159,1751,185"/>
-<area shape="poly" id="edge15_Node000013_Node000072" title=" " alt="" coords="1826,106,1706,157,1704,152,1824,102"/>
-<area shape="rect" id="Node000073" href="$InitLoadModel_8h.html" title="Initial loading model for setting displacement and velocity conditions." alt="" coords="1825,159,2004,185"/>
-<area shape="poly" id="edge16_Node000013_Node000073" title=" " alt="" coords="1863,103,1899,147,1895,150,1859,106"/>
-<area shape="rect" id="Node000074" href="$JointContactModel_8h.html" title="Contact model for spherical joint interactions." alt="" coords="659,159,864,185"/>
-<area shape="poly" id="edge17_Node000013_Node000074" title=" " alt="" coords="1758,98,1373,115,1126,131,876,155,838,160,837,155,876,149,1125,126,1372,110,1758,93"/>
-<area shape="rect" id="Node000077" href="$LatticeModel_8h.html" title="Lattice model for managing collections of rod elements." alt="" coords="1536,247,1707,273"/>
-<area shape="poly" id="edge19_Node000013_Node000077" title=" " alt="" coords="1846,106,1813,148,1764,194,1716,223,1669,245,1666,240,1714,219,1761,190,1809,144,1842,103"/>
-<area shape="rect" id="Node000080" href="$MassModel_8h.html" title="Mass model for adding concentrated masses to node groups." alt="" coords="2079,159,2239,185"/>
-<area shape="poly" id="edge20_Node000013_Node000080" title=" " alt="" coords="1897,101,2102,153,2100,159,1896,107"/>
-<area shape="rect" id="Node000081" href="$NeumannModel_8h.html" title="Neumann boundary conditions model for applying loads on node groups." alt="" coords="2263,159,2452,185"/>
-<area shape="poly" id="edge21_Node000013_Node000081" title=" " alt="" coords="1933,101,2251,149,2281,154,2280,160,2250,155,1932,107"/>
-<area shape="rect" id="Node000082" href="$PeriodicBCModel_8h.html" title="Periodic boundary conditions model for rectangular unit cells." alt="" coords="2733,247,2929,273"/>
-<area shape="poly" id="edge22_Node000013_Node000082" title=" " alt="" coords="1947,93,2077,100,2226,111,2365,127,2422,137,2465,150,2483,159,2495,169,2506,180,2523,190,2571,208,2622,223,2720,243,2719,248,2621,228,2569,213,2520,194,2503,184,2491,173,2480,163,2463,154,2421,143,2364,132,2226,116,2076,105,1946,99"/>
+<area shape="rect" id="Node000073" href="$ImpactModel_8h.html" title="Impact model for updating acceleration based on response forces and impactor weights." alt="" coords="1580,159,1751,185"/>
+<area shape="poly" id="edge15_Node000013_Node000073" title=" " alt="" coords="1826,106,1706,157,1704,152,1824,102"/>
+<area shape="rect" id="Node000074" href="$InitLoadModel_8h.html" title="Initial loading model for setting displacement and velocity conditions." alt="" coords="1825,159,2004,185"/>
+<area shape="poly" id="edge16_Node000013_Node000074" title=" " alt="" coords="1863,103,1899,147,1895,150,1859,106"/>
+<area shape="rect" id="Node000075" href="$JointContactModel_8h.html" title="Contact model for spherical joint interactions." alt="" coords="659,159,864,185"/>
+<area shape="poly" id="edge17_Node000013_Node000075" title=" " alt="" coords="1758,98,1373,115,1126,131,876,155,838,160,837,155,876,149,1125,126,1372,110,1758,93"/>
+<area shape="rect" id="Node000078" href="$LatticeModel_8h.html" title="Lattice model for managing collections of rod elements." alt="" coords="1536,247,1707,273"/>
+<area shape="poly" id="edge19_Node000013_Node000078" title=" " alt="" coords="1846,106,1813,148,1764,194,1716,223,1669,245,1666,240,1714,219,1761,190,1809,144,1842,103"/>
+<area shape="rect" id="Node000081" href="$MassModel_8h.html" title="Mass model for adding concentrated masses to node groups." alt="" coords="2079,159,2239,185"/>
+<area shape="poly" id="edge20_Node000013_Node000081" title=" " alt="" coords="1897,101,2102,153,2100,159,1896,107"/>
+<area shape="rect" id="Node000082" href="$NeumannModel_8h.html" title="Neumann boundary conditions model for applying loads on node groups." alt="" coords="2263,159,2452,185"/>
+<area shape="poly" id="edge21_Node000013_Node000082" title=" " alt="" coords="1933,101,2251,149,2281,154,2280,160,2250,155,1932,107"/>
+<area shape="rect" id="Node000083" href="$PeriodicBCModel_8h.html" title="Periodic boundary conditions model for rectangular unit cells." alt="" coords="2733,247,2929,273"/>
+<area shape="poly" id="edge22_Node000013_Node000083" title=" " alt="" coords="1947,93,2077,100,2226,111,2365,127,2422,137,2465,150,2483,159,2495,169,2506,180,2523,190,2571,208,2622,223,2720,243,2719,248,2621,228,2569,213,2520,194,2503,184,2491,173,2480,163,2463,154,2421,143,2364,132,2226,116,2076,105,1946,99"/>
 <area shape="rect" id="Node000090" href="$RodContactModel_8h.html" title="Contact model for rod&#45;to&#45;rod interactions." alt="" coords="1354,159,1555,185"/>
 <area shape="poly" id="edge25_Node000013_Node000090" title=" " alt="" coords="1795,107,1526,159,1525,154,1794,101"/>
 <area shape="rect" id="Node000092" href="$SpringMassModel_8h.html" title="Spring&#45;mass system model for boundary conditions." alt="" coords="433,159,634,185"/>
@@ -67,13 +67,13 @@
 <area shape="poly" id="edge30_Node000013_Node000093" title=" " alt="" coords="1896,101,1955,121,2017,150,2043,170,2053,180,2068,190,2109,207,2153,222,2237,242,2236,247,2151,227,2107,212,2066,194,2050,184,2039,174,2015,154,1953,126,1894,107"/>
 <area shape="poly" id="edge13_Node000043_Node000053" title=" " alt="" coords="384,182,421,189,652,235,651,240,420,195,383,187"/>
 <area shape="poly" id="edge14_Node000053_Node000004" title=" " alt="" coords="686,283,503,327,502,322,684,277"/>
-<area shape="poly" id="edge18_Node000074_Node000053" title=" " alt="" coords="764,185,764,226,759,226,759,185"/>
+<area shape="poly" id="edge18_Node000075_Node000053" title=" " alt="" coords="764,185,764,226,759,226,759,185"/>
 <area shape="rect" id="Node000087" href="$PBCGroupInputModule_8h.html" title="Module for generating periodic boundary condition node groups." alt="" coords="5391,328,5631,353"/>
-<area shape="poly" id="edge23_Node000082_Node000087" title=" " alt="" coords="2889,270,2942,277,3165,293,3460,306,4168,323,4871,332,5377,336,5377,341,4871,338,4167,328,3460,311,3165,298,2941,283,2888,275"/>
+<area shape="poly" id="edge23_Node000083_Node000087" title=" " alt="" coords="2889,270,2942,277,3165,293,3460,306,4168,323,4871,332,5377,336,5377,341,4871,338,4167,328,3460,311,3165,298,2941,283,2888,275"/>
 <area shape="rect" id="Node000089" href="$GroupInputModule_8h.html" title="Module for generating node and element groups from input files." alt="" coords="5636,401,5791,427"/>
 <area shape="poly" id="edge24_Node000087_Node000089" title=" " alt="" coords="5544,351,5669,394,5667,399,5542,356"/>
 <area shape="poly" id="edge27_Node000090_Node000053" title=" " alt="" coords="1385,187,1335,195,877,249,876,244,1334,189,1384,182"/>
-<area shape="poly" id="edge26_Node000090_Node000077" title=" " alt="" coords="1478,182,1588,238,1585,243,1476,187"/>
+<area shape="poly" id="edge26_Node000090_Node000078" title=" " alt="" coords="1478,182,1588,238,1585,243,1476,187"/>
 <area shape="poly" id="edge31_Node000093_Node000087" title=" " alt="" coords="2418,263,2722,277,3511,301,4282,318,5377,335,5377,340,4281,323,3511,306,2721,283,2417,269"/>
 <area shape="poly" id="edge34_Node000094_Node000014" title=" " alt="" coords="4338,97,3618,114,3211,131,3042,142,2914,155,2888,159,2887,154,2913,149,3042,137,3211,126,3618,109,4338,92"/>
 <area shape="poly" id="edge36_Node000094_Node000015" title=" " alt="" coords="4338,97,3541,114,3084,131,2894,142,2750,155,2720,159,2719,154,2749,149,2893,137,3084,125,3541,108,4338,91"/>
@@ -112,6 +112,6 @@
 <area shape="poly" id="edge52_Node000138_Node000087" title=" " alt="" coords="5677,275,5552,325,5550,320,5675,270"/>
 <area shape="poly" id="edge51_Node000138_Node000137" title=" " alt="" coords="5716,271,5752,316,5748,319,5711,275"/>
 <area shape="poly" id="edge54_Node000140_Node000017" title=" " alt="" coords="3047,185,3047,233,3041,233,3041,185"/>
-<area shape="poly" id="edge55_Node000140_Node000082" title=" " alt="" coords="3016,187,2873,245,2871,240,3014,182"/>
+<area shape="poly" id="edge55_Node000140_Node000083" title=" " alt="" coords="3016,187,2873,245,2871,240,3014,182"/>
 <area shape="poly" id="edge56_Node000140_Node000138" title=" " alt="" coords="3114,182,3176,189,3395,203,3683,215,4375,235,5565,254,5565,260,4375,240,3683,221,3395,209,3176,195,3113,187"/>
 </map>

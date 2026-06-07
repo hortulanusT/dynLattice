@@ -6,8 +6,8 @@ var searchData=
   ['updatevec_3',['updateVec',['../classExplicitModule.html#abaa87ce7952935afa9f9b81a2ade8ecd',1,'ExplicitModule']]],
   ['updcond_5f_4',['updCond_',['../classExplicitModule.html#a1bee631eb7f516825cfa42ad9dc6876f',1,'ExplicitModule']]],
   ['updforce_5',['updForce',['../classMilneDeviceModule.html#a595eaa4a15a66117fff5ee7e5f4148fb',1,'MilneDeviceModule']]],
-  ['usage_6',['usage',['../md_README.html#autotoc_md42',1,'Basic Usage'],['../usage.html',1,'Usage']]],
-  ['usage_20disclosure_7',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md33',1,'']]],
+  ['usage_6',['usage',['../md_README.html#autotoc_md45',1,'Basic Usage'],['../usage.html',1,'Usage']]],
+  ['usage_20disclosure_7',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md36',1,'']]],
   ['usage_2emd_8',['usage.md',['../usage_8md.html',1,'']]],
-  ['using_20the_20code_9',['3. Using the code',['../install.html#autotoc_md22',1,'']]]
+  ['using_20the_20code_9',['3. Using the code',['../install.html#autotoc_md24',1,'']]]
 ];

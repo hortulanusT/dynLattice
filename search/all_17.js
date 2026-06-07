@@ -8,15 +8,15 @@ var searchData=
   ['rdofs_5f_5',['rdofs_',['../classExplicitModule.html#a7c3e31121784bdd72c191a033cfd3546',1,'ExplicitModule']]],
   ['readme_2emd_6',['README.md',['../README_8md.html',1,'']]],
   ['reduction_5fprop_7',['REDUCTION_PROP',['../classNeumannModel.html#ac6a23d6a97151e277c12ce00b1133db0',1,'NeumannModel']]],
-  ['references_8',['References',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md35',1,'']]],
+  ['references_8',['References',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md38',1,'']]],
   ['registered_20materials_9',['Registered Materials',['../__declareMaterials_8h.html#Currently',1,'']]],
   ['rejectdeform_10',['rejectdeform',['../classElasticRodMaterial.html#a9700528bd143efdc91c940003aa28704',1,'ElasticRodMaterial::rejectDeform()'],['../classElastoPlasticRodMaterial.html#a9650c029f418f7f20753edb663c5895a',1,'ElastoPlasticRodMaterial::rejectDeform()'],['../classMaterial.html#a750ded2d63b912afa8077758741fefa9',1,'Material::rejectDeform()']]],
-  ['related_20publications_11',['Related Publications',['../index.html#autotoc_md24',1,'']]],
+  ['related_20publications_11',['Related Publications',['../index.html#autotoc_md26',1,'']]],
   ['report_12',['REPORT',['../testing_8h.html#aa583aec62de195f014c42d5e6ce48491',1,'testing.h']]],
-  ['repository_20and_20build_20the_20documentation_13',['2. Get the repository and build the documentation',['../install.html#autotoc_md21',1,'']]],
-  ['requirements_14',['requirements',['../md_README.html#autotoc_md44',1,'Requirements'],['../install.html#autotoc_md18',1,'Requirements']]],
-  ['resarch_20impact_20statement_15',['Resarch Impact Statement',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md32',1,'']]],
-  ['rod_20constitutive_20models_16',['Materials (Rod Constitutive Models)',['../md_CONTRIBUTING.html#autotoc_md7',1,'']]],
+  ['repository_20and_20build_20the_20documentation_13',['2. Get the repository and build the documentation',['../install.html#autotoc_md23',1,'']]],
+  ['requirements_14',['requirements',['../md_README.html#autotoc_md47',1,'Requirements'],['../install.html#autotoc_md20',1,'Requirements']]],
+  ['research_20impact_20statement_15',['Research impact statement',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md35',1,'']]],
+  ['rod_20constitutive_20models_16',['Materials (Rod Constitutive Models)',['../md_CONTRIBUTING.html#autotoc_md8',1,'']]],
   ['rod_5fcontact_5fprop_17',['ROD_CONTACT_PROP',['../classLatticeModel.html#a6abc96d8e7dcb6c2ea78281fad051f6a',1,'LatticeModel']]],
   ['rod_5flist_5fprop_18',['ROD_LIST_PROP',['../classLatticeModel.html#a40a7c6f2b32098ea8ab194db4a2e03cb',1,'LatticeModel']]],
   ['rodcontactmodel_19',['rodcontactmodel',['../classRodContactModel.html',1,'RodContactModel'],['../classRodContactModel.html#a88c430564bce93755e0749d7722b117f',1,'RodContactModel::RodContactModel()']]],
@@ -29,5 +29,5 @@ var searchData=
   ['rot_5fdof_5fprop_26',['ROT_DOF_PROP',['../classFollowerLoadModel.html#af6a5066befe6a4cfb65eac651e313c26',1,'FollowerLoadModel']]],
   ['rot_5fnames_5fprop_27',['ROT_NAMES_PROP',['../classPeriodicBCModel.html#a07bb75e4ff44e15f9a77eb68a37cb70a',1,'PeriodicBCModel']]],
   ['rot_5fpart_28',['ROT_PART',['../classSpecialCosseratRodModel.html#aa75375721e60f975c33943dfe6ed2496',1,'SpecialCosseratRodModel']]],
-  ['run_29',['run',['../classTangentOutputModule.html#a797d936175d7c8b1fae24088e71dfaf3',1,'TangentOutputModule::run()'],['../classPBCGroupOutputModule.html#a4ffb6c48c47843f997074b38b83387f5',1,'PBCGroupOutputModule::run()'],['../classParaViewModule.html#a5f50032835669a90d8fc9634b1cd9902',1,'ParaViewModule::run()'],['../classLenientNonlinModule.html#ad525a829f7d0f57aacf6ad7bea4615bc',1,'LenientNonlinModule::run()'],['../classGroupOutputModule.html#ab8c657b17f692ca96c6d7995454afb22',1,'GroupOutputModule::run()'],['../classGMSHInputModule.html#a011765e00a6b5abd96432a2995fa3987',1,'GMSHInputModule::run()'],['../classGitReportModule.html#aef3b32db7c638bb5ec77fdd37069231b',1,'GitReportModule::run()'],['../classForceOutputModule.html#a962aed603a6969e94650a4f0f797db2f',1,'ForceOutputModule::run()']]]
+  ['run_29',['run',['../classTangentOutputModule.html#a797d936175d7c8b1fae24088e71dfaf3',1,'TangentOutputModule::run()'],['../classPBCGroupOutputModule.html#af209d901e4de0c59793e0332c5bd6dfb',1,'PBCGroupOutputModule::run()'],['../classParaViewModule.html#a5f50032835669a90d8fc9634b1cd9902',1,'ParaViewModule::run()'],['../classLenientNonlinModule.html#a1e20611c8dbcd9f02ea08f6da0bb778c',1,'LenientNonlinModule::run()'],['../classGroupOutputModule.html#a4c5660be7d4ce6eb7dc43dc93650b08f',1,'GroupOutputModule::run()'],['../classGMSHInputModule.html#a011765e00a6b5abd96432a2995fa3987',1,'GMSHInputModule::run()'],['../classGitReportModule.html#aef3b32db7c638bb5ec77fdd37069231b',1,'GitReportModule::run()'],['../classForceOutputModule.html#a962aed603a6969e94650a4f0f797db2f',1,'ForceOutputModule::run()']]]
 ];

@@ -79,9 +79,9 @@ $(function() {
   <div class="headertitle"><div class="title">dynLattice</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md36"></a> <a href="https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4"><img src="https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4/status.svg" alt="JOSS status" style="pointer-events: none;" class="inline"/></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="pointer-events: none;" class="inline"/></a> <a href="https://hortulanust.github.io/dynLattice/"><img src="https://img.shields.io/badge/Docs-1.11-00a6d6" alt="Docs: 1.11" class="inline"/></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md39"></a> <a href="https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4"><img src="https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4/status.svg" alt="JOSS status" style="pointer-events: none;" class="inline"/></a> <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" style="pointer-events: none;" class="inline"/></a> <a href="https://doi.org/10.5281/zenodo.20474969"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20474969.svg" alt="DOI" style="pointer-events: none;" class="inline"/></a> <a href="https://hortulanust.github.io/dynLattice/"><img src="https://img.shields.io/badge/Docs-1.11-00a6d6" alt="Docs: 1.11" class="inline"/></a></p>
 <p>dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the <a href="https://doi.org/10.1016/0045-7825(86)90079-4">Simo &amp; Vu-Quoc (1986)</a> formulation with support for inelastic materials, explicit time marching, and contact mechanics.</p>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<h1><a class="anchor" id="autotoc_md40"></a>
 Features</h1>
 <ul>
 <li><b>Geometrically exact beam elements</b> with support for large deformations</li>
@@ -92,18 +92,18 @@ Features</h1>
 <li><b>Containerized environment</b> with Apptainer for reproducible simulations</li>
 <li><b>Comprehensive test suite</b> with validation benchmarks</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md38"></a>
+<h1><a class="anchor" id="autotoc_md41"></a>
 Publications</h1>
 <p><a href="https://doi.org/10.1016/j.mechmat.2024.104952"><img src="https://img.shields.io/badge/Article-Mech.%20Mater.%20(2024)-orange?logo=DOI" alt="Article: Mech. Mater." class="inline"/></a> <a href="https://doi.org/10.1007/s00466-024-02572-3"><img src="https://img.shields.io/badge/Article-Comput.%20Mech.%20(2025)-orange?logo=DOI" alt="Article: Comput. Mech." class="inline"/></a> <a href="https://doi.org/10.1016/j.ijimpeng.2025.105402"><img src="https://img.shields.io/badge/Article-Int.%20J.%20Impact%20Eng.%20(2025)-orange?logo=DOI" alt="Article: Int. J. Impact Eng." class="inline"/></a> <a href="https://doi.org/10.1016/j.mtadv.2025.100656"><img src="https://img.shields.io/badge/Article-Mater.%20Today%20Adv.%20(2025)-orange?logo=DOI" alt="Preprint: Mater. Today Adv." class="inline"/></a></p>
 <p><a href="https://doi.org/10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f"><img src="https://img.shields.io/badge/Dissertation-TU%20Delft%20(2025)-00a6d6?logo=DOI" alt="Dissertation: TU Delft" class="inline"/></a></p>
-<h1><a class="anchor" id="autotoc_md39"></a>
+<h1><a class="anchor" id="autotoc_md42"></a>
 Quick Start</h1>
-<h2><a class="anchor" id="autotoc_md40"></a>
+<h2><a class="anchor" id="autotoc_md43"></a>
 Prerequisites</h2>
 <ul>
 <li><a href="https://apptainer.org/">Apptainer</a> installed on your system</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md41"></a>
+<h2><a class="anchor" id="autotoc_md44"></a>
 Installation</h2>
 <ol type="1">
 <li>Download the <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a></li>
@@ -111,25 +111,25 @@ Installation</h2>
 <li>Build the code <code>jive make</code></li>
 <li>Run tests to verify installation: <code>jive make tests</code></li>
 </ol>
-<h2><a class="anchor" id="autotoc_md42"></a>
+<h2><a class="anchor" id="autotoc_md45"></a>
 Basic Usage</h2>
 <p>After building, the main executable <code>dynLattice</code> will be available in the <code>bin/</code> directory. Run simulations using:</p>
 <div class="fragment"><div class="line">jive bin/dynLattice input_file.pro</div>
 </div><!-- fragment --><p>Example input files can be found in the <code>tests/</code> directory.</p>
-<h1><a class="anchor" id="autotoc_md43"></a>
+<h1><a class="anchor" id="autotoc_md46"></a>
 Documentation</h1>
 <ul>
-<li><b>API Documentation</b>: Build with <code>jive make doc</code> and open <code>doc/html/index.html</code></li>
+<li><b>API Documentation</b>: Build with <code>jive make docs</code> and open <code>doc/html/index.html</code></li>
 <li><b>Installation Guide</b>: <a class="el" href="install_8md.html">doc/install.md</a></li>
 <li><b>Usage Instructions</b>: <a class="el" href="usage_8md.html">doc/usage.md</a></li>
 <li><b>Benchmarks</b>: <a class="el" href="Benchmarks_8md.html">tests/Benchmarks.md</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md44"></a>
+<h1><a class="anchor" id="autotoc_md47"></a>
 Requirements</h1>
 <p>The code requires the JIVE finite element toolkit and its dependencies. All requirements are provided through the included Apptainer container (<code>jive.sif</code>). To build the documentation, use:</p>
-<div class="fragment"><div class="line">jive make doc</div>
+<div class="fragment"><div class="line">jive make docs</div>
 </div><!-- fragment --><p>The documentation is also available as <a href="https://hortulanust.github.io/dynLattice/">GitHub Pages</a></p>
-<h1><a class="anchor" id="autotoc_md45"></a>
+<h1><a class="anchor" id="autotoc_md48"></a>
 Project Structure</h1>
 <div class="fragment"><div class="line">.</div>
 <div class="line">├── .gitignore            ← gitignore file to ignore compiled files and other artifacts</div>
@@ -178,7 +178,7 @@ Project Structure</h1>
 <div class="line">    ├── plastic/          ← Plasticity test cases</div>
 <div class="line">    ├── transient/        ← Transient analysis test cases</div>
 <div class="line">    └── *.png             ← Result images from benchmark tests (ignored by git)</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md46"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md49"></a>
 Contributing</h1>
 <p>We welcome contributions to dynLattice! Please see <a class="el" href="md_CONTRIBUTING.html">CONTRIBUTING.md</a> for guidelines on:</p>
 <ul>
@@ -187,7 +187,7 @@ Contributing</h1>
 <li>Submitting pull requests</li>
 <li>Running tests</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md47"></a>
+<h1><a class="anchor" id="autotoc_md50"></a>
 Examples and Validation</h1>
 <p>The <code>tests/</code> directory contains numerous validation cases and benchmarks:</p>
 <ul>
@@ -197,8 +197,8 @@ Examples and Validation</h1>
 </li>
 <li><b>Transient Benchmarks</b>: Dynamic analysis validation</li>
 </ul>
-<p>Each benchmark includes input files (<code>.pro</code>, <code>.geo</code>) and reference results.</p>
-<h1><a class="anchor" id="autotoc_md48"></a>
+<p>Each benchmark includes input files (<code>.pro</code>, <code>.geo</code>), reference results, and a post-processing script that asserts numerical agreement.</p>
+<h1><a class="anchor" id="autotoc_md51"></a>
 License</h1>
 <p>This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. </p>
 </div></div><!-- contents -->

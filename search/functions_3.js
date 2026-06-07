@@ -4,5 +4,5 @@ var searchData=
   ['declarematerials_1',['declarematerials',['../__declareMaterials_8cpp.html#aabaffb2a8a227118311ee91d6e4b7e76',1,'declareMaterials():&#160;_declareMaterials.cpp'],['../__declareMaterials_8h.html#aabaffb2a8a227118311ee91d6e4b7e76',1,'declareMaterials():&#160;_declareMaterials.cpp']]],
   ['declaremodels_2',['declaremodels',['../__declareModels_8cpp.html#aed222682373b505e96db376f01afde21',1,'declareModels():&#160;_declareModels.cpp'],['../__declareModels_8h.html#aed222682373b505e96db376f01afde21',1,'declareModels():&#160;_declareModels.cpp']]],
   ['declaremodules_3',['declaremodules',['../__declareModules_8cpp.html#af57aef82e5284f8152bf13897f35160d',1,'declareModules():&#160;_declareModules.cpp'],['../__declareModules_8h.html#af57aef82e5284f8152bf13897f35160d',1,'declareModules():&#160;_declareModules.cpp']]],
-  ['dirichletmodel_4',['DirichletModel',['../classDirichletModel.html#abefcc0c67b1109bede61846d75e4e017',1,'DirichletModel']]]
+  ['dirichletmodel_4',['DirichletModel',['../classDirichletModel.html#a86584baf307e61215679c0de8be7e491',1,'DirichletModel']]]
 ];
