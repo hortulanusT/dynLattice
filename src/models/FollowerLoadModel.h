@@ -80,7 +80,7 @@ public:
 
       (const String &action,
        const Properties &params,
-       const Properties &globdat);
+       const Properties &globdat) override;
 
   /// @brief Factory method for creating new FollowerLoadModel instances
   /// @param name Model name

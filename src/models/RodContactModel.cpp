@@ -480,9 +480,6 @@ void RodContactModel::computeContacts_
   double uA = 0; // local coordinates
   double uB = 0;
 
-  idx_t iNodeA;
-  idx_t iNodeB;
-
   Vector f_contrib;
   Matrix k_contrib;
 
@@ -554,6 +551,8 @@ void RodContactModel::computeContacts_
     }
     else if (!shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
+      idx_t iNodeA;
+
       if (verbose_)
         jem::System::debug(myName_) << "NTS contact ";
       // LATER higher order elements
@@ -597,6 +596,8 @@ void RodContactModel::computeContacts_
     }
     else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
     {
+      idx_t iNodeB;
+
       if (verbose_)
         jem::System::debug(myName_) << "NTS contact ";
       dofsAB.resize(globalRank * 3);
@@ -767,9 +768,6 @@ void RodContactModel::computeBlacklist_
   double uA = 0; // local coordinates
   double uB = 0;
 
-  idx_t iNodeA;
-  idx_t iNodeB;
-
   Vector f_contrib(0);
   Matrix k_contrib(0, 0);
 
@@ -822,6 +820,8 @@ void RodContactModel::computeBlacklist_
     }
     else if (!shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
+      idx_t iNodeA;
+
       if (uA < -1.)
       {
         iNodeA = 0;
@@ -854,6 +854,8 @@ void RodContactModel::computeBlacklist_
     }
     else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
     {
+      idx_t iNodeB;
+      
       if (uB < -1.)
       {
         iNodeB = 0;

@@ -16,6 +16,8 @@ Material::Material(const String &name,
                    const Properties &props,
                    const Properties &globdat) : Super(name)
 {
+  (void)globdat; // unused
+
   verbosity_ = 1;
 
   Properties myProps = props.findProps(name);
@@ -34,11 +36,11 @@ String Material::getContext() const
   return NamedObject::makeContext("material", myName_);
 }
 
-void Material::configure(const Properties &props, const Properties &globdat)
+void Material::configure(const Properties &, const Properties &)
 {
 }
 
-void Material::getConfig(const Properties &props, const Properties &globdat) const
+void Material::getConfig(const Properties &, const Properties &) const
 {
 }
 

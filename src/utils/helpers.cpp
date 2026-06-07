@@ -102,7 +102,7 @@ namespace jive_helpers
     double tr_R = trace(R) <= 3. ? trace(R) : 3.; // trace of the matrix
 
     theta = acos((tr_R - 1.) / 2.);
-    rv = unskew((Matrix)(R - R.transpose()));
+    rv = unskew(Matrix(R - R.transpose()));
 
     if (jem::isTiny(theta))
       rv *= 1 / 2.; // infinitesimal rotation
@@ -256,7 +256,7 @@ namespace jive_helpers
 
   Vector unskew(const Matrix &mat)
   {
-#ifndef _NDEBUG
+#ifndef NDEBUG
     if (fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) > TINY * matrixNorm2(mat) && fabs(mat(0, 0) + mat(1, 1) + mat(2, 2)) > TINY)
       TEST_NO_CONTEXT(mat)
 #endif

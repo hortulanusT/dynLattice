@@ -4,6 +4,7 @@ type: software
 title: "dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials"
 version: "1.11"
 date-released: "2025"
+doi: "10.5281/zenodo.20474969"
 url: "https://github.com/hortulanusT/dynLattice"
 repository-code: "https://github.com/hortulanusT/dynLattice"
 license: MIT
@@ -110,10 +111,10 @@ references:
       - given-names: "L. J."
         family-names: "Sluys"
         orcid: "https://orcid.org/0000-0002-0880-1473"
-    journal: "engrXiv"
+    journal: "Materials Today Advances"
+    volume: 28
     year: 2025
-    doi: "10.31224/5224"
-    notes: "Preprint"
+    doi: "j.mtadv.2025.100656"
   - type: thesis
     title: "Are Auxetics Better for Protection? On the Behaviour of Architected Metamaterials under High-Rate Loading Conditions"
     authors:

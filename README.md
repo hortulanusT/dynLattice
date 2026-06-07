@@ -2,6 +2,7 @@
 
 [![JOSS status](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4/status.svg)](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20474969.svg)](https://doi.org/10.5281/zenodo.20474969)
 [![Docs: 1.11](https://img.shields.io/badge/Docs-1.11-00a6d6)](https://hortulanust.github.io/dynLattice/)
 
 dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the [Simo & Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) formulation with support for inelastic materials, explicit time marching, and contact mechanics.
@@ -53,7 +54,7 @@ Example input files can be found in the `tests/` directory.
 
 ## Documentation
 
-- **API Documentation**: Build with `jive make doc` and open `doc/html/index.html`
+- **API Documentation**: Build with `jive make docs` and open `doc/html/index.html`
 - **Installation Guide**: [doc/install.md](doc/install.md)
 - **Usage Instructions**: [doc/usage.md](doc/usage.md)
 - **Benchmarks**: [tests/Benchmarks.md](tests/Benchmarks.md)
@@ -63,7 +64,7 @@ Example input files can be found in the `tests/` directory.
 The code requires the JIVE finite element toolkit and its dependencies. All requirements are provided through the included Apptainer container (`jive.sif`). To build the documentation, use:
 
 ```bash
-jive make doc
+jive make docs
 ```
 
 The documentation is also available as [GitHub Pages](https://hortulanust.github.io/dynLattice/)
@@ -138,7 +139,7 @@ The `tests/` directory contains numerous validation cases and benchmarks:
 - **Plasticity Benchmarks**: Material nonlinearity validation  
 - **Transient Benchmarks**: Dynamic analysis validation
 
-Each benchmark includes input files (`.pro`, `.geo`) and reference results.
+Each benchmark includes input files (`.pro`, `.geo`), reference results, and a post-processing script that asserts numerical agreement.
 
 ## License
 

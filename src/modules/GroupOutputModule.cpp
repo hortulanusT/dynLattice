@@ -205,6 +205,10 @@ Ref<Module> GroupOutputModule::makeNew(const String &name,
                                        const Properties &props,
                                        const Properties &globdat)
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<GroupOutputModule>(name);
 }
 

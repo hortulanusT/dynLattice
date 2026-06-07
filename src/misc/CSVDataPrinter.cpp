@@ -61,7 +61,7 @@ void CSVDataPrinter::printTable
   {
     mode_ = TABLES;
     writePrefix_(out, globdat);
-    startTables_(out, label, table, globdat);
+    startTables_(out, table, globdat);
   }
   JEM_PRECHECK2(mode_ == TABLES, "Cannot Output Tables and Vectors in the same csv, try using seperate modules!");
 
@@ -69,7 +69,7 @@ void CSVDataPrinter::printTable
 
   double val;
   IdxVector rows(table.rowCount());
-  table.getRowItems()->getItemMap()->getItemIDs(rows, (IdxVector)jem::iarray(table.rowCount()));
+  table.getRowItems()->getItemMap()->getItemIDs(rows, IdxVector(jem::iarray(table.rowCount())));
 
   for (idx_t row : rows)
     for (idx_t column = 0; column < table.columnCount(); column++)
@@ -96,7 +96,7 @@ void CSVDataPrinter::printVector
   {
     mode_ = VECTORS;
     writePrefix_(out, globdat);
-    startVectors_(out, label, vec, dofs, globdat);
+    startVectors_(out, dofs, globdat);
   }
   JEM_PRECHECK2(mode_ == VECTORS, "Cannot Output Tables and Vectors in the same csv, try using seperate modules!");
 
@@ -122,12 +122,12 @@ void CSVDataPrinter::printSparseVector
   {
     mode_ = SPARSEVECTORS;
     writePrefix_(out, globdat);
-    startVectors_(out, label, vec, dofs, globdat, idofs);
+    startVectors_(out, dofs, globdat, idofs);
   }
   JEM_PRECHECK2(mode_ == SPARSEVECTORS, "Cannot Output Tables and Vectors in the same csv, try using seperate modules!");
 
   writePrefix_(out, globdat, label);
-  writeVector_(out, (Vector)vec[idofs]);
+  writeVector_(out, Vector(vec[idofs]));
 }
 
 //-----------------------------------------------------------------------
@@ -137,14 +137,15 @@ void CSVDataPrinter::printSparseVector
 void CSVDataPrinter::startTables_
 
     (Output &out,
-     const String &label,
      const Table &table,
      const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   double val;
   IdxVector rows(table.rowCount());
-  table.getRowItems()->getItemMap()->getItemIDs(rows, (IdxVector)jem::iarray(table.rowCount()));
+  table.getRowItems()->getItemMap()->getItemIDs(rows, IdxVector(jem::iarray(table.rowCount())));
 
   for (idx_t row : rows)
     for (idx_t column = 0; column < table.columnCount(); column++)
@@ -161,14 +162,14 @@ void CSVDataPrinter::startTables_
 void CSVDataPrinter::startVectors_
 
     (Output &out,
-     const String &label,
-     const Vector &vec,
      const DofSpace &dofs,
      const Properties &globdat,
      const IdxVector &idofs)
 
 {
-  IdxVector reportDofs = idofs.size() ? idofs : (IdxVector)jem::iarray(dofs.dofCount());
+  (void)globdat; // unused
+
+  IdxVector reportDofs = idofs.size() ? idofs : IdxVector(jem::iarray(dofs.dofCount()));
 
   for (idx_t dof : reportDofs)
     print(out, ",", dofs.getDofName(dof));

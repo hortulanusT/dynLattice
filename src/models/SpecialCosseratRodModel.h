@@ -19,6 +19,7 @@
 #include <jem/base/Array.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
+#include <jem/base/Float.h>
 #include <jem/numeric/Quaternion.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/algebra/matmul.h>

@@ -268,17 +268,21 @@ void JointContactModel::computeContacts_
 
   for (idx_t iContact = 0; iContact < nodesA.size(); iContact++)
   {
-    // get the positions of the nodes
-    allNodes_.getNodeCoords(posA, nodesA[iContact]);
-    allNodes_.getNodeCoords(posB, nodesB[iContact]);
-
-    // compute the contact
-    computeContact_(contactStiffness, contactForce, posA, posB);
-
     // get the dofs
     // LATER make the Dofs more flexible and general
     dofs_->getDofIndices(dofsA, nodesA[iContact], IdxVector({0, 1, 2}));
     dofs_->getDofIndices(dofsB, nodesB[iContact], IdxVector({0, 1, 2}));
+
+    // get the positions of the nodes
+    allNodes_.getNodeCoords(posA, nodesA[iContact]);
+    allNodes_.getNodeCoords(posB, nodesB[iContact]);
+
+    // add the displacements to get the current positions
+    posA += disp[dofsA];
+    posB += disp[dofsB];
+
+    // compute the contact
+    computeContact_(contactStiffness, contactForce, posA, posB);
 
     if (verbose_)
     {

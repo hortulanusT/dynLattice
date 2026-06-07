@@ -120,7 +120,7 @@ public:
 
   /// @brief Shutdown the module
   /// @param globdat Global data container
-  virtual void shutdown(const Properties &globdat);
+  virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Configure the module from properties
   /// @param props User-specified module properties
@@ -142,7 +142,7 @@ public:
   /// @param info Solver information
   /// @param globdat Global data container
   virtual void solve(const Properties &info,
-                     const Properties &globdat) = 0;
+                     const Properties &globdat) override = 0;
 
   /// @brief Cancel current solution attempt
   /// @param globdat Global data container

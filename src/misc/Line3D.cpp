@@ -148,7 +148,7 @@ void Line3D::getXi(const Quadix &Xi,
   Matrix grads(shapeFuncCount(), ipointCount());
   getShapeGradients(grads, w, c);
 
-  Matrix phiP = matmul((Matrix)(c + u), grads);
+  Matrix phiP = matmul(Matrix(c + u), grads);
 
   Xi = 0.;
 

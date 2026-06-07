@@ -254,25 +254,25 @@ protected:
 };
 
 /// @brief Default element-specific stress computation
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic)
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &, const idx_t &, const bool)
 {
   getStress(stress, strain);
 }
 
 /// @brief Default element-specific stiffness matrix
-Matrix Material::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
+Matrix Material::getMaterialStiff(const idx_t &, const idx_t &) const
 {
   return getMaterialStiff();
 }
 
 /// @brief Default element-specific mass matrix
-Matrix Material::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
+Matrix Material::getMaterialMass(const idx_t &, const idx_t &) const
 {
   return getMaterialMass();
 }
 
 /// @brief Default element-specific lumped mass
-Matrix Material::getLumpedMass(const double l, const idx_t &ielem) const
+Matrix Material::getLumpedMass(const double l, const idx_t &) const
 {
   return getLumpedMass(l);
 }

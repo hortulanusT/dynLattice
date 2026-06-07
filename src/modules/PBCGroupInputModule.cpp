@@ -153,18 +153,18 @@ Module::Status PBCGroupInputModule::init
   if (corners_)
   {
     XNodeSet xnodes = XNodeSet::get(globdat, getContext());
-    Vector coords(rank_);
+    Vector origin_coords(rank_);
+    Vector corner_coords(rank_);
     Vector extent(rank_);
-    myVars.getProps("ORIGIN").get(coords[0], "X");
-    myVars.getProps("ORIGIN").get(coords[1], "Y");
-    myVars.getProps("ORIGIN").get(coords[2], "Z");
+    myVars.getProps("ORIGIN").get(origin_coords[0], "X");
+    myVars.getProps("ORIGIN").get(origin_coords[1], "Y");
+    myVars.getProps("ORIGIN").get(origin_coords[2], "Z");
     myVars.getProps("SIZE").get(extent[0], "X");
     myVars.getProps("SIZE").get(extent[1], "Y");
     myVars.getProps("SIZE").get(extent[2], "Z");
     myVars.makeProps("all.extent").set("dx", extent[0]);
     myVars.makeProps("all.extent").set("dy", extent[1]);
     myVars.makeProps("all.extent").set("dz", extent[2]);
-    Vector corner_coords(rank_);
 
     for (idx_t i = 0; i <= rank_; i++)
     {
@@ -172,7 +172,7 @@ Module::Status PBCGroupInputModule::init
           NodeGroup::find(CORNERS[i], xnodes, globdat);
       if (corner_nodes.size() < 1)
       {
-        corner_coords = coords;
+        corner_coords = origin_coords;
         if (i != 0)
         {
           if (jem::isTiny(extent[i - 1]))
@@ -361,6 +361,10 @@ Ref<Module> PBCGroupInputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 //-----------------------------------------------------------------------

@@ -95,7 +95,7 @@ public:
 
       (const String &action,
        const Properties &params,
-       const Properties &globdat);
+       const Properties &globdat) override;
 
   /// @brief Calculate total kinetic energy of the lattice
   /// @param globdat Global data container

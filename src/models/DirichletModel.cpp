@@ -52,10 +52,9 @@ const char *DirichletModel::LOADED_PROP = "loaded";
 
 DirichletModel::DirichletModel
 
-    (const String &name, const Ref<Model> &child)
-    :
+    (const String &name) :
 
-      Super(name)
+                           Super(name)
 
 {
   dispScale_ = 0.;
@@ -108,14 +107,14 @@ bool DirichletModel::takeAction
       if (params.find(dispScale_, ActionParams::SCALE_FACTOR) || Globdat::getVariables(globdat).find(dispScale_, jive::model::RunvarNames::LOAD_SCALE))
         System::info() << " ...Applying displacment factor " << dispScale_
                        << endl;
-      else if (dispScale0_ != 1. && dispScale_ != 1.)
+      else if (jem::numeric::abs(dispScale0_ - 1.0) > jem::Float::EPSILON && jem::numeric::abs(dispScale_ - 1.0) > jem::Float::EPSILON)
       {
         System::warn() << "no displacement factor given, applying unit displacement" << endl;
         dispScale_ = 1.;
       }
     }
 
-    if (dispScale0_ != dispScale_)
+    if (jem::numeric::abs(dispScale0_ - dispScale_) > jem::Float::EPSILON)
       applyConstraints_(params, globdat);
 
     return true;
@@ -172,6 +171,8 @@ void DirichletModel::configure
     (const Properties &props, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   Properties myProps = props.findProps(myName_);
 
   double maxD = Float::MAX_VALUE;
@@ -242,6 +243,8 @@ void DirichletModel::getConfig
     (const Properties &conf, const Properties &globdat) const
 
 {
+  (void)globdat; // unused
+
   Properties myConf = conf.makeProps(myName_);
 
   switch (method_)
@@ -272,8 +275,8 @@ void DirichletModel::getConfig
 
 Ref<Model> DirichletModel::makeNew
 
-    (const String &name, const Properties &conf, const Properties &props,
-     const Properties &globdat)
+    (const String &name, const Properties &, const Properties &,
+     const Properties &)
 
 {
   return newInstance<Self>(name);
@@ -301,7 +304,7 @@ void DirichletModel::advance_
     (const Properties &globdat)
 
 {
-  if (method_ == RATE && jem::numeric::abs(dispIncr_) < Float::EPSILON)
+  if (method_ == RATE && jem::numeric::abs(dispIncr_) < jem::Float::EPSILON)
   {
     System::warn() << myName_ << " zero increment in RATE mode."
                    << " It seems the time increment has not been set."
@@ -310,7 +313,7 @@ void DirichletModel::advance_
 
   dispScale_ = dispScale0_ + dispIncr_;
 
-  if (dispIncr_ != 0.)
+  if (jem::numeric::abs(dispIncr_) > jem::Float::EPSILON)
     System::info() << " ...New displacement factor " << dispScale_
                    << endl;
   globdat.set(varName_, dispScale_);
@@ -325,6 +328,8 @@ void DirichletModel::applyConstraints_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)params; // unused
+
   idx_t nn;
   Assignable<NodeGroup> group;
   IdxVector inodes;
@@ -369,6 +374,8 @@ void DirichletModel::checkCommit_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   // terminate the computation if displacement exceeds maximum.
   // be careful with this!
 
@@ -390,6 +397,9 @@ void DirichletModel::commit_
     (const Properties &params, const Properties &globdat)
 
 {
+  (void)params;  // unused
+  (void)globdat; // unused
+
   // store converged boundary quantities
 
   dispScale0_ = dispScale_;

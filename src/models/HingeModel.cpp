@@ -228,6 +228,8 @@ void HingeModel::updForces_(const Vector &fint)
 
 bool HingeModel::evalPlastic_(const Vector &disp) // todo: transform to matrial coordinates
 {
+  (void)disp; // unused
+
   bool checked = true;
   double f_old, f_trial;
   double deltaFlow;

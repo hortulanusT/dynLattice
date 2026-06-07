@@ -119,11 +119,47 @@ jive make plastic-tests
 jive make transient-tests
 ```
 
+## CI Checks
+
+On every push and every pull request targeting `main`, two checks run in CI:
+
+**Numerical regression tests** — `make tests` runs validation benchmarks. For the single benchmarks, the output is compared against reference data stored in `tests\<...>\ref_data`.
+
+**Hygienic build** — New code in `src/` __should__ compile without warnings with additional flags enabled:
+
+| Flag | What it catches |
+| ---- | --------------- |
+| `-Wextra` | Additional warnings beyond `-Wall` |
+| `-Wpedantic` | Deviations from ISO specifications |
+| `-Wshadow` | Local variables that hide an outer-scope variable |
+| `-Wsuggest-override` | Virtual overrides missing the `override` keyword |
+| `-Wold-style-cast` | old, C-style casts (`(Type)expr`) |
+| `-Woverloaded-virtual` | Derived-class functions that accidentally hide a base virtual |
+| `-Wdouble-promotion` | Implicit `float` → `double` conversions |
+| `-Wundef` | Macros used in `#if` that are not defined |
+| `-Wnon-virtual-dtor` | Classes with virtual functions but a non-virtual destructor |
+| `-Winit-self` | Variables initialised with themselves (`int x = x`) |
+| `-Wconversion` | Implicit narrowing conversions |
+| `-Wsign-conversion` | Implicit signed/unsigned conversions |
+| `-Wfloat-equal` | Direct `==` / `!=` comparisons of floating-point values |
+
+You can run both checks locally:
+
+```bash
+# Run all regression tests
+jive make tests
+
+# Build with stricter warning flags
+jive make HYGIENE=1
+```
+
+CI fails if any benchmark exits non-zero, or if any warning originates from project sources (`src/`). Third-party or library headers are not checked.
+
 ### Documentation
 
 ```bash
 # Generate API documentation
-jive make doc
+jive make docs
 
 # Open documentation in browser
 firefox doc/html/index.html

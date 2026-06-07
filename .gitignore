@@ -5,3 +5,5 @@ doc/*/
 # results
 tests/*/test*/
 tests/*.png
+
+__pycache__

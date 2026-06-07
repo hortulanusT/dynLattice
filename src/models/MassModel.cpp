@@ -34,6 +34,8 @@ MassModel::MassModel
                                   Super(name)
 
 {
+  (void)globdat; // unused
+
   // Get the Properties associated with this model
   Properties myProps = props.findProps(myName_);
   Properties myConf = conf.makeProps(myName_);

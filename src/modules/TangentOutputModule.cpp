@@ -139,6 +139,7 @@ Module::Status TangentOutputModule::init(const Properties &conf,
 
 void TangentOutputModule::shutdown(const Properties &globdat)
 {
+  (void)globdat; // unused
 }
 
 Module::Status TangentOutputModule::run(const Properties &globdat)
@@ -308,8 +309,14 @@ void TangentOutputModule::storeTangentProps_(const Matrix &strains,
 
 void TangentOutputModule::condenseMatrix_(const Matrix &strains,
                                           const Matrix &stresses,
-                                          const Properties &globdat){
-    NOT_IMPLEMENTED}
+                                          const Properties &globdat)
+{
+  (void)strains;  // unused
+  (void)stresses; // unused
+  (void)globdat;  // unused
+
+  NOT_IMPLEMENTED
+}
 
 Ref<Module> TangentOutputModule::makeNew
 
@@ -317,6 +324,10 @@ Ref<Module> TangentOutputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return jem::newInstance<Self>(name);
 }
 

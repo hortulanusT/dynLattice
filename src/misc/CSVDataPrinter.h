@@ -121,22 +121,18 @@ private:
   /**
    * @brief Initialize table output format and write headers
    * @param[in] out Output stream for CSV data
-   * @param[in] label Data label for identification
    * @param[in] table Table containing data structure
    * @param[in] globdat Global data properties with simulation context
    */
   void startTables_
 
       (Output &out,
-       const String &label,
        const Table &table,
        const Properties &globdat);
 
   /**
    * @brief Initialize vector output format and write headers
    * @param[in] out Output stream for CSV data
-   * @param[in] label Data label for identification
-   * @param[in] vec Vector containing data to print
    * @param[in] dofs Degree of freedom space for context
    * @param[in] globdat Global data properties with simulation context
    * @param[in] idofs DOF indices for sparse vectors (optional)
@@ -144,8 +140,6 @@ private:
   void startVectors_
 
       (Output &out,
-       const String &label,
-       const Vector &vec,
        const DofSpace &dofs,
        const Properties &globdat,
        const IdxVector &idofs = {});

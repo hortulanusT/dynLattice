@@ -51,16 +51,16 @@ public:
   /// @param globdat Global data container
   /// @return Module status
   virtual Status init(const Properties &conf, const Properties &props,
-                      const Properties &globdat);
+                      const Properties &globdat) override;
 
   /// @brief Run PBC output extraction
   /// @param globdat Global data container
   /// @return Module status
-  virtual Status run(const Properties &globdat);
+  virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown and finalize output
   /// @param globdat Global data container
-  virtual void shutdown(const Properties &globdat);
+  virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new instances
   /// @param name Module name

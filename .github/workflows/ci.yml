@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  fetch-container:
+    runs-on: ubuntu-latest
+    name: Fetch container
+    concurrency:
+      group: fetch-container
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+      - id: jive-hash
+        run: echo "hash=$(git rev-parse HEAD:jive.sif)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        id: cache-jive
+        with:
+          path: jive.sif
+          key: jive-sif-${{ steps.jive-hash.outputs.hash }}
+      - if: steps.cache-jive.outputs.cache-hit != 'true'
+        run: wget -O jive.sif "https://github.com/hortulanusT/dynLattice/raw/${{ github.sha }}/jive.sif"
+
+  hygienic-build:
+    needs: fetch-container
+    runs-on: ubuntu-latest
+    name: Hygienic build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Apptainer
+        uses: eWaterCycle/setup-apptainer@v2
+        with:
+          apptainer-version: 1.4.2
+      - id: jive-hash
+        run: echo "hash=$(git rev-parse HEAD:jive.sif)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: jive.sif
+          key: jive-sif-${{ steps.jive-hash.outputs.hash }}
+      - name: Build hygienic
+        run: |
+          apptainer exec jive.sif make HYGIENE=1 > hygienic_build.log 2>&1
+          grep "warning:" hygienic_build.log | grep "^src/" | sort -u > hygienic_warnings.log || true
+
+          if [[ -s hygienic_warnings.log ]]; then
+            echo "::error::Hygienic build produced project warnings"
+            echo "Warnings found:"
+            sed -n 's/.*\[-W\([^]]*\)\].*/\1/p' hygienic_warnings.log | sort | uniq -c | sort -nr
+            exit 1
+          fi
+
+  tests:
+    needs: fetch-container
+    runs-on: ubuntu-latest
+    name: Tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Apptainer
+        uses: eWaterCycle/setup-apptainer@v2
+        with:
+          apptainer-version: 1.4.2
+      - id: jive-hash
+        run: echo "hash=$(git rev-parse HEAD:jive.sif)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: jive.sif
+          key: jive-sif-${{ steps.jive-hash.outputs.hash }}
+      - name: Run tests
+        run: apptainer exec jive.sif make tests

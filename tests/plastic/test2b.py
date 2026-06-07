@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 
 # TEST 2b from Smirit et al. (axial stretch kinematic hardening)
+import sys
 import numpy as np
+from pathlib import Path
 from termcolor import colored
 from matplotlib import pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import envelope_error
+
+TOL = 0.05
 
 test_passed = False
 
@@ -26,16 +33,20 @@ try:
   plt.ylim(-1.5, 1.5)
 
   plt.title("b) kinematic hardening")
+
+  sim_force = sim_resp[:, 1] / 10.0
+  err = envelope_error(sim_force, ref_data[:, 1])
+  test_passed = err <= TOL
+
 except Exception as e:
   print(e)
-else:
-  test_passed = True
 
 if test_passed:
-  print(colored("PLASTIC TEST 2b RUN THROUGH", "green"))
+  print(colored("PLASTIC TEST 2b PASSED", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/plastic/test2b/result.pdf")
   plt.savefig("tests/plastic2b_result.png")
 else:
   print(colored("PLASTIC TEST 2b FAILED", "red", attrs=["bold"]))
+  sys.exit(1)

@@ -227,6 +227,7 @@ void ParaViewModule::shutdown
 
     (const Properties &globdat)
 {
+  (void)globdat; // unused
 }
 
 //-----------------------------------------------------------------------
@@ -551,7 +552,6 @@ void ParaViewModule::writePiece_
       Ref<XTable> datumTable =
           newInstance<SparseTable>(info.nodeData[iPtDatum], pointSet);
       Vector weights(datumTable->rowCount());
-      Properties params("actionParams");
 
       weights = 0.;
 
@@ -640,7 +640,7 @@ void ParaViewModule::writeDataArray_
   {
     for (idx_t iColumn = 0; iColumn < data.shape()[1]; iColumn++)
     {
-      *file << (float)data(iRow, iColumn)
+      *file << static_cast<float>(data(iRow, iColumn))
             << SPACING; // float since ParaView can only read single
                         // precision floats
     }
@@ -687,6 +687,10 @@ Ref<Module> ParaViewModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<ParaViewModule>(name);
 }
 

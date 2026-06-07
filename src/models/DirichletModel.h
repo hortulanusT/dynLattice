@@ -73,26 +73,25 @@ public:
 
   JEM_DECLARE_CLASS(DirichletModel, Model);
 
-  /// @brief Constructor with optional child model
-  /// @param name Model name (default: "arclen")
-  /// @param child Optional child model reference
+  /// @brief Constructor
+  /// @param name Model name (default: "dirichlet")
   explicit DirichletModel
 
-      (const String &name = "arclen", const Ref<Model> &child = NIL);
+      (const String &name = "dirichlet");
 
   /// @brief Configure Dirichlet boundary conditions from properties
   /// @param props User-specified configuration properties
   /// @param globdat Global data container
   virtual void configure
 
-      (const Properties &props, const Properties &globdat);
+      (const Properties &props, const Properties &globdat) override;
 
   /// @brief Get current configuration
   /// @param conf Actually used configuration properties (output)
   /// @param globdat Global data container
   virtual void getConfig
 
-      (const Properties &conf, const Properties &globdat) const;
+      (const Properties &conf, const Properties &globdat) const override;
 
   /// @brief Handle model actions (INIT, GET_CONSTRAINTS, ADVANCE, etc.)
   /// @param action Action name to execute
@@ -102,7 +101,7 @@ public:
   virtual bool takeAction
 
       (const String &action, const Properties &params,
-       const Properties &globdat);
+       const Properties &globdat) override;
 
   /// @brief Factory method for creating new DirichletModel instances
   /// @param name Model name
@@ -203,5 +202,5 @@ private:
   double initDisp_;     ///< Initial displacement value
   Properties lbcProps_; ///< Boundary condition properties
   String varName_;      ///< Variable name for load factor
-  /// @}
+                        /// @}
 };

@@ -79,7 +79,7 @@ public:
   /// iteration limit for lenient convergence behavior
   virtual Status init(const Properties &conf,
                       const Properties &props,
-                      const Properties &globdat);
+                      const Properties &globdat) override;
 
   /// @brief Run the lenient nonlinear solver
   /// @param globdat Global data container
@@ -87,21 +87,21 @@ public:
   /// @details Executes the nonlinear solution process with lenient convergence
   /// criteria. If convergence fails after maxIter_ iterations, accepts the
   /// current solution and continues
-  virtual Status run(const Properties &globdat);
+  virtual Status run(const Properties &globdat) override;
 
   /// @brief Configure module parameters
   /// @param props Configuration properties
   /// @param globdat Global data container
   /// @details Delegates to base class configuration
   virtual void configure(const Properties &props,
-                         const Properties &globdat);
+                         const Properties &globdat) override;
 
   /// @brief Get current configuration
   /// @param conf Configuration properties (output)
   /// @param globdat Global data container
   /// @details Delegates to base class configuration retrieval
   virtual void getConfig(const Properties &conf,
-                         const Properties &globdat) const;
+                         const Properties &globdat) const override;
 
 protected:
   /// @brief Protected destructor

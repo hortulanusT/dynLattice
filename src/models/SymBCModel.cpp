@@ -67,6 +67,8 @@ bool SymBCModel::takeAction
     (const String &action, const Properties &params,
      const Properties &globdat)
 {
+  (void)params; // unused
+
   using jive::model::ActionParams;
   using jive::model::Actions;
 

@@ -87,14 +87,14 @@ public:
   /// @details Configures node and element groups, DOF specifications, and
   /// translates DOF names to indices. Performs initial data extraction.
   virtual Status init(const Properties &conf, const Properties &props,
-                      const Properties &globdat);
+                      const Properties &globdat) override;
 
   /// @brief Extract and store group-based output data
   /// @param globdat Global data container
   /// @return Module status
   /// @details Extracts state variables from all configured node and element groups
   /// and stores aggregated results in the global variables database
-  virtual Status run(const Properties &globdat);
+  virtual Status run(const Properties &globdat) override;
 
   /// @brief Factory method for creating new GroupOutputModule instances
   /// @param name Module name

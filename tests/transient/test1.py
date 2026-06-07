@@ -1,11 +1,18 @@
 #!/usr/bin/python3
 
 # TEST 1 (Ex 5.1 from dynamic Simo Paper)
+import sys
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from termcolor import colored
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import interp_on_reference, relative_L2
+
+TOL = 0.05
 
 test_passed = False
 
@@ -37,10 +44,15 @@ try:
   dev_rz = np.rad2deg(psi - rz)
   dev_u1 = (delta_vect*out_vect).sum(axis=1)
   dev_u2 = (delta_vect*tan_vect).sum(axis=1)
-except IOError:
-  pass
-else:
-  test_passed = True
+
+  err_psi = relative_L2(interp_on_reference(t, psi, BC_ref[:, 0]), BC_ref[:, 1])
+  err_rz  = relative_L2(interp_on_reference(t, dev_rz,  angle_ref[:, 0]), angle_ref[:, 1])
+  err_u1  = relative_L2(interp_on_reference(t, dev_u1,  u1_ref[:, 0]),    u1_ref[:, 1])
+  err_u2  = relative_L2(interp_on_reference(t, dev_u2,  u2_ref[:, 0]),    u2_ref[:, 1])
+  test_passed= all(e <= TOL for e in [err_psi, err_rz, err_u1, err_u2])
+
+except Exception as e:
+  print(e)
 
 if test_passed:
   with PdfPages("tests/transient/test1/result.pdf") as pdf:
@@ -91,6 +103,7 @@ if test_passed:
     plt.savefig("tests/transient1_resultC.png")
     plt.close()
 
-  print(colored("TRANSIENT TEST 1 RUN THROUGH", "green"))
+  print(colored("TRANSIENT TEST 1 PASSED", "green"))
 else:
   print(colored("TRANSIENT TEST 1 FAILED", "red", attrs=["bold"]))
+  sys.exit(1)

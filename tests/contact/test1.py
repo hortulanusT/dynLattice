@@ -2,10 +2,13 @@
 
 # two beams crossed in an X shape
 
+import sys
 import os
 import numpy as np
 from termcolor import colored
 from matplotlib import pyplot as plt
+
+TOL = 0.05
 
 test_passed = False
 
@@ -25,16 +28,24 @@ try:
   plt.ylabel("contact force (N)")
 
   plt.legend()
+
+  # Settled-tail comparison: (68.4 N, Zavarise et al. 2000, Fig. 7)
+  ref_force = ref_disp[-1]
+  sim_mag = np.sqrt((sim_resp[:, 0]**2 + sim_resp[:, 1]**2 + sim_resp[:, 2]**2))
+  settled = sim_mag[int(0.95 * len(sim_mag)):]
+  sim_final = float(np.mean(settled))
+  err = abs(sim_final - ref_force) / ref_force
+  test_passed = err <= TOL
+
 except Exception as e:
   print(e)
-else:
-  test_passed = True
 
 if test_passed:
-  print(colored("CONTACT TEST 1 RUN THROUGH", "green"))
+  print(colored("CONTACT TEST 1 PASSED", "green"))
 
   plt.tight_layout()
   plt.savefig("tests/contact/test1/result.pdf")
   plt.savefig("tests/contact1_result.png")
 else:
   print(colored("CONTACT TEST 1 FAILED", "red", attrs=["bold"]))
+  sys.exit(1)

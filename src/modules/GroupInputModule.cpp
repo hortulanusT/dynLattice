@@ -135,6 +135,10 @@ Ref<Module> GroupInputModule::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 
@@ -210,7 +214,6 @@ void GroupInputModule::NGroup_::configure
   rank_ = 3;
   all_ = false;
 
-  String xtypename;
   Vector bounds;
 
   // get properties
@@ -663,7 +666,6 @@ void GroupInputModule::EGroup_::configure
   rank_ = 3;
   all_ = false;
 
-  String xtypename;
   Vector bounds;
 
   // get properties

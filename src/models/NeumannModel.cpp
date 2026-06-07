@@ -120,7 +120,7 @@ bool NeumannModel::takeAction
     if (extScale_)
     {
       params.get(scale, ActionParams::SCALE_FACTOR);
-      if (scale != 0.)
+      if (jem::numeric::abs(scale) > jem::Float::EPSILON)
       {
         System::info(myName_) << " ...Applying load with factor " << scale << endl;
         getExtVector_(f, globdat, scale);
@@ -167,6 +167,8 @@ void NeumannModel::configure
      const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   Properties myProps = props.findProps(myName_);
 
   double maxD = Float::MAX_VALUE;
@@ -215,6 +217,8 @@ void NeumannModel::getConfig
      const Properties &globdat) const
 
 {
+  (void)globdat; // unused
+
   Properties myConf = conf.makeProps(myName_);
 
   myConf.set(REDUCTION_PROP, reduction_);
@@ -240,6 +244,10 @@ Ref<Model> NeumannModel::makeNew
      const Properties &globdat)
 
 {
+  (void)conf;    // unused
+  (void)props;   // unused
+  (void)globdat; // unused
+
   return newInstance<Self>(name);
 }
 
@@ -355,7 +363,7 @@ void NeumannModel::advance_
   if (accepted)
   {
     loadScale_ = loadScale0_ + loadIncr_;
-    if (loadIncr_ != 0.)
+    if (jem::numeric::abs(loadIncr_) > jem::Float::EPSILON)
       System::info() << " ...New load factor " << loadScale_ << endl;
     globdat.set(varName_, loadScale_);
   }
@@ -371,6 +379,8 @@ void NeumannModel::commit_
      const Properties &globdat)
 
 {
+  (void)params;  // unused
+  (void)globdat; // unused
   // store converged boundary quantities
 
   loadScale0_ = loadScale_;
@@ -386,6 +396,8 @@ void NeumannModel::reduceStep_
      const Properties &globdat)
 
 {
+  (void)params;  // unused
+  (void)globdat; // unused
   // reduce the load increment and use the new increment
   // to update the prescribed value for this time step
 
@@ -404,6 +416,9 @@ void NeumannModel::increaseStep_
      const Properties &globdat)
 
 {
+  (void)params;  // unused
+  (void)globdat; // unused
+
   loadIncr_ /= reduction_;
 
   loadScale_ = loadScale0_ + loadIncr_;

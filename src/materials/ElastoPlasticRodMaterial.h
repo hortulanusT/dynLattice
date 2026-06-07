@@ -61,6 +61,10 @@ public:
   /// @brief Get hardening values from hardening parameters
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
+  /// @brief Elastic stress computation based on elastic rod material model
+  /// @throws jem::Exception as this method should not be called directly for elasto-plastic materials
+  virtual void getStress(const Vector &stress, const Vector &strain) override;
+
   /// @brief Plastic stress computation using convex cutting plane algorithm
   /// @details Implements iterative return mapping with yield condition evaluation
   /// @param stress Calculated stress vector (output)
@@ -97,9 +101,8 @@ protected:
 
   /// @name Function argument organization
   /// @{
-  idx_t argCount_;        ///< Total arguments to yield condition
-  jem::Slice stressPart_; ///< Stress portion of arguments
-  jem::Slice hardPart_;   ///< Hardening portion of arguments
+  idx_t dofCount_; ///< Degrees of freedom in stress/strain vectors
+  idx_t argCount_; ///< Total arguments to yield condition
   /// @}
 
   /// @name Hardening and plastic state

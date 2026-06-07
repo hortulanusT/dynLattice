@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # TEST 1 from Simo/Vu-Quoc
+import sys
 import numpy as np
 from termcolor import colored
 from matplotlib import pyplot as plt
@@ -35,8 +36,8 @@ try:
 
   test_passed = np.allclose(
       sim_disp, ideal_disp) and np.allclose(sim_resp, ideal_resp)
-except:
-  pass
+except Exception as e:
+  print(e)
 
 if test_passed:
   print(colored("STATIC TEST 1 PASSED", "green"))
@@ -46,3 +47,4 @@ if test_passed:
   plt.savefig("tests/beam1_result.png")
 else:
   print(colored("STATIC TEST 1 FAILED", "red", attrs=["bold"]))
+  sys.exit(1)

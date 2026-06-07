@@ -201,6 +201,8 @@ Module::Status ExplicitModule::init
 
 void ExplicitModule::shutdown(const Properties &globdat)
 {
+  (void)globdat; // unused
+
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -216,6 +218,8 @@ void ExplicitModule::configure
     (const Properties &props, const Properties &globdat)
 
 {
+  (void)globdat; // unused
+
   using jive::implict::PropNames;
   Properties myProps = props.findProps(myName_);
 
@@ -238,6 +242,8 @@ void ExplicitModule::getConfig
     (const Properties &conf, const Properties &globdat) const
 
 {
+  (void)globdat; // unused
+
   using jive::implict::PropNames;
   Properties myConf = conf.makeProps(myName_);
 
@@ -290,14 +296,14 @@ bool ExplicitModule::commit(const Properties &globdat)
 
   SolverInfo::get(globdat).get(error, SolverInfo::RESIDUAL);
 
-  double dtime_opt = dtime_ * pow(prec_ / error, 1. / ((double)order_ + 1.));
+  double dtime_opt = dtime_ * pow(prec_ / error, 1. / (static_cast<double>(order_) + 1.));
 
   accept = true;
   if (model_->takeAction(Actions::CHECK_COMMIT, params, globdat))
   {
     params.find(accept, ActionParams::ACCEPT);
   }
-  accept = accept && (error <= prec_ || dtime_ == minDtime_);
+  accept = accept && (error <= prec_ || dtime_ <= minDtime_);
 
   if (accept)
   {
@@ -317,9 +323,9 @@ bool ExplicitModule::commit(const Properties &globdat)
   }
 
   jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
-  if (dtime_ == maxDtime_ && dtime_ > minDtime_)
+  if (dtime_ >= maxDtime_ && dtime_ > minDtime_)
     jem::System::info(myName_) << " !!! Largest allowed time step !!!\n";
-  if (dtime_ == minDtime_ && dtime_ < maxDtime_)
+  if (dtime_ <= minDtime_ && dtime_ < maxDtime_)
     jem::System::info(myName_) << " !!! Smallest allowed time step !!!\n";
   Globdat::getVariables(globdat).set(jive::implict::PropNames::DELTA_TIME,
                                      dtime_);
@@ -335,6 +341,8 @@ void ExplicitModule::getAcce(const Vector &a,
                              const Vector &fres,
                              const Properties &globdat)
 {
+  (void)globdat; // unused
+
   // Compute acceleration
   if (mode_ == CONSISTENT)
   {
@@ -489,7 +497,7 @@ ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (!jem::testany(rdofs_ == i))
       y_diff[i] /= lenScale_;
-  return norm2(y_diff) / sqrt((double)y_diff.size());
+  return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }
 
 // //-----------------------------------------------------------------------

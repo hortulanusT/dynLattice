@@ -47,7 +47,7 @@ public:
   /// 1. Predict velocities and displacements using Adams-Bashforth
   /// 2. Correct using Adams-Moulton with updated forces
   /// 3. Evaluate solution quality for step size adaptation
-  virtual void solve(const Properties &info, const Properties &globdat);
+  virtual void solve(const Properties &info, const Properties &globdat) override;
 
   /// @brief Factory method for creating new MilneDeviceModule instances
   /// @param name Module name
