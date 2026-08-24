@@ -4,6 +4,7 @@ bin/*
 doc/*/
 # results
 tests/*/test*/
-tests/*.png
+tests/**/*.png
+tests/**/*.gif
 
 __pycache__

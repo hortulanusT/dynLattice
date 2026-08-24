@@ -1,8 +1,20 @@
 \page usage Usage
 
+# Example 1: spin-up of a flexible beam
 As an example use-case, the transient \ref transient1 is laid out and explained.
 
-# Setup
+## Explanation
+Test 1 reproduces Example 5.1 from [Simo, Vu-Quoc (1988)](https://doi.org/10.1016/0045-7825(88)90073-4): a straight, initially unstressed flexible rod, clamped at one end to a rigid hub, is spun up by a prescribed base rotation. The rod is free at its other end. This serves as a first tutorial case: it involves only a single rod with a minimal (elastic) model, yet it already exercises the full dynamic solver, the rod's geometrically-exact (Cosserat) kinematics, and different boundary-conditions. The rod itself is 10m long, unloaded otherwise and starts out perfectly straight, as shown below.
+
+![Test 1 Geometry](test1_schematic.png)
+
+The fixed end is only fixed in translation and has a rotation about the out-of-plane axis (`rz`) prescribed to follow \f$\psi(t) = 6/15 \cdot (1-\cos(2\pi t/15))\f$ for \f$t<15\f$s and held constant afterwards (see `model.model.disp.scaleFunc` below) — a single sinusoidal half-wave ramp up to a constant angular velocity. Physically, this drives a spin-up phase (0s-15s) in which the rod elongates under the growing centrifugal load, followed by a free-flutter phase (15s-30s) in which the tip continues to oscillate once the prescribed rotation has plateaued. The results obtained with the current implementation agree well with the reference solution from literature; see \ref transientbenchmarks for the quantitative comparison.
+
+The settings below produce a series of ParaView (`.vtu`/`.pvd`) files that can be opened directly in ParaView, or rendered into a video like the one below:
+
+![Test 1 Animation](test1_animate.gif)
+
+## Setup
 As a first step, we need to compile the program using `jive make`. This will create the executable `bin/dynLattice` we can use to run the simulation.
 
 The next step is to create the needed files, starting with the geometry file, in this case `tests/transient/test1.geo`. The `GMSH` syntax can be found on their [documentation](https://gmsh.info/doc/texinfo/gmsh.html#Gmsh-scripting-language).
