@@ -7,10 +7,10 @@
 1. Install `apptainer` following the [installation instructions](https://apptainer.org/docs/admin/main/installation.html).
 
 # 2. Get the repository and build the documentation
-1. Clone the repository
+1. Clone the repository **or** download the _Source code_ for the [latest release](https://github.com/hortulanusT/dynLattice/releases/latest)
 2. Download the  `jive.sif` for the [latest release](https://github.com/hortulanusT/dynLattice/releases/latest) and place it in the folder with the repository
 3. Define an appropriate alias for running inside the apptainer `alias jive="apptainer exec $(pwd)/jive.sif"`
-4. Build the documentation via `jive make docs` (this will execute the test cases as well)
+4. Build the documentation via `jive make docs` (this will execute the test cases as well, but not the second example from \ref usage)
 
 # 3. Extend the code or use it for new cases
 1. You can build the code via `jive make` and then execute any test via `jive bin/dynLattice path/to/inputs.pro`
