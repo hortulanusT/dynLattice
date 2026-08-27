@@ -32,9 +32,9 @@ The `input.pro` file defines the input modules that read the parameterized geome
 | `Input.input.onelab.LengthRatio="0.5883253012048192";` | set the ratio between the two bar lengths of the re-entrant unit cell |
 | `Input.input.onelab.Angle="55";` | set the re-entrant angle between the two bars to 55° |
 | `Input.input.onelab.Thickness="0.00075";` | set the (unused by the .geo file directly, but referenced for context) wall thickness to 0.75mm |
-| `Input.input.onelab.RepX="6.0";` | tile the unit cell 6 times in the horizontal (x) direction |
-| `Input.input.onelab.RepY="4";` | tile the unit cell 4 times in the vertical (y) direction |
-| `Input.input.onelab.Scale="1.0";` | apply no additional overall scaling |
+| `Input.input.onelab.RepX="3";` | tile the unit cell 6 times in the horizontal (x) direction |
+| `Input.input.onelab.RepY="2";` | tile the unit cell 4 times in the vertical (y) direction |
+| `Input.input.onelab.Scale="4.0";` | apply a scaling factor of 4 to recover the original size from the paper |
 | `Input.input.file="tests/docs/re-entrant.geo";` | set the geometry file path |
 | **Node Group Definition** | |
 | `Input.nodeInput.type = "PBCGroupInput";` | use PBCGroupInputModule instead of the plain GroupInputModule from \ref prop1, which additionally derives the boundary node groups (`xmin`, `xmax`, `ymin`, `ymax`, and the corner nodes) needed to apply periodic boundary conditions |
@@ -104,7 +104,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.plate_springs.type = 'springMass";` | SpringMassModel, used to model the compliant support as a small elastic rod rather than a rigid boundary |
 | `model.model.plate_springs.boundary = "ymin";` | attach the spring to the bottom ("ymin") edge |
 | `model.model.plate_springs.springs = [ "plate1"];` | define a single named spring, "plate1" |
-| `model.model.plate_springs.plate1.extentVector = [ 0., -0.005, 0.];` | the spring rod extends 5mm further downward from the lattice's base |
+| `model.model.plate_springs.plate1.extentVector = [ 0., -0.01, 0.];` | the spring rod extends 10mm further downward from the lattice's base |
 | `model.model.plate_springs.plate1.nElem = 4;` | discretize the spring rod into 4 elements |
 | `model.model.plate_springs.plate1.pElem = 1;` | use linear (order 1) elements for the spring rod |
 | `model.model.plate_springs.plate1.type	= 'specialCosseratRod";` | the spring itself is again a SpecialCosseratRodModel |
