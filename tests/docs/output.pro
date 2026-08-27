@@ -27,4 +27,5 @@ Output.paraview.plate1 = Output.paraview.beams;
 Output.paraview.plate1.el_data = [ "mat_strain", "mat_stress" ];
 Output.paraview.plate1.node_data = ["fres"];
 Output.paraview.output_format = "$(CASE_NAME)/vis%i";
-Output.paraview.sampleWhen = "(i-1)%100<1";
+Output.paraview.sampleWhen="(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo > 0.01) || (i<=1)";
+Output.paraview.sampleInfo="abs(ymax.disp.dy/SIZE.Y)";

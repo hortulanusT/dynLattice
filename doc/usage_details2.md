@@ -73,7 +73,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.lattice.contact.penaltySTS=56250.0;` | segment-to-segment contact penalty stiffness |
 | `model.model.lattice.contact.penaltyNTS=562500.0;` | node-to-segment contact penalty stiffness |
 | `model.model.lattice.jointContact.type = "JointContact";` | additionally enable contact between the rod joints themselves |
-| `model.model.lattice.jointContact.radius=0.000375;` | joint contact radius |
+| `model.model.lattice.jointContact.radius=0.0005;` | joint contact radius |
 | `model.model.lattice.jointContact.penalty=5625000.0;` | joint contact penalty stiffness |
 | **Loading and Support** | |
 | `model.model.load.type = "Multi";` | bundle the impact and support related sub-models together |
@@ -144,4 +144,5 @@ The `output.pro` file defines the output modules used to record the impact respo
 | `Output.paraview.plate1.el_data = [ "mat_strain", "mat_stress" ];` | ... except for element data, since the spring is purely elastic (no plastic strain) |
 | `Output.paraview.plate1.node_data = ["fres"];` | ... and node data, since it carries no contact or lumped mass |
 | `Output.paraview.output_format = "$(CASE_NAME)/vis%i";` | output file naming pattern |
-| `Output.paraview.sampleWhen = "(i-1)%100<1";` | write a ParaView frame every 100 time steps |
+| `Output.paraview.sampleWhen = "(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo > 0.002) OR (i<=1)";` | write a ParaView frame every 1% strain |
+| `Output.paraview.sampleInfo="abs(ymax.disp.dy/SIZE.Y)";` | define strain measure for Output |
