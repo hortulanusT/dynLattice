@@ -8,3 +8,7 @@ tests/**/*.png
 tests/**/*.gif
 
 __pycache__
+
+# keep the example 2 graphics (runs for ~1h otherwise)
+!tests/docs/test2_schematic.png
+!tests/docs/test2_animate.gif
