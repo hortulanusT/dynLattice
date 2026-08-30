@@ -20,10 +20,10 @@ docs-clean-only:
 	@rm -rf doc/html
 
 # Documentation assets
-tests/transient/test1_schematic.png: tests tests/transient/test1_schematic.py
+tests/transient/test1_schematic.png: tests/transient/test1_schematic.py tests
 	@$<
 
-tests/transient/test1_animate.gif: tests tests/transient/test1_animate.py
+tests/transient/test1_animate.gif: tests/transient/test1_animate.py tests
 	@$<
 
 # test2 is a docs-only example (not part of `tests`), so it's run here instead
