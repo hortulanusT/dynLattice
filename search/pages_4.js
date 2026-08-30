@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['of_20conduct_0',['Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]]
+  ['dynlattice_0',['dynlattice',['../md_CONTRIBUTING.html',1,'Contributing to dynLattice'],['../md_README.html',1,'dynLattice'],['../index.html',1,'dynLattice']]]
 ];

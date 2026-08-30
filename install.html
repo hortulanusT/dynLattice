@@ -91,10 +91,29 @@ Requirements</h1>
 <h1><a class="anchor" id="autotoc_md21"></a>
 1. Install &lt;em&gt;apptainer&lt;/em&gt;</h1>
 <ol type="1">
-<li>Install <code>apptainer</code> following the <a href="https://apptainer.org/get-started/">quick start guide</a>.</li>
+<li>Install <code>apptainer</code> following the <a href="https://apptainer.org/docs/admin/main/installation.html">installation instructions</a>.</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md22"></a>
-(Optional) build the *.sif* file yourself</h1>
+2. Get the repository and build the documentation</h1>
+<ol type="1">
+<li>Clone the repository <b>or</b> download the <em>Source code</em> for the <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a></li>
+<li>Download the <code>jive.sif</code> for the <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a> and place it in the folder with the repository</li>
+<li>Define an appropriate alias for running inside the apptainer <code>alias jive="apptainer exec $(pwd)/jive.sif"</code></li>
+<li>Build the documentation via <code>jive make docs</code> (this will execute the test cases as well, but not the second example from <a class="el" href="usage.html">Usage</a>)</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md23"></a>
+3. Extend the code or use it for new cases</h1>
+<ol type="1">
+<li>You can build the code via <code>jive make</code> and then execute any test via <code>jive bin/dynLattice path/to/inputs.pro</code></li>
+<li>Once you are done with your setup and sure everything works, build the optimized version via <code>jive make opt</code> and then run <code>bin/dynLattice-opt path/to/inputs.pro</code></li>
+<li>If you want to debug your own additions using the GNU Project debugger build <code>jive make debug</code> and then run <code>jive gdb bin/dynLattice-dbg</code><ul>
+<li>proceed with <code>(gdb) run path/to/inputs.pro</code></li>
+<li>use <code>(gdb) call dprint(&amp;variable)</code> to get the variable printed if it is a Vector or a Matrix</li>
+</ul>
+</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md24"></a>
+(Optional, instead of 2.2 above) build the *.sif* file yourself</h1>
 <p>A <code>.def</code> file is provided to build the container yourself.</p><ol type="1">
 <li>Put all the required archives into a directory called <code>zips</code>.<ul>
 <li><a href="https://dynaflow.com/software/jive/jive-downloads/">JEM/JIVE 3.0</a></li>
@@ -103,25 +122,7 @@ Requirements</h1>
 <li><a href="https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/src/hdf5-1.12.2.tar.gz">HDF5 1.12.2</a></li>
 </ul>
 </li>
-<li>Run the command <code>sudo apptainer build jive.sif jive.def</code>.</li>
-</ol>
-<h1><a class="anchor" id="autotoc_md23"></a>
-2. Get the repository and build the documentation</h1>
-<ol type="1">
-<li>Get <a href="https://github.com/hortulanusT/dynLattice/releases/latest">latest release</a> of the repository.</li>
-<li>Define an appropriate alias for running inside the apptainer <code>alias jive="apptainer exec $(pwd)/jive.sif"</code></li>
-<li>Build the documentation via <code>jive make docs</code> (this will execute the test cases as well)</li>
-</ol>
-<h1><a class="anchor" id="autotoc_md24"></a>
-3. Using the code</h1>
-<ol type="1">
-<li>You can build the code via <code>jive make</code> and then execute any test via <code>jive bin/dynLattice path/to/inputs.pro</code></li>
-<li>Once you are done with your setup and sure everything works, build the optimized version via <code>jive make opt</code> and then run <code>bin/dynLattice-opt path/to/inputs.pro</code></li>
-<li>If you want to debug your own additions using the GNU Project debugger build <code>jive make debug</code> and then run <code>jive gdb bin/dynLattice-dbg</code><ul>
-<li>proceed with <code>(gdb) run path/to/inputs.pro</code></li>
-<li>use <code>(gdb) call dprint(&amp;variable)</code> to get the variable printed if it is a Vector or a Matrix </li>
-</ul>
-</li>
+<li>Run the command <code>sudo apptainer build jive.sif jive.def</code>. </li>
 </ol>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

@@ -8,7 +8,7 @@ var searchData=
   ['decrfact_5f_5',['decrFact_',['../classExplicitModule.html#ad671788786b9a84389544345fa8f0a3d',1,'ExplicitModule']]],
   ['density_6',['DENSITY',['../classElasticRodMaterial.html#a87cd2745181690590fad6d60638fb265',1,'ElasticRodMaterial']]],
   ['density_5f_7',['density_',['../classElasticRodMaterial.html#a1be8b4d9a1d4bd4bea2d9605378f3b17',1,'ElasticRodMaterial']]],
-  ['design_8',['Software design',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md34',1,'']]],
+  ['design_8',['Software design',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md39',1,'']]],
   ['development_20builds_9',['Development Builds',['../md_CONTRIBUTING.html#autotoc_md13',1,'']]],
   ['development_20setup_10',['Development Setup',['../md_CONTRIBUTING.html#autotoc_md2',1,'']]],
   ['development_20workflow_11',['Development Workflow',['../md_CONTRIBUTING.html#autotoc_md3',1,'']]],
@@ -16,7 +16,7 @@ var searchData=
   ['dirichletmodel_2ecpp_13',['DirichletModel.cpp',['../DirichletModel_8cpp.html',1,'']]],
   ['dirichletmodel_2eh_14',['DirichletModel.h',['../DirichletModel_8h.html',1,'']]],
   ['discard_15',['DISCARD',['../structSolverNames.html#a75c40ca159c206d830177e7905397d7d',1,'SolverNames']]],
-  ['disclosure_16',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md36',1,'']]],
+  ['disclosure_16',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
   ['disp_17',['DISP',['../classPeriodicBCModel.html#a013e10d2609cffb9e7a0f520b7577bbaa1d62fb8e9ffe692962902146d40f48bc',1,'PeriodicBCModel']]],
   ['disp_5fdofs_18',['DISP_DOFS',['../classInitLoadModel.html#a6e1b0cb7292b8d367ff7df04ee75ee8a',1,'InitLoadModel']]],
   ['disp_5fgroups_19',['DISP_GROUPS',['../classInitLoadModel.html#acb19c47c30be8d7982f7d449f3045e4d',1,'InitLoadModel']]],
@@ -24,7 +24,7 @@ var searchData=
   ['disp_5frate_5fprop_21',['DISP_RATE_PROP',['../classDirichletModel.html#a73b3d95f10148ae767a6575eb7fcd7eb',1,'DirichletModel']]],
   ['disp_5fvals_22',['DISP_VALS',['../classInitLoadModel.html#aaa1e362be1e2528a37088b575ccceb6e',1,'InitLoadModel']]],
   ['dispdata_23',['dispData',['../structParaViewModule_1_1ElementInfo.html#ad9d0ab10070de25577034227009bc694',1,'ParaViewModule::ElementInfo']]],
-  ['documentation_24',['documentation',['../install.html#autotoc_md23',1,'2. Get the repository and build the documentation'],['../md_README.html#autotoc_md46',1,'Documentation'],['../md_CONTRIBUTING.html#autotoc_md16',1,'Documentation']]],
+  ['documentation_24',['documentation',['../install.html#autotoc_md22',1,'2. Get the repository and build the documentation'],['../md_README.html#autotoc_md51',1,'Documentation'],['../md_CONTRIBUTING.html#autotoc_md16',1,'Documentation']]],
   ['documentation_20example_25',['Documentation Example',['../md_CONTRIBUTING.html#autotoc_md6',1,'']]],
   ['documentation_20pages_26',['Documentation Pages',['../index.html#autotoc_md25',1,'']]],
   ['dof_5fequal_5fnames_5fprop_27',['DOF_EQUAL_NAMES_PROP',['../classSymBCModel.html#af2d767940f410791f11c5d1ecdbee562',1,'SymBCModel']]],
@@ -39,5 +39,6 @@ var searchData=
   ['dtime_5f_36',['dtime_',['../classExplicitModule.html#a4fb36d7ab21afbdd400077ad1b3c3364',1,'ExplicitModule']]],
   ['dupednodegroup_5f_37',['dupedNodeGroup_',['../classPBCGroupInputModule.html#a36cd142f0ef057dd428671dd6e4e4686',1,'PBCGroupInputModule']]],
   ['dupednodes_5fprop_38',['DUPEDNODES_PROP',['../classPBCGroupInputModule.html#aed47e9cf536e196e7a99868a2768b44d',1,'PBCGroupInputModule']]],
-  ['dynlattice_39',['dynlattice',['../md_CONTRIBUTING.html',1,'Contributing to dynLattice'],['../index.html',1,'dynLattice'],['../md_README.html',1,'dynLattice']]]
+  ['dynamic_20crush_20of_20a_20re_20entrant_20honeycomb_20lattice_39',['Example 2: dynamic crush of a re-entrant honeycomb lattice',['../usage.html#autotoc_md30',1,'']]],
+  ['dynlattice_40',['dynlattice',['../md_CONTRIBUTING.html',1,'Contributing to dynLattice'],['../index.html',1,'dynLattice'],['../md_README.html',1,'dynLattice']]]
 ];

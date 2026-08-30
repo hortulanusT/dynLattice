@@ -19,7 +19,8 @@ var searchData=
   ['step_5fcount_16',['STEP_COUNT',['../classExplicitModule.html#a5f7579dc73743c82d128ada197fb611d',1,'ExplicitModule']]],
   ['step_5fsize_17',['STEP_SIZE',['../structSolverNames.html#a521d36876f0f5719d6c45623100f7a58',1,'SolverNames']]],
   ['step_5fsize_5f0_18',['STEP_SIZE_0',['../structSolverNames.html#a33cc1ac3f6b0afdc6f992a7bcf8fc569',1,'SolverNames']]],
-  ['store_5ftangents_19',['STORE_TANGENTS',['../classGMSHInputModule.html#aa89f57fbdec197868e0dcfdffcbba42b',1,'GMSHInputModule']]],
-  ['surfaces_5fprop_20',['SURFACES_PROP',['../classSymBCModel.html#a0504bb696199ced201df6b585c38acd8',1,'SymBCModel']]],
-  ['symmetric_5fonly_21',['SYMMETRIC_ONLY',['../classSpecialCosseratRodModel.html#a4925beac5bcda2d07f5f8cb24a029cb4',1,'SpecialCosseratRodModel']]]
+  ['stiff_5fprefix_19',['STIFF_PREFIX',['../classElasticRodMaterial.html#a7976806ebeb377d34e1ab57fe313a34b',1,'ElasticRodMaterial']]],
+  ['store_5ftangents_20',['STORE_TANGENTS',['../classGMSHInputModule.html#aa89f57fbdec197868e0dcfdffcbba42b',1,'GMSHInputModule']]],
+  ['surfaces_5fprop_21',['SURFACES_PROP',['../classSymBCModel.html#a0504bb696199ced201df6b585c38acd8',1,'SymBCModel']]],
+  ['symmetric_5fonly_22',['SYMMETRIC_ONLY',['../classSpecialCosseratRodModel.html#a4925beac5bcda2d07f5f8cb24a029cb4',1,'SpecialCosseratRodModel']]]
 ];

@@ -7,5 +7,6 @@ var searchData=
   ['hingemodel_4',['hingemodel',['../classHingeModel.html',1,'HingeModel'],['../classHingeModel.html#a91e7e907dcf88f8e7d5a2a52b55b052c',1,'HingeModel::HingeModel()']]],
   ['hingemodel_2ecpp_5',['HingeModel.cpp',['../HingeModel_8cpp.html',1,'']]],
   ['hingemodel_2eh_6',['HingeModel.h',['../HingeModel_8h.html',1,'']]],
-  ['hinges_7',['HINGES',['../classSpecialCosseratRodModel.html#aec1ecfef93407d81962a9bdba0fc1b43',1,'SpecialCosseratRodModel']]]
+  ['hinges_7',['HINGES',['../classSpecialCosseratRodModel.html#aec1ecfef93407d81962a9bdba0fc1b43',1,'SpecialCosseratRodModel']]],
+  ['honeycomb_20lattice_8',['Example 2: dynamic crush of a re-entrant honeycomb lattice',['../usage.html#autotoc_md30',1,'']]]
 ];
