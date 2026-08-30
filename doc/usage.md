@@ -1,144 +1,39 @@
 \page usage Usage
 
+# Example 1: spin-up of a flexible beam
 As an example use-case, the transient \ref transient1 is laid out and explained.
 
-# Setup
+## Explanation
+Test 1 reproduces Example 5.1 from [Simo, Vu-Quoc (1988)](https://doi.org/10.1016/0045-7825(88)90073-4): a straight, initially unstressed flexible rod, clamped at one end to a rigid hub, is spun up by a prescribed base rotation. The rod is free at its other end. This serves as a first tutorial case: it involves only a single rod with a minimal (elastic) model, yet it already exercises the full dynamic solver, the rod's geometrically-exact (Cosserat) kinematics, and different boundary-conditions. The rod itself is 10m long, unloaded otherwise and starts out perfectly straight, as shown below.
+
+![Test 1 Geometry](test1_schematic.png)
+
+The fixed end is only fixed in translation and has a rotation about the out-of-plane axis (`rz`) prescribed to follow \f$\psi(t) = 6/15 \cdot (1-\cos(2\pi t/15))\f$ for \f$t<15\f$s and held constant afterwards (see `model.model.disp.scaleFunc` in the detailed explanation) — a single sinusoidal half-wave ramp up to a constant angular velocity. Physically, this drives a spin-up phase (0s-15s) in which the rod elongates under the growing centrifugal load, followed by a free-flutter phase (15s-30s) in which the tip continues to oscillate once the prescribed rotation has plateaued. The results obtained with the current implementation agree well with the reference solution from literature; see \ref transientbenchmarks for the quantitative comparison.
+
+The settings below produce a series of ParaView (`.vtu`/`.pvd`) files that can be opened directly in ParaView, or rendered into a video like the one below:
+
+![Test 1 Animation](test1_animate.gif)
+
+## Setup
 As a first step, we need to compile the program using `jive make`. This will create the executable `bin/dynLattice` we can use to run the simulation.
 
 The next step is to create the needed files, starting with the geometry file, in this case `tests/transient/test1.geo`. The `GMSH` syntax can be found on their [documentation](https://gmsh.info/doc/texinfo/gmsh.html#Gmsh-scripting-language).
 
-Now, we need to create our property file with model inputs. For our case, it can be found in `tests/transient/test1.pro` and will be explained line-by-line in the following. Note that the file contains include statements for three other input files: `input.pro`, `model.pro` and `output.pro`. Some of the contents of these included files are overwritten in `test1.pro` after the `include` statements.
+Now, we need to create our property file with model inputs. For our case, it can be found in `tests/transient/test1.pro` and will be explained line-by-line in the following. Note that the file contains include statements for three other input files: `input.pro`, `model.pro` and `output.pro`. Some of the contents of these included files are overwritten in `test1.pro` after the `include` statements. A detailed overview over the properties and their effects can be found in \ref prop1
 
-| Command | Explanation |
-| ------- | ----------- |
-| **Program Control** | |
-| `control.runWhile = "t <= 30";` | lets the control module (cf. main.cpp) terminate the simulation once the variable `t` (defaults to the current simulation time in seconds) has become greater than `30`. |
-| **Solver Configuration** | |
-| `Solver.modules = [ "integrator" ];` | defines the modules, that make up the solver. In our case it is only one, called `integrator`. |
-| `Solver.integrator.type = "MilneDevice";` | defines the type of the `integrator` module, in our case it's a MilneDeviceModule (this type needs to agree with the name it is declared under in the [ModuleFactory](https://jive-manual.dynaflow.com/classjive_1_1app_1_1ModuleFactory.html)) |
-| `Solver.integrator.deltaTime = 5e-5;` | set the starting time step size for the `integrator` to \f$5 \times 10^{-5}\f$ seconds |
-| **Material Properties** | |
-| `params.rod_details.material.type = "ElasticRod";` | define the type of the material to be ElasticRodMaterial |
-| `params.rod_details.material.cross_section = "square";` | define the rod to be of square cross-section |
-| `params.rod_details.material.side_length = "sqrt(12/2e3)";` | define the sides to be \f$\sqrt{12/2e3}\approx0.0775\f$ (meter) long |
-| `params.rod_details.material.young = "5.6e10/12";` | define the rods Young's modulus to be \f$5.6e10/12\approx4.67e9\f$ (Pascal) |
-| `params.rod_details.material.shear_modulus = 2e9;` | define the rods shear modulus to be \f$2e9\f$ (Pascal) |
-| `params.rod_details.material.density = 200.;` | define the rod to have a density of \f$200\f$ (kilogram/meter³) |
-| **File Includes** | |
-| `include "input.pro";` | include the \ref input file defining input modules and geometry reading |
-| `include "model.pro";` | include the \ref model file defining the physical model |
-| `include "output.pro";` | include the \ref output file defining output modules and data collection |
-| **Additional Settings** | |
-| `Input.input.order = 2;` | set the interpolation order for the input elements to 2 (quadratic elements) |
-| **Force Model Override** | |
-| `model.model.force.type = "None";` | override the force model from model.pro to have no applied forces |
-| **Displacement Boundary Conditions** | |
-| `model.model.disp.type = "LoadScale";` | set the displacement boundary condition to use load scaling ([LoadScaleModel](https://jive-manual.dynaflow.com/classjive_1_1model_1_1LoadScaleModel.html)) (in dynamic simulations displacement prescribtions are prescribing accelerations) |
-| `model.model.disp.scaleFunc = "if (t<15, 6/15 * (1 - cos(2*PI/15 * t)), 0)";` | define a time-dependent scaling function: a single sinusoidal half-wave during the first 15s |
-| `model.model.disp.model.type = "Dirichlet";` | specify that the displacement model uses Dirichlet boundary conditions (DirichletModel) (they will apply to the acceleration in the dynamic solves) |
-| `model.model.disp.model.nodeGroups = [ "fixed" ];` | apply the displacement (acceleration) boundary condition to the "fixed" node group |
-| `model.model.disp.model.factors = [ 1. ];` | set the scaling factor for the displacement (acceleration) to 1.0 |
-| `model.model.disp.model.dofs = [ "rz" ];` | apply the displacement (acceleration) boundary condition to the rz (rotation about z-axis) degree of freedom |
-| **CSV Output Configuration** | |
-| `Output.disp.type = "Sample";` | override the output type from output.pro to use sampling output ([SampleModule](https://jive-manual.dynaflow.com/classjive_1_1app_1_1SampleModule.html)) |
-| `Output.disp.file = "$(CASE_NAME)/disp.gz";` | specify the output file path using the case name variable, compressed with gzip |
-| `Output.disp.dataSets = [ "free.disp.dx", "free.disp.dy", "free.disp.dz", "free.disp.rx", "free.disp.ry", "free.disp.rz" ];` | define the datasets to output: all displacement and rotation components for the "free" node group |
-| `Output.disp.dataSets += "fixed.disp.rz";` | append the rz displacement of the "fixed" node group to the output datasets |
-| `Output.disp.dataSets += "t";` | append the time variable to the output datasets |
-| `Output.disp.separator = ",";` | set the CSV separator character to comma |
-| **ParaView Visualization Output** | |
-| `Output.modules += "paraview";` | add a ParaView output module to the existing output modules |
-| `Output.paraview.type = "ParaView";` | specify the module type as ParaViewModule visualization output |
-| `Output.paraview.output_format = "$(CASE_NAME)/visual/step%i";` | set the output format with case name and step numbering |
-| `Output.paraview.groups = [ "beams" ];` | define the groups to include in ParaView output (beams) |
-| `Output.paraview.beams.shape = "Line3";` | specify that beams should be visualized as 3D line elements |
-| `Output.paraview.beams.disps = model.model.rodMesh.child.dofNamesTrans;` | include translational displacement fields in the ParaView output |
-| `Output.paraview.beams.otherDofs = model.model.rodMesh.child.dofNamesRot;` | include rotational degree of freedom fields in the ParaView output |
-| `Output.paraview.beams.node_data = ["fint", "fext", "fres"];` | specify node data to output: internal forces, external forces, and residual forces |
-| `Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];` | specify element data to output: strain, stress, material stress, and material strain |
-| `Output.paraview.sampleWhen = "t % 0.1 < deltaTime";` | set the sampling condition: output when time modulo 0.1 is less than the time step size (every 0.1 seconds) |
+# Example 2: dynamic crush of a re-entrant honeycomb lattice
+As a second, more involved example, `tests/docs/test2.pro` is laid out, adapted from [Gärtner et al. (2025)](https://doi.org/10.1016/j.ijimpeng.2025.105402).
 
+## Explanation
+Test 2 is adapted from the impact experiments in [Gärtner et al. (2025)](https://doi.org/10.1016/j.ijimpeng.2025.105402), which studies whether re-entrant (auxetic) honeycomb geometries actually help mitigate transmitted impact loads compared to conventional lattices. The lattice itself is a re-entrant honeycomb unit cell tiled 6×4 times, made of slender elasto-plastic steel rods, and repeats periodically in the horizontal direction so that it behaves as an effectively infinite strip in that direction, as shown below.
 
-\subsubsection input input.pro
-The `input.pro` file defines the input modules responsible for reading geometry and defining node groups. Here are the line-by-line explanations:
+![Test 2 Geometry](test2_schematic.png)
 
-| Command | Explanation |
-| ------- | ----------- |
-| **Input Module Configuration** | |
-| `Input.modules = [ "input", "groupInput" ];` | define the input modules: "input" for geometry reading and "groupInput" for node group creation |
-| **Geometry Input Settings** | |
-| `Input.input.type = "GMSHInput";` | specify that the input module is a GMSHInputModule |
-| `Input.input.file = "$(CASE_NAME).geo";` | set the geometry file path using the case name variable with .geo extension |
-| **Node Group Definition** | |
-| `Input.groupInput.type = "GroupInput";` | specify that the groupInput module is a GroupInputModule |
-| `Input.groupInput.nodeGroups = [ "fixed", "free" ];` | define two node groups: "fixed" and "free" |
-| **Fixed Group Criteria** | |
-| `Input.groupInput.fixed.xtype = "min";` | nodes in "fixed" group have minimum x-coordinate values |
-| `Input.groupInput.fixed.ytype = "min";` | nodes in "fixed" group have minimum y-coordinate values |
-| `Input.groupInput.fixed.ztype = "min";` | nodes in "fixed" group have minimum z-coordinate values |
-| **Free Group Criteria** | |
-| `Input.groupInput.free.xtype = "max";` | nodes in "free" group have maximum x-coordinate values |
-| `Input.groupInput.free.ytype = "max";` | nodes in "free" group have maximum y-coordinate values |
-| `Input.groupInput.free.ztype = "max";` | nodes in "free" group have maximum z-coordinate values |
+The top edge represents a rigid impactor: it carries an attached mass and is given an initial downward velocity of \f$v_0=70\f$ m/s, so it starts flying freely into the lattice below it. The bottom edge rests on a compliant support, modeled as a slender elastic spring rod representing the finite stiffness of the support/load-cell plate used in the experiments. Both edges are otherwise guided to move only vertically. Since the lattice walls come into contact with each other as the re-entrant cells collapse, both rod-rod and rod-joint self-contact are enabled. 
 
-\subsubsection model model.pro
-The `model.pro` file defines the physical model and boundary conditions. Here are the line-by-line explanations:
+The simulation runs until the impactor has moved down by half the lattice's height and its velocity becomes non-negative again, i.e. until the lattice has been crushed by about 50% and starts to rebound. Physically, a compressive wave runs down through the tiled unit cells, with plastic hinges forming at the rod junctions (visible as the brighter segments around the (elastic) joints) and the re-entrant cells drawing inward rather than bulging outward, which is the defining characteristic of auxetic geometries. Unlike Test 1, there is no direct literature data to compare to, but the corresponding publication [Gärtner et al. (2025)](https://doi.org/10.1016/j.ijimpeng.2025.105402) compares a similar (but larger) setup against Experiments and commercial FE-Engines; it primarily illustrates a more complex model setup, see \ref transientbenchmarks and \ref contactbenchmarks for validated benchmarks of the individual ingredients (contact, plasticity) used here.
 
-| Command | Explanation |
-| ------- | ----------- |
-| **Model Structure** | |
-| `model.type = "Matrix";` | define the top-level model type as [MatrixModel](https://jive-manual.dynaflow.com/classjive_1_1model_1_1MatrixModel.html) |
-| `model.model.type = "Multi";` | specify that the model contains multiple sub-models ([MultiModel](https://jive-manual.dynaflow.com/classjive_1_1model_1_1MultiModel.html)) |
-| `model.model.models = [ "rodMesh", "fixed", "force", "disp" ];` | define the four sub-models: rod mesh, fixed boundaries, forces, and displacements |
-| **Rod Mesh Configuration** | |
-| `model.model.rodMesh.type = "Lattice";` | specify the rod mesh as a LatticeModel (for beam/rod networks) |
-| `model.model.rodMesh.prefix = "beam_";` | set the prefix for beam element names to "beam_" |
-| `model.model.rodMesh.child.type = "specialCosseratRod";` | define individual rod elements as SpecialCosseratRodModel |
-| `model.model.rodMesh.child.dofNamesTrans = ["dx", "dy", "dz"];` | define translational degrees of freedom: x, y, z displacements |
-| `model.model.rodMesh.child.dofNamesRot = ["rx", "ry", "rz"];` | define rotational degrees of freedom: rotations about x, y, z axes |
-| `model.model.rodMesh.child += params.rod_details;` | inherit additional rod properties from the params.rod_details defined in main file |
-| **Fixed Boundary Conditions** | |
-| `model.model.fixed.type = "Dirichlet";` | specify the fixed boundary conditions to use the DirichletModel |
-| `model.model.fixed.maxDisp = 0.;` | set maximum displacement limit to 0 (fully constrained) |
-| `model.model.fixed.dispIncr = 0.;` | set displacement increment to 0 (no movement allowed) |
-| `model.model.fixed.nodeGroups = [ "fixed", "fixed", "fixed" ];` | apply constraints to "fixed" node group for all three translational DOFs |
-| `model.model.fixed.dofs = model.model.rodMesh.child.dofNamesTrans;` | constrain all translational degrees of freedom (dx, dy, dz) |
-| `model.model.fixed.factors = [ 0., 0., 0. ];` | set constraint factors to 0 for all translational DOFs (no movement) |
-| `model.model.fixed.nodeGroups += [ "fixed", "fixed", "fixed" ];` | extend constraints to rotational DOFs for the same node group |
-| `model.model.fixed.dofs += model.model.rodMesh.child.dofNamesRot;` | add rotational degrees of freedom (rx, ry, rz) to constraints |
-| `model.model.fixed.factors += [ 0., 0., 0. ];` | set constraint factors to 0 for all rotational DOFs (no rotation) |
-| **Force Boundary Conditions** | |
-| `model.model.force.type = "Neumann";` | specify the force boundary conditions to use the NeumannModel |
-| `model.model.force.initLoad = 0.;` | set initial load value to 0 |
-| `model.model.force.loadIncr = 0.;` | set load increment to 0 (no force applied by default) |
-| `model.model.force.nodeGroups = [ "fixed" ];` | apply force boundary condition to "fixed" node group |
-| `model.model.force.factors = [ 0. ];` | set force scaling factor to 0 (no force applied) |
-| `model.model.force.dofs = [ "dx" ];` | specify that force is applied in x-direction |
-| **Displacement Boundary Conditions** | |
-| `model.model.disp.type = "Dirichlet";` | specify the prescribed displacements to use the DirichletModel |
-| `model.model.disp.initDisp = 0.;` | set initial displacement to 0 |
-| `model.model.disp.dispIncr = 0.;` | set displacement increment to 0 (no prescribed displacement by default) |
-| `model.model.disp.nodeGroups = [ "fixed" ];` | apply displacement boundary condition to "fixed" node group |
-| `model.model.disp.factors = [ 0. ];` | set displacement scaling factor to 0 (no prescribed displacement) |
-| `model.model.disp.dofs = [ "dx" ];` | specify that displacement is prescribed in x-direction |
+![Test 2 Animation (1 Frame ~ 1% Strain)](test2_animate.gif)
 
-\subsubsection output output.pro
-The `output.pro` file defines the output modules for data collection and logging. Here are the line-by-line explanations:
-
-| Command | Explanation |
-| ------- | ----------- |
-| **Output Module Configuration** | |
-| `Output.modules = [ "loadextent", "disp" ];` | define two output modules: "loadextent" for force tracking and "disp" for displacement data |
-| **Load Extent Output** | |
-| `Output.loadextent.type = "GroupOutput";` | use the GroupOutputModule to extract data from the output groups |
-| `Output.loadextent.nodeGroups = [ "fixed", "free" ];` | track data for both "fixed" and "free" node groups |
-| `Output.loadextent.dofs = model.model.rodMesh.child.dofNamesTrans;` | include translational degrees of freedom (dx, dy, dz) in output |
-| `Output.loadextent.dofs += model.model.rodMesh.child.dofNamesRot;` | add rotational degrees of freedom (rx, ry, rz) to output |
-| `Output.loadextent.dimensions = model.model.rodMesh.child.dofNamesTrans;` | specify spatial dimensions for output based on translational DOFs |
-| **Displacement CSV Output** | |
-| `Output.disp.type = "CSVOutput";` | use the CSVOutputModule to output the collected data |
-| `Output.disp.file = "$(CASE_NAME)/disp.gz";` | set output file path with case name and gzip compression |
-| `Output.disp.vectors = [ "state = disp" ];` | output displacement state vectors |
-| **Logging Configuration** | |
-| `log.pattern = "*";` | set logging pattern to capture all log messages (wildcard pattern) |
-| `log.file = "-";` | direct log output to standard output (console) using "-" |
+## Setup
+The workflow is the same as for \ref transient1 "Example 1": compile with `jive make`, then supply a geometry file (here `tests/docs/re-entrant.geo`, parameterized so the same file generates the honeycomb for any cell angle/aspect ratio/repetition count) and a property file (`tests/docs/test2.pro`, including `input.pro`, `model.pro` and `output.pro` from the same folder). A detailed, line-by-line overview of the properties can be found in \ref prop2.

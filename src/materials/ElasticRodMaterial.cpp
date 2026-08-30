@@ -30,6 +30,7 @@ using jive::Vector;
 JEM_DEFINE_CLASS(ElasticRodMaterial);
 
 const char *ElasticRodMaterial::TYPE_NAME = "ElasticRod";
+const char *ElasticRodMaterial::STIFF_PREFIX = "C_";
 const char *ElasticRodMaterial::YOUNGS_MODULUS = "young";
 const char *ElasticRodMaterial::SHEAR_MODULUS = "shear_modulus";
 const char *ElasticRodMaterial::POISSON_RATIO = "poisson_ratio";
@@ -53,6 +54,12 @@ ElasticRodMaterial::ElasticRodMaterial(const String &name,
   rodName_ = jem::util::StringUtils::split(myName_, '.')[0];
   edgeFact_ = 1.0;
   edgeElems_ = 1;
+
+  materialK_.resize(6, 6);
+  materialK_ = 0.0;
+
+  materialM_.resize(6, 6);
+  materialM_ = 0.0;
 
   configure(props, globdat);
   getConfig(conf, globdat);
@@ -78,111 +85,145 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   myProps.find(elemCount, "elemCount");
   dofCount = dofs->typeCount();
 
-  myProps.get(young_, YOUNGS_MODULUS);
-
-  // Validate Young's modulus
-  if (young_ <= 0.0)
+  if (myProps.find(materialK_(0, 0), STIFF_PREFIX + jem::String("11")) &&
+      myProps.find(materialK_(1, 1), STIFF_PREFIX + jem::String("22")) &&
+      myProps.find(materialK_(2, 2), STIFF_PREFIX + jem::String("33")) &&
+      myProps.find(materialK_(3, 3), STIFF_PREFIX + jem::String("44")) &&
+      myProps.find(materialK_(4, 4), STIFF_PREFIX + jem::String("55")) &&
+      myProps.find(materialK_(5, 5), STIFF_PREFIX + jem::String("66")))
   {
-    throw jem::IllegalInputException(
-        getContext() + ": Young's modulus must be positive, got " + String(young_));
-  }
+    young_ = NAN;
+    shearMod_ = NAN;
+    shearParam_ = NAN;
 
-  if (!myProps.find(shearMod_, SHEAR_MODULUS))
-  {
-    double nu;
-    myProps.get(nu, POISSON_RATIO);
-
-    // Validate Poisson's ratio
-    if (nu <= -1.0 || nu >= 0.5)
+    for (char i = '1'; i <= '6'; i++)
     {
-      throw jem::IllegalInputException(
-          getContext() + ": Poisson's ratio must be in range (-1, 0.5), got " + String(nu));
-    }
-
-    shearMod_ = young_ / 2. / (nu + 1.);
-  }
-  else
-  {
-    // Validate shear modulus
-    if (shearMod_ <= 0.0)
-    {
-      throw jem::IllegalInputException(
-          getContext() + ": Shear modulus must be positive, got " + String(shearMod_));
-    }
-  }
-
-  areaMoment_.resize(2);
-
-  if (!myProps.find(crossSection_, CROSS_SECTION))
-  {
-    myProps.get(area_, AREA);
-    myProps.get(areaMoment_, AREA_MOMENT);
-
-    // Validate geometric properties
-    if (area_ <= 0.0)
-    {
-      throw jem::IllegalInputException(
-          getContext() + ": Cross-sectional area must be positive, got " + String(area_));
-    }
-
-    if (areaMoment_.size() == 1)
-    {
-      areaMoment_.reshape(2);
-      areaMoment_[1] = areaMoment_[0];
-    }
-
-    // Validate area moments
-    for (idx_t i = 0; i < areaMoment_.size(); ++i)
-    {
-      if (areaMoment_[i] <= 0.0)
+      for (char j = '1'; j <= '6'; j++)
       {
-        throw jem::IllegalInputException(
-            getContext() + ": Area moment of inertia must be positive, got " + String(areaMoment_[i]));
+        if (i != j)
+        {
+          myProps.find(materialK_(i - '1', j - '1'), STIFF_PREFIX + jem::String(i) + jem::String(j));
+        }
       }
     }
 
-    shearParam_ = 5. / 6.; // standard square cross-section
-  }
-  else if (crossSection_ == "square")
-  {
-    myProps.get(sideLength_, SIDE_LENGTH);
-    JEM_ASSERT2(sideLength_.size() == 1, "A square has only one side!");
-    sideLength_.reshape(2);
-    sideLength_[1] = sideLength_[0];
-
-    area_ = pow(sideLength_[0], 2);
-    areaMoment_[0] = areaMoment_[1] = pow(sideLength_[0], 4) / 12.;
-    shearParam_ = 5. / 6.;
-
-    crossSection_ = "rectangle";
-  }
-  else if (crossSection_ == "circle")
-  {
-    myProps.get(radius_, RADIUS);
-    area_ = M_PI * pow(radius_, 2);
-    areaMoment_ = M_PI * pow(radius_, 4) / 4.;
-    shearParam_ = 9. / 10.;
-  }
-  else if (crossSection_ == "rectangle")
-  {
-    myProps.get(sideLength_, SIDE_LENGTH);
-    JEM_ASSERT2(sideLength_.size() == 2,
-                "A rectangle has only two sides!");
-    area_ = jem::product(sideLength_);
-
-    areaMoment_[0] = pow(sideLength_[1], 3) * sideLength_[0] / 12.;
-    areaMoment_[1] = pow(sideLength_[0], 3) * sideLength_[1] / 12.;
-
-    shearParam_ = 5. / 6.;
+    jem::System::info(myName_) << " ...Using direct stiffness matrix input, ignoring other material properties.";
+    jem::System::info(myName_) << " Density will be multiplied with 1 for the mass matrix.\n";
+    area_ = 1.;
+    areaMoment_.resize(2);
+    areaMoment_ = 1.;
+    polarMoment_ = 1.;
   }
   else
-    throw jem::IllegalInputException(
-        getContext(), "unknown cross section, only 'rectangle', 'square' and 'circle' "
-                      "are supported");
+  {
+    myProps.get(young_, YOUNGS_MODULUS);
 
-  polarMoment_ = jem::sum(areaMoment_);
-  myProps.find(shearParam_, SHEAR_FACTOR);
-  myProps.find(polarMoment_, POLAR_MOMENT);
+    // Validate Young's modulus
+    if (young_ <= 0.0)
+    {
+      throw jem::IllegalInputException(
+          getContext() + ": Young's modulus must be positive, got " + String(young_));
+    }
+
+    if (!myProps.find(shearMod_, SHEAR_MODULUS))
+    {
+      double nu;
+      myProps.get(nu, POISSON_RATIO);
+
+      // Validate Poisson's ratio
+      if (nu <= -1.0 || nu >= 0.5)
+      {
+        throw jem::IllegalInputException(
+            getContext() + ": Poisson's ratio must be in range (-1, 0.5), got " + String(nu));
+      }
+
+      shearMod_ = young_ / 2. / (nu + 1.);
+    }
+    else
+    {
+      // Validate shear modulus
+      if (shearMod_ <= 0.0)
+      {
+        throw jem::IllegalInputException(
+            getContext() + ": Shear modulus must be positive, got " + String(shearMod_));
+      }
+    }
+
+    areaMoment_.resize(2);
+
+    if (!myProps.find(crossSection_, CROSS_SECTION))
+    {
+      myProps.get(area_, AREA);
+      myProps.get(areaMoment_, AREA_MOMENT);
+
+      // Validate geometric properties
+      if (area_ <= 0.0)
+      {
+        throw jem::IllegalInputException(
+            getContext() + ": Cross-sectional area must be positive, got " + String(area_));
+      }
+
+      if (areaMoment_.size() == 1)
+      {
+        areaMoment_.reshape(2);
+        areaMoment_[1] = areaMoment_[0];
+      }
+
+      // Validate area moments
+      for (idx_t i = 0; i < areaMoment_.size(); ++i)
+      {
+        if (areaMoment_[i] <= 0.0)
+        {
+          throw jem::IllegalInputException(
+              getContext() + ": Area moment of inertia must be positive, got " + String(areaMoment_[i]));
+        }
+      }
+
+      shearParam_ = 5. / 6.; // standard square cross-section
+    }
+    else if (crossSection_ == "square")
+    {
+      myProps.get(sideLength_, SIDE_LENGTH);
+      JEM_ASSERT2(sideLength_.size() == 1, "A square has only one side!");
+      sideLength_.reshape(2);
+      sideLength_[1] = sideLength_[0];
+
+      area_ = pow(sideLength_[0], 2);
+      areaMoment_[0] = areaMoment_[1] = pow(sideLength_[0], 4) / 12.;
+      shearParam_ = 5. / 6.;
+
+      crossSection_ = "rectangle";
+    }
+    else if (crossSection_ == "circle")
+    {
+      myProps.get(radius_, RADIUS);
+      area_ = M_PI * pow(radius_, 2);
+      areaMoment_ = M_PI * pow(radius_, 4) / 4.;
+      shearParam_ = 9. / 10.;
+    }
+    else if (crossSection_ == "rectangle")
+    {
+      myProps.get(sideLength_, SIDE_LENGTH);
+      JEM_ASSERT2(sideLength_.size() == 2,
+                  "A rectangle has only two sides!");
+      area_ = jem::product(sideLength_);
+
+      areaMoment_[0] = pow(sideLength_[1], 3) * sideLength_[0] / 12.;
+      areaMoment_[1] = pow(sideLength_[0], 3) * sideLength_[1] / 12.;
+
+      shearParam_ = 5. / 6.;
+    }
+    else
+      throw jem::IllegalInputException(
+          getContext(), "unknown cross section, only 'rectangle', 'square' and 'circle' "
+                        "are supported");
+
+    polarMoment_ = jem::sum(areaMoment_);
+    myProps.find(shearParam_, SHEAR_FACTOR);
+    myProps.find(polarMoment_, POLAR_MOMENT);
+
+    calcMaterialStiff_();
+  }
 
   density_ = 0.;
   myProps.find(density_, DENSITY);
@@ -193,8 +234,6 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     throw jem::IllegalInputException(
         getContext() + ": Density cannot be negative, got " + String(density_));
   }
-
-  calcMaterialStiff_();
   calcMaterialMass_();
 
   double inertiaCorrect;
@@ -233,9 +272,25 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
 
   Properties myConf = conf.makeProps(myName_);
 
-  myConf.set(YOUNGS_MODULUS, young_);
-  myConf.set(SHEAR_MODULUS, shearMod_);
-  myConf.set(SHEAR_FACTOR, shearParam_);
+  if (isnan(young_) || isnan(shearMod_) || isnan(shearParam_))
+  {
+    for (char i = '1'; i <= '6'; i++)
+    {
+      for (char j = '1'; j <= '6'; j++)
+      {
+        if (jem::numeric::abs(materialK_(i - '1', j - '1')) > jem::Float::EPSILON)
+        {
+          myConf.set(STIFF_PREFIX + jem::String(i) + jem::String(j), materialK_(i - '1', j - '1'));
+        }
+      }
+    }
+  }
+  else
+  {
+    myConf.set(YOUNGS_MODULUS, young_);
+    myConf.set(SHEAR_MODULUS, shearMod_);
+    myConf.set(SHEAR_FACTOR, shearParam_);
+  }
 
   myConf.set(AREA, area_);
   myConf.set(AREA_MOMENT, areaMoment_);
@@ -264,8 +319,6 @@ void ElasticRodMaterial::getConfig(const Properties &conf, const Properties &glo
 
 void ElasticRodMaterial::calcMaterialStiff_()
 {
-  materialK_.resize(6, 6);
-  materialK_ = 0.0;
   materialK_(0, 0) = shearMod_ * shearParam_ * area_;
   materialK_(1, 1) = shearMod_ * shearParam_ * area_;
   materialK_(2, 2) = young_ * area_;
@@ -276,8 +329,6 @@ void ElasticRodMaterial::calcMaterialStiff_()
 
 void ElasticRodMaterial::calcMaterialMass_()
 {
-  materialM_.resize(6, 6);
-  materialM_ = 0.0;
   materialM_(0, 0) = density_ * area_;
   materialM_(1, 1) = density_ * area_;
   materialM_(2, 2) = density_ * area_;

@@ -34,13 +34,15 @@ dynLattice is a finite element environment for dynamic simulation of beam networ
 
 ### Installation
 
-1. Download the [latest release](https://github.com/hortulanusT/dynLattice/releases/latest)
+1. Clone the repository **or** download the _Source code_ for the [latest release](https://github.com/hortulanusT/dynLattice/releases/latest)
 
-2. Set up the container alias `alias jive="apptainer exec $(pwd)/jive.sif"`
+2. Download the  `jive.sif` for the [latest release](https://github.com/hortulanusT/dynLattice/releases/latest) and place it in the folder with the repository
 
-3. Build the code `jive make`
+3. Set up the container alias `alias jive="apptainer exec $(pwd)/jive.sif"`
 
-4. Run tests to verify installation: `jive make tests`
+4. Build the code `jive make`
+
+5. Run tests to verify installation: `jive make tests`
 
 ### Basic Usage
 

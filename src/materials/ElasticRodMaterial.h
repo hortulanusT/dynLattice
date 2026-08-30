@@ -22,6 +22,7 @@ public:
   /// @name Material type and property identifiers
   /// @{
   static const char *TYPE_NAME;
+  static const char *STIFF_PREFIX;   ///< Prefix for direct stiffness-matrix input
   static const char *YOUNGS_MODULUS; ///< Young's modulus property key
   static const char *SHEAR_MODULUS;  ///< Shear modulus property key
   static const char *POISSON_RATIO;  ///< Poisson's ratio property key
