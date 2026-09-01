@@ -34,7 +34,8 @@ Metamaterials offer unique properties not found in naturally occurring materials
 Harnessing these properties presents new possibilities for a wide range of fields [@jiao23; @bryn25].
 In order to enable engineers to design mechanical metamaterials, the relation between the geometry of the beam network and the resulting properties needs to be understood. 
 For large deformations at high rates, this usually requires destructive testing, limiting the speed of developments.
-This limitation can be overcome using efficient numerical tools, allowing for both the accurate and fast description of the inelastic deformation at high rates [@bonfanti24].
+[dynLattice]{.sc} presents an efficient open-source numerical tool for investigating the dynamic behaviour of beam networks and lattice metamaterials.
+Combining geometrically exact beam elements, inelastic material behaviour, contact, and explicit adaptive time integration, it can accurately simulate nonlinear deformations at high rates and reduce the reliance on physical experiments during the design process.
 
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
