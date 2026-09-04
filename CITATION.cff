@@ -3,10 +3,10 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials"
 version: "1.12"
-date-released: "2025"
+date-released: "2025-08-13"
 doi: "10.5281/zenodo.20474969"
-url: "https://github.com/hortulanusT/dynLattice"
-repository-code: "https://github.com/hortulanusT/dynLattice"
+url: "https://hortulanust.github.io/dynLattice/"
+repository: "https://github.com/hortulanusT/dynLattice"
 license: MIT
 abstract: "dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on Simo & Vu-Quoc (1986) formulation with support for inelastic materials, explicit time marching, and contact mechanics. The software is designed for analyzing beam structures undergoing fast deformation with large strains and nonlinear material behavior."
 
@@ -15,10 +15,7 @@ authors:
     family-names: "Gärtner"
     email: "til.gaertner@ibnm.uni-hannover.de"
     orcid: "https://orcid.org/0000-0002-5088-855X"
-    affiliation:
-      - "Delft University of Technology"
-      - "Netherlands Organization for Applied Scientific Research (TNO)"
-      - "Leibniz University Hannover"
+    affiliation: "Leibniz University Hannover"
   - given-names: "Frans P."
     family-names: "van der Meer"
     email: "f.p.vandermeer@tudelft.nl"
@@ -114,14 +111,14 @@ references:
     journal: "Materials Today Advances"
     volume: 28
     year: 2025
-    doi: "j.mtadv.2025.100656"
+    doi: "10.1016/j.mtadv.2025.10065"
   - type: thesis
     title: "Are Auxetics Better for Protection? On the Behaviour of Architected Metamaterials under High-Rate Loading Conditions"
     authors:
       - given-names: "Til"
         family-names: "Gärtner"
         orcid: "https://orcid.org/0000-0002-5088-855X"
-    institution: "Technische Universiteit Delft"
+    institution: "Delft University of Technology"
     thesis-type: "PhD thesis"
     year: 2025
     doi: "10.4233/uuid:9d0b230e-1008-46a2-a193-b9dd3f8c472f"
