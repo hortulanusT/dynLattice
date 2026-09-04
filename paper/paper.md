@@ -40,7 +40,7 @@ Combining geometrically exact beam elements, inelastic material behaviour, conta
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
 
-![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="80%"}
+![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="90%"}
 
 In \autoref{fig:beam}, a beam undergoing large deformation is shown. 
 A beam is described with the centerline $\mathbf{x}(s)$, where $s\in[s_0,s_1]$ is the measure along the length of the beam, with two orthonormal directors attached to it $\mathbf{d}_1(s),\mathbf{d}_2(s)$.
