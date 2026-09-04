@@ -12,7 +12,7 @@ var searchData=
   ['adding_20new_20components_9',['Adding New Components',['../md_CONTRIBUTING.html#autotoc_md7',1,'']]],
   ['advance_10',['advance',['../classExplicitModule.html#a8af6667d866af19248bec4e2f318bdf3',1,'ExplicitModule::advance()'],['../classAdaptiveStepModule.html#ae0bd5fcc5fe49cf51cb651443dba9eaa',1,'AdaptiveStepModule::advance()']]],
   ['advance_5f_11',['advance_',['../classDirichletModel.html#a38e7414f176a45323d990ee336ad8b9e',1,'DirichletModel']]],
-  ['ai_20usage_20disclosure_12',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
+  ['ai_20usage_20disclosure_12',['AI usage disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
   ['and_20build_20the_20documentation_13',['2. Get the repository and build the documentation',['../install.html#autotoc_md22',1,'']]],
   ['and_20validation_14',['Examples and Validation',['../md_README.html#autotoc_md55',1,'']]],
   ['applyconstraints_5f_15',['applyconstraints_',['../classSpringMassModel.html#ab7957c552879df05b9c8b0a9a7c1c39a',1,'SpringMassModel::applyConstraints_()'],['../classDirichletModel.html#afffb593dadec248853183e6fd4e90b45',1,'DirichletModel::applyConstraints_()']]],

@@ -8,7 +8,7 @@ var searchData=
   ['updcond_5f_5',['updCond_',['../classExplicitModule.html#a1bee631eb7f516825cfa42ad9dc6876f',1,'ExplicitModule']]],
   ['updforce_6',['updForce',['../classMilneDeviceModule.html#a595eaa4a15a66117fff5ee7e5f4148fb',1,'MilneDeviceModule']]],
   ['usage_7',['usage',['../md_README.html#autotoc_md50',1,'Basic Usage'],['../usage.html',1,'Usage']]],
-  ['usage_20disclosure_8',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
+  ['usage_20disclosure_8',['AI usage disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
   ['usage_2emd_9',['usage.md',['../usage_8md.html',1,'']]],
   ['usage_5fdetails1_2emd_10',['usage_details1.md',['../usage__details1_8md.html',1,'']]],
   ['usage_5fdetails2_2emd_11',['usage_details2.md',['../usage__details2_8md.html',1,'']]],

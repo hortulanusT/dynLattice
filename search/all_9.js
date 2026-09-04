@@ -16,7 +16,7 @@ var searchData=
   ['dirichletmodel_2ecpp_13',['DirichletModel.cpp',['../DirichletModel_8cpp.html',1,'']]],
   ['dirichletmodel_2eh_14',['DirichletModel.h',['../DirichletModel_8h.html',1,'']]],
   ['discard_15',['DISCARD',['../structSolverNames.html#a75c40ca159c206d830177e7905397d7d',1,'SolverNames']]],
-  ['disclosure_16',['AI Usage Disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
+  ['disclosure_16',['AI usage disclosure',['..//home/runner/work/dynLattice/dynLattice/paper/paper.md#autotoc_md41',1,'']]],
   ['disp_17',['DISP',['../classPeriodicBCModel.html#a013e10d2609cffb9e7a0f520b7577bbaa1d62fb8e9ffe692962902146d40f48bc',1,'PeriodicBCModel']]],
   ['disp_5fdofs_18',['DISP_DOFS',['../classInitLoadModel.html#a6e1b0cb7292b8d367ff7df04ee75ee8a',1,'InitLoadModel']]],
   ['disp_5fgroups_19',['DISP_GROUPS',['../classInitLoadModel.html#acb19c47c30be8d7982f7d449f3045e4d',1,'InitLoadModel']]],
