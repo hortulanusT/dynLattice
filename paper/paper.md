@@ -40,7 +40,7 @@ Combining geometrically exact beam elements, inelastic material behaviour, conta
 # Background
 The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
 
-![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="100%"}
+![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="90%"}
 
 In \autoref{fig:beam}, a beam undergoing large deformation is shown. 
 A beam is described with the centerline $\mathbf{x}(s)$, where $s\in[s_0,s_1]$ is the measure along the length of the beam, with two orthonormal directors attached to it $\mathbf{d}_1(s),\mathbf{d}_2(s)$.
@@ -57,7 +57,7 @@ General-purpose finite element frameworks, such as Kratos [@kratos; @Dadvand2010
 In this regard, a specialized lattice framework, e.g., GXBeam [@GXBeam], typically delivers high-fidelity beam kinematics but focuses only on elastic deformations or omits contact between the constituting beams of the lattice.
 As a result, many researchers rely on their own implementation of Simo-Reissner beams, which are usually not available to the community and only consider a subset of the requirements needed for a general toolkit.
 An open and extensible environment that unifies geometrically exact beams, explicit dynamics, inelasticity, and contact is therefore central to advancing simulation-driven design of lattice metamaterials for high-rate and large-deformation applications.
-Here, [dynLattice]{.sc} takes a first step by building upon the `JIVE` framework [@jive21; @nguyenthanh20], keeping the extensible object-oriented design philosophy, and providing extensive documentation in the style of the underlying framework.
+Here, [dynLattice]{.sc} takes a first step by building upon the `Jive` framework [@jive21; @nguyenthanh20], keeping the extensible object-oriented design philosophy, and providing extensive documentation in the style of the underlying framework.
 
 # State of the field
 There is a wide plethora of existing finite element toolkits available in the market, such as MOOSE [@moose], FEniCS [@fenics], or deal.II [@dealii], to name a few prominent ones.
@@ -70,22 +70,22 @@ Here, the same beam theory employed in this contribution is used, however, due t
 
 # Software design
 In order to design metamaterials undergoing large deformations at high rates, [dynLattice]{.sc} provides both researchers and engineers in the field with a toolkit for numerical experiments.
-[dynLattice]{.sc} is built on top of the openly available C++ `JIVE` finite element toolkit [@jive21; @nguyenthanh20] and follows the object-oriented design of `JIVE` to describe the partial differential equations and corresponding solution procedures.
+[dynLattice]{.sc} is built on top of the openly available C++ `Jive` finite element toolkit [@jive21; @nguyenthanh20] and follows the object-oriented design of `Jive` to describe the partial differential equations and corresponding solution procedures.
 The toolkit allows for the implementation of original methods through the development of custom _modules_, for parts of the program flow in the simulation framework, and of custom _models_, for anything related to the numerical representation of the system of partial differential equations.
-In the present addition to the `JIVE` framework, the _models_ further contain a separate _materials_ class, representing the constitutive models considered in the problem, separating geometric from material considerations.
+In the present addition to the `Jive` framework, the _models_ further contain a separate _materials_ class, representing the constitutive models considered in the problem, separating geometric from material considerations.
 This separation allows both the easy and user-friendly extension of the frameworks by simple inheritance of the provided classes and usability by structuring the inputs needed for the program flow and the problem description.
-[dynLattice]{.sc} additionally uses `GMSH` [@geuzaine09] to mesh the imported geometries efficiently.
+[dynLattice]{.sc} additionally uses `Gmsh` [@geuzaine09] to mesh the imported geometries efficiently.
 
 # Research impact statement
 [dynLattice]{.sc} has enabled a series of research efforts investigating lattice metamaterials [@gärtner24; @gärtner25b; @gärtner_diss].
 In addition to investigating lattice materials, it has been used to study the behaviour of beams as a multi-scale problem [@gärtner25] and has undergone a thorough comparison with experimental data and results from commercial tools [@gärtner_TNO].
-Collaborating researchers could easily install and run the software using the provided documentation and `apptainer`. 
+Collaborating researchers could easily install and run the software using the provided documentation and `Apptainer`. 
 
 In addition to external collaboration, [dynLattice]{.sc} was also used as a ready-made software package in multiple student theses [@niessen22; @ijzendoorn24; @smit24].
-During these projects, dynLattice was used on a large cluster, DelftBlue [@DHPC2024], and on various local machines using the provided `apptainer`. 
+During these projects, [dynLattice]{.sc} was used on a large cluster, DelftBlue [@DHPC2024], and on various local machines using the provided `Apptainer`. 
 This demonstrates its availability and usability as stand-alone software without the need for further modifications.
 
-Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `JIVE` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in the Software design section.
+Changes to the source code that enable further research are made possible by the object-oriented philosophy inherited from the `Jive` package and the clear structure of the code into _modules_, _models_ and _materials_, as described in the Software design section.
 The provided documentation, available in the source and on the [project website](https://hortulanust.github.io/dynLattice/), facilitates quick and straightforward adoption by third parties.
 The included benchmarks serve as a verification tool for the correctness of the implementation and as a guide for creating and extending simple problems.
 
