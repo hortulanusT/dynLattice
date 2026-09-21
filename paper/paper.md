@@ -38,7 +38,7 @@ For large deformations at high rates, this usually requires destructive testing,
 Combining geometrically exact beam elements, inelastic material behaviour, contact, and explicit adaptive time integration, it can accurately simulate nonlinear deformations at high rates and reduce the reliance on physical experiments during the design process.
 
 # Background
-The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given in [@gärtner_diss].
+The following is a short description of the beam kinematics and cross-sectional kinetics implemented in this software, with a more detailed description given by @gärtner_diss.
 
 ![A beam undergoing large deformation. \label{fig:beam}](beam_concept.pdf){#beam width="90%"}
 
@@ -49,7 +49,7 @@ $$
   \Lambda(s)=\mathbf{d}_i(s)\otimes\mathbf{e}_i=\begin{bmatrix}\mathbf{d}_1(s)&\mathbf{d}_2(s)&\mathbf{d}_3(s)\end{bmatrix}.
 $$
 From these measures, strain prescriptors, describing stretching, shearing, bending, and twisting of the beam, can be derived. 
-These strain prescriptors are then used together with the material model of the beam, be it elastic (cf. [@simo86; @eugster15]) or elasto-plastic (cf. [@smriti20; @herrnböck22; @gärtner25]), to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
+These strain prescriptors are then used together with the material model of the beam, be it elastic [@simo86; @eugster15] or elasto-plastic [@smriti20; @herrnböck22; @gärtner25], to assemble the global force vector and---in the static, implicit case---the tangent stiffness matrix using standard finite element procedures.
 
 # Statement of need
 Research on the dynamic behaviour of mechanical metamaterials, especially beam lattices, relies on numerical tools that can capture large deformations, inelastic behaviour, and contact while remaining efficient and flexible enough for parameter studies [@bonfanti24].
