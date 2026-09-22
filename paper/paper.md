@@ -1,5 +1,5 @@
 ---
-title: '[dynLattice]{.sc}: A finite element environment for dynamic simulation of beam networks and lattice metamaterials'
+title: 'dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials'
 tags:
   - finite elements
   - geometrically exact beams

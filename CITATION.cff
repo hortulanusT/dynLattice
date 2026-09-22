@@ -1,26 +1,40 @@
-cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-type: software
-title: "dynLattice: A finite element environment for dynamic simulation of beam networks and lattice metamaterials"
-version: "1.12"
-date-released: "2025-08-13"
-doi: "10.5281/zenodo.20474969"
-url: "https://hortulanust.github.io/dynLattice/"
-repository: "https://github.com/hortulanusT/dynLattice"
-license: MIT
-abstract: "dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on Simo & Vu-Quoc (1986) formulation with support for inelastic materials, explicit time marching, and contact mechanics. The software is designed for analyzing beam structures undergoing fast deformation with large strains and nonlinear material behavior."
-
+cff-version: "1.2.0"
 authors:
-  - given-names: "Til"
-    family-names: "Gärtner"
-    email: "til.gaertner@ibnm.uni-hannover.de"
+- family-names: Gärtner
+  given-names: Til
+  orcid: "https://orcid.org/0000-0002-5088-855X"
+- family-names: Meer
+  given-names: Frans P.
+  name-particle: van der
+  orcid: "https://orcid.org/0000-0002-6691-1259"
+doi: 10.5281/zenodo.22310033
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Gärtner
+    given-names: Til
     orcid: "https://orcid.org/0000-0002-5088-855X"
-    affiliation: "Leibniz University Hannover"
-  - given-names: "Frans P."
-    family-names: "van der Meer"
-    email: "f.p.vandermeer@tudelft.nl"
+  - family-names: Meer
+    given-names: Frans P.
+    name-particle: van der
     orcid: "https://orcid.org/0000-0002-6691-1259"
-    affiliation: "Delft University of Technology"
+  date-published: 2026-09-21
+  doi: 10.21105/joss.10410
+  issn: 2475-9066
+  issue: 125
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 10410
+  title: "dynLattice: A finite element environment for dynamic
+    simulation of beam networks and lattice metamaterials"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.10410"
+  volume: 11
+title: "dynLattice: A finite element environment for dynamic
+  simulation of beam networks and lattice metamaterials"
+
 
 keywords:
   - "finite elements"
