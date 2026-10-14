@@ -283,64 +283,45 @@ void RodContactModel::findPossibleBeams_
      IdxVector &beamsB,
      const Vector &disp) const
 {
-  const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
+  const idx_t rodCount = rodList_.size();
 
   // store the possible contact Pairs
   ArrayBuffer<idx_t> beamACandidates;
   ArrayBuffer<idx_t> beamBCandidates;
 
-  // Get the boxes of the rods
-  Matrix elemBoxA(globalRank, 2);
-  Matrix elemBoxB(globalRank, 2);
-  // IdxVector dofsA(nodeCount);
-  IdxVector dofsB(nodeCount);
-  // Matrix possA(globalRank, 0);
-  Matrix possB(globalRank, 0);
-  bool cornerCheck = false;
+  // Compute the bounding box of every rod once
+  Matrix boxMin(globalRank, rodCount);
+  Matrix boxMax(globalRank, rodCount);
 
-  possB.resize(globalRank, rodNodes_[0].size());
-  allNodes_.getSomeCoords(possB, rodNodes_[0]);
-
-  dofsB.resize(rodNodes_[0].size());
-  for (idx_t idof = 0; idof < globalRank; idof++)
+  for (idx_t iRod = 0; iRod < rodCount; iRod++)
   {
-    dofs_->getDofIndices(dofsB, rodNodes_[0], idof);
-    possB(idof, ALL) += disp[dofsB];
-  }
+    const IdxVector &nodes = rodNodes_[iRod];
+    Matrix poss(globalRank, nodes.size());
+    IdxVector dofs(nodes.size());
 
-  for (idx_t idof = 0; idof < globalRank; idof++)
-  {
-    elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
-    elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
-  }
-
-  for (idx_t iRod = 0; iRod < rodList_.size(); iRod++)
-  {
-    elemBoxA = elemBoxB.clone();
-
-    for (idx_t jRod = rodList_.size() - 1; jRod > iRod; jRod--)
+    allNodes_.getSomeCoords(poss, nodes);
+    for (idx_t idof = 0; idof < globalRank; idof++)
     {
-      possB.reshape(globalRank, rodNodes_[jRod].size());
-      allNodes_.getSomeCoords(possB, rodNodes_[jRod]);
+      dofs_->getDofIndices(dofs, nodes, idof);
+      poss(idof, ALL) += disp[dofs];
+    }
 
-      dofsB.resize(rodNodes_[jRod].size());
+    for (idx_t idof = 0; idof < globalRank; idof++)
+    {
+      boxMin(idof, iRod) = min(poss(idof, ALL)) - radius_;
+      boxMax(idof, iRod) = max(poss(idof, ALL)) + radius_;
+    }
+  }
+
+  for (idx_t iRod = 0; iRod < rodCount; iRod++)
+  {
+    for (idx_t jRod = rodCount - 1; jRod > iRod; jRod--)
+    {
+      bool cornerCheck = true;
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        dofs_->getDofIndices(dofsB, rodNodes_[jRod], idof);
-        possB(idof, ALL) += disp[dofsB];
-      }
-
-      for (idx_t idof = 0; idof < globalRank; idof++)
-      {
-        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
-        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
-      }
-
-      cornerCheck = true;
-      for (idx_t idof = 0; idof < globalRank; idof++)
-      {
-        cornerCheck &= elemBoxA(idof, 1) >= elemBoxB(idof, 0) && elemBoxB(idof, 1) >= elemBoxA(idof, 0);
+        cornerCheck &= boxMax(idof, iRod) >= boxMin(idof, jRod) && boxMax(idof, jRod) >= boxMin(idof, iRod);
       }
 
       if (cornerCheck)
