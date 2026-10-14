@@ -373,6 +373,9 @@ bool SpecialCosseratRodModel::takeAction
   if (action == Actions::COMMIT)
   {
     material_->applyDeform();
+#ifndef NDEBUG
+    energiesStored_ = true;
+#endif
 
     Properties vars = Globdat::getVariables(globdat);
     Vector disp;
@@ -387,6 +390,9 @@ bool SpecialCosseratRodModel::takeAction
     double dE_pot = 0.;
     double dE_diss = 0.;
     getEnergies_(dE_pot, dE_diss, disp);
+#ifndef NDEBUG
+    energiesStored_ = false;
+#endif
     E_diss += dE_diss;
     E_pot += dE_pot;
 
@@ -1159,37 +1165,27 @@ void SpecialCosseratRodModel::getPotentialEnergy_(XTable &energy_table, const Ve
   }
 }
 
-void SpecialCosseratRodModel::getEnergies_(double &E_pot, double &E_diss, const Vector &disp) const
+void SpecialCosseratRodModel::getEnergies_(double &E_pot, double &E_diss, const Vector &) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
 
   E_pot = 0.;
   E_diss = 0.;
 
-  // PER ELEMENT VALUES
-  Matrix nodeU(rank, nodeCount);
   Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Matrix stress(dofCount, ipCount);
+  Matrix grads(shapeK_->shapeFuncCount(), ipCount);
   Vector weights(ipCount);
-  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
-  // DOF INDICES
+  const Matrix shapes = shapeK_->getShapeFunctions();
   IdxVector inodes(nodeCount);
 
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    getStrains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
-
-    shapes = shapeK_->getShapeFunctions();
+    allNodes_.getSomeCoords(nodePhi_0, inodes);
+    shapeK_->getShapeGradients(grads, weights, nodePhi_0);
 
     for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
@@ -1209,7 +1205,7 @@ void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const V
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
-  const idx_t jCol = energy_table.addColumn("potentialEnergy");
+  const idx_t jCol = energy_table.addColumn("dissipatedEnergy");
 
   // PER ELEMENT VALUES
   Matrix nodeU(rank, nodeCount);

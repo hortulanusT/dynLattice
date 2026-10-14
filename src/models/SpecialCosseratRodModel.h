@@ -333,7 +333,7 @@ class SpecialCosseratRodModel : public Model
   /// @brief Calculate the potential and dissipated energy of the rod in a single pass
   /// @param[out] E_pot  Potential energy value (output)
   /// @param[out] E_diss  Dissipated energy value (output)
-  /// @param[in] disp  Displacement vector
+  /// @param[in] disp  Displacement vector (unused: the energies are read from the material, which stored them in applyDeform())
   void getEnergies_(double &E_pot,
                     double &E_diss,
                     const Vector &disp) const;
@@ -372,6 +372,10 @@ class SpecialCosseratRodModel : public Model
 
   mutable IdxMatrix nodeDofs_;   ///< Cached dof indices per node (jtypes_ x all nodes)
   mutable bool nodeDofsValid_;   ///< False after the DofSpace changed
+
+#ifndef NDEBUG
+  mutable bool energiesStored_ = false; ///< Debug only: true between applyDeform() and the next assemble_/cancel
+#endif
 
   bool symOnly_;        ///< Symmetric tangent stiffness flag
   Vector thickFact_;    ///< Thickening factors

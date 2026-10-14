@@ -173,6 +173,9 @@ class Material : public NamedObject
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index within the element
   /// @returns Total dissipated energy at the specified location
+  /// @note Contract: must return the value of the last committed state, i.e. it has
+  ///       to be stored in applyDeform(). SpecialCosseratRodModel::getEnergies_ reads
+  ///       it right after applyDeform() without re-evaluating strains/stresses.
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
   /// @brief Get the potential energy at a specific integration point.
@@ -183,6 +186,9 @@ class Material : public NamedObject
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index within the element
   /// @returns Elastic potential energy at the specified location
+  /// @note Contract: must return the value of the last committed state, i.e. it has
+  ///       to be stored in applyDeform(). SpecialCosseratRodModel::getEnergies_ reads
+  ///       it right after applyDeform() without re-evaluating strains/stresses.
   /// @note 0 for purely elastic materials
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
