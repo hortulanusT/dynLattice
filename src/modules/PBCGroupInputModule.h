@@ -71,7 +71,7 @@ class PBCGroupInputModule : public GroupInputModule
   virtual ~PBCGroupInputModule();
 
   /// @brief Prepare properties for PBC group generation
-  /// @param[in] myProps  Module properties to configure
+  /// @param[in,out] myProps  Module properties updated with generated group settings
   void prepareProps_(const Properties &myProps) const;
 
   /// @brief Sort boundary nodes into master/slave pairs

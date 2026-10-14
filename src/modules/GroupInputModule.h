@@ -98,18 +98,6 @@ class GroupInputModule : public Module
   /// @brief Number of nodes in the mesh
   idx_t numNodes_;
 
-  /// @brief Configure module from properties
-  /// @param[out] conf  Actually used configuration properties (output)
-  /// @param[in] props  User-specified module properties
-  /// @param[in] globdat  Global data container
-  void configure_(const Properties &conf,
-                  const Properties &props,
-                  const Properties &globdat);
-
-  /// @brief Create all node groups from global data
-  /// @param[in] globdat  Global data container with group definitions
-  void makeNodeGroups_(const Properties &globdat);
-
   //=======================================================================
   //   class NGroup_
   //=======================================================================

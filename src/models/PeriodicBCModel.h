@@ -147,7 +147,7 @@ class PeriodicBCModel : public Model
   void setConstraints_();
 
   /// @brief Get external force vector
-  /// @param[out] f  External force vector
+  /// @param[in,out] f  External force vector with periodic loads added
   /// @param[in] globdat  Global data container
   /// @param[in] scale  Scaling factor
   void getExtVec_(const Vector &f,

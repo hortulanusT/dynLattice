@@ -133,13 +133,13 @@ class NeumannModel : public Model
   void init_(const Properties &globdat);
 
   /// @brief Compute external force vector
-  /// @param[out] fext  External force vector
+  /// @param[in,out] fext  External force vector with this model's load added
   /// @param[in] globdat  Global data container
   void getExtVector_(const Vector &fext,
                      const Properties &globdat) const;
 
   /// @brief Compute external force vector with scaling
-  /// @param[out] fext  External force vector
+  /// @param[in,out] fext  External force vector with the scaled load added
   /// @param[in] globdat  Global data container
   /// @param[in] scale  Scaling factor
   void getExtVector_(const Vector &fext,
