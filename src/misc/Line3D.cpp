@@ -199,14 +199,7 @@ void Line3D::getPi(const Cubix &Pi,
 {
   const Cubix Ri(globalRank(), globalRank(), ipointCount());
 
-  getRotations(Ri, Rn);
-
-  Pi = 0.;
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
-  }
+  getPi(Pi, Ri, Rn);
 }
 
 void Line3D::getPi(const Cubix &Pi,

@@ -57,33 +57,58 @@ class Line3D : public Shape
   /// @brief Get the global rank (spatial dimension).
   /// @return Global rank (always 3 for 3D space)
   inline idx_t globalRank() const override;
+
+  /// @brief Get the local rank of the line element.
+  /// @return Local coordinate dimension
   inline idx_t localRank() const override;
+
+  /// @brief Get the number of nodes in the line element.
+  /// @return Number of nodes
   inline idx_t nodeCount() const override;
+
+  /// @brief Get the number of vertices in the line element.
+  /// @return Number of vertices
   inline idx_t vertexCount() const override;
+
+  /// @brief Get the number of integration points.
+  /// @return Number of integration points
   inline idx_t ipointCount() const override;
+
+  /// @brief Get the number of shape functions.
+  /// @return Number of shape functions
   inline idx_t shapeFuncCount() const override;
 
+  /// @brief Get the local coordinates of the vertices.
+  /// @return Matrix of vertex coordinates
   inline Matrix getVertexCoords() const override;
+
+  /// @brief Get the integration scheme.
+  /// @return Matrix describing the integration scheme
   inline Matrix getIntegrationScheme() const override;
 
+  /// @brief Check whether a local point is inside the element.
+  /// @param[in] u Local coordinate vector
+  /// @return Whether the point is contained in the element
   inline bool containsLocalPoint(const Vector &u) const override;
 
   /// @brief Compute integration weights for numerical integration.
-  ///
-  /// @param[out] w Integration weights at quadrature points
-  /// @param[in] c Node coordinates matrix
+  /// @param[out] w Integration weights at the integration points
+  /// @param[in] c Node coordinates matrix, c(i,j) is the i-th coordinate of the j-th node
   void getIntegrationWeights(const Vector &w,
                              const Matrix &c) const override;
 
+  /// @brief Get shape function values at the integration points.
+  /// @return Matrix of shape function values
   inline Matrix getVertexFunctions() const override;
 
+  /// @brief Get shape function values at the integration points.
+  /// @return Matrix of shape function values
   inline Matrix getShapeFunctions() const override;
 
   /// @brief Transform local coordinates to global coordinates.
-  ///
-  /// @param[out] x Global coordinates vector
-  /// @param[in] u Local coordinates vector
-  /// @param[in] c Node coordinates matrix
+  /// @param[out] x Global coordinate vector
+  /// @param[in] u Local coordinate vector
+  /// @param[in] c Coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
   void getGlobalPoint(const Vector &x,
                       const Vector &u,
                       const Matrix &c) const override;
@@ -97,16 +122,15 @@ class Line3D : public Shape
                          const Matrix &c) const;
 
   /// @brief return the rotations at the integration points
-  /// @param[out] Ri Ri(.,.,i) rotational matrix at the integration points
-  /// @param[in] Rn rotation at the nodes. Rn(.,i) rotational displacement at the nodes
+  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotational matrix at the i-th integration point
+  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getRotations(const Cubix &Ri,
                     const Cubix &Rn) const;
 
   /// @brief Get the Xi at the integration points
-  ///
-  /// @param[out] Xi Xi(.,.,j,i) where j are the nodes and i are the integration points
+  /// @param[out] Xi 6 x 6 Xi(.,.,j,i), where j are the nodes and i are the integration points
   /// @param[out] w weights of the integration points
-  /// @param[in] u displacements of the nodes, c(i,j) is the i-th displacement of the j-th node
+  /// @param[in] u displacements of the nodes, u(i,j) is the i-th displacement of the j-th node
   /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
   void getXi(const Quadix &Xi,
              const Vector &w,
@@ -114,47 +138,43 @@ class Line3D : public Shape
              const Matrix &c) const;
 
   /// @brief Get the Psi at the integration points
-  ///
-  /// @param[out] Psi Psi(.,.,j,i) where j are the nodes and i are the integration points
+  /// @param[out] Psi 6 x 9 Psi(.,.,j,i), where j are the nodes and i are the integration points
   /// @param[out] w weights of the integration points
   /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
   void getPsi(const Quadix &Psi,
               const Vector &w,
               const Matrix &c) const;
+
   /// @brief Get the Pi at the integration points
-  ///
-  /// @param[out] Pi Pi(.,.,i) where i are the integration points
-  /// @param[out] Ri Ri(.,.,i) rotation at the integration points
-  /// @param[in] Rn rotations at the nodes.
+  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
+  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point
+  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getPi(const Cubix &Pi,
              const Cubix &Ri,
              const Cubix &Rn) const;
 
   /// @brief Get the Pi at the integration points
-  ///
-  /// @param[out] Pi Pi(.,.,i) where i are the integration points
-  /// @param[in] Rn rotations at the nodes.
+  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
+  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getPi(const Cubix &Pi,
              const Cubix &Rn) const;
 
   /// @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
-  ///
-  /// @param[out] LambdaP curvature at the integration points
+  /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
   /// @param[out] w integration weights
   /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  /// @param[in] nodeLambda rotation at the nodes.
+  /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getRotationGradients(const Cubix &LambdaP,
                             const Vector &w,
                             const Matrix &c,
                             const Cubix &nodeLambda) const;
 
   /// @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
-  ///
-  /// @param[out] LambdaP curvature at the integration points
+  /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
   /// @param[out] w integration weights
-  /// @param[in] Rn initial rotations at the integration points. Rn(.,.,i) initial rotation at the integration points
+  /// @param[in] Rn initial rotations, Rn(.,.,i) is the input rotation matrix at the i-th integration point
   /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  /// @param[in] theta rotation at the nodes. theta(.,i) rotational displacement at the nodes
+  /// @param[in] theta nodal rotation vectors, theta(.,i) is the rotational displacement at the i-th node
   void getRotationGradients(const Cubix &LambdaP,
                             const Vector &w,
                             const Cubix &Rn,
@@ -162,13 +182,12 @@ class Line3D : public Shape
                             const Matrix &theta) const;
 
   /// @brief Get the Pi, the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors
-  ///
-  /// @param[out] Pi Pi(.,.,i) where i are the integration points
-  /// @param[out] Ri Ri(.,.,i) rotation at the integration points
-  /// @param[out] LambdaP curvature at the integration points
+  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
+  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point
+  /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
   /// @param[out] w integration weights
   /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  /// @param[in] nodeLambda rotation at the nodes.
+  /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getPiAndRotationGradients(const Cubix &Pi,
                                  const Cubix &Ri,
                                  const Cubix &LambdaP,
@@ -180,24 +199,24 @@ class Line3D : public Shape
   // local location functions
   //------------------------------------------------
   /// @brief Evaluate shape functions at given local coordinates.
-  /// @param[out] h Shape function values
-  /// @param[in] u Local coordinates
+  /// @param[out] h Shape function value vector
+  /// @param[in] u Local coordinate vector
   inline void evalShapeFunctions(const Vector &h,
                                  const Vector &u) const override;
 
   /// @brief Evaluate shape functions and their gradients at local coordinates.
-  /// @param[out] h Shape function values
-  /// @param[out] g Shape function gradients
-  /// @param[in] u Local coordinates
+  /// @param[out] h Shape function value vector
+  /// @param[out] g Shape function gradient vector
+  /// @param[in] u Local coordinate vector
   inline void evalShapeGradients(const Vector &h,
                                  const Vector &g,
                                  const Vector &u) const;
 
   /// @brief Evaluate shape functions, gradients, and second derivatives.
-  /// @param[out] h Shape function values
-  /// @param[out] g Shape function gradients
-  /// @param[out] gg Shape function second derivatives
-  /// @param[in] u Local coordinates
+  /// @param[out] h Shape function value vector
+  /// @param[out] g Shape function gradient vector
+  /// @param[out] gg Shape function second derivative vector
+  /// @param[in] u Local coordinate vector
   inline void evalShapeGradGrads(const Vector &h,
                                  const Vector &g,
                                  const Vector &gg,
@@ -205,20 +224,18 @@ class Line3D : public Shape
 
  private:
   /// @brief Get the rotations at the integration points from the node rotation vectors
-  ///
   /// @param[out] Ri Rotation matrices at the integration points
-  /// @param[in] node_psi Node rotation vectors
+  /// @param[in] node_psi Nodal rotation vectors
   /// @param[in] Lambda_r Reference rotation matrix
   void getRotations_(const Cubix &Ri,
                      const Matrix &node_psi,
                      const Matrix &Lambda_r) const;
 
   /// @brief Get the rotation gradients at the integration points from the node rotation vectors
-  ///
   /// @param[out] LambdaP Rotation gradients at the integration points
   /// @param[out] w Integration weights
   /// @param[in] c Coordinates of the nodes
-  /// @param[in] node_psi Node rotation vectors
+  /// @param[in] node_psi Nodal rotation vectors
   /// @param[in] Lambda_r Reference rotation matrix
   void getRotationGradients_(const Cubix &LambdaP,
                              const Vector &w,
@@ -227,17 +244,15 @@ class Line3D : public Shape
                              const Matrix &Lambda_r) const;
 
   /// @brief Get the reference rotation according to Crisfield/Jelenic
-  ///
   /// @param[out] Lambda_r Reference rotation matrix
-  /// @param[in] Rn Rotation matrices at the nodes
+  /// @param[in] Rn Nodal rotation matrices
   void getRefRot_(const Matrix Lambda_r,
                   const Cubix Rn) const;
 
   /// @brief Get the local node rotation vectors according to Crisfield/Jelenic
-  ///
-  /// @param[out] psi Node rotation vectors
+  /// @param[out] psi Nodal rotation vectors
   /// @param[out] Lambda_r Reference rotation matrix
-  /// @param[in] Rn Rotation matrices at the nodes
+  /// @param[in] Rn Nodal rotation matrices
   void getNodeRotVecs_(const Matrix psi,
                        const Matrix Lambda_r,
                        const Cubix Rn) const;
@@ -249,56 +264,80 @@ class Line3D : public Shape
 //=====================================================================
 //    inline implementations
 //=====================================================================
+/// @brief Get the global rank (spatial dimension).
+/// @return Global rank
 idx_t Line3D::globalRank() const
 {
   return GLOB_RANK;
 }
 
+/// @brief Get the local rank of the line element.
+/// @return Local coordinate dimension
 idx_t Line3D::localRank() const
 {
   return intLine_->localRank();
 }
 
+/// @brief Get the number of nodes in the line element.
+/// @return Number of nodes
 idx_t Line3D::nodeCount() const
 {
   return intLine_->nodeCount();
 }
 
+/// @brief Get the number of vertices in the line element.
+/// @return Number of vertices
 idx_t Line3D::vertexCount() const
 {
   return intLine_->vertexCount();
 }
 
+/// @brief Get the number of integration points.
+/// @return Number of integration points
 idx_t Line3D::ipointCount() const
 {
   return intLine_->ipointCount();
 }
 
+/// @brief Get the number of shape functions.
+/// @return Number of shape functions
 idx_t Line3D::shapeFuncCount() const
 {
   return intLine_->shapeFuncCount();
 }
 
+/// @brief Get the local coordinates of the vertices.
+/// @return Matrix of vertex coordinates
 Matrix Line3D::getVertexCoords() const
 {
   return intLine_->getVertexCoords();
 }
 
+/// @brief Get the integration scheme.
+/// @return Matrix describing the integration scheme
 Matrix Line3D::getIntegrationScheme() const
 {
   return intLine_->getIntegrationScheme();
 }
 
+/// @brief Check whether a local point is inside the element.
+/// @param[in] u Local coordinate vector
+/// @return Whether the point is contained in the element
 bool Line3D::containsLocalPoint(const Vector &u) const
 {
   return intLine_->containsLocalPoint(u);
 }
 
+/// @brief Get the vertex shape function values at the integration points.
+/// @return Matrix of shape function values
 Matrix Line3D::getVertexFunctions() const
 {
   return intLine_->getVertexFunctions();
 }
 
+/// @brief Evaluate shape functions at given local coordinates.
+/// @param[out] h Shape function value vector
+/// @param[in] u Local coordinate vector
 void Line3D::evalShapeFunctions(const Vector &h,
                                 const Vector &u) const
 {
@@ -306,6 +345,10 @@ void Line3D::evalShapeFunctions(const Vector &h,
   intLine_->evalShapeFunctions(h, u);
 }
 
+/// @brief Evaluate shape functions and their gradients at local coordinates.
+/// @param[out] h Shape function value vector
+/// @param[out] g Shape function gradient vector
+/// @param[in] u Local coordinate vector
 void Line3D::evalShapeGradients(const Vector &h,
                                 const Vector &g,
                                 const Vector &u) const
@@ -316,6 +359,11 @@ void Line3D::evalShapeGradients(const Vector &h,
   g = g_dummy(0, ALL);
 }
 
+/// @brief Evaluate shape functions, gradients, and second derivatives.
+/// @param[out] h Shape function value vector
+/// @param[out] g Shape function gradient vector
+/// @param[out] gg Shape function second derivative vector
+/// @param[in] u Local coordinate vector
 void Line3D::evalShapeGradGrads(const Vector &h,
                                 const Vector &g,
                                 const Vector &gg,
@@ -329,6 +377,8 @@ void Line3D::evalShapeGradGrads(const Vector &h,
   gg = gg_dummy(0, ALL);
 }
 
+/// @brief Get shape function values at the integration points.
+/// @return Matrix of shape function values
 Matrix Line3D::getShapeFunctions() const
 {
   return intLine_->getShapeFunctions();
