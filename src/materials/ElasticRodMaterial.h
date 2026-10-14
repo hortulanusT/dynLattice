@@ -104,6 +104,7 @@ class ElasticRodMaterial : public Material
   virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
 
  protected:
+  /// @brief Destroy the elastic rod material
   ~ElasticRodMaterial();
 
  protected:

@@ -105,6 +105,7 @@ class CSVDataPrinter : public DataPrinter
        const Properties &globdat) override;
 
  protected:
+  /// @brief Destroy the CSV data printer
   virtual ~CSVDataPrinter();
 
  private:

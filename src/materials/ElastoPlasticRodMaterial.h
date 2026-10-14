@@ -97,6 +97,7 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
  protected:
+  /// @brief Destroy the elasto-plastic rod material
   ~ElastoPlasticRodMaterial();
 
  protected:
