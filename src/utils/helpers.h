@@ -10,6 +10,7 @@
 
 #include <jem/base/Array.h>
 #include <jem/base/CString.h>
+#include <jem/base/tuple/Tuple.h>
 #include <jem/numeric/Quaternion.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/func/Function.h>

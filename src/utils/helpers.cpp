@@ -6,6 +6,37 @@
  */
 #include "utils/helpers.h"
 
+namespace
+{
+typedef jem::Tuple<double, 3> Vec3;
+typedef jem::Tuple<double, 3, 3> Mat3;
+
+// fill a skew-symmetric matrix from a 3-vector
+inline void skew3(Mat3 &S, const Vec3 &v)
+{
+  S = 0.;
+  S(0, 1) = -1 * v[2];
+  S(0, 2) = 1 * v[1];
+  S(1, 2) = -1 * v[0];
+  S(1, 0) = 1 * v[2];
+  S(2, 0) = -1 * v[1];
+  S(2, 1) = 1 * v[0];
+}
+
+// C = A * B without heap allocation (C must not alias A or B)
+inline void mul3(Mat3 &C, const Mat3 &A, const Mat3 &B)
+{
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+    {
+      double sum = 0.;
+      for (int k = 0; k < 3; k++)
+        sum += A(i, k) * B(k, j);
+      C(i, j) = sum;
+    }
+}
+} // namespace
+
 namespace jive_helpers
 {
 Vector funcGrad(const Ref<Function> func, const Vector &args)
@@ -102,7 +133,12 @@ void logMat(const Vector &rv, const Matrix &R)
   double tr_R = trace(R) <= 3. ? trace(R) : 3.; // trace of the matrix
 
   theta = acos((tr_R - 1.) / 2.);
-  rv = unskew(Matrix(R - R.transpose()));
+
+  // axial vector of R - R^T
+  rv[0] = (R(2, 1) - R(1, 2)) - (R(1, 2) - R(2, 1));
+  rv[1] = (R(0, 2) - R(2, 0)) - (R(2, 0) - R(0, 2));
+  rv[2] = (R(1, 0) - R(0, 1)) - (R(0, 1) - R(1, 0));
+  rv /= 2.;
 
   if (jem::isTiny(theta))
     rv *= 1 / 2.; // infinitesimal rotation
@@ -138,62 +174,86 @@ void mat2vec(const Vector &vec, const Matrix &mat)
 
 void expVec(const Matrix &Exp, const Vector &psi)
 {
-  Exp = eye();
   const double theta = norm2(psi);
+  const Vec3 p = {psi[0], psi[1], psi[2]};
 
   if (jem::isTiny(theta))
-    Exp += skew(psi); // infinitesimal rotation
+  {
+    Mat3 S;
+    skew3(S, p);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        Exp(i, j) = (i == j ? 1. : 0.) + S(i, j); // infinitesimal rotation
+  }
   else
   {
-    const Vector k(psi.size());
-    const Matrix K(psi.size(), psi.size());
+    const Vec3 k = {p[0] / theta, p[1] / theta, p[2] / theta};
+    Mat3 K, KK;
+    skew3(K, k);
+    mul3(KK, K, K);
 
-    k = psi / theta;
-    K = skew(k);
-
-    Exp += sin(theta) * K;
-    Exp += (1 - cos(theta)) * matmul(K, K);
+    const double s = sin(theta);
+    const double c = 1 - cos(theta);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+      {
+        double e = (i == j ? 1. : 0.);
+        e += s * K(i, j);
+        e += c * KK(i, j);
+        Exp(i, j) = e;
+      }
   }
 }
 
 void expVecP(const Matrix &ExpP, const Vector &psi, const Vector &psiP)
 {
   const double theta = norm2(psi);
+  const Vec3 p = {psi[0], psi[1], psi[2]};
+  const Vec3 pP = {psiP[0], psiP[1], psiP[2]};
 
   if (theta < TINY)
   {
-    ExpP = skew(psiP);
+    Mat3 S;
+    skew3(S, pP);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        ExpP(i, j) = S(i, j);
     return;
   }
-  // TEST_NO_CONTEXT(skew(psiP))
 
   // derivative of norm
   const double thetaP = dot(psi, psiP) / theta;
 
-  const Vector k(psi.size());
-  const Vector kP(psi.size());
-  const Matrix K(psi.size(), psi.size());
-  const Matrix KP(psi.size(), psi.size());
+  Vec3 k, kP;
+  for (int i = 0; i < 3; i++)
+  {
+    k[i] = p[i] / theta;
+    // Quotient rule
+    kP[i] = (pP[i] * theta - p[i] * thetaP) / theta / theta;
+  }
 
-  k = psi / theta;
-  // Quotient rule
-  kP = (psiP * theta - psi * thetaP) / theta / theta;
+  Mat3 K, KP, KK, KKP, KPK;
+  skew3(K, k);
+  skew3(KP, kP);
+  mul3(KK, K, K);
+  mul3(KKP, K, KP);
+  mul3(KPK, KP, K);
 
-  K = skew(k);
-  KP = skew(kP);
-
-  // Exp  = eye();
-  ExpP = 0;
-  // TEST_NO_CONTEXT(ExpP)
-  // Exp   += sin(theta) * K;
-  ExpP += cos(theta) * thetaP * K;
-  ExpP += sin(theta) * KP;
-  // TEST_NO_CONTEXT(ExpP)
-  // Exp   += (1-cos(theta)) * matmul ( K, K );
-  ExpP += sin(theta) * thetaP * matmul(K, K);
-  ExpP += (1 - cos(theta)) * matmul(K, KP);
-  ExpP += (1 - cos(theta)) * matmul(KP, K);
-  // TEST_NO_CONTEXT(ExpP)
+  const double s = sin(theta);
+  const double c = 1 - cos(theta);
+  const double cosThetaP = cos(theta) * thetaP;
+  const double sinThetaP = s * thetaP;
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+    {
+      double e = 0.;
+      e += cosThetaP * K(i, j);
+      e += s * KP(i, j);
+      e += sinThetaP * KK(i, j);
+      e += c * KKP(i, j);
+      e += c * KPK(i, j);
+      ExpP(i, j) = e;
+    }
 }
 
 double trace(const Matrix &mat)

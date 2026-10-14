@@ -12,6 +12,7 @@
 #include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/numeric/algebra/MatmulChain.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/numeric/algebra/utilities.h>
 
@@ -131,6 +132,7 @@ void Line3D::getRotations_(const Cubix &Ri,
                            const Matrix &Lambda_r) const
 {
   Matrix ip_psi(globalRank(), ipointCount());
+  jem::numeric::MatmulChain<double, 2> mc2;
 
   // get the _local_ rotations in the integration points
   Matrix shapeFuncs = getShapeFunctions();
@@ -142,7 +144,7 @@ void Line3D::getRotations_(const Cubix &Ri,
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec(Ri[iIp], ip_psi[iIp]);
-    Ri[iIp] = matmul(Lambda_r, Ri[iIp]);
+    Ri[iIp] = mc2.matmul(Lambda_r, Ri[iIp]);
   }
 }
 
@@ -282,10 +284,12 @@ void Line3D::getRotationGradients_(const Cubix &LambdaP,
   psi = matmul(node_psi, shapes);
   psiP = matmul(node_psi, grads);
 
+  jem::numeric::MatmulChain<double, 2> mc2;
+
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     expVecP(LambdaP[ip], psi[ip], psiP[ip]);
-    LambdaP[ip] = matmul(Lambda_r, LambdaP[ip]);
+    LambdaP[ip] = mc2.matmul(Lambda_r, LambdaP[ip]);
   }
 }
 
@@ -298,11 +302,12 @@ void Line3D::getRefRot_(const Matrix Lambda_r,
   const double c = 0.5;
 
   Vector phi_IJ(globalRank());
+  jem::numeric::MatmulChain<double, 2> mc2;
 
-  logMat(phi_IJ, matmul(Rn[I].transpose(), Rn[J]));
+  logMat(phi_IJ, mc2.matmul(Rn[I].transpose(), Rn[J]));
   phi_IJ = c * phi_IJ;
   expVec(Lambda_r, phi_IJ);
-  Lambda_r = matmul(Rn[I], Lambda_r);
+  Lambda_r = mc2.matmul(Rn[I], Lambda_r);
 }
 
 void Line3D::getNodeRotVecs_(const Matrix psi,
@@ -311,6 +316,8 @@ void Line3D::getNodeRotVecs_(const Matrix psi,
 {
   getRefRot_(Lambda_r, Rn);
 
+  jem::numeric::MatmulChain<double, 2> mc2;
+
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    logMat(psi[iNode], matmul(Lambda_r.transpose(), Rn[iNode]));
+    logMat(psi[iNode], mc2.matmul(Lambda_r.transpose(), Rn[iNode]));
 }
