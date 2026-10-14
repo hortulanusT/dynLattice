@@ -140,6 +140,11 @@ SpecialCosseratRodModel::SpecialCosseratRodModel
   // get the nonmutable DOF-Space into the class member
   dofs_ = dofs;
 
+  // the cached node dofs depend on the numbering of the DofSpace
+  nodeDofsValid_ = false;
+  jem::util::connect(dofs_->newSizeEvent, this, &SpecialCosseratRodModel::invalidateNodeDofs_);
+  jem::util::connect(dofs_->newOrderEvent, this, &SpecialCosseratRodModel::invalidateNodeDofs_);
+
   // get the material
   props.set(joinNames(myName_, "material.ipCount"), shapeK_->ipointCount());
   props.set(joinNames(myName_, "material.elemCount"), rodElems_.size());
@@ -780,6 +785,26 @@ void SpecialCosseratRodModel::getStresses_(
   }
 }
 
+void SpecialCosseratRodModel::updNodeDofs_() const
+{
+  nodeDofs_.resize(jtypes_.size(), allNodes_.size());
+
+  IdxVector idofs(jtypes_.size());
+
+  for (idx_t inode = 0; inode < allNodes_.size(); inode++)
+  {
+    dofs_->getDofIndices(idofs, inode, jtypes_);
+    nodeDofs_[inode] = idofs;
+  }
+
+  nodeDofsValid_ = true;
+}
+
+void SpecialCosseratRodModel::invalidateNodeDofs_()
+{
+  nodeDofsValid_ = false;
+}
+
 void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
                                                const Matrix &nodeU,
                                                const Cubix &nodeLambda,
@@ -787,6 +812,9 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
                                                const IdxVector &inodes) const
 {
   const idx_t nodeCount = inodes.size();
+
+  if (!nodeDofsValid_)
+    updNodeDofs_();
 
   IdxVector idofs_trans(TRANS_DOF_COUNT);
   IdxVector idofs_rot(ROT_DOF_COUNT);
@@ -797,8 +825,8 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
 
   for (idx_t inode = 0; inode < nodeCount; inode++)
   {
-    dofs_->getDofIndices(idofs_trans, inodes[inode], transTypes_);
-    dofs_->getDofIndices(idofs_rot, inodes[inode], rotTypes_);
+    idofs_trans.ref(nodeDofs_(TRANS_PART, inodes[inode]));
+    idofs_rot.ref(nodeDofs_(ROT_PART, inodes[inode]));
 
     nodeU[inode] = disp[idofs_trans];
     expVec(nodeLambda[inode], Vector(disp[idofs_rot]));
@@ -812,6 +840,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t elemCount = rodElems_.size();
@@ -879,12 +910,12 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        dofs_->getDofIndices(Idofs, inodes[Inode], jtypes_);
+        Idofs.ref(nodeDofs_[inodes[Inode]]);
 
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         {
           // SUBHEADER2( Inode, Jnode)
-          dofs_->getDofIndices(Jdofs, inodes[Jnode], jtypes_);
+          Jdofs.ref(nodeDofs_[inodes[Jnode]]);
 
           // Stiffness contribution S ( element stiffness matrix )
           addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
@@ -910,6 +941,9 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t elemCount = rodElems_.size();
@@ -950,7 +984,7 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     {
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        dofs_->getDofIndices(Idofs, inodes[Inode], jtypes_);
+        Idofs.ref(nodeDofs_[inodes[Inode]]);
 
         fint[Idofs] += weights[ip] * matmul(XI[ip][Inode], stress[ip]);
       }
@@ -962,6 +996,9 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
                                             const Vector &velo,
                                             const Ref<AbstractMatrix> mass) const
 {
+
+  if (!nodeDofsValid_)
+    updNodeDofs_();
   IdxVector idofs(ROT_DOF_COUNT);
   Vector temp(velo.size());
   Vector omega(ROT_DOF_COUNT);
@@ -988,7 +1025,7 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
-    dofs_->getDofIndices(idofs, inode, rotTypes_);
+    idofs.ref(nodeDofs_(ROT_PART, inode));
 
     if (sparse)
     {
@@ -1013,6 +1050,9 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
 void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   // REPORT(JEM_FUNC)
   MatmulChain<double, 3> mc3;
 
@@ -1056,10 +1096,10 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
-      dofs_->getDofIndices(idofs, inodes[inode], jtypes_);
+      idofs.ref(nodeDofs_[inodes[inode]]);
       for (idx_t jnode = 0; jnode < nodeCount; jnode++)
       {
-        dofs_->getDofIndices(jdofs, inodes[jnode], jtypes_);
+        jdofs.ref(nodeDofs_[inodes[jnode]]);
 
         spatialInertia = 0;
 

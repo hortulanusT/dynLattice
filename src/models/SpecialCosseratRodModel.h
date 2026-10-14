@@ -23,6 +23,7 @@
 #include <jem/numeric/Quaternion.h>
 #include <jem/numeric/algebra.h>
 #include <jem/numeric/algebra/matmul.h>
+#include <jem/util/Event.h>
 #include <jem/util/Properties.h>
 #include <jem/util/StringUtils.h>
 
@@ -64,6 +65,7 @@ using jem::numeric::Quaternion;
 using jem::util::Properties;
 
 using jive::BoolVector;
+using jive::IdxMatrix;
 using jive::algebra::AbstractMatrix;
 using jive::algebra::FlexMBuilder;
 using jive::algebra::MatrixBuilder;
@@ -310,6 +312,12 @@ class SpecialCosseratRodModel : public Model
                     const bool spatial = true,
                     const String &loadCase = "") const;
 
+  /// @brief Rebuild the cached dof indices of all nodes
+  void updNodeDofs_() const;
+
+  /// @brief Mark the cached dof indices as outdated (DofSpace changed)
+  void invalidateNodeDofs_();
+
   /// @brief Format the displacements nicely
   /// @param[out] nodePhi_0  Node positions, 3 x nodeCount
   /// @param[out] nodeU  Node displacements, 3 x nodeCount
@@ -361,6 +369,9 @@ class SpecialCosseratRodModel : public Model
   IdxVector transTypes_; ///< Translational DOF types
   IdxVector rotTypes_;   ///< Rotational DOF types
   IdxVector jtypes_;     ///< Joint DOF types
+
+  mutable IdxMatrix nodeDofs_;   ///< Cached dof indices per node (jtypes_ x all nodes)
+  mutable bool nodeDofsValid_;   ///< False after the DofSpace changed
 
   bool symOnly_;        ///< Symmetric tangent stiffness flag
   Vector thickFact_;    ///< Thickening factors
