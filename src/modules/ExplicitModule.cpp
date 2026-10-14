@@ -103,6 +103,7 @@ Module::Status ExplicitModule::init
       dofsSO3_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
       dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, dofsSO3_[i]);
     }
+    updRotMask_();
     myConf.set(SO3_DOFS, SO3_dof_names);
 
     String modelType;
@@ -441,6 +442,7 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     rdofs_.resize(dofsSO3_.size(), dofs_->getItems()->size());
     for (idx_t idof = 0; idof < dofsSO3_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, dofsSO3_[idof]);
+    updRotMask_();
   }
 
   if (mode_ == LUMPED)
@@ -456,6 +458,24 @@ void ExplicitModule::updateMass_(const Properties &globdat)
   }
 
   valid_ = true;
+}
+
+//-----------------------------------------------------------------------
+//   updRotMask_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::updRotMask_()
+{
+  isRotDof_.resize(dofs_->dofCount());
+  isRotDof_ = false;
+
+  for (idx_t iRot = 0; iRot < rdofs_.size(0); iRot++)
+    for (idx_t iNode = 0; iNode < rdofs_.size(1); iNode++)
+    {
+      const idx_t idof = rdofs_(iRot, iNode);
+      if (idof >= 0 && idof < isRotDof_.size())
+        isRotDof_[idof] = true;
+    }
 }
 
 //-----------------------------------------------------------------------
@@ -495,7 +515,7 @@ ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
   Vector y_diff = Vector(y_pre - y_cor);
   for (idx_t i = 0; i < y_diff.size(); i++)
-    if (!jem::testany(rdofs_ == i))
+    if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;
   return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }

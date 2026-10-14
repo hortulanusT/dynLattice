@@ -49,6 +49,7 @@ using jem::idx_t;
 using jem::newInstance;
 using jem::numeric::Function;
 
+using jive::BoolVector;
 using jive::IdxMatrix;
 using jive::Properties;
 using jive::Ref;
@@ -182,6 +183,8 @@ class ExplicitModule : public SolverModule
 
   /// @brief invalidate_ current state
   void invalidate_();
+  /// @brief Rebuild the rotational DOF mask from rdofs_
+  void updRotMask_();
 
   /// @brief Adams-Bashforth 2-step update
   /// @param delta_y Displacement increment
@@ -263,6 +266,7 @@ class ExplicitModule : public SolverModule
   Vector massInv_;        ///< Inverse mass matrix
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping
+  BoolVector isRotDof_;   ///< Mask of rotational DOFs (rebuilt with rdofs_)
   /// @}
 
   /// @name System components
