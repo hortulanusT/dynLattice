@@ -40,10 +40,10 @@ class MaterialFactory : public Factory
 
   /// @brief Constructor function pointer for material creation.
   ///
-  /// @param name Material instance identifier
-  /// @param conf Configuration properties for output
-  /// @param props Input properties with material parameters
-  /// @param globdat Global simulation data
+  /// @param[in] name  Material instance identifier
+  /// @param[out] conf  Configuration properties for output
+  /// @param[in] props  Input properties with material parameters
+  /// @param[in] globdat  Global simulation data
   /// @returns Reference to newly created Material
   typedef Ref<Material> (*Constructor)(const String &name,
                                        const Properties &conf,
@@ -52,13 +52,13 @@ class MaterialFactory : public Factory
 
   /// @brief Register a material type with the factory.
   ///
-  /// @param type Material type identifier (e.g., "ElasticRodMaterial")
-  /// @param ctor Constructor function matching Constructor signature
+  /// @param[in] type  Material type identifier (e.g., "ElasticRodMaterial")
+  /// @param[in] ctor  Constructor function matching Constructor signature
   static void declare(const String &type, Constructor ctor);
 
   /// @brief Check if a material type is registered.
   ///
-  /// @param type Material type identifier to check
+  /// @param[in] type  Material type identifier to check
   /// @returns true if registered, false otherwise
   static bool exists(const String &type);
 
@@ -69,11 +69,11 @@ class MaterialFactory : public Factory
 
   /// @brief Create material instance with explicit type.
   ///
-  /// @param type Material type identifier
-  /// @param name Material instance name
-  /// @param conf Configuration properties for output
-  /// @param props Input properties with parameters
-  /// @param globdat Global simulation data
+  /// @param[in] type  Material type identifier
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Configuration properties for output
+  /// @param[in] props  Input properties with parameters
+  /// @param[in] globdat  Global simulation data
   /// @returns Reference to created Material (null if type not registered)
   static Ref<Material> newInstance(const String &type,
                                    const String &name,
@@ -83,10 +83,10 @@ class MaterialFactory : public Factory
 
   /// @brief Create material instance with type from properties.
   ///
-  /// @param name Material instance name
-  /// @param conf Configuration properties for output
-  /// @param props Input properties containing type and parameters
-  /// @param globdat Global simulation data
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Configuration properties for output
+  /// @param[in] props  Input properties containing type and parameters
+  /// @param[in] globdat  Global simulation data
   /// @returns Reference to created Material
   /// @throws jive::util::noSuchTypeError if type not registered
   static Ref<Material> newInstance(const String &name,
