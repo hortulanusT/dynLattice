@@ -66,53 +66,53 @@ class AdaptiveStepModule : public SolverModule
   /// @}
 
   /// @brief Constructor with optional nonlinear solver
-  /// @param name Module name
-  /// @param solver Nonlinear solver module
+  /// @param[in] name  Module name
+  /// @param[in] solver  Nonlinear solver module
   explicit AdaptiveStepModule(const String &name = "AdaptiveStep",
                               Ref<NonlinModule> solver = nullptr);
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Configure the module from properties
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   virtual void configure(const Properties &props,
                          const Properties &globdat) override;
 
   /// @brief Get current module configuration
-  /// @param props Actually used configuration properties (output)
-  /// @param globdat Global data container
+  /// @param[out] props  Actually used configuration properties (output)
+  /// @param[in] globdat  Global data container
   virtual void getConfig(const Properties &props,
                          const Properties &globdat) const override;
 
   /// @brief Advance to next time step
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void advance(const Properties &globdat) override;
 
   /// @brief Solve the current step with adaptive control
-  /// @param info Solver information
-  /// @param globdat Global data container
+  /// @param[in] info  Solver information
+  /// @param[in] globdat  Global data container
   virtual void solve(const Properties &info,
                      const Properties &globdat) override;
 
   /// @brief Cancel current solution attempt
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void cancel(const Properties &globdat) override;
 
   /// @brief Commit current solution
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return true if commit was successful
   virtual bool commit(const Properties &globdat) override;
 
   /// @brief Set convergence precision
-  /// @param eps Convergence tolerance
+  /// @param[in] eps  Convergence tolerance
   virtual inline void setPrecision(double eps) override;
 
   /// @brief Get current convergence precision
@@ -120,10 +120,10 @@ class AdaptiveStepModule : public SolverModule
   virtual inline double getPrecision() const override;
 
   /// @brief Factory method for creating new AdaptiveStepModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new AdaptiveStepModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -162,7 +162,7 @@ class AdaptiveStepModule : public SolverModule
 //-----------------------------------------------------------------------
 
 /// @brief Set convergence precision for the underlying solver
-/// @param eps Convergence tolerance
+/// @param[in] eps  Convergence tolerance
 void AdaptiveStepModule::setPrecision(double eps)
 {
   solver_->setPrecision(eps);
