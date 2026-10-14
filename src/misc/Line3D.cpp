@@ -38,24 +38,16 @@ using jive::geom::StdLine4;
 
 namespace
 {
-// C = op(A) * op(B) for 3x3 matrices without heap allocation (C may alias A or B)
-template <bool transA, bool transB>
+// C = A * B for 3x3 matrices; the product is formed on the stack first, so C may alias A or B
 inline void mul3(const jem::Array<double, 2> &C,
                  const jem::Array<double, 2> &A,
                  const jem::Array<double, 2> &B)
 {
-  double R[3][3];
+  jem::Tuple<double, 3, 3> T;
+  jem::numeric::matmul(T, A, B);
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
-    {
-      double sum = 0.;
-      for (int k = 0; k < 3; k++)
-        sum += (transA ? A(k, i) : A(i, k)) * (transB ? B(j, k) : B(k, j));
-      R[i][j] = sum;
-    }
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
-      C(i, j) = R[i][j];
+      C(i, j) = T(i, j);
 }
 } // namespace
 
@@ -166,7 +158,7 @@ void Line3D::getRotations_(const Cubix &Ri,
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec(Ri[iIp], ip_psi[iIp]);
-    mul3<false, false>(Ri[iIp], Lambda_r, Ri[iIp]);
+    mul3(Ri[iIp], Lambda_r, Ri[iIp]);
   }
 }
 
@@ -303,7 +295,7 @@ void Line3D::getRotationGradients_(const Cubix &LambdaP,
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     expVecP(LambdaP[ip], psi[ip], psiP[ip]);
-    mul3<false, false>(LambdaP[ip], Lambda_r, LambdaP[ip]);
+    mul3(LambdaP[ip], Lambda_r, LambdaP[ip]);
   }
 }
 
@@ -318,11 +310,11 @@ void Line3D::getRefRot_(const Matrix Lambda_r,
   Vector phi_IJ(globalRank());
 
   Matrix rel(globalRank(), globalRank());
-  mul3<true, false>(rel, Rn[I], Rn[J]);
+  mul3(rel, Rn[I].transpose(), Rn[J]);
   logMat(phi_IJ, rel);
   phi_IJ = c * phi_IJ;
   expVec(Lambda_r, phi_IJ);
-  mul3<false, false>(Lambda_r, Rn[I], Lambda_r);
+  mul3(Lambda_r, Rn[I], Lambda_r);
 }
 
 void Line3D::getNodeRotVecs_(const Matrix psi,
@@ -335,7 +327,7 @@ void Line3D::getNodeRotVecs_(const Matrix psi,
 
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
   {
-    mul3<true, false>(rel, Lambda_r, Rn[iNode]);
+    mul3(rel, Lambda_r.transpose(), Rn[iNode]);
     logMat(psi[iNode], rel);
   }
 }
