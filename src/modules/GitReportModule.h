@@ -35,32 +35,32 @@ class GitReportModule : public Module
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit GitReportModule(const String &name = "GitReport");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Run Git reporting
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown the module
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new GitReportModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new GitReportModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,

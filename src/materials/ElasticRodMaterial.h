@@ -45,12 +45,21 @@ class ElasticRodMaterial : public Material
   JEM_DECLARE_CLASS(ElasticRodMaterial, Material);
 
   /// @brief Constructor with configuration and global data
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
   ElasticRodMaterial(const String &name,
                      const Properties &conf,
                      const Properties &props,
                      const Properties &globdat);
 
   /// @brief Factory method for material creation
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
+  /// @return Reference to the created material
   static Ref<Material> makeNew(const String &name, const Properties &conf,
                                const Properties &props, const Properties &globdat);
 
@@ -59,8 +68,8 @@ class ElasticRodMaterial : public Material
 
   /// @brief Configure material properties including cross-sectional geometry
   ///
-  /// @param props Properties containing configuration parameters
-  /// @param globdat Global data container with simulation context
+  /// @param[in] props  Properties containing configuration parameters
+  /// @param[in] globdat  Global data container with simulation context
   /// @throws jem::IllegalInputException if negative material properties are provided
   virtual void configure(const Properties &props, const Properties &globdat) override;
 

@@ -76,29 +76,29 @@ class SymBCModel : public Model
   JEM_DECLARE_CLASS(SymBCModel, Model);
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit SymBCModel(const String &name,
                       const Properties &conf,
                       const Properties &props,
                       const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new SymBCModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -110,7 +110,7 @@ class SymBCModel : public Model
 
  private:
   /// @brief Initialize model
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Set symmetry constraints

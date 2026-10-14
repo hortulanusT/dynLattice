@@ -42,31 +42,31 @@ class PBCGroupOutputModule : public GroupOutputModule
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "pbcGroupOutput")
+  /// @param[in] name  Module name (default: "pbcGroupOutput")
   explicit PBCGroupOutputModule(const String &name = "pbcGroupOutput");
 
   /// @brief Initialize PBC output module
-  /// @param conf Configuration properties (output)
-  /// @param props User properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] props  User properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf, const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Run PBC output extraction
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown and finalize output
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new instances
-  /// @param name Module name
-  /// @param conf Configuration properties (output)
-  /// @param props User properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] props  User properties
+  /// @param[in] globdat  Global data container
   /// @return New module instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);
@@ -75,10 +75,10 @@ class PBCGroupOutputModule : public GroupOutputModule
   static void declare();
 
   /// @brief Generate strain/stress data set expressions
-  /// @param dim Spatial dimension
-  /// @param strains Include strain measures
-  /// @param stresses Include stress measures
-  /// @param dofNames DOF names for coordinate directions
+  /// @param[in] dim  Spatial dimension
+  /// @param[in] strains  Include strain measures
+  /// @param[in] stresses  Include stress measures
+  /// @param[in] dofNames  DOF names for coordinate directions
   /// @return Vector of data set expressions
   static StringVector getDataSets(const idx_t dim,
                                   const bool strains = false,
@@ -88,12 +88,12 @@ class PBCGroupOutputModule : public GroupOutputModule
 
  protected:
   /// @brief Generate CSV header string
-  /// @param existing Existing header content
+  /// @param[in] existing  Existing header content
   /// @return Complete header with PBC-specific columns
   String getHeader_(String existing) const;
 
   /// @brief Generate data set expressions
-  /// @param existing Existing data sets
+  /// @param[in] existing  Existing data sets
   /// @return Complete data sets with PBC-specific expressions
   StringVector getDataSets_(StringVector existing) const;
 

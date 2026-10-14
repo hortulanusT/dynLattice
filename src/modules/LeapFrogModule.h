@@ -36,12 +36,12 @@ class LeapFrogModule : public ExplicitModule
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "leapFrog")
+  /// @param[in] name  Module name (default: "leapFrog")
   explicit LeapFrogModule(const String &name = "leapFrog");
 
   /// @brief Solve using leap-frog integration scheme
-  /// @param info Solver information (output)
-  /// @param globdat Global data container
+  /// @param[out] info  Solver information (output)
+  /// @param[in] globdat  Global data container
   /// @details Performs one time step using the leap-frog algorithm:
   /// 1. Compute forces and accelerations at current time
   /// 2. Update velocities using current and previous accelerations
@@ -49,10 +49,10 @@ class LeapFrogModule : public ExplicitModule
   virtual void solve(const Properties &info, const Properties &globdat) override;
 
   /// @brief Factory method for creating new LeapFrogModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new LeapFrogModule instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);

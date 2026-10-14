@@ -85,29 +85,29 @@ class SpringMassModel : public Model
   /// @}
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit SpringMassModel(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new SpringMassModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -122,7 +122,7 @@ class SpringMassModel : public Model
   virtual ~SpringMassModel();
 
   /// @brief Apply constraints to the spring-mass system
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return true if constraints were applied successfully
   virtual bool applyConstraints_(const Properties &globdat) const;
 

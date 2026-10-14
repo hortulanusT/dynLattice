@@ -62,10 +62,10 @@ class JointContactModel : public Model
   /// @}
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit JointContactModel
 
       (const String &name,
@@ -74,9 +74,9 @@ class JointContactModel : public Model
        const Properties &globdat);
 
   /// @brief Handle model actions for contact mechanics
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -85,10 +85,10 @@ class JointContactModel : public Model
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new JointContactModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new JointContactModel instance
   static Ref<Model> makeNew
 
@@ -102,17 +102,17 @@ class JointContactModel : public Model
 
  protected:
   /// @brief Find pairs of joints in contact
-  /// @param disp Displacement vector of all nodes
+  /// @param[in] disp  Displacement vector of all nodes
   virtual void findContacts_
 
       (const Vector &disp);
 
   /// @brief Compute contact effects for detected contact pairs
-  /// @param mbld Stiffness matrix builder
-  /// @param fint Internal force vector
-  /// @param nodesA Node IDs of first contact side
-  /// @param nodesB Node IDs of second contact side
-  /// @param disp Displacement vector of all elements
+  /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
+  /// @param[in,out] fint  Internal force vector, updated with contact contributions
+  /// @param[in] nodesA  Node IDs of first contact side
+  /// @param[in] nodesB  Node IDs of second contact side
+  /// @param[in] disp  Displacement vector of all elements
   virtual void computeContacts_
 
       (MatrixBuilder &mbld,
@@ -122,10 +122,10 @@ class JointContactModel : public Model
        const Vector &disp);
 
   /// @brief Compute single contact interaction
-  /// @param contactStiffness Contact stiffness matrix (output)
-  /// @param contactForce Contact force vector (output)
-  /// @param posA Position of first joint
-  /// @param posB Position of second joint
+  /// @param[out] contactStiffness  Contact stiffness matrix
+  /// @param[out] contactForce  Contact force vector
+  /// @param[in] posA  Position of first joint
+  /// @param[in] posB  Position of second joint
   virtual void computeContact_
 
       (Matrix contactStiffness,

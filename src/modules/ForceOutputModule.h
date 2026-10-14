@@ -73,32 +73,32 @@ class ForceOutputModule : public Module
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit ForceOutputModule(const String &name = "ForceOutput");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Run the force output operation
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown the module and close output files
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new ForceOutputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new ForceOutputModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -114,14 +114,14 @@ class ForceOutputModule : public Module
 
  private:
   /// @brief Write file header with column names
-  /// @param time Include time column flag
+  /// @param[in] time  Include time column flag
   void writeHeader_(const bool time = false);
 
   /// @brief Write data line to output file
-  /// @param data Force data vector
-  /// @param step Time step number
-  /// @param type Force type identifier
-  /// @param time Current simulation time
+  /// @param[in] data  Force data vector
+  /// @param[in] step  Time step number
+  /// @param[in] type  Force type identifier
+  /// @param[in] time  Current simulation time
   void writeLine_(const Vector &data,
                   const idx_t step,
                   const String type,

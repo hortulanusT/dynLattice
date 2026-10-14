@@ -53,14 +53,14 @@ class LenientNonlinModule : public NonlinModule
 
   JEM_DECLARE_CLASS(LenientNonlinModule, NonlinModule);
   /// @brief Constructor
-  /// @param name Module name (default: "lenient")
+  /// @param[in] name  Module name (default: "lenient")
   explicit LenientNonlinModule(const String &name = "lenient");
 
   /// @brief Factory method for creating new LenientNonlinModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new LenientNonlinModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -71,9 +71,9 @@ class LenientNonlinModule : public NonlinModule
   static void declare();
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Initializes the base NonlinModule and retrieves the maximum
   /// iteration limit for lenient convergence behavior
@@ -82,7 +82,7 @@ class LenientNonlinModule : public NonlinModule
                       const Properties &globdat) override;
 
   /// @brief Run the lenient nonlinear solver
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Executes the nonlinear solution process with lenient convergence
   /// criteria. If convergence fails after maxIter_ iterations, accepts the
@@ -90,15 +90,15 @@ class LenientNonlinModule : public NonlinModule
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Configure module parameters
-  /// @param props Configuration properties
-  /// @param globdat Global data container
+  /// @param[in] props  Configuration properties
+  /// @param[in] globdat  Global data container
   /// @details Delegates to base class configuration
   virtual void configure(const Properties &props,
                          const Properties &globdat) override;
 
   /// @brief Get current configuration
-  /// @param conf Configuration properties (output)
-  /// @param globdat Global data container
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] globdat  Global data container
   /// @details Delegates to base class configuration retrieval
   virtual void getConfig(const Properties &conf,
                          const Properties &globdat) const override;

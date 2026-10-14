@@ -111,51 +111,51 @@ class ExplicitModule : public SolverModule
   /// @}
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Shutdown the module
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Configure the module from properties
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   virtual void configure(const Properties &props,
                          const Properties &globdat) override;
 
   /// @brief Get current module configuration
-  /// @param props Actually used configuration properties (output)
-  /// @param globdat Global data container
+  /// @param[out] props  Actually used configuration properties (output)
+  /// @param[in] globdat  Global data container
   virtual void getConfig(const Properties &props,
                          const Properties &globdat) const override;
 
   /// @brief Advance to next time step
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void advance(const Properties &globdat) override;
 
   /// @brief Solve current time step (pure virtual)
-  /// @param info Solver information
-  /// @param globdat Global data container
+  /// @param[out] info  Solver information
+  /// @param[in] globdat  Global data container
   virtual void solve(const Properties &info,
                      const Properties &globdat) override = 0;
 
   /// @brief Cancel current solution attempt
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void cancel(const Properties &globdat) override;
 
   /// @brief Compute next step size and commit solution
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return true if step can be accepted
   virtual bool commit(const Properties &globdat) override;
 
   /// @brief Set convergence precision
-  /// @param eps Convergence tolerance
+  /// @param[in] eps  Convergence tolerance
   virtual void setPrecision(double eps) override;
 
   /// @brief Get current convergence precision
@@ -171,14 +171,14 @@ class ExplicitModule : public SolverModule
 
  protected:
   /// @brief Protected constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit ExplicitModule(const String &name = "");
 
   /// @brief Protected destructor
   virtual ~ExplicitModule();
 
   /// @brief Update mass matrix
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void updateMass_(const Properties &globdat);
 
   /// @brief invalidate_ current state
@@ -187,51 +187,51 @@ class ExplicitModule : public SolverModule
   void updRotMask_();
 
   /// @brief Adams-Bashforth 2-step update
-  /// @param delta_y Displacement increment
-  /// @param f_cur Current force vector
-  /// @param f_old Previous force vector
+  /// @param[out] delta_y  Displacement increment
+  /// @param[in] f_cur  Current force vector
+  /// @param[in] f_old  Previous force vector
   inline void ABupdate(const Vector &delta_y,
                        const Vector &f_cur,
                        const Vector &f_old) const;
 
   /// @brief Adams-Bashforth 1-step update (explicit Euler)
-  /// @param delta_y Displacement increment
-  /// @param f_cur Current force vector
+  /// @param[out] delta_y  Displacement increment
+  /// @param[in] f_cur  Current force vector
   inline void ABupdate(const Vector &delta_y,
                        const Vector &f_cur) const;
 
   /// @brief Update displacement vectors with optional SO(3) handling
-  /// @param y_new New displacement vector
-  /// @param y_old Old displacement vector
-  /// @param delta_y Displacement increment
-  /// @param rot Flag for rotational DOFs
+  /// @param[out] y_new  New displacement vector
+  /// @param[in] y_old  Old displacement vector
+  /// @param[in] delta_y  Displacement increment
+  /// @param[in] rot  Flag for rotational DOFs
   void updateVec(const Vector &y_new,
                  const Vector &y_old,
                  const Vector &delta_y,
                  const bool rot = false);
 
   /// @brief Get acceleration and return resulting force vector
-  /// @param a Acceleration vector (output)
-  /// @param cons Constraint manager
-  /// @param fres Resulting force vector
-  /// @param globdat Global data container
+  /// @param[out] a  Acceleration vector
+  /// @param[in] cons  Constraint manager
+  /// @param[in] fres  Resulting force vector
+  /// @param[in] globdat  Global data container
   void getAcce(const Vector &a,
                const Ref<Constraints> &cons,
                const Vector &fres,
                const Properties &globdat);
 
   /// @brief Get force vector
-  /// @param fint Internal force vector
-  /// @param fext External force vector
-  /// @param globdat Global data container
+  /// @param[out] fint  Internal force vector
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
   /// @return Resulting force vector (external - internal)
   Vector getForce(const Vector &fint,
                   const Vector &fext,
                   const Properties &globdat);
 
   /// @brief Get solution quality measure
-  /// @param y_pre Predicted solution
-  /// @param y_cor Corrected solution
+  /// @param[in] y_pre  Predicted solution
+  /// @param[in] y_cor  Corrected solution
   /// @return Quality measure
   double getQuality(const Vector &y_pre,
                     const Vector &y_cor);

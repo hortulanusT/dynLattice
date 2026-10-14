@@ -64,23 +64,23 @@ class GroupInputModule : public Module
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit GroupInputModule(const String &name = "groupInput");
 
   /// @brief Initialize the module and create groups
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Factory method for creating new GroupInputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new GroupInputModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -91,6 +91,7 @@ class GroupInputModule : public Module
   static void declare();
 
  protected:
+  /// @brief Protected destructor
   virtual ~GroupInputModule();
 
  private:
@@ -98,15 +99,15 @@ class GroupInputModule : public Module
   idx_t numNodes_;
 
   /// @brief Configure module from properties
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   void configure_(const Properties &conf,
                   const Properties &props,
                   const Properties &globdat);
 
   /// @brief Create all node groups from global data
-  /// @param globdat Global data container with group definitions
+  /// @param[in] globdat  Global data container with group definitions
   void makeNodeGroups_(const Properties &globdat);
 
   //=======================================================================
@@ -127,15 +128,15 @@ class GroupInputModule : public Module
     ~NGroup_();
 
     /// @brief Configure node group from properties
-    /// @param conf Actually used configuration properties (output)
-    /// @param props Group specification properties
-    /// @param name Group name
+    /// @param[out] conf  Actually used configuration properties (output)
+    /// @param[in] props  Group specification properties
+    /// @param[in] name  Group name
     void configure(const Properties &conf,
                    const Properties &props,
                    const String &name);
 
     /// @brief Generate the node group and store in global data
-    /// @param globdat Global data container
+    /// @param[in] globdat  Global data container
     void makeGroup(const Properties &globdat);
 
     /// @name Class constants
@@ -156,18 +157,18 @@ class GroupInputModule : public Module
 
    private:
     /// @brief Find candidate nodes from element restrictions
-    /// @param elems Element set to search
-    /// @param globdat Global data container
+    /// @param[in] elems  Element set to search
+    /// @param[in] globdat  Global data container
     void findCandidates_(const ElementSet &elems,
                          const Properties &globdat);
 
     /// @brief Find nodes matching coordinate criteria
-    /// @param nodes Node set to search
+    /// @param[in] nodes  Node set to search
     void findNodes_(const NodeSet &nodes);
 
     /// @brief Store the generated node group
-    /// @param nodes Node set containing the nodes
-    /// @param globdat Global data container
+    /// @param[in] nodes  Node set containing the nodes
+    /// @param[in] globdat  Global data container
     void store_(const NodeSet &nodes,
                 const Properties &globdat);
 
@@ -219,15 +220,15 @@ class GroupInputModule : public Module
     ~EGroup_();
 
     /// @brief Configure element group from properties
-    /// @param conf Actually used configuration properties (output)
-    /// @param props Group specification properties
-    /// @param name Group name
+    /// @param[out] conf  Actually used configuration properties (output)
+    /// @param[in] props  Group specification properties
+    /// @param[in] name  Group name
     void configure(const Properties &conf,
                    const Properties &props,
                    const String &name);
 
     /// @brief Generate the element group and store in global data
-    /// @param globdat Global data container
+    /// @param[in] globdat  Global data container
     void makeGroup(const Properties &globdat);
 
     /// @name Class constants
@@ -248,14 +249,14 @@ class GroupInputModule : public Module
 
    private:
     /// @brief Find elements matching coordinate criteria
-    /// @param elems Element set to search
-    /// @param globdat Global data container
+    /// @param[in] elems  Element set to search
+    /// @param[in] globdat  Global data container
     void findElems_(const ElementSet &elems,
                     const Properties &globdat);
 
     /// @brief Store the generated element group
-    /// @param elems Element set containing the elements
-    /// @param globdat Global data container
+    /// @param[in] elems  Element set containing the elements
+    /// @param[in] globdat  Global data container
     void store_(const ElementSet &elems,
                 const Properties &globdat);
 

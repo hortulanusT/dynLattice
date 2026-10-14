@@ -37,12 +37,12 @@ class MilneDeviceModule : public ExplicitModule
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "MilneDevice")
+  /// @param[in] name  Module name (default: "MilneDevice")
   explicit MilneDeviceModule(const String &name = "MilneDevice");
 
   /// @brief Solve using Milne's device predictor-corrector method
-  /// @param info Solver information (output)
-  /// @param globdat Global data container
+  /// @param[out] info  Solver information (output)
+  /// @param[in] globdat  Global data container
   /// @details Performs one time step using predictor-corrector algorithm:
   /// 1. Predict velocities and displacements using Adams-Bashforth
   /// 2. Correct using Adams-Moulton with updated forces
@@ -50,10 +50,10 @@ class MilneDeviceModule : public ExplicitModule
   virtual void solve(const Properties &info, const Properties &globdat) override;
 
   /// @brief Factory method for creating new MilneDeviceModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new MilneDeviceModule instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);
@@ -66,9 +66,9 @@ class MilneDeviceModule : public ExplicitModule
 
  protected:
   /// @brief Update forces for corrector step
-  /// @param fint Internal force vector (modified)
-  /// @param fext External force vector
-  /// @param globdat Global data container
+  /// @param[in,out] fint  Internal force vector, modified in place
+  /// @param[in] fext  External force vector
+  /// @param[in] globdat  Global data container
   /// @return Resulting force vector (external - internal)
   /// @details In the corrector step, only internal forces change due to
   /// updated displacement field, so external forces remain constant
@@ -81,16 +81,16 @@ class MilneDeviceModule : public ExplicitModule
   /// @{
 
   /// @brief Adams-Moulton 2-step corrector (Trapezoidal rule)
-  /// @param delta_y Change in state variable (output)
-  /// @param f_pre Force at previous time step
-  /// @param f_cur Force at current time step
+  /// @param[out] delta_y  Change in state variable
+  /// @param[in] f_pre  Force at previous time step
+  /// @param[in] f_cur  Force at current time step
   /// @details Implements trapezoidal rule: Δy = Δt/2 * (f_prev + f_cur)
   inline void AMupdate_(const Vector &delta_y, const Vector &f_pre,
                         const Vector &f_cur) const;
 
   /// @brief Adams-Moulton 1-step corrector (Euler implicit)
-  /// @param delta_y Change in state variable (output)
-  /// @param f_pre Force at previous time step
+  /// @param[out] delta_y  Change in state variable
+  /// @param[in] f_pre  Force at previous time step
   /// @details Implements backward Euler: Δy = Δt * f_prev
   inline void AMupdate_(const Vector &delta_y, const Vector &f_pre) const;
   /// @}

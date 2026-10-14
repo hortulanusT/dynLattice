@@ -60,10 +60,10 @@ class FollowerLoadModel : public Model
   JEM_DECLARE_CLASS(FollowerLoadModel, Model);
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit FollowerLoadModel
 
       (const String &name,
@@ -72,9 +72,9 @@ class FollowerLoadModel : public Model
        const Properties &globdat);
 
   /// @brief Handle model actions (INIT, ADVANCE, GET_EXT_VECTOR)
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -83,10 +83,10 @@ class FollowerLoadModel : public Model
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new FollowerLoadModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new FollowerLoadModel instance
   static Ref<Model> makeNew
 
@@ -100,15 +100,15 @@ class FollowerLoadModel : public Model
 
  private:
   /// @brief Compute external force vector with current rotations
-  /// @param fext External force vector to modify
-  /// @param scale Load scale factor
-  /// @param globdat Global data container
+  /// @param[in,out] fext  External force vector with follower loads added
+  /// @param[in] scale  Load scale factor
+  /// @param[in] globdat  Global data container
   void get_ext_vec_(const Vector &fext,
                     const double scale,
                     const Properties &globdat) const;
 
   /// @brief Update rotation matrices based on current displacements
-  /// @param d Current displacement vector
+  /// @param[in] d  Current displacement vector
   /// @details Computes rotation matrices from rotational DOF values using exponential map
   void advance_rots_(const Vector &d) const;
 

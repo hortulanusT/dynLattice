@@ -98,29 +98,29 @@ class PeriodicBCModel : public Model
   };
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit PeriodicBCModel(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new PeriodicBCModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -132,13 +132,13 @@ class PeriodicBCModel : public Model
 
  private:
   /// @brief Initialize model
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Fix corner constraints
-  /// @param globdat Global data container
-  /// @param currentGrad Current gradient matrix
-  /// @param scale Scaling factor
+  /// @param[in] globdat  Global data container
+  /// @param[in] currentGrad  Current gradient matrix
+  /// @param[in] scale  Scaling factor
   void fixCorners_(const Properties &globdat,
                    const Matrix &currentGrad,
                    const double scale = NAN);
@@ -147,9 +147,9 @@ class PeriodicBCModel : public Model
   void setConstraints_();
 
   /// @brief Get external force vector
-  /// @param f External force vector
-  /// @param globdat Global data container
-  /// @param scale Scaling factor
+  /// @param[out] f  External force vector
+  /// @param[in] globdat  Global data container
+  /// @param[in] scale  Scaling factor
   void getExtVec_(const Vector &f,
                   const Properties &globdat,
                   const double scale = 1.);

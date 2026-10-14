@@ -76,13 +76,13 @@ class GroupOutputModule : public Module
   JEM_DECLARE_CLASS(GroupOutputModule, Module);
 
   /// @brief Constructor
-  /// @param name Module name (default: "groupOutput")
+  /// @param[in] name  Module name (default: "groupOutput")
   explicit GroupOutputModule(const String &name = "groupOutput");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Configures node and element groups, DOF specifications, and
   /// translates DOF names to indices. Performs initial data extraction.
@@ -90,17 +90,17 @@ class GroupOutputModule : public Module
                       const Properties &globdat) override;
 
   /// @brief Extract and store group-based output data
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Extracts state variables from all configured node and element groups
   /// and stores aggregated results in the global variables database
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Factory method for creating new GroupOutputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new GroupOutputModule instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props,

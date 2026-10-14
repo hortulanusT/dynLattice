@@ -77,32 +77,32 @@ class NeumannModel : public Model
   JEM_DECLARE_CLASS(NeumannModel, Model);
 
   /// @brief Constructor
-  /// @param name Model name
+  /// @param[in] name  Model name
   explicit NeumannModel(const String &name);
 
   /// @brief Configure the model from properties
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   virtual void configure(const Properties &props,
                          const Properties &globdat) override;
 
   /// @brief Get current model configuration
-  /// @param conf Actually used configuration properties (output)
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] globdat  Global data container
   virtual void getConfig(const Properties &conf,
                          const Properties &globdat) const override;
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Set load increment
-  /// @param incr New load increment value
+  /// @param[in] incr  New load increment value
   void setLoadIncr(double incr);
 
   /// @brief Get current load increment
@@ -110,10 +110,10 @@ class NeumannModel : public Model
   inline double getLoadIncr() const;
 
   /// @brief Create new NeumannModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -129,42 +129,42 @@ class NeumannModel : public Model
 
  private:
   /// @brief Initialize model
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Compute external force vector
-  /// @param fext External force vector
-  /// @param globdat Global data container
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
   void getExtVector_(const Vector &fext,
                      const Properties &globdat) const;
 
   /// @brief Compute external force vector with scaling
-  /// @param fext External force vector
-  /// @param globdat Global data container
-  /// @param scale Scaling factor
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
+  /// @param[in] scale  Scaling factor
   void getExtVector_(const Vector &fext,
                      const Properties &globdat,
                      const double scale) const;
 
   /// @brief Advance to next time step
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void advance_(const Properties &globdat);
 
   /// @brief Commit current step
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   void commit_(const Properties &params,
                const Properties &globdat);
 
   /// @brief Reduce step size
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   void reduceStep_(const Properties &params,
                    const Properties &globdat);
 
   /// @brief Increase step size
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   void increaseStep_(const Properties &params,
                      const Properties &globdat);
 

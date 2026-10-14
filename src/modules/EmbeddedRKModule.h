@@ -33,29 +33,29 @@ class EmbeddedRKModule : public ExplicitModule
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit EmbeddedRKModule(const String &name = "EmbeddedRK");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Solve using embedded Runge-Kutta method
-  /// @param info Solver information
-  /// @param globdat Global data container
+  /// @param[out] info  Solver information
+  /// @param[in] globdat  Global data container
   virtual void solve(const Properties &info,
                      const Properties &globdat) override;
 
   /// @brief Factory method for creating new EmbeddedRKModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new EmbeddedRKModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -80,30 +80,30 @@ class EmbeddedRKModule : public ExplicitModule
   void initODE45_();
 
   /// @brief Correct rotation values for RKMK method updates
-  /// @param uncorrected Uncorrected displacement vector
-  /// @param delta Displacement increment
+  /// @param[in,out] uncorrected  Displacement vector corrected in place
+  /// @param[in] delta  Displacement increment
   /// @details Implements Runge-Kutta-Munthe-Kaas method for rotation manifolds
   /// @see [Munthe-Kaas (1998)](https://doi.org/10.1007/BF02510919)
   void correctDisp_(const Vector &uncorrected, const Vector &delta);
 
   /// @brief Calculate Bernoulli coefficient for exponential map corrections
-  /// @param i Coefficient index
+  /// @param[in] i  Coefficient index
   /// @return Bernoulli coefficient value
   double bernoulliCoeff_(const idx_t i);
 
   /// @brief Compute adjoint operator for Lie group integration
-  /// @param point Current point on manifold
-  /// @param about Reference point
-  /// @param iterate Iteration number
+  /// @param[in] point  Current point on manifold
+  /// @param[in] about  Reference point
+  /// @param[in] iterate  Iteration number
   /// @return Adjoint matrix
   Matrix adjoint_(const Matrix &point,
                   const Matrix &about,
                   const idx_t iterate);
 
   /// @brief Compute inverse derivative of exponential map
-  /// @param res Result matrix (output)
-  /// @param point Current point
-  /// @param about Reference point
+  /// @param[out] res  Result matrix
+  /// @param[in] point  Current point
+  /// @param[in] about  Reference point
   void invDerivExpMap_(const Matrix &res,
                        const Matrix &point,
                        const Matrix &about);

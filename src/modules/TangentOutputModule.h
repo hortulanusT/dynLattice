@@ -65,31 +65,31 @@ class TangentOutputModule : public Module
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "tangentOutput")
+  /// @param[in] name  Module name (default: "tangentOutput")
   explicit TangentOutputModule(const String &name = "tangentOutput");
 
   /// @brief Initialize tangent property calculation
-  /// @param conf Configuration properties (output)
-  /// @param props User properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] props  User properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf, const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Run tangent property calculation
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown module and finalize output
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new instances
-  /// @param name Module name
-  /// @param conf Configuration properties (output)
-  /// @param props User properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] props  User properties
+  /// @param[in] globdat  Global data container
   /// @return New module instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);
@@ -102,35 +102,35 @@ class TangentOutputModule : public Module
   /// @{
 
   /// @brief Read current strain and stress from boundary
-  /// @param strains Current strain vector
-  /// @param stresses Current stress vector
-  /// @param globdat Global data container
+  /// @param[out] strains  Current strain components (rank squared entries)
+  /// @param[out] stresses  Current stress components (rank squared entries)
+  /// @param[in] globdat  Global data container
   void readStrainStress_(const Vector &strains, const Vector &stresses,
                          const Properties &globdat);
 
   /// @brief Report strain-stress data to output
-  /// @param H Strain tensor components (displacement gradient)
-  /// @param N Stress tensor components (nominal stress)
+  /// @param[in] H  Strain tensor components (displacement gradient)
+  /// @param[in] N  Stress tensor components (nominal stress)
   void reportStrainStress_(const Vector &H, const Vector &N);
 
   /// @brief Calculate strain-stress relationship
-  /// @param strains Strain matrix for different load cases
-  /// @param stresses Corresponding stress matrix
-  /// @param globdat Global data container
+  /// @param[out] strains  Strain matrix for different load cases
+  /// @param[out] stresses  Corresponding stress matrix
+  /// @param[in] globdat  Global data container
   void getStrainStress_(const Matrix &strains, const Matrix &stresses,
                         const Properties &globdat);
 
   /// @brief Store computed tangent properties
-  /// @param strains Applied strain matrix
-  /// @param stresses Resulting stress matrix
-  /// @param globdat Global data container
+  /// @param[in] strains  Applied strain matrix
+  /// @param[in] stresses  Resulting stress matrix
+  /// @param[in] globdat  Global data container
   void storeTangentProps_(const Matrix &strains, const Matrix &stresses,
                           const Properties &globdat);
 
   /// @brief Extract properties via matrix condensation
-  /// @param strains Applied strain matrix
-  /// @param stresses Resulting stress matrix
-  /// @param globdat Global data container
+  /// @param[in] strains  Applied strain matrix
+  /// @param[in] stresses  Resulting stress matrix
+  /// @param[in] globdat  Global data container
   void condenseMatrix_(const Matrix &strains, const Matrix &stresses,
                        const Properties &globdat);
   /// @}
