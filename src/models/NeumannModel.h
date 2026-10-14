@@ -44,22 +44,20 @@ using jive::util::XDofSpace;
 //   class NeumannModel
 //-----------------------------------------------------------------------
 
-/**
- * @class NeumannModel
- * @brief Model for applying Neumann boundary conditions on node groups
- *
- * The NeumannModel applies load boundary conditions on specified node groups
- * with configurable load increment control. Unlike point loads, this model
- * can handle dynamic node group configurations and provides sophisticated
- * load scaling and increment management for nonlinear analysis.
- *
- * Features:
- * - Load application on multiple node groups with individual DOF types
- * - Load increment control with adaptive stepping
- * - Initial load specification and load reduction capabilities
- * - External scaling support for displacement control
- * - Maximum load value constraints
- */
+/// @class NeumannModel
+/// @brief Model for applying Neumann boundary conditions on node groups
+///
+/// The NeumannModel applies load boundary conditions on specified node groups
+/// with configurable load increment control. Unlike point loads, this model
+/// can handle dynamic node group configurations and provides sophisticated
+/// load scaling and increment management for nonlinear analysis.
+///
+/// Features:
+/// - Load application on multiple node groups with individual DOF types
+/// - Load increment control with adaptive stepping
+/// - Initial load specification and load reduction capabilities
+/// - External scaling support for displacement control
+/// - Maximum load value constraints
 class NeumannModel : public Model
 {
 public:

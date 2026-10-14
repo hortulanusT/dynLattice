@@ -47,13 +47,11 @@ public:
   /// @brief Register plastic material type with factory
   static void declare();
 
-  /**
-   * @brief Configure plasticity parameters and yield conditions
-   *
-   * @param props Properties containing configuration parameters
-   * @param globdat Global data container with simulation context
-   * @throws jem::util::PropertyException if yield function is not provided
-   */
+  /// @brief Configure plasticity parameters and yield conditions
+  ///
+  /// @param props Properties containing configuration parameters
+  /// @param globdat Global data container with simulation context
+  /// @throws jem::util::PropertyException if yield function is not provided
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;

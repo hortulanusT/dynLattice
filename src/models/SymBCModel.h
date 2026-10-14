@@ -48,22 +48,20 @@ typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 //   class SymBCModel
 //-----------------------------------------------------------------------
 
-/**
- * @class SymBCModel
- * @brief Model for symmetry boundary conditions on plane symmetric domains
- *
- * The SymBCModel implements plane symmetry boundary conditions that enforce
- * constraints between symmetric surfaces. It supports two types of symmetry:
- * opposing DOFs (antisymmetric) and equal DOFs (symmetric). Surface pairs
- * are automatically constrained based on the specified symmetry type.
- *
- * Features:
- * - Opposing DOF constraints for antisymmetric behavior
- * - Equal DOF constraints for symmetric behavior
- * - Multiple surface pair support
- * - Automatic constraint generation between symmetric surfaces
- * - Configurable DOF type specification
- */
+/// @class SymBCModel
+/// @brief Model for symmetry boundary conditions on plane symmetric domains
+///
+/// The SymBCModel implements plane symmetry boundary conditions that enforce
+/// constraints between symmetric surfaces. It supports two types of symmetry:
+/// opposing DOFs (antisymmetric) and equal DOFs (symmetric). Surface pairs
+/// are automatically constrained based on the specified symmetry type.
+///
+/// Features:
+/// - Opposing DOF constraints for antisymmetric behavior
+/// - Equal DOF constraints for symmetric behavior
+/// - Multiple surface pair support
+/// - Automatic constraint generation between symmetric surfaces
+/// - Configurable DOF type specification
 class SymBCModel : public Model
 {
 public:

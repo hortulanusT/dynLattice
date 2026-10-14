@@ -59,23 +59,21 @@ using jive_helpers::vec2mat;
 //   class PeriodicBCModel
 //-----------------------------------------------------------------------
 
-/**
- * @class PeriodicBCModel
- * @brief Model for applying periodic boundary conditions on rectangular unit cells
- *
- * The PeriodicBCModel implements periodic boundary conditions specifically
- * designed for rectangular unit cells. It supports multiple operation modes
- * including load control, displacement control, and gradient updates.
- *
- * Features:
- * - Three operation modes: LOAD, UPD (update), and DISP (displacement)
- * - Automatic corner constraint handling
- * - Master-slave edge DOF pairing for periodicity
- * - Gradient-based deformation control
- * - Support for rotational DOFs
- *
- * @note Only works for rectangular unit cells
- */
+/// @class PeriodicBCModel
+/// @brief Model for applying periodic boundary conditions on rectangular unit cells
+///
+/// The PeriodicBCModel implements periodic boundary conditions specifically
+/// designed for rectangular unit cells. It supports multiple operation modes
+/// including load control, displacement control, and gradient updates.
+///
+/// Features:
+/// - Three operation modes: LOAD, UPD (update), and DISP (displacement)
+/// - Automatic corner constraint handling
+/// - Master-slave edge DOF pairing for periodicity
+/// - Gradient-based deformation control
+/// - Support for rotational DOFs
+///
+/// @note Only works for rectangular unit cells
 class PeriodicBCModel : public Model
 {
 public:

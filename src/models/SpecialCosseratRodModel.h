@@ -93,31 +93,29 @@ using jive_helpers::vec2mat;
 //   class SpecialCosseratRodModel
 //-----------------------------------------------------------------------
 
-/**
- * @class SpecialCosseratRodModel
- * @brief Special Cosserat rod finite element model with geometrically exact kinematics
- *
- * The SpecialCosseratRodModel implements a geometrically exact rod formulation
- * based on the Cosserat theory (Simo-Reissner rod). It features 6 DOF per node
- * (3 translational + 3 rotational) and supports large deformations, rotations,
- * and complex material behavior including plasticity.
- *
- * Features:
- * - Geometrically exact rod kinematics with 6 DOF per node
- * - Large deformation and rotation capabilities
- * - Material integration with plasticity support
- * - Hinge connection modeling
- * - Gyroscopic effects for dynamic analysis
- * - Initial strain and rotation specification
- * - Energy calculation (potential and dissipated)
- * - Strain and stress output tables
- *
- * @see [Reissner (1981)](https://doi.org/10.1007/BF00946983)
- * @see [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4)
- * @see [Crisfield, Jelenić (1999)](https://doi.org/10.1098/rspa.1999.0352)
- * @see [Antman (2005)](https://doi.org/10.1007/0-387-27649-1)
- * @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
- */
+/// @class SpecialCosseratRodModel
+/// @brief Special Cosserat rod finite element model with geometrically exact kinematics
+///
+/// The SpecialCosseratRodModel implements a geometrically exact rod formulation
+/// based on the Cosserat theory (Simo-Reissner rod). It features 6 DOF per node
+/// (3 translational + 3 rotational) and supports large deformations, rotations,
+/// and complex material behavior including plasticity.
+///
+/// Features:
+/// - Geometrically exact rod kinematics with 6 DOF per node
+/// - Large deformation and rotation capabilities
+/// - Material integration with plasticity support
+/// - Hinge connection modeling
+/// - Gyroscopic effects for dynamic analysis
+/// - Initial strain and rotation specification
+/// - Energy calculation (potential and dissipated)
+/// - Strain and stress output tables
+///
+/// @see [Reissner (1981)](https://doi.org/10.1007/BF00946983)
+/// @see [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4)
+/// @see [Crisfield, Jelenić (1999)](https://doi.org/10.1098/rspa.1999.0352)
+/// @see [Antman (2005)](https://doi.org/10.1007/0-387-27649-1)
+/// @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
 class SpecialCosseratRodModel : public Model
 {
 public:

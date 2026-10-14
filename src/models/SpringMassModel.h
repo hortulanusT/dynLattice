@@ -54,22 +54,20 @@ using jive::util::DofSpace;
 //   class SpringMassModel
 //-----------------------------------------------------------------------
 
-/**
- * @class SpringMassModel
- * @brief Model for spring-mass systems at domain boundaries
- *
- * The SpringMassModel emulates singular beams at boundaries to create
- * spring-mass systems for boundary condition modeling. It automatically
- * generates spring elements along specified boundaries and manages
- * child model instances for the spring elements.
- *
- * Features:
- * - Automatic spring element generation at boundaries
- * - Configurable spring properties and element counts
- * - Edge node constraint management
- * - Child model integration for spring behavior
- * - Extent vector specification for spring placement
- */
+/// @class SpringMassModel
+/// @brief Model for spring-mass systems at domain boundaries
+///
+/// The SpringMassModel emulates singular beams at boundaries to create
+/// spring-mass systems for boundary condition modeling. It automatically
+/// generates spring elements along specified boundaries and manages
+/// child model instances for the spring elements.
+///
+/// Features:
+/// - Automatic spring element generation at boundaries
+/// - Configurable spring properties and element counts
+/// - Edge node constraint management
+/// - Child model integration for spring behavior
+/// - Extent vector specification for spring placement
 class SpringMassModel : public Model
 {
 

@@ -61,23 +61,21 @@ using jive::util::XTable;
 //   class RodContactModel
 //-----------------------------------------------------------------------
 
-/**
- * @class RodContactModel
- * @brief Model for rod-to-rod contact interactions using penalty methods
- *
- * The RodContactModel implements contact mechanics between rod elements using
- * penalty-based formulations. It supports both segment-to-segment and node-to-segment
- * contact types with automatic contact detection, blacklist filtering, and
- * configurable penalty parameters.
- *
- * Features:
- * - Segment-to-segment (STS) and node-to-segment (NTS) contact formulations
- * - Automatic contact pair detection and filtering
- * - Blacklist system to exclude initial contacts
- * - Configurable penalty parameters for different contact types
- * - Rod radius specification for contact detection
- * - Verbose output options for debugging
- */
+/// @class RodContactModel
+/// @brief Model for rod-to-rod contact interactions using penalty methods
+///
+/// The RodContactModel implements contact mechanics between rod elements using
+/// penalty-based formulations. It supports both segment-to-segment and node-to-segment
+/// contact types with automatic contact detection, blacklist filtering, and
+/// configurable penalty parameters.
+///
+/// Features:
+/// - Segment-to-segment (STS) and node-to-segment (NTS) contact formulations
+/// - Automatic contact pair detection and filtering
+/// - Blacklist system to exclude initial contacts
+/// - Configurable penalty parameters for different contact types
+/// - Rod radius specification for contact detection
+/// - Verbose output options for debugging
 class RodContactModel : public Model
 {
 
