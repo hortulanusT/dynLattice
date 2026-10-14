@@ -13,6 +13,7 @@
 #include <math.h>
 
 #include <jive/algebra/SparseMatrixObject.h>
+using jive_helpers::mul3;
 using jem::newInstance;
 
 //=======================================================================
@@ -748,12 +749,9 @@ void SpecialCosseratRodModel::getStrains_(
   const Cubix ipLambdaP(globRank, globRank, ipCount);
   const Matrix ipPhi(globRank, ipCount);
   const Matrix ipPhiP(globRank, ipCount);
-  const IdxVector inodes(shapeK_->nodeCount());
+  const Matrix shapes = shapeK_->getShapeFunctions();
+  const Matrix grads(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
 
-  Matrix shapes(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
-  Matrix grads(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
-
-  shapes = shapeK_->getShapeFunctions();
   shapeK_->getShapeGradients(grads, w, nodePhi_0);
   // TEST_CONTEXT(shapes)
   // TEST_CONTEXT(grads)
@@ -763,13 +761,13 @@ void SpecialCosseratRodModel::getStrains_(
   shapeK_->getPiAndRotationGradients(ipPI, ipLambda, ipLambdaP, w, nodePhi_0, nodeLambda);
 
   // get the strains (material + spatial );
+  Matrix lambdaTLambdaP(globRank, globRank);
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     strains[ip][TRANS_PART] =
         matmul(ipLambda[ip].transpose(), ipPhiP[ip]);
-    // TEST_CONTEXT(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]))
-    strains[ip][ROT_PART] =
-        unskew(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]));
+    mul3(lambdaTLambdaP, ipLambda[ip].transpose(), ipLambdaP[ip]);
+    strains[ip][ROT_PART] = unskew(lambdaTLambdaP);
   }
 
   // TEST_CONTEXT(strains)
@@ -790,7 +788,6 @@ void SpecialCosseratRodModel::getStresses_(
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
   const Matrix strains(stresses.shape());
-  const Cubix stiffness(dofCount, dofCount, ipCount);
   const Cubix ipPI(dofCount, dofCount, ipCount);
 
   // get the (material) strains
@@ -853,8 +850,7 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
 
     nodeU[inode] = disp[idofs_trans];
     expVec(nodeLambda[inode], Vector(disp[idofs_rot]));
-    nodeLambda[inode] =
-        matmul(nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
+    mul3(nodeLambda[inode], nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
   }
 }
 
@@ -1009,7 +1005,15 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
       {
         Idofs.ref(nodeDofs_[inodes[Inode]]);
 
-        fint[Idofs] += weights[ip] * matmul(XI[ip][Inode], stress[ip]);
+        // fint[Idofs] += weights[ip] * XI * stress without temporaries
+        const jem::Array<double, 2> xi = XI[ip][Inode];
+        for (idx_t i = 0; i < dofCount; i++)
+        {
+          double sum = 0.;
+          for (idx_t j = 0; j < dofCount; j++)
+            sum += xi(i, j) * stress(j, ip);
+          fint[Idofs[i]] += weights[ip] * sum;
+        }
       }
     }
   }

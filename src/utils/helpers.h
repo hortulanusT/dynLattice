@@ -109,6 +109,14 @@ void vec2mat(const Matrix &mat, const Vector &vec);
 /// @param[in] mat  Matrix whose entry count matches the vector size
 void mat2vec(const Vector &vec, const Matrix &mat);
 
+/// @brief C = A * B for 3 x 3 matrices without heap allocation.
+///
+/// The product is formed on the stack first, so C may alias A or B.
+/// @param[out] C  3 x 3 result
+/// @param[in] A  3 x 3 left factor
+/// @param[in] B  3 x 3 right factor
+void mul3(const Matrix &C, const Matrix &A, const Matrix &B);
+
 /// @brief compute the exponential of a axial vector.
 ///
 /// It computes the matrix exponential of the skew-symmetric matrix of this

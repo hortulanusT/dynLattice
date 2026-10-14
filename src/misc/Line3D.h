@@ -247,6 +247,18 @@ class Line3D : public Shape
 
  protected:
   jem::Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
+
+  /// @name Memo of the last getShapeGradients() call
+  /// @details The gradients only depend on the node coordinates, and the same
+  /// coordinates are requested several times in a row (strains, Xi, rotation
+  /// gradients of one element). A hit needs bit-identical coordinates, so the
+  /// results are exactly those of a fresh evaluation. Not thread safe.
+  /// @{
+  mutable bool gradMemoValid_ = false;
+  mutable Matrix gradMemoCoords_;
+  mutable Matrix gradMemoGrads_;
+  mutable Vector gradMemoWeights_;
+  /// @}
 };
 
 //=====================================================================

@@ -159,6 +159,15 @@ void mat2vec(const Vector &vec, const Matrix &mat)
   }
 }
 
+void mul3(const Matrix &C, const Matrix &A, const Matrix &B)
+{
+  Mat3 T;
+  jem::numeric::matmul(T, A, B);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      C(i, j) = T(i, j);
+}
+
 void expVec(const Matrix &Exp, const Vector &psi)
 {
   const double theta = norm2(psi);

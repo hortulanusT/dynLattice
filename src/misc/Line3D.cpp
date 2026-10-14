@@ -22,6 +22,7 @@
 using jive_helpers::expVec;
 using jive_helpers::expVecP;
 using jive_helpers::logMat;
+using jive_helpers::mul3;
 using jive_helpers::skew;
 
 using jem::ALL;
@@ -35,21 +36,6 @@ using jive::geom::StdLine;
 using jive::geom::StdLine2;
 using jive::geom::StdLine3;
 using jive::geom::StdLine4;
-
-namespace
-{
-// C = A * B for 3x3 matrices; the product is formed on the stack first, so C may alias A or B
-inline void mul3(const jem::Array<double, 2> &C,
-                 const jem::Array<double, 2> &A,
-                 const jem::Array<double, 2> &B)
-{
-  jem::Tuple<double, 3, 3> T;
-  jem::numeric::matmul(T, A, B);
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
-      C(i, j) = T(i, j);
-}
-} // namespace
 
 const String Line3D::PROP_NODES = "numPoints";
 const String Line3D::PROP_INT = "intScheme";
@@ -119,6 +105,15 @@ void Line3D::getShapeGradients(const Matrix &g,
                                const Vector &w,
                                const Matrix &c) const
 {
+  if (gradMemoValid_ && gradMemoCoords_.size(0) == c.size(0) &&
+      gradMemoCoords_.size(1) == c.size(1) &&
+      jem::testall(gradMemoCoords_ == c))
+  {
+    g = gradMemoGrads_;
+    w = gradMemoWeights_;
+    return;
+  }
+
   Matrix c1(localRank(), nodeCount());
   c1(0, 0) = 0.;
   for (idx_t iNode = 1; iNode < nodeCount(); iNode++) // LATER get something more elaborate that also includes real shapes for higher order elements
@@ -128,6 +123,14 @@ void Line3D::getShapeGradients(const Matrix &g,
   intLine_->getShapeGradients(g1, w, c1);
 
   g = g1(0, ALL, ALL);
+
+  gradMemoCoords_.resize(c.shape());
+  gradMemoCoords_ = c;
+  gradMemoGrads_.resize(g.shape());
+  gradMemoGrads_ = g;
+  gradMemoWeights_.resize(w.size());
+  gradMemoWeights_ = w;
+  gradMemoValid_ = true;
 }
 
 void Line3D::getRotations(const Cubix &Ri,
