@@ -12,19 +12,6 @@
 #include "ParaViewModule.h"
 #include "utils/testing.h"
 
-void vec2mat(const Matrix &mat, const Vector &vec)
-{
-  const idx_t rows = mat.size(0);
-  const idx_t cols = mat.size(1);
-  JEM_ASSERT2(rows * cols == vec.size(),
-              "Vector and Matrix not of the same size!");
-
-  for (idx_t irow = 0; irow < rows; irow++)
-  {
-    mat(irow, ALL) = vec[SliceFromTo(irow * cols, (irow + 1) * cols)];
-  }
-}
-
 //=======================================================================
 //   class ParaViewModule
 //=======================================================================
