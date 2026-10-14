@@ -57,9 +57,11 @@ RodContactModel::RodContactModel
   StringVector rodNames;
   myProps.get(rodNames, LatticeModel::ROD_LIST_PROP);
   rodList_.resize(rodNames.size());
+  rodNodes_.resize(rodNames.size());
   for (idx_t iRod = 0; iRod < rodNames.size(); iRod++)
   {
     rodList_[iRod] = ElementGroup::get(rodNames[iRod], allElems_, globdat, getContext());
+    rodNodes_[iRod].ref(rodList_[iRod].getNodeIndices());
   }
 
   // Initialize the internal shape.
@@ -297,13 +299,13 @@ void RodContactModel::findPossibleBeams_
   Matrix possB(globalRank, 0);
   bool cornerCheck = false;
 
-  possB.resize(globalRank, rodList_[0].getNodeIndices().size());
-  allNodes_.getSomeCoords(possB, rodList_[0].getNodeIndices());
+  possB.resize(globalRank, rodNodes_[0].size());
+  allNodes_.getSomeCoords(possB, rodNodes_[0]);
 
-  dofsB.resize(rodList_[0].getNodeIndices().size());
+  dofsB.resize(rodNodes_[0].size());
   for (idx_t idof = 0; idof < globalRank; idof++)
   {
-    dofs_->getDofIndices(dofsB, rodList_[0].getNodeIndices(), idof);
+    dofs_->getDofIndices(dofsB, rodNodes_[0], idof);
     possB(idof, ALL) += disp[dofsB];
   }
 
@@ -319,13 +321,13 @@ void RodContactModel::findPossibleBeams_
 
     for (idx_t jRod = rodList_.size() - 1; jRod > iRod; jRod--)
     {
-      possB.reshape(globalRank, rodList_[jRod].getNodeIndices().size());
-      allNodes_.getSomeCoords(possB, rodList_[jRod].getNodeIndices());
+      possB.reshape(globalRank, rodNodes_[jRod].size());
+      allNodes_.getSomeCoords(possB, rodNodes_[jRod]);
 
-      dofsB.resize(rodList_[jRod].getNodeIndices().size());
+      dofsB.resize(rodNodes_[jRod].size());
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        dofs_->getDofIndices(dofsB, rodList_[jRod].getNodeIndices(), idof);
+        dofs_->getDofIndices(dofsB, rodNodes_[jRod], idof);
         possB(idof, ALL) += disp[dofsB];
       }
 
@@ -390,7 +392,7 @@ void RodContactModel::findPossibleElements_
     allElems_.getElemNodes(nodesA, iElemA);
     allNodes_.getSomeCoords(possA, nodesA);
 
-    if (jem::testany(nodesA[0] == rodList_[beamB].getNodeIndices()) || jem::testany(nodesA[1] == rodList_[beamB].getNodeIndices())) // LATER higher order elements
+    if (jem::testany(nodesA[0] == rodNodes_[beamB]) || jem::testany(nodesA[1] == rodNodes_[beamB])) // LATER higher order elements
       continue;
 
     for (idx_t idof = 0; idof < 3; idof++)
@@ -410,7 +412,7 @@ void RodContactModel::findPossibleElements_
       allElems_.getElemNodes(nodesB, iElemB);
       allNodes_.getSomeCoords(possB, nodesB);
 
-      if (jem::testany(nodesB[0] == rodList_[beamA].getNodeIndices()) || jem::testany(nodesB[1] == rodList_[beamA].getNodeIndices())) // LATER higher order elements
+      if (jem::testany(nodesB[0] == rodNodes_[beamA]) || jem::testany(nodesB[1] == rodNodes_[beamA])) // LATER higher order elements
         continue;
 
       for (idx_t idof = 0; idof < globalRank; idof++)

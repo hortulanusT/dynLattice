@@ -232,6 +232,7 @@ class RodContactModel : public Model
   Assignable<NodeSet> allNodes_;            ///< All nodes in the model
   Assignable<ElementSet> allElems_;         ///< All elements in the model
   Array<Assignable<ElementGroup>> rodList_; ///< List of rod element groups
+  Array<IdxVector> rodNodes_;               ///< Cached unique node indices of each rod
   Ref<DofSpace> dofs_;                      ///< DOF space
   Ref<Line3D> shape_;                       ///< Line shape functions
 
