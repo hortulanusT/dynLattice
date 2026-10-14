@@ -378,8 +378,11 @@ bool SpecialCosseratRodModel::takeAction
     vars.find(E_diss, "dissipatedEnergy");
 
     StateVector::get(disp, dofs_, globdat);
-    E_diss += getDissipatedEnergy_(disp);
-    E_pot += getPotentialEnergy_(disp);
+    double dE_pot = 0.;
+    double dE_diss = 0.;
+    getEnergies_(dE_pot, dE_diss, disp);
+    E_diss += dE_diss;
+    E_pot += dE_pot;
 
     vars.set("potentialEnergy", E_pot);
     vars.set("dissipatedEnergy", E_diss);
@@ -1071,14 +1074,16 @@ void SpecialCosseratRodModel::getPotentialEnergy_(XTable &energy_table, const Ve
   }
 }
 
-double SpecialCosseratRodModel::getPotentialEnergy_(const Vector &disp) const
+void SpecialCosseratRodModel::getEnergies_(double &E_pot, double &E_diss, const Vector &disp) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
-  double E_pot = 0.;
+
+  E_pot = 0.;
+  E_diss = 0.;
 
   // PER ELEMENT VALUES
   Matrix nodeU(rank, nodeCount);
@@ -1106,11 +1111,10 @@ double SpecialCosseratRodModel::getPotentialEnergy_(const Vector &disp) const
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
         E_pot += weights[ip] * shapes(iNode, ip) * material_->getPotentialEnergy(ie, ip);
+        E_diss += weights[ip] * shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip);
       }
     }
   }
-
-  return E_pot;
 }
 
 void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
@@ -1152,48 +1156,6 @@ void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const V
       }
     }
   }
-}
-
-double SpecialCosseratRodModel::getDissipatedEnergy_(const Vector &disp) const
-{
-  const idx_t elemCount = rodElems_.size();
-  const idx_t ipCount = shapeK_->ipointCount();
-  const idx_t nodeCount = shapeK_->nodeCount();
-  const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
-  double E_diss = 0.;
-
-  // PER ELEMENT VALUES
-  Matrix nodeU(rank, nodeCount);
-  Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Matrix stress(dofCount, ipCount);
-  Vector weights(ipCount);
-  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
-  // DOF INDICES
-  IdxVector inodes(nodeCount);
-
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    getStrains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
-
-    shapes = shapeK_->getShapeFunctions();
-
-    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
-    {
-      for (idx_t ip = 0; ip < ipCount; ip++)
-      {
-        E_diss += weights[ip] * shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip);
-      }
-    }
-  }
-
-  return E_diss;
 }
 
 //-----------------------------------------------------------------------

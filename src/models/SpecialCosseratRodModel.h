@@ -304,10 +304,13 @@ class SpecialCosseratRodModel : public Model
                         const Vector &disp,
                         const IdxVector &inodes) const;
 
-  /// @brief Calculate potential energy of the rod
+  /// @brief Calculate the potential and dissipated energy of the rod in a single pass
+  /// @param E_pot Potential energy value (output)
+  /// @param E_diss Dissipated energy value (output)
   /// @param disp Displacement vector
-  /// @return Potential energy value
-  double getPotentialEnergy_(const Vector &disp) const;
+  void getEnergies_(double &E_pot,
+                    double &E_diss,
+                    const Vector &disp) const;
 
   /// @brief Calculate potential energy and fill table
   /// @param energy_table Output energy table
@@ -316,11 +319,6 @@ class SpecialCosseratRodModel : public Model
   void getPotentialEnergy_(XTable &energy_table,
                            const Vector &table_weights,
                            const Vector &disp) const;
-
-  /// @brief Calculate dissipated energy of the material
-  /// @param disp Displacement vector
-  /// @return Dissipated energy value
-  double getDissipatedEnergy_(const Vector &disp) const;
 
   /// @brief Calculate dissipated energy and fill table
   /// @param energy_table Output energy table
