@@ -38,6 +38,7 @@ Thank you for your interest in contributing to dynLattice! This guide will help 
   - `camelCase` for functions and variables
   - `camelCase_` for private/protected functions and variables
   - `UPPER_CASE` for constants
+- C++ is formatted using `clang-format`(see also `.clang-format`)
 - Document public interfaces with [Doxygen](https://doxygen.nl/) style comments
   - Use `///` (and `///<` for trailing member documentation)
   - Use `/** ... */` only for the `@file` header at the top of a file

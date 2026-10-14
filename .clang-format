@@ -1,0 +1,11 @@
+---
+# Minimal style: matches the existing code, only normalises the basics.
+BasedOnStyle: LLVM
+IndentWidth: 2
+UseTab: Never
+BreakBeforeBraces: Allman
+AccessModifierOffset: -1
+# Do not re-wrap lines, reorder includes or reflow comments.
+ColumnLimit: 0
+SortIncludes: Never
+ReflowComments: false
