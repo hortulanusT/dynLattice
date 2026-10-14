@@ -999,6 +999,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   Cubix nodeLambda(rank, rank, nodeCount);
 
   Cubix ipLambda(rank, rank, ipCount);
+  Cubix ipMass(rank, rank, ipCount);
 
   Matrix spatialInertia(dofCount, dofCount);
 
@@ -1014,6 +1015,9 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
     l = sum(weights) / (nodeCount - 1);
 
+    for (idx_t ip = 0; ip < ipCount; ip++)
+      ipMass[ip] = mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
       dofs_->getDofIndices(idofs, inodes[inode], jtypes_);
@@ -1024,8 +1028,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         spatialInertia = 0;
 
         for (idx_t ip = 0; ip < ipCount; ip++)
-          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
-                                                    mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) * ipMass[ip];
         if (inode == jnode)
           spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART),
                                                            nodeLambda[inode].transpose());
@@ -1033,7 +1036,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
           spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
         // TEST_CONTEXT(spatialInertia)
-        mbld.addBlock(idofs, idofs, spatialInertia);
+        mbld.addBlock(idofs, jdofs, spatialInertia);
       }
     }
   }
