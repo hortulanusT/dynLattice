@@ -315,7 +315,7 @@ void ElastoPlasticRodMaterial::rejectDeform()
   currDeltaFlow_ = 0.;
 }
 
-void ElastoPlasticRodMaterial::getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const
+void ElastoPlasticRodMaterial::getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const
 {
   using jive::IdxVector;
   using jive::util::XTable;

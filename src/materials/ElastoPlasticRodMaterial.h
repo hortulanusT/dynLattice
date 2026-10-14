@@ -77,7 +77,7 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
 
   virtual void rejectDeform() override;
 
-  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const override;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
 

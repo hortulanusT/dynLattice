@@ -423,7 +423,7 @@ void SpecialCosseratRodModel::getMaterialTable_
           "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
-  material_->getTable(name, mat_table, rodElems_.getIndices(), weights);
+  material_->getTable(mat_table, weights, name, rodElems_.getIndices());
 }
 //-----------------------------------------------------------------------
 //   getStrainTable_

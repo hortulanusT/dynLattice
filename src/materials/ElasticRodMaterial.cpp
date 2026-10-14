@@ -417,7 +417,7 @@ void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, c
   stress = matmul(getMaterialStiff(ielem, ip), strain);
 }
 
-void ElasticRodMaterial::getTable(const String &name, XTable &, const IdxVector &, const Vector &) const
+void ElasticRodMaterial::getTable(XTable &, const Vector &, const String &name, const IdxVector &) const
 {
   using jive::IdxVector;
   using jive::util::XTable;

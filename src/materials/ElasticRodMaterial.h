@@ -82,7 +82,7 @@ class ElasticRodMaterial : public Material
 
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = false) override;
 
-  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const override;
 
   virtual void applyDeform() override;
 

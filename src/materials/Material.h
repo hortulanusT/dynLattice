@@ -43,10 +43,10 @@ class Material : public NamedObject
 
   /// @brief Constructs a new Material object.
   ///
-  /// @param name Material instance name for identification
-  /// @param conf Configuration properties container for output
-  /// @param props Input properties for material parameters
-  /// @param globdat Global data container for simulation state
+  /// @param[in] name  Material instance name for identification
+  /// @param[out] conf  Configuration properties container for output
+  /// @param[in] props  Input properties for material parameters
+  /// @param[in] globdat  Global data container for simulation state
   Material(const String &name,
            const Properties &conf,
            const Properties &props,
@@ -54,15 +54,15 @@ class Material : public NamedObject
 
   /// @brief Configure the material with given properties.
   ///
-  /// @param props Properties containing configuration parameters
-  /// @param globdat Global data container with simulation context
+  /// @param[in] props  Properties containing configuration parameters
+  /// @param[in] globdat  Global data container with simulation context
   /// @throws Derived classes may throw exceptions for invalid parameters
   virtual void configure(const Properties &props, const Properties &globdat);
 
   /// @brief Retrieve current material configuration.
   ///
-  /// @param conf Properties object to store configuration in
-  /// @param globdat Global data container with simulation context
+  /// @param[out] conf  Properties object to store configuration in
+  /// @param[in] globdat  Global data container with simulation context
   virtual void getConfig(const Properties &conf, const Properties &globdat) const;
 
   /// @brief Compute stress vector from strain vector.
@@ -70,19 +70,19 @@ class Material : public NamedObject
   /// Fundamental constitutive relationship defining material response to deformation.
   /// All derived material classes must implement this method.
   ///
-  /// @param[out] stress Computed stress vector at current state
-  /// @param[in] strain Input strain vector for stress computation
+  /// @param[out] stress  Computed stress vector at current state
+  /// @param[in] strain  Input strain vector for stress computation
   ///
   /// @note For rod elements: 6-dimensional vectors (axial, shear, bending, torsion)
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
   /// @brief Compute stress with element and integration point context.
   ///
-  /// @param[out] stress Computed stress vector
-  /// @param[in] strain Input strain vector
-  /// @param[in] ielem Element index for state tracking
-  /// @param[in] ip Integration point index
-  /// @param[in] inelastic Enable inelastic behavior (default: true)
+  /// @param[out] stress  Computed stress vector
+  /// @param[in] strain  Input strain vector
+  /// @param[in] ielem  Element index for state tracking
+  /// @param[in] ip  Integration point index
+  /// @param[in] inelastic  Enable inelastic behavior (default: true)
   ///
   /// @note Default delegates to getStress(stress, strain)
   /// ElastoPlasticRodMaterial overrides for plastic state management
@@ -100,8 +100,8 @@ class Material : public NamedObject
   ///
   /// Enhanced version that allows state-dependent stiffness computation.
   ///
-  /// @param ielem Element index for state tracking
-  /// @param ip Integration point index within the element
+  /// @param[in] ielem  Element index for state tracking
+  /// @param[in] ip  Integration point index within the element
   /// @returns Material stiffness matrix for the specified location
   ///
   /// @note Default implementation delegates to getMaterialStiff()
@@ -119,8 +119,8 @@ class Material : public NamedObject
   ///
   /// Enhanced version for element-specific mass computation.
   ///
-  /// @param ielem Element index for potential state tracking
-  /// @param ip Integration point index within the element
+  /// @param[in] ielem  Element index for potential state tracking
+  /// @param[in] ip  Integration point index within the element
   /// @returns Material mass matrix for the specified location
   virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
 
@@ -128,7 +128,7 @@ class Material : public NamedObject
   ///
   /// Computes a lumped (diagonal) mass matrix for the given element length.
   ///
-  /// @param l Element length
+  /// @param[in] l  Element length
   /// @returns Lumped mass matrix for the element
   virtual Matrix getLumpedMass(const double l) const;
 
@@ -136,8 +136,8 @@ class Material : public NamedObject
   ///
   /// Element-specific version of lumped mass computation.
   ///
-  /// @param l Element length
-  /// @param ielem Element index for potential customization
+  /// @param[in] l  Element length
+  /// @param[in] ielem  Element index for potential customization
   /// @returns Lumped mass matrix for the specified element
   virtual inline Matrix getLumpedMass(const double l, const idx_t &ielem) const;
 
@@ -159,19 +159,19 @@ class Material : public NamedObject
   /// This method fills an XTable with strain-related data for output or
   /// post-processing purposes. The specific data depends on the material type.
   ///
-  /// @param name Name identifier for the table data
-  /// @param strain_table Output table to populate with strain data
-  /// @param items Index vector specifying which items to include
-  /// @param weights Weight vector for data averaging or integration
-  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const = 0;
+  /// @param[out] strain_table  Output table to populate with strain data
+  /// @param[in,out] weights  Weight vector for data averaging or integration
+  /// @param[in] name  Name identifier for the table data
+  /// @param[in] items  Index vector specifying which items to include
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const = 0;
 
   /// @brief Get the dissipated energy at a specific integration point.
   ///
   /// Computes the energy dissipated through inelastic processes at the
   /// specified element and integration point location.
   ///
-  /// @param ielem Element index
-  /// @param ip Integration point index within the element
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index within the element
   /// @returns Total dissipated energy at the specified location
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
@@ -180,8 +180,8 @@ class Material : public NamedObject
   /// Computes the stored elastic energy at the specified element and
   /// integration point location.
   ///
-  /// @param ielem Element index
-  /// @param ip Integration point index within the element
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index within the element
   /// @returns Elastic potential energy at the specified location
   /// @note 0 for purely elastic materials
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
@@ -191,8 +191,8 @@ class Material : public NamedObject
   /// Computes the energy stored in hardening variables for plasticity models.
   /// This represents the energy associated with the evolution of the yield surface.
   ///
-  /// @param ielem Element index
-  /// @param ip Integration point index within the element
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index within the element
   /// @returns Hardening potential energy at the specified location
   virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const = 0;
 
