@@ -22,19 +22,6 @@ inline void skew3(Mat3 &S, const Vec3 &v)
   S(2, 0) = -1 * v[1];
   S(2, 1) = 1 * v[0];
 }
-
-// C = A * B without heap allocation (C must not alias A or B)
-inline void mul3(Mat3 &C, const Mat3 &A, const Mat3 &B)
-{
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
-    {
-      double sum = 0.;
-      for (int k = 0; k < 3; k++)
-        sum += A(i, k) * B(k, j);
-      C(i, j) = sum;
-    }
-}
 } // namespace
 
 namespace jive_helpers
@@ -190,7 +177,7 @@ void expVec(const Matrix &Exp, const Vector &psi)
     const Vec3 k = {p[0] / theta, p[1] / theta, p[2] / theta};
     Mat3 K, KK;
     skew3(K, k);
-    mul3(KK, K, K);
+    jem::numeric::matmul(KK, K, K);
 
     const double s = sin(theta);
     const double c = 1 - cos(theta);
@@ -235,9 +222,9 @@ void expVecP(const Matrix &ExpP, const Vector &psi, const Vector &psiP)
   Mat3 K, KP, KK, KKP, KPK;
   skew3(K, k);
   skew3(KP, kP);
-  mul3(KK, K, K);
-  mul3(KKP, K, KP);
-  mul3(KPK, KP, K);
+  jem::numeric::matmul(KK, K, K);
+  jem::numeric::matmul(KKP, K, KP);
+  jem::numeric::matmul(KPK, KP, K);
 
   const double s = sin(theta);
   const double c = 1 - cos(theta);
