@@ -57,7 +57,7 @@ using jive::util::Globdat;
 /// with plasticity where step size needs to adapt to material nonlinearity.
 class AdaptiveStepModule : public SolverModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(AdaptiveStepModule, SolverModule);
 
   /// @name Property identifiers
@@ -133,11 +133,11 @@ public:
   /// @brief Register AdaptiveStepModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~AdaptiveStepModule();
 
-private:
+ private:
   /// @name Solver components
   /// @{
   Ref<NonlinModule> solver_; ///< Nonlinear solver module

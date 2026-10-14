@@ -48,7 +48,7 @@ using jive::util::Globdat;
 /// Supports multiple node groups with different displacement factors and DOF types.
 class DirichletModel : public Model
 {
-public:
+ public:
   /// @brief Displacement control methods
   enum Method
   {
@@ -117,10 +117,10 @@ public:
   /// @brief Register DirichletModel type with ModelFactory
   static void declare();
 
-protected:
+ protected:
   virtual ~DirichletModel();
 
-protected:
+ protected:
   /// @brief Initialize model state and DOF mappings
   /// @param globdat Global data container with node set and DOF space
   void init_
@@ -165,7 +165,7 @@ protected:
 
       (const Properties &params);
 
-private:
+ private:
   /// @name Core system components
   /// @{
   Ref<DofSpace> dofs_;        ///< Degree of freedom space

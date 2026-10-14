@@ -43,7 +43,7 @@ using jive::util::Globdat;
 /// and specified impactor weights for different node groups and DOF types.
 class ImpactModel : public Model
 {
-public:
+ public:
   JEM_DECLARE_CLASS(ImpactModel, Model);
 
   /// @name Property identifiers
@@ -93,7 +93,7 @@ public:
   /// @brief Register ImpactModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @name System components
   /// @{
   Ref<DofSpace> dofs_;        ///< Degree of freedom space

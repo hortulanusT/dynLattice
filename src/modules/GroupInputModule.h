@@ -53,7 +53,7 @@ using jive::util::XDofSpace;
 /// Supports complex group definitions with partial element selections.
 class GroupInputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(GroupInputModule, Module);
 
   /// @name Property identifiers
@@ -90,10 +90,10 @@ public:
   /// @brief Register GroupInputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   virtual ~GroupInputModule();
 
-private:
+ private:
   /// @brief Number of nodes in the mesh
   idx_t numNodes_;
 
@@ -119,7 +119,7 @@ private:
   /// complex group definitions with partial element selections.
   class NGroup_ : public Object
   {
-  public:
+   public:
     /// @brief Constructor
     explicit NGroup_();
 
@@ -154,7 +154,7 @@ private:
       BOUNDS ///< Check within bounds
     };
 
-  private:
+   private:
     /// @brief Find candidate nodes from element restrictions
     /// @param elems Element set to search
     /// @param globdat Global data container
@@ -211,7 +211,7 @@ private:
   /// for grouping elements by spatial location.
   class EGroup_ : public Object
   {
-  public:
+   public:
     /// @brief Constructor
     explicit EGroup_();
 
@@ -246,7 +246,7 @@ private:
       BOUNDS ///< Check within bounds
     };
 
-  private:
+   private:
     /// @brief Find elements matching coordinate criteria
     /// @param elems Element set to search
     /// @param globdat Global data container

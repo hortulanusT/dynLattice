@@ -27,7 +27,7 @@ using jive::app::OutputModule;
 /// @see CSVDataPrinter
 class CSVOutputModule : public OutputModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(CSVOutputModule, OutputModule);
 
   /// @name Property identifiers
@@ -55,7 +55,7 @@ public:
   /// @brief Register CSVOutputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~CSVOutputModule();
 };

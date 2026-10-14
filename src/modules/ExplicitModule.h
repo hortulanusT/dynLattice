@@ -91,7 +91,7 @@ using jive_helpers::logMat;
 /// special integration of SO(3) rotational degrees of freedom using exponential maps.
 class ExplicitModule : public SolverModule
 {
-public:
+ public:
   /// @brief Mass matrix formulation modes
   enum MassMode
   {
@@ -168,7 +168,7 @@ public:
 
   // static void declare();
 
-protected:
+ protected:
   /// @brief Protected constructor
   /// @param name Module name
   explicit ExplicitModule(const String &name = "");
@@ -233,7 +233,7 @@ protected:
   double getQuality(const Vector &y_pre,
                     const Vector &y_cor);
 
-protected:
+ protected:
   /// @name Module state
   /// @{
   bool valid_; ///< State validity flag

@@ -56,7 +56,7 @@ using jive::util::FuncUtils;
 /// homogenized material properties for multi-scale modeling applications.
 class TangentOutputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(TangentOutputModule, Module);
 
   /// @name Property identifiers
@@ -97,7 +97,7 @@ public:
   /// @brief Register module type with factory
   static void declare();
 
-private:
+ private:
   /// @name Strain-stress analysis methods
   /// @{
 
@@ -135,11 +135,11 @@ private:
                        const Properties &globdat);
   /// @}
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~TangentOutputModule();
 
-private:
+ private:
   /// @name Configuration parameters
   /// @{
   String mode_;      ///< Calculation mode ("finDiff" or "matCond")

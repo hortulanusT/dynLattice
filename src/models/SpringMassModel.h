@@ -71,7 +71,7 @@ using jive::util::DofSpace;
 class SpringMassModel : public Model
 {
 
-public:
+ public:
   JEM_DECLARE_CLASS(SpringMassModel, Model);
 
   /// @name Property identifiers
@@ -117,7 +117,7 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~SpringMassModel();
 
@@ -126,7 +126,7 @@ protected:
   /// @return true if constraints were applied successfully
   virtual bool applyConstraints_(const Properties &globdat) const;
 
-private:
+ private:
   Array<Ref<Model>> children_;     ///< Child model instances
   Assignable<NodeGroup> boundary_; ///< Boundary node group
   IdxMatrix edgeNodes_;            ///< Edge node connectivity

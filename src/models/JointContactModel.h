@@ -50,7 +50,7 @@ using jive::util::FuncUtils;
 /// contributions for joint-to-joint interactions.
 class JointContactModel : public Model
 {
-public:
+ public:
   JEM_DECLARE_CLASS(JointContactModel, Model);
 
   /// @name Property identifiers
@@ -100,7 +100,7 @@ public:
   /// @brief Register JointContactModel type with ModelFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Find pairs of joints in contact
   /// @param disp Displacement vector of all nodes
   virtual void findContacts_
@@ -133,7 +133,7 @@ protected:
        Vector posA,
        Vector posB);
 
-private:
+ private:
   /// @name System components
   /// @{
   Assignable<NodeSet> allNodes_;    ///< All nodes in the system

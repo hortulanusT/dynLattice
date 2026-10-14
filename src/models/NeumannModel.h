@@ -60,7 +60,7 @@ using jive::util::XDofSpace;
 /// - Maximum load value constraints
 class NeumannModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;      ///< Model type name
@@ -123,11 +123,11 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~NeumannModel();
 
-private:
+ private:
   /// @brief Initialize model
   /// @param globdat Global data container
   void init_(const Properties &globdat);
@@ -168,7 +168,7 @@ private:
   void increaseStep_(const Properties &params,
                      const Properties &globdat);
 
-private:
+ private:
   Ref<DofSpace> dofs_;        ///< DOF space
   Assignable<NodeSet> nodes_; ///< Node set
 

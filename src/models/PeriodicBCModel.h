@@ -76,7 +76,7 @@ using jive_helpers::vec2mat;
 /// @note Only works for rectangular unit cells
 class PeriodicBCModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;       ///< Model type name
@@ -130,7 +130,7 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-private:
+ private:
   /// @brief Initialize model
   /// @param globdat Global data container
   void init_(const Properties &globdat);
@@ -154,7 +154,7 @@ private:
                   const Properties &globdat,
                   const double scale = 1.);
 
-private:
+ private:
   Assignable<NodeSet> nodes_;      ///< Node set
   Ref<DofSpace> dofs_;             ///< DOF space
   Ref<Constraints> cons_;          ///< Constraints

@@ -61,7 +61,7 @@ typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 /// yield condition evaluation and plastic constraint enforcement.
 class HingeModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;  ///< Model type name
@@ -109,7 +109,7 @@ public:
   /// @brief Register HingeModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @brief Create hinge elements for specified element group
   /// @param elementName Name of the element group
   /// @param globdat Global database
@@ -132,7 +132,7 @@ private:
   /// @brief Get constraint information
   void getCons_();
 
-private:
+ private:
   /// @name System components
   /// @{
   Assignable<ElementGroup> egroup_; ///< Hinge element group

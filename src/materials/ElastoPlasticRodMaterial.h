@@ -22,7 +22,7 @@ using jive::util::FuncUtils;
 /// @see [Corresponding Paper](https://doi.org/10.1007/s00466-024-02572-3)
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
 {
-public:
+ public:
   /// @name Plasticity property identifiers
   /// @{
   static const char *TYPE_NAME;
@@ -85,10 +85,10 @@ public:
 
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
-protected:
+ protected:
   ~ElastoPlasticRodMaterial();
 
-protected:
+ protected:
   /// @name Plasticity algorithm components
   /// @{
   Ref<Function> yieldCond_;         ///< Yield condition function

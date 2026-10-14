@@ -74,7 +74,7 @@ static_assert(GMSH_API_VERSION_PATCH == 5, "Wrong GMSH API version, please use 4
 /// GMSH API version 4.9.5 for compatibility.
 class GMSHInputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(GMSHInputModule, Module);
 
   /// @name Property identifiers
@@ -127,7 +127,7 @@ public:
   /// @brief Register GMSHInputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   ~GMSHInputModule();
 
@@ -156,7 +156,7 @@ protected:
   /// @param globdat Global database
   void writeOutFile_(const Properties &globdat) const;
 
-private:
+ private:
   /// @name GMSH-JIVE mapping
   /// @{
   Assignable<XNodeSet> nodes_;                               ///< Node set

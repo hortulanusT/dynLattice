@@ -31,7 +31,7 @@ using jive::util::Factory;
 /// @see Material, ElasticRodMaterial, ElastoPlasticRodMaterial, declareMaterials()
 class MaterialFactory : public Factory
 {
-public:
+ public:
   /// @brief Type alias for the MaterialFactory class itself
   typedef MaterialFactory Self;
 
@@ -94,7 +94,7 @@ public:
                                    const Properties &props,
                                    const Properties &globdat);
 
-private:
+ private:
   /// @brief Forward declaration of internal constructor map class
   class CtorMap_;
 };

@@ -67,7 +67,7 @@ using jive::util::Globdat;
 /// and can be accessed by other modules or for post-processing.
 class GroupOutputModule : public Module
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME; ///< Module type name
@@ -109,11 +109,11 @@ public:
   /// @brief Register GroupOutputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~GroupOutputModule();
 
-protected:
+ protected:
   /// @name Group configuration
   /// @{
   StringVector nodeGroups_; ///< Node groups for singular element force/displacement calculations

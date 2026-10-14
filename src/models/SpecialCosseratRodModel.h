@@ -118,7 +118,7 @@ using jive_helpers::vec2mat;
 /// @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
 class SpecialCosseratRodModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;         ///< Model type name
@@ -177,7 +177,7 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-private:
+ private:
   /// @brief Assemble stiffness matrix and internal forces
   /// @param mbld Tangent stiffness matrix builder
   /// @param fint Internal force vector
@@ -330,7 +330,7 @@ private:
                             const Vector &table_weights,
                             const Vector &disp) const;
 
-private:
+ private:
   Assignable<ElementGroup> rodElems_; ///< Rod element group
   IdxVector rodNodes_;                ///< Rod node indices
   Assignable<ElementSet> allElems_;   ///< All elements

@@ -855,7 +855,7 @@ void RodContactModel::computeBlacklist_
     else if (!shape_->containsLocalPoint(Vector({uB})) && shape_->containsLocalPoint(Vector({uA})))
     {
       idx_t iNodeB;
-      
+
       if (uB < -1.)
       {
         iNodeB = 0;

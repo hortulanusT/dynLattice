@@ -26,7 +26,7 @@ using jive::app::ModuleFactory;
 /// tracking. Requires GIT_HASH to be defined during compilation.
 class GitReportModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(GitReportModule, Module);
 
   /// @name Property identifiers
@@ -70,7 +70,7 @@ public:
   /// @brief Register GitReportModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~GitReportModule();
 };

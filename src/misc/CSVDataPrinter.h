@@ -32,7 +32,7 @@ using jive::util::Table;
 /// @see [jive::app::DataPrinter](https://jive-manual.dynaflow.com/classjive_1_1app_1_1DataPrinter.html)
 class CSVDataPrinter : public DataPrinter
 {
-public:
+ public:
   /// Output mode enumeration for CSV printer state
   enum mode
   {
@@ -104,10 +104,10 @@ public:
        const DofSpace &dofs,
        const Properties &globdat) override;
 
-protected:
+ protected:
   virtual ~CSVDataPrinter();
 
-private:
+ private:
   /// @brief Initialize table output format and write headers
   /// @param[in] out Output stream for CSV data
   /// @param[in] table Table containing data structure
@@ -148,6 +148,6 @@ private:
       (Output &out,
        const Vector &vec);
 
-private:
+ private:
   mode mode_; ///< Current output mode state
 };

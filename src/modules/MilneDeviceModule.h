@@ -28,7 +28,7 @@
 /// @see [Milne (1926)](https://doi.org/10.1080/00029890.1926.11986619)
 class MilneDeviceModule : public ExplicitModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(MilneDeviceModule, ExplicitModule);
 
   /// @name Property identifiers
@@ -64,7 +64,7 @@ public:
   /// @brief Destructor
   virtual ~MilneDeviceModule();
 
-protected:
+ protected:
   /// @brief Update forces for corrector step
   /// @param fint Internal force vector (modified)
   /// @param fext External force vector
@@ -76,7 +76,7 @@ protected:
                   const Vector &fext,
                   const Properties &globdat);
 
-private:
+ private:
   /// @name Adams-Moulton corrector methods
   /// @{
 

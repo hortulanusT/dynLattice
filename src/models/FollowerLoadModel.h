@@ -47,7 +47,7 @@ using jive_helpers::eye;
 /// other loads that maintain fixed orientation relative to deformed geometry.
 class FollowerLoadModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;
@@ -98,7 +98,7 @@ public:
   /// @brief Register FollowerLoadModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @brief Compute external force vector with current rotations
   /// @param fext External force vector to modify
   /// @param scale Load scale factor

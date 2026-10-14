@@ -61,7 +61,7 @@ using jive::util::XTable;
 /// global properties like kinetic energy and total mass.
 class LatticeModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;          ///< Model type name
@@ -135,7 +135,7 @@ public:
   /// @brief Register LatticeModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @name Child models
   /// @{
   Array<Ref<Model>> children_; ///< Array of child rod models

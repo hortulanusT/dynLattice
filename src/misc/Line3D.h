@@ -38,7 +38,7 @@ using jive_helpers::Quadix;
 /// @see [Line Shapes](https://jive-manual.dynaflow.com/group__LineShapes.html)
 class Line3D : public Shape
 {
-public:
+ public:
   static const String PROP_NODES; ///< Property name for number of nodes
   static const String PROP_INT;   ///< Property name for integration scheme
   static const String PROP_LOCAL; ///< Property name for local coordinates
@@ -188,7 +188,7 @@ public:
                                  const Vector &gg,
                                  const Vector &u) const;
 
-private:
+ private:
   /// @brief Get the reference rotation according to Crisfield/Jelenic
   ///
   /// @param[out] Lambda_r Reference rotation matrix
@@ -205,7 +205,7 @@ private:
                        const Matrix Lambda_r,
                        const Cubix Rn) const;
 
-protected:
+ protected:
   jem::Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
 };
 

@@ -35,7 +35,7 @@ using jive::util::XTable;
 /// @see ElasticRodMaterial, ElastoPlasticRodMaterial, MaterialFactory
 class Material : public NamedObject
 {
-public:
+ public:
   JEM_DECLARE_CLASS(Material, NamedObject);
 
   /// Property name for verbosity level control
@@ -202,7 +202,7 @@ public:
   /// @note 0 for purely elastic materials
   virtual String getContext() const override;
 
-protected:
+ protected:
   /// @brief Destroy the Material object
   ///
   /// Virtual destructor ensures proper cleanup of derived classes.

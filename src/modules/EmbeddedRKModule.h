@@ -24,7 +24,7 @@
 /// @see [RKMK 1999] (https://doi.org/10.1016/S0168-9274(98)00030-0)
 class EmbeddedRKModule : public ExplicitModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(EmbeddedRKModule, ExplicitModule);
 
   /// @name Property identifiers
@@ -68,7 +68,7 @@ public:
   /// @brief Protected destructor
   virtual ~EmbeddedRKModule();
 
-private:
+ private:
   /// @brief Initialize the Butcher tableau for Bogacki-Shampine method (ODE23)
   /// @details Sets up the coefficients for the 3rd-order embedded method
   /// equivalent to MATLAB's ode23 solver
@@ -108,7 +108,7 @@ private:
                        const Matrix &point,
                        const Matrix &about);
 
-private:
+ private:
   /// @name Runge-Kutta parameters
   /// @{
   String kind_;     ///< RK method type (ODE23 or ODE45)

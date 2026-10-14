@@ -27,7 +27,7 @@
 /// @see [Leap-frog integration](https://en.wikipedia.org/wiki/Leapfrog_integration)
 class LeapFrogModule : public ExplicitModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(LeapFrogModule, ExplicitModule);
 
   /// @name Property identifiers
@@ -60,7 +60,7 @@ public:
   /// @brief Register LeapFrogModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~LeapFrogModule();
 };

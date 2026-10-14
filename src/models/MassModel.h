@@ -41,7 +41,7 @@ using jive::util::Assignable;
 /// masses, lumped inertias, or point masses attached to the structure.
 class MassModel : public Model
 {
-public:
+ public:
   JEM_DECLARE_CLASS(MassModel, Model);
 
   /// @name Property identifiers
@@ -91,10 +91,10 @@ public:
   /// @brief Register MassModel type with ModelFactory
   static void declare();
 
-protected:
+ protected:
   virtual ~MassModel();
 
-private:
+ private:
   /// @name Mass configuration
   /// @{
   Vector totalMass_;            ///< Mass values for each group

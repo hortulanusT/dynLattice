@@ -60,7 +60,7 @@ using jive::util::FuncUtils;
 /// and gyroscopic forces with configurable sampling conditions.
 class ForceOutputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(ForceOutputModule, Module);
 
   /// @name Property identifiers
@@ -108,11 +108,11 @@ public:
   /// @brief Register ForceOutputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~ForceOutputModule();
 
-private:
+ private:
   /// @brief Write file header with column names
   /// @param time Include time column flag
   void writeHeader_(const bool time = false);
@@ -127,7 +127,7 @@ private:
                   const String type,
                   const double time = -1.) const;
 
-private:
+ private:
   /// @name System components
   /// @{
   Ref<DofSpace> dofs_; ///< Degree of freedom space

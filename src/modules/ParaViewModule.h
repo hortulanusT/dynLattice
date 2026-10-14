@@ -109,7 +109,7 @@ using jive::util::XTable;
 /// @see [VTK file formats](https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf)
 class ParaViewModule : public Module
 {
-protected:
+ protected:
   /// @brief Structure containing element group export information
   /// @details Stores configuration for each element group to be exported,
   /// including shape information and data field specifications
@@ -123,7 +123,7 @@ protected:
     StringVector dofData;  ///< Additional DOF data to export
   };
 
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME; ///< Module type name
@@ -183,7 +183,7 @@ public:
   /// conventions. This function converts from GMSH ordering to ParaView ordering
   static IdxVector gmsh2ParaNodeOrder(const IdxVector elNodes, const String &name);
 
-private:
+ private:
   /// @name File output methods
   /// @{
 
@@ -244,7 +244,7 @@ private:
                        const String &type, const String &name);
   /// @}
 
-private:
+ private:
   /// @name Configuration parameters
   /// @{
   String nameFormat_;          ///< Output file name format string

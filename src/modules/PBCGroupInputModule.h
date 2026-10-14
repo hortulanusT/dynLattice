@@ -26,7 +26,7 @@
 /// node groups for PBC implementation.
 class PBCGroupInputModule : public GroupInputModule
 {
-public:
+ public:
   /// @name Type definitions
   /// @{
   typedef PBCGroupInputModule Self; ///< Self type alias
@@ -66,7 +66,7 @@ public:
   /// @brief Register module type with factory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~PBCGroupInputModule();
 
@@ -84,7 +84,7 @@ protected:
                           const NodeSet &nodes, const Properties &globdat,
                           const idx_t ix) const;
 
-protected:
+ protected:
   /// @name Configuration parameters
   /// @{
   idx_t rank_;               ///< Spatial dimension of the domain

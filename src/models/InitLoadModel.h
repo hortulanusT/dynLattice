@@ -39,7 +39,7 @@ using jive::util::DofSpace;
 /// starting conditions.
 class InitLoadModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;   ///< Model type name
@@ -92,7 +92,7 @@ public:
   /// @brief Register InitLoadModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @brief Initialize model and apply initial conditions
   /// @param globdat Global data container
   void init_

@@ -79,7 +79,7 @@ using jive::util::XTable;
 class RodContactModel : public Model
 {
 
-public:
+ public:
   JEM_DECLARE_CLASS(RodContactModel, Model);
 
   /// @name Property identifiers
@@ -125,7 +125,7 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-protected:
+ protected:
   /// @brief Find pairs of contacts
   /// @param elementsA Element IDs of one side of the contact
   /// @param elementsB Element IDs of the other side
@@ -228,7 +228,7 @@ protected:
                            const Matrix &possM,
                            const double uM) const;
 
-private:
+ private:
   Assignable<NodeSet> allNodes_;            ///< All nodes in the model
   Assignable<ElementSet> allElems_;         ///< All elements in the model
   Array<Assignable<ElementGroup>> rodList_; ///< List of rod element groups

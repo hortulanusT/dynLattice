@@ -28,7 +28,7 @@ using jive::app::SampleModule;
 /// and calculates displacement gradients and stress tensors for homogenization.
 class PBCGroupOutputModule : public GroupOutputModule
 {
-public:
+ public:
   /// @name Type definitions
   /// @{
   typedef PBCGroupOutputModule Self; ///< Self type alias
@@ -86,7 +86,7 @@ public:
                                   const StringVector &dofNames = {
                                       "dx", "dy", "dz"});
 
-protected:
+ protected:
   /// @brief Generate CSV header string
   /// @param existing Existing header content
   /// @return Complete header with PBC-specific columns
@@ -97,7 +97,7 @@ protected:
   /// @return Complete data sets with PBC-specific expressions
   StringVector getDataSets_(StringVector existing) const;
 
-protected:
+ protected:
   /// @name Child modules
   /// @{
   Ref<SampleModule> child_; ///< Child sampling module for data output

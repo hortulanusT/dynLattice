@@ -45,7 +45,7 @@ using jive::model::Model;
 /// necessary.
 class LenientNonlinModule : public NonlinModule
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME; ///< Module type name
@@ -103,11 +103,11 @@ public:
   virtual void getConfig(const Properties &conf,
                          const Properties &globdat) const override;
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~LenientNonlinModule();
 
-private:
+ private:
   /// @name Solver parameters
   /// @{
   idx_t maxIter_; ///< Maximum iterations before accepting non-converged solution

@@ -18,7 +18,7 @@ using jive::String;
 /// @brief Linear elastic rod material with configurable cross-sectional properties
 class ElasticRodMaterial : public Material
 {
-public:
+ public:
   /// @name Material type and property identifiers
   /// @{
   static const char *TYPE_NAME;
@@ -94,10 +94,10 @@ public:
 
   virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
 
-protected:
+ protected:
   ~ElasticRodMaterial();
 
-protected:
+ protected:
   /// @brief Calculate material stiffness matrix
   void calcMaterialStiff_();
   /// @brief Calculate material mass matrix
