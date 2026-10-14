@@ -145,29 +145,29 @@ class SpecialCosseratRodModel : public Model
   JEM_DECLARE_CLASS(SpecialCosseratRodModel, Model);
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit SpecialCosseratRodModel(const String &name,
                                    const Properties &conf,
                                    const Properties &props,
                                    const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new SpecialCosseratRodModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -179,42 +179,42 @@ class SpecialCosseratRodModel : public Model
 
  private:
   /// @brief Assemble stiffness matrix and internal forces
-  /// @param mbld Tangent stiffness matrix builder
-  /// @param fint Internal force vector
-  /// @param disp Current DOF values
-  /// @param loadCase Load case identifier
+  /// @param[in,out] mbld  Tangent stiffness matrix builder
+  /// @param[in,out] fint  Internal force vector
+  /// @param[in] disp  Current DOF values
+  /// @param[in] loadCase  Load case identifier
   void assemble_(MatrixBuilder &mbld,
                  const Vector &fint,
                  const Vector &disp,
                  const String &loadCase = "") const;
 
   /// @brief Construct internal force vector only
-  /// @param fint Internal force vector
-  /// @param disp Current DOF values
-  /// @param loadCase Load case identifier
+  /// @param[in,out] fint  Internal force vector
+  /// @param[in] disp  Current DOF values
+  /// @param[in] loadCase  Load case identifier
   void assemble_(const Vector &fint,
                  const Vector &disp,
                  const String &loadCase = "") const;
 
   /// @brief Construct gyroscopic forces (omega x Theta*omega)
-  /// @param fint Gyroscopic force vector
-  /// @param velo Current DOF velocities
-  /// @param mass Current mass matrix
+  /// @param[in,out] fint  Gyroscopic force vector
+  /// @param[in] velo  Current DOF velocities
+  /// @param[in] mass  Current mass matrix
   void assembleGyro_(const Vector &fint,
                      const Vector &velo,
                      const Ref<AbstractMatrix> mass) const;
 
   /// @brief Assemble mass matrix
-  /// @param mbld Mass matrix builder
-  /// @param disp Current DOF values
+  /// @param[in,out] mbld  Mass matrix builder
+  /// @param[in] disp  Current DOF values
   void assembleM_(MatrixBuilder &mbld,
                   Vector &disp) const;
 
   /// @brief Fill table with strain values per element
-  /// @param strain_table Output strain table
-  /// @param weights Table weights
-  /// @param disp Current displacements
-  /// @param mat_vals flag for the material frame of reference
+  /// @param[out] strain_table  Output strain table
+  /// @param[in,out] weights  Table weights
+  /// @param[in] disp  Current displacements
+  /// @param[in] mat_vals  flag for the material frame of reference
   /// @note If mat_vals is true, the strain values are in the material frame of
   /// reference, otherwise in the spatial frame of reference
   void getStrainTable_(XTable &strain_table,
@@ -223,18 +223,18 @@ class SpecialCosseratRodModel : public Model
                        const bool mat_vals = false);
 
   /// @brief Fill table with material/plastic strain values per element
-  /// @param mat_table Output material table
-  /// @param weights Table weights
-  /// @param name Table name
+  /// @param[out] mat_table  Output material table
+  /// @param[in,out] weights  Table weights
+  /// @param[in] name  Table name
   void getMaterialTable_(XTable &mat_table,
                          const Vector &weights,
                          const String &name);
 
   /// @brief Fill table with stress values per element
-  /// @param stress_table Output stress table
-  /// @param weights Table weights
-  /// @param disp Current displacements
-  /// @param mat_vals flag for the material frame of reference
+  /// @param[out] stress_table  Output stress table
+  /// @param[in,out] weights  Table weights
+  /// @param[in] disp  Current displacements
+  /// @param[in] mat_vals  flag for the material frame of reference
   /// @note If mat_vals is true, the strain values are in the material frame of
   /// reference, otherwise in the spatial frame of reference
   void getStressTable_(XTable &stress_table,
@@ -249,23 +249,23 @@ class SpecialCosseratRodModel : public Model
   void initStrain_();
 
   /// @brief Get the geometric stiffness matrix
-  /// @param B B-matrix at integration points
-  /// @param stresses Spatial stress components at integration points
-  /// @param nodePhi_0 Location of the nodes
-  /// @param nodeU Translational displacement of nodes
+  /// @param[out] B  B-matrices at integration points
+  /// @param[in] stresses  Spatial stress components at integration points
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
   void getGeomtericStiffness_(const Cubix &B,
                               const Matrix &stresses,
                               const Matrix &nodePhi_0,
                               const Matrix &nodeU) const;
 
   /// @brief Get the strains in the integration points of an element
-  /// @param strains Strain components at integration points
-  /// @param w Integration point weights
-  /// @param nodePhi_0 Location of the nodes
-  /// @param nodeU Translational displacement of nodes
-  /// @param nodeLambda Rotational orientation of nodes
-  /// @param ie Element index
-  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
+  /// @param[out] strains  Strain components at integration points, strain component by integration point
+  /// @param[out] w  Integration point weights
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
+  /// @param[in] nodeLambda  Rotational orientation of nodes, 3 x 3 x nodeCount
+  /// @param[in] ie  Element index
+  /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
   void getStrains_(const Matrix &strains,
                    const Vector &w,
                    const Matrix &nodePhi_0,
@@ -275,14 +275,14 @@ class SpecialCosseratRodModel : public Model
                    const bool spatial = true) const;
 
   /// @brief Get the strains in the integration points of an element and return the Pi matrices
-  /// @param strains Strain components at integration points
-  /// @param w Integration point weights
-  /// @param[out] ipPI Pi matrices at the integration points
-  /// @param nodePhi_0 Location of the nodes
-  /// @param nodeU Translational displacement of nodes
-  /// @param nodeLambda Rotational orientation of nodes
-  /// @param ie Element index
-  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
+  /// @param[out] strains  Strain components at integration points, strain component by integration point
+  /// @param[out] w  Integration point weights
+  /// @param[out] ipPI  Pi matrices at the integration points, one matrix per integration point
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
+  /// @param[in] nodeLambda  Rotational orientation of nodes, 3 x 3 x nodeCount
+  /// @param[in] ie  Element index
+  /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
   void getStrains_(const Matrix &strains,
                    const Vector &w,
                    const Cubix &ipPI,
@@ -293,14 +293,14 @@ class SpecialCosseratRodModel : public Model
                    const bool spatial = true) const;
 
   /// @brief Get the stresses in the integration points of an element
-  /// @param stresses Stress components at integration points
-  /// @param w Integration point weights
-  /// @param nodePhi_0 Location of the nodes
-  /// @param nodeU Translational displacement of nodes
-  /// @param nodeLambda Rotational orientation of nodes
-  /// @param ie Element index
-  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
-  /// @param loadCase Load case identifier
+  /// @param[out] stresses  Stress components at integration points, stress component by integration point
+  /// @param[out] w  Integration point weights
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
+  /// @param[in] nodeLambda  Rotational orientation of nodes, 3 x 3 x nodeCount
+  /// @param[in] ie  Element index
+  /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
+  /// @param[in] loadCase  Load case identifier
   void getStresses_(const Matrix &stresses,
                     const Vector &w,
                     const Matrix &nodePhi_0,
@@ -311,11 +311,11 @@ class SpecialCosseratRodModel : public Model
                     const String &loadCase = "") const;
 
   /// @brief Format the displacements nicely
-  /// @param nodePhi_0 Node positions
-  /// @param nodeU Node displacements
-  /// @param nodeLambda Node rotations
-  /// @param disp Displacement vector
-  /// @param inodes Node indices
+  /// @param[out] nodePhi_0  Node positions, 3 x nodeCount
+  /// @param[out] nodeU  Node displacements, 3 x nodeCount
+  /// @param[out] nodeLambda  Node rotations, 3 x 3 x nodeCount
+  /// @param[in] disp  Displacement vector
+  /// @param[in] inodes  Node indices
   void getDisplacments_(const Matrix &nodePhi_0,
                         const Matrix &nodeU,
                         const Cubix &nodeLambda,
@@ -323,25 +323,25 @@ class SpecialCosseratRodModel : public Model
                         const IdxVector &inodes) const;
 
   /// @brief Calculate the potential and dissipated energy of the rod in a single pass
-  /// @param E_pot Potential energy value (output)
-  /// @param E_diss Dissipated energy value (output)
-  /// @param disp Displacement vector
+  /// @param[out] E_pot  Potential energy value (output)
+  /// @param[out] E_diss  Dissipated energy value (output)
+  /// @param[in] disp  Displacement vector
   void getEnergies_(double &E_pot,
                     double &E_diss,
                     const Vector &disp) const;
 
   /// @brief Calculate potential energy and fill table
-  /// @param energy_table Output energy table
-  /// @param table_weights Table weights
-  /// @param disp Displacement vector
+  /// @param[out] energy_table  Output energy table
+  /// @param[in,out] table_weights  Table weights
+  /// @param[in] disp  Displacement vector
   void getPotentialEnergy_(XTable &energy_table,
                            const Vector &table_weights,
                            const Vector &disp) const;
 
   /// @brief Calculate dissipated energy and fill table
-  /// @param energy_table Output energy table
-  /// @param table_weights Table weights
-  /// @param disp Displacement vector
+  /// @param[out] energy_table  Output energy table
+  /// @param[in,out] table_weights  Table weights
+  /// @param[in] disp  Displacement vector
   void getDissipatedEnergy_(XTable &energy_table,
                             const Vector &table_weights,
                             const Vector &disp) const;
