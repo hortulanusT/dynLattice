@@ -12,6 +12,7 @@
 #include <jem/base/ClassTemplate.h>
 #include <math.h>
 
+#include <jive/algebra/SparseMatrixObject.h>
 using jem::newInstance;
 
 //=======================================================================
@@ -962,16 +963,51 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
                                             const Ref<AbstractMatrix> mass) const
 {
   IdxVector idofs(ROT_DOF_COUNT);
-  Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
   Vector temp(velo.size());
+  Vector omega(ROT_DOF_COUNT);
+  Vector Theta_omega(ROT_DOF_COUNT);
 
-  mass->matmul(temp, velo);
+  // only the rotational rows of M*velo are needed, so use the sparse
+  // structure directly instead of a full matrix-vector product
+  jive::algebra::SparseMatrixObject *sparse = nullptr;
+  if (!mass->isSymmetric())
+    sparse = dynamic_cast<jive::algebra::SparseMatrixObject *>(mass.get());
+
+  IdxVector rowOffsets, colIndices;
+  Vector values;
+  if (sparse)
+  {
+    rowOffsets.ref(sparse->getRowOffsets());
+    colIndices.ref(sparse->getColumnIndices());
+    values.ref(sparse->getValues());
+  }
+  else
+  {
+    mass->matmul(temp, velo);
+  }
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
     dofs_->getDofIndices(idofs, inode, rotTypes_);
 
-    fgyro[idofs] += matmul(skew(Vector(velo[idofs])), Vector(temp[idofs]));
+    if (sparse)
+    {
+      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+      {
+        double sum = 0.;
+        const idx_t irow = idofs[i];
+        for (idx_t k = rowOffsets[irow]; k < rowOffsets[irow + 1]; k++)
+          sum += values[k] * velo[colIndices[k]];
+        Theta_omega[i] = sum;
+      }
+    }
+    else
+    {
+      Theta_omega = temp[idofs];
+    }
+
+    omega = velo[idofs];
+    fgyro[idofs] += matmul(skew(omega), Theta_omega);
   }
 }
 
