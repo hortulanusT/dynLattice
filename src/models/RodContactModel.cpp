@@ -356,68 +356,80 @@ void RodContactModel::findPossibleElements_
   ArrayBuffer<idx_t> beamACandidates;
   ArrayBuffer<idx_t> beamBCandidates;
 
-  // Get the boxes of the rods
-  Matrix elemBoxA(globalRank, 2);
-  Matrix elemBoxB(globalRank, 2);
-  IdxVector nodesA(nodeCount);
-  IdxVector nodesB(nodeCount);
-  IdxVector dofsA(nodeCount);
-  IdxVector dofsB(nodeCount);
-  Matrix possA(globalRank, nodeCount);
-  Matrix possB(globalRank, nodeCount);
-  bool cornerCheck = false;
+  IdxVector nodes(nodeCount);
+  IdxVector dofs(nodeCount);
+  Matrix poss(globalRank, nodeCount);
 
-  // iterate over the elements
-  for (idx_t iElemA : rodList_[beamA].getIDs())
+  // Compute the box of every element of beam B once
+  const IdxVector idsA = rodList_[beamA].getIDs();
+  const IdxVector idsB = rodList_[beamB].getIDs();
+  const idx_t countB = idsB.size();
+  Matrix boxMinB(globalRank, countB);
+  Matrix boxMaxB(globalRank, countB);
+  Array<bool> skipB(countB);
+
+  for (idx_t jB = 0; jB < countB; jB++)
   {
-    allElems_.getElemNodes(nodesA, iElemA);
-    allNodes_.getSomeCoords(possA, nodesA);
+    allElems_.getElemNodes(nodes, idsB[jB]);
 
-    if (jem::testany(nodesA[0] == rodNodes_[beamB]) || jem::testany(nodesA[1] == rodNodes_[beamB])) // LATER higher order elements
+    // elements sharing a node with the other beam can not be in contact
+    skipB[jB] = jem::testany(nodes[0] == rodNodes_[beamA]) || jem::testany(nodes[1] == rodNodes_[beamA]); // LATER higher order elements
+    if (skipB[jB])
       continue;
 
-    for (idx_t idof = 0; idof < 3; idof++)
+    allNodes_.getSomeCoords(poss, nodes);
+    for (idx_t idof = 0; idof < globalRank; idof++)
     {
-      dofs_->getDofIndices(dofsA, nodesA, idof);
-      possA(idof, ALL) += disp[dofsA];
+      dofs_->getDofIndices(dofs, nodes, idof);
+      poss(idof, ALL) += disp[dofs];
     }
 
     for (idx_t idof = 0; idof < globalRank; idof++)
     {
-      elemBoxA(idof, 0) = min(possA(idof, ALL)) - radius_;
-      elemBoxA(idof, 1) = max(possA(idof, ALL)) + radius_;
+      boxMinB(idof, jB) = min(poss(idof, ALL)) - radius_;
+      boxMaxB(idof, jB) = max(poss(idof, ALL)) + radius_;
+    }
+  }
+
+  // iterate over the elements of beam A
+  Vector boxMinA(globalRank);
+  Vector boxMaxA(globalRank);
+
+  for (idx_t iElemA : idsA)
+  {
+    allElems_.getElemNodes(nodes, iElemA);
+
+    if (jem::testany(nodes[0] == rodNodes_[beamB]) || jem::testany(nodes[1] == rodNodes_[beamB])) // LATER higher order elements
+      continue;
+
+    allNodes_.getSomeCoords(poss, nodes);
+    for (idx_t idof = 0; idof < globalRank; idof++)
+    {
+      dofs_->getDofIndices(dofs, nodes, idof);
+      poss(idof, ALL) += disp[dofs];
     }
 
-    for (idx_t iElemB : rodList_[beamB].getIDs())
+    for (idx_t idof = 0; idof < globalRank; idof++)
     {
-      allElems_.getElemNodes(nodesB, iElemB);
-      allNodes_.getSomeCoords(possB, nodesB);
+      boxMinA[idof] = min(poss(idof, ALL)) - radius_;
+      boxMaxA[idof] = max(poss(idof, ALL)) + radius_;
+    }
 
-      if (jem::testany(nodesB[0] == rodNodes_[beamA]) || jem::testany(nodesB[1] == rodNodes_[beamA])) // LATER higher order elements
+    for (idx_t jB = 0; jB < countB; jB++)
+    {
+      if (skipB[jB])
         continue;
 
+      bool cornerCheck = true;
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        dofs_->getDofIndices(dofsB, nodesB, idof);
-        possB(idof, ALL) += disp[dofsB];
-      }
-
-      for (idx_t idof = 0; idof < globalRank; idof++)
-      {
-        elemBoxB(idof, 0) = min(possB(idof, ALL)) - radius_;
-        elemBoxB(idof, 1) = max(possB(idof, ALL)) + radius_;
-      }
-
-      cornerCheck = true;
-      for (idx_t idof = 0; idof < globalRank; idof++)
-      {
-        cornerCheck &= elemBoxA(idof, 1) >= elemBoxB(idof, 0) && elemBoxB(idof, 1) >= elemBoxA(idof, 0);
+        cornerCheck &= boxMaxA[idof] >= boxMinB(idof, jB) && boxMaxB(idof, jB) >= boxMinA[idof];
       }
 
       if (cornerCheck)
       {
         beamACandidates.pushBack(iElemA);
-        beamBCandidates.pushBack(iElemB);
+        beamBCandidates.pushBack(idsB[jB]);
       }
     }
   }
