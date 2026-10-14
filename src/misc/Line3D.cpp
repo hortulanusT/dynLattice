@@ -36,6 +36,29 @@ using jive::geom::StdLine2;
 using jive::geom::StdLine3;
 using jive::geom::StdLine4;
 
+namespace
+{
+// C = op(A) * op(B) for 3x3 matrices without heap allocation (C may alias A or B)
+template <bool transA, bool transB>
+inline void mul3(const jem::Array<double, 2> &C,
+                 const jem::Array<double, 2> &A,
+                 const jem::Array<double, 2> &B)
+{
+  double R[3][3];
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+    {
+      double sum = 0.;
+      for (int k = 0; k < 3; k++)
+        sum += (transA ? A(k, i) : A(i, k)) * (transB ? B(j, k) : B(k, j));
+      R[i][j] = sum;
+    }
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      C(i, j) = R[i][j];
+}
+} // namespace
+
 const String Line3D::PROP_NODES = "numPoints";
 const String Line3D::PROP_INT = "intScheme";
 const idx_t Line3D::GLOB_RANK = 3;
@@ -132,7 +155,6 @@ void Line3D::getRotations_(const Cubix &Ri,
                            const Matrix &Lambda_r) const
 {
   Matrix ip_psi(globalRank(), ipointCount());
-  jem::numeric::MatmulChain<double, 2> mc2;
 
   // get the _local_ rotations in the integration points
   Matrix shapeFuncs = getShapeFunctions();
@@ -144,7 +166,7 @@ void Line3D::getRotations_(const Cubix &Ri,
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec(Ri[iIp], ip_psi[iIp]);
-    Ri[iIp] = mc2.matmul(Lambda_r, Ri[iIp]);
+    mul3<false, false>(Ri[iIp], Lambda_r, Ri[iIp]);
   }
 }
 
@@ -277,12 +299,11 @@ void Line3D::getRotationGradients_(const Cubix &LambdaP,
   psi = matmul(node_psi, shapes);
   psiP = matmul(node_psi, grads);
 
-  jem::numeric::MatmulChain<double, 2> mc2;
 
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     expVecP(LambdaP[ip], psi[ip], psiP[ip]);
-    LambdaP[ip] = mc2.matmul(Lambda_r, LambdaP[ip]);
+    mul3<false, false>(LambdaP[ip], Lambda_r, LambdaP[ip]);
   }
 }
 
@@ -295,12 +316,13 @@ void Line3D::getRefRot_(const Matrix Lambda_r,
   const double c = 0.5;
 
   Vector phi_IJ(globalRank());
-  jem::numeric::MatmulChain<double, 2> mc2;
 
-  logMat(phi_IJ, mc2.matmul(Rn[I].transpose(), Rn[J]));
+  Matrix rel(globalRank(), globalRank());
+  mul3<true, false>(rel, Rn[I], Rn[J]);
+  logMat(phi_IJ, rel);
   phi_IJ = c * phi_IJ;
   expVec(Lambda_r, phi_IJ);
-  Lambda_r = mc2.matmul(Rn[I], Lambda_r);
+  mul3<false, false>(Lambda_r, Rn[I], Lambda_r);
 }
 
 void Line3D::getNodeRotVecs_(const Matrix psi,
@@ -309,8 +331,11 @@ void Line3D::getNodeRotVecs_(const Matrix psi,
 {
   getRefRot_(Lambda_r, Rn);
 
-  jem::numeric::MatmulChain<double, 2> mc2;
+  Matrix rel(globalRank(), globalRank());
 
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    logMat(psi[iNode], mc2.matmul(Lambda_r.transpose(), Rn[iNode]));
+  {
+    mul3<true, false>(rel, Lambda_r, Rn[iNode]);
+    logMat(psi[iNode], rel);
+  }
 }
