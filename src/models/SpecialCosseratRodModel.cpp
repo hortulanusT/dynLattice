@@ -333,6 +333,23 @@ bool SpecialCosseratRodModel::takeAction
     return true;
   }
 
+  // Only the gyroscopic part of GET_INT_VECTOR, added onto INT_VECTOR. It lets the
+  // explicit integrators reuse an internal force evaluated without MATRIX2.
+  if (action == "GET_GYRO_VECTOR")
+  {
+    Vector fint;
+    Vector velo;
+    Ref<AbstractMatrix> mass;
+
+    if (!params.find(mass, ActionParams::MATRIX2))
+      return false;
+    params.get(fint, ActionParams::INT_VECTOR);
+    StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
+    assembleGyro_(fint, velo, mass);
+
+    return true;
+  }
+
   if (action == Actions::GET_INT_VECTOR)
   {
     Vector fint;

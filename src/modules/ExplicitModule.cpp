@@ -37,6 +37,7 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
+  fintCacheValid_ = false;
   lenScale_ = 1e-3;
   dofsSO3_.resize(0);
   rdofs_.resize(0, 0);
@@ -261,6 +262,10 @@ void ExplicitModule::advance(const Properties &globdat)
 {
   Properties params;
 
+  // outputs of the finished step have been written by now; the cached copy
+  // stays valid for getForce(), which compares the state before using it
+  globdat.erase(ActionParams::INT_VECTOR);
+
   // check if mass needs to be updated
   valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
   if (!valid_)
@@ -280,6 +285,7 @@ void ExplicitModule::cancel(const Properties &globdat)
   Properties params;
 
   // update time in models and boundary conditions
+  dropCommittedForce_(globdat);
   Globdat::restoreTime(globdat);
   Globdat::restoreStep(globdat);
   StateVector::restoreNew(dofs_, globdat);
@@ -317,9 +323,11 @@ bool ExplicitModule::commit(const Properties &globdat)
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     StateVector::updateOld(dofs_, globdat);
+    storeCommittedForce_(globdat);
   }
   else
   {
+    dropCommittedForce_(globdat);
     dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
   }
 
@@ -414,9 +422,84 @@ ExplicitModule::getForce(const Vector &fint,
 
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
-  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+
+  // The state is the committed one if nothing touched it since the commit;
+  // then the internal force of the output pass can be reused.
+  bool reuse = false;
+  if (fintCacheValid_)
+  {
+    Vector disp, velo;
+    StateVector::get(disp, dofs_, globdat);
+    StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
+    reuse = jem::testall(disp == fintCacheDisp_) &&
+            jem::testall(velo == fintCacheVelo_);
+  }
+
+  if (reuse)
+  {
+    fint = fintCache_;
+    // only the gyroscopic term depends on the (new) mass matrix
+    if (mode_ == CONSISTENT)
+      model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+
+#ifndef NDEBUG
+    Vector fintFresh(fint.size());
+    Properties checkParams;
+    fintFresh = 0.0;
+    checkParams.set(ActionParams::INT_VECTOR, fintFresh);
+    if (mode_ == CONSISTENT)
+      checkParams.set(ActionParams::MATRIX2, solver_->getMatrix());
+    model_->takeAction(Actions::GET_INT_VECTOR, checkParams, globdat);
+    const double scale = 1. + norm2(fintFresh);
+    JEM_ASSERT2(norm2(Vector(fintFresh - fint)) <= 1e-9 * scale,
+                "reused internal force differs from a fresh evaluation");
+#endif
+  }
+  else
+  {
+    model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+  }
 
   return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
+//   storeCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::storeCommittedForce_(const Properties &globdat)
+{
+  Properties params;
+  const idx_t dofCount = dofs_->dofCount();
+
+  // fresh arrays: the published vector must not change anymore
+  fintCache_.ref(Vector(dofCount));
+  fintCache_ = 0.0;
+
+  // the same evaluation the next step starts with (no output load case,
+  // no MATRIX2, i.e. without the gyroscopic term)
+  params.set(ActionParams::INT_VECTOR, fintCache_);
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+
+  Vector disp, velo;
+  StateVector::get(disp, dofs_, globdat);
+  StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
+  fintCacheDisp_.ref(Vector(disp.clone()));
+  fintCacheVelo_.ref(Vector(velo.clone()));
+  fintCacheValid_ = true;
+
+  globdat.set(ActionParams::INT_VECTOR, fintCache_);
+}
+
+//-----------------------------------------------------------------------
+//   dropCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::dropCommittedForce_(const Properties &globdat)
+{
+  if (fintCacheValid_)
+    globdat.erase(ActionParams::INT_VECTOR);
+  fintCacheValid_ = false;
 }
 
 //-----------------------------------------------------------------------
