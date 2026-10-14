@@ -274,6 +274,24 @@ class SpecialCosseratRodModel : public Model
                    const idx_t ie,
                    const bool spatial = true) const;
 
+  /// @brief Get the strains in the integration points of an element and return the Pi matrices
+  /// @param strains Strain components at integration points
+  /// @param w Integration point weights
+  /// @param[out] ipPI Pi matrices at the integration points
+  /// @param nodePhi_0 Location of the nodes
+  /// @param nodeU Translational displacement of nodes
+  /// @param nodeLambda Rotational orientation of nodes
+  /// @param ie Element index
+  /// @param spatial use inertial frame of reference (true) or spatial frame of reference (false)
+  void getStrains_(const Matrix &strains,
+                   const Vector &w,
+                   const Cubix &ipPI,
+                   const Matrix &nodePhi_0,
+                   const Matrix &nodeU,
+                   const Cubix &nodeLambda,
+                   const idx_t ie,
+                   const bool spatial = true) const;
+
   /// @brief Get the stresses in the integration points of an element
   /// @param stresses Stress components at integration points
   /// @param w Integration point weights

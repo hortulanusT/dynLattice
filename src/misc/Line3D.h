@@ -161,6 +161,21 @@ class Line3D : public Shape
                             const Matrix &c,
                             const Matrix &theta) const;
 
+  /// @brief Get the Pi, the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors
+  ///
+  /// @param[out] Pi Pi(.,.,i) where i are the integration points
+  /// @param[out] Ri Ri(.,.,i) rotation at the integration points
+  /// @param[out] LambdaP curvature at the integration points
+  /// @param[out] w integration weights
+  /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
+  /// @param[in] nodeLambda rotation at the nodes.
+  void getPiAndRotationGradients(const Cubix &Pi,
+                                 const Cubix &Ri,
+                                 const Cubix &LambdaP,
+                                 const Vector &w,
+                                 const Matrix &c,
+                                 const Cubix &nodeLambda) const;
+
   //------------------------------------------------
   // local location functions
   //------------------------------------------------
@@ -189,6 +204,28 @@ class Line3D : public Shape
                                  const Vector &u) const;
 
  private:
+  /// @brief Get the rotations at the integration points from the node rotation vectors
+  ///
+  /// @param[out] Ri Rotation matrices at the integration points
+  /// @param[in] node_psi Node rotation vectors
+  /// @param[in] Lambda_r Reference rotation matrix
+  void getRotations_(const Cubix &Ri,
+                     const Matrix &node_psi,
+                     const Matrix &Lambda_r) const;
+
+  /// @brief Get the rotation gradients at the integration points from the node rotation vectors
+  ///
+  /// @param[out] LambdaP Rotation gradients at the integration points
+  /// @param[out] w Integration weights
+  /// @param[in] c Coordinates of the nodes
+  /// @param[in] node_psi Node rotation vectors
+  /// @param[in] Lambda_r Reference rotation matrix
+  void getRotationGradients_(const Cubix &LambdaP,
+                             const Vector &w,
+                             const Matrix &c,
+                             const Matrix &node_psi,
+                             const Matrix &Lambda_r) const;
+
   /// @brief Get the reference rotation according to Crisfield/Jelenic
   ///
   /// @param[out] Lambda_r Reference rotation matrix

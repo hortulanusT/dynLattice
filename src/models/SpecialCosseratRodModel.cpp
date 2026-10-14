@@ -699,15 +699,23 @@ void SpecialCosseratRodModel::getStrains_(
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
     const bool spatial) const
 {
+  const Cubix ipPI(dofs_->typeCount(), dofs_->typeCount(), shapeK_->ipointCount());
+
+  getStrains_(strains, w, ipPI, nodePhi_0, nodeU, nodeLambda, ie, spatial);
+}
+
+void SpecialCosseratRodModel::getStrains_(
+    const Matrix &strains, const Vector &w, const Cubix &ipPI, const Matrix &nodePhi_0,
+    const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
+    const bool spatial) const
+{
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
 
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t globRank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
 
   const Cubix ipLambda(globRank, globRank, ipCount);
-  const Cubix ipPI(dofCount, dofCount, ipCount);
   const Cubix ipLambdaP(globRank, globRank, ipCount);
   const Matrix ipPhi(globRank, ipCount);
   const Matrix ipPhiP(globRank, ipCount);
@@ -723,8 +731,7 @@ void SpecialCosseratRodModel::getStrains_(
 
   ipPhi = matmul(Matrix(nodePhi_0 + nodeU), shapes);
   ipPhiP = matmul(Matrix(nodePhi_0 + nodeU), grads);
-  shapeK_->getPi(ipPI, ipLambda, nodeLambda);
-  shapeK_->getRotationGradients(ipLambdaP, w, nodePhi_0, nodeLambda);
+  shapeK_->getPiAndRotationGradients(ipPI, ipLambda, ipLambdaP, w, nodePhi_0, nodeLambda);
 
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
@@ -755,21 +762,20 @@ void SpecialCosseratRodModel::getStresses_(
   const idx_t dofCount = dofs_->typeCount();
   const Matrix strains(stresses.shape());
   const Cubix stiffness(dofCount, dofCount, ipCount);
-  const Cubix PI(dofCount, dofCount, ipCount);
+  const Cubix ipPI(dofCount, dofCount, ipCount);
 
   // get the (material) strains
-  getStrains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
+  getStrains_(strains, w, ipPI, nodePhi_0, nodeU, nodeLambda, ie, false);
   // TEST_CONTEXT(strains)
 
   for (idx_t ip = 0; ip < ipCount; ip++)
     material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "output");
 
-  // get the (spatial) stresses
+  // get the (spatial) stresses (PI was already computed with the strains)
   if (spatial)
   {
-    shapeK_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++)
-      stresses[ip] = matmul(PI[ip], stresses[ip]);
+      stresses[ip] = matmul(ipPI[ip], stresses[ip]);
   }
 }
 
