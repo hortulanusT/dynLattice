@@ -1,6 +1,6 @@
 \mainpage dynLattice
 
-Welcome to the `dynLattice` documentation (version 1.12). This project contains JIVE code to simulate lattices undergoing high strain-rate dynamic deformation based on nonlinear beam elements. It also contains some test files to verify the correctness of the implementation.
+Welcome to the `dynLattice` documentation (version 1.12). This project contains JIVE code to simulate lattices undergoing high strain-rate dynamic deformation based on nonlinear beam elements. It also contains some test files to verify the correctness of the implementation. The code can be found on [GitHub](https://github.com/hortulanusT/dynLattice)
 
 # Documentation Pages
 
@@ -14,6 +14,8 @@ Welcome to the `dynLattice` documentation (version 1.12). This project contains 
  
 
 # Related Publications
+The repository has been published in JOSS: [![JOSS status](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4/status.svg)](https://joss.theoj.org/papers/5061ee2b9ca05710f511f2b61c4933e4)
+
 The following articles are using the code in this repository:
 
 - [Geometric effects on impact mitigation in architected auxetic metamaterials](https://doi.org/10.1016/j.mechmat.2024.104952)
