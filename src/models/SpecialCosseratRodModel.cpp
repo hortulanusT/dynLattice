@@ -13,8 +13,8 @@
 #include <math.h>
 
 #include <jive/algebra/SparseMatrixObject.h>
-using jive_helpers::mul3;
 using jem::newInstance;
+using jive_helpers::mul3;
 
 //=======================================================================
 //   class SpecialCosseratRodModel
@@ -1036,9 +1036,8 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
   // only the rotational rows of M*velo are needed, so use the sparse
   // structure directly instead of a full matrix-vector product
-  jive::algebra::SparseMatrixObject *sparse = nullptr;
-  if (!mass->isSymmetric())
-    sparse = dynamic_cast<jive::algebra::SparseMatrixObject *>(mass.get());
+  jive::algebra::SparseMatrixObject *sparse =
+      dynamic_cast<jive::algebra::SparseMatrixObject *>(mass.get());
 
   IdxVector rowOffsets, colIndices;
   Vector values;
