@@ -184,13 +184,14 @@ class ExplicitModule : public SolverModule
   /// @brief invalidate_ current state
   void invalidate_();
 
-  /// @brief Evaluate the internal force at the committed state and publish it
-  /// @details The vector is stored in globdat under ActionParams::INT_VECTOR so
-  /// output modules can read it, and it is reused by the next getForce() call
-  /// if the state has not changed in between. It does not contain the
-  /// gyroscopic term, which depends on the mass of the next step.
+  /// @brief Evaluate the internal force at the committed state
   /// @param[in] globdat  Global data container
-  void storeCommittedForce_(const Properties &globdat);
+  void evalCommittedForce_(const Properties &globdat);
+
+  /// @brief Publish the internal force of the committed state in globdat
+  /// Not compatible with TangentOutputModule.
+  /// @param[in] globdat  Global data container
+  void publishCommittedForce_(const Properties &globdat);
 
   /// @brief Remove the published force again (it is no longer valid)
   /// @param[in] globdat  Global data container
@@ -260,7 +261,6 @@ class ExplicitModule : public SolverModule
   bool fintCacheValid_;  ///< True between commit and the next state change
   Vector fintCache_;     ///< Internal force (without gyroscopic term) at the committed state
   Vector fintCacheDisp_; ///< Displacements the cached force belongs to
-  Vector fintCacheVelo_; ///< Velocities the cached force belongs to
   /// @}
 
   /// @name Time stepping parameters

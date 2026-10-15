@@ -319,11 +319,12 @@ bool ExplicitModule::commit(const Properties &globdat)
                  decrFact_ * dtime_,
                  minDtime_);
     params.clear();
+    evalCommittedForce_(globdat);
     model_->takeAction(Actions::COMMIT, params, globdat);
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     StateVector::updateOld(dofs_, globdat);
-    storeCommittedForce_(globdat);
+    publishCommittedForce_(globdat);
   }
   else
   {
@@ -428,11 +429,9 @@ ExplicitModule::getForce(const Vector &fint,
   bool reuse = false;
   if (fintCacheValid_)
   {
-    Vector disp, velo;
+    Vector disp;
     StateVector::get(disp, dofs_, globdat);
-    StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
-    reuse = jem::testall(disp == fintCacheDisp_) &&
-            jem::testall(velo == fintCacheVelo_);
+    reuse = jem::testall(disp == fintCacheDisp_);
   }
 
   if (reuse)
@@ -464,31 +463,36 @@ ExplicitModule::getForce(const Vector &fint,
 }
 
 //-----------------------------------------------------------------------
-//   storeCommittedForce_
+//   evalCommittedForce_
 //-----------------------------------------------------------------------
 
-void ExplicitModule::storeCommittedForce_(const Properties &globdat)
+void ExplicitModule::evalCommittedForce_(const Properties &globdat)
 {
   Properties params;
   const idx_t dofCount = dofs_->dofCount();
 
-  // fresh arrays: the published vector must not change anymore
-  fintCache_.ref(Vector(dofCount));
+  fintCache_.resize(dofCount);
   fintCache_ = 0.0;
 
   // the same evaluation the next step starts with (no output load case,
   // no MATRIX2, i.e. without the gyroscopic term)
   params.set(ActionParams::INT_VECTOR, fintCache_);
   model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+}
 
-  Vector disp, velo;
+//-----------------------------------------------------------------------
+//   publishCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::publishCommittedForce_(const Properties &globdat)
+{
+  Vector disp;
   StateVector::get(disp, dofs_, globdat);
-  StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
   fintCacheDisp_.ref(Vector(disp.clone()));
-  fintCacheVelo_.ref(Vector(velo.clone()));
   fintCacheValid_ = true;
 
-  globdat.set(ActionParams::INT_VECTOR, fintCache_);
+  // Publish the cached force to the global data container
+  globdat.set(ActionParams::INT_VECTOR, fintCache_.clone());
 }
 
 //-----------------------------------------------------------------------
@@ -568,6 +572,7 @@ void ExplicitModule::updRotMask_()
 void ExplicitModule::invalidate_()
 {
   valid_ = false;
+  fintCacheValid_ = false;
 }
 
 //-----------------------------------------------------------------------

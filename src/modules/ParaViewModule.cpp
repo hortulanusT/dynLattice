@@ -487,14 +487,7 @@ void ParaViewModule::writePiece_
       Matrix fint_mat(groupNodes.size(), dofs->typeCount());
       fint = 0.;
 
-      // an explicit integrator publishes the force of the committed state
-      Vector fintCommitted;
-      if (globdat.find(fintCommitted, ActionParams::INT_VECTOR) &&
-          fintCommitted.size() == fint.size())
-      {
-        fint = fintCommitted;
-      }
-      else
+      if (!globdat.find(fint, ActionParams::INT_VECTOR))
       {
         params.set(ActionParams::INT_VECTOR, fint);
         model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
@@ -525,14 +518,7 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
       params.erase(ActionParams::EXT_VECTOR);
 
-      // an explicit integrator publishes the force of the committed state
-      Vector fintCommitted;
-      if (globdat.find(fintCommitted, ActionParams::INT_VECTOR) &&
-          fintCommitted.size() == fint.size())
-      {
-        fint = fintCommitted;
-      }
-      else
+      if (!globdat.find(fint, ActionParams::INT_VECTOR))
       {
         params.set(ActionParams::INT_VECTOR, fint);
         model->takeAction(Actions::GET_INT_VECTOR, params, globdat);

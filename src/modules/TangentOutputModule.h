@@ -54,6 +54,13 @@ using jive::util::FuncUtils;
 ///
 /// The module performs strain-stress analysis on boundary nodes and calculates
 /// homogenized material properties for multi-scale modeling applications.
+///
+/// @note Only for static analyses with an implicit (Newton) solver. The
+/// finite-difference perturbations are solved with an internal NonlinModule;
+/// combined with an explicit integrator, output modules would read the
+/// internal force published for the committed state instead of the perturbed
+/// one, and the tangent would be zero. run() therefore refuses to work when
+/// such a published force is present.
 class TangentOutputModule : public Module
 {
  public:

@@ -153,10 +153,15 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
 
     if (intOut_)
     {
-      force = 0.;
-      params.set(ActionParams::INT_VECTOR, force);
-      model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-      writeLine_(force, step, ActionParams::INT_VECTOR, time);
+      Vector fint;
+      if (!globdat.find(fint, ActionParams::INT_VECTOR))
+      {
+        fint.ref(force);
+        fint = 0.;
+        params.set(ActionParams::INT_VECTOR, fint);
+        model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+      }
+      writeLine_(fint, step, ActionParams::INT_VECTOR, time);
       params.clear();
     }
 
