@@ -108,6 +108,7 @@ class ExplicitModule : public SolverModule
   static const char *STEP_COUNT; ///< Step count property
   static const char *SO3_DOFS;   ///< SO(3) DOF types property
   static const char *LEN_SCALE;  ///< Length scale property
+  static const char *MASS_MATRIX; ///< globdat key of the published mass matrix
   /// @}
 
   /// @brief Initialize the module
@@ -190,10 +191,14 @@ class ExplicitModule : public SolverModule
 
   /// @brief Publish the internal force of the committed state in globdat
   /// Not compatible with TangentOutputModule.
+  /// With a consistent mass a reference to the mass matrix of the finished
+  /// step is published as well (MASS_MATRIX), so that output modules can
+  /// evaluate the gyroscopic force on demand (GET_GYRO_VECTOR); the solver
+  /// itself does not use it.
   /// @param[in] globdat  Global data container
   void publishCommittedForce_(const Properties &globdat);
 
-  /// @brief Remove the published force again (it is no longer valid)
+  /// @brief Remove the published forces again (they are no longer valid)
   /// @param[in] globdat  Global data container
   void dropCommittedForce_(const Properties &globdat);
 

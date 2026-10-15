@@ -28,6 +28,8 @@
 #include <jive/util/Globdat.h>
 #include <jive/util/utilities.h>
 
+#include "modules/ExplicitModule.h"
+
 using jem::newInstance;
 using jem::io::FileWriter;
 using jem::io::GzipFileWriter;
@@ -56,8 +58,12 @@ using jive::util::FuncUtils;
 
 /// @brief Module for outputting internal, external, and gyroscopic forces
 /// @details Writes force vectors to output files during simulation for post-processing
-/// and analysis. Supports selective output of internal forces, external forces,
-/// and gyroscopic forces with configurable sampling conditions.
+/// and analysis. Supports selective output of internal, external, and
+/// gyroscopic forces with configurable sampling conditions. The gyroscopic
+/// forces are evaluated on demand with the mass matrix an explicit integrator
+/// with consistent mass publishes (ExplicitModule::MASS_MATRIX); without one
+/// they are not written. Only the DOFs selected via the dofs
+/// property are written, in the order of the header.
 class ForceOutputModule : public Module
 {
  public:

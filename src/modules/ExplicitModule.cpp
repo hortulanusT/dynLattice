@@ -24,6 +24,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
+const char *ExplicitModule::MASS_MATRIX = "explicitMass";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -265,6 +266,7 @@ void ExplicitModule::advance(const Properties &globdat)
   // outputs of the finished step have been written by now; the cached copy
   // stays valid for getForce(), which compares the state before using it
   globdat.erase(ActionParams::INT_VECTOR);
+  globdat.erase(MASS_MATRIX);
 
   // check if mass needs to be updated
   valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
@@ -493,6 +495,11 @@ void ExplicitModule::publishCommittedForce_(const Properties &globdat)
 
   // Publish the cached force to the global data container
   globdat.set(ActionParams::INT_VECTOR, fintCache_.clone());
+
+  // only a reference: output modules can evaluate the gyroscopic force with
+  // it on demand (consistent mass only; lumped mode has no gyroscopic term)
+  if (mode_ == CONSISTENT)
+    globdat.set(MASS_MATRIX, solver_->getMatrix());
 }
 
 //-----------------------------------------------------------------------
@@ -503,6 +510,7 @@ void ExplicitModule::dropCommittedForce_(const Properties &globdat)
 {
   if (fintCacheValid_)
     globdat.erase(ActionParams::INT_VECTOR);
+  globdat.erase(MASS_MATRIX);
   fintCacheValid_ = false;
 }
 
