@@ -807,14 +807,17 @@ void SpecialCosseratRodModel::getStresses_(
 
 void SpecialCosseratRodModel::updNodeDofs_() const
 {
-  nodeDofs_.resize(jtypes_.size(), allNodes_.size());
-
+  // only the nodes of this rod; column i belongs to the global node
+  // nodeIdx[i], i.e. it is addressed via rodNodes_ (global -> rod-local)
+  const IdxVector nodeIdx = rodElems_.getNodeIndices();
   IdxVector idofs(jtypes_.size());
 
-  for (idx_t inode = 0; inode < allNodes_.size(); inode++)
+  nodeDofs_.resize(jtypes_.size(), nodeIdx.size());
+
+  for (idx_t i = 0; i < nodeIdx.size(); i++)
   {
-    dofs_->getDofIndices(idofs, inode, jtypes_);
-    nodeDofs_[inode] = idofs;
+    dofs_->getDofIndices(idofs, nodeIdx[i], jtypes_);
+    nodeDofs_[i] = idofs;
   }
 
   nodeDofsValid_ = true;
@@ -845,8 +848,8 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
 
   for (idx_t inode = 0; inode < nodeCount; inode++)
   {
-    idofs_trans.ref(nodeDofs_(TRANS_PART, inodes[inode]));
-    idofs_rot.ref(nodeDofs_(ROT_PART, inodes[inode]));
+    idofs_trans.ref(nodeDofs_(TRANS_PART, rodNodes_[inodes[inode]]));
+    idofs_rot.ref(nodeDofs_(ROT_PART, rodNodes_[inodes[inode]]));
 
     nodeU[inode] = disp[idofs_trans];
     expVec(nodeLambda[inode], Vector(disp[idofs_rot]));
@@ -929,12 +932,12 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        Idofs.ref(nodeDofs_[inodes[Inode]]);
+        Idofs.ref(nodeDofs_[rodNodes_[inodes[Inode]]]);
 
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         {
           // SUBHEADER2( Inode, Jnode)
-          Jdofs.ref(nodeDofs_[inodes[Jnode]]);
+          Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
 
           // Stiffness contribution S ( element stiffness matrix )
           addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
@@ -1003,7 +1006,7 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     {
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        Idofs.ref(nodeDofs_[inodes[Inode]]);
+        Idofs.ref(nodeDofs_[rodNodes_[inodes[Inode]]]);
 
         // fint[Idofs] += weights[ip] * XI * stress without temporaries
         const jem::Array<double, 2> xi = XI[ip][Inode];
@@ -1052,7 +1055,7 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
-    idofs.ref(nodeDofs_(ROT_PART, inode));
+    idofs.ref(nodeDofs_(ROT_PART, rodNodes_[inode]));
 
     if (sparse)
     {
@@ -1123,10 +1126,10 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
-      idofs.ref(nodeDofs_[inodes[inode]]);
+      idofs.ref(nodeDofs_[rodNodes_[inodes[inode]]]);
       for (idx_t jnode = 0; jnode < nodeCount; jnode++)
       {
-        jdofs.ref(nodeDofs_[inodes[jnode]]);
+        jdofs.ref(nodeDofs_[rodNodes_[inodes[jnode]]]);
 
         spatialInertia = 0;
 

@@ -312,7 +312,7 @@ class SpecialCosseratRodModel : public Model
                     const bool spatial = true,
                     const String &loadCase = "") const;
 
-  /// @brief Rebuild the cached dof indices of all nodes
+  /// @brief Rebuild the cached dof indices of the nodes of this rod
   void updNodeDofs_() const;
 
   /// @brief Mark the cached dof indices as outdated (DofSpace changed)
@@ -370,7 +370,7 @@ class SpecialCosseratRodModel : public Model
   IdxVector rotTypes_;   ///< Rotational DOF types
   IdxVector jtypes_;     ///< Joint DOF types
 
-  mutable IdxMatrix nodeDofs_;   ///< Cached dof indices per node (jtypes_ x all nodes)
+  mutable IdxMatrix nodeDofs_;   ///< Cached dof indices (jtypes_ x rod nodes, column = rodNodes_[global node])
   mutable bool nodeDofsValid_;   ///< False after the DofSpace changed
 
 #ifndef NDEBUG
