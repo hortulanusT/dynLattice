@@ -206,10 +206,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified model properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified model properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -264,10 +264,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">contactStiffness</td><td>Contact stiffness matrix (output) </td></tr>
-    <tr><td class="paramname">contactForce</td><td>Contact force vector (output) </td></tr>
-    <tr><td class="paramname">posA</td><td>Position of first joint </td></tr>
-    <tr><td class="paramname">posB</td><td>Position of second joint </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">contactStiffness</td><td>Contact stiffness matrix </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">contactForce</td><td>Contact force vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">posA</td><td>Position of first joint </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">posB</td><td>Position of second joint </td></tr>
   </table>
   </dd>
 </dl>
@@ -327,11 +327,11 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mbld</td><td>Stiffness matrix builder </td></tr>
-    <tr><td class="paramname">fint</td><td>Internal force vector </td></tr>
-    <tr><td class="paramname">nodesA</td><td>Node IDs of first contact side </td></tr>
-    <tr><td class="paramname">nodesB</td><td>Node IDs of second contact side </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">mbld</td><td>Stiffness matrix builder, updated with contact contributions </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">fint</td><td>Internal force vector, updated with contact contributions </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nodesA</td><td>Node IDs of first contact side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nodesB</td><td>Node IDs of second contact side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
 </dl>
@@ -388,7 +388,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">disp</td><td>Displacement vector of all nodes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all nodes </td></tr>
   </table>
   </dd>
 </dl>
@@ -442,10 +442,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified model properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified model properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -494,9 +494,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">action</td><td>Action name to execute </td></tr>
-    <tr><td class="paramname">params</td><td>Action parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">action</td><td>Action name to execute </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>

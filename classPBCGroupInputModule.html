@@ -201,6 +201,7 @@ Protected Member Functions</h2></td></tr>
 <tr class="separator:a0e6b2eb1edc6b3c2a4f0772f780d9925"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classGroupInputModule"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classGroupInputModule')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classGroupInputModule.html">GroupInputModule</a></td></tr>
 <tr class="memitem:aadbdab896f307462911614ba81fc01d3 inherit pro_methods_classGroupInputModule" id="r_aadbdab896f307462911614ba81fc01d3"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGroupInputModule.html#aadbdab896f307462911614ba81fc01d3">~GroupInputModule</a> ()</td></tr>
+<tr class="memdesc:aadbdab896f307462911614ba81fc01d3 inherit pro_methods_classGroupInputModule"><td class="mdescLeft">&#160;</td><td class="mdescRight">Protected destructor.  <br /></td></tr>
 <tr class="separator:aadbdab896f307462911614ba81fc01d3 inherit pro_methods_classGroupInputModule"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
@@ -282,7 +283,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name (default: "pbcGroupInput") </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name (default: "pbcGroupInput") </td></tr>
   </table>
   </dd>
 </dl>
@@ -381,9 +382,9 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified module properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified module properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -440,10 +441,10 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name </td></tr>
-    <tr><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -476,7 +477,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">myProps</td><td>Module properties to configure </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">myProps</td><td>Module properties updated with generated group settings </td></tr>
   </table>
   </dd>
 </dl>
@@ -536,11 +537,11 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">islaves</td><td>Slave node indices </td></tr>
-    <tr><td class="paramname">imasters</td><td>Master node indices </td></tr>
-    <tr><td class="paramname">nodes</td><td>Node set </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
-    <tr><td class="paramname">ix</td><td>Coordinate direction index </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">islaves</td><td>Slave node indices, reordered in place </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">imasters</td><td>Master node indices </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nodes</td><td>Node set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ix</td><td>Coordinate direction index </td></tr>
   </table>
   </dd>
 </dl>

@@ -7,5 +7,6 @@ var searchData=
   ['mat2vec_4',['mat2vec',['../namespacejive__helpers.html#af2db54913eb33c43b5eac2095805f455',1,'jive_helpers']]],
   ['material_5',['Material',['../classMaterial.html#ab1195615c77eb8f971629fabb8ca4ad9',1,'Material']]],
   ['matrixnorm2_6',['matrixNorm2',['../namespacejive__helpers.html#ad17adc84a741b97c647e04aa1a75d43e',1,'jive_helpers']]],
-  ['milnedevicemodule_7',['MilneDeviceModule',['../classMilneDeviceModule.html#a20b9d6469dd7f5e8b969fc9693230543',1,'MilneDeviceModule']]]
+  ['milnedevicemodule_7',['MilneDeviceModule',['../classMilneDeviceModule.html#a20b9d6469dd7f5e8b969fc9693230543',1,'MilneDeviceModule']]],
+  ['mul3_8',['mul3',['../namespacejive__helpers.html#ae42d7761ccb90542c70d63c22c1e8f3e',1,'jive_helpers']]]
 ];

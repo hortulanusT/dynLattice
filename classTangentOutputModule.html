@@ -152,7 +152,8 @@ Protected Member Functions</h2></td></tr>
 <li><b>Finite differences</b>: Applies strain perturbations and measures stress response</li>
 <li><b>Matrix condensation</b>: Direct extraction from tangent stiffness matrix *(NOT IMPLEMENTED)*</li>
 </ul>
-<p>The module performs strain-stress analysis on boundary nodes and calculates homogenized material properties for multi-scale modeling applications. </p>
+<p>The module performs strain-stress analysis on boundary nodes and calculates homogenized material properties for multi-scale modeling applications.</p>
+<dl class="section note"><dt>Note</dt><dd>Only for static analyses with an implicit (Newton) solver. The finite-difference perturbations are solved with an internal NonlinModule; combined with an explicit integrator, output modules would read the internal force published for the committed state instead of the perturbed one, and the tangent would be zero. <a class="el" href="classTangentOutputModule.html#a797d936175d7c8b1fae24088e71dfaf3" title="Run tangent property calculation.">run()</a> therefore refuses to work when such a published force is present. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a3bdc60face3cf7ddac997ddc85c19196" name="a3bdc60face3cf7ddac997ddc85c19196"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3bdc60face3cf7ddac997ddc85c19196">&#9670;&#160;</a></span>TangentOutputModule()</h2>
@@ -179,7 +180,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name (default: "tangentOutput") </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name (default: "tangentOutput") </td></tr>
   </table>
   </dd>
 </dl>
@@ -278,9 +279,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -335,10 +336,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name </td></tr>
-    <tr><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -371,7 +372,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -404,7 +405,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>

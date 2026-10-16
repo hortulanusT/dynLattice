@@ -135,26 +135,31 @@ Project Structure</h1>
 <div class="fragment"><div class="line">.</div>
 <div class="line">├── .gitignore            ← gitignore file to ignore compiled files and other artifacts</div>
 <div class="line">├── .gitattributes        ← git attributes file</div>
+<div class="line">├── .clang-format         ← code formatting rules (clang-format)</div>
+<div class="line">├── .git-blame-ignore-revs ← commits ignored by git blame (formatting only)</div>
 <div class="line">├── .github/              ← GitHub workflows and configuration</div>
 <div class="line">├── .vscode/              ← VS Code workspace configuration</div>
 <div class="line">├── CITATION.cff          ← Citation metadata file</div>
 <div class="line">├── LICENSE               ← MIT license file</div>
+<div class="line">├── CODE_OF_CONDUCT.md    ← code of conduct</div>
 <div class="line">├── README.md             ← this file</div>
 <div class="line">├── CONTRIBUTING.md       ← contribution guidelines</div>
 <div class="line">├── codemeta.json         ← software metadata</div>
 <div class="line">├── Makefile              ← makefile for building the code and documentation</div>
 <div class="line">├── jive.def              ← Apptainer definition file for building the container</div>
 <div class="line">├── jive.sif              ← Apptainer container for running the code</div>
-<div class="line">├── bin/                  ← Compiled code (ignored by git)</div>
+<div class="line">├── bin/                  ← Compiled code (contents ignored by git)</div>
 <div class="line">│   ├── dynLattice        ← main executable for the program</div>
 <div class="line">│   ├── dynLattice-opt    ← optimized executable for the program</div>
-<div class="line">│   └── dynLattice-debug  ← executable with debug symbols</div>
+<div class="line">│   └── dynLattice-dbg    ← executable with debug symbols</div>
 <div class="line">├── doc/                  ← Documentation files</div>
 <div class="line">│   ├── doc.mk            ← Makefile for documentation</div>
 <div class="line">│   ├── doxygen.conf      ← Doxygen configuration for API documentation</div>
 <div class="line">│   ├── install.md        ← Installation instructions</div>
 <div class="line">│   ├── main.md           ← Main documentation content</div>
 <div class="line">│   ├── usage.md          ← Usage instructions</div>
+<div class="line">│   ├── usage_details1.md ← Input properties explained for example 1</div>
+<div class="line">│   ├── usage_details2.md ← Input properties explained for example 2</div>
 <div class="line">│   └── html/             ← Generated HTML documentation (ignored by git)</div>
 <div class="line">├── paper/                ← JOSS paper and related materials</div>
 <div class="line">│   ├── paper.md          ← Main paper content in Markdown</div>
@@ -169,6 +174,7 @@ Project Structure</h1>
 <div class="line">│   └── utils/            ← Utility functions and macros</div>
 <div class="line">└── tests/                ← Test cases and benchmarks</div>
 <div class="line">    ├── testing.mk        ← Makefile for running tests</div>
+<div class="line">    ├── metrics.py        ← Comparison metrics used by the test scripts</div>
 <div class="line">    ├── Benchmarks.md     ← Overview of all benchmarks</div>
 <div class="line">    ├── BeamBenchmarks.md ← Beam element benchmarks</div>
 <div class="line">    ├── ContactBenchmarks.md ← Contact mechanics benchmarks</div>
@@ -178,6 +184,7 @@ Project Structure</h1>
 <div class="line">    ├── contact/          ← Contact test cases</div>
 <div class="line">    ├── plastic/          ← Plasticity test cases</div>
 <div class="line">    ├── transient/        ← Transient analysis test cases</div>
+<div class="line">    ├── docs/             ← Examples used in the documentation</div>
 <div class="line">    └── *.png             ← Result images from benchmark tests (ignored by git)</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md54"></a>
 Contributing</h1>

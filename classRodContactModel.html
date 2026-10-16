@@ -241,10 +241,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified model properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified model properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -293,9 +293,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">elementsA</td><td>Element IDs A </td></tr>
-    <tr><td class="paramname">elementsB</td><td>Element IDs B </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element IDs A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element IDs B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -355,11 +355,11 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mbld</td><td>Stiffness matrix builder </td></tr>
-    <tr><td class="paramname">fint</td><td>Internal force vector </td></tr>
-    <tr><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
-    <tr><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">mbld</td><td>Stiffness matrix builder, updated with contact contributions </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">fint</td><td>Internal force vector, updated with contact contributions </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
 </dl>
@@ -419,11 +419,11 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">f_contrib</td><td>Force contribution </td></tr>
-    <tr><td class="paramname">k_contrib</td><td>Stiffness contribution </td></tr>
-    <tr><td class="paramname">possS</td><td>Position of the secondary node </td></tr>
-    <tr><td class="paramname">possM</td><td>Positions of the main beam </td></tr>
-    <tr><td class="paramname">uM</td><td>Local coordinate of the main beam </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">f_contrib</td><td>Force contribution </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">k_contrib</td><td>Stiffness contribution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possS</td><td>Position of the secondary node </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possM</td><td>Positions of the main beam </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uM</td><td>Local coordinate of the main beam </td></tr>
   </table>
   </dd>
 </dl>
@@ -491,12 +491,12 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">f_contrib</td><td>Force contribution </td></tr>
-    <tr><td class="paramname">k_contrib</td><td>Stiffness contribution </td></tr>
-    <tr><td class="paramname">possA</td><td>Positions of Beam A </td></tr>
-    <tr><td class="paramname">possB</td><td>Positions of Beam B </td></tr>
-    <tr><td class="paramname">uA</td><td>Local coordinate Beam A </td></tr>
-    <tr><td class="paramname">uB</td><td>Local coordinate Beam B </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">f_contrib</td><td>Force contribution </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">k_contrib</td><td>Stiffness contribution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possA</td><td>Positions of Beam A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possB</td><td>Positions of Beam B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uA</td><td>Local coordinate Beam A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">uB</td><td>Local coordinate Beam B </td></tr>
   </table>
   </dd>
 </dl>
@@ -565,8 +565,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">elementsA</td><td>Element ID A </td></tr>
-    <tr><td class="paramname">elementsB</td><td>Element ID B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element ID A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element ID B </td></tr>
   </table>
   </dd>
 </dl>
@@ -621,10 +621,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">uA</td><td>Local coordinate Beam A </td></tr>
-    <tr><td class="paramname">uB</td><td>Local coordinate Beam B </td></tr>
-    <tr><td class="paramname">possA</td><td>Positions Beam A </td></tr>
-    <tr><td class="paramname">possB</td><td>Positions Beam B </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">uA</td><td>Local coordinate Beam A </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">uB</td><td>Local coordinate Beam B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possA</td><td>Positions Beam A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possB</td><td>Positions Beam B </td></tr>
   </table>
   </dd>
 </dl>
@@ -672,9 +672,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
-    <tr><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
 </dl>
@@ -722,9 +722,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">beamsA</td><td>Indices of the beams in contact </td></tr>
-    <tr><td class="paramname">beamsB</td><td>Indices of corresponding beams </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">beamsA</td><td>Indices of the beams in contact </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">beamsB</td><td>Indices of corresponding beams </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
 </dl>
@@ -784,11 +784,11 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">elemsA</td><td>Element ID of one side of the contact </td></tr>
-    <tr><td class="paramname">elemsB</td><td>Corresponding element ID on the other side </td></tr>
-    <tr><td class="paramname">beamA</td><td>Possible beam on side A </td></tr>
-    <tr><td class="paramname">beamB</td><td>Possible beam on side B </td></tr>
-    <tr><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemsA</td><td>Element ID of one side of the contact </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemsB</td><td>Corresponding element ID on the other side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beamA</td><td>Possible beam on side A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beamB</td><td>Possible beam on side B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
 </dl>
@@ -830,8 +830,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">posS</td><td>Secondary point </td></tr>
-    <tr><td class="paramname">possM</td><td>Main element positions </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">posS</td><td>Secondary point </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">possM</td><td>Main element positions </td></tr>
   </table>
   </dd>
 </dl>
@@ -886,10 +886,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified model properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified model properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -938,9 +938,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">action</td><td>Action name </td></tr>
-    <tr><td class="paramname">params</td><td>Action parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">action</td><td>Action name </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>

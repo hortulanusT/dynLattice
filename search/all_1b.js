@@ -4,7 +4,7 @@ var searchData=
   ['validation_1',['Examples and Validation',['../md_README.html#autotoc_md55',1,'']]],
   ['validation_20tests_2',['Validation Tests',['../md_CONTRIBUTING.html#autotoc_md11',1,'']]],
   ['vec0_3',['vec0',['../namespacejive__helpers.html#a8a8e50bd5b06b63a1d47f549fe3a1fcd',1,'jive_helpers']]],
-  ['vec2mat_4',['vec2mat',['../ParaViewModule_8cpp.html#aaf941acafe2fe8810a60fbbaaacff7ca',1,'vec2mat():&#160;ParaViewModule.cpp'],['../namespacejive__helpers.html#a4fb2a0a5fcc45faa6eefef6174e9f3fb',1,'jive_helpers::vec2mat()']]],
+  ['vec2mat_4',['vec2mat',['../namespacejive__helpers.html#a4fb2a0a5fcc45faa6eefef6174e9f3fb',1,'jive_helpers']]],
   ['vectors_5',['VECTORS',['../classCSVDataPrinter.html#a6ee30170a5f484c8bdfc0c6078e6abaaa8c9628af51062656cfe66f2147fff95c',1,'CSVDataPrinter']]],
   ['velo_5fdofs_6',['VELO_DOFS',['../classInitLoadModel.html#a85d9135254136f5957760663217108b4',1,'InitLoadModel']]],
   ['velo_5fgroups_7',['VELO_GROUPS',['../classInitLoadModel.html#adcfdfc4e563feb4c81774e5a6bb7b205',1,'InitLoadModel']]],

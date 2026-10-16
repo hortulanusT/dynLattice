@@ -97,7 +97,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classEmbeddedRKModule.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classEmbeddedRKModule.html">EmbeddedRKModule</a> : <span class="keyword">public</span> <a class="code hl_class" href="classExplicitModule.html">ExplicitModule</a></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  JEM_DECLARE_CLASS(<a class="code hl_class" href="classEmbeddedRKModule.html">EmbeddedRKModule</a>, <a class="code hl_class" href="classExplicitModule.html">ExplicitModule</a>);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classEmbeddedRKModule.html#ad641c938a87c801fa5c4c9af744d476b">   32</a></span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="classEmbeddedRKModule.html#ad641c938a87c801fa5c4c9af744d476b">TYPE_NAME</a>; </div>
@@ -120,7 +120,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classEmbeddedRKModule.html#a52622946c72dd5df07b3d2eeb011cf72">~EmbeddedRKModule</a>();</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordtype">void</span> initODE23_();</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordtype">void</span> initODE45_();</div>
@@ -137,7 +137,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                       <span class="keyword">const</span> Matrix &amp;point,</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                       <span class="keyword">const</span> Matrix &amp;about);</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  String kind_;     </div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  idx_t order_;     </div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  idx_t butchSize_; </div>
@@ -155,7 +155,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassEmbeddedRKModule_html_a52622946c72dd5df07b3d2eeb011cf72"><div class="ttname"><a href="classEmbeddedRKModule.html#a52622946c72dd5df07b3d2eeb011cf72">EmbeddedRKModule::~EmbeddedRKModule</a></div><div class="ttdeci">virtual ~EmbeddedRKModule()</div><div class="ttdoc">Protected destructor.</div><div class="ttdef"><b>Definition</b> EmbeddedRKModule.cpp:37</div></div>
 <div class="ttc" id="aclassEmbeddedRKModule_html_a9b032ed4ea836f609d01f5a19e5d1143"><div class="ttname"><a href="classEmbeddedRKModule.html#a9b032ed4ea836f609d01f5a19e5d1143">EmbeddedRKModule::solve</a></div><div class="ttdeci">virtual void solve(const Properties &amp;info, const Properties &amp;globdat) override</div><div class="ttdoc">Solve using embedded Runge-Kutta method.</div><div class="ttdef"><b>Definition</b> EmbeddedRKModule.cpp:154</div></div>
 <div class="ttc" id="aclassEmbeddedRKModule_html_ad641c938a87c801fa5c4c9af744d476b"><div class="ttname"><a href="classEmbeddedRKModule.html#ad641c938a87c801fa5c4c9af744d476b">EmbeddedRKModule::TYPE_NAME</a></div><div class="ttdeci">static const char * TYPE_NAME</div><div class="ttdoc">Module type name.</div><div class="ttdef"><b>Definition</b> EmbeddedRKModule.h:32</div></div>
-<div class="ttc" id="aclassExplicitModule_html"><div class="ttname"><a href="classExplicitModule.html">ExplicitModule</a></div><div class="ttdoc">Base class for explicit time integration schemes.</div><div class="ttdef"><b>Definition</b> ExplicitModule.h:93</div></div>
+<div class="ttc" id="aclassExplicitModule_html"><div class="ttname"><a href="classExplicitModule.html">ExplicitModule</a></div><div class="ttdoc">Base class for explicit time integration schemes.</div><div class="ttdef"><b>Definition</b> ExplicitModule.h:94</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

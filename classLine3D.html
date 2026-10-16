@@ -104,13 +104,17 @@ Collaboration diagram for Line3D:</div>
 <div class="dyncontent">
 <div class="center"><img src="classLine3D__coll__graph.png" border="0" usemap="#aLine3D_coll__map" alt="Collaboration graph"/></div>
 <map name="aLine3D_coll__map" id="aLine3D_coll__map">
-<area shape="rect" title="Shape function for 1D line elements in 3D space." alt="" coords="89,123,155,148"/>
+<area shape="rect" title="Shape function for 1D line elements in 3D space." alt="" coords="209,123,275,148"/>
 <area shape="rect" title=" " alt="" coords="5,5,68,31"/>
-<area shape="poly" title=" " alt="" coords="56,40,116,121,111,124,51,44"/>
+<area shape="poly" title=" " alt="" coords="57,39,86,69,123,96,167,115,209,126,208,131,165,120,121,101,83,73,53,43"/>
 <area shape="rect" title=" " alt="" coords="92,5,152,31"/>
-<area shape="poly" title=" " alt="" coords="125,44,125,123,119,123,119,44"/>
+<area shape="poly" title=" " alt="" coords="127,44,134,72,149,97,178,116,209,127,208,132,175,121,145,100,129,74,122,45"/>
 <area shape="rect" title=" " alt="" coords="215,5,269,31"/>
-<area shape="poly" title=" " alt="" coords="241,45,232,74,215,101,187,120,156,131,155,126,184,115,211,97,227,72,236,44"/>
+<area shape="poly" title=" " alt="" coords="245,44,245,123,239,123,239,44"/>
+<area shape="rect" title=" " alt="" coords="326,5,390,31"/>
+<area shape="poly" title=" " alt="" coords="357,45,348,74,331,101,305,119,276,130,274,125,302,114,327,97,343,71,352,44"/>
+<area shape="rect" title=" " alt="" coords="484,5,547,31"/>
+<area shape="poly" title=" " alt="" coords="514,46,505,75,496,89,485,101,469,110,446,117,390,127,276,136,275,130,389,122,445,112,467,105,482,97,492,86,500,72,509,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -123,27 +127,37 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a036b1de3e833be4f0c26ddb9da8a050e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global rank (spatial dimension).  <br /></td></tr>
 <tr class="separator:a036b1de3e833be4f0c26ddb9da8a050e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d89e75aae99d2c6b4c4bc73d78fcb46" id="r_a5d89e75aae99d2c6b4c4bc73d78fcb46"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a5d89e75aae99d2c6b4c4bc73d78fcb46">localRank</a> () const override</td></tr>
+<tr class="memdesc:a5d89e75aae99d2c6b4c4bc73d78fcb46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local rank of the line element.  <br /></td></tr>
 <tr class="separator:a5d89e75aae99d2c6b4c4bc73d78fcb46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65457d2ea9cd00c9514b9637463fff69" id="r_a65457d2ea9cd00c9514b9637463fff69"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a65457d2ea9cd00c9514b9637463fff69">nodeCount</a> () const override</td></tr>
+<tr class="memdesc:a65457d2ea9cd00c9514b9637463fff69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of nodes in the line element.  <br /></td></tr>
 <tr class="separator:a65457d2ea9cd00c9514b9637463fff69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5d93c202d963eb352cec9983df6ed11" id="r_ad5d93c202d963eb352cec9983df6ed11"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#ad5d93c202d963eb352cec9983df6ed11">vertexCount</a> () const override</td></tr>
+<tr class="memdesc:ad5d93c202d963eb352cec9983df6ed11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of vertices in the line element.  <br /></td></tr>
 <tr class="separator:ad5d93c202d963eb352cec9983df6ed11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae542d55a3ec341092ea060269d6a96fa" id="r_ae542d55a3ec341092ea060269d6a96fa"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#ae542d55a3ec341092ea060269d6a96fa">ipointCount</a> () const override</td></tr>
+<tr class="memdesc:ae542d55a3ec341092ea060269d6a96fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of integration points.  <br /></td></tr>
 <tr class="separator:ae542d55a3ec341092ea060269d6a96fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03104f9753fe6721938098971b08bb0c" id="r_a03104f9753fe6721938098971b08bb0c"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a03104f9753fe6721938098971b08bb0c">shapeFuncCount</a> () const override</td></tr>
+<tr class="memdesc:a03104f9753fe6721938098971b08bb0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of shape functions.  <br /></td></tr>
 <tr class="separator:a03104f9753fe6721938098971b08bb0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ef1247a81ad8e28cc264ec5247e2191" id="r_a0ef1247a81ad8e28cc264ec5247e2191"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a0ef1247a81ad8e28cc264ec5247e2191">getVertexCoords</a> () const override</td></tr>
+<tr class="memdesc:a0ef1247a81ad8e28cc264ec5247e2191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local coordinates of the vertices.  <br /></td></tr>
 <tr class="separator:a0ef1247a81ad8e28cc264ec5247e2191"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a4ccce4ae17ea745e521a9682038801" id="r_a7a4ccce4ae17ea745e521a9682038801"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a7a4ccce4ae17ea745e521a9682038801">getIntegrationScheme</a> () const override</td></tr>
+<tr class="memdesc:a7a4ccce4ae17ea745e521a9682038801"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the integration scheme.  <br /></td></tr>
 <tr class="separator:a7a4ccce4ae17ea745e521a9682038801"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a8d6857b010aa47557ab4143e07f7ff" id="r_a5a8d6857b010aa47557ab4143e07f7ff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a5a8d6857b010aa47557ab4143e07f7ff">containsLocalPoint</a> (const Vector &amp;u) const override</td></tr>
+<tr class="memdesc:a5a8d6857b010aa47557ab4143e07f7ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether a local point is inside the element.  <br /></td></tr>
 <tr class="separator:a5a8d6857b010aa47557ab4143e07f7ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a853ea9103171edb0699405c67fd54003" id="r_a853ea9103171edb0699405c67fd54003"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a853ea9103171edb0699405c67fd54003">getIntegrationWeights</a> (const Vector &amp;w, const Matrix &amp;c) const override</td></tr>
 <tr class="memdesc:a853ea9103171edb0699405c67fd54003"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute integration weights for numerical integration.  <br /></td></tr>
 <tr class="separator:a853ea9103171edb0699405c67fd54003"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23aae69fa5436708aea06f62f75605b8" id="r_a23aae69fa5436708aea06f62f75605b8"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a23aae69fa5436708aea06f62f75605b8">getVertexFunctions</a> () const override</td></tr>
+<tr class="memdesc:a23aae69fa5436708aea06f62f75605b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get shape function values at the integration points.  <br /></td></tr>
 <tr class="separator:a23aae69fa5436708aea06f62f75605b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a966555deafc31a84663feeec9e2a1709" id="r_a966555deafc31a84663feeec9e2a1709"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a966555deafc31a84663feeec9e2a1709">getShapeFunctions</a> () const override</td></tr>
+<tr class="memdesc:a966555deafc31a84663feeec9e2a1709"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get shape function values at the integration points.  <br /></td></tr>
 <tr class="separator:a966555deafc31a84663feeec9e2a1709"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac183c1baad336a60b926517eb510e735" id="r_ac183c1baad336a60b926517eb510e735"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#ac183c1baad336a60b926517eb510e735">getGlobalPoint</a> (const Vector &amp;x, const Vector &amp;u, const Matrix &amp;c) const override</td></tr>
 <tr class="memdesc:ac183c1baad336a60b926517eb510e735"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform local coordinates to global coordinates.  <br /></td></tr>
@@ -169,9 +183,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2391f5310f97a7a0f93c142a71c612c9" id="r_a2391f5310f97a7a0f93c142a71c612c9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a2391f5310f97a7a0f93c142a71c612c9">getRotationGradients</a> (const Cubix &amp;LambdaP, const Vector &amp;w, const Matrix &amp;c, const Cubix &amp;nodeLambda) const</td></tr>
 <tr class="memdesc:a2391f5310f97a7a0f93c142a71c612c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)  <br /></td></tr>
 <tr class="separator:a2391f5310f97a7a0f93c142a71c612c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3763ddbf99a2054cf4189b66259d4bbb" id="r_a3763ddbf99a2054cf4189b66259d4bbb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a3763ddbf99a2054cf4189b66259d4bbb">getRotationGradients</a> (const Cubix &amp;LambdaP, const Vector &amp;w, const Cubix &amp;Rn, const Matrix &amp;c, const Matrix &amp;theta) const</td></tr>
-<tr class="memdesc:a3763ddbf99a2054cf4189b66259d4bbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)  <br /></td></tr>
-<tr class="separator:a3763ddbf99a2054cf4189b66259d4bbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abeacab49b3ae6de40b9f07058867b49d" id="r_abeacab49b3ae6de40b9f07058867b49d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#abeacab49b3ae6de40b9f07058867b49d">getPiAndRotationGradients</a> (const Cubix &amp;Pi, const Cubix &amp;Ri, const Cubix &amp;LambdaP, const Vector &amp;w, const Matrix &amp;c, const Cubix &amp;nodeLambda) const</td></tr>
+<tr class="memdesc:abeacab49b3ae6de40b9f07058867b49d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the Pi, the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors.  <br /></td></tr>
+<tr class="separator:abeacab49b3ae6de40b9f07058867b49d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19c15032c120ef81aad642dd7c604408" id="r_a19c15032c120ef81aad642dd7c604408"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a19c15032c120ef81aad642dd7c604408">evalShapeFunctions</a> (const Vector &amp;h, const Vector &amp;u) const override</td></tr>
 <tr class="memdesc:a19c15032c120ef81aad642dd7c604408"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate shape functions at given local coordinates.  <br /></td></tr>
 <tr class="separator:a19c15032c120ef81aad642dd7c604408"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,6 +216,17 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:ad1ee71c1e8003999228b45b4fbfd9a41" id="r_ad1ee71c1e8003999228b45b4fbfd9a41"><td class="memItemLeft" align="right" valign="top">jem::Ref&lt; ParametricLine &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#ad1ee71c1e8003999228b45b4fbfd9a41">intLine_</a></td></tr>
 <tr class="memdesc:ad1ee71c1e8003999228b45b4fbfd9a41"><td class="mdescLeft">&#160;</td><td class="mdescRight">internal line element for some standard functions  <br /></td></tr>
 <tr class="separator:ad1ee71c1e8003999228b45b4fbfd9a41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Memo of the last getShapeGradients() call</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>The gradients only depend on the node coordinates, and the same coordinates are requested several times in a row (strains, Xi, rotation gradients of one element). A hit needs bit-identical coordinates, so the results are exactly those of a fresh evaluation. Not thread safe. </p>
+</div></td></tr>
+<tr class="memitem:adb1675eb01fc75a72c3e5c467ad89a4f" id="r_adb1675eb01fc75a72c3e5c467ad89a4f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#adb1675eb01fc75a72c3e5c467ad89a4f">gradMemoValid_</a> = false</td></tr>
+<tr class="separator:adb1675eb01fc75a72c3e5c467ad89a4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b819dcbb61e7e64453c5e9765c67b35" id="r_a4b819dcbb61e7e64453c5e9765c67b35"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a4b819dcbb61e7e64453c5e9765c67b35">gradMemoCoords_</a></td></tr>
+<tr class="separator:a4b819dcbb61e7e64453c5e9765c67b35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa381c19933fd80dd10f96c316e19ff30" id="r_aa381c19933fd80dd10f96c316e19ff30"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#aa381c19933fd80dd10f96c316e19ff30">gradMemoGrads_</a></td></tr>
+<tr class="separator:aa381c19933fd80dd10f96c316e19ff30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a775d9576db897939ef106ed9c73060e8" id="r_a775d9576db897939ef106ed9c73060e8"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLine3D.html#a775d9576db897939ef106ed9c73060e8">gradMemoWeights_</a></td></tr>
+<tr class="separator:a775d9576db897939ef106ed9c73060e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides shape functions and geometric operations for line elements embedded in 3D space. Supports 2, 3, and 4-node line elements with configurable integration schemes and rotational control functions.</p>
@@ -295,6 +320,13 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinate vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Whether the point is contained in the element </dd></dl>
 
 </div>
 </div>
@@ -333,8 +365,8 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function values </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinates </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function value vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinate vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -388,10 +420,10 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function values </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">g</td><td>Shape function gradients </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">gg</td><td>Shape function second derivatives </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinates </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function value vector </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">g</td><td>Shape function gradient vector </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">gg</td><td>Shape function second derivative vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinate vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -439,9 +471,9 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function values </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">g</td><td>Shape function gradients </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinates </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">h</td><td>Shape function value vector </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">g</td><td>Shape function gradient vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinate vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -489,9 +521,9 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">x</td><td>Global coordinates vector </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinates vector </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Node coordinates matrix </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">x</td><td>Global coordinate vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>Local coordinate vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -520,6 +552,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Matrix describing the integration scheme </dd></dl>
 
 </div>
 </div>
@@ -558,8 +591,8 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>Integration weights at quadrature points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Node coordinates matrix </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>Integration weights at the integration points </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Node coordinates matrix, c(i,j) is the i-th coordinate of the j-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -599,9 +632,9 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Pi</td><td>Pi(.,.,i) where i are the integration points </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">Ri</td><td>Ri(.,.,i) rotation at the integration points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>rotations at the nodes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Pi</td><td>6 x 6 Pi(.,.,i) where i are the integration points </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Ri</td><td>3 x 3 Ri(.,.,i) rotation at the i-th integration point </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -635,8 +668,71 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Pi</td><td>Pi(.,.,i) where i are the integration points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>rotations at the nodes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Pi</td><td>6 x 6 Pi(.,.,i) where i are the integration points </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abeacab49b3ae6de40b9f07058867b49d" name="abeacab49b3ae6de40b9f07058867b49d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abeacab49b3ae6de40b9f07058867b49d">&#9670;&#160;</a></span>getPiAndRotationGradients()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Line3D::getPiAndRotationGradients </td>
+          <td>(</td>
+          <td class="paramtype">const Cubix &amp;&#160;</td>
+          <td class="paramname"><em>Pi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Cubix &amp;&#160;</td>
+          <td class="paramname"><em>Ri</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Cubix &amp;&#160;</td>
+          <td class="paramname"><em>LambdaP</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>w</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Cubix &amp;&#160;</td>
+          <td class="paramname"><em>nodeLambda</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">Pi</td><td>6 x 6 Pi(.,.,i) where i are the integration points </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Ri</td><td>3 x 3 Ri(.,.,i) rotation at the i-th integration point </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">LambdaP</td><td>3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>integration weights </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nodeLambda</td><td>nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -676,7 +772,7 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Psi</td><td>Psi(.,.,j,i) where j are the nodes and i are the integration points </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Psi</td><td>6 x 9 Psi(.,.,j,i), where j are the nodes and i are the integration points </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>weights of the integration points </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
   </table>
@@ -685,64 +781,8 @@ Supported Elements</h1>
 
 </div>
 </div>
-<a id="a3763ddbf99a2054cf4189b66259d4bbb" name="a3763ddbf99a2054cf4189b66259d4bbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3763ddbf99a2054cf4189b66259d4bbb">&#9670;&#160;</a></span>getRotationGradients() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Line3D::getRotationGradients </td>
-          <td>(</td>
-          <td class="paramtype">const Cubix &amp;&#160;</td>
-          <td class="paramname"><em>LambdaP</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector &amp;&#160;</td>
-          <td class="paramname"><em>w</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Cubix &amp;&#160;</td>
-          <td class="paramname"><em>Rn</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Matrix &amp;&#160;</td>
-          <td class="paramname"><em>c</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Matrix &amp;&#160;</td>
-          <td class="paramname"><em>theta</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">LambdaP</td><td>curvature at the integration points </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>integration weights </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>initial rotations at the integration points. Rn(.,.,i) initial rotation at the integration points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">theta</td><td>rotation at the nodes. theta(.,i) rotational displacement at the nodes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a2391f5310f97a7a0f93c142a71c612c9" name="a2391f5310f97a7a0f93c142a71c612c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2391f5310f97a7a0f93c142a71c612c9">&#9670;&#160;</a></span>getRotationGradients() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2391f5310f97a7a0f93c142a71c612c9">&#9670;&#160;</a></span>getRotationGradients()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -780,10 +820,10 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">LambdaP</td><td>curvature at the integration points </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">LambdaP</td><td>3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>integration weights </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">nodeLambda</td><td>rotation at the nodes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nodeLambda</td><td>nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -817,8 +857,8 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Ri</td><td>Ri(.,.,i) rotational matrix at the integration points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>rotation at the nodes. Rn(.,i) rotational displacement at the nodes </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Ri</td><td>3 x 3 Ri(.,.,i) rotational matrix at the i-th integration point </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Rn</td><td>nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node </td></tr>
   </table>
   </dd>
 </dl>
@@ -847,6 +887,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Matrix of shape function values </dd></dl>
 
 </div>
 </div>
@@ -914,6 +955,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Matrix of vertex coordinates </dd></dl>
 
 </div>
 </div>
@@ -939,6 +981,8 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Get the vertex shape function values at the integration points.</p>
+<dl class="section return"><dt>Returns</dt><dd>Matrix of shape function values </dd></dl>
 
 </div>
 </div>
@@ -981,9 +1025,9 @@ Supported Elements</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Xi</td><td>Xi(.,.,j,i) where j are the nodes and i are the integration points </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Xi</td><td>6 x 6 Xi(.,.,j,i), where j are the nodes and i are the integration points </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">w</td><td>weights of the integration points </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>displacements of the nodes, c(i,j) is the i-th displacement of the j-th node </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">u</td><td>displacements of the nodes, u(i,j) is the i-th displacement of the j-th node </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node </td></tr>
   </table>
   </dd>
@@ -1013,7 +1057,9 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>Global rank (always 3 for 3D space) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Global rank (always 3 for 3D space)</dd>
+<dd>
+Global rank </dd></dl>
 
 </div>
 </div>
@@ -1039,6 +1085,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of integration points </dd></dl>
 
 </div>
 </div>
@@ -1064,6 +1111,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Local coordinate dimension </dd></dl>
 
 </div>
 </div>
@@ -1089,6 +1137,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of nodes </dd></dl>
 
 </div>
 </div>
@@ -1114,6 +1163,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of shape functions </dd></dl>
 
 </div>
 </div>
@@ -1139,6 +1189,7 @@ Supported Elements</h1>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Number of vertices </dd></dl>
 
 </div>
 </div>
@@ -1159,6 +1210,94 @@ Supported Elements</h1>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b819dcbb61e7e64453c5e9765c67b35" name="a4b819dcbb61e7e64453c5e9765c67b35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b819dcbb61e7e64453c5e9765c67b35">&#9670;&#160;</a></span>gradMemoCoords_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Matrix Line3D::gradMemoCoords_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa381c19933fd80dd10f96c316e19ff30" name="aa381c19933fd80dd10f96c316e19ff30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa381c19933fd80dd10f96c316e19ff30">&#9670;&#160;</a></span>gradMemoGrads_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Matrix Line3D::gradMemoGrads_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adb1675eb01fc75a72c3e5c467ad89a4f" name="adb1675eb01fc75a72c3e5c467ad89a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb1675eb01fc75a72c3e5c467ad89a4f">&#9670;&#160;</a></span>gradMemoValid_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Line3D::gradMemoValid_ = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a775d9576db897939ef106ed9c73060e8" name="a775d9576db897939ef106ed9c73060e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a775d9576db897939ef106ed9c73060e8">&#9670;&#160;</a></span>gradMemoWeights_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector Line3D::gradMemoWeights_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">mutable</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

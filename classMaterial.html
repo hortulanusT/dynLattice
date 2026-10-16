@@ -158,9 +158,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a750ded2d63b912afa8077758741fefa9" id="r_a750ded2d63b912afa8077758741fefa9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a750ded2d63b912afa8077758741fefa9">rejectDeform</a> ()=0</td></tr>
 <tr class="memdesc:a750ded2d63b912afa8077758741fefa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reject the current deformation and revert to previous state.  <br /></td></tr>
 <tr class="separator:a750ded2d63b912afa8077758741fefa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7925191b83264b0419248a73a38347bb" id="r_a7925191b83264b0419248a73a38347bb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a7925191b83264b0419248a73a38347bb">getTable</a> (const String &amp;name, XTable &amp;strain_table, const IdxVector &amp;items, const Vector &amp;weights) const =0</td></tr>
-<tr class="memdesc:a7925191b83264b0419248a73a38347bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Populate strain table with material-specific data.  <br /></td></tr>
-<tr class="separator:a7925191b83264b0419248a73a38347bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14955e9742039ef188fd13d52c4a7f97" id="r_a14955e9742039ef188fd13d52c4a7f97"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a14955e9742039ef188fd13d52c4a7f97">getTable</a> (XTable &amp;strain_table, const Vector &amp;weights, const String &amp;name, const IdxVector &amp;items) const =0</td></tr>
+<tr class="memdesc:a14955e9742039ef188fd13d52c4a7f97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Populate strain table with material-specific data.  <br /></td></tr>
+<tr class="separator:a14955e9742039ef188fd13d52c4a7f97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a60401740bbd3a1304cdf1b47ddaeaf" id="r_a1a60401740bbd3a1304cdf1b47ddaeaf"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a1a60401740bbd3a1304cdf1b47ddaeaf">getDissipatedEnergy</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const =0</td></tr>
 <tr class="memdesc:a1a60401740bbd3a1304cdf1b47ddaeaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the dissipated energy at a specific integration point.  <br /></td></tr>
 <tr class="separator:a1a60401740bbd3a1304cdf1b47ddaeaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,10 +242,10 @@ Hierarchy</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> instance name for identification </td></tr>
-    <tr><td class="paramname">conf</td><td>Configuration properties container for output </td></tr>
-    <tr><td class="paramname">props</td><td>Input properties for material parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container for simulation state </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> instance name for identification </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Configuration properties container for output </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>Input properties for material parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container for simulation state </td></tr>
   </table>
   </dd>
 </dl>
@@ -342,8 +342,8 @@ Hierarchy</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">props</td><td>Properties containing configuration parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container with simulation context </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>Properties containing configuration parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container with simulation context </td></tr>
   </table>
   </dd>
 </dl>
@@ -393,8 +393,8 @@ Hierarchy</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">conf</td><td>Properties object to store configuration in </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container with simulation context </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Properties object to store configuration in </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container with simulation context </td></tr>
   </table>
   </dd>
 </dl>
@@ -466,12 +466,13 @@ Hierarchy</h1>
 <p>Computes the energy dissipated through inelastic processes at the specified element and integration point location.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ielem</td><td>Element index </td></tr>
-    <tr><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Total dissipated energy at the specified location </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Contract: must return the value of the last committed state, i.e. it has to be stored in <a class="el" href="classMaterial.html#affbf4f4b8114e4a46d713a203e85dc45" title="Apply computed deformation to the material state.">applyDeform()</a>. SpecialCosseratRodModel::getEnergies_ reads it right after <a class="el" href="classMaterial.html#affbf4f4b8114e4a46d713a203e85dc45" title="Apply computed deformation to the material state.">applyDeform()</a> without re-evaluating strains/stresses. </dd></dl>
 
 <p>Implemented in <a class="el" href="classElasticRodMaterial.html#ad9926616c3840d1c515e043bda08cba0">ElasticRodMaterial</a>, and <a class="el" href="classElastoPlasticRodMaterial.html#adae64db652f4cc2e3badb5f26b53f11e">ElastoPlasticRodMaterial</a>.</p>
 
@@ -513,8 +514,8 @@ Hierarchy</h1>
 <p>Computes the energy stored in hardening variables for plasticity models. This represents the energy associated with the evolution of the yield surface.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ielem</td><td>Element index </td></tr>
-    <tr><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
   </table>
   </dd>
 </dl>
@@ -550,7 +551,7 @@ Hierarchy</h1>
 <p>Computes a lumped (diagonal) mass matrix for the given element length.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">l</td><td>Element length </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>Element length </td></tr>
   </table>
   </dd>
 </dl>
@@ -597,8 +598,8 @@ Hierarchy</h1>
 <p>Element-specific version of lumped mass computation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">l</td><td>Element length </td></tr>
-    <tr><td class="paramname">ielem</td><td>Element index for potential customization </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">l</td><td>Element length </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index for potential customization </td></tr>
   </table>
   </dd>
 </dl>
@@ -674,8 +675,8 @@ Hierarchy</h1>
 <p>Enhanced version for element-specific mass computation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ielem</td><td>Element index for potential state tracking </td></tr>
-    <tr><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index for potential state tracking </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
   </table>
   </dd>
 </dl>
@@ -751,8 +752,8 @@ Hierarchy</h1>
 <p>Enhanced version that allows state-dependent stiffness computation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ielem</td><td>Element index for state tracking </td></tr>
-    <tr><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index for state tracking </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
   </table>
   </dd>
 </dl>
@@ -799,13 +800,15 @@ Hierarchy</h1>
 <p>Computes the stored elastic energy at the specified element and integration point location.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ielem</td><td>Element index </td></tr>
-    <tr><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index within the element </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Elastic potential energy at the specified location </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>0 for purely elastic materials </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Contract: must return the value of the last committed state, i.e. it has to be stored in <a class="el" href="classMaterial.html#affbf4f4b8114e4a46d713a203e85dc45" title="Apply computed deformation to the material state.">applyDeform()</a>. SpecialCosseratRodModel::getEnergies_ reads it right after <a class="el" href="classMaterial.html#affbf4f4b8114e4a46d713a203e85dc45" title="Apply computed deformation to the material state.">applyDeform()</a> without re-evaluating strains/stresses. </dd>
+<dd>
+0 for purely elastic materials </dd></dl>
 
 <p>Implemented in <a class="el" href="classElasticRodMaterial.html#aecda0d3f0c884ab4451d3d5fe220a13c">ElasticRodMaterial</a>, and <a class="el" href="classElastoPlasticRodMaterial.html#a1b29cd37cfc83229fd84f6679db5655d">ElastoPlasticRodMaterial</a>.</p>
 
@@ -926,8 +929,8 @@ Hierarchy</h1>
 
 </div>
 </div>
-<a id="a7925191b83264b0419248a73a38347bb" name="a7925191b83264b0419248a73a38347bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7925191b83264b0419248a73a38347bb">&#9670;&#160;</a></span>getTable()</h2>
+<a id="a14955e9742039ef188fd13d52c4a7f97" name="a14955e9742039ef188fd13d52c4a7f97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14955e9742039ef188fd13d52c4a7f97">&#9670;&#160;</a></span>getTable()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -938,26 +941,26 @@ Hierarchy</h1>
         <tr>
           <td class="memname">virtual void Material::getTable </td>
           <td>(</td>
-          <td class="paramtype">const String &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">XTable &amp;&#160;</td>
           <td class="paramname"><em>strain_table</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const IdxVector &amp;&#160;</td>
-          <td class="paramname"><em>items</em>, </td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector &amp;&#160;</td>
-          <td class="paramname"><em>weights</em>&#160;</td>
+          <td class="paramtype">const String &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IdxVector &amp;&#160;</td>
+          <td class="paramname"><em>items</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -974,15 +977,15 @@ Hierarchy</h1>
 <p>This method fills an XTable with strain-related data for output or post-processing purposes. The specific data depends on the material type.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Name identifier for the table data </td></tr>
-    <tr><td class="paramname">strain_table</td><td>Output table to populate with strain data </td></tr>
-    <tr><td class="paramname">items</td><td>Index vector specifying which items to include </td></tr>
-    <tr><td class="paramname">weights</td><td>Weight vector for data averaging or integration </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">strain_table</td><td>Output table to populate with strain data </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">weights</td><td>Weight vector for data averaging or integration </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Name identifier for the table data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">items</td><td>Index vector specifying which items to include </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classElasticRodMaterial.html#a55895811960b6464620ae8e3609ea8c0">ElasticRodMaterial</a>, and <a class="el" href="classElastoPlasticRodMaterial.html#a6a0c0ad9f0946939825eaabe73b5e8c9">ElastoPlasticRodMaterial</a>.</p>
+<p>Implemented in <a class="el" href="classElasticRodMaterial.html#ab0c8652205e810817a55129a3d65af2b">ElasticRodMaterial</a>, and <a class="el" href="classElastoPlasticRodMaterial.html#acee8318c5d901493ec96d5e2ef9656d0">ElastoPlasticRodMaterial</a>.</p>
 
 </div>
 </div>

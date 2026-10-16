@@ -177,6 +177,7 @@ Static Public Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a3d6be9cf00e855e5cb7be1eb9e6aeed7" id="r_a3d6be9cf00e855e5cb7be1eb9e6aeed7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDirichletModel.html#a3d6be9cf00e855e5cb7be1eb9e6aeed7">~DirichletModel</a> ()</td></tr>
+<tr class="memdesc:a3d6be9cf00e855e5cb7be1eb9e6aeed7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Protected destructor.  <br /></td></tr>
 <tr class="separator:a3d6be9cf00e855e5cb7be1eb9e6aeed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ddef3c8d6f985694d0cf04474aff4bf" id="r_a1ddef3c8d6f985694d0cf04474aff4bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDirichletModel.html#a1ddef3c8d6f985694d0cf04474aff4bf">init_</a> (const Properties &amp;globdat)</td></tr>
 <tr class="memdesc:a1ddef3c8d6f985694d0cf04474aff4bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize model state and DOF mappings.  <br /></td></tr>
@@ -248,7 +249,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name (default: "dirichlet") </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name (default: "dirichlet") </td></tr>
   </table>
   </dd>
 </dl>
@@ -306,7 +307,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container</td></tr>
   </table>
   </dd>
 </dl>
@@ -349,8 +350,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">params</td><td>Action parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container</td></tr>
   </table>
   </dd>
 </dl>
@@ -393,8 +394,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">params</td><td>Action parameters containing termination flags </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters containing termination flags </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container</td></tr>
   </table>
   </dd>
 </dl>
@@ -437,8 +438,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">params</td><td>Action parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container</td></tr>
   </table>
   </dd>
 </dl>
@@ -481,8 +482,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">props</td><td>User-specified configuration properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified configuration properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -549,8 +550,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -582,7 +583,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container with node set and DOF space </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container with node set and DOF space </td></tr>
   </table>
   </dd>
 </dl>
@@ -636,10 +637,10 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Model name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified model properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Model name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified model properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -672,7 +673,7 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">params</td><td>Parameters containing step size information</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Parameters containing step size information</td></tr>
   </table>
   </dd>
 </dl>
@@ -721,9 +722,9 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">action</td><td>Action name to execute </td></tr>
-    <tr><td class="paramname">params</td><td>Action parameters </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">action</td><td>Action name to execute </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Action parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>

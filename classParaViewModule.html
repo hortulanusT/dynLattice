@@ -139,12 +139,6 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a9f1df304e1644706ef0f91920ca16ae8" id="r_a9f1df304e1644706ef0f91920ca16ae8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParaViewModule.html#a9f1df304e1644706ef0f91920ca16ae8">declare</a> ()</td></tr>
 <tr class="memdesc:a9f1df304e1644706ef0f91920ca16ae8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register <a class="el" href="classParaViewModule.html" title="Module for exporting simulation data to ParaView format.">ParaViewModule</a> type with ModuleFactory.  <br /></td></tr>
 <tr class="separator:a9f1df304e1644706ef0f91920ca16ae8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a908dc275cea81a14378eb5f730db2c94" id="r_a908dc275cea81a14378eb5f730db2c94"><td class="memItemLeft" align="right" valign="top">static idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParaViewModule.html#a908dc275cea81a14378eb5f730db2c94">nameToVTKNum</a> (const String &amp;name)</td></tr>
-<tr class="memdesc:a908dc275cea81a14378eb5f730db2c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert element shape name to VTK cell type number.  <br /></td></tr>
-<tr class="separator:a908dc275cea81a14378eb5f730db2c94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa07017efc4ac4d12922fab7e0b73d03a" id="r_aa07017efc4ac4d12922fab7e0b73d03a"><td class="memItemLeft" align="right" valign="top">static IdxVector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParaViewModule.html#aa07017efc4ac4d12922fab7e0b73d03a">gmsh2ParaNodeOrder</a> (const IdxVector elNodes, const String &amp;name)</td></tr>
-<tr class="memdesc:aa07017efc4ac4d12922fab7e0b73d03a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert GMSH node ordering to ParaView node ordering.  <br /></td></tr>
-<tr class="separator:aa07017efc4ac4d12922fab7e0b73d03a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -196,7 +190,7 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name (default: "paraView") </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name (default: "paraView") </td></tr>
   </table>
   </dd>
 </dl>
@@ -226,51 +220,6 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a id="aa07017efc4ac4d12922fab7e0b73d03a" name="aa07017efc4ac4d12922fab7e0b73d03a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa07017efc4ac4d12922fab7e0b73d03a">&#9670;&#160;</a></span>gmsh2ParaNodeOrder()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">IdxVector ParaViewModule::gmsh2ParaNodeOrder </td>
-          <td>(</td>
-          <td class="paramtype">const IdxVector&#160;</td>
-          <td class="paramname"><em>elNodes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const String &amp;&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">elNodes</td><td>Vector with JIVE node indices </td></tr>
-    <tr><td class="paramname">name</td><td>Element shape name </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Correctly ordered node vector for ParaView</dd></dl>
-<p>Different finite element codes use different node ordering conventions. This function converts from GMSH ordering to ParaView ordering </p>
 
 </div>
 </div>
@@ -315,9 +264,9 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified module properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified module properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -373,48 +322,14 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">name</td><td>Module name </td></tr>
-    <tr><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
-    <tr><td class="paramname">props</td><td>User-specified module properties </td></tr>
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Module name </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">conf</td><td>Actually used configuration properties (output) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">props</td><td>User-specified module properties </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to new <a class="el" href="classParaViewModule.html" title="Module for exporting simulation data to ParaView format.">ParaViewModule</a> instance </dd></dl>
-
-</div>
-</div>
-<a id="a908dc275cea81a14378eb5f730db2c94" name="a908dc275cea81a14378eb5f730db2c94"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a908dc275cea81a14378eb5f730db2c94">&#9670;&#160;</a></span>nameToVTKNum()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">idx_t ParaViewModule::nameToVTKNum </td>
-          <td>(</td>
-          <td class="paramtype">const String &amp;&#160;</td>
-          <td class="paramname"><em>name</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">name</td><td>Element shape name (e.g., "Triangle", "Tetrahedron") </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>VTK cell type identifier</dd></dl>
-<p>Maps JIVE element shape names to corresponding VTK cell type numbers for proper visualization in ParaView </p>
 
 </div>
 </div>
@@ -443,7 +358,7 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container </td></tr>
   </table>
   </dd>
 </dl>
@@ -477,7 +392,7 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">globdat</td><td>Global data container</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">globdat</td><td>Global data container</td></tr>
   </table>
   </dd>
 </dl>

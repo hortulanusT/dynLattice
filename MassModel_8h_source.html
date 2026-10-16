@@ -123,7 +123,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00042" data-start="{" data-end="};">
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classMassModel.html">   42</a></span><span class="keyword">class </span><a class="code hl_class" href="classMassModel.html">MassModel</a> : <span class="keyword">public</span> Model</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>{</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  JEM_DECLARE_CLASS(<a class="code hl_class" href="classMassModel.html">MassModel</a>, Model);</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classMassModel.html#a5cfdc331daba74f2cb03a3ab12641557">   49</a></span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="classMassModel.html#a5cfdc331daba74f2cb03a3ab12641557">TYPE_NAME</a>;        </div>
@@ -153,18 +153,18 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classMassModel.html#afd3a4249ffe8c2193bee8667ad1ea818">declare</a>();</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="keyword">protected</span>:</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classMassModel.html#aaf384cbb1b464efa84045ce745d1062a">~MassModel</a>();</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  Vector totalMass_;            </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  StringVector nodeGroupNames_; </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  StringVector dofNames_;       </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  Ref&lt;DofSpace&gt; dofs_;                      </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  IdxVector dofTypes_;                      </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  Array&lt;Assignable&lt;NodeGroup&gt;&gt; nodeGroups_; </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>};</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> <span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keyword">virtual</span> <a class="code hl_function" href="classMassModel.html#aaf384cbb1b464efa84045ce745d1062a">~MassModel</a>();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  Vector totalMass_;            </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  StringVector nodeGroupNames_; </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  StringVector dofNames_;       </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  Ref&lt;DofSpace&gt; dofs_;                      </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  IdxVector dofTypes_;                      </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  Array&lt;Assignable&lt;NodeGroup&gt;&gt; nodeGroups_; </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>};</div>
 </div>
 <div class="ttc" id="aclassMassModel_html"><div class="ttname"><a href="classMassModel.html">MassModel</a></div><div class="ttdoc">Model for adding concentrated masses to specified node groups.</div><div class="ttdef"><b>Definition</b> MassModel.h:43</div></div>
 <div class="ttc" id="aclassMassModel_html_a0888e147873db94a11a39c10b4cf7919"><div class="ttname"><a href="classMassModel.html#a0888e147873db94a11a39c10b4cf7919">MassModel::TOTAL_MASS_PROP</a></div><div class="ttdeci">static const char * TOTAL_MASS_PROP</div><div class="ttdoc">Total mass values.</div><div class="ttdef"><b>Definition</b> MassModel.h:50</div></div>
@@ -172,7 +172,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassMassModel_html_a5cfdc331daba74f2cb03a3ab12641557"><div class="ttname"><a href="classMassModel.html#a5cfdc331daba74f2cb03a3ab12641557">MassModel::TYPE_NAME</a></div><div class="ttdeci">static const char * TYPE_NAME</div><div class="ttdoc">Model type name.</div><div class="ttdef"><b>Definition</b> MassModel.h:49</div></div>
 <div class="ttc" id="aclassMassModel_html_a6040977eb8e2b898afb716e42abc19a3"><div class="ttname"><a href="classMassModel.html#a6040977eb8e2b898afb716e42abc19a3">MassModel::takeAction</a></div><div class="ttdeci">virtual bool takeAction(const String &amp;action, const Properties &amp;params, const Properties &amp;globdat) override</div><div class="ttdoc">Handle model actions for mass matrix assembly.</div><div class="ttdef"><b>Definition</b> MassModel.cpp:65</div></div>
 <div class="ttc" id="aclassMassModel_html_a9c76633bebd6dd28af400c0931f9ca02"><div class="ttname"><a href="classMassModel.html#a9c76633bebd6dd28af400c0931f9ca02">MassModel::makeNew</a></div><div class="ttdeci">static Ref&lt; Model &gt; makeNew(const String &amp;name, const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat)</div><div class="ttdoc">Factory method for creating new MassModel instances.</div><div class="ttdef"><b>Definition</b> MassModel.cpp:122</div></div>
-<div class="ttc" id="aclassMassModel_html_aaf384cbb1b464efa84045ce745d1062a"><div class="ttname"><a href="classMassModel.html#aaf384cbb1b464efa84045ce745d1062a">MassModel::~MassModel</a></div><div class="ttdeci">virtual ~MassModel()</div><div class="ttdef"><b>Definition</b> MassModel.cpp:58</div></div>
+<div class="ttc" id="aclassMassModel_html_aaf384cbb1b464efa84045ce745d1062a"><div class="ttname"><a href="classMassModel.html#aaf384cbb1b464efa84045ce745d1062a">MassModel::~MassModel</a></div><div class="ttdeci">virtual ~MassModel()</div><div class="ttdoc">Protected destructor.</div><div class="ttdef"><b>Definition</b> MassModel.cpp:58</div></div>
 <div class="ttc" id="aclassMassModel_html_abae741bb880c6b2ab4a26bffd592170e"><div class="ttname"><a href="classMassModel.html#abae741bb880c6b2ab4a26bffd592170e">MassModel::DOFS_PROP</a></div><div class="ttdeci">static const char * DOFS_PROP</div><div class="ttdoc">DOF type names.</div><div class="ttdef"><b>Definition</b> MassModel.h:52</div></div>
 <div class="ttc" id="aclassMassModel_html_afd3a4249ffe8c2193bee8667ad1ea818"><div class="ttname"><a href="classMassModel.html#afd3a4249ffe8c2193bee8667ad1ea818">MassModel::declare</a></div><div class="ttdeci">static void declare()</div><div class="ttdoc">Register MassModel type with ModelFactory.</div><div class="ttdef"><b>Definition</b> MassModel.cpp:133</div></div>
 </div><!-- fragment --></div><!-- contents -->

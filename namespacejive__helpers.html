@@ -120,6 +120,9 @@ Functions</h2></td></tr>
 <tr class="memitem:af2db54913eb33c43b5eac2095805f455" id="r_af2db54913eb33c43b5eac2095805f455"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#af2db54913eb33c43b5eac2095805f455">mat2vec</a> (const Vector &amp;vec, const Matrix &amp;mat)</td></tr>
 <tr class="memdesc:af2db54913eb33c43b5eac2095805f455"><td class="mdescLeft">&#160;</td><td class="mdescRight">rearrange a matrix into a vector.  <br /></td></tr>
 <tr class="separator:af2db54913eb33c43b5eac2095805f455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae42d7761ccb90542c70d63c22c1e8f3e" id="r_ae42d7761ccb90542c70d63c22c1e8f3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#ae42d7761ccb90542c70d63c22c1e8f3e">mul3</a> (const Matrix &amp;C, const Matrix &amp;A, const Matrix &amp;B)</td></tr>
+<tr class="memdesc:ae42d7761ccb90542c70d63c22c1e8f3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">C = A * B for 3 x 3 matrices without heap allocation.  <br /></td></tr>
+<tr class="separator:ae42d7761ccb90542c70d63c22c1e8f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1831aed12a74679c81a2c462d1072029" id="r_a1831aed12a74679c81a2c462d1072029"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#a1831aed12a74679c81a2c462d1072029">expVec</a> (const Matrix &amp;Exp, const Vector &amp;v)</td></tr>
 <tr class="memdesc:a1831aed12a74679c81a2c462d1072029"><td class="mdescLeft">&#160;</td><td class="mdescRight">compute the exponential of a axial vector.  <br /></td></tr>
 <tr class="separator:a1831aed12a74679c81a2c462d1072029"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -215,8 +218,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">n</td><td>parameter n </td></tr>
-    <tr><td class="paramname">k</td><td>parameter k </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Parameter n </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>Parameter k </td></tr>
   </table>
   </dd>
 </dl>
@@ -251,8 +254,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">funcs</td><td>array of functions to evaluate </td></tr>
-    <tr><td class="paramname">args</td><td>point to evaluate at </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">funcs</td><td>array of functions to evaluate </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>point to evaluate at </td></tr>
   </table>
   </dd>
 </dl>
@@ -288,8 +291,8 @@ Variables</h2></td></tr>
 <p>It computes the matrix exponential of the skew-symmetric matrix of this vector so when \(\Theta=[\theta\times]\) this function will return \(\exp(\Theta)\). </p><dl class="section see"><dt>See also</dt><dd><a href="https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Exponential_map_from_%F0%9D%94%B0%F0%9D%94%AC(3)_to_SO(3)">Wikipedia</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">Exp</td><td>resulting matrix exponential </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>axial rotation vector </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">Exp</td><td>3 x 3 matrix exponential </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>3-component axial rotation vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -332,9 +335,9 @@ Variables</h2></td></tr>
 <a href="https://en.wikipedia.org/wiki/Differentiation_rules">Differentiation rules</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">ExpP</td><td>resulting matrix exponential </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>axial rotation vector </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vP</td><td>derivative of the axial rotation vector </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">ExpP</td><td>Derivative of the 3 x 3 matrix exponential </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v</td><td>3-component axial rotation vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vP</td><td>Derivative of the axial rotation vector </td></tr>
   </table>
   </dd>
 </dl>
@@ -358,7 +361,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dim</td><td>dimension of the identity matrix (default 3) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>dimension of the identity matrix (default 3) </td></tr>
   </table>
   </dd>
 </dl>
@@ -383,7 +386,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">n</td><td>integer to calculate the factorial from </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Integer to calculate the factorial from </td></tr>
   </table>
   </dd>
 </dl>
@@ -418,8 +421,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">func</td><td>function of which to evaluate the gradient </td></tr>
-    <tr><td class="paramname">args</td><td>point to evaluate the gradient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">func</td><td>function of which to evaluate the gradient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>point to evaluate the gradient </td></tr>
   </table>
   </dd>
 </dl>
@@ -454,8 +457,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">func</td><td>function of which to evaluate the Hessian </td></tr>
-    <tr><td class="paramname">args</td><td>point to evaluate the Hessian </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">func</td><td>function of which to evaluate the Hessian </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>point to evaluate the Hessian </td></tr>
   </table>
   </dd>
 </dl>
@@ -490,8 +493,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">funcs</td><td>array of functions of which to evaluate the gradient </td></tr>
-    <tr><td class="paramname">args</td><td>point to evaluate the gradient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">funcs</td><td>array of functions of which to evaluate the gradient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>point to evaluate the gradient </td></tr>
   </table>
   </dd>
 </dl>
@@ -527,8 +530,8 @@ Variables</h2></td></tr>
 <p>This function computes the logarithmic map of a rotation matrix as a member of the Lie group SO(3) to the Lie algebra \(\mathfrak{so}(3)\). It returns the axial vector of the rotation matrix. </p><dl class="section see"><dt>See also</dt><dd><a href="https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Log_map_from_SO(3)_to_%F0%9D%94%B0%F0%9D%94%AC(3)">Wikipedia</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">rv</td><td>rotational vector </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">R</td><td>rotational matrix </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">rv</td><td>3-component rotational vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">R</td><td>3 x 3 rotational matrix </td></tr>
   </table>
   </dd>
 </dl>
@@ -562,8 +565,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">mat</td><td>matrix of given dimensions </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>vector (needs to have fitting dimension) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">vec</td><td>Vector populated with the matrix values by row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Matrix whose entry count matches the vector size </td></tr>
   </table>
   </dd>
 </dl>
@@ -587,11 +590,53 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>matrix </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Matrix </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>resulting 2-norm </dd></dl>
+
+</div>
+</div>
+<a id="ae42d7761ccb90542c70d63c22c1e8f3e" name="ae42d7761ccb90542c70d63c22c1e8f3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae42d7761ccb90542c70d63c22c1e8f3e">&#9670;&#160;</a></span>mul3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void jive_helpers::mul3 </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>C</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>B</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The product is formed on the stack first, so C may alias A or B. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>3 x 3 result </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>3 x 3 left factor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>3 x 3 right factor </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -612,7 +657,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">vec</td><td>vector to be changed to skew symmetric matrix </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>Vector to be changed to a skew-symmetric matrix </td></tr>
   </table>
   </dd>
 </dl>
@@ -637,7 +682,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>matrix to get the trace of </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Matrix to get the trace of </td></tr>
   </table>
   </dd>
 </dl>
@@ -662,7 +707,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>skew symmetric matrix </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Skew-symmetric matrix </td></tr>
   </table>
   </dd>
 </dl>
@@ -697,8 +742,8 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">mat</td><td>matrix of given dimensions </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>vector (needs to have fitting dimension) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">mat</td><td>Matrix populated from the vector values by row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>Vector whose size matches the number of matrix entries </td></tr>
   </table>
   </dd>
 </dl>
