@@ -18,7 +18,7 @@ using jive::String;
 /// @brief Linear elastic rod material with configurable cross-sectional properties
 class ElasticRodMaterial : public Material
 {
-public:
+ public:
   /// @name Material type and property identifiers
   /// @{
   static const char *TYPE_NAME;
@@ -45,25 +45,32 @@ public:
   JEM_DECLARE_CLASS(ElasticRodMaterial, Material);
 
   /// @brief Constructor with configuration and global data
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
   ElasticRodMaterial(const String &name,
                      const Properties &conf,
                      const Properties &props,
                      const Properties &globdat);
 
   /// @brief Factory method for material creation
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
+  /// @return Reference to the created material
   static Ref<Material> makeNew(const String &name, const Properties &conf,
                                const Properties &props, const Properties &globdat);
 
   /// @brief Register material type with factory
   static void declare();
 
-  /**
-   * @brief Configure material properties including cross-sectional geometry
-   *
-   * @param props Properties containing configuration parameters
-   * @param globdat Global data container with simulation context
-   * @throws jem::IllegalInputException if negative material properties are provided
-   */
+  /// @brief Configure material properties including cross-sectional geometry
+  ///
+  /// @param[in] props  Properties containing configuration parameters
+  /// @param[in] globdat  Global data container with simulation context
+  /// @throws jem::IllegalInputException if negative material properties are provided
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
@@ -84,7 +91,7 @@ public:
 
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = false) override;
 
-  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const override;
 
   virtual void applyDeform() override;
 
@@ -96,10 +103,11 @@ public:
 
   virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
 
-protected:
+ protected:
+  /// @brief Destroy the elastic rod material
   ~ElasticRodMaterial();
 
-protected:
+ protected:
   /// @brief Calculate material stiffness matrix
   void calcMaterialStiff_();
   /// @brief Calculate material mass matrix

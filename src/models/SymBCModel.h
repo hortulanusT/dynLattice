@@ -48,25 +48,23 @@ typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 //   class SymBCModel
 //-----------------------------------------------------------------------
 
-/**
- * @class SymBCModel
- * @brief Model for symmetry boundary conditions on plane symmetric domains
- *
- * The SymBCModel implements plane symmetry boundary conditions that enforce
- * constraints between symmetric surfaces. It supports two types of symmetry:
- * opposing DOFs (antisymmetric) and equal DOFs (symmetric). Surface pairs
- * are automatically constrained based on the specified symmetry type.
- *
- * Features:
- * - Opposing DOF constraints for antisymmetric behavior
- * - Equal DOF constraints for symmetric behavior
- * - Multiple surface pair support
- * - Automatic constraint generation between symmetric surfaces
- * - Configurable DOF type specification
- */
+/// @class SymBCModel
+/// @brief Model for symmetry boundary conditions on plane symmetric domains
+///
+/// The SymBCModel implements plane symmetry boundary conditions that enforce
+/// constraints between symmetric surfaces. It supports two types of symmetry:
+/// opposing DOFs (antisymmetric) and equal DOFs (symmetric). Surface pairs
+/// are automatically constrained based on the specified symmetry type.
+///
+/// Features:
+/// - Opposing DOF constraints for antisymmetric behavior
+/// - Equal DOF constraints for symmetric behavior
+/// - Multiple surface pair support
+/// - Automatic constraint generation between symmetric surfaces
+/// - Configurable DOF type specification
 class SymBCModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;            ///< Model type name
@@ -78,29 +76,29 @@ public:
   JEM_DECLARE_CLASS(SymBCModel, Model);
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit SymBCModel(const String &name,
                       const Properties &conf,
                       const Properties &props,
                       const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new SymBCModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -110,15 +108,15 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-private:
+ private:
   /// @brief Initialize model
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Set symmetry constraints
   void setConstraints_();
 
-private:
+ private:
   Assignable<NodeSet> nodes_;    ///< Node set
   Ref<DofSpace> dofs_;           ///< DOF space
   Ref<Constraints> cons_;        ///< Constraints

@@ -27,7 +27,7 @@ using jive::app::OutputModule;
 /// @see CSVDataPrinter
 class CSVOutputModule : public OutputModule
 {
-public:
+ public:
   JEM_DECLARE_CLASS(CSVOutputModule, OutputModule);
 
   /// @name Property identifiers
@@ -36,16 +36,16 @@ public:
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
-  /// @param printer Data printer for CSV output (will be always a new CSVDataPrinter Instance)
+  /// @param[in] name  Module name
+  /// @param[in] printer  Data printer for CSV output (will be always a new CSVDataPrinter Instance)
   explicit CSVOutputModule(const String &name = "csvOutput",
                            const Ref<DataPrinter> printer = nullptr);
 
   /// @brief Factory method for creating new CSVOutputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new CSVOutputModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -55,7 +55,7 @@ public:
   /// @brief Register CSVOutputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~CSVOutputModule();
 };

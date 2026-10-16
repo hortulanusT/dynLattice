@@ -61,7 +61,7 @@ typedef jem::util::ArrayBuffer<idx_t> IdxBuffer;
 /// yield condition evaluation and plastic constraint enforcement.
 class HingeModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;  ///< Model type name
@@ -71,10 +71,10 @@ public:
   JEM_DECLARE_CLASS(HingeModel, Model);
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit HingeModel
 
       (const String &name,
@@ -83,9 +83,9 @@ public:
        const Properties &globdat);
 
   /// @brief Handle model actions (INIT, GET_MATRIX, GET_INT_VECTOR, etc.)
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -94,10 +94,10 @@ public:
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new HingeModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new HingeModel instance
   static Ref<Model> makeNew
 
@@ -109,30 +109,30 @@ public:
   /// @brief Register HingeModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @brief Create hinge elements for specified element group
-  /// @param elementName Name of the element group
-  /// @param globdat Global database
+  /// @param[in] elementName  Name of the element group
+  /// @param[in] globdat  Global database
   /// @return Created element group
   ElementGroup createHinges_(const String &elementName, const Properties &globdat);
 
   /// @brief Store forces relevant for existing hinges
-  /// @param fint Global internal force vector
+  /// @param[in] fint  Global internal force vector
   void updForces_(const Vector &fint);
 
   /// @brief Evaluate plastic development in the hinges
+  /// @param[in] disp  Displacement vector
   /// @return true if no new plasticity was discovered, false if plastic movement is detected
   bool evalPlastic_(const Vector &disp);
 
   /// @brief Initialize model state and DOF mappings
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Get constraint information
-  /// @brief Get constraint information
   void getCons_();
 
-private:
+ private:
   /// @name System components
   /// @{
   Assignable<ElementGroup> egroup_; ///< Hinge element group

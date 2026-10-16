@@ -74,7 +74,7 @@ static_assert(GMSH_API_VERSION_PATCH == 5, "Wrong GMSH API version, please use 4
 /// GMSH API version 4.9.5 for compatibility.
 class GMSHInputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(GMSHInputModule, Module);
 
   /// @name Property identifiers
@@ -92,32 +92,32 @@ public:
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit GMSHInputModule(const String &name = "GMSHInput");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   Status init(const Properties &conf,
               const Properties &props,
               const Properties &globdat) override;
 
   /// @brief Run mesh import process
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   Status run(const Properties &globdat) override;
 
   /// @brief Shutdown the module
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new GMSHInputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new GMSHInputModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -127,36 +127,36 @@ public:
   /// @brief Register GMSHInputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   ~GMSHInputModule();
 
   /// @brief Open geometry file and generate mesh
-  /// @param geoFile Name of the .geo file
-  /// @param order Mesh order (1=linear, 2=quadratic, etc.)
+  /// @param[in] geoFile  Name of the .geo file
+  /// @param[in] order  Mesh order (1=linear, 2=quadratic, etc.)
   void openMesh_(const String &geoFile, const idx_t order);
 
   /// @brief Prepare ONELAB properties for mesh generation
-  /// @param onelabProps ONELAB properties to set
+  /// @param[in] onelabProps  ONELAB properties to set
   void prepareOnelab_(const Properties &onelabProps);
 
   /// @brief Populate nodes in global database
-  /// @param dim Embedding space dimension (coordinates per node)
+  /// @param[in] dim  Embedding space dimension (coordinates per node)
   void createNodes_(const idx_t dim);
 
   /// @brief Populate elements in global database
-  /// @param globdat Global database
+  /// @param[in] globdat  Global database
   void createElems_(const Properties &globdat);
 
   /// @brief Store tangent vectors in global database
-  /// @param globdat Global database
+  /// @param[in] globdat  Global database
   void storeTangents_(const Properties &globdat);
 
   /// @brief Write output file for GMSH post-processing
-  /// @param globdat Global database
+  /// @param[in] globdat  Global database
   void writeOutFile_(const Properties &globdat) const;
 
-private:
+ private:
   /// @name GMSH-JIVE mapping
   /// @{
   Assignable<XNodeSet> nodes_;                               ///< Node set

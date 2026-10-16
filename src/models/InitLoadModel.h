@@ -39,7 +39,7 @@ using jive::util::DofSpace;
 /// starting conditions.
 class InitLoadModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;   ///< Model type name
@@ -54,10 +54,10 @@ public:
   JEM_DECLARE_CLASS(InitLoadModel, Model);
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit InitLoadModel
 
       (const String &name,
@@ -66,9 +66,9 @@ public:
        const Properties &globdat);
 
   /// @brief Handle model actions for initial loading
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -77,10 +77,10 @@ public:
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new InitLoadModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new InitLoadModel instance
   static Ref<Model> makeNew
 
@@ -92,9 +92,9 @@ public:
   /// @brief Register InitLoadModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @brief Initialize model and apply initial conditions
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_
 
       (const Properties &globdat);

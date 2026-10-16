@@ -28,6 +28,8 @@
 #include <jive/util/Globdat.h>
 #include <jive/util/utilities.h>
 
+#include "modules/ExplicitModule.h"
+
 using jem::newInstance;
 using jem::io::FileWriter;
 using jem::io::GzipFileWriter;
@@ -56,11 +58,15 @@ using jive::util::FuncUtils;
 
 /// @brief Module for outputting internal, external, and gyroscopic forces
 /// @details Writes force vectors to output files during simulation for post-processing
-/// and analysis. Supports selective output of internal forces, external forces,
-/// and gyroscopic forces with configurable sampling conditions.
+/// and analysis. Supports selective output of internal, external, and
+/// gyroscopic forces with configurable sampling conditions. The gyroscopic
+/// forces are evaluated on demand with the mass matrix an explicit integrator
+/// with consistent mass publishes (ExplicitModule::MASS_MATRIX); without one
+/// they are not written. Only the DOFs selected via the dofs
+/// property are written, in the order of the header.
 class ForceOutputModule : public Module
 {
-public:
+ public:
   JEM_DECLARE_CLASS(ForceOutputModule, Module);
 
   /// @name Property identifiers
@@ -73,32 +79,32 @@ public:
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name
+  /// @param[in] name  Module name
   explicit ForceOutputModule(const String &name = "ForceOutput");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf,
                       const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Run the force output operation
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown the module and close output files
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new ForceOutputModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new ForceOutputModule instance
   static Ref<Module> makeNew(const String &name,
                              const Properties &conf,
@@ -108,26 +114,26 @@ public:
   /// @brief Register ForceOutputModule type with ModuleFactory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~ForceOutputModule();
 
-private:
+ private:
   /// @brief Write file header with column names
-  /// @param time Include time column flag
+  /// @param[in] time  Include time column flag
   void writeHeader_(const bool time = false);
 
   /// @brief Write data line to output file
-  /// @param data Force data vector
-  /// @param step Time step number
-  /// @param type Force type identifier
-  /// @param time Current simulation time
+  /// @param[in] data  Force data vector
+  /// @param[in] step  Time step number
+  /// @param[in] type  Force type identifier
+  /// @param[in] time  Current simulation time
   void writeLine_(const Vector &data,
                   const idx_t step,
                   const String type,
                   const double time = -1.) const;
 
-private:
+ private:
   /// @name System components
   /// @{
   Ref<DofSpace> dofs_; ///< Degree of freedom space

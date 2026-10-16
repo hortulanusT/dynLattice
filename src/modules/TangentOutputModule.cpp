@@ -149,6 +149,13 @@ Module::Status TangentOutputModule::run(const Properties &globdat)
     Globdat::getVariables(globdat).erase("tangentModuli");
     return OK;
   }
+
+  // only explicit integrators publish the internal force in globdat
+  if (globdat.contains(jive::model::ActionParams::INT_VECTOR))
+    throw jem::Error(JEM_FUNC,
+                     "TangentOutputModule requires a static analysis with an "
+                     "implicit solver; an explicit integrator is active");
+
   jem::System::info(myName_)
       << " ...Start calculating tangent properties\n";
 

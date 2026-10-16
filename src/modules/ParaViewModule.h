@@ -109,7 +109,7 @@ using jive::util::XTable;
 /// @see [VTK file formats](https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf)
 class ParaViewModule : public Module
 {
-protected:
+ protected:
   /// @brief Structure containing element group export information
   /// @details Stores configuration for each element group to be exported,
   /// including shape information and data field specifications
@@ -123,7 +123,7 @@ protected:
     StringVector dofData;  ///< Additional DOF data to export
   };
 
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME; ///< Module type name
@@ -131,13 +131,13 @@ public:
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "paraView")
+  /// @param[in] name  Module name (default: "paraView")
   explicit ParaViewModule(const String &name = "paraView");
 
   /// @brief Initialize the module
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Configures output format, file type, element groups, data fields,
   /// and sampling conditions for ParaView export
@@ -145,22 +145,22 @@ public:
                       const Properties &globdat) override;
 
   /// @brief Run the ParaView export
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Module status
   /// @details Exports current simulation state to VTU file if sampling
   /// conditions are met, and updates PVD collection if enabled
   virtual Status run(const Properties &globdat) override;
 
   /// @brief Shutdown and finalize ParaView export
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @details Writes final PVD collection file for time series visualization
   virtual void shutdown(const Properties &globdat) override;
 
   /// @brief Factory method for creating new ParaViewModule instances
-  /// @param name Module name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new ParaViewModule instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);
@@ -168,44 +168,44 @@ public:
   /// @brief Register ParaViewModule type with ModuleFactory
   static void declare();
 
+ private:
   /// @brief Convert element shape name to VTK cell type number
-  /// @param name Element shape name (e.g., "Triangle", "Tetrahedron")
+  /// @param[in] name  Element shape name (e.g., "Triangle", "Tetrahedron")
   /// @return VTK cell type identifier
   /// @details Maps JIVE element shape names to corresponding VTK cell type
   /// numbers for proper visualization in ParaView
   static idx_t nameToVTKNum(const String &name);
 
   /// @brief Convert GMSH node ordering to ParaView node ordering
-  /// @param elNodes Vector with JIVE node indices
-  /// @param name Element shape name
+  /// @param[in] elNodes  Vector with JIVE node indices
+  /// @param[in] name  Element shape name
   /// @return Correctly ordered node vector for ParaView
   /// @details Different finite element codes use different node ordering
   /// conventions. This function converts from GMSH ordering to ParaView ordering
   static IdxVector gmsh2ParaNodeOrder(const IdxVector elNodes, const String &name);
 
-private:
   /// @name File output methods
   /// @{
 
   /// @brief Write VTU file with simulation data
-  /// @param fileName Output file name
-  /// @param globdat Global data container
+  /// @param[in] fileName  Output file name
+  /// @param[in] globdat  Global data container
   /// @details Main file writing function that coordinates the export of all
   /// configured element groups and their associated data to a VTU file
   void writeFile_(const String &fileName, const Properties &globdat);
 
   /// @brief Write mesh piece for specific element group
-  /// @param file Output file writer
-  /// @param points Node set containing point information
-  /// @param cells Element set containing cell information
-  /// @param group Element group to export
-  /// @param disp Displacement state vector
-  /// @param velo Velocity state vector
-  /// @param acce Acceleration state vector
-  /// @param dofs DOF space with degree of freedom information
-  /// @param model Model reference for data extraction
-  /// @param globdat Global data container
-  /// @param info Element group configuration information
+  /// @param[in,out] file  Output file writer
+  /// @param[in] points  Node set containing point information
+  /// @param[in] cells  Element set containing cell information
+  /// @param[in] group  Element group to export
+  /// @param[in] disp  Displacement state vector
+  /// @param[in] velo  Velocity state vector
+  /// @param[in] acce  Acceleration state vector
+  /// @param[in] dofs  DOF space with degree of freedom information
+  /// @param[in] model  Model reference for data extraction
+  /// @param[in] globdat  Global data container
+  /// @param[in] info  Element group configuration information
   /// @details Writes the mesh geometry and associated data for a single element
   /// group in VTK unstructured grid format
   void writePiece_(const Ref<PrintWriter> &file, const Assignable<NodeSet> &points,
@@ -216,35 +216,35 @@ private:
                    const ElementInfo &info);
 
   /// @brief Write data array from matrix
-  /// @param file Output file writer
-  /// @param data Matrix containing data values
-  /// @param type VTK data type string
-  /// @param name Data array name
+  /// @param[in,out] file  Output file writer
+  /// @param[in] data  Matrix containing data values
+  /// @param[in] type  VTK data type string
+  /// @param[in] name  Data array name
   /// @details Writes matrix data in VTK DataArray format with proper formatting
   void writeDataArray_(const Ref<PrintWriter> &file, const Matrix &data,
                        const String &type, const String &name);
 
   /// @brief Write data array from XTable
-  /// @param file Output file writer
-  /// @param data XTable containing data values
-  /// @param rows Row indices to extract
-  /// @param type VTK data type string
-  /// @param name Data array name
+  /// @param[in,out] file  Output file writer
+  /// @param[in] data  XTable containing data values
+  /// @param[in] rows  Row indices to extract
+  /// @param[in] type  VTK data type string
+  /// @param[in] name  Data array name
   /// @details Writes XTable data for specified rows in VTK DataArray format
   void writeDataArray_(const Ref<PrintWriter> &file, const Ref<XTable> &data,
                        const IdxVector &rows, const String &type, const String &name);
 
   /// @brief Write data array from vector
-  /// @param file Output file writer
-  /// @param data Vector containing data values
-  /// @param type VTK data type string
-  /// @param name Data array name
+  /// @param[in,out] file  Output file writer
+  /// @param[in] data  Vector containing data values
+  /// @param[in] type  VTK data type string
+  /// @param[in] name  Data array name
   /// @details Writes vector data in VTK DataArray format
   void writeDataArray_(const Ref<PrintWriter> &file, const Vector &data,
                        const String &type, const String &name);
   /// @}
 
-private:
+ private:
   /// @name Configuration parameters
   /// @{
   String nameFormat_;          ///< Output file name format string

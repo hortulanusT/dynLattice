@@ -12,19 +12,6 @@
 #include "ParaViewModule.h"
 #include "utils/testing.h"
 
-void vec2mat(const Matrix &mat, const Vector &vec)
-{
-  const idx_t rows = mat.size(0);
-  const idx_t cols = mat.size(1);
-  JEM_ASSERT2(rows * cols == vec.size(),
-              "Vector and Matrix not of the same size!");
-
-  for (idx_t irow = 0; irow < rows; irow++)
-  {
-    mat(irow, ALL) = vec[SliceFromTo(irow * cols, (irow + 1) * cols)];
-  }
-}
-
 //=======================================================================
 //   class ParaViewModule
 //=======================================================================
@@ -500,9 +487,12 @@ void ParaViewModule::writePiece_
       Matrix fint_mat(groupNodes.size(), dofs->typeCount());
       fint = 0.;
 
-      params.set(ActionParams::INT_VECTOR, fint);
-      model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-      params.erase(ActionParams::INT_VECTOR);
+      if (!globdat.find(fint, ActionParams::INT_VECTOR))
+      {
+        params.set(ActionParams::INT_VECTOR, fint);
+        model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+        params.erase(ActionParams::INT_VECTOR);
+      }
 
       for (idx_t ipoint = 0; ipoint < groupNodes.size(); ipoint++)
       {
@@ -528,9 +518,12 @@ void ParaViewModule::writePiece_
       model->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
       params.erase(ActionParams::EXT_VECTOR);
 
-      params.set(ActionParams::INT_VECTOR, fint);
-      model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-      params.erase(ActionParams::INT_VECTOR);
+      if (!globdat.find(fint, ActionParams::INT_VECTOR))
+      {
+        params.set(ActionParams::INT_VECTOR, fint);
+        model->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+        params.erase(ActionParams::INT_VECTOR);
+      }
 
       fres = fext - fint;
 

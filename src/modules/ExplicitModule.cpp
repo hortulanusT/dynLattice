@@ -24,6 +24,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
+const char *ExplicitModule::MASS_MATRIX = "explicitMass";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -37,6 +38,7 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
+  fintCacheValid_ = false;
   lenScale_ = 1e-3;
   dofsSO3_.resize(0);
   rdofs_.resize(0, 0);
@@ -103,6 +105,7 @@ Module::Status ExplicitModule::init
       dofsSO3_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
       dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, dofsSO3_[i]);
     }
+    updRotMask_();
     myConf.set(SO3_DOFS, SO3_dof_names);
 
     String modelType;
@@ -260,6 +263,11 @@ void ExplicitModule::advance(const Properties &globdat)
 {
   Properties params;
 
+  // outputs of the finished step have been written by now; the cached copy
+  // stays valid for getForce(), which compares the state before using it
+  globdat.erase(ActionParams::INT_VECTOR);
+  globdat.erase(MASS_MATRIX);
+
   // check if mass needs to be updated
   valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
   if (!valid_)
@@ -279,6 +287,7 @@ void ExplicitModule::cancel(const Properties &globdat)
   Properties params;
 
   // update time in models and boundary conditions
+  dropCommittedForce_(globdat);
   Globdat::restoreTime(globdat);
   Globdat::restoreStep(globdat);
   StateVector::restoreNew(dofs_, globdat);
@@ -312,13 +321,16 @@ bool ExplicitModule::commit(const Properties &globdat)
                  decrFact_ * dtime_,
                  minDtime_);
     params.clear();
+    evalCommittedForce_(globdat);
     model_->takeAction(Actions::COMMIT, params, globdat);
     Globdat::commitStep(globdat);
     Globdat::commitTime(globdat);
     StateVector::updateOld(dofs_, globdat);
+    publishCommittedForce_(globdat);
   }
   else
   {
+    dropCommittedForce_(globdat);
     dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
   }
 
@@ -413,9 +425,93 @@ ExplicitModule::getForce(const Vector &fint,
 
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
   model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
-  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+
+  // The state is the committed one if nothing touched it since the commit;
+  // then the internal force of the output pass can be reused.
+  bool reuse = false;
+  if (fintCacheValid_)
+  {
+    Vector disp;
+    StateVector::get(disp, dofs_, globdat);
+    reuse = jem::testall(disp == fintCacheDisp_);
+  }
+
+  if (reuse)
+  {
+    fint = fintCache_;
+    // only the gyroscopic term depends on the (new) mass matrix
+    if (mode_ == CONSISTENT)
+      model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+
+#ifndef NDEBUG
+    Vector fintFresh(fint.size());
+    Properties checkParams;
+    fintFresh = 0.0;
+    checkParams.set(ActionParams::INT_VECTOR, fintFresh);
+    if (mode_ == CONSISTENT)
+      checkParams.set(ActionParams::MATRIX2, solver_->getMatrix());
+    model_->takeAction(Actions::GET_INT_VECTOR, checkParams, globdat);
+    const double scale = 1. + norm2(fintFresh);
+    JEM_ASSERT2(norm2(Vector(fintFresh - fint)) <= 1e-9 * scale,
+                "reused internal force differs from a fresh evaluation");
+#endif
+  }
+  else
+  {
+    model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+  }
 
   return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
+//   evalCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::evalCommittedForce_(const Properties &globdat)
+{
+  Properties params;
+  const idx_t dofCount = dofs_->dofCount();
+
+  fintCache_.resize(dofCount);
+  fintCache_ = 0.0;
+
+  // the same evaluation the next step starts with (no output load case,
+  // no MATRIX2, i.e. without the gyroscopic term)
+  params.set(ActionParams::INT_VECTOR, fintCache_);
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+}
+
+//-----------------------------------------------------------------------
+//   publishCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::publishCommittedForce_(const Properties &globdat)
+{
+  Vector disp;
+  StateVector::get(disp, dofs_, globdat);
+  fintCacheDisp_.ref(Vector(disp.clone()));
+  fintCacheValid_ = true;
+
+  // Publish the cached force to the global data container
+  globdat.set(ActionParams::INT_VECTOR, fintCache_.clone());
+
+  // only a reference: output modules can evaluate the gyroscopic force with
+  // it on demand (consistent mass only; lumped mode has no gyroscopic term)
+  if (mode_ == CONSISTENT)
+    globdat.set(MASS_MATRIX, solver_->getMatrix());
+}
+
+//-----------------------------------------------------------------------
+//   dropCommittedForce_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::dropCommittedForce_(const Properties &globdat)
+{
+  if (fintCacheValid_)
+    globdat.erase(ActionParams::INT_VECTOR);
+  globdat.erase(MASS_MATRIX);
+  fintCacheValid_ = false;
 }
 
 //-----------------------------------------------------------------------
@@ -441,6 +537,7 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     rdofs_.resize(dofsSO3_.size(), dofs_->getItems()->size());
     for (idx_t idof = 0; idof < dofsSO3_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, dofsSO3_[idof]);
+    updRotMask_();
   }
 
   if (mode_ == LUMPED)
@@ -459,12 +556,31 @@ void ExplicitModule::updateMass_(const Properties &globdat)
 }
 
 //-----------------------------------------------------------------------
+//   updRotMask_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::updRotMask_()
+{
+  isRotDof_.resize(dofs_->dofCount());
+  isRotDof_ = false;
+
+  for (idx_t iRot = 0; iRot < rdofs_.size(0); iRot++)
+    for (idx_t iNode = 0; iNode < rdofs_.size(1); iNode++)
+    {
+      const idx_t idof = rdofs_(iRot, iNode);
+      if (idof >= 0 && idof < isRotDof_.size())
+        isRotDof_[idof] = true;
+    }
+}
+
+//-----------------------------------------------------------------------
 //   invalidate_
 //-----------------------------------------------------------------------
 
 void ExplicitModule::invalidate_()
 {
   valid_ = false;
+  fintCacheValid_ = false;
 }
 
 //-----------------------------------------------------------------------
@@ -495,7 +611,7 @@ ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
   Vector y_diff = Vector(y_pre - y_cor);
   for (idx_t i = 0; i < y_diff.size(); i++)
-    if (!jem::testany(rdofs_ == i))
+    if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;
   return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }

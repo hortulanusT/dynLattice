@@ -61,7 +61,7 @@ using jive::util::XTable;
 /// global properties like kinetic energy and total mass.
 class LatticeModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;          ///< Model type name
@@ -75,10 +75,10 @@ public:
   JEM_DECLARE_CLASS(LatticeModel, Model);
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit LatticeModel
 
       (const String &name,
@@ -87,9 +87,9 @@ public:
        const Properties &globdat);
 
   /// @brief Handle model actions for lattice coordination
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -98,32 +98,32 @@ public:
        const Properties &globdat) override;
 
   /// @brief Calculate total kinetic energy of the lattice
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Total kinetic energy
   double getKineticEnergy(const Properties &globdat) const;
 
   /// @brief Calculate kinetic energy and store in table
-  /// @param energy_table Output energy table
-  /// @param table_weights Table weights
-  /// @param globdat Global data container
+  /// @param[out] energy_table  Output energy table with one scalar value per node
+  /// @param[in,out] table_weights  Table weights for the output rows
+  /// @param[in] globdat  Global data container
   void getKineticEnergy(XTable &energy_table, const Vector &table_weights, const Properties &globdat) const;
 
   /// @brief Calculate total mass of the lattice
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @return Total mass
   double getMass(const Properties &globdat) const;
 
   /// @brief Calculate mass and store in table
-  /// @param mass_table Output mass table
-  /// @param table_weights Table weights
-  /// @param globdat Global data container
+  /// @param[out] mass_table  Output mass table with one scalar value per node
+  /// @param[in,out] table_weights  Table weights for the output rows
+  /// @param[in] globdat  Global data container
   void getMass(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const;
 
   /// @brief Factory method for creating new LatticeModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new LatticeModel instance
   static Ref<Model> makeNew
 
@@ -135,7 +135,7 @@ public:
   /// @brief Register LatticeModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @name Child models
   /// @{
   Array<Ref<Model>> children_; ///< Array of child rod models

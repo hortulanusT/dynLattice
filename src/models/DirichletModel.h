@@ -48,7 +48,7 @@ using jive::util::Globdat;
 /// Supports multiple node groups with different displacement factors and DOF types.
 class DirichletModel : public Model
 {
-public:
+ public:
   /// @brief Displacement control methods
   enum Method
   {
@@ -74,29 +74,29 @@ public:
   JEM_DECLARE_CLASS(DirichletModel, Model);
 
   /// @brief Constructor
-  /// @param name Model name (default: "dirichlet")
+  /// @param[in] name  Model name (default: "dirichlet")
   explicit DirichletModel
 
       (const String &name = "dirichlet");
 
   /// @brief Configure Dirichlet boundary conditions from properties
-  /// @param props User-specified configuration properties
-  /// @param globdat Global data container
+  /// @param[in] props  User-specified configuration properties
+  /// @param[in] globdat  Global data container
   virtual void configure
 
       (const Properties &props, const Properties &globdat) override;
 
   /// @brief Get current configuration
-  /// @param conf Actually used configuration properties (output)
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] globdat  Global data container
   virtual void getConfig
 
       (const Properties &conf, const Properties &globdat) const override;
 
   /// @brief Handle model actions (INIT, GET_CONSTRAINTS, ADVANCE, etc.)
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -104,10 +104,10 @@ public:
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new DirichletModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new DirichletModel instance
   static Ref<Model> makeNew
 
@@ -117,55 +117,56 @@ public:
   /// @brief Register DirichletModel type with ModelFactory
   static void declare();
 
-protected:
+ protected:
+  /// @brief Protected destructor
   virtual ~DirichletModel();
 
-protected:
+ protected:
   /// @brief Initialize model state and DOF mappings
-  /// @param globdat Global data container with node set and DOF space
+  /// @param[in] globdat  Global data container with node set and DOF space
   void init_
 
       (const Properties &globdat);
 
   /// @brief Advance to next time step
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   /// @details Updates displacement scale factor and logs progress
   void advance_
 
       (const Properties &globdat);
 
   /// @brief Apply displacement constraints to system
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @details Iterates through node groups and applies scaled displacement constraints
   void applyConstraints_
 
       (const Properties &params, const Properties &globdat);
 
   /// @brief Check if current state should be committed
-  /// @param params Action parameters containing termination flags
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters containing termination flags
+  /// @param[in] globdat  Global data container
   /// @details Terminates computation if displacement exceeds maximum value
   void checkCommit_
 
       (const Properties &params, const Properties &globdat);
 
   /// @brief Commit current displacement state
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @details Stores converged displacement scale factor
   void commit_
 
       (const Properties &params, const Properties &globdat);
 
   /// @brief Set time step size for displacement control
-  /// @param params Parameters containing step size information
+  /// @param[in] params  Parameters containing step size information
   /// @details Calculates displacement increment based on control method
   void setDT_
 
       (const Properties &params);
 
-private:
+ private:
   /// @name Core system components
   /// @{
   Ref<DofSpace> dofs_;        ///< Degree of freedom space

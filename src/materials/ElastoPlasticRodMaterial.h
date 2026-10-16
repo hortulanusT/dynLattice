@@ -22,7 +22,7 @@ using jive::util::FuncUtils;
 /// @see [Corresponding Paper](https://doi.org/10.1007/s00466-024-02572-3)
 class ElastoPlasticRodMaterial : public ElasticRodMaterial
 {
-public:
+ public:
   /// @name Plasticity property identifiers
   /// @{
   static const char *TYPE_NAME;
@@ -35,30 +35,39 @@ public:
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
 
   /// @brief Constructor with plasticity configuration
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
   ElastoPlasticRodMaterial(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
 
   /// @brief Factory method for plastic material creation
+  /// @param[in] name  Material instance name
+  /// @param[out] conf  Actually used configuration properties
+  /// @param[in] props  User-specified material properties
+  /// @param[in] globdat  Global data container
+  /// @return Reference to the created material
   static Ref<Material> makeNew(const String &name, const Properties &conf,
                                const Properties &props, const Properties &globdat);
 
   /// @brief Register plastic material type with factory
   static void declare();
 
-  /**
-   * @brief Configure plasticity parameters and yield conditions
-   *
-   * @param props Properties containing configuration parameters
-   * @param globdat Global data container with simulation context
-   * @throws jem::util::PropertyException if yield function is not provided
-   */
+  /// @brief Configure plasticity parameters and yield conditions
+  ///
+  /// @param[in] props  Properties containing configuration parameters
+  /// @param[in] globdat  Global data container with simulation context
+  /// @throws jem::util::PropertyException if yield function is not provided
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
   /// @brief Get hardening values from hardening parameters
+  /// @param[out] hardVals  Computed hardening values
+  /// @param[in] hardParams  Hardening parameters
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
   /// @brief Elastic stress computation based on elastic rod material model
@@ -67,11 +76,11 @@ public:
 
   /// @brief Plastic stress computation using convex cutting plane algorithm
   /// @details Implements iterative return mapping with yield condition evaluation
-  /// @param stress Calculated stress vector (output)
-  /// @param strain Input strain vector
-  /// @param ielem Element index
-  /// @param ip Integration point index
-  /// @param inelastic Whether to compute the inelastic stress update
+  /// @param[out] stress  Calculated stress vector
+  /// @param[in] strain  Input strain vector
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index
+  /// @param[in] inelastic  Whether to compute the inelastic stress update
   /// @see [Computational Inelasticity](https://doi.org/10.1007/b98904) Box 3.6
   virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
@@ -79,7 +88,7 @@ public:
 
   virtual void rejectDeform() override;
 
-  virtual void getTable(const String &name, XTable &strain_table, const IdxVector &items, const Vector &weights) const override;
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const override;
 
   virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
@@ -87,10 +96,11 @@ public:
 
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
 
-protected:
+ protected:
+  /// @brief Destroy the elasto-plastic rod material
   ~ElastoPlasticRodMaterial();
 
-protected:
+ protected:
   /// @name Plasticity algorithm components
   /// @{
   Ref<Function> yieldCond_;         ///< Yield condition function

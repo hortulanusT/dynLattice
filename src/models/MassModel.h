@@ -41,7 +41,7 @@ using jive::util::Assignable;
 /// masses, lumped inertias, or point masses attached to the structure.
 class MassModel : public Model
 {
-public:
+ public:
   JEM_DECLARE_CLASS(MassModel, Model);
 
   /// @name Property identifiers
@@ -53,10 +53,10 @@ public:
   /// @}
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit MassModel
 
       (const String &name,
@@ -65,9 +65,9 @@ public:
        const Properties &globdat);
 
   /// @brief Handle model actions for mass matrix assembly
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -76,10 +76,10 @@ public:
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new MassModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new MassModel instance
   static Ref<Model> makeNew
 
@@ -91,10 +91,11 @@ public:
   /// @brief Register MassModel type with ModelFactory
   static void declare();
 
-protected:
+ protected:
+  /// @brief Protected destructor
   virtual ~MassModel();
 
-private:
+ private:
   /// @name Mass configuration
   /// @{
   Vector totalMass_;            ///< Mass values for each group

@@ -12,7 +12,9 @@
 #include <jem/base/ClassTemplate.h>
 #include <math.h>
 
+#include <jive/algebra/SparseMatrixObject.h>
 using jem::newInstance;
+using jive_helpers::mul3;
 
 //=======================================================================
 //   class SpecialCosseratRodModel
@@ -138,6 +140,11 @@ SpecialCosseratRodModel::SpecialCosseratRodModel
 
   // get the nonmutable DOF-Space into the class member
   dofs_ = dofs;
+
+  // the cached node dofs depend on the numbering of the DofSpace
+  nodeDofsValid_ = false;
+  jem::util::connect(dofs_->newSizeEvent, this, &SpecialCosseratRodModel::invalidateNodeDofs_);
+  jem::util::connect(dofs_->newOrderEvent, this, &SpecialCosseratRodModel::invalidateNodeDofs_);
 
   // get the material
   props.set(joinNames(myName_, "material.ipCount"), shapeK_->ipointCount());
@@ -327,6 +334,23 @@ bool SpecialCosseratRodModel::takeAction
     return true;
   }
 
+  // Only the gyroscopic part of GET_INT_VECTOR, added onto INT_VECTOR. It lets the
+  // explicit integrators reuse an internal force evaluated without MATRIX2.
+  if (action == "GET_GYRO_VECTOR")
+  {
+    Vector fint;
+    Vector velo;
+    Ref<AbstractMatrix> mass;
+
+    if (!params.find(mass, ActionParams::MATRIX2))
+      return false;
+    params.get(fint, ActionParams::INT_VECTOR);
+    StateVector::get(velo, jive::model::STATE1, dofs_, globdat);
+    assembleGyro_(fint, velo, mass);
+
+    return true;
+  }
+
   if (action == Actions::GET_INT_VECTOR)
   {
     Vector fint;
@@ -367,6 +391,9 @@ bool SpecialCosseratRodModel::takeAction
   if (action == Actions::COMMIT)
   {
     material_->applyDeform();
+#ifndef NDEBUG
+    energiesStored_ = true;
+#endif
 
     Properties vars = Globdat::getVariables(globdat);
     Vector disp;
@@ -378,8 +405,14 @@ bool SpecialCosseratRodModel::takeAction
     vars.find(E_diss, "dissipatedEnergy");
 
     StateVector::get(disp, dofs_, globdat);
-    E_diss += getDissipatedEnergy_(disp);
-    E_pot += getPotentialEnergy_(disp);
+    double dE_pot = 0.;
+    double dE_diss = 0.;
+    getEnergies_(dE_pot, dE_diss, disp);
+#ifndef NDEBUG
+    energiesStored_ = false;
+#endif
+    E_diss += dE_diss;
+    E_pot += dE_pot;
 
     vars.set("potentialEnergy", E_pot);
     vars.set("dissipatedEnergy", E_diss);
@@ -420,7 +453,7 @@ void SpecialCosseratRodModel::getMaterialTable_
           "kappa_" + dofName[SliceFrom(dofName.size() - 1)]);
   }
 
-  material_->getTable(name, mat_table, rodElems_.getIndices(), weights);
+  material_->getTable(mat_table, weights, name, rodElems_.getIndices());
 }
 //-----------------------------------------------------------------------
 //   getStrainTable_
@@ -696,41 +729,45 @@ void SpecialCosseratRodModel::getStrains_(
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
     const bool spatial) const
 {
+  const Cubix ipPI(dofs_->typeCount(), dofs_->typeCount(), shapeK_->ipointCount());
+
+  getStrains_(strains, w, ipPI, nodePhi_0, nodeU, nodeLambda, ie, spatial);
+}
+
+void SpecialCosseratRodModel::getStrains_(
+    const Matrix &strains, const Vector &w, const Cubix &ipPI, const Matrix &nodePhi_0,
+    const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
+    const bool spatial) const
+{
   // TEST_CONTEXT(nodePhi_0)
   // TEST_CONTEXT(nodeU)
 
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t globRank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
 
   const Cubix ipLambda(globRank, globRank, ipCount);
-  const Cubix ipPI(dofCount, dofCount, ipCount);
   const Cubix ipLambdaP(globRank, globRank, ipCount);
   const Matrix ipPhi(globRank, ipCount);
   const Matrix ipPhiP(globRank, ipCount);
-  const IdxVector inodes(shapeK_->nodeCount());
+  const Matrix shapes = shapeK_->getShapeFunctions();
+  const Matrix grads(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
 
-  Matrix shapes(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
-  Matrix grads(shapeK_->shapeFuncCount(), shapeK_->ipointCount());
-
-  shapes = shapeK_->getShapeFunctions();
   shapeK_->getShapeGradients(grads, w, nodePhi_0);
   // TEST_CONTEXT(shapes)
   // TEST_CONTEXT(grads)
 
   ipPhi = matmul(Matrix(nodePhi_0 + nodeU), shapes);
   ipPhiP = matmul(Matrix(nodePhi_0 + nodeU), grads);
-  shapeK_->getPi(ipPI, ipLambda, nodeLambda);
-  shapeK_->getRotationGradients(ipLambdaP, w, nodePhi_0, nodeLambda);
+  shapeK_->getPiAndRotationGradients(ipPI, ipLambda, ipLambdaP, w, nodePhi_0, nodeLambda);
 
   // get the strains (material + spatial );
+  Matrix lambdaTLambdaP(globRank, globRank);
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     strains[ip][TRANS_PART] =
         matmul(ipLambda[ip].transpose(), ipPhiP[ip]);
-    // TEST_CONTEXT(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]))
-    strains[ip][ROT_PART] =
-        unskew(matmul(ipLambda[ip].transpose(), ipLambdaP[ip]));
+    mul3(lambdaTLambdaP, ipLambda[ip].transpose(), ipLambdaP[ip]);
+    strains[ip][ROT_PART] = unskew(lambdaTLambdaP);
   }
 
   // TEST_CONTEXT(strains)
@@ -751,23 +788,44 @@ void SpecialCosseratRodModel::getStresses_(
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t dofCount = dofs_->typeCount();
   const Matrix strains(stresses.shape());
-  const Cubix stiffness(dofCount, dofCount, ipCount);
-  const Cubix PI(dofCount, dofCount, ipCount);
+  const Cubix ipPI(dofCount, dofCount, ipCount);
 
   // get the (material) strains
-  getStrains_(strains, w, nodePhi_0, nodeU, nodeLambda, ie, false);
+  getStrains_(strains, w, ipPI, nodePhi_0, nodeU, nodeLambda, ie, false);
   // TEST_CONTEXT(strains)
 
   for (idx_t ip = 0; ip < ipCount; ip++)
     material_->getStress(stresses[ip], strains[ip], ie, ip, loadCase != "output");
 
-  // get the (spatial) stresses
+  // get the (spatial) stresses (PI was already computed with the strains)
   if (spatial)
   {
-    shapeK_->getPi(PI, nodeLambda);
     for (idx_t ip = 0; ip < ipCount; ip++)
-      stresses[ip] = matmul(PI[ip], stresses[ip]);
+      stresses[ip] = matmul(ipPI[ip], stresses[ip]);
   }
+}
+
+void SpecialCosseratRodModel::updNodeDofs_() const
+{
+  // only the nodes of this rod; column i belongs to the global node
+  // nodeIdx[i], i.e. it is addressed via rodNodes_ (global -> rod-local)
+  const IdxVector nodeIdx = rodElems_.getNodeIndices();
+  IdxVector idofs(jtypes_.size());
+
+  nodeDofs_.resize(jtypes_.size(), nodeIdx.size());
+
+  for (idx_t i = 0; i < nodeIdx.size(); i++)
+  {
+    dofs_->getDofIndices(idofs, nodeIdx[i], jtypes_);
+    nodeDofs_[i] = idofs;
+  }
+
+  nodeDofsValid_ = true;
+}
+
+void SpecialCosseratRodModel::invalidateNodeDofs_()
+{
+  nodeDofsValid_ = false;
 }
 
 void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
@@ -778,6 +836,9 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
 {
   const idx_t nodeCount = inodes.size();
 
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   IdxVector idofs_trans(TRANS_DOF_COUNT);
   IdxVector idofs_rot(ROT_DOF_COUNT);
 
@@ -787,13 +848,12 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
 
   for (idx_t inode = 0; inode < nodeCount; inode++)
   {
-    dofs_->getDofIndices(idofs_trans, inodes[inode], transTypes_);
-    dofs_->getDofIndices(idofs_rot, inodes[inode], rotTypes_);
+    idofs_trans.ref(nodeDofs_(TRANS_PART, rodNodes_[inodes[inode]]));
+    idofs_rot.ref(nodeDofs_(ROT_PART, rodNodes_[inodes[inode]]));
 
     nodeU[inode] = disp[idofs_trans];
     expVec(nodeLambda[inode], Vector(disp[idofs_rot]));
-    nodeLambda[inode] =
-        matmul(nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
+    mul3(nodeLambda[inode], nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
   }
 }
 
@@ -802,6 +862,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t elemCount = rodElems_.size();
@@ -869,12 +932,12 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        dofs_->getDofIndices(Idofs, inodes[Inode], jtypes_);
+        Idofs.ref(nodeDofs_[rodNodes_[inodes[Inode]]]);
 
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         {
           // SUBHEADER2( Inode, Jnode)
-          dofs_->getDofIndices(Jdofs, inodes[Jnode], jtypes_);
+          Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
 
           // Stiffness contribution S ( element stiffness matrix )
           addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
@@ -900,6 +963,9 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t elemCount = rodElems_.size();
@@ -940,9 +1006,17 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     {
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
-        dofs_->getDofIndices(Idofs, inodes[Inode], jtypes_);
+        Idofs.ref(nodeDofs_[rodNodes_[inodes[Inode]]]);
 
-        fint[Idofs] += weights[ip] * matmul(XI[ip][Inode], stress[ip]);
+        // fint[Idofs] += weights[ip] * XI * stress without temporaries
+        const jem::Array<double, 2> xi = XI[ip][Inode];
+        for (idx_t i = 0; i < dofCount; i++)
+        {
+          double sum = 0.;
+          for (idx_t j = 0; j < dofCount; j++)
+            sum += xi(i, j) * stress(j, ip);
+          fint[Idofs[i]] += weights[ip] * sum;
+        }
       }
     }
   }
@@ -952,22 +1026,62 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
                                             const Vector &velo,
                                             const Ref<AbstractMatrix> mass) const
 {
-  IdxVector idofs(ROT_DOF_COUNT);
-  Matrix Theta(ROT_DOF_COUNT, ROT_DOF_COUNT);
-  Vector temp(velo.size());
 
-  mass->matmul(temp, velo);
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+  IdxVector idofs(ROT_DOF_COUNT);
+  Vector temp(velo.size());
+  Vector omega(ROT_DOF_COUNT);
+  Vector Theta_omega(ROT_DOF_COUNT);
+
+  // only the rotational rows of M*velo are needed, so use the sparse
+  // structure directly instead of a full matrix-vector product
+  jive::algebra::SparseMatrixObject *sparse =
+      dynamic_cast<jive::algebra::SparseMatrixObject *>(mass.get());
+
+  IdxVector rowOffsets, colIndices;
+  Vector values;
+  if (sparse)
+  {
+    rowOffsets.ref(sparse->getRowOffsets());
+    colIndices.ref(sparse->getColumnIndices());
+    values.ref(sparse->getValues());
+  }
+  else
+  {
+    mass->matmul(temp, velo);
+  }
 
   for (idx_t inode : rodElems_.getNodeIndices())
   {
-    dofs_->getDofIndices(idofs, inode, rotTypes_);
+    idofs.ref(nodeDofs_(ROT_PART, rodNodes_[inode]));
 
-    fgyro[idofs] += matmul(skew(Vector(velo[idofs])), Vector(temp[idofs]));
+    if (sparse)
+    {
+      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+      {
+        double sum = 0.;
+        const idx_t irow = idofs[i];
+        for (idx_t k = rowOffsets[irow]; k < rowOffsets[irow + 1]; k++)
+          sum += values[k] * velo[colIndices[k]];
+        Theta_omega[i] = sum;
+      }
+    }
+    else
+    {
+      Theta_omega = temp[idofs];
+    }
+
+    omega = velo[idofs];
+    fgyro[idofs] += matmul(skew(omega), Theta_omega);
   }
 }
 
 void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
 {
+  if (!nodeDofsValid_)
+    updNodeDofs_();
+
   // REPORT(JEM_FUNC)
   MatmulChain<double, 3> mc3;
 
@@ -990,6 +1104,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   Cubix nodeLambda(rank, rank, nodeCount);
 
   Cubix ipLambda(rank, rank, ipCount);
+  Cubix ipMass(rank, rank, ipCount);
 
   Matrix spatialInertia(dofCount, dofCount);
 
@@ -1005,18 +1120,20 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
 
     l = sum(weights) / (nodeCount - 1);
 
+    for (idx_t ip = 0; ip < ipCount; ip++)
+      ipMass[ip] = mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
-      dofs_->getDofIndices(idofs, inodes[inode], jtypes_);
+      idofs.ref(nodeDofs_[rodNodes_[inodes[inode]]]);
       for (idx_t jnode = 0; jnode < nodeCount; jnode++)
       {
-        dofs_->getDofIndices(jdofs, inodes[jnode], jtypes_);
+        jdofs.ref(nodeDofs_[rodNodes_[inodes[jnode]]]);
 
         spatialInertia = 0;
 
         for (idx_t ip = 0; ip < ipCount; ip++)
-          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) *
-                                                    mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) * ipMass[ip];
         if (inode == jnode)
           spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART),
                                                            nodeLambda[inode].transpose());
@@ -1024,7 +1141,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
           spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
         // TEST_CONTEXT(spatialInertia)
-        mbld.addBlock(idofs, idofs, spatialInertia);
+        mbld.addBlock(idofs, jdofs, spatialInertia);
       }
     }
   }
@@ -1071,46 +1188,37 @@ void SpecialCosseratRodModel::getPotentialEnergy_(XTable &energy_table, const Ve
   }
 }
 
-double SpecialCosseratRodModel::getPotentialEnergy_(const Vector &disp) const
+void SpecialCosseratRodModel::getEnergies_(double &E_pot, double &E_diss, const Vector &) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
-  double E_pot = 0.;
 
-  // PER ELEMENT VALUES
-  Matrix nodeU(rank, nodeCount);
+  E_pot = 0.;
+  E_diss = 0.;
+
   Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Matrix stress(dofCount, ipCount);
+  Matrix grads(shapeK_->shapeFuncCount(), ipCount);
   Vector weights(ipCount);
-  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
-  // DOF INDICES
+  const Matrix shapes = shapeK_->getShapeFunctions();
   IdxVector inodes(nodeCount);
 
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    getStrains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
-
-    shapes = shapeK_->getShapeFunctions();
+    allNodes_.getSomeCoords(nodePhi_0, inodes);
+    shapeK_->getShapeGradients(grads, weights, nodePhi_0);
 
     for (idx_t iNode = 0; iNode < nodeCount; iNode++)
     {
       for (idx_t ip = 0; ip < ipCount; ip++)
       {
         E_pot += weights[ip] * shapes(iNode, ip) * material_->getPotentialEnergy(ie, ip);
+        E_diss += weights[ip] * shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip);
       }
     }
   }
-
-  return E_pot;
 }
 
 void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
@@ -1120,7 +1228,7 @@ void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const V
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
-  const idx_t jCol = energy_table.addColumn("potentialEnergy");
+  const idx_t jCol = energy_table.addColumn("dissipatedEnergy");
 
   // PER ELEMENT VALUES
   Matrix nodeU(rank, nodeCount);
@@ -1152,48 +1260,6 @@ void SpecialCosseratRodModel::getDissipatedEnergy_(XTable &energy_table, const V
       }
     }
   }
-}
-
-double SpecialCosseratRodModel::getDissipatedEnergy_(const Vector &disp) const
-{
-  const idx_t elemCount = rodElems_.size();
-  const idx_t ipCount = shapeK_->ipointCount();
-  const idx_t nodeCount = shapeK_->nodeCount();
-  const idx_t rank = shapeK_->globalRank();
-  const idx_t dofCount = dofs_->typeCount();
-  double E_diss = 0.;
-
-  // PER ELEMENT VALUES
-  Matrix nodeU(rank, nodeCount);
-  Matrix nodePhi_0(rank, nodeCount);
-  Cubix nodeLambda(rank, rank, nodeCount);
-  Matrix strain(dofCount, ipCount);
-  Matrix stress(dofCount, ipCount);
-  Vector weights(ipCount);
-  Matrix shapes(shapeK_->shapeFuncCount(), ipCount);
-  // DOF INDICES
-  IdxVector inodes(nodeCount);
-
-  for (idx_t ie = 0; ie < elemCount; ie++)
-  {
-    allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-
-    getStrains_(strain, weights, nodePhi_0, nodeU, nodeLambda, ie, false);
-    getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, false, "output");
-
-    shapes = shapeK_->getShapeFunctions();
-
-    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
-    {
-      for (idx_t ip = 0; ip < ipCount; ip++)
-      {
-        E_diss += weights[ip] * shapes(iNode, ip) * material_->getDissipatedEnergy(ie, ip);
-      }
-    }
-  }
-
-  return E_diss;
 }
 
 //-----------------------------------------------------------------------

@@ -59,26 +59,24 @@ using jive_helpers::vec2mat;
 //   class PeriodicBCModel
 //-----------------------------------------------------------------------
 
-/**
- * @class PeriodicBCModel
- * @brief Model for applying periodic boundary conditions on rectangular unit cells
- *
- * The PeriodicBCModel implements periodic boundary conditions specifically
- * designed for rectangular unit cells. It supports multiple operation modes
- * including load control, displacement control, and gradient updates.
- *
- * Features:
- * - Three operation modes: LOAD, UPD (update), and DISP (displacement)
- * - Automatic corner constraint handling
- * - Master-slave edge DOF pairing for periodicity
- * - Gradient-based deformation control
- * - Support for rotational DOFs
- *
- * @note Only works for rectangular unit cells
- */
+/// @class PeriodicBCModel
+/// @brief Model for applying periodic boundary conditions on rectangular unit cells
+///
+/// The PeriodicBCModel implements periodic boundary conditions specifically
+/// designed for rectangular unit cells. It supports multiple operation modes
+/// including load control, displacement control, and gradient updates.
+///
+/// Features:
+/// - Three operation modes: LOAD, UPD (update), and DISP (displacement)
+/// - Automatic corner constraint handling
+/// - Master-slave edge DOF pairing for periodicity
+/// - Gradient-based deformation control
+/// - Support for rotational DOFs
+///
+/// @note Only works for rectangular unit cells
 class PeriodicBCModel : public Model
 {
-public:
+ public:
   /// @name Property identifiers
   /// @{
   static const char *TYPE_NAME;       ///< Model type name
@@ -100,29 +98,29 @@ public:
   };
 
   /// @brief Constructor
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit PeriodicBCModel(const String &name,
                            const Properties &conf,
                            const Properties &props,
                            const Properties &globdat);
 
   /// @brief Handle model actions
-  /// @param action Action name
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction(const String &action,
                           const Properties &params,
                           const Properties &globdat) override;
 
   /// @brief Create new PeriodicBCModel instance
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return New model instance
   static Ref<Model> makeNew(const String &name,
                             const Properties &conf,
@@ -132,15 +130,15 @@ public:
   /// @brief Declare model type to factory
   static void declare();
 
-private:
+ private:
   /// @brief Initialize model
-  /// @param globdat Global data container
+  /// @param[in] globdat  Global data container
   void init_(const Properties &globdat);
 
   /// @brief Fix corner constraints
-  /// @param globdat Global data container
-  /// @param currentGrad Current gradient matrix
-  /// @param scale Scaling factor
+  /// @param[in] globdat  Global data container
+  /// @param[in] currentGrad  Current gradient matrix
+  /// @param[in] scale  Scaling factor
   void fixCorners_(const Properties &globdat,
                    const Matrix &currentGrad,
                    const double scale = NAN);
@@ -149,14 +147,14 @@ private:
   void setConstraints_();
 
   /// @brief Get external force vector
-  /// @param f External force vector
-  /// @param globdat Global data container
-  /// @param scale Scaling factor
+  /// @param[in,out] f  External force vector with periodic loads added
+  /// @param[in] globdat  Global data container
+  /// @param[in] scale  Scaling factor
   void getExtVec_(const Vector &f,
                   const Properties &globdat,
                   const double scale = 1.);
 
-private:
+ private:
   Assignable<NodeSet> nodes_;      ///< Node set
   Ref<DofSpace> dofs_;             ///< DOF space
   Ref<Constraints> cons_;          ///< Constraints

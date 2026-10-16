@@ -43,7 +43,7 @@ using jive::util::Globdat;
 /// and specified impactor weights for different node groups and DOF types.
 class ImpactModel : public Model
 {
-public:
+ public:
   JEM_DECLARE_CLASS(ImpactModel, Model);
 
   /// @name Property identifiers
@@ -55,10 +55,10 @@ public:
   /// @}
 
   /// @brief Constructor with configuration and properties
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   explicit ImpactModel
 
       (const String &name,
@@ -67,9 +67,9 @@ public:
        const Properties &globdat);
 
   /// @brief Handle model actions for impact boundary conditions
-  /// @param action Action name to execute
-  /// @param params Action parameters
-  /// @param globdat Global data container
+  /// @param[in] action  Action name to execute
+  /// @param[in] params  Action parameters
+  /// @param[in] globdat  Global data container
   /// @return true if action was handled
   virtual bool takeAction
 
@@ -78,10 +78,10 @@ public:
        const Properties &globdat) override;
 
   /// @brief Factory method for creating new ImpactModel instances
-  /// @param name Model name
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified model properties
-  /// @param globdat Global data container
+  /// @param[in] name  Model name
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified model properties
+  /// @param[in] globdat  Global data container
   /// @return Reference to new ImpactModel instance
   static Ref<Model> makeNew
 
@@ -93,7 +93,7 @@ public:
   /// @brief Register ImpactModel type with ModelFactory
   static void declare();
 
-private:
+ private:
   /// @name System components
   /// @{
   Ref<DofSpace> dofs_;        ///< Degree of freedom space

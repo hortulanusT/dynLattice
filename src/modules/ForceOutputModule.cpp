@@ -138,14 +138,17 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
 {
   if (FuncUtils::evalCond(*sampleCond_, globdat))
   {
-    Vector force(dofsOut_.size());
+    // the model actions fill vectors over all DOFs (global indices); only
+    // the entries in dofsOut_ are written, in the order of the header
+    Vector force(dofs_->dofCount());
     idx_t step;
     double time = -1;
+    const bool started = started_;
 
     globdat.get(step, jive::util::Globdat::TIME_STEP);
     globdat.find(time, jive::util::Globdat::TIME);
 
-    if (!started_)
+    if (!started)
       writeHeader_(time >= 0);
 
     Properties params;
@@ -153,10 +156,17 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
 
     if (intOut_)
     {
-      force = 0.;
-      params.set(ActionParams::INT_VECTOR, force);
-      model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-      writeLine_(force, step, ActionParams::INT_VECTOR, time);
+      // an explicit integrator publishes the force of the committed state
+      Vector fint;
+      if (!globdat.find(fint, ActionParams::INT_VECTOR) ||
+          fint.size() != force.size())
+      {
+        fint.ref(force);
+        fint = 0.;
+        params.set(ActionParams::INT_VECTOR, fint);
+        model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+      }
+      writeLine_(Vector(fint[dofsOut_]), step, ActionParams::INT_VECTOR, time);
       params.clear();
     }
 
@@ -165,17 +175,29 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
       force = 0.;
       params.set(ActionParams::EXT_VECTOR, force);
       model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
-      writeLine_(force, step, ActionParams::EXT_VECTOR, time);
+      writeLine_(Vector(force[dofsOut_]), step, ActionParams::EXT_VECTOR, time);
       params.clear();
     }
 
     if (gyroOut_)
     {
-      force = 0.;
-      params.set(ActionParams::INT_VECTOR, force);
-      model_->takeAction("GET_GYRO_VECTOR", params, globdat);
-      writeLine_(force, step, "gyroVector", time);
-      params.clear();
+      // only an explicit integrator with consistent mass publishes its mass
+      jem::Ref<jive::algebra::AbstractMatrix> mass;
+      if (globdat.find(mass, ExplicitModule::MASS_MATRIX))
+      {
+        force = 0.;
+        params.set(ActionParams::INT_VECTOR, force);
+        params.set(ActionParams::MATRIX2, mass);
+        model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+        writeLine_(Vector(force[dofsOut_]), step, "gyroVector", time);
+        params.clear();
+      }
+      else if (!started) // only warn once per simulation
+      {
+        jem::System::warn() << myName_ << " : no gyroscopic forces available "
+                            << "(explicit integrator with consistent mass "
+                            << "required); not writing them\n";
+      }
     }
 
     globdat.erase(PropNames::LOAD_CASE);

@@ -38,7 +38,10 @@ Thank you for your interest in contributing to dynLattice! This guide will help 
   - `camelCase` for functions and variables
   - `camelCase_` for private/protected functions and variables
   - `UPPER_CASE` for constants
+- C++ is formatted using `clang-format`(see also `.clang-format`)
 - Document public interfaces with [Doxygen](https://doxygen.nl/) style comments
+  - Use `///` (and `///<` for trailing member documentation)
+  - Use `/** ... */` only for the `@file` header at the top of a file
 
 ### Documentation Example
 
@@ -169,7 +172,7 @@ firefox doc/html/index.html
 
 ```bash
 # Debug with GDB
-jive gdb bin/dynLattice-debug
+jive gdb bin/dynLattice-dbg
 
 # Within GDB, print JEM/JIVE variables
 (gdb) call dprint(&variable_name)

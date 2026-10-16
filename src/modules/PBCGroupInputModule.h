@@ -26,7 +26,7 @@
 /// node groups for PBC implementation.
 class PBCGroupInputModule : public GroupInputModule
 {
-public:
+ public:
   /// @name Type definitions
   /// @{
   typedef PBCGroupInputModule Self; ///< Self type alias
@@ -43,22 +43,22 @@ public:
   /// @}
 
   /// @brief Constructor
-  /// @param name Module name (default: "pbcGroupInput")
+  /// @param[in] name  Module name (default: "pbcGroupInput")
   explicit PBCGroupInputModule(const String &name = "pbcGroupInput");
 
   /// @brief Initialize PBC node group generation
-  /// @param conf Actually used configuration properties (output)
-  /// @param props User-specified module properties
-  /// @param globdat Global data container
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
   /// @return Module status
   virtual Status init(const Properties &conf, const Properties &props,
                       const Properties &globdat) override;
 
   /// @brief Factory method for creating new instances
-  /// @param name Module name
-  /// @param conf Configuration properties (output)
-  /// @param props User properties
-  /// @param globdat Global data container
+  /// @param[in] name  Module name
+  /// @param[out] conf  Configuration properties (output)
+  /// @param[in] props  User properties
+  /// @param[in] globdat  Global data container
   /// @return New module instance
   static Ref<Module> makeNew(const String &name, const Properties &conf,
                              const Properties &props, const Properties &globdat);
@@ -66,25 +66,25 @@ public:
   /// @brief Register module type with factory
   static void declare();
 
-protected:
+ protected:
   /// @brief Protected destructor
   virtual ~PBCGroupInputModule();
 
   /// @brief Prepare properties for PBC group generation
-  /// @param myProps Module properties to configure
+  /// @param[in,out] myProps  Module properties updated with generated group settings
   void prepareProps_(const Properties &myProps) const;
 
   /// @brief Sort boundary nodes into master/slave pairs
-  /// @param islaves Slave node indices
-  /// @param imasters Master node indices
-  /// @param nodes Node set
-  /// @param globdat Global data container
-  /// @param ix Coordinate direction index
+  /// @param[in,out] islaves  Slave node indices, reordered in place
+  /// @param[in] imasters  Master node indices
+  /// @param[in] nodes  Node set
+  /// @param[in] globdat  Global data container
+  /// @param[in] ix  Coordinate direction index
   void sortBoundaryNodes_(const IdxVector &islaves, const IdxVector &imasters,
                           const NodeSet &nodes, const Properties &globdat,
                           const idx_t ix) const;
 
-protected:
+ protected:
   /// @name Configuration parameters
   /// @{
   idx_t rank_;               ///< Spatial dimension of the domain

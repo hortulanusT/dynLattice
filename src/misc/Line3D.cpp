@@ -12,6 +12,7 @@
 #include <jem/base/Array.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/numeric/algebra/MatmulChain.h>
 #include <jem/numeric/algebra/matmul.h>
 #include <jem/numeric/algebra/utilities.h>
 
@@ -21,6 +22,7 @@
 using jive_helpers::expVec;
 using jive_helpers::expVecP;
 using jive_helpers::logMat;
+using jive_helpers::mul3;
 using jive_helpers::skew;
 
 using jem::ALL;
@@ -103,6 +105,15 @@ void Line3D::getShapeGradients(const Matrix &g,
                                const Vector &w,
                                const Matrix &c) const
 {
+  if (gradMemoValid_ && gradMemoCoords_.size(0) == c.size(0) &&
+      gradMemoCoords_.size(1) == c.size(1) &&
+      jem::testall(gradMemoCoords_ == c))
+  {
+    g = gradMemoGrads_;
+    w = gradMemoWeights_;
+    return;
+  }
+
   Matrix c1(localRank(), nodeCount());
   c1(0, 0) = 0.;
   for (idx_t iNode = 1; iNode < nodeCount(); iNode++) // LATER get something more elaborate that also includes real shapes for higher order elements
@@ -112,6 +123,14 @@ void Line3D::getShapeGradients(const Matrix &g,
   intLine_->getShapeGradients(g1, w, c1);
 
   g = g1(0, ALL, ALL);
+
+  gradMemoCoords_.resize(c.shape());
+  gradMemoCoords_ = c;
+  gradMemoGrads_.resize(g.shape());
+  gradMemoGrads_ = g;
+  gradMemoWeights_.resize(w.size());
+  gradMemoWeights_ = w;
+  gradMemoValid_ = true;
 }
 
 void Line3D::getRotations(const Cubix &Ri,
@@ -119,10 +138,18 @@ void Line3D::getRotations(const Cubix &Ri,
 {
   Matrix Lambda_r(globalRank(), globalRank());
   Matrix node_psi(globalRank(), nodeCount());
-  Matrix ip_psi(globalRank(), ipointCount());
 
-  // get the Rotaion matrices and the relative rotations between them
+  // get the Rotation matrices and the relative rotations between them
   getNodeRotVecs_(node_psi, Lambda_r, Rn);
+
+  getRotations_(Ri, node_psi, Lambda_r);
+}
+
+void Line3D::getRotations_(const Cubix &Ri,
+                           const Matrix &node_psi,
+                           const Matrix &Lambda_r) const
+{
+  Matrix ip_psi(globalRank(), ipointCount());
 
   // get the _local_ rotations in the integration points
   Matrix shapeFuncs = getShapeFunctions();
@@ -134,7 +161,7 @@ void Line3D::getRotations(const Cubix &Ri,
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
     expVec(Ri[iIp], ip_psi[iIp]);
-    Ri[iIp] = matmul(Lambda_r, Ri[iIp]);
+    mul3(Ri[iIp], Lambda_r, Ri[iIp]);
   }
 }
 
@@ -189,14 +216,7 @@ void Line3D::getPi(const Cubix &Pi,
 {
   const Cubix Ri(globalRank(), globalRank(), ipointCount());
 
-  getRotations(Ri, Rn);
-
-  Pi = 0.;
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
-  }
+  getPi(Pi, Ri, Rn);
 }
 
 void Line3D::getPi(const Cubix &Pi,
@@ -222,11 +242,49 @@ void Line3D::getRotationGradients(const Cubix &LambdaP,
 
   Matrix Lambda_r(globalRank(), globalRank());
   Matrix node_psi(globalRank(), nodeCount());
-  Matrix ip_psi(globalRank(), ipointCount());
 
-  // get the Rotaion matrices and the relative rotations between them
+  // get the Rotation matrices and the relative rotations between them
   getNodeRotVecs_(node_psi, Lambda_r, nodeLambda);
 
+  getRotationGradients_(LambdaP, w, c, node_psi, Lambda_r);
+}
+
+void Line3D::getPiAndRotationGradients(const Cubix &Pi,
+                                       const Cubix &Ri,
+                                       const Cubix &LambdaP,
+                                       const Vector &w,
+                                       const Matrix &c,
+                                       const Cubix &nodeLambda) const
+{
+  JEM_ASSERT2(LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size");
+
+  Matrix Lambda_r(globalRank(), globalRank());
+  Matrix node_psi(globalRank(), nodeCount());
+
+  // the node rotation vectors are shared by the rotations and their gradients
+  getNodeRotVecs_(node_psi, Lambda_r, nodeLambda);
+
+  getRotations_(Ri, node_psi, Lambda_r);
+
+  Pi = 0.;
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
+    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
+  }
+
+  getRotationGradients_(LambdaP, w, c, node_psi, Lambda_r);
+}
+
+//------------------------------------------------------
+// private helper functions
+//------------------------------------------------------
+void Line3D::getRotationGradients_(const Cubix &LambdaP,
+                                   const Vector &w,
+                                   const Matrix &c,
+                                   const Matrix &node_psi,
+                                   const Matrix &Lambda_r) const
+{
   Matrix shapes = getShapeFunctions();
   Matrix grads(shapeFuncCount(), ipointCount());
   getShapeGradients(grads, w, c);
@@ -236,16 +294,14 @@ void Line3D::getRotationGradients(const Cubix &LambdaP,
   psi = matmul(node_psi, shapes);
   psiP = matmul(node_psi, grads);
 
+
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     expVecP(LambdaP[ip], psi[ip], psiP[ip]);
-    LambdaP[ip] = matmul(Lambda_r, LambdaP[ip]);
+    mul3(LambdaP[ip], Lambda_r, LambdaP[ip]);
   }
 }
 
-//------------------------------------------------------
-// private helper functions
-//------------------------------------------------------
 void Line3D::getRefRot_(const Matrix Lambda_r,
                         const Cubix Rn) const
 {
@@ -256,10 +312,12 @@ void Line3D::getRefRot_(const Matrix Lambda_r,
 
   Vector phi_IJ(globalRank());
 
-  logMat(phi_IJ, matmul(Rn[I].transpose(), Rn[J]));
+  Matrix rel(globalRank(), globalRank());
+  mul3(rel, Rn[I].transpose(), Rn[J]);
+  logMat(phi_IJ, rel);
   phi_IJ = c * phi_IJ;
   expVec(Lambda_r, phi_IJ);
-  Lambda_r = matmul(Rn[I], Lambda_r);
+  mul3(Lambda_r, Rn[I], Lambda_r);
 }
 
 void Line3D::getNodeRotVecs_(const Matrix psi,
@@ -268,6 +326,11 @@ void Line3D::getNodeRotVecs_(const Matrix psi,
 {
   getRefRot_(Lambda_r, Rn);
 
+  Matrix rel(globalRank(), globalRank());
+
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    logMat(psi[iNode], matmul(Lambda_r.transpose(), Rn[iNode]));
+  {
+    mul3(rel, Lambda_r.transpose(), Rn[iNode]);
+    logMat(psi[iNode], rel);
+  }
 }

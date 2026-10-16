@@ -77,26 +77,31 @@ The documentation is also available as [GitHub Pages](https://hortulanust.github
 .
 ├── .gitignore            ← gitignore file to ignore compiled files and other artifacts
 ├── .gitattributes        ← git attributes file
+├── .clang-format         ← code formatting rules (clang-format)
+├── .git-blame-ignore-revs ← commits ignored by git blame (formatting only)
 ├── .github/              ← GitHub workflows and configuration
 ├── .vscode/              ← VS Code workspace configuration
 ├── CITATION.cff          ← Citation metadata file
 ├── LICENSE               ← MIT license file
+├── CODE_OF_CONDUCT.md    ← code of conduct
 ├── README.md             ← this file
 ├── CONTRIBUTING.md       ← contribution guidelines
 ├── codemeta.json         ← software metadata
 ├── Makefile              ← makefile for building the code and documentation
 ├── jive.def              ← Apptainer definition file for building the container
 ├── jive.sif              ← Apptainer container for running the code
-├── bin/                  ← Compiled code (ignored by git)
+├── bin/                  ← Compiled code (contents ignored by git)
 │   ├── dynLattice        ← main executable for the program
 │   ├── dynLattice-opt    ← optimized executable for the program
-│   └── dynLattice-debug  ← executable with debug symbols
+│   └── dynLattice-dbg    ← executable with debug symbols
 ├── doc/                  ← Documentation files
 │   ├── doc.mk            ← Makefile for documentation
 │   ├── doxygen.conf      ← Doxygen configuration for API documentation
 │   ├── install.md        ← Installation instructions
 │   ├── main.md           ← Main documentation content
 │   ├── usage.md          ← Usage instructions
+│   ├── usage_details1.md ← Input properties explained for example 1
+│   ├── usage_details2.md ← Input properties explained for example 2
 │   └── html/             ← Generated HTML documentation (ignored by git)
 ├── paper/                ← JOSS paper and related materials
 │   ├── paper.md          ← Main paper content in Markdown
@@ -111,6 +116,7 @@ The documentation is also available as [GitHub Pages](https://hortulanust.github
 │   └── utils/            ← Utility functions and macros
 └── tests/                ← Test cases and benchmarks
     ├── testing.mk        ← Makefile for running tests
+    ├── metrics.py        ← Comparison metrics used by the test scripts
     ├── Benchmarks.md     ← Overview of all benchmarks
     ├── BeamBenchmarks.md ← Beam element benchmarks
     ├── ContactBenchmarks.md ← Contact mechanics benchmarks
@@ -120,6 +126,7 @@ The documentation is also available as [GitHub Pages](https://hortulanust.github
     ├── contact/          ← Contact test cases
     ├── plastic/          ← Plasticity test cases
     ├── transient/        ← Transient analysis test cases
+    ├── docs/             ← Examples used in the documentation
     └── *.png             ← Result images from benchmark tests (ignored by git)
 ```
 
