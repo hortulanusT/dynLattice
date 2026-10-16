@@ -349,11 +349,20 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l) const
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const
 {
-  if (jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
     return getLumpedMass(l);
 
-  if (ielem == 0 || ielem == nElem_ - 1)
-    return Matrix(edgeFact_ * getLumpedMass(l));
+  // same edge elements and block scaling as getMaterialMass(ielem, ip)
+  if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
+  {
+    Matrix mass = getLumpedMass(l);
+    mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
+    mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
+
+    return mass;
+  }
 
   return getLumpedMass(l);
 }
