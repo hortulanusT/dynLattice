@@ -172,7 +172,7 @@ firefox doc/html/index.html
 
 ```bash
 # Debug with GDB
-jive gdb bin/dynLattice-debug
+jive gdb bin/dynLattice-dbg
 
 # Within GDB, print JEM/JIVE variables
 (gdb) call dprint(&variable_name)
