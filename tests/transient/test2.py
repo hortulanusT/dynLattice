@@ -14,12 +14,15 @@ from metrics import curve_distance_2d
 
 TOL = 0.05
 
+T_END = 1.0  # the simulation runs to t = 1
+
 test_passed = False
 
 try:
   data = pd.read_csv("tests/transient/test2/disp.gz",
                     index_col=["time", "label"]).xs("disp",
                                                     level="label")
+  completed = data.index.max() >= T_END - 1e-6
   data.columns = pd.MultiIndex.from_tuples([
       tuple([
           name[:name.find("[")],
@@ -48,7 +51,8 @@ try:
   N_nodes = len(dx.columns)
 
   for time in ref_data.columns.unique(0):
-    t_ref = ref_data.loc[:, time]
+    # the reference snapshots are padded with NaN rows
+    t_ref = ref_data.loc[:, time].dropna().copy()
     t_ref['dist'] = t_ref[['X', 'Y']].apply(lambda row: np.linalg.norm(
         (row.X, row.Y)),
         axis=1)
@@ -80,11 +84,12 @@ try:
     sim_xy = np.column_stack([sim_x, sim_z])
     snapshot_dists.append(curve_distance_2d(sim_xy, ref_xy))
 
-  test_passed = max(snapshot_dists) <= TOL
+  test_passed = completed and all(
+      np.isfinite(d) and d <= TOL for d in snapshot_dists)
 except Exception as e:
   print(e)
 
-if max(data.index) > 0.9 and test_passed:
+if test_passed:
   print(colored("TRANSIENT TEST 2 PASSED", "green"))
 
   plt.legend(ncol=2)
