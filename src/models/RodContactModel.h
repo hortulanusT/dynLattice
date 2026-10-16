@@ -127,8 +127,8 @@ class RodContactModel : public Model
 
  protected:
   /// @brief Find pairs of contacts
-  /// @param[out] elementsA  Element IDs of one side of the contact
-  /// @param[out] elementsB  Element IDs of the other side
+  /// @param[out] elementsA  Element indices of one side of the contact
+  /// @param[out] elementsB  Element indices of the other side
   /// @param[in] disp  Displacement vector of all elements
   virtual void findContacts_(IdxVector &elementsA,
                              IdxVector &elementsB,
@@ -137,11 +137,9 @@ class RodContactModel : public Model
   /// @brief Compute the bounding box of every rod element in the current configuration
   /// @details Each box encloses the displaced element nodes and is widened by
   /// the contact radius. Computed once per contact search, so that the
-  /// element-level search of every rod pair only compares boxes. Like the
-  /// rest of the contact search, the elements are addressed by the values of
-  /// ElementGroup::getIDs(), which are used as element indices.
-  /// @param[out] elemBoxMin  Lower box corners (globalRank x element count), column = element
-  /// @param[out] elemBoxMax  Upper box corners (globalRank x element count), column = element
+  /// element-level search of every rod pair only compares boxes.
+  /// @param[out] elemBoxMin  Lower box corners (globalRank x element count), column = element index
+  /// @param[out] elemBoxMax  Upper box corners (globalRank x element count), column = element index
   /// @param[in] disp  Displacement vector of all elements
   void getElementBoxes_(Matrix &elemBoxMin,
                         Matrix &elemBoxMax,
@@ -156,8 +154,8 @@ class RodContactModel : public Model
                                   const Vector &disp) const;
 
   /// @brief Get the contacting point between two beams in possible contact
-  /// @param[out] elemsA  Element ID of one side of the contact
-  /// @param[out] elemsB  Corresponding element ID on the other side
+  /// @param[out] elemsA  Element index of one side of the contact
+  /// @param[out] elemsB  Corresponding element index on the other side
   /// @param[in] beamA  Possible beam on side A
   /// @param[in] beamB  Possible beam on side B
   /// @param[in] elemBoxMin  Lower element box corners (see getElementBoxes_)
@@ -172,8 +170,8 @@ class RodContactModel : public Model
   /// @brief Compute the effects of the contact
   /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
   /// @param[in,out] fint  Internal force vector, updated with contact contributions
-  /// @param[in] elementsA  Element IDs of one side of the contact
-  /// @param[in] elementsB  Element IDs of the other side
+  /// @param[in] elementsA  Element indices of one side of the contact
+  /// @param[in] elementsB  Element indices of the other side
   /// @param[in] disp  Displacement vector of all elements
   virtual void computeContacts_(MatrixBuilder &mbld,
                                 const Vector &fint,
@@ -182,16 +180,16 @@ class RodContactModel : public Model
                                 const Vector &disp);
 
   /// @brief Build the list of nodes initially in contact
-  /// @param[in] elementsA  Element IDs A
-  /// @param[in] elementsB  Element IDs B
+  /// @param[in] elementsA  Element indices A
+  /// @param[in] elementsB  Element indices B
   /// @param[in] disp  Displacement vector
   virtual void computeBlacklist_(const IdxVector &elementsA,
                                  const IdxVector &elementsB,
                                  const Vector &disp);
 
   /// @brief Check whether a contact is on the blacklist
-  /// @param[in] elementsA  Element ID A
-  /// @param[in] elementsB  Element ID B
+  /// @param[in] elementsA  Element index A
+  /// @param[in] elementsB  Element index B
   /// @return true if the contact is on the blacklist
   virtual bool filterBlacklist_(const idx_t elementsA,
                                 const idx_t elementsB) const;

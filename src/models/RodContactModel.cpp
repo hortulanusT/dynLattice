@@ -302,8 +302,7 @@ void RodContactModel::getElementBoxes_
 
   for (idx_t iRod = 0; iRod < rodList_.size(); iRod++)
   {
-    // same element addressing as findPossibleElements_ and computeContacts_
-    for (idx_t iElem : rodList_[iRod].getIDs())
+    for (idx_t iElem : rodList_[iRod].getIndices())
     {
       allElems_.getElemNodes(nodes, iElem);
       allNodes_.getSomeCoords(poss, nodes);
@@ -408,22 +407,23 @@ void RodContactModel::findPossibleElements_
 
   IdxVector nodes(nodeCount);
 
-  // the boxes come from getElementBoxes_ (same element addressing)
-  const IdxVector idsA = rodList_[beamA].getIDs();
-  const IdxVector idsB = rodList_[beamB].getIDs();
-  const idx_t countB = idsB.size();
+  // element indices (not IDs): getElemNodes, the element boxes and
+  // computeContacts_ all address elements by index
+  const IdxVector rodElemsA = rodList_[beamA].getIndices();
+  const IdxVector rodElemsB = rodList_[beamB].getIndices();
+  const idx_t countB = rodElemsB.size();
   Array<bool> skipB(countB);
 
   for (idx_t jB = 0; jB < countB; jB++)
   {
-    allElems_.getElemNodes(nodes, idsB[jB]);
+    allElems_.getElemNodes(nodes, rodElemsB[jB]);
 
     // elements sharing a node with the other beam can not be in contact
     skipB[jB] = jem::testany(nodes[0] == rodNodes_[beamA]) || jem::testany(nodes[1] == rodNodes_[beamA]); // LATER higher order elements
   }
 
   // iterate over the elements of beam A
-  for (idx_t iElemA : idsA)
+  for (idx_t iElemA : rodElemsA)
   {
     allElems_.getElemNodes(nodes, iElemA);
 
@@ -435,7 +435,7 @@ void RodContactModel::findPossibleElements_
       if (skipB[jB])
         continue;
 
-      const idx_t jElemB = idsB[jB];
+      const idx_t jElemB = rodElemsB[jB];
       bool cornerCheck = true;
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
