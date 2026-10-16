@@ -256,6 +256,12 @@ void RodContactModel::findContacts_
   ArrayBuffer<idx_t> beamAElements;
   ArrayBuffer<idx_t> beamBElements;
 
+  // the box of an element takes part in many rod pairs, so compute every box
+  // once per search and only compare boxes afterwards
+  Matrix elemBoxMin;
+  Matrix elemBoxMax;
+  getElementBoxes_(elemBoxMin, elemBoxMax, disp);
+
   findPossibleBeams_(beamsA, beamsB, disp);
 
   for (idx_t i = 0; i < beamsA.size(); i++)
@@ -263,7 +269,7 @@ void RodContactModel::findContacts_
     IdxVector contactAElements;
     IdxVector contactBElements;
 
-    findPossibleElements_(contactAElements, contactBElements, beamsA[i], beamsB[i], disp);
+    findPossibleElements_(contactAElements, contactBElements, beamsA[i], beamsB[i], elemBoxMin, elemBoxMax);
 
     beamAElements.pushBack(contactAElements.begin(), contactAElements.end());
     beamBElements.pushBack(contactBElements.begin(), contactBElements.end());
@@ -271,6 +277,49 @@ void RodContactModel::findContacts_
 
   elementsA.ref(beamAElements.toArray());
   elementsB.ref(beamBElements.toArray());
+}
+
+//-----------------------------------------------------------------------
+//   getElementBoxes_
+//-----------------------------------------------------------------------
+
+void RodContactModel::getElementBoxes_
+
+    (Matrix &elemBoxMin,
+     Matrix &elemBoxMax,
+     const Vector &disp) const
+{
+  const idx_t nodeCount = shape_->nodeCount();
+  const idx_t globalRank = shape_->globalRank();
+
+  IdxVector nodes(nodeCount);
+  IdxVector dofs(nodeCount);
+  Matrix poss(globalRank, nodeCount);
+
+  // columns of elements outside the rods stay unused
+  elemBoxMin.resize(globalRank, allElems_.size());
+  elemBoxMax.resize(globalRank, allElems_.size());
+
+  for (idx_t iRod = 0; iRod < rodList_.size(); iRod++)
+  {
+    // same element addressing as findPossibleElements_ and computeContacts_
+    for (idx_t iElem : rodList_[iRod].getIDs())
+    {
+      allElems_.getElemNodes(nodes, iElem);
+      allNodes_.getSomeCoords(poss, nodes);
+      for (idx_t idof = 0; idof < globalRank; idof++)
+      {
+        dofs_->getDofIndices(dofs, nodes, idof);
+        poss(idof, ALL) += disp[dofs];
+      }
+
+      for (idx_t idof = 0; idof < globalRank; idof++)
+      {
+        elemBoxMin(idof, iElem) = min(poss(idof, ALL)) - radius_;
+        elemBoxMax(idof, iElem) = max(poss(idof, ALL)) + radius_;
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -347,7 +396,8 @@ void RodContactModel::findPossibleElements_
      IdxVector &elemsB,
      const idx_t &beamA,
      const idx_t &beamB,
-     const Vector &disp) const
+     const Matrix &elemBoxMin,
+     const Matrix &elemBoxMax) const
 {
   const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
@@ -357,15 +407,11 @@ void RodContactModel::findPossibleElements_
   ArrayBuffer<idx_t> beamBCandidates;
 
   IdxVector nodes(nodeCount);
-  IdxVector dofs(nodeCount);
-  Matrix poss(globalRank, nodeCount);
 
-  // Compute the box of every element of beam B once
+  // the boxes come from getElementBoxes_ (same element addressing)
   const IdxVector idsA = rodList_[beamA].getIDs();
   const IdxVector idsB = rodList_[beamB].getIDs();
   const idx_t countB = idsB.size();
-  Matrix boxMinB(globalRank, countB);
-  Matrix boxMaxB(globalRank, countB);
   Array<bool> skipB(countB);
 
   for (idx_t jB = 0; jB < countB; jB++)
@@ -374,27 +420,9 @@ void RodContactModel::findPossibleElements_
 
     // elements sharing a node with the other beam can not be in contact
     skipB[jB] = jem::testany(nodes[0] == rodNodes_[beamA]) || jem::testany(nodes[1] == rodNodes_[beamA]); // LATER higher order elements
-    if (skipB[jB])
-      continue;
-
-    allNodes_.getSomeCoords(poss, nodes);
-    for (idx_t idof = 0; idof < globalRank; idof++)
-    {
-      dofs_->getDofIndices(dofs, nodes, idof);
-      poss(idof, ALL) += disp[dofs];
-    }
-
-    for (idx_t idof = 0; idof < globalRank; idof++)
-    {
-      boxMinB(idof, jB) = min(poss(idof, ALL)) - radius_;
-      boxMaxB(idof, jB) = max(poss(idof, ALL)) + radius_;
-    }
   }
 
   // iterate over the elements of beam A
-  Vector boxMinA(globalRank);
-  Vector boxMaxA(globalRank);
-
   for (idx_t iElemA : idsA)
   {
     allElems_.getElemNodes(nodes, iElemA);
@@ -402,34 +430,22 @@ void RodContactModel::findPossibleElements_
     if (jem::testany(nodes[0] == rodNodes_[beamB]) || jem::testany(nodes[1] == rodNodes_[beamB])) // LATER higher order elements
       continue;
 
-    allNodes_.getSomeCoords(poss, nodes);
-    for (idx_t idof = 0; idof < globalRank; idof++)
-    {
-      dofs_->getDofIndices(dofs, nodes, idof);
-      poss(idof, ALL) += disp[dofs];
-    }
-
-    for (idx_t idof = 0; idof < globalRank; idof++)
-    {
-      boxMinA[idof] = min(poss(idof, ALL)) - radius_;
-      boxMaxA[idof] = max(poss(idof, ALL)) + radius_;
-    }
-
     for (idx_t jB = 0; jB < countB; jB++)
     {
       if (skipB[jB])
         continue;
 
+      const idx_t jElemB = idsB[jB];
       bool cornerCheck = true;
       for (idx_t idof = 0; idof < globalRank; idof++)
       {
-        cornerCheck &= boxMaxA[idof] >= boxMinB(idof, jB) && boxMaxB(idof, jB) >= boxMinA[idof];
+        cornerCheck &= elemBoxMax(idof, iElemA) >= elemBoxMin(idof, jElemB) && elemBoxMax(idof, jElemB) >= elemBoxMin(idof, iElemA);
       }
 
       if (cornerCheck)
       {
         beamACandidates.pushBack(iElemA);
-        beamBCandidates.pushBack(idsB[jB]);
+        beamBCandidates.pushBack(jElemB);
       }
     }
   }

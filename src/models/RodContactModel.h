@@ -134,6 +134,19 @@ class RodContactModel : public Model
                              IdxVector &elementsB,
                              const Vector &disp) const;
 
+  /// @brief Compute the bounding box of every rod element in the current configuration
+  /// @details Each box encloses the displaced element nodes and is widened by
+  /// the contact radius. Computed once per contact search, so that the
+  /// element-level search of every rod pair only compares boxes. Like the
+  /// rest of the contact search, the elements are addressed by the values of
+  /// ElementGroup::getIDs(), which are used as element indices.
+  /// @param[out] elemBoxMin  Lower box corners (globalRank x element count), column = element
+  /// @param[out] elemBoxMax  Upper box corners (globalRank x element count), column = element
+  /// @param[in] disp  Displacement vector of all elements
+  void getElementBoxes_(Matrix &elemBoxMin,
+                        Matrix &elemBoxMax,
+                        const Vector &disp) const;
+
   /// @brief Find beams of possible contact pairs
   /// @param[out] beamsA  Indices of the beams in contact
   /// @param[out] beamsB  Indices of corresponding beams
@@ -147,12 +160,14 @@ class RodContactModel : public Model
   /// @param[out] elemsB  Corresponding element ID on the other side
   /// @param[in] beamA  Possible beam on side A
   /// @param[in] beamB  Possible beam on side B
-  /// @param[in] disp  Displacement vector of all elements
+  /// @param[in] elemBoxMin  Lower element box corners (see getElementBoxes_)
+  /// @param[in] elemBoxMax  Upper element box corners (see getElementBoxes_)
   virtual void findPossibleElements_(IdxVector &elemsA,
                                      IdxVector &elemsB,
                                      const idx_t &beamA,
                                      const idx_t &beamB,
-                                     const Vector &disp) const;
+                                     const Matrix &elemBoxMin,
+                                     const Matrix &elemBoxMax) const;
 
   /// @brief Compute the effects of the contact
   /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
