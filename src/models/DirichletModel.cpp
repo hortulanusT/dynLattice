@@ -16,6 +16,7 @@
 
 #include "DirichletModel.h"
 #include "utils/SolverNames.h"
+#include "utils/helpers.h"
 #include "utils/testing.h"
 
 using jem::io::endl;
@@ -356,7 +357,9 @@ void DirichletModel::applyConstraints_
     {
       idx_t idof = dofs_->getDofIndex(inodes[in], itype);
 
-      cons_->addConstraint(idof, val);
+      // re-applied whenever the displacement factor changes: after the
+      // first time only the values change
+      jive_helpers::setDofValue(*cons_, idof, val);
     }
   }
 

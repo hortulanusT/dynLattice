@@ -335,4 +335,35 @@ Vector unskew(const Matrix &mat)
 
   return res;
 }
+
+void setDofValue(jive::util::Constraints &cons, const idx_t idof, const double rval)
+{
+  if (cons.isSlaveDof(idof) && cons.masterDofCount(idof) == 0 && cons.hasRvalue(idof))
+    cons.setRvalue(idof, rval);
+  else
+    cons.addConstraint(idof, rval);
+}
+
+void linkDofs(jive::util::Constraints &cons, const idx_t idof, const idx_t jdof, const double coeff)
+{
+  // a prescribed master: JIVE would store idof = coeff * value of jdof
+  if (cons.isSlaveDof(jdof) && cons.masterDofCount(jdof) == 0 && cons.hasRvalue(jdof))
+  {
+    setDofValue(cons, idof, coeff * cons.getRvalue(jdof));
+    return;
+  }
+
+  if (cons.isSlaveDof(idof) && cons.masterDofCount(idof) == 1 && !cons.hasRvalue(idof))
+  {
+    double rval;
+    IdxVector jdofs(1);
+    Vector coeffs(1);
+    cons.getConstraint(rval, jdofs, coeffs, idof);
+
+    if (jdofs[0] == jdof && jem::numeric::abs(coeffs[0] - coeff) <= 0.)
+      return;
+  }
+
+  cons.addConstraint(idof, jdof, coeff);
+}
 } // namespace jive_helpers

@@ -5,6 +5,7 @@
  */
 
 #include "models/ImpactModel.h"
+#include "utils/helpers.h"
 #include <jem/base/ClassTemplate.h>
 
 JEM_DEFINE_CLASS(ImpactModel);
@@ -98,8 +99,9 @@ bool ImpactModel::takeAction
 
         jem::System::info() << " ...Applying acceleration of " << -1. * force / weights_[i] << " to " << nodeGroups_[i] << jem::io::endl;
 
+        // re-applied on every GET_CONSTRAINTS: update the values only
         for (idx_t idof : idofs)
-          cons_->addConstraint(idof, -1. * force / weights_[i]);
+          jive_helpers::setDofValue(*cons_, idof, -1. * force / weights_[i]);
       }
       else
         jem::System::warn() << "No Force data for " << nodeGroups_[i] << " in global Database!\n";

@@ -8,6 +8,7 @@
  */
 
 #include "models/SpringMassModel.h"
+#include "utils/helpers.h"
 #include "utils/testing.h"
 
 #include <jem/base/ClassTemplate.h>
@@ -177,7 +178,8 @@ bool SpringMassModel::applyConstraints_
     mDof = dofs->getDofIndex(edgeNodes_(0, 0), iDofType);
     for (idx_t bDof : bDofs)
     {
-      cons->addConstraint(bDof, mDof, 1.0);
+      // applied on every GET_CONSTRAINTS: only changes are written
+      jive_helpers::linkDofs(*cons, bDof, mDof, 1.0);
     }
   }
 
@@ -189,7 +191,7 @@ bool SpringMassModel::applyConstraints_
     {
       sDof = dofs->getDofIndex(edgeNodes_(iSpring - 1, 1), iDofType);
       mDof = dofs->getDofIndex(edgeNodes_(iSpring, 0), iDofType);
-      cons->addConstraint(sDof, mDof, 1.0);
+      jive_helpers::linkDofs(*cons, sDof, mDof, 1.0);
     }
   }
 
@@ -197,7 +199,7 @@ bool SpringMassModel::applyConstraints_
   for (idx_t iDofType = 0; iDofType < dofs->typeCount(); iDofType++)
   {
     sDof = dofs->getDofIndex(edgeNodes_(edgeNodes_.size(0) - 1, 1), iDofType);
-    cons->addConstraint(sDof, 0.);
+    jive_helpers::setDofValue(*cons, sDof, 0.);
   }
 
   cons->compress();

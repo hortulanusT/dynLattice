@@ -16,6 +16,7 @@
 #include <jem/numeric/func/Function.h>
 
 #include <jive/Array.h>
+#include <jive/util/Constraints.h>
 #include <jive/util/FuncUtils.h>
 
 #define WARN(key) jem::System::warn() << key << "\n";
@@ -175,4 +176,19 @@ Matrix skew(const Vector &vec);
 /// @param[in] mat  Skew-symmetric matrix
 /// @returns axial vector
 Vector unskew(const Matrix &mat);
+
+/// @brief prescribe the value of a dof, i.e. constrain idof = rval.
+///
+/// @param[in,out] cons  constraints to modify
+/// @param[in] idof  dof index to prescribe
+/// @param[in] rval  prescribed value
+void setDofValue(jive::util::Constraints &cons, const idx_t idof, const double rval);
+
+/// @brief link a slave dof to a master dof, i.e. constrain idof = coeff * jdof.
+///
+/// @param[in,out] cons  constraints to modify
+/// @param[in] idof  slave dof index
+/// @param[in] jdof  master dof index
+/// @param[in] coeff  coefficient of the master dof
+void linkDofs(jive::util::Constraints &cons, const idx_t idof, const idx_t jdof, const double coeff);
 }; // namespace jive_helpers
