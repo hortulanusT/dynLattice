@@ -1083,8 +1083,6 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
     updNodeDofs_();
 
   // REPORT(JEM_FUNC)
-  MatmulChain<double, 3> mc3;
-
   const idx_t dofCount = dofs_->typeCount();
   const idx_t nodeCount = shapeM_->nodeCount();
   const idx_t elemCount = rodElems_.size();
@@ -1103,8 +1101,9 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   Matrix nodeU(rank, nodeCount);
   Cubix nodeLambda(rank, rank, nodeCount);
 
-  Cubix ipLambda(rank, rank, ipCount);
   Cubix ipMass(rank, rank, ipCount);
+  Matrix massLambdaT(rank, rank); // intermediate product J·Λᵀ
+  Matrix nodeRotMass(rank, rank);
 
   Matrix spatialInertia(dofCount, dofCount);
 
@@ -1113,15 +1112,29 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   {
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
     getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
-    shapeM_->getRotations(ipLambda, nodeLambda);
 
     shapeM_->getIntegrationWeights(weights, nodePhi_0);
     shapes = shapeM_->getShapeFunctions();
 
     l = sum(weights) / (nodeCount - 1);
 
+    // translational mass per unit length: ρA·I is invariant under rotation
     for (idx_t ip = 0; ip < ipCount; ip++)
-      ipMass[ip] = mc3.matmul(ipLambda[ip], material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART), ipLambda[ip].transpose());
+    {
+      ipMass[ip] = material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART);
+
+#ifndef NDEBUG
+      const double scalarMass = ipMass[ip](0, 0);
+      for (idx_t i = 0; i < rank; i++)
+        for (idx_t j = 0; j < rank; j++)
+          JEM_ASSERT2(jem::numeric::abs(ipMass[ip](i, j) - (i == j ? scalarMass : 0.)) <=
+                          1e-14 * jem::numeric::abs(scalarMass),
+                      "translational material mass must be a scalar times the identity");
+#endif
+    }
+
+    // the lumped rotational inertia only depends on the element
+    const Matrix lumpedRotMass = material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART);
 
     for (idx_t inode = 0; inode < nodeCount; inode++)
     {
@@ -1135,8 +1148,12 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
         for (idx_t ip = 0; ip < ipCount; ip++)
           spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) * ipMass[ip];
         if (inode == jnode)
-          spatialInertia(ROT_PART, ROT_PART) += mc3.matmul(nodeLambda[inode], material_->getLumpedMass(l, ie)(ROT_PART, ROT_PART),
-                                                           nodeLambda[inode].transpose());
+        {
+          // node rotational inertia Λ_N·J·Λ_Nᵀ, formed as Λ_N·(J·Λ_Nᵀ)
+          mul3(massLambdaT, lumpedRotMass, nodeLambda[inode].transpose());
+          mul3(nodeRotMass, nodeLambda[inode], massLambdaT);
+          spatialInertia(ROT_PART, ROT_PART) += nodeRotMass;
+        }
         if ((inode == jnode) && (inode == 0 || inode == nodeCount - 1))
           spatialInertia(ROT_PART, ROT_PART) /= 2.;
 
