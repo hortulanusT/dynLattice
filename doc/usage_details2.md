@@ -65,6 +65,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.lattice.child.material.poisson_ratio=0.265;` | steel Poisson's ratio |
 | `model.model.lattice.child.material.density=8000.;` | steel density, \f$8000\f$ kg/m³ |
 | `model.model.lattice.child.material.yieldCond = "...";` | define the (multi-axial) yield surface, fitted so its yield strength matches a macroscopic 280 MPa yield strength scaled from a microscopic J2 value of 450 MPa and the rod's cross-section |
+| `model.model.lattice.child.material.yieldType = "SuperEllipse";` | optional: evaluate the yield surface \f$\sum_i \lvert s_i/(c_i-h_i)\rvert^{p_i}-(1+h_0)\f$ natively instead of the interpreted `yieldCond` (same function, faster); the strengths \f$c_i\f$ and exponents \f$p_i\f$ (one per DOF, written as floats) are given by `yieldStrength` and `yieldExponent`, \f$h_i\f$ and \f$h_0\f$ are the kinematic and isotropic hardening stresses |
 | `model.model.lattice.child.material.kinematicTensor = [...];` | define the 6×6 kinematic-hardening modulus tensor, scaled from a reference hardening modulus of 20 GPa down to the 1.75 GPa hardening modulus fitted to the Johnson-Cook material model used experimentally |
 | `model.model.lattice.child.material.edge_factor = 1.25;` | increase the rod's effective bending stiffness by 25% to account for the stiffening effect of the physical joints connecting the rods |
 | **Self-Contact** | |
