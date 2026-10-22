@@ -123,6 +123,13 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   currHardParams_.resize(argCount_ - dofCount_, ipCount, elemCount);
   currHardParams_ = 0.;
 
+  plastStrain_.resize(dofCount_);
+  hardParams_.resize(argCount_ - dofCount_);
+  hardStress_.resize(argCount_ - dofCount_);
+  elasticStrain_.resize(dofCount_);
+  yieldArgs_.resize(argCount_);
+  yieldGrad_.resize(argCount_);
+
   oldPlastStrains_.resize(dofCount_, ipCount, elemCount);
   oldPlastStrains_ = 0.;
   currPlastStrains_.resize(dofCount_, ipCount, elemCount);
@@ -337,20 +344,26 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   // REPORT("Step 1")
   idx_t liter = 0;
-  Vector plastStrain = oldPlastStrains_(ALL, ip, ielem).clone();
-  Vector hardParams = oldHardParams_(ALL, ip, ielem).clone();
+  // The local names are second handles on the work arrays (no new arrays are
+  // created); the assignment then copies the old state of this integration
+  // point into them. The iteration below changes them in place.
+  Vector plastStrain = plastStrain_;
+  Vector hardParams = hardParams_;
+  plastStrain = oldPlastStrains_(ALL, ip, ielem);
+  hardParams = oldHardParams_(ALL, ip, ielem);
   double deltaFlow = 0.;
 
-  Vector hardStress(argCount_ - dofCount_);
-  Vector args(argCount_);
+  Vector hardStress = hardStress_;
+  Vector args = yieldArgs_;
   double yieldValue = 0.;
-  Vector yieldGrad(argCount_);
+  Vector yieldGrad = yieldGrad_;
   double deltaDeltaFlow = 0.;
 
   while (true)
   {
     // SUBHEADER2("Step 2", liter)
-    Super::getStress(stress, Vector(strain - plastStrain), ielem, ip, false);
+    elasticStrain_ = strain - plastStrain;
+    Super::getStress(stress, elasticStrain_, ielem, ip, false);
     getHardVals(hardStress, hardParams);
 
     if (!inelastic || ((jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))

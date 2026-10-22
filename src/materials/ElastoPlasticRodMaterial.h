@@ -157,6 +157,19 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   Cubix oldPlastStrains_;  ///< Plastic strains from last converged step
   Cubix currPlastStrains_; ///< Current plastic strains
 
+  /// @name Work arrays of getStress
+  /// Created once in configure and overwritten in every call, so that getStress
+  /// does not have to create new arrays for every integration point
+  /// (see the note in utils/helpers.h). Not thread safe.
+  /// @{
+  Vector plastStrain_;   ///< Plastic strain iterate
+  Vector hardParams_;    ///< Hardening parameter iterate
+  Vector hardStress_;    ///< Hardening stresses
+  Vector elasticStrain_; ///< Elastic strain
+  Vector yieldArgs_;     ///< Arguments of the yield condition
+  Vector yieldGrad_;     ///< Gradient of the yield condition
+  /// @}
+
   Matrix currDeltaFlow_; ///< Current plastic flow increment
   Matrix energyDiss_;    ///< Dissipated energy storage
   Matrix energyHardPot_; ///< Hardening potential energy storage

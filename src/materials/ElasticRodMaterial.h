@@ -6,6 +6,7 @@
 
 #pragma once
 #include "materials/Material.h"
+#include <jem/numeric/algebra/MatmulChain.h>
 
 // Forward declarations
 class MaterialFactory;
@@ -142,6 +143,10 @@ class ElasticRodMaterial : public Material
   Cubix oldStrains_;  ///< Strains from last converged step
   Cubix currStrains_; ///< Strains from current iteration
   Matrix energyPot_;  ///< Potential energy storage
+
+  /// Matrix-vector products without creating new arrays; the result is valid
+  /// until the next call (see the note in utils/helpers.h)
+  jem::numeric::MatmulChain<double, 1> matvec_;
 
   String rodName_; ///< Material instance name
   /// @}

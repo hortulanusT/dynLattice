@@ -417,13 +417,13 @@ Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &) co
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
 {
-  stress = matmul(getMaterialStiff(), strain);
+  stress = matvec_.matmul(getMaterialStiff(), strain);
 }
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool)
 {
   currStrains_(ALL, ip, ielem) = strain;
-  stress = matmul(getMaterialStiff(ielem, ip), strain);
+  stress = matvec_.matmul(getMaterialStiff(ielem, ip), strain);
 }
 
 void ElasticRodMaterial::getTable(XTable &, const Vector &, const String &name, const IdxVector &) const
@@ -441,7 +441,7 @@ void ElasticRodMaterial::applyDeform()
   {
     for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      energyPot_(ip, ielem) = 0.5 * dotProduct(currStrains_(ALL, ip, ielem), matmul(getMaterialStiff(ielem, ip), currStrains_(ALL, ip, ielem)));
+      energyPot_(ip, ielem) = 0.5 * dotProduct(currStrains_(ALL, ip, ielem), matvec_.matmul(getMaterialStiff(ielem, ip), currStrains_(ALL, ip, ielem)));
     }
   }
 
