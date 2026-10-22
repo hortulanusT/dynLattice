@@ -168,9 +168,18 @@ double matrixNorm2(const Matrix &mat);
 
 /// @brief construct a skew symetric matrix from a given vector.
 ///
+/// Convenient form for set-up code; it creates a new matrix. In hot code use
+/// the form below with a work matrix.
 /// @param[in] vec  Vector to be changed to a skew-symmetric matrix
 /// @returns skew symmetric matrix
 Matrix skew(const Vector &vec);
+
+/// @brief fill an existing 3 x 3 matrix with the skew symmetric matrix of a vector
+///
+/// Does not create a new matrix, so it is the form for hot code.
+/// @param[out] S  3 x 3 skew symmetric matrix
+/// @param[in] vec  Vector
+void skew(const Matrix &S, const Vector &vec);
 
 /// @brief construct a axial vector from a given skew-symmetric
 /// matrix

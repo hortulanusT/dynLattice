@@ -300,17 +300,22 @@ double matrixNorm2(const Matrix &mat)
 Matrix skew(const Vector &vec)
 {
   Matrix res(3, 3);
-  res = 0.;
-
-  res(0, 1) = -1 * vec[2];
-  res(0, 2) = 1 * vec[1];
-  res(1, 2) = -1 * vec[0];
-  res(1, 0) = 1 * vec[2];
-  res(2, 0) = -1 * vec[1];
-  res(2, 1) = 1 * vec[0];
+  skew(res, vec);
 
   return res;
 };
+
+void skew(const Matrix &S, const Vector &vec)
+{
+  S = 0.;
+
+  S(0, 1) = -1 * vec[2];
+  S(0, 2) = 1 * vec[1];
+  S(1, 2) = -1 * vec[0];
+  S(1, 0) = 1 * vec[2];
+  S(2, 0) = -1 * vec[1];
+  S(2, 1) = 1 * vec[0];
+}
 
 Vector unskew(const Matrix &mat)
 {
