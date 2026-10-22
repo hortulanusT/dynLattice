@@ -110,6 +110,32 @@ void vec2mat(const Matrix &mat, const Vector &vec);
 /// @param[in] mat  Matrix whose entry count matches the vector size
 void mat2vec(const Vector &vec, const Matrix &mat);
 
+// -----------------------------------------------------------------------
+// Temporary arrays: why and how we avoid them
+//
+// A JEM array (Vector, Matrix, Cubix) is a small handle that points to a
+// block of numbers. Copying a handle ("Vector a = b;") is cheap and does NOT
+// copy the numbers: a and b then show the same numbers. Creating a new array,
+// or writing "x = matmul(A, v)", asks the memory manager for a fresh block of
+// numbers and gives it back afterwards. For the 3 to 6 numbers of a rod
+// element this bookkeeping costs more than the arithmetic itself, and in the
+// force assembly it happens millions of times per run. Therefore the code that
+// is executed for every element and every time step ("hot code") follows
+// three rules; everywhere else (set-up, output, rarely used code) the short
+// forms matmul(A, v) and skew(v) stay, because they are easier to read.
+//
+//  1. Work arrays: arrays that live as (mutable) members of the class, are
+//     created once in the constructor/configure and overwritten in every
+//     call. A work array is always written completely before it is read
+//     within the same call, and it is never used to carry values from one
+//     call to the next. A class with work arrays must not be used by several
+//     threads at once.
+//  2. 3 x 3 products: mul3(C, A, B). C may be one of the factors.
+//  3. All other matrix products: a MatmulChain member (jem::numeric), which
+//     keeps its result array and reuses it. The result is only valid until
+//     the next call of the same chain, so use it directly or copy it first.
+// -----------------------------------------------------------------------
+
 /// @brief C = A * B for 3 x 3 matrices without heap allocation.
 ///
 /// The product is formed on the stack first, so C may alias A or B (unlike

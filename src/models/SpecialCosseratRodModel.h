@@ -247,8 +247,26 @@ class SpecialCosseratRodModel : public Model
   /// @brief Initialize rotation of elements
   void initRotation_();
 
+  /// @brief Cache the reference shape gradients and integration weights of the elements
+  /// @details They only depend on the undeformed node positions, so they are
+  /// computed once here and not again in every force evaluation. Also creates
+  /// the work arrays (see the note in utils/helpers.h).
+  void initShape_();
+
   /// @brief Initialize initial strain of elements
   void initStrain_();
+
+  /// @brief Tangent of the deformed line at the integration points
+  /// @details The derivative of the current position (undeformed position plus
+  /// displacement) with respect to the line coordinate, using the cached gradients.
+  /// @param[out] phiP  3 x ipointCount
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
+  /// @param[in] ie  Element index in the rod element group
+  void getTangents_(const Matrix &phiP,
+                    const Matrix &nodePhi_0,
+                    const Matrix &nodeU,
+                    const idx_t ie) const;
 
   /// @brief Get the geometric stiffness matrix
   /// @param[out] B  B-matrices at integration points
@@ -386,4 +404,21 @@ class SpecialCosseratRodModel : public Model
 
   Cubix LambdaN_;    ///< Reference rotations per node
   Cubix matStrain0_; ///< Initial strain configuration
+
+  // The reference geometry does not change during a run (as for matStrain0_)
+  Cubix elemGrads_;    ///< Reference shape gradients, shapeFuncCount x ipCount x rod elements
+  Matrix elemWeights_; ///< Reference integration weights, ipCount x rod elements
+
+  // Work arrays of getStrains_, getStresses_ and the assembly: created once in
+  // initShape_ and overwritten in every call (see the note in utils/helpers.h).
+  // Not thread safe. ipPhiP_ is filled by getTangents_ and consumed at once.
+  mutable Matrix curPhi_;     ///< Current node locations, 3 x nodeCount
+  mutable Matrix ipPhiP_;     ///< Tangents at the integration points, 3 x ipCount
+  mutable Cubix ipLambda_;    ///< Rotations at the integration points
+  mutable Cubix ipLambdaP_;   ///< Their gradients
+  mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
+  mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
+  mutable Cubix piWork_;      ///< Spatial transformations, dofCount x dofCount x ipCount
+  mutable MatmulChain<double, 1> matvec_; ///< Matrix-vector products without allocations
+  mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

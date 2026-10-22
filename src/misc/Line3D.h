@@ -7,6 +7,7 @@
 #pragma once
 
 #include "utils/helpers.h"
+#include <jem/numeric/algebra/MatmulChain.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
 #include <jive/geom/ParametricLine.h>
@@ -16,6 +17,7 @@
 using jem::idx_t;
 using jem::String;
 using jem::util::Properties;
+using jem::numeric::MatmulChain;
 using jive::Cubix;
 using jive::Matrix;
 using jive::Vector;
@@ -137,6 +139,14 @@ class Line3D : public Shape
              const Matrix &u,
              const Matrix &c) const;
 
+  /// @brief Xi from precomputed shape gradients and tangent (allocation free)
+  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] phiP  Tangent of the deformed line at the integration points, 3 x ipointCount
+  void getXi(const Quadix &Xi,
+             const Matrix &grads,
+             const Matrix &phiP) const;
+
   /// @brief Get the Psi at the integration points
   /// @param[out] Psi 6 x 9 Psi(.,.,j,i), where j are the nodes and i are the integration points
   /// @param[out] w weights of the integration points
@@ -183,6 +193,14 @@ class Line3D : public Shape
                                  const Matrix &c,
                                  const Cubix &nodeLambda) const;
 
+  /// @brief As above, with precomputed shape gradients (allocation free)
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  void getPiAndRotationGradients(const Cubix &Pi,
+                                 const Cubix &Ri,
+                                 const Cubix &LambdaP,
+                                 const Matrix &grads,
+                                 const Cubix &nodeLambda) const;
+
   //------------------------------------------------
   // local location functions
   //------------------------------------------------
@@ -226,8 +244,7 @@ class Line3D : public Shape
   /// @param[in] node_psi Nodal rotation vectors
   /// @param[in] Lambda_r Reference rotation matrix
   void getRotationGradients_(const Cubix &LambdaP,
-                             const Vector &w,
-                             const Matrix &c,
+                             const Matrix &grads,
                              const Matrix &node_psi,
                              const Matrix &Lambda_r) const;
 
@@ -247,6 +264,18 @@ class Line3D : public Shape
 
  protected:
   jem::Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
+
+  // Work arrays and matrix product of the functions that run for every element
+  // (see the note in utils/helpers.h): created once in the constructor and
+  // overwritten in every call. The object is not thread safe.
+  // The result of matmul_ is only valid until its next call.
+  mutable Matrix nodePsi_; ///< relative rotation vectors of the nodes, 3 x nodeCount
+  mutable Matrix lambdaR_; ///< reference rotation, 3 x 3
+  mutable Matrix ipPsi_;   ///< rotation vectors at the integration points, 3 x ipointCount
+  mutable MatmulChain<double, 2> matmul_; ///< matrix products without allocations
+  mutable Matrix relRot_;  ///< relative rotation, 3 x 3
+  mutable Matrix skewP_;   ///< skew symmetric matrix of the tangent, 3 x 3
+  mutable Vector phiIJ_;   ///< relative rotation vector between the reference nodes
 
   /// @name Memo of the last getShapeGradients() call
   /// @details The gradients only depend on the node coordinates, and the same
