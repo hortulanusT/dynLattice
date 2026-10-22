@@ -112,7 +112,9 @@ void mat2vec(const Vector &vec, const Matrix &mat);
 
 /// @brief C = A * B for 3 x 3 matrices without heap allocation.
 ///
-/// The product is formed on the stack first, so C may alias A or B.
+/// The product is formed on the stack first, so C may alias A or B (unlike
+/// jem::numeric::matmul(C, A, B)); the 3 x 3 sizes are fixed, which makes it
+/// faster than the general matmul. Use it for every 3 x 3 product in hot code.
 /// @param[out] C  3 x 3 result
 /// @param[in] A  3 x 3 left factor
 /// @param[in] B  3 x 3 right factor

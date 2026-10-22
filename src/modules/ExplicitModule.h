@@ -81,6 +81,7 @@ using jive::util::XTable;
 
 using jive_helpers::expVec;
 using jive_helpers::logMat;
+using jive_helpers::mul3;
 
 //-----------------------------------------------------------------------
 //   class ExplicitModule

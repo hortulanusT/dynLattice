@@ -162,7 +162,9 @@ void mat2vec(const Vector &vec, const Matrix &mat)
 void mul3(const Matrix &C, const Matrix &A, const Matrix &B)
 {
   Mat3 T;
-  jem::numeric::matmul(T, A, B);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      T(i, j) = A(i, 0) * B(0, j) + A(i, 1) * B(1, j) + A(i, 2) * B(2, j);
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
       C(i, j) = T(i, j);
