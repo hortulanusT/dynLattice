@@ -16,8 +16,8 @@
 
 using jem::idx_t;
 using jem::String;
-using jem::util::Properties;
 using jem::numeric::MatmulChain;
+using jem::util::Properties;
 using jive::Cubix;
 using jive::Matrix;
 using jive::Vector;
@@ -183,18 +183,8 @@ class Line3D : public Shape
   /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
   /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point
   /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
-  /// @param[out] w integration weights
-  /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
+  /// @param[in] grads shape gradients, shapeFuncCount x ipointCount (see getShapeGradients)
   /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getPiAndRotationGradients(const Cubix &Pi,
-                                 const Cubix &Ri,
-                                 const Cubix &LambdaP,
-                                 const Vector &w,
-                                 const Matrix &c,
-                                 const Cubix &nodeLambda) const;
-
-  /// @brief As above, with precomputed shape gradients (allocation free)
-  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
   void getPiAndRotationGradients(const Cubix &Pi,
                                  const Cubix &Ri,
                                  const Cubix &LambdaP,
@@ -239,8 +229,7 @@ class Line3D : public Shape
 
   /// @brief Get the rotation gradients at the integration points from the node rotation vectors
   /// @param[out] LambdaP Rotation gradients at the integration points
-  /// @param[out] w Integration weights
-  /// @param[in] c Coordinates of the nodes
+  /// @param[in] grads Shape gradients, shapeFuncCount x ipointCount
   /// @param[in] node_psi Nodal rotation vectors
   /// @param[in] Lambda_r Reference rotation matrix
   void getRotationGradients_(const Cubix &LambdaP,
@@ -269,13 +258,13 @@ class Line3D : public Shape
   // (see the note in utils/helpers.h): created once in the constructor and
   // overwritten in every call. The object is not thread safe.
   // The result of matmul_ is only valid until its next call.
-  mutable Matrix nodePsi_; ///< relative rotation vectors of the nodes, 3 x nodeCount
-  mutable Matrix lambdaR_; ///< reference rotation, 3 x 3
-  mutable Matrix ipPsi_;   ///< rotation vectors at the integration points, 3 x ipointCount
+  mutable Matrix nodePsi_;                ///< relative rotation vectors of the nodes, 3 x nodeCount
+  mutable Matrix lambdaR_;                ///< reference rotation, 3 x 3
+  mutable Matrix ipPsi_;                  ///< rotation vectors at the integration points, 3 x ipointCount
   mutable MatmulChain<double, 2> matmul_; ///< matrix products without allocations
-  mutable Matrix relRot_;  ///< relative rotation, 3 x 3
-  mutable Matrix skewP_;   ///< skew symmetric matrix of the tangent, 3 x 3
-  mutable Vector phiIJ_;   ///< relative rotation vector between the reference nodes
+  mutable Matrix relRot_;                 ///< relative rotation, 3 x 3
+  mutable Matrix skewP_;                  ///< skew symmetric matrix of the tangent, 3 x 3
+  mutable Vector phiIJ_;                  ///< relative rotation vector between the reference nodes
 
   /// @name Memo of the last getShapeGradients() call
   /// @details The gradients only depend on the node coordinates, and the same

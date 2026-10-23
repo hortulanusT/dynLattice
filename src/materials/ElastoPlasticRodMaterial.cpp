@@ -344,27 +344,20 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   // REPORT("Step 1")
   idx_t liter = 0;
-  // The local names are second handles on the work arrays (no new arrays are
-  // created); the assignment then copies the old state of this integration
-  // point into them. The iteration below changes them in place.
-  Vector plastStrain = plastStrain_;
-  Vector hardParams = hardParams_;
-  plastStrain = oldPlastStrains_(ALL, ip, ielem);
-  hardParams = oldHardParams_(ALL, ip, ielem);
+  // start from the old state of this integration point (copied into the work arrays)
+  plastStrain_ = oldPlastStrains_(ALL, ip, ielem);
+  hardParams_ = oldHardParams_(ALL, ip, ielem);
   double deltaFlow = 0.;
 
-  Vector hardStress = hardStress_;
-  Vector args = yieldArgs_;
   double yieldValue = 0.;
-  Vector yieldGrad = yieldGrad_;
   double deltaDeltaFlow = 0.;
 
   while (true)
   {
     // SUBHEADER2("Step 2", liter)
-    elasticStrain_ = strain - plastStrain;
+    elasticStrain_ = strain - plastStrain_;
     Super::getStress(stress, elasticStrain_, ielem, ip, false);
-    getHardVals(hardStress, hardParams);
+    getHardVals(hardStress_, hardParams_);
 
     if (!inelastic || ((jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
     {
@@ -373,10 +366,10 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
       break;
     }
 
-    args[jem::SliceTo(dofCount_)] = stress;
-    args[jem::SliceFromTo(dofCount_, argCount_)] = hardStress;
+    yieldArgs_[jem::SliceTo(dofCount_)] = stress;
+    yieldArgs_[jem::SliceFromTo(dofCount_, argCount_)] = hardStress_;
 
-    yieldValue = getYield_(args);
+    yieldValue = getYield_(yieldArgs_);
 
     if (verbosity_ > 2)
       jem::System::debug(myName_) << "        iter = " << liter << ", f = " << yieldValue << "\n";
@@ -389,21 +382,21 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     }
     // SUBHEADER2("Step 3", liter)
 
-    getYieldGrad_(yieldGrad, args);
+    getYieldGrad_(yieldGrad_, yieldArgs_);
 
-    deltaDeltaFlow = yieldValue / (dotProduct(yieldGrad[jem::SliceTo(dofCount_)], matmul(materialK_, yieldGrad[jem::SliceTo(dofCount_)])) + dotProduct(yieldGrad[jem::SliceFromTo(dofCount_, argCount_)], matmul(materialH_, yieldGrad[jem::SliceFromTo(dofCount_, argCount_)])));
+    deltaDeltaFlow = yieldValue / (dotProduct(yieldGrad_[jem::SliceTo(dofCount_)], matmul(materialK_, yieldGrad_[jem::SliceTo(dofCount_)])) + dotProduct(yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)], matmul(materialH_, yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)])));
 
     // SUBHEADER2("Step 4", liter)
-    plastStrain += deltaDeltaFlow * yieldGrad[jem::SliceTo(dofCount_)];
-    hardParams += deltaDeltaFlow * yieldGrad[jem::SliceFromTo(dofCount_, argCount_)];
+    plastStrain_ += deltaDeltaFlow * yieldGrad_[jem::SliceTo(dofCount_)];
+    hardParams_ += deltaDeltaFlow * yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)];
     deltaFlow += deltaDeltaFlow;
 
     liter++;
   }
 
   currStrains_(ALL, ip, ielem) = strain;
-  currPlastStrains_(ALL, ip, ielem) = plastStrain;
-  currHardParams_(ALL, ip, ielem) = hardParams;
+  currPlastStrains_(ALL, ip, ielem) = plastStrain_;
+  currHardParams_(ALL, ip, ielem) = hardParams_;
   currDeltaFlow_(ip, ielem) = deltaFlow;
 }
 

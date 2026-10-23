@@ -272,19 +272,6 @@ void Line3D::getRotationGradients(const Cubix &LambdaP,
 void Line3D::getPiAndRotationGradients(const Cubix &Pi,
                                        const Cubix &Ri,
                                        const Cubix &LambdaP,
-                                       const Vector &w,
-                                       const Matrix &c,
-                                       const Cubix &nodeLambda) const
-{
-  Matrix grads(shapeFuncCount(), ipointCount());
-  getShapeGradients(grads, w, c);
-
-  getPiAndRotationGradients(Pi, Ri, LambdaP, grads, nodeLambda);
-}
-
-void Line3D::getPiAndRotationGradients(const Cubix &Pi,
-                                       const Cubix &Ri,
-                                       const Cubix &LambdaP,
                                        const Matrix &grads,
                                        const Cubix &nodeLambda) const
 {
@@ -315,7 +302,8 @@ void Line3D::getRotationGradients_(const Cubix &LambdaP,
 {
   const Matrix shapes = getShapeFunctions();
 
-  // both products share the work space of matmul_, so the first one is kept
+  // matmul_ returns its own work array, which the next call overwrites,
+  // so the first product is copied into ipPsi_
   ipPsi_ = matmul_.matmul(node_psi, shapes);
   const Matrix psiP = matmul_.matmul(node_psi, grads);
 
