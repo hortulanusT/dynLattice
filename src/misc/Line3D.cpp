@@ -269,11 +269,10 @@ void Line3D::getRotationGradients(const Cubix &LambdaP,
   getRotationGradients_(LambdaP, grads, node_psi, Lambda_r);
 }
 
-void Line3D::getPiAndRotationGradients(const Cubix &Pi,
-                                       const Cubix &Ri,
-                                       const Cubix &LambdaP,
-                                       const Matrix &grads,
-                                       const Cubix &nodeLambda) const
+void Line3D::getRotationsAndGradients(const Cubix &Ri,
+                                      const Cubix &LambdaP,
+                                      const Matrix &grads,
+                                      const Cubix &nodeLambda) const
 {
   JEM_ASSERT2(LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size");
 
@@ -281,13 +280,6 @@ void Line3D::getPiAndRotationGradients(const Cubix &Pi,
   getNodeRotVecs_(nodePsi_, lambdaR_, nodeLambda);
 
   getRotations_(Ri, nodePsi_, lambdaR_);
-
-  Pi = 0.;
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
-  }
 
   getRotationGradients_(LambdaP, grads, nodePsi_, lambdaR_);
 }

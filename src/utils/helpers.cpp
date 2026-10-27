@@ -170,6 +170,18 @@ void mul3(const Matrix &C, const Matrix &A, const Matrix &B)
       C(i, j) = T(i, j);
 }
 
+void mul3(const Vector &y, const Matrix &A, const Vector &x)
+{
+  const Vec3 t = {x[0], x[1], x[2]};
+  for (int i = 0; i < 3; i++)
+  {
+    double s = 0.;
+    for (int j = 0; j < 3; j++)
+      s += A(i, j) * t[j];
+    y[i] = s;
+  }
+}
+
 void expVec(const Matrix &Exp, const Vector &psi)
 {
   const double theta = norm2(psi);

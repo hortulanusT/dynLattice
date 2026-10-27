@@ -294,24 +294,6 @@ class SpecialCosseratRodModel : public Model
                    const idx_t ie,
                    const bool spatial = true) const;
 
-  /// @brief Get the strains in the integration points of an element and return the Pi matrices
-  /// @param[out] strains  Strain components at integration points, strain component by integration point
-  /// @param[out] w  Integration point weights
-  /// @param[out] ipPI  Pi matrices at the integration points, one matrix per integration point
-  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
-  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
-  /// @param[in] nodeLambda  Rotational orientation of nodes, 3 x 3 x nodeCount
-  /// @param[in] ie  Element index
-  /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
-  void getStrains_(const Matrix &strains,
-                   const Vector &w,
-                   const Cubix &ipPI,
-                   const Matrix &nodePhi_0,
-                   const Matrix &nodeU,
-                   const Cubix &nodeLambda,
-                   const idx_t ie,
-                   const bool spatial = true) const;
-
   /// @brief Get the stresses in the integration points of an element
   /// @param[out] stresses  Stress components at integration points, stress component by integration point
   /// @param[out] w  Integration point weights
@@ -414,11 +396,10 @@ class SpecialCosseratRodModel : public Model
   // Not thread safe. ipPhiP_ is filled by getTangents_ and consumed at once.
   mutable Matrix curPhi_;     ///< Current node locations, 3 x nodeCount
   mutable Matrix ipPhiP_;     ///< Tangents at the integration points, 3 x ipCount
-  mutable Cubix ipLambda_;    ///< Rotations at the integration points
+  mutable Cubix ipLambda_;    ///< Rotations at the integration points (Pi = diag(ipLambda_, ipLambda_))
   mutable Cubix ipLambdaP_;   ///< Their gradients
   mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
   mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
-  mutable Cubix piWork_;      ///< Spatial transformations, dofCount x dofCount x ipCount
   mutable MatmulChain<double, 1> matvec_; ///< Matrix-vector products without allocations
   mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

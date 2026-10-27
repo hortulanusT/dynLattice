@@ -598,7 +598,6 @@ void SpecialCosseratRodModel::initShape_()
   ipLambdaP_.resize(rank, rank, ipCount);
   lambdaTP_.resize(rank, rank);
   strainWork_.resize(dofCount, ipCount);
-  piWork_.resize(dofCount, dofCount, ipCount);
 }
 
 //-----------------------------------------------------------------------
@@ -762,16 +761,6 @@ void SpecialCosseratRodModel::getGeomtericStiffness_(const Cubix &B,
   }
 }
 
-void SpecialCosseratRodModel::getStrains_(
-    const Matrix &strains, const Vector &w, const Matrix &nodePhi_0,
-    const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
-    const bool spatial) const
-{
-  const Cubix ipPI(dofs_->typeCount(), dofs_->typeCount(), shapeK_->ipointCount());
-
-  getStrains_(strains, w, ipPI, nodePhi_0, nodeU, nodeLambda, ie, spatial);
-}
-
 void SpecialCosseratRodModel::getTangents_(const Matrix &phiP,
                                            const Matrix &nodePhi_0,
                                            const Matrix &nodeU,
@@ -782,7 +771,7 @@ void SpecialCosseratRodModel::getTangents_(const Matrix &phiP,
 }
 
 void SpecialCosseratRodModel::getStrains_(
-    const Matrix &strains, const Vector &w, const Cubix &ipPI, const Matrix &nodePhi_0,
+    const Matrix &strains, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
     const bool spatial) const
 {
@@ -793,22 +782,25 @@ void SpecialCosseratRodModel::getStrains_(
   w = elemWeights_[ie];
 
   getTangents_(ipPhiP_, nodePhi_0, nodeU, ie);
-  shapeK_->getPiAndRotationGradients(ipPI, ipLambda_, ipLambdaP_, grads, nodeLambda);
+  shapeK_->getRotationsAndGradients(ipLambda_, ipLambdaP_, grads, nodeLambda);
 
   // get the strains (material + spatial );
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
-    strains[ip][TRANS_PART] =
-        matvec_.matmul(ipLambda_[ip].transpose(), ipPhiP_[ip]);
+    mul3(strains[ip][TRANS_PART], ipLambda_[ip].transpose(), ipPhiP_[ip]);
     mul3(lambdaTP_, ipLambda_[ip].transpose(), ipLambdaP_[ip]);
     strains[ip][ROT_PART] = unskew(lambdaTP_);
   }
 
   strains -= matStrain0_[ie];
 
+  // spatial = Pi * material with the block-diagonal Pi = diag(Lambda, Lambda)
   if (spatial)
     for (idx_t ip = 0; ip < ipCount; ip++)
-      strains[ip] = matvec_.matmul(ipPI[ip], strains[ip]);
+    {
+      mul3(strains[ip][TRANS_PART], ipLambda_[ip], strains[ip][TRANS_PART]);
+      mul3(strains[ip][ROT_PART], ipLambda_[ip], strains[ip][ROT_PART]);
+    }
 }
 
 void SpecialCosseratRodModel::getStresses_(
@@ -819,16 +811,20 @@ void SpecialCosseratRodModel::getStresses_(
   const idx_t ipCount = shapeK_->ipointCount();
 
   // get the (material) strains
-  getStrains_(strainWork_, w, piWork_, nodePhi_0, nodeU, nodeLambda, ie, false);
+  getStrains_(strainWork_, w, nodePhi_0, nodeU, nodeLambda, ie, false);
 
   for (idx_t ip = 0; ip < ipCount; ip++)
     material_->getStress(stresses[ip], strainWork_[ip], ie, ip, loadCase != "output");
 
-  // get the (spatial) stresses (PI was already computed with the strains)
+  // get the (spatial) stresses with Pi = diag(Lambda, Lambda); the rotations
+  // ipLambda_ were computed with the strains
   if (spatial)
   {
     for (idx_t ip = 0; ip < ipCount; ip++)
-      stresses[ip] = matvec_.matmul(piWork_[ip], stresses[ip]);
+    {
+      mul3(stresses[ip][TRANS_PART], ipLambda_[ip], stresses[ip][TRANS_PART]);
+      mul3(stresses[ip][ROT_PART], ipLambda_[ip], stresses[ip][ROT_PART]);
+    }
   }
 }
 

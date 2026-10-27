@@ -130,7 +130,8 @@ void mat2vec(const Vector &vec, const Matrix &mat);
 //     within the same call, and it is never used to carry values from one
 //     call to the next. A class with work arrays must not be used by several
 //     threads at once.
-//  2. 3 x 3 products: mul3(C, A, B). C may be one of the factors.
+//  2. 3 x 3 products: mul3(C, A, B) and mul3(y, A, x). The result may be one
+//     of the factors.
 //  3. All other matrix products: a MatmulChain member (jem::numeric), which
 //     keeps its result array and reuses it. The result is only valid until
 //     the next call of the same chain, so use it directly or copy it first.
@@ -145,6 +146,15 @@ void mat2vec(const Vector &vec, const Matrix &mat);
 /// @param[in] A  3 x 3 left factor
 /// @param[in] B  3 x 3 right factor
 void mul3(const Matrix &C, const Matrix &A, const Matrix &B);
+
+/// @brief y = A * x for a 3 x 3 matrix without heap allocation.
+///
+/// x is copied first, so y may alias x. The sums are formed in the same order
+/// as in jem::numeric::matmul (starting from zero), so the results are the same.
+/// @param[out] y  3 vector result
+/// @param[in] A  3 x 3 matrix (may be a transposed view)
+/// @param[in] x  3 vector
+void mul3(const Vector &y, const Matrix &A, const Vector &x);
 
 /// @brief compute the exponential of a axial vector.
 ///

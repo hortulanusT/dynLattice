@@ -179,17 +179,15 @@ class Line3D : public Shape
                             const Matrix &c,
                             const Cubix &nodeLambda) const;
 
-  /// @brief Get the Pi, the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors
-  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
-  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point
+  /// @brief Get the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors
+  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point (Pi = diag(Ri, Ri), see getPi)
   /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
   /// @param[in] grads shape gradients, shapeFuncCount x ipointCount (see getShapeGradients)
   /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getPiAndRotationGradients(const Cubix &Pi,
-                                 const Cubix &Ri,
-                                 const Cubix &LambdaP,
-                                 const Matrix &grads,
-                                 const Cubix &nodeLambda) const;
+  void getRotationsAndGradients(const Cubix &Ri,
+                                const Cubix &LambdaP,
+                                const Matrix &grads,
+                                const Cubix &nodeLambda) const;
 
   //------------------------------------------------
   // local location functions
