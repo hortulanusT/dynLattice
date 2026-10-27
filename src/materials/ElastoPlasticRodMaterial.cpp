@@ -135,6 +135,9 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   currPlastStrains_.resize(dofCount_, ipCount, elemCount);
   currPlastStrains_ = 0.;
 
+  oldStresses_.resize(dofCount_, ipCount, elemCount);
+  oldStresses_ = 0.;
+
   currDeltaFlow_.resize(ipCount, elemCount);
   currDeltaFlow_ = 0.;
 
@@ -402,9 +405,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
 void ElastoPlasticRodMaterial::applyDeform()
 {
-  Vector oldElastStrain(currStrains_.size(0));
   Vector currElastStrain(currStrains_.size(0));
-  Vector oldStress(currStrains_.size(0));
   Vector currStress(currStrains_.size(0));
   Vector deltaPlastStrain(currStrains_.size(0));
   Vector currHardParams(currHardParams_.size(0));
@@ -413,11 +414,9 @@ void ElastoPlasticRodMaterial::applyDeform()
   {
     for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      oldElastStrain = oldStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
       currElastStrain = currStrains_(ALL, ip, ielem) - currPlastStrains_(ALL, ip, ielem);
       deltaPlastStrain = currPlastStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
       currHardParams = currHardParams_(ALL, ip, ielem);
-      Super::getStress(oldStress, oldElastStrain);
       Super::getStress(currStress, currElastStrain);
 
       energyHardPot_(ip, ielem) = 0.5 * dotProduct(currHardParams, matmul(materialH_, currHardParams));
@@ -426,8 +425,9 @@ void ElastoPlasticRodMaterial::applyDeform()
       WARN_ASSERT2(currDeltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
       if (jem::numeric::abs(currDeltaFlow_(ip, ielem)) > jem::Float::EPSILON)
       {
-        energyDiss_(ip, ielem) += dotProduct((oldStress + currStress) / 2., deltaPlastStrain);
+        energyDiss_(ip, ielem) += dotProduct((oldStresses_(ALL, ip, ielem) + currStress) / 2., deltaPlastStrain);
       }
+      oldStresses_(ALL, ip, ielem) = currStress;
     }
   }
 

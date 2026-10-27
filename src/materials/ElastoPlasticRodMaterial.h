@@ -157,6 +157,8 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   Cubix oldPlastStrains_;  ///< Plastic strains from last converged step
   Cubix currPlastStrains_; ///< Current plastic strains
 
+  Cubix oldStresses_; ///< Elastic stresses from last converged step (set in applyDeform)
+
   /// @name Work arrays of getStress
   /// Created once in configure and overwritten in every call, so that getStress
   /// does not have to create new arrays for every integration point
