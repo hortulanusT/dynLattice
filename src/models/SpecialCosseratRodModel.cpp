@@ -911,6 +911,7 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Quadix XI(dofCount, dofCount, nodeCount, ipCount);
   Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
   Cubix PI(dofCount, dofCount, ipCount);
+  Matrix materialC(dofCount, dofCount);
   Matrix spatialC(dofCount, dofCount);
   Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
                   ipCount);
@@ -956,7 +957,8 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
       // get the spatial stiffness
-      spatialC = mc3.matmul(PI[ip], material_->getMaterialStiff(ie, ip), PI[ip].transpose());
+      material_->getMaterialStiff(materialC, ie, ip);
+      spatialC = mc3.matmul(PI[ip], materialC, PI[ip].transpose());
       // TEST_CONTEXT(PI[ip])
       // TEST_CONTEXT(material_->getMaterialStiff(ie, ip))
 
@@ -1138,6 +1140,7 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   Matrix massLambdaT(rank, rank); // intermediate product J·Λᵀ
   Matrix nodeRotMass(rank, rank);
 
+  Matrix materialM(dofCount, dofCount);
   Matrix spatialInertia(dofCount, dofCount);
 
   // iterate through the elements
@@ -1154,7 +1157,8 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
     // translational mass per unit length: ρA·I is invariant under rotation
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      ipMass[ip] = material_->getMaterialMass(ie, ip)(TRANS_PART, TRANS_PART);
+      material_->getMaterialMass(materialM, ie, ip);
+      ipMass[ip] = materialM(TRANS_PART, TRANS_PART);
 
 #ifndef NDEBUG
       const double scalarMass = ipMass[ip](0, 0);

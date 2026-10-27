@@ -107,6 +107,18 @@ class Material : public NamedObject
   /// @note Default implementation delegates to getMaterialStiff()
   virtual inline Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const;
 
+  /// @brief Write the material stiffness matrix into an existing matrix (no allocation, for hot code)
+  /// @param[out] stiff  Material stiffness matrix, overwritten
+  /// @note Default implementation copies getMaterialStiff()
+  virtual inline void getMaterialStiff(const Matrix &stiff) const;
+
+  /// @brief Write the material stiffness matrix for an element and integration point into an existing matrix
+  /// @param[out] stiff  Material stiffness matrix, overwritten
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index
+  /// @note Default implementation copies getMaterialStiff(ielem, ip)
+  virtual inline void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const;
+
   /// @brief Get the material mass matrix per unit length.
   ///
   /// Computes the material mass density matrix used in dynamic analysis.
@@ -123,6 +135,18 @@ class Material : public NamedObject
   /// @param[in] ip  Integration point index within the element
   /// @returns Material mass matrix for the specified location
   virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
+
+  /// @brief Write the material mass matrix per unit length into an existing matrix (no allocation, for hot code)
+  /// @param[out] mass  Material mass matrix, overwritten
+  /// @note Default implementation copies getMaterialMass()
+  virtual inline void getMaterialMass(const Matrix &mass) const;
+
+  /// @brief Write the material mass matrix for an element and integration point into an existing matrix
+  /// @param[out] mass  Material mass matrix, overwritten
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index
+  /// @note Default implementation copies getMaterialMass(ielem, ip)
+  virtual inline void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const;
 
   /// @brief Get the lumped mass matrix for a given element length.
   ///
@@ -231,10 +255,34 @@ Matrix Material::getMaterialStiff(const idx_t &, const idx_t &) const
   return getMaterialStiff();
 }
 
+/// @brief Default stiffness matrix in output form
+void Material::getMaterialStiff(const Matrix &stiff) const
+{
+  stiff = getMaterialStiff();
+}
+
+/// @brief Default element-specific stiffness matrix in output form
+void Material::getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const
+{
+  stiff = getMaterialStiff(ielem, ip);
+}
+
 /// @brief Default element-specific mass matrix
 Matrix Material::getMaterialMass(const idx_t &, const idx_t &) const
 {
   return getMaterialMass();
+}
+
+/// @brief Default mass matrix in output form
+void Material::getMaterialMass(const Matrix &mass) const
+{
+  mass = getMaterialMass();
+}
+
+/// @brief Default element-specific mass matrix in output form
+void Material::getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const
+{
+  mass = getMaterialMass(ielem, ip);
 }
 
 /// @brief Default element-specific lumped mass

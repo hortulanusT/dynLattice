@@ -80,9 +80,17 @@ class ElasticRodMaterial : public Material
 
   virtual Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const override;
 
+  virtual void getMaterialStiff(const Matrix &stiff) const override;
+
+  virtual void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const override;
+
   virtual Matrix getMaterialMass() const override;
 
   virtual Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual void getMaterialMass(const Matrix &mass) const override;
+
+  virtual void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const override;
 
   virtual Matrix getLumpedMass(const double l) const override;
 
@@ -147,6 +155,7 @@ class ElasticRodMaterial : public Material
   /// Matrix-vector products without creating new arrays; the result is valid
   /// until the next call (see the note in utils/helpers.h)
   jem::numeric::MatmulChain<double, 1> matvec_;
+  Matrix stiffWork_; ///< Work array for the stiffness in getStress and applyDeform
 
   String rodName_; ///< Material instance name
   /// @}
