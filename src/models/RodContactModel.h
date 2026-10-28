@@ -18,6 +18,7 @@
 #include <jem/base/Array.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>
+#include <jem/util/Event.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
@@ -146,12 +147,15 @@ class RodContactModel : public Model
                         const Vector &disp) const;
 
   /// @brief Find beams of possible contact pairs
+  /// @details The box of a rod is the union of the boxes of its elements.
   /// @param[out] beamsA  Indices of the beams in contact
   /// @param[out] beamsB  Indices of corresponding beams
-  /// @param[in] disp  Displacement vector of all elements
+  /// @param[in] elemBoxMin  Lower element box corners (see getElementBoxes_)
+  /// @param[in] elemBoxMax  Upper element box corners (see getElementBoxes_)
   virtual void findPossibleBeams_(IdxVector &beamsA,
                                   IdxVector &beamsB,
-                                  const Vector &disp) const;
+                                  const Matrix &elemBoxMin,
+                                  const Matrix &elemBoxMax) const;
 
   /// @brief Get the contacting point between two beams in possible contact
   /// @param[out] elemsA  Element index of one side of the contact
@@ -241,11 +245,25 @@ class RodContactModel : public Model
                            const Matrix &possM,
                            const double uM) const;
 
+  /// @brief Whether a node belongs to a rod (see nodeRods_)
+  /// @param[in] inode  Node index
+  /// @param[in] iRod  Rod index
+  bool nodeInRod_(const idx_t inode, const idx_t iRod) const;
+
+  /// @brief Fill the cache of translational dof indices of the rod nodes (see nodeDofs_)
+  void updNodeDofs_() const;
+
+  /// @brief Mark the cached dof indices as outdated (connected to the DofSpace events)
+  void invalidateNodeDofs_();
+
  private:
   Assignable<NodeSet> allNodes_;            ///< All nodes in the model
   Assignable<ElementSet> allElems_;         ///< All elements in the model
   Array<Assignable<ElementGroup>> rodList_; ///< List of rod element groups
   Array<IdxVector> rodNodes_;               ///< Cached unique node indices of each rod
+  IdxMatrix nodeRods_;                      ///< Rods of every node, padded with -1 (column = node index; the topology is constant)
+  mutable IdxMatrix nodeDofs_;              ///< Cached translational dof indices (globalRank x nodes, column = node index)
+  mutable bool nodeDofsValid_;              ///< False after the DofSpace changed
   Ref<DofSpace> dofs_;                      ///< DOF space
   Ref<Line3D> shape_;                       ///< Line shape functions
 
