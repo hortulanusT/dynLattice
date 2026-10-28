@@ -159,13 +159,14 @@ void Line3D::getRotations_(const Cubix &Ri,
   // get the _local_ rotations in the integration points
   const Matrix shapeFuncs = getShapeFunctions();
 
-  // get the rotation vectors associated with the local rotations
-  const Matrix ip_psi = matmul_.matmul(node_psi, shapeFuncs);
+  // get the rotation vectors associated with the local rotations; kept in
+  // ipPsi_ for getRotationGradients_ (matmul_ overwrites its result)
+  ipPsi_ = matmul_.matmul(node_psi, shapeFuncs);
 
   // construct the local rotation matrices
   for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
   {
-    expVec(Ri[iIp], ip_psi[iIp]);
+    expVec(Ri[iIp], ipPsi_[iIp]);
     mul3(Ri[iIp], Lambda_r, Ri[iIp]);
   }
 }
@@ -266,7 +267,8 @@ void Line3D::getRotationGradients(const Cubix &LambdaP,
   Matrix grads(shapeFuncCount(), ipointCount());
   getShapeGradients(grads, w, c);
 
-  getRotationGradients_(LambdaP, grads, node_psi, Lambda_r);
+  ipPsi_ = matmul_.matmul(node_psi, getShapeFunctions());
+  getRotationGradients_(LambdaP, grads, ipPsi_, node_psi, Lambda_r);
 }
 
 void Line3D::getRotationsAndGradients(const Cubix &Ri,
@@ -279,9 +281,10 @@ void Line3D::getRotationsAndGradients(const Cubix &Ri,
   // the node rotation vectors are shared by the rotations and their gradients
   getNodeRotVecs_(nodePsi_, lambdaR_, nodeLambda);
 
+  // getRotations_ leaves the rotation vectors at the integration points in ipPsi_
   getRotations_(Ri, nodePsi_, lambdaR_);
 
-  getRotationGradients_(LambdaP, grads, nodePsi_, lambdaR_);
+  getRotationGradients_(LambdaP, grads, ipPsi_, nodePsi_, lambdaR_);
 }
 
 //------------------------------------------------------
@@ -289,19 +292,15 @@ void Line3D::getRotationsAndGradients(const Cubix &Ri,
 //------------------------------------------------------
 void Line3D::getRotationGradients_(const Cubix &LambdaP,
                                    const Matrix &grads,
+                                   const Matrix &ip_psi,
                                    const Matrix &node_psi,
                                    const Matrix &Lambda_r) const
 {
-  const Matrix shapes = getShapeFunctions();
-
-  // matmul_ returns its own work array, which the next call overwrites,
-  // so the first product is copied into ipPsi_
-  ipPsi_ = matmul_.matmul(node_psi, shapes);
   const Matrix psiP = matmul_.matmul(node_psi, grads);
 
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
-    expVecP(LambdaP[ip], ipPsi_[ip], psiP[ip]);
+    expVecP(LambdaP[ip], ip_psi[ip], psiP[ip]);
     mul3(LambdaP[ip], Lambda_r, LambdaP[ip]);
   }
 }

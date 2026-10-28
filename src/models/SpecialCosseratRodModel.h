@@ -356,7 +356,8 @@ class SpecialCosseratRodModel : public Model
 
  private:
   Assignable<ElementGroup> rodElems_; ///< Rod element group
-  IdxVector rodNodes_;                ///< Rod node indices
+  IdxVector rodNodes_;                ///< Global node index -> rod-local index (-1 if not on this rod)
+  IdxVector rodNodeIdx_;              ///< Rod-local index -> global node index (rodElems_.getNodeIndices(), the topology is constant)
   Assignable<ElementSet> allElems_;   ///< All elements
   Assignable<NodeSet> allNodes_;      ///< All nodes
 
@@ -400,6 +401,5 @@ class SpecialCosseratRodModel : public Model
   mutable Cubix ipLambdaP_;   ///< Their gradients
   mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
   mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
-  mutable MatmulChain<double, 1> matvec_; ///< Matrix-vector products without allocations
   mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

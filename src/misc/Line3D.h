@@ -228,10 +228,12 @@ class Line3D : public Shape
   /// @brief Get the rotation gradients at the integration points from the node rotation vectors
   /// @param[out] LambdaP Rotation gradients at the integration points
   /// @param[in] grads Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] ip_psi Rotation vectors at the integration points (node_psi times the shape functions)
   /// @param[in] node_psi Nodal rotation vectors
   /// @param[in] Lambda_r Reference rotation matrix
   void getRotationGradients_(const Cubix &LambdaP,
                              const Matrix &grads,
+                             const Matrix &ip_psi,
                              const Matrix &node_psi,
                              const Matrix &Lambda_r) const;
 

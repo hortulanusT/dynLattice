@@ -330,7 +330,9 @@ void ElastoPlasticRodMaterial::getSuperEllipseGrad_(const Vector &grad, const Ve
 
 void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector &hardParams) const
 {
-  hardVals = -1. * matmul(materialH_, hardParams);
+  // output form of the same product: no temporary
+  matmul(hardVals, materialH_, hardParams);
+  hardVals *= -1.;
 }
 
 void ElastoPlasticRodMaterial::getStress(const Vector &, const Vector &)

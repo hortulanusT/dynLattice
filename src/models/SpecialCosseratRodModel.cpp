@@ -98,10 +98,10 @@ SpecialCosseratRodModel::SpecialCosseratRodModel
 
   // store the inverse relation from the global node ids to the local
   // indizes on this rod
+  rodNodeIdx_.ref(rodElems_.getNodeIndices());
   rodNodes_.resize(allNodes_.size());
   rodNodes_ = -1;
-  rodNodes_[rodElems_.getNodeIndices()] =
-      jem::iarray(rodElems_.getNodeIndices().size());
+  rodNodes_[rodNodeIdx_] = jem::iarray(rodNodeIdx_.size());
 
   // Initialize the internal shape.
   myProps.makeProps("stiffShape").set("numPoints", allElems_.getElemNodeCount(rodElems_.getIndex(0)));
@@ -1058,10 +1058,11 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
   if (!nodeDofsValid_)
     updNodeDofs_();
-  IdxVector idofs(ROT_DOF_COUNT);
+  IdxVector idofs;
   Vector temp(velo.size());
   Vector omega(ROT_DOF_COUNT);
   Vector Theta_omega(ROT_DOF_COUNT);
+  Vector gyro(ROT_DOF_COUNT);
   Matrix omegaSkew(ROT_DOF_COUNT, ROT_DOF_COUNT);
 
   // only the rotational rows of M*velo are needed, so use the sparse
@@ -1082,7 +1083,7 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
     mass->matmul(temp, velo);
   }
 
-  for (idx_t inode : rodElems_.getNodeIndices())
+  for (idx_t inode : rodNodeIdx_)
   {
     idofs.ref(nodeDofs_(ROT_PART, rodNodes_[inode]));
 
@@ -1104,7 +1105,8 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
 
     omega = velo[idofs];
     skew(omegaSkew, omega);
-    fgyro[idofs] += matvec_.matmul(omegaSkew, Theta_omega);
+    mul3(gyro, omegaSkew, Theta_omega);
+    fgyro[idofs] += gyro;
   }
 }
 
