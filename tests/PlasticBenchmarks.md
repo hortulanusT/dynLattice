@@ -3,12 +3,12 @@ The plastic tests validate the correct implementation of the inelastic material 
 
 # Test Cases
 ## Test 1
-Test 1 implements Example 5.1 from [Smriti, Kumar, Steinmann (2011)](https://doi.org/10.1002/nme.6566). This example shows the plastic behavior of a cantilever beam under a constant twist, being subjected to axial tension and compression. The hardening observed is a result of the multi-axial loading condition and can be viewed as *geometric hardening*, as no hardening is present in the considered material parameters. The custom implementation shows an excellent agreement with the results from literature
+Test 1 implements Example 5.1 from [Smriti, Kumar, Steinmann (2021)](https://doi.org/10.1002/nme.6566). This example shows the plastic behavior of a cantilever beam under a constant twist, being subjected to axial tension and compression. The hardening observed is a result of the multi-axial loading condition and can be viewed as *geometric hardening*, as no hardening is present in the considered material parameters. The custom implementation shows an excellent agreement with the results from literature
 
 ![Test 1 Results](plastic1_result.png)
 
 ## Test 2
-Test 2 implements Example 5.2 from [Smriti, Kumar, Steinmann (2011)](https://doi.org/10.1002/nme.6566). This example shows the plastic behavior of a cantilever beam subjected to axial tension and compression with the effects of either isotropic or kinematic hardening present in the material model. Both, case a) *isotropic hardening* and case b) *kinematic hardening* show an excellent agreement with the results from literature.
+Test 2 implements Example 5.2 from [Smriti, Kumar, Steinmann (2021)](https://doi.org/10.1002/nme.6566). This example shows the plastic behavior of a cantilever beam subjected to axial tension and compression with the effects of either isotropic or kinematic hardening present in the material model. Both, case a) *isotropic hardening* and case b) *kinematic hardening* show an excellent agreement with the results from literature.
 
 ![Test 2a Results](plastic2a_result.png)
 ![Test 2b Results](plastic2b_result.png)

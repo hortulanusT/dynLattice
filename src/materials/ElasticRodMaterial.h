@@ -39,7 +39,7 @@ class ElasticRodMaterial : public Material
   /// @name Element and edge properties
   /// @{
   static const char *N_ELEM;      ///< Number of elements property key
-  static const char *EDGE_FACTOR; ///< Edge factor for lattice materials property key
+  static const char *EDGE_FACTOR; ///< Edge factor f property key: edge elements get stiffness blocks scaled by f^2, f^3, f^4 and mass blocks by (2-f)^2, (2-f)^3, (2-f)^4
   static const char *EDGE_ELEMS;  ///< Number of edge elements property key
   /// @}
 
