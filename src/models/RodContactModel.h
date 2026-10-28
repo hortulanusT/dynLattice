@@ -18,6 +18,7 @@
 #include <jem/base/Array.h>
 #include <jem/base/Error.h>
 #include <jem/base/System.h>
+#include <jem/util/Event.h>
 #include <jem/util/Properties.h>
 #include <jive/Array.h>
 #include <jive/algebra/MatrixBuilder.h>
@@ -127,38 +128,54 @@ class RodContactModel : public Model
 
  protected:
   /// @brief Find pairs of contacts
-  /// @param[out] elementsA  Element IDs of one side of the contact
-  /// @param[out] elementsB  Element IDs of the other side
+  /// @param[out] elementsA  Element indices of one side of the contact
+  /// @param[out] elementsB  Element indices of the other side
   /// @param[in] disp  Displacement vector of all elements
   virtual void findContacts_(IdxVector &elementsA,
                              IdxVector &elementsB,
                              const Vector &disp) const;
 
+  /// @brief Compute the bounding box of every rod element in the current configuration
+  /// @details Each box encloses the displaced element nodes and is widened by
+  /// the contact radius. Computed once per contact search, so that the
+  /// element-level search of every rod pair only compares boxes.
+  /// @param[out] elemBoxMin  Lower box corners (globalRank x element count), column = element index
+  /// @param[out] elemBoxMax  Upper box corners (globalRank x element count), column = element index
+  /// @param[in] disp  Displacement vector of all elements
+  void getElementBoxes_(Matrix &elemBoxMin,
+                        Matrix &elemBoxMax,
+                        const Vector &disp) const;
+
   /// @brief Find beams of possible contact pairs
+  /// @details The box of a rod is the union of the boxes of its elements.
   /// @param[out] beamsA  Indices of the beams in contact
   /// @param[out] beamsB  Indices of corresponding beams
-  /// @param[in] disp  Displacement vector of all elements
+  /// @param[in] elemBoxMin  Lower element box corners (see getElementBoxes_)
+  /// @param[in] elemBoxMax  Upper element box corners (see getElementBoxes_)
   virtual void findPossibleBeams_(IdxVector &beamsA,
                                   IdxVector &beamsB,
-                                  const Vector &disp) const;
+                                  const Matrix &elemBoxMin,
+                                  const Matrix &elemBoxMax) const;
 
   /// @brief Get the contacting point between two beams in possible contact
-  /// @param[out] elemsA  Element ID of one side of the contact
-  /// @param[out] elemsB  Corresponding element ID on the other side
+  /// @param[out] elemsA  Element index of one side of the contact
+  /// @param[out] elemsB  Corresponding element index on the other side
   /// @param[in] beamA  Possible beam on side A
   /// @param[in] beamB  Possible beam on side B
-  /// @param[in] disp  Displacement vector of all elements
+  /// @param[in] elemBoxMin  Lower element box corners (see getElementBoxes_)
+  /// @param[in] elemBoxMax  Upper element box corners (see getElementBoxes_)
   virtual void findPossibleElements_(IdxVector &elemsA,
                                      IdxVector &elemsB,
                                      const idx_t &beamA,
                                      const idx_t &beamB,
-                                     const Vector &disp) const;
+                                     const Matrix &elemBoxMin,
+                                     const Matrix &elemBoxMax) const;
 
   /// @brief Compute the effects of the contact
   /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
   /// @param[in,out] fint  Internal force vector, updated with contact contributions
-  /// @param[in] elementsA  Element IDs of one side of the contact
-  /// @param[in] elementsB  Element IDs of the other side
+  /// @param[in] elementsA  Element indices of one side of the contact
+  /// @param[in] elementsB  Element indices of the other side
   /// @param[in] disp  Displacement vector of all elements
   virtual void computeContacts_(MatrixBuilder &mbld,
                                 const Vector &fint,
@@ -167,16 +184,16 @@ class RodContactModel : public Model
                                 const Vector &disp);
 
   /// @brief Build the list of nodes initially in contact
-  /// @param[in] elementsA  Element IDs A
-  /// @param[in] elementsB  Element IDs B
+  /// @param[in] elementsA  Element indices A
+  /// @param[in] elementsB  Element indices B
   /// @param[in] disp  Displacement vector
   virtual void computeBlacklist_(const IdxVector &elementsA,
                                  const IdxVector &elementsB,
                                  const Vector &disp);
 
   /// @brief Check whether a contact is on the blacklist
-  /// @param[in] elementsA  Element ID A
-  /// @param[in] elementsB  Element ID B
+  /// @param[in] elementsA  Element index A
+  /// @param[in] elementsB  Element index B
   /// @return true if the contact is on the blacklist
   virtual bool filterBlacklist_(const idx_t elementsA,
                                 const idx_t elementsB) const;
@@ -228,11 +245,25 @@ class RodContactModel : public Model
                            const Matrix &possM,
                            const double uM) const;
 
+  /// @brief Whether a node belongs to a rod (see nodeRods_)
+  /// @param[in] inode  Node index
+  /// @param[in] iRod  Rod index
+  bool nodeInRod_(const idx_t inode, const idx_t iRod) const;
+
+  /// @brief Fill the cache of translational dof indices of the rod nodes (see nodeDofs_)
+  void updNodeDofs_() const;
+
+  /// @brief Mark the cached dof indices as outdated (connected to the DofSpace events)
+  void invalidateNodeDofs_();
+
  private:
   Assignable<NodeSet> allNodes_;            ///< All nodes in the model
   Assignable<ElementSet> allElems_;         ///< All elements in the model
   Array<Assignable<ElementGroup>> rodList_; ///< List of rod element groups
   Array<IdxVector> rodNodes_;               ///< Cached unique node indices of each rod
+  IdxMatrix nodeRods_;                      ///< Rods of every node, padded with -1 (column = node index; the topology is constant)
+  mutable IdxMatrix nodeDofs_;              ///< Cached translational dof indices (globalRank x nodes, column = node index)
+  mutable bool nodeDofsValid_;              ///< False after the DofSpace changed
   Ref<DofSpace> dofs_;                      ///< DOF space
   Ref<Line3D> shape_;                       ///< Line shape functions
 

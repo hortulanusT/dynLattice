@@ -6,6 +6,7 @@
 
 #pragma once
 #include "materials/Material.h"
+#include <jem/numeric/algebra/MatmulChain.h>
 
 // Forward declarations
 class MaterialFactory;
@@ -38,7 +39,7 @@ class ElasticRodMaterial : public Material
   /// @name Element and edge properties
   /// @{
   static const char *N_ELEM;      ///< Number of elements property key
-  static const char *EDGE_FACTOR; ///< Edge factor for lattice materials property key
+  static const char *EDGE_FACTOR; ///< Edge factor f property key: edge elements get stiffness blocks scaled by f^2, f^3, f^4 and mass blocks by (2-f)^2, (2-f)^3, (2-f)^4
   static const char *EDGE_ELEMS;  ///< Number of edge elements property key
   /// @}
 
@@ -79,9 +80,17 @@ class ElasticRodMaterial : public Material
 
   virtual Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const override;
 
+  virtual void getMaterialStiff(const Matrix &stiff) const override;
+
+  virtual void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const override;
+
   virtual Matrix getMaterialMass() const override;
 
   virtual Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const override;
+
+  virtual void getMaterialMass(const Matrix &mass) const override;
+
+  virtual void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const override;
 
   virtual Matrix getLumpedMass(const double l) const override;
 
@@ -142,6 +151,11 @@ class ElasticRodMaterial : public Material
   Cubix oldStrains_;  ///< Strains from last converged step
   Cubix currStrains_; ///< Strains from current iteration
   Matrix energyPot_;  ///< Potential energy storage
+
+  /// Matrix-vector products without creating new arrays; the result is valid
+  /// until the next call (see the note in utils/helpers.h)
+  jem::numeric::MatmulChain<double, 1> matvec_;
+  Matrix stiffWork_; ///< Work array for the stiffness in getStress and applyDeform
 
   String rodName_; ///< Material instance name
   /// @}

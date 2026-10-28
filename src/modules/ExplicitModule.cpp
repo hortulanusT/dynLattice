@@ -394,7 +394,7 @@ void ExplicitModule::updateVec(const Vector &y_new,
 
       expVec(R_old, r_node);
       expVec(V_upd, d_r);
-      matmul(R_new, V_upd, R_old);
+      mul3(R_new, V_upd, R_old);
 
       logMat(r_node, R_new);
 

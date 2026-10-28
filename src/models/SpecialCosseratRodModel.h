@@ -247,8 +247,26 @@ class SpecialCosseratRodModel : public Model
   /// @brief Initialize rotation of elements
   void initRotation_();
 
+  /// @brief Cache the reference shape gradients and integration weights of the elements
+  /// @details They only depend on the undeformed node positions, so they are
+  /// computed once here and not again in every force evaluation. Also creates
+  /// the work arrays (see the note in utils/helpers.h).
+  void initShape_();
+
   /// @brief Initialize initial strain of elements
   void initStrain_();
+
+  /// @brief Tangent of the deformed line at the integration points
+  /// @details The derivative of the current position (undeformed position plus
+  /// displacement) with respect to the line coordinate, using the cached gradients.
+  /// @param[out] phiP  3 x ipointCount
+  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
+  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
+  /// @param[in] ie  Element index in the rod element group
+  void getTangents_(const Matrix &phiP,
+                    const Matrix &nodePhi_0,
+                    const Matrix &nodeU,
+                    const idx_t ie) const;
 
   /// @brief Get the geometric stiffness matrix
   /// @param[out] B  B-matrices at integration points
@@ -270,24 +288,6 @@ class SpecialCosseratRodModel : public Model
   /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
   void getStrains_(const Matrix &strains,
                    const Vector &w,
-                   const Matrix &nodePhi_0,
-                   const Matrix &nodeU,
-                   const Cubix &nodeLambda,
-                   const idx_t ie,
-                   const bool spatial = true) const;
-
-  /// @brief Get the strains in the integration points of an element and return the Pi matrices
-  /// @param[out] strains  Strain components at integration points, strain component by integration point
-  /// @param[out] w  Integration point weights
-  /// @param[out] ipPI  Pi matrices at the integration points, one matrix per integration point
-  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
-  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
-  /// @param[in] nodeLambda  Rotational orientation of nodes, 3 x 3 x nodeCount
-  /// @param[in] ie  Element index
-  /// @param[in] spatial  use inertial frame of reference (true) or spatial frame of reference (false)
-  void getStrains_(const Matrix &strains,
-                   const Vector &w,
-                   const Cubix &ipPI,
                    const Matrix &nodePhi_0,
                    const Matrix &nodeU,
                    const Cubix &nodeLambda,
@@ -356,7 +356,8 @@ class SpecialCosseratRodModel : public Model
 
  private:
   Assignable<ElementGroup> rodElems_; ///< Rod element group
-  IdxVector rodNodes_;                ///< Rod node indices
+  IdxVector rodNodes_;                ///< Global node index -> rod-local index (-1 if not on this rod)
+  IdxVector rodNodeIdx_;              ///< Rod-local index -> global node index (rodElems_.getNodeIndices(), the topology is constant)
   Assignable<ElementSet> allElems_;   ///< All elements
   Assignable<NodeSet> allNodes_;      ///< All nodes
 
@@ -386,4 +387,19 @@ class SpecialCosseratRodModel : public Model
 
   Cubix LambdaN_;    ///< Reference rotations per node
   Cubix matStrain0_; ///< Initial strain configuration
+
+  // The reference geometry does not change during a run (as for matStrain0_)
+  Cubix elemGrads_;    ///< Reference shape gradients, shapeFuncCount x ipCount x rod elements
+  Matrix elemWeights_; ///< Reference integration weights, ipCount x rod elements
+
+  // Work arrays of getStrains_, getStresses_ and the assembly: created once in
+  // initShape_ and overwritten in every call (see the note in utils/helpers.h).
+  // Not thread safe. ipPhiP_ is filled by getTangents_ and consumed at once.
+  mutable Matrix curPhi_;     ///< Current node locations, 3 x nodeCount
+  mutable Matrix ipPhiP_;     ///< Tangents at the integration points, 3 x ipCount
+  mutable Cubix ipLambda_;    ///< Rotations at the integration points (Pi = diag(ipLambda_, ipLambda_))
+  mutable Cubix ipLambdaP_;   ///< Their gradients
+  mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
+  mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
+  mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

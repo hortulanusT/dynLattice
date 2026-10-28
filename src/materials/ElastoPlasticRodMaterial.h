@@ -28,9 +28,19 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   static const char *TYPE_NAME;
   static const char *YIELD_PROP;       ///< Yield condition function
   static const char *YIELD_DERIV_PROP; ///< Yield condition derivatives
+  static const char *YIELD_TYPE_PROP;  ///< Yield condition type (see YieldType)
+  static const char *YIELD_STRENGTH_PROP; ///< Strengths c_i of the super-ellipse yield condition
+  static const char *YIELD_EXPONENT_PROP; ///< Exponents p_i of the super-ellipse yield condition
   static const char *ISO_HARD_PROP;    ///< Isotropic hardening parameters
   static const char *KIN_HARD_PROP;    ///< Kinematic hardening parameters
   /// @}
+
+  /// @brief Yield condition implementations, selected by the property `yieldType`
+  enum YieldType
+  {
+    EXPRESSION,   ///< "Expression": interpreted function `yieldCond` (default)
+    SUPER_ELLIPSE ///< "SuperEllipse": native Lamé curve, see getSuperEllipse_
+  };
 
   JEM_DECLARE_CLASS(ElastoPlasticRodMaterial, ElasticRodMaterial);
 
@@ -100,6 +110,23 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   /// @brief Destroy the elasto-plastic rod material
   ~ElastoPlasticRodMaterial();
 
+  /// @brief Value of the yield condition
+  /// @param[in] args  Stresses, [isotropic hardening stress], [kinematic hardening stresses]
+  double getYield_(const Vector &args) const;
+
+  /// @brief Gradient of the yield condition with respect to args
+  /// @param[out] grad  Gradient
+  /// @param[in] args  Stresses, [isotropic hardening stress], [kinematic hardening stresses]
+  void getYieldGrad_(const Vector &grad, const Vector &args) const;
+
+  /// @brief Super-ellipse yield condition f = sum_i |s_i/(c_i-h_i)|^p_i - (1+h_0)
+  /// @details Kinematic hardening h_i shifts the strengths c_i (Herrnböck et al., Comput. Mech. 2023,
+  /// Eq. 39), isotropic hardening h_0 acts on the sum (Herrnböck et al., Comput. Mech. 2021, Eq. 47).
+  double getSuperEllipse_(const Vector &args) const;
+
+  /// @brief Gradient of the super-ellipse yield condition (zero stress derivative for |s_i| < EPS)
+  void getSuperEllipseGrad_(const Vector &grad, const Vector &args) const;
+
  protected:
   /// @name Plasticity algorithm components
   /// @{
@@ -107,6 +134,11 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   FuncUtils::FuncArray yieldDeriv_; ///< Derivatives of yield condition
   idx_t maxIter_;                   ///< Max iterations for stress update
   double precision_;                ///< Convergence tolerance for stress update
+  YieldType yieldType_;             ///< Selected yield condition implementation
+  bool isoHard_;                    ///< Isotropic hardening stress is a yield function argument
+  bool kinHard_;                    ///< Kinematic hardening stresses are yield function arguments
+  Vector yieldStrength_;            ///< Strengths c_i of the super-ellipse yield condition
+  Vector yieldExponent_;            ///< Exponents p_i of the super-ellipse yield condition
   /// @}
 
   /// @name Function argument organization
@@ -124,6 +156,21 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
 
   Cubix oldPlastStrains_;  ///< Plastic strains from last converged step
   Cubix currPlastStrains_; ///< Current plastic strains
+
+  Cubix oldStresses_; ///< Elastic stresses from last converged step (set in applyDeform)
+
+  /// @name Work arrays of getStress
+  /// Created once in configure and overwritten in every call, so that getStress
+  /// does not have to create new arrays for every integration point
+  /// (see the note in utils/helpers.h). Not thread safe.
+  /// @{
+  Vector plastStrain_;   ///< Plastic strain iterate
+  Vector hardParams_;    ///< Hardening parameter iterate
+  Vector hardStress_;    ///< Hardening stresses
+  Vector elasticStrain_; ///< Elastic strain
+  Vector yieldArgs_;     ///< Arguments of the yield condition
+  Vector yieldGrad_;     ///< Gradient of the yield condition
+  /// @}
 
   Matrix currDeltaFlow_; ///< Current plastic flow increment
   Matrix energyDiss_;    ///< Dissipated energy storage

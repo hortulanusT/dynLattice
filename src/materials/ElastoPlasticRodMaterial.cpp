@@ -31,6 +31,9 @@ JEM_DEFINE_CLASS(ElastoPlasticRodMaterial);
 const char *ElastoPlasticRodMaterial::TYPE_NAME = "ElastoPlasticRod";
 const char *ElastoPlasticRodMaterial::YIELD_PROP = "yieldCond";
 const char *ElastoPlasticRodMaterial::YIELD_DERIV_PROP = "yieldDeriv";
+const char *ElastoPlasticRodMaterial::YIELD_TYPE_PROP = "yieldType";
+const char *ElastoPlasticRodMaterial::YIELD_STRENGTH_PROP = "yieldStrength";
+const char *ElastoPlasticRodMaterial::YIELD_EXPONENT_PROP = "yieldExponent";
 const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "isotropicCoefficient";
 const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "kinematicTensor";
 
@@ -41,6 +44,7 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
 {
   maxIter_ = 20;
   precision_ = 1e-5;
+  yieldType_ = EXPRESSION;
   materialH_.resize(0);
   argCount_ = 0;
 
@@ -75,13 +79,16 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   double isoCoeff;
   Vector kinHard;
   Matrix kinFacts(dofCount_, dofCount_);
-  if (myProps.find(isoCoeff, ISO_HARD_PROP))
+  isoHard_ = myProps.find(isoCoeff, ISO_HARD_PROP);
+  kinHard_ = false;
+  if (isoHard_)
   {
     args = args + ", h_0";
     argCount_ += 1;
   }
   if (myProps.find(kinHard, KIN_HARD_PROP))
   {
+    kinHard_ = true;
     jive_helpers::vec2mat(kinFacts.transpose(), kinHard);
     for (String dofName : dofNames)
     {
@@ -116,10 +123,20 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   currHardParams_.resize(argCount_ - dofCount_, ipCount, elemCount);
   currHardParams_ = 0.;
 
+  plastStrain_.resize(dofCount_);
+  hardParams_.resize(argCount_ - dofCount_);
+  hardStress_.resize(argCount_ - dofCount_);
+  elasticStrain_.resize(dofCount_);
+  yieldArgs_.resize(argCount_);
+  yieldGrad_.resize(argCount_);
+
   oldPlastStrains_.resize(dofCount_, ipCount, elemCount);
   oldPlastStrains_ = 0.;
   currPlastStrains_.resize(dofCount_, ipCount, elemCount);
   currPlastStrains_ = 0.;
+
+  oldStresses_.resize(dofCount_, ipCount, elemCount);
+  oldStresses_ = 0.;
 
   currDeltaFlow_.resize(ipCount, elemCount);
   currDeltaFlow_ = 0.;
@@ -129,17 +146,53 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   energyHardPot_.resize(ipCount, elemCount);
   energyHardPot_ = 0.;
 
-  if (!myProps.contains(YIELD_PROP))
-    throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
-  FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
-  if (myProps.contains(YIELD_DERIV_PROP))
+  String yieldTypeName;
+  if (myProps.find(yieldTypeName, YIELD_TYPE_PROP))
   {
-    FuncUtils::configFuncs(yieldDeriv_, args, YIELD_DERIV_PROP, myProps, globdat);
-    JEM_PRECHECK(yieldDeriv_.size() == argCount_);
+    if (yieldTypeName == "Expression")
+    {
+      yieldType_ = EXPRESSION;
+    }
+    else if (yieldTypeName == "SuperEllipse")
+    {
+      yieldType_ = SUPER_ELLIPSE;
+    }
+    else
+    {
+      myProps.propertyError(YIELD_TYPE_PROP,
+                            "invalid yield type: " + yieldTypeName + "; valid types are `Expression' and `SuperEllipse'");
+    }
   }
-  else
+  yieldDeriv_.resize(0);
+
+  switch (yieldType_)
   {
-    yieldDeriv_.resize(0);
+  case EXPRESSION:
+    if (!myProps.contains(YIELD_PROP))
+      throw jem::util::PropertyException("Expected a yield function for an elasto-plastic material!");
+    FuncUtils::configFunc(yieldCond_, args, YIELD_PROP, myProps, globdat);
+    if (myProps.contains(YIELD_DERIV_PROP))
+    {
+      FuncUtils::configFuncs(yieldDeriv_, args, YIELD_DERIV_PROP, myProps, globdat);
+      JEM_PRECHECK(yieldDeriv_.size() == argCount_);
+    }
+    break;
+
+  case SUPER_ELLIPSE:
+    if (myProps.contains(YIELD_PROP) || myProps.contains(YIELD_DERIV_PROP))
+      throw jem::util::PropertyException(
+          "The '" + String(YIELD_PROP) + "' and '" + YIELD_DERIV_PROP + "' properties cannot be combined with "
+          + YIELD_TYPE_PROP + " = \"SuperEllipse\"!");
+    if (argCount_ == dofCount_)
+      throw jem::util::PropertyException(
+          "The super-ellipse yield condition requires isotropic and/or kinematic hardening!");
+    if (!myProps.find(yieldStrength_, YIELD_STRENGTH_PROP) || !myProps.find(yieldExponent_, YIELD_EXPONENT_PROP))
+      throw jem::util::PropertyException(
+          "The super-ellipse yield condition requires '" + String(YIELD_STRENGTH_PROP) + "' and '" + YIELD_EXPONENT_PROP + "'!");
+    if (yieldStrength_.size() != dofCount_ || yieldExponent_.size() != dofCount_)
+      throw jem::util::PropertyException(
+          "'" + String(YIELD_STRENGTH_PROP) + "' and '" + YIELD_EXPONENT_PROP + "' need one entry per degree of freedom!");
+    break;
   }
 
   myProps.find(maxIter_, jive::implict::PropNames::MAX_ITER);
@@ -152,10 +205,22 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
   Properties myConf = conf.makeProps(myName_);
 
-  FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
-  if (yieldDeriv_.size() > 0)
+  switch (yieldType_)
   {
-    FuncUtils::getConfig(myConf, yieldDeriv_, YIELD_DERIV_PROP);
+  case EXPRESSION:
+    myConf.set(YIELD_TYPE_PROP, "Expression");
+    FuncUtils::getConfig(myConf, yieldCond_, YIELD_PROP);
+    if (yieldDeriv_.size() > 0)
+    {
+      FuncUtils::getConfig(myConf, yieldDeriv_, YIELD_DERIV_PROP);
+    }
+    break;
+
+  case SUPER_ELLIPSE:
+    myConf.set(YIELD_TYPE_PROP, "SuperEllipse");
+    myConf.set(YIELD_STRENGTH_PROP, yieldStrength_);
+    myConf.set(YIELD_EXPONENT_PROP, yieldExponent_);
+    break;
   }
 
   if (argCount_ == 7)
@@ -182,9 +247,92 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
   myConf.set(jive::implict::PropNames::PRECISION, precision_);
 }
 
+double ElastoPlasticRodMaterial::getYield_(const Vector &args) const
+{
+  switch (yieldType_)
+  {
+  case SUPER_ELLIPSE:
+    return getSuperEllipse_(args);
+
+  case EXPRESSION:
+    break;
+  }
+  return yieldCond_->getValue(args.addr());
+}
+
+void ElastoPlasticRodMaterial::getYieldGrad_(const Vector &grad, const Vector &args) const
+{
+  switch (yieldType_)
+  {
+  case SUPER_ELLIPSE:
+    getSuperEllipseGrad_(grad, args);
+    return;
+
+  case EXPRESSION:
+    break;
+  }
+
+  if (yieldDeriv_.size() > 0)
+  {
+    grad = jive_helpers::evalFuncs(yieldDeriv_, args);
+  }
+  else
+  {
+    grad = jive_helpers::funcGrad(yieldCond_, args);
+    for (idx_t i = 0; i < dofCount_; i++)
+      if (jem::numeric::abs(args[i]) < jem::Float::EPSILON)
+        grad[i] = 0.;
+  }
+}
+
+// args = [s (dofCount_), h_0 (if isoHard_), h_i (dofCount_, if kinHard_)]
+// f = sum_i |s_i / d_i|^p_i - (1 + h_0),  d_i = c_i - h_i
+
+double ElastoPlasticRodMaterial::getSuperEllipse_(const Vector &args) const
+{
+  const idx_t kinOffset = dofCount_ + (isoHard_ ? 1 : 0);
+
+  double f = -1.;
+
+  for (idx_t i = 0; i < dofCount_; i++)
+  {
+    const double d = yieldStrength_[i] - (kinHard_ ? args[kinOffset + i] : 0.);
+    f += pow(jem::numeric::abs(args[i] / d), yieldExponent_[i]);
+  }
+
+  if (isoHard_)
+    f -= args[dofCount_];
+
+  return f;
+}
+
+// df/ds_i = p_i |s_i/d_i|^p_i sign(s_i) / |s_i|,  df/dh_i = p_i |s_i/d_i|^p_i / d_i,  df/dh_0 = -1
+
+void ElastoPlasticRodMaterial::getSuperEllipseGrad_(const Vector &grad, const Vector &args) const
+{
+  const idx_t kinOffset = dofCount_ + (isoHard_ ? 1 : 0);
+
+  for (idx_t i = 0; i < dofCount_; i++)
+  {
+    const double s = args[i];
+    const double p = yieldExponent_[i];
+    const double d = yieldStrength_[i] - (kinHard_ ? args[kinOffset + i] : 0.);
+    const double ppow = p * pow(jem::numeric::abs(s / d), p);
+
+    grad[i] = (jem::numeric::abs(s) < jem::Float::EPSILON) ? 0. : jem::numeric::sign(ppow / jem::numeric::abs(s), s);
+    if (kinHard_)
+      grad[kinOffset + i] = ppow / d;
+  }
+
+  if (isoHard_)
+    grad[dofCount_] = -1.;
+}
+
 void ElastoPlasticRodMaterial::getHardVals(const Vector &hardVals, const Vector &hardParams) const
 {
-  hardVals = -1. * matmul(materialH_, hardParams);
+  // output form of the same product: no temporary
+  matmul(hardVals, materialH_, hardParams);
+  hardVals *= -1.;
 }
 
 void ElastoPlasticRodMaterial::getStress(const Vector &, const Vector &)
@@ -201,21 +349,20 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   // REPORT("Step 1")
   idx_t liter = 0;
-  Vector plastStrain = oldPlastStrains_(ALL, ip, ielem).clone();
-  Vector hardParams = oldHardParams_(ALL, ip, ielem).clone();
+  // start from the old state of this integration point (copied into the work arrays)
+  plastStrain_ = oldPlastStrains_(ALL, ip, ielem);
+  hardParams_ = oldHardParams_(ALL, ip, ielem);
   double deltaFlow = 0.;
 
-  Vector hardStress(argCount_ - dofCount_);
-  Vector args(argCount_);
   double yieldValue = 0.;
-  Vector yieldGrad(argCount_);
   double deltaDeltaFlow = 0.;
 
   while (true)
   {
     // SUBHEADER2("Step 2", liter)
-    Super::getStress(stress, Vector(strain - plastStrain), ielem, ip, false);
-    getHardVals(hardStress, hardParams);
+    elasticStrain_ = strain - plastStrain_;
+    Super::getStress(stress, elasticStrain_, ielem, ip, false);
+    getHardVals(hardStress_, hardParams_);
 
     if (!inelastic || ((jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
     {
@@ -224,10 +371,10 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
       break;
     }
 
-    args[jem::SliceTo(dofCount_)] = stress;
-    args[jem::SliceFromTo(dofCount_, argCount_)] = hardStress;
+    yieldArgs_[jem::SliceTo(dofCount_)] = stress;
+    yieldArgs_[jem::SliceFromTo(dofCount_, argCount_)] = hardStress_;
 
-    yieldValue = yieldCond_->getValue(args.addr());
+    yieldValue = getYield_(yieldArgs_);
 
     if (verbosity_ > 2)
       jem::System::debug(myName_) << "        iter = " << liter << ", f = " << yieldValue << "\n";
@@ -240,39 +387,27 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     }
     // SUBHEADER2("Step 3", liter)
 
-    if (yieldDeriv_.size() > 0)
-    {
-      yieldGrad = jive_helpers::evalFuncs(yieldDeriv_, args);
-    }
-    else
-    {
-      yieldGrad = jive_helpers::funcGrad(yieldCond_, args);
-      for (idx_t i = 0; i < dofCount_; i++)
-        if (jem::numeric::abs(args[i]) < jem::Float::EPSILON)
-          yieldGrad[i] = 0.;
-    }
+    getYieldGrad_(yieldGrad_, yieldArgs_);
 
-    deltaDeltaFlow = yieldValue / (dotProduct(yieldGrad[jem::SliceTo(dofCount_)], matmul(materialK_, yieldGrad[jem::SliceTo(dofCount_)])) + dotProduct(yieldGrad[jem::SliceFromTo(dofCount_, argCount_)], matmul(materialH_, yieldGrad[jem::SliceFromTo(dofCount_, argCount_)])));
+    deltaDeltaFlow = yieldValue / (dotProduct(yieldGrad_[jem::SliceTo(dofCount_)], matmul(materialK_, yieldGrad_[jem::SliceTo(dofCount_)])) + dotProduct(yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)], matmul(materialH_, yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)])));
 
     // SUBHEADER2("Step 4", liter)
-    plastStrain += deltaDeltaFlow * yieldGrad[jem::SliceTo(dofCount_)];
-    hardParams += deltaDeltaFlow * yieldGrad[jem::SliceFromTo(dofCount_, argCount_)];
+    plastStrain_ += deltaDeltaFlow * yieldGrad_[jem::SliceTo(dofCount_)];
+    hardParams_ += deltaDeltaFlow * yieldGrad_[jem::SliceFromTo(dofCount_, argCount_)];
     deltaFlow += deltaDeltaFlow;
 
     liter++;
   }
 
   currStrains_(ALL, ip, ielem) = strain;
-  currPlastStrains_(ALL, ip, ielem) = plastStrain;
-  currHardParams_(ALL, ip, ielem) = hardParams;
+  currPlastStrains_(ALL, ip, ielem) = plastStrain_;
+  currHardParams_(ALL, ip, ielem) = hardParams_;
   currDeltaFlow_(ip, ielem) = deltaFlow;
 }
 
 void ElastoPlasticRodMaterial::applyDeform()
 {
-  Vector oldElastStrain(currStrains_.size(0));
   Vector currElastStrain(currStrains_.size(0));
-  Vector oldStress(currStrains_.size(0));
   Vector currStress(currStrains_.size(0));
   Vector deltaPlastStrain(currStrains_.size(0));
   Vector currHardParams(currHardParams_.size(0));
@@ -281,11 +416,9 @@ void ElastoPlasticRodMaterial::applyDeform()
   {
     for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      oldElastStrain = oldStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
       currElastStrain = currStrains_(ALL, ip, ielem) - currPlastStrains_(ALL, ip, ielem);
       deltaPlastStrain = currPlastStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
       currHardParams = currHardParams_(ALL, ip, ielem);
-      Super::getStress(oldStress, oldElastStrain);
       Super::getStress(currStress, currElastStrain);
 
       energyHardPot_(ip, ielem) = 0.5 * dotProduct(currHardParams, matmul(materialH_, currHardParams));
@@ -294,8 +427,9 @@ void ElastoPlasticRodMaterial::applyDeform()
       WARN_ASSERT2(currDeltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
       if (jem::numeric::abs(currDeltaFlow_(ip, ielem)) > jem::Float::EPSILON)
       {
-        energyDiss_(ip, ielem) += dotProduct((oldStress + currStress) / 2., deltaPlastStrain);
+        energyDiss_(ip, ielem) += dotProduct((oldStresses_(ALL, ip, ielem) + currStress) / 2., deltaPlastStrain);
       }
+      oldStresses_(ALL, ip, ielem) = currStress;
     }
   }
 

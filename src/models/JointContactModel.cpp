@@ -208,29 +208,39 @@ void JointContactModel::findContacts_
 {
   contactsA_.clear();
   contactsB_.clear();
-  Vector posA(allNodes_.rank());
-  Vector posB(allNodes_.rank());
-  IdxVector dofsA(allNodes_.rank());
-  IdxVector dofsB(allNodes_.rank());
+
+  const idx_t rank = allNodes_.rank();
+  const idx_t jointCount = jointList_.size();
+  const IdxVector transTypes({0, 1, 2});
+
+  // current position and displacement of every joint, computed once per
+  // search instead of once per joint pair
+  Matrix jointPos(rank, jointCount);
+  Matrix jointDisp(rank, jointCount);
+  IdxVector dofs(rank);
+
+  for (idx_t ijoint = 0; ijoint < jointCount; ijoint++)
+  {
+    dofs_->getDofIndices(dofs, jointList_[ijoint], transTypes);
+    allNodes_.getNodeCoords(jointPos[ijoint], jointList_[ijoint]);
+    jointDisp[ijoint] = disp[dofs];
+    jointPos[ijoint] += jointDisp[ijoint];
+  }
 
   // iterate through the joints
-  for (idx_t ijointA = 0; ijointA < jointList_.size() - 1; ijointA++)
+  for (idx_t ijointA = 0; ijointA < jointCount - 1; ijointA++)
   {
-    // get the positions of the node
-    dofs_->getDofIndices(dofsA, jointList_[ijointA], IdxVector({0, 1, 2}));
-    allNodes_.getNodeCoords(posA, jointList_[ijointA]);
-    posA += disp[dofsA];
+    const Vector posA = jointPos[ijointA];
+    const Vector dispA = jointDisp[ijointA];
 
-    for (idx_t ijointB = ijointA + 1; ijointB < jointList_.size(); ijointB++)
+    for (idx_t ijointB = ijointA + 1; ijointB < jointCount; ijointB++)
     {
-      // get the positions of the node
-      dofs_->getDofIndices(dofsB, jointList_[ijointB], IdxVector({0, 1, 2}));
-      allNodes_.getNodeCoords(posB, jointList_[ijointB]);
-      posB += disp[dofsB];
+      const Vector posB = jointPos[ijointB];
+      const Vector dispB = jointDisp[ijointB];
 
       // check if the nodes are in contact
       // only consider nodes that were not in contact in the undeformed configuration
-      if (norm2(posA - posB) <= 2 * radius_ && norm2(posA - disp[dofsA] - (posB - disp[dofsB])) > 2 * radius_)
+      if (norm2(posA - posB) <= 2 * radius_ && norm2(posA - dispA - (posB - dispB)) > 2 * radius_)
       {
         contactsA_.pushBack(ijointA);
         contactsB_.pushBack(ijointB);

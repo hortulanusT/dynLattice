@@ -61,6 +61,8 @@ ElasticRodMaterial::ElasticRodMaterial(const String &name,
   materialM_.resize(6, 6);
   materialM_ = 0.0;
 
+  stiffWork_.resize(6, 6);
+
   configure(props, globdat);
   getConfig(conf, globdat);
 }
@@ -349,11 +351,20 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l) const
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const
 {
-  if (jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON)
+  if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
     return getLumpedMass(l);
 
-  if (ielem == 0 || ielem == nElem_ - 1)
-    return Matrix(edgeFact_ * getLumpedMass(l));
+  // same edge elements and block scaling as getMaterialMass(ielem, ip)
+  if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
+  {
+    Matrix mass = getLumpedMass(l);
+    mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
+    mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
+    mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
+
+    return mass;
+  }
 
   return getLumpedMass(l);
 }
@@ -363,23 +374,32 @@ Matrix ElasticRodMaterial::getMaterialStiff() const
   return materialK_.clone();
 }
 
-Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &) const
+Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
 {
+  Matrix stiff(materialK_.size(0), materialK_.size(1));
+  getMaterialStiff(stiff, ielem, ip);
+  return stiff;
+}
+
+void ElasticRodMaterial::getMaterialStiff(const Matrix &stiff) const
+{
+  stiff = materialK_;
+}
+
+void ElasticRodMaterial::getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &) const
+{
+  stiff = materialK_;
+
   if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
-    return getMaterialStiff();
+    return;
 
   if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
   {
-    Matrix stiff = getMaterialStiff();
     stiff(jem::SliceTo(3), jem::SliceTo(3)) *= pow(edgeFact_, 2);
     stiff(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(edgeFact_, 3);
     stiff(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(edgeFact_, 3);
     stiff(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(edgeFact_, 4);
-
-    return stiff;
   }
-
-  return getMaterialStiff();
 }
 
 Matrix ElasticRodMaterial::getMaterialMass() const
@@ -387,34 +407,45 @@ Matrix ElasticRodMaterial::getMaterialMass() const
   return materialM_.clone();
 }
 
-Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &) const
+Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
 {
+  Matrix mass(materialM_.size(0), materialM_.size(1));
+  getMaterialMass(mass, ielem, ip);
+  return mass;
+}
+
+void ElasticRodMaterial::getMaterialMass(const Matrix &mass) const
+{
+  mass = materialM_;
+}
+
+void ElasticRodMaterial::getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &) const
+{
+  mass = materialM_;
+
   if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
-    return getMaterialMass();
+    return;
 
   if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
   {
-    Matrix mass = getMaterialMass();
     mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
     mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
     mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
     mass(jem::SliceFrom(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 4);
-
-    return mass;
   }
-
-  return getMaterialMass();
 }
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain)
 {
-  stress = matmul(getMaterialStiff(), strain);
+  getMaterialStiff(stiffWork_);
+  stress = matvec_.matmul(stiffWork_, strain);
 }
 
 void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool)
 {
   currStrains_(ALL, ip, ielem) = strain;
-  stress = matmul(getMaterialStiff(ielem, ip), strain);
+  getMaterialStiff(stiffWork_, ielem, ip);
+  stress = matvec_.matmul(stiffWork_, strain);
 }
 
 void ElasticRodMaterial::getTable(XTable &, const Vector &, const String &name, const IdxVector &) const
@@ -432,7 +463,8 @@ void ElasticRodMaterial::applyDeform()
   {
     for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
-      energyPot_(ip, ielem) = 0.5 * dotProduct(currStrains_(ALL, ip, ielem), matmul(getMaterialStiff(ielem, ip), currStrains_(ALL, ip, ielem)));
+      getMaterialStiff(stiffWork_, ielem, ip);
+      energyPot_(ip, ielem) = 0.5 * dotProduct(currStrains_(ALL, ip, ielem), matvec_.matmul(stiffWork_, currStrains_(ALL, ip, ielem)));
     }
   }
 

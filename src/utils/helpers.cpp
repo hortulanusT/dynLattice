@@ -162,10 +162,24 @@ void mat2vec(const Vector &vec, const Matrix &mat)
 void mul3(const Matrix &C, const Matrix &A, const Matrix &B)
 {
   Mat3 T;
-  jem::numeric::matmul(T, A, B);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      T(i, j) = A(i, 0) * B(0, j) + A(i, 1) * B(1, j) + A(i, 2) * B(2, j);
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
       C(i, j) = T(i, j);
+}
+
+void mul3(const Vector &y, const Matrix &A, const Vector &x)
+{
+  const Vec3 t = {x[0], x[1], x[2]};
+  for (int i = 0; i < 3; i++)
+  {
+    double s = 0.;
+    for (int j = 0; j < 3; j++)
+      s += A(i, j) * t[j];
+    y[i] = s;
+  }
 }
 
 void expVec(const Matrix &Exp, const Vector &psi)
@@ -298,17 +312,22 @@ double matrixNorm2(const Matrix &mat)
 Matrix skew(const Vector &vec)
 {
   Matrix res(3, 3);
-  res = 0.;
-
-  res(0, 1) = -1 * vec[2];
-  res(0, 2) = 1 * vec[1];
-  res(1, 2) = -1 * vec[0];
-  res(1, 0) = 1 * vec[2];
-  res(2, 0) = -1 * vec[1];
-  res(2, 1) = 1 * vec[0];
+  skew(res, vec);
 
   return res;
 };
+
+void skew(const Matrix &S, const Vector &vec)
+{
+  S = 0.;
+
+  S(0, 1) = -1 * vec[2];
+  S(0, 2) = 1 * vec[1];
+  S(1, 2) = -1 * vec[0];
+  S(1, 0) = 1 * vec[2];
+  S(2, 0) = -1 * vec[1];
+  S(2, 1) = 1 * vec[0];
+}
 
 Vector unskew(const Matrix &mat)
 {
@@ -334,5 +353,36 @@ Vector unskew(const Matrix &mat)
   res /= 2.;
 
   return res;
+}
+
+void setDofValue(jive::util::Constraints &cons, const idx_t idof, const double rval)
+{
+  if (cons.isSlaveDof(idof) && cons.masterDofCount(idof) == 0 && cons.hasRvalue(idof))
+    cons.setRvalue(idof, rval);
+  else
+    cons.addConstraint(idof, rval);
+}
+
+void linkDofs(jive::util::Constraints &cons, const idx_t idof, const idx_t jdof, const double coeff)
+{
+  // a prescribed master: JIVE would store idof = coeff * value of jdof
+  if (cons.isSlaveDof(jdof) && cons.masterDofCount(jdof) == 0 && cons.hasRvalue(jdof))
+  {
+    setDofValue(cons, idof, coeff * cons.getRvalue(jdof));
+    return;
+  }
+
+  if (cons.isSlaveDof(idof) && cons.masterDofCount(idof) == 1 && !cons.hasRvalue(idof))
+  {
+    double rval;
+    IdxVector jdofs(1);
+    Vector coeffs(1);
+    cons.getConstraint(rval, jdofs, coeffs, idof);
+
+    if (jdofs[0] == jdof && jem::numeric::abs(coeffs[0] - coeff) <= 0.)
+      return;
+  }
+
+  cons.addConstraint(idof, jdof, coeff);
 }
 } // namespace jive_helpers

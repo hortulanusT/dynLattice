@@ -16,6 +16,7 @@
 #include <jem/numeric/func/Function.h>
 
 #include <jive/Array.h>
+#include <jive/util/Constraints.h>
 #include <jive/util/FuncUtils.h>
 
 #define WARN(key) jem::System::warn() << key << "\n";
@@ -109,13 +110,51 @@ void vec2mat(const Matrix &mat, const Vector &vec);
 /// @param[in] mat  Matrix whose entry count matches the vector size
 void mat2vec(const Vector &vec, const Matrix &mat);
 
+// -----------------------------------------------------------------------
+// Temporary arrays: why and how we avoid them
+//
+// A JEM array (Vector, Matrix, Cubix) is a small handle that points to a
+// block of numbers. Copying a handle ("Vector a = b;") is cheap and does NOT
+// copy the numbers: a and b then show the same numbers. Creating a new array,
+// or writing "x = matmul(A, v)", asks the memory manager for a fresh block of
+// numbers and gives it back afterwards. For the 3 to 6 numbers of a rod
+// element this bookkeeping costs more than the arithmetic itself, and in the
+// force assembly it happens millions of times per run. Therefore the code that
+// is executed for every element and every time step ("hot code") follows
+// three rules; everywhere else (set-up, output, rarely used code) the short
+// forms matmul(A, v) and skew(v) stay, because they are easier to read.
+//
+//  1. Work arrays: arrays that live as (mutable) members of the class, are
+//     created once in the constructor/configure and overwritten in every
+//     call. A work array is always written completely before it is read
+//     within the same call, and it is never used to carry values from one
+//     call to the next. A class with work arrays must not be used by several
+//     threads at once.
+//  2. 3 x 3 products: mul3(C, A, B) and mul3(y, A, x). The result may be one
+//     of the factors.
+//  3. All other matrix products: a MatmulChain member (jem::numeric), which
+//     keeps its result array and reuses it. The result is only valid until
+//     the next call of the same chain, so use it directly or copy it first.
+// -----------------------------------------------------------------------
+
 /// @brief C = A * B for 3 x 3 matrices without heap allocation.
 ///
-/// The product is formed on the stack first, so C may alias A or B.
+/// The product is formed on the stack first, so C may alias A or B (unlike
+/// jem::numeric::matmul(C, A, B)); the 3 x 3 sizes are fixed, which makes it
+/// faster than the general matmul. Use it for every 3 x 3 product in hot code.
 /// @param[out] C  3 x 3 result
 /// @param[in] A  3 x 3 left factor
 /// @param[in] B  3 x 3 right factor
 void mul3(const Matrix &C, const Matrix &A, const Matrix &B);
+
+/// @brief y = A * x for a 3 x 3 matrix without heap allocation.
+///
+/// x is copied first, so y may alias x. The sums are formed in the same order
+/// as in jem::numeric::matmul (starting from zero), so the results are the same.
+/// @param[out] y  3 vector result
+/// @param[in] A  3 x 3 matrix (may be a transposed view)
+/// @param[in] x  3 vector
+void mul3(const Vector &y, const Matrix &A, const Vector &x);
 
 /// @brief compute the exponential of a axial vector.
 ///
@@ -165,9 +204,18 @@ double matrixNorm2(const Matrix &mat);
 
 /// @brief construct a skew symetric matrix from a given vector.
 ///
+/// Convenient form for set-up code; it creates a new matrix. In hot code use
+/// the form below with a work matrix.
 /// @param[in] vec  Vector to be changed to a skew-symmetric matrix
 /// @returns skew symmetric matrix
 Matrix skew(const Vector &vec);
+
+/// @brief fill an existing 3 x 3 matrix with the skew symmetric matrix of a vector
+///
+/// Does not create a new matrix, so it is the form for hot code.
+/// @param[out] S  3 x 3 skew symmetric matrix
+/// @param[in] vec  Vector
+void skew(const Matrix &S, const Vector &vec);
 
 /// @brief construct a axial vector from a given skew-symmetric
 /// matrix
@@ -175,4 +223,19 @@ Matrix skew(const Vector &vec);
 /// @param[in] mat  Skew-symmetric matrix
 /// @returns axial vector
 Vector unskew(const Matrix &mat);
+
+/// @brief prescribe the value of a dof, i.e. constrain idof = rval.
+///
+/// @param[in,out] cons  constraints to modify
+/// @param[in] idof  dof index to prescribe
+/// @param[in] rval  prescribed value
+void setDofValue(jive::util::Constraints &cons, const idx_t idof, const double rval);
+
+/// @brief link a slave dof to a master dof, i.e. constrain idof = coeff * jdof.
+///
+/// @param[in,out] cons  constraints to modify
+/// @param[in] idof  slave dof index
+/// @param[in] jdof  master dof index
+/// @param[in] coeff  coefficient of the master dof
+void linkDofs(jive::util::Constraints &cons, const idx_t idof, const idx_t jdof, const double coeff);
 }; // namespace jive_helpers

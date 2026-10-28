@@ -9,7 +9,7 @@
 | `Solver.integrator.type = "MilneDevice";` | use the same adaptive MilneDeviceModule integrator as in \ref prop1 |
 | `Solver.integrator.deltaTime = 2e-9;` | start with a much smaller time step \f$2\times10^{-9}\f$s than Test 1, since the impact loading and thin rods involve much higher characteristic frequencies |
 | `Solver.integrator.dofs_SO3 = ["rx", "ry", "rz"];` | tell the integrator which degrees of freedom are rotations living on SO(3), so it can update/interpolate them consistently |
-| `Solver.integrator.lengthScale = 3.7500000000000003e-05;` | a characteristic length (here the rod's half cross-section side length) used internally to non-dimensionalize the adaptive error estimate |
+| `Solver.integrator.lengthScale = 3.7500000000000003e-05;` | a characteristic length used internally to non-dimensionalize the adaptive error estimate |
 | `Solver.integrator.precision = .3e-4;` | set the target relative error used by the adaptive step-size control |
 | **File Includes** | |
 | `include "input.pro";` | include the \ref input2 file defining input modules, the parameterized geometry and periodic node groups |
@@ -28,7 +28,7 @@ The `input.pro` file defines the input modules that read the parameterized geome
 | `Input.input.verbose = false;` | suppress some outputs |
 | `Input.input.store_tangents = true;` | additionally store the tangent direction of each rod segment at the nodes, needed to construct the initial (curved) rod kinematics |
 | `Input.input.onelab.Rotation = "180";` | set the GMSH `onelab` parameter `Rotation` (rotates the whole structure by 180°) |
-| `Input.input.onelab.BaseWidth="0.0083";` | set the honeycomb's base bar width \f$b=.3\f$mm |
+| `Input.input.onelab.BaseWidth="0.0083";` | set the honeycomb's base bar width \f$b\f$ (before scaling) |
 | `Input.input.onelab.LengthRatio="0.5883253012048192";` | set the ratio between the two bar lengths of the re-entrant unit cell |
 | `Input.input.onelab.Angle="55";` | set the re-entrant angle between the two bars to 55° |
 | `Input.input.onelab.Thickness="0.00075";` | set the (unused by the .geo file directly, but referenced for context) wall thickness to 0.75mm |
@@ -54,7 +54,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | **Lattice / Material Configuration** | |
 | `model.model.lattice.type = "Lattice";` | as in \ref prop1, use a LatticeModel to assemble many individual rods into one model |
 | `model.model.lattice.prefix = "beam_";` | prefix used for the individual rod element names |
-| `model.model.lattice.child.type = 'specialCosseratRod";` | each rod in the lattice is again a SpecialCosseratRodModel |
+| `model.model.lattice.child.type = "specialCosseratRod";` | each rod in the lattice is again a SpecialCosseratRodModel |
 | `model.model.lattice.child.dofNamesTrans = ["dx", "dy", "dz"];` | translational degrees of freedom |
 | `model.model.lattice.child.dofNamesRot = ["rx", "ry", "rz"];` | rotational degrees of freedom |
 | `model.model.lattice.child.material_ey = [ 0., 0., 1. ];` | set the rod's local cross-section "up" direction, needed to orient the (non-circular) rectangular cross-section |
@@ -66,7 +66,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.lattice.child.material.density=8000.;` | steel density, \f$8000\f$ kg/m³ |
 | `model.model.lattice.child.material.yieldCond = "...";` | define the (multi-axial) yield surface, fitted so its yield strength matches a macroscopic 280 MPa yield strength scaled from a microscopic J2 value of 450 MPa and the rod's cross-section |
 | `model.model.lattice.child.material.kinematicTensor = [...];` | define the 6×6 kinematic-hardening modulus tensor, scaled from a reference hardening modulus of 20 GPa down to the 1.75 GPa hardening modulus fitted to the Johnson-Cook material model used experimentally |
-| `model.model.lattice.child.material.edge_factor = 1.25;` | increase the rod's effective bending stiffness by 25% to account for the stiffening effect of the physical joints connecting the rods |
+| `model.model.lattice.child.material.edge_factor = 1.25;` | modify the elements at both ends of each rod (`edge_elements`, default 1) to account for the stiffening effect of the physical joints connecting the rods: their stiffness blocks (translational, coupling, rotational) are multiplied by \f$f^2\f$, \f$f^3\f$, \f$f^4\f$ and their mass blocks by \f$(2-f)^2\f$, \f$(2-f)^3\f$, \f$(2-f)^4\f$ with \f$f=1.25\f$, i.e. the edge elements become stiffer and, on purpose, lighter |
 | **Self-Contact** | |
 | `model.model.lattice.contact.type = "RodContact";` | enable rod-on-rod self-contact, since the re-entrant cells touch each other once sufficiently compacted |
 | `model.model.lattice.contact.radius=0.000375;` | contact radius, matching the rod's half cross-section side length |
@@ -101,17 +101,25 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.fixed.dispIncr = 0.;` | homogeneous (zero) constraint |
 | **Compliant Support Plate** | |
 | `model.model.models += "plate_springs";` | add a further sub-model representing the support plate |
-| `model.model.plate_springs.type = 'springMass";` | SpringMassModel, used to model the compliant support as a small elastic rod rather than a rigid boundary |
+| `model.model.plate_springs.type = "SpringMass";` | SpringMassModel, used to model the compliant support as a small elastic rod rather than a rigid boundary |
 | `model.model.plate_springs.boundary = "ymin";` | attach the spring to the bottom ("ymin") edge |
 | `model.model.plate_springs.springs = [ "plate1"];` | define a single named spring, "plate1" |
 | `model.model.plate_springs.plate1.extentVector = [ 0., -0.01, 0.];` | the spring rod extends 10mm further downward from the lattice's base |
 | `model.model.plate_springs.plate1.nElem = 4;` | discretize the spring rod into 4 elements |
 | `model.model.plate_springs.plate1.pElem = 1;` | use linear (order 1) elements for the spring rod |
-| `model.model.plate_springs.plate1.type	= 'specialCosseratRod";` | the spring itself is again a SpecialCosseratRodModel |
+| `model.model.plate_springs.plate1.type	= "specialCosseratRod";` | the spring itself is again a SpecialCosseratRodModel |
 | `model.model.plate_springs.plate1.dofNamesTrans	= [ "dx", "dy", "dz" ];` | translational degrees of freedom |
 | `model.model.plate_springs.plate1.dofNamesRot	= [ "rx", "ry", "rz" ];` | rotational degrees of freedom |
 | `model.model.plate_springs.plate1.material_ey = [0., 0., 1.];` | cross-section orientation |
 | `model.model.plate_springs.plate1.material = "ElasticRod" { ... };` | a purely elastic rod representing a steel plate, \f$0.18\f$m wide and 0.75mm thick, used to give the support a realistic, finite stiffness rather than being perfectly rigid |
+
+\note The same yield surface \f$\sum_i \lvert s_i/(c_i-h_i)\rvert^{p_i}-1\f$ can also be evaluated natively, which is faster than the interpreted `yieldCond` and gives the same results up to rounding. Replace the `yieldCond` lines (they cannot be combined) by
+```
+model.model.lattice.child.material.yieldType     = "SuperEllipse";
+model.model.lattice.child.material.yieldStrength = ["280/450*205*0.75^2", "280/450*205*0.75^2", "280/450*467.5*0.75^2", "280/450*0.1175*0.75^3", "280/450*0.1175*0.75^3", "280/450*0.09375*0.75^3"];
+model.model.lattice.child.material.yieldExponent = [2.68, 2.68, 1.75, 1.93, 1.93, 1.70];
+```
+`yieldStrength` holds the strengths \f$c_i\f$ and `yieldExponent` the exponents \f$p_i\f$ (one per DOF, written as floats); \f$h_i\f$ are the kinematic hardening stresses. With isotropic hardening the constant becomes \f$1+h_0\f$.
 
 \section output2 output.pro
 The `output.pro` file defines the output modules used to record the impact response and produce the ParaView visualization.
@@ -122,12 +130,12 @@ The `output.pro` file defines the output modules used to record the impact respo
 | `log.pattern = "*.info";` | only log "info"-level messages |
 | `log.file="$(CASE_NAME)/run.log";` | write the log to a file next to the case's other outputs |
 | **Output Module Configuration** | |
-| `Output.modules = ["groupOut", 'sampling", "paraview"];` | define three output modules: group averaging, CSV sampling, and ParaView visualization |
+| `Output.modules = ["groupOut", "sampling", "paraview"];` | define three output modules: group averaging, CSV sampling, and ParaView visualization |
 | `Output.groupOut.type = "GroupOutput";` | GroupOutputModule, used to compute averaged group quantities used below |
 | `Output.groupOut.nodeGroups = ["ymax", "ymin", "plate1_bot"];` | track the impactor, the base of the lattice, and the bottom of the support spring |
 | `Output.groupOut.dofs = "dy";` | in the vertical direction |
 | **CSV Output Configuration** | |
-| `Output.sampling.type = 'sample";` | SampleModule, used to write a CSV time history |
+| `Output.sampling.type = "Sample";` | SampleModule, used to write a CSV time history |
 | `Output.sampling.file = "$(CASE_NAME)/data.csv";` | output file path |
 | `Output.sampling.header="...";` | descriptive column header for the CSV file: time, impactor velocity/displacement/force, base force, nominal strain, top/bottom pressure, potential/dissipated/kinetic energy, mass, support-plate force |
 | `Output.sampling.dataSets=[...];` | the corresponding data expressions: `t`, `ymax.velo.dy`, `ymax.disp.dy`, `ymax.resp.dy`, `ymin.resp.dy`, the nominal compaction `ymax.disp.dy/SIZE.Y`, the top/bottom pressures (force divided by the lattice's cross-sectional area), `potentialEnergy`, `dissipatedEnergy`, `kineticEnergy`, `mass`, and the support-plate force `plate1_bot.resp.dy` |
@@ -144,5 +152,5 @@ The `output.pro` file defines the output modules used to record the impact respo
 | `Output.paraview.plate1.el_data = [ "mat_strain", "mat_stress" ];` | ... except for element data, since the spring is purely elastic (no plastic strain) |
 | `Output.paraview.plate1.node_data = ["fres"];` | ... and node data, since it carries no contact or lumped mass |
 | `Output.paraview.output_format = "$(CASE_NAME)/vis%i";` | output file naming pattern |
-| `Output.paraview.sampleWhen = "(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo > 0.002) OR (i<=1)";` | write a ParaView frame every 1% strain |
+| `Output.paraview.sampleWhen = "(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo > 0.01) OR (i<=1)";` | write a ParaView frame every 1% strain |
 | `Output.paraview.sampleInfo="abs(ymax.disp.dy/SIZE.Y)";` | define strain measure for Output |
