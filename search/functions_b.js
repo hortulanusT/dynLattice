@@ -8,5 +8,5 @@ var searchData=
   ['material_5',['Material',['../classMaterial.html#ab1195615c77eb8f971629fabb8ca4ad9',1,'Material']]],
   ['matrixnorm2_6',['matrixNorm2',['../namespacejive__helpers.html#ad17adc84a741b97c647e04aa1a75d43e',1,'jive_helpers']]],
   ['milnedevicemodule_7',['MilneDeviceModule',['../classMilneDeviceModule.html#a20b9d6469dd7f5e8b969fc9693230543',1,'MilneDeviceModule']]],
-  ['mul3_8',['mul3',['../namespacejive__helpers.html#ae42d7761ccb90542c70d63c22c1e8f3e',1,'jive_helpers']]]
+  ['mul3_8',['mul3',['../namespacejive__helpers.html#ae42d7761ccb90542c70d63c22c1e8f3e',1,'jive_helpers::mul3(const Matrix &amp;C, const Matrix &amp;A, const Matrix &amp;B)'],['../namespacejive__helpers.html#a3655fb2bd8a6e87d955b95913a7d31ad',1,'jive_helpers::mul3(const Vector &amp;y, const Matrix &amp;A, const Vector &amp;x)']]]
 ];

@@ -247,24 +247,22 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
 <div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>  <span class="keywordtype">void</span> initRotation_();</div>
 <div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>  <span class="keywordtype">void</span> initStrain_();</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  <span class="keywordtype">void</span> getGeomtericStiffness_(<span class="keyword">const</span> Cubix &amp;B,</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                              <span class="keyword">const</span> Matrix &amp;stresses,</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                              <span class="keyword">const</span> Matrix &amp;nodePhi_0,</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                              <span class="keyword">const</span> Matrix &amp;nodeU) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>  <span class="keywordtype">void</span> getStrains_(<span class="keyword">const</span> Matrix &amp;strains,</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>                   <span class="keyword">const</span> Vector &amp;w,</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>                   <span class="keyword">const</span> Matrix &amp;nodePhi_0,</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>                   <span class="keyword">const</span> Matrix &amp;nodeU,</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>                   <span class="keyword">const</span> Cubix &amp;nodeLambda,</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>                   <span class="keyword">const</span> idx_t ie,</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>                   <span class="keyword">const</span> <span class="keywordtype">bool</span> spatial = <span class="keyword">true</span>) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  <span class="keywordtype">void</span> getStrains_(<span class="keyword">const</span> Matrix &amp;strains,</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>                   <span class="keyword">const</span> Vector &amp;w,</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>                   <span class="keyword">const</span> Cubix &amp;ipPI,</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>  <span class="keywordtype">void</span> initShape_();</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="keywordtype">void</span> initStrain_();</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>  <span class="keywordtype">void</span> getTangents_(<span class="keyword">const</span> Matrix &amp;phiP,</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>                    <span class="keyword">const</span> Matrix &amp;nodePhi_0,</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>                    <span class="keyword">const</span> Matrix &amp;nodeU,</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>                    <span class="keyword">const</span> idx_t ie) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>  <span class="keywordtype">void</span> getGeomtericStiffness_(<span class="keyword">const</span> Cubix &amp;B,</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>                              <span class="keyword">const</span> Matrix &amp;stresses,</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>                              <span class="keyword">const</span> Matrix &amp;nodePhi_0,</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>                              <span class="keyword">const</span> Matrix &amp;nodeU) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  <span class="keywordtype">void</span> getStrains_(<span class="keyword">const</span> Matrix &amp;strains,</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>                   <span class="keyword">const</span> Vector &amp;w,</div>
 <div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>                   <span class="keyword">const</span> Matrix &amp;nodePhi_0,</div>
 <div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>                   <span class="keyword">const</span> Matrix &amp;nodeU,</div>
 <div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                   <span class="keyword">const</span> Cubix &amp;nodeLambda,</div>
@@ -305,36 +303,52 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> <span class="keyword">private</span>:</div>
 <div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>  Assignable&lt;ElementGroup&gt; rodElems_; </div>
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>  IdxVector rodNodes_;                </div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>  Assignable&lt;ElementSet&gt; allElems_;   </div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  Assignable&lt;NodeSet&gt; allNodes_;      </div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> </div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>  Ref&lt;DofSpace&gt; dofs_;     </div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  Ref&lt;Line3D&gt; shapeK_;     </div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>  Ref&lt;Line3D&gt; shapeM_;     </div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>  Ref&lt;Material&gt; material_; </div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  Ref&lt;Model&gt; hinges_;      </div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span> </div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>  IdxVector transTypes_; </div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>  IdxVector rotTypes_;   </div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  IdxVector jtypes_;     </div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  <span class="keyword">mutable</span> IdxMatrix nodeDofs_;   </div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  <span class="keyword">mutable</span> <span class="keywordtype">bool</span> nodeDofsValid_;   </div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="preprocessor">#ifndef NDEBUG</span></div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>  <span class="keyword">mutable</span> <span class="keywordtype">bool</span> energiesStored_ = <span class="keyword">false</span>; </div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="keywordtype">bool</span> symOnly_;        </div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  Vector thickFact_;    </div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>  Vector materialYDir_; </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  IdxVector givenNodes_; </div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  Matrix givenDirs_;     </div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span> </div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>  Cubix LambdaN_;    </div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>  Cubix matStrain0_; </div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>};</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>  IdxVector rodNodeIdx_;              </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>  Assignable&lt;ElementSet&gt; allElems_;   </div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  Assignable&lt;NodeSet&gt; allNodes_;      </div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>  Ref&lt;DofSpace&gt; dofs_;     </div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>  Ref&lt;Line3D&gt; shapeK_;     </div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>  Ref&lt;Line3D&gt; shapeM_;     </div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>  Ref&lt;Material&gt; material_; </div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>  Ref&lt;Model&gt; hinges_;      </div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span> </div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>  IdxVector transTypes_; </div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>  IdxVector rotTypes_;   </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>  IdxVector jtypes_;     </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>  <span class="keyword">mutable</span> IdxMatrix nodeDofs_;   </div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>  <span class="keyword">mutable</span> <span class="keywordtype">bool</span> nodeDofsValid_;   </div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="preprocessor">#ifndef NDEBUG</span></div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  <span class="keyword">mutable</span> <span class="keywordtype">bool</span> energiesStored_ = <span class="keyword">false</span>; </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span> </div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  <span class="keywordtype">bool</span> symOnly_;        </div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>  Vector thickFact_;    </div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  Vector materialYDir_; </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span> </div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  IdxVector givenNodes_; </div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>  Matrix givenDirs_;     </div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span> </div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>  Cubix LambdaN_;    </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>  Cubix matStrain0_; </div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span> </div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>  <span class="comment">// The reference geometry does not change during a run (as for matStrain0_)</span></div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>  Cubix elemGrads_;    </div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>  Matrix elemWeights_; </div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>  <span class="comment">// Work arrays of getStrains_, getStresses_ and the assembly: created once in</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>  <span class="comment">// initShape_ and overwritten in every call (see the note in utils/helpers.h).</span></div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>  <span class="comment">// Not thread safe. ipPhiP_ is filled by getTangents_ and consumed at once.</span></div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>  <span class="keyword">mutable</span> Matrix curPhi_;     </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>  <span class="keyword">mutable</span> Matrix ipPhiP_;     </div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  <span class="keyword">mutable</span> Cubix ipLambda_;    </div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>  <span class="keyword">mutable</span> Cubix ipLambdaP_;   </div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>  <span class="keyword">mutable</span> Matrix lambdaTP_;   </div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>  <span class="keyword">mutable</span> Matrix strainWork_; </div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  <span class="keyword">mutable</span> MatmulChain&lt;double, 2&gt; matmul_; </div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>};</div>
 </div>
 <div class="ttc" id="aLine3D_8h_html"><div class="ttname"><a href="Line3D_8h.html">Line3D.h</a></div><div class="ttdoc">Shape function for 1D line elements in 3D space.</div></div>
 <div class="ttc" id="aMaterialFactory_8h_html"><div class="ttname"><a href="MaterialFactory_8h.html">MaterialFactory.h</a></div><div class="ttdoc">Factory to register all the materials with.</div></div>
@@ -343,10 +357,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a190a0c7d700548ab83908c7ef0eb5ebb"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a190a0c7d700548ab83908c7ef0eb5ebb">SpecialCosseratRodModel::takeAction</a></div><div class="ttdeci">virtual bool takeAction(const String &amp;action, const Properties &amp;params, const Properties &amp;globdat) override</div><div class="ttdoc">Handle model actions.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.cpp:205</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a1a87b3d96552d63705ec62552405debb"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a1a87b3d96552d63705ec62552405debb">SpecialCosseratRodModel::GIVEN_NODES</a></div><div class="ttdeci">static const char * GIVEN_NODES</div><div class="ttdoc">Given direction nodes property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:133</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a1dc97f4994ea59c34ae0b2f71cfcd623"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a1dc97f4994ea59c34ae0b2f71cfcd623">SpecialCosseratRodModel::ROT_DOF_COUNT</a></div><div class="ttdeci">static const idx_t ROT_DOF_COUNT</div><div class="ttdoc">Number of rotational DOFs.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:142</div></div>
-<div class="ttc" id="aclassSpecialCosseratRodModel_html_a4113702c37d25986bb333b1530db63b0"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a4113702c37d25986bb333b1530db63b0">SpecialCosseratRodModel::makeNew</a></div><div class="ttdeci">static Ref&lt; Model &gt; makeNew(const String &amp;name, const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat)</div><div class="ttdoc">Create new SpecialCosseratRodModel instance.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.cpp:1271</div></div>
+<div class="ttc" id="aclassSpecialCosseratRodModel_html_a4113702c37d25986bb333b1530db63b0"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a4113702c37d25986bb333b1530db63b0">SpecialCosseratRodModel::makeNew</a></div><div class="ttdeci">static Ref&lt; Model &gt; makeNew(const String &amp;name, const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat)</div><div class="ttdoc">Create new SpecialCosseratRodModel instance.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.cpp:1323</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a45ac3ed1b7a0683c5e697ff2b2770ab2"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a45ac3ed1b7a0683c5e697ff2b2770ab2">SpecialCosseratRodModel::TRANS_DOF_COUNT</a></div><div class="ttdeci">static const idx_t TRANS_DOF_COUNT</div><div class="ttdoc">Number of translational DOFs.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:141</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a4925beac5bcda2d07f5f8cb24a029cb4"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a4925beac5bcda2d07f5f8cb24a029cb4">SpecialCosseratRodModel::SYMMETRIC_ONLY</a></div><div class="ttdeci">static const char * SYMMETRIC_ONLY</div><div class="ttdoc">Symmetric tangent stiffness property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:131</div></div>
-<div class="ttc" id="aclassSpecialCosseratRodModel_html_a6c1e70dec70a6656e3ada27dae509deb"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a6c1e70dec70a6656e3ada27dae509deb">SpecialCosseratRodModel::declare</a></div><div class="ttdeci">static void declare()</div><div class="ttdoc">Declare model type to factory.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.cpp:1284</div></div>
+<div class="ttc" id="aclassSpecialCosseratRodModel_html_a6c1e70dec70a6656e3ada27dae509deb"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a6c1e70dec70a6656e3ada27dae509deb">SpecialCosseratRodModel::declare</a></div><div class="ttdeci">static void declare()</div><div class="ttdoc">Declare model type to factory.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.cpp:1336</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a6e9e2193e4bb42a53cf24ec5ca908ad8"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a6e9e2193e4bb42a53cf24ec5ca908ad8">SpecialCosseratRodModel::GIVEN_DIRS</a></div><div class="ttdeci">static const char * GIVEN_DIRS</div><div class="ttdoc">Given directions property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:134</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_a931a4b0790496adcb3899d168df1c424"><div class="ttname"><a href="classSpecialCosseratRodModel.html#a931a4b0790496adcb3899d168df1c424">SpecialCosseratRodModel::MATERIAL_Y_DIR</a></div><div class="ttdeci">static const char * MATERIAL_Y_DIR</div><div class="ttdoc">Material y-direction property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:132</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_aa75375721e60f975c33943dfe6ed2496"><div class="ttname"><a href="classSpecialCosseratRodModel.html#aa75375721e60f975c33943dfe6ed2496">SpecialCosseratRodModel::ROT_PART</a></div><div class="ttdeci">static const Slice ROT_PART</div><div class="ttdoc">Rotational DOF slice.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:144</div></div>
@@ -359,12 +373,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_ad7230b5c02f8f40c2bbfa4bbdafcf655"><div class="ttname"><a href="classSpecialCosseratRodModel.html#ad7230b5c02f8f40c2bbfa4bbdafcf655">SpecialCosseratRodModel::LUMPED_MASS</a></div><div class="ttdeci">static const char * LUMPED_MASS</div><div class="ttdoc">Lumped mass property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:135</div></div>
 <div class="ttc" id="aclassSpecialCosseratRodModel_html_aec1ecfef93407d81962a9bdba0fc1b43"><div class="ttname"><a href="classSpecialCosseratRodModel.html#aec1ecfef93407d81962a9bdba0fc1b43">SpecialCosseratRodModel::HINGES</a></div><div class="ttdeci">static const char * HINGES</div><div class="ttdoc">Hinges property.</div><div class="ttdef"><b>Definition</b> SpecialCosseratRodModel.h:136</div></div>
 <div class="ttc" id="ahelpers_8h_html"><div class="ttname"><a href="helpers_8h.html">helpers.h</a></div><div class="ttdoc">file containing some basic helper functions</div></div>
-<div class="ttc" id="anamespacejive__helpers_html_a0b5f66e8ad4468a3dfe2fdb9208df005"><div class="ttname"><a href="namespacejive__helpers.html#a0b5f66e8ad4468a3dfe2fdb9208df005">jive_helpers::unskew</a></div><div class="ttdeci">Vector unskew(const Matrix &amp;mat)</div><div class="ttdoc">construct a axial vector from a given skew-symmetric matrix</div><div class="ttdef"><b>Definition</b> helpers.cpp:313</div></div>
-<div class="ttc" id="anamespacejive__helpers_html_a1831aed12a74679c81a2c462d1072029"><div class="ttname"><a href="namespacejive__helpers.html#a1831aed12a74679c81a2c462d1072029">jive_helpers::expVec</a></div><div class="ttdeci">void expVec(const Matrix &amp;Exp, const Vector &amp;psi)</div><div class="ttdoc">compute the exponential of a axial vector.</div><div class="ttdef"><b>Definition</b> helpers.cpp:171</div></div>
+<div class="ttc" id="anamespacejive__helpers_html_a0b5f66e8ad4468a3dfe2fdb9208df005"><div class="ttname"><a href="namespacejive__helpers.html#a0b5f66e8ad4468a3dfe2fdb9208df005">jive_helpers::unskew</a></div><div class="ttdeci">Vector unskew(const Matrix &amp;mat)</div><div class="ttdoc">construct a axial vector from a given skew-symmetric matrix</div><div class="ttdef"><b>Definition</b> helpers.cpp:332</div></div>
+<div class="ttc" id="anamespacejive__helpers_html_a1831aed12a74679c81a2c462d1072029"><div class="ttname"><a href="namespacejive__helpers.html#a1831aed12a74679c81a2c462d1072029">jive_helpers::expVec</a></div><div class="ttdeci">void expVec(const Matrix &amp;Exp, const Vector &amp;psi)</div><div class="ttdoc">compute the exponential of a axial vector.</div><div class="ttdef"><b>Definition</b> helpers.cpp:185</div></div>
 <div class="ttc" id="anamespacejive__helpers_html_a4fb2a0a5fcc45faa6eefef6174e9f3fb"><div class="ttname"><a href="namespacejive__helpers.html#a4fb2a0a5fcc45faa6eefef6174e9f3fb">jive_helpers::vec2mat</a></div><div class="ttdeci">void vec2mat(const Matrix &amp;mat, const Vector &amp;vec)</div><div class="ttdoc">rearrange a vector into a matrix.</div><div class="ttdef"><b>Definition</b> helpers.cpp:136</div></div>
 <div class="ttc" id="anamespacejive__helpers_html_a87a9b27a70f72443e29e06980c499339"><div class="ttname"><a href="namespacejive__helpers.html#a87a9b27a70f72443e29e06980c499339">jive_helpers::eye</a></div><div class="ttdeci">Matrix eye(const idx_t dim)</div><div class="ttdoc">generates an identity matrix of the given dimension.</div><div class="ttdef"><b>Definition</b> helpers.cpp:106</div></div>
-<div class="ttc" id="anamespacejive__helpers_html_a8a7ed2b1afb1cb70215eb8a4dc084538"><div class="ttname"><a href="namespacejive__helpers.html#a8a7ed2b1afb1cb70215eb8a4dc084538">jive_helpers::e3</a></div><div class="ttdeci">const Vector e3</div><div class="ttdef"><b>Definition</b> helpers.h:51</div></div>
-<div class="ttc" id="anamespacejive__helpers_html_ac93eb1a5ee06a740f26e2c57ed134768"><div class="ttname"><a href="namespacejive__helpers.html#ac93eb1a5ee06a740f26e2c57ed134768">jive_helpers::skew</a></div><div class="ttdeci">Matrix skew(const Vector &amp;vec)</div><div class="ttdoc">construct a skew symetric matrix from a given vector.</div><div class="ttdef"><b>Definition</b> helpers.cpp:298</div></div>
+<div class="ttc" id="anamespacejive__helpers_html_a8a7ed2b1afb1cb70215eb8a4dc084538"><div class="ttname"><a href="namespacejive__helpers.html#a8a7ed2b1afb1cb70215eb8a4dc084538">jive_helpers::e3</a></div><div class="ttdeci">const Vector e3</div><div class="ttdef"><b>Definition</b> helpers.h:52</div></div>
+<div class="ttc" id="anamespacejive__helpers_html_ac93eb1a5ee06a740f26e2c57ed134768"><div class="ttname"><a href="namespacejive__helpers.html#ac93eb1a5ee06a740f26e2c57ed134768">jive_helpers::skew</a></div><div class="ttdeci">Matrix skew(const Vector &amp;vec)</div><div class="ttdoc">construct a skew symetric matrix from a given vector.</div><div class="ttdef"><b>Definition</b> helpers.cpp:312</div></div>
 <div class="ttc" id="atesting_8h_html"><div class="ttname"><a href="testing_8h.html">testing.h</a></div><div class="ttdoc">several compiler macros for faster testing of variables</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

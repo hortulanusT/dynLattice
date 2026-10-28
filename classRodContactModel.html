@@ -155,12 +155,15 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ab97bbcdc11d056b635a6035c842a19a3" id="r_ab97bbcdc11d056b635a6035c842a19a3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#ab97bbcdc11d056b635a6035c842a19a3">findContacts_</a> (IdxVector &amp;elementsA, IdxVector &amp;elementsB, const Vector &amp;disp) const</td></tr>
 <tr class="memdesc:ab97bbcdc11d056b635a6035c842a19a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find pairs of contacts.  <br /></td></tr>
 <tr class="separator:ab97bbcdc11d056b635a6035c842a19a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6f4ebee1b62a33d3a914cb337307904" id="r_aa6f4ebee1b62a33d3a914cb337307904"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#aa6f4ebee1b62a33d3a914cb337307904">findPossibleBeams_</a> (IdxVector &amp;beamsA, IdxVector &amp;beamsB, const Vector &amp;disp) const</td></tr>
-<tr class="memdesc:aa6f4ebee1b62a33d3a914cb337307904"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find beams of possible contact pairs.  <br /></td></tr>
-<tr class="separator:aa6f4ebee1b62a33d3a914cb337307904"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af87c3fd38bab01ca3fc3445a41c96b6b" id="r_af87c3fd38bab01ca3fc3445a41c96b6b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#af87c3fd38bab01ca3fc3445a41c96b6b">findPossibleElements_</a> (IdxVector &amp;elemsA, IdxVector &amp;elemsB, const idx_t &amp;beamA, const idx_t &amp;beamB, const Vector &amp;disp) const</td></tr>
-<tr class="memdesc:af87c3fd38bab01ca3fc3445a41c96b6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the contacting point between two beams in possible contact.  <br /></td></tr>
-<tr class="separator:af87c3fd38bab01ca3fc3445a41c96b6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e1e4c65495bd505355b41f5d2961a64" id="r_a9e1e4c65495bd505355b41f5d2961a64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#a9e1e4c65495bd505355b41f5d2961a64">getElementBoxes_</a> (Matrix &amp;elemBoxMin, Matrix &amp;elemBoxMax, const Vector &amp;disp) const</td></tr>
+<tr class="memdesc:a9e1e4c65495bd505355b41f5d2961a64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the bounding box of every rod element in the current configuration.  <br /></td></tr>
+<tr class="separator:a9e1e4c65495bd505355b41f5d2961a64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad92ecb6b57884df0dc2e27a1a1154e7b" id="r_ad92ecb6b57884df0dc2e27a1a1154e7b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#ad92ecb6b57884df0dc2e27a1a1154e7b">findPossibleBeams_</a> (IdxVector &amp;beamsA, IdxVector &amp;beamsB, const Matrix &amp;elemBoxMin, const Matrix &amp;elemBoxMax) const</td></tr>
+<tr class="memdesc:ad92ecb6b57884df0dc2e27a1a1154e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find beams of possible contact pairs.  <br /></td></tr>
+<tr class="separator:ad92ecb6b57884df0dc2e27a1a1154e7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d1a25bb666758be1a650204985166e8" id="r_a6d1a25bb666758be1a650204985166e8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#a6d1a25bb666758be1a650204985166e8">findPossibleElements_</a> (IdxVector &amp;elemsA, IdxVector &amp;elemsB, const idx_t &amp;beamA, const idx_t &amp;beamB, const Matrix &amp;elemBoxMin, const Matrix &amp;elemBoxMax) const</td></tr>
+<tr class="memdesc:a6d1a25bb666758be1a650204985166e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the contacting point between two beams in possible contact.  <br /></td></tr>
+<tr class="separator:a6d1a25bb666758be1a650204985166e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23df03c5023f0c9f8a8f3b18ba393b3d" id="r_a23df03c5023f0c9f8a8f3b18ba393b3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#a23df03c5023f0c9f8a8f3b18ba393b3d">computeContacts_</a> (MatrixBuilder &amp;mbld, const Vector &amp;fint, const IdxVector &amp;elementsA, const IdxVector &amp;elementsB, const Vector &amp;disp)</td></tr>
 <tr class="memdesc:a23df03c5023f0c9f8a8f3b18ba393b3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the effects of the contact.  <br /></td></tr>
 <tr class="separator:a23df03c5023f0c9f8a8f3b18ba393b3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,6 +185,15 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a4fbd2dec1a864ef4f5c28801801aae89" id="r_a4fbd2dec1a864ef4f5c28801801aae89"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#a4fbd2dec1a864ef4f5c28801801aae89">computeNTS_</a> (Vector &amp;f_contrib, Matrix &amp;k_contrib, const Vector &amp;possS, const Matrix &amp;possM, const double uM) const</td></tr>
 <tr class="memdesc:a4fbd2dec1a864ef4f5c28801801aae89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the force and stiffness contributions of a node-to-segment contact.  <br /></td></tr>
 <tr class="separator:a4fbd2dec1a864ef4f5c28801801aae89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5be52c66f18b2e54dd3ae3dbda413f3" id="r_ae5be52c66f18b2e54dd3ae3dbda413f3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#ae5be52c66f18b2e54dd3ae3dbda413f3">nodeInRod_</a> (const idx_t inode, const idx_t iRod) const</td></tr>
+<tr class="memdesc:ae5be52c66f18b2e54dd3ae3dbda413f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether a node belongs to a rod (see nodeRods_)  <br /></td></tr>
+<tr class="separator:ae5be52c66f18b2e54dd3ae3dbda413f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae01cc7d2fa5362020e8e68e8c9dd18e3" id="r_ae01cc7d2fa5362020e8e68e8c9dd18e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#ae01cc7d2fa5362020e8e68e8c9dd18e3">updNodeDofs_</a> () const</td></tr>
+<tr class="memdesc:ae01cc7d2fa5362020e8e68e8c9dd18e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill the cache of translational dof indices of the rod nodes (see nodeDofs_)  <br /></td></tr>
+<tr class="separator:ae01cc7d2fa5362020e8e68e8c9dd18e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accbcd3b346da957c5c6f714689ae2e5f" id="r_accbcd3b346da957c5c6f714689ae2e5f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRodContactModel.html#accbcd3b346da957c5c6f714689ae2e5f">invalidateNodeDofs_</a> ()</td></tr>
+<tr class="memdesc:accbcd3b346da957c5c6f714689ae2e5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mark the cached dof indices as outdated (connected to the DofSpace events)  <br /></td></tr>
+<tr class="separator:accbcd3b346da957c5c6f714689ae2e5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="classRodContactModel.html" title="Model for rod-to-rod contact interactions using penalty methods.">RodContactModel</a> implements contact mechanics between rod elements using penalty-based formulations. It supports both segment-to-segment and node-to-segment contact types with automatic contact detection, blacklist filtering, and configurable penalty parameters.</p>
@@ -293,8 +305,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element IDs A </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element IDs B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element indices A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element indices B </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector </td></tr>
   </table>
   </dd>
@@ -357,8 +369,8 @@ Protected Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">mbld</td><td>Stiffness matrix builder, updated with contact contributions </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">fint</td><td>Internal force vector, updated with contact contributions </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element indices of one side of the contact </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element indices of the other side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
@@ -565,8 +577,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element ID A </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element ID B </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsA</td><td>Element index A </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elementsB</td><td>Element index B </td></tr>
   </table>
   </dd>
 </dl>
@@ -672,8 +684,8 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">elementsA</td><td>Element IDs of one side of the contact </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">elementsB</td><td>Element IDs of the other side </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elementsA</td><td>Element indices of one side of the contact </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elementsB</td><td>Element indices of the other side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
   </table>
   </dd>
@@ -681,8 +693,8 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aa6f4ebee1b62a33d3a914cb337307904" name="aa6f4ebee1b62a33d3a914cb337307904"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6f4ebee1b62a33d3a914cb337307904">&#9670;&#160;</a></span>findPossibleBeams_()</h2>
+<a id="ad92ecb6b57884df0dc2e27a1a1154e7b" name="ad92ecb6b57884df0dc2e27a1a1154e7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad92ecb6b57884df0dc2e27a1a1154e7b">&#9670;&#160;</a></span>findPossibleBeams_()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -705,8 +717,14 @@ Protected Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector &amp;&#160;</td>
-          <td class="paramname"><em>disp</em>&#160;</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMax</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -720,19 +738,20 @@ Protected Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
+<p>The box of a rod is the union of the boxes of its elements. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">beamsA</td><td>Indices of the beams in contact </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">beamsB</td><td>Indices of corresponding beams </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elemBoxMin</td><td>Lower element box corners (see getElementBoxes_) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elemBoxMax</td><td>Upper element box corners (see getElementBoxes_) </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="af87c3fd38bab01ca3fc3445a41c96b6b" name="af87c3fd38bab01ca3fc3445a41c96b6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af87c3fd38bab01ca3fc3445a41c96b6b">&#9670;&#160;</a></span>findPossibleElements_()</h2>
+<a id="a6d1a25bb666758be1a650204985166e8" name="a6d1a25bb666758be1a650204985166e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d1a25bb666758be1a650204985166e8">&#9670;&#160;</a></span>findPossibleElements_()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -767,8 +786,14 @@ Protected Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Vector &amp;&#160;</td>
-          <td class="paramname"><em>disp</em>&#160;</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMax</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -784,11 +809,12 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">elemsA</td><td>Element ID of one side of the contact </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">elemsB</td><td>Corresponding element ID on the other side </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemsA</td><td>Element index of one side of the contact </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemsB</td><td>Corresponding element index on the other side </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beamA</td><td>Possible beam on side A </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beamB</td><td>Possible beam on side B </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elemBoxMin</td><td>Lower element box corners (see getElementBoxes_) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">elemBoxMax</td><td>Upper element box corners (see getElementBoxes_) </td></tr>
   </table>
   </dd>
 </dl>
@@ -836,6 +862,81 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Coordinate on the main element </dd></dl>
+
+</div>
+</div>
+<a id="a9e1e4c65495bd505355b41f5d2961a64" name="a9e1e4c65495bd505355b41f5d2961a64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e1e4c65495bd505355b41f5d2961a64">&#9670;&#160;</a></span>getElementBoxes_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RodContactModel::getElementBoxes_ </td>
+          <td>(</td>
+          <td class="paramtype">Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Matrix &amp;&#160;</td>
+          <td class="paramname"><em>elemBoxMax</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>disp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Each box encloses the displaced element nodes and is widened by the contact radius. Computed once per contact search, so that the element-level search of every rod pair only compares boxes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemBoxMin</td><td>Lower box corners (globalRank x element count), column = element index </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">elemBoxMax</td><td>Upper box corners (globalRank x element count), column = element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">disp</td><td>Displacement vector of all elements </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="accbcd3b346da957c5c6f714689ae2e5f" name="accbcd3b346da957c5c6f714689ae2e5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accbcd3b346da957c5c6f714689ae2e5f">&#9670;&#160;</a></span>invalidateNodeDofs_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RodContactModel::invalidateNodeDofs_ </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -897,6 +998,49 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ae5be52c66f18b2e54dd3ae3dbda413f3" name="ae5be52c66f18b2e54dd3ae3dbda413f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5be52c66f18b2e54dd3ae3dbda413f3">&#9670;&#160;</a></span>nodeInRod_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool RodContactModel::nodeInRod_ </td>
+          <td>(</td>
+          <td class="paramtype">const idx_t&#160;</td>
+          <td class="paramname"><em>inode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t&#160;</td>
+          <td class="paramname"><em>iRod</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">inode</td><td>Node index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">iRod</td><td>Rod index </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ae2aa0ee6e9ed321b10a920c24a96b3c1" name="ae2aa0ee6e9ed321b10a920c24a96b3c1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae2aa0ee6e9ed321b10a920c24a96b3c1">&#9670;&#160;</a></span>takeAction()</h2>
 
@@ -945,6 +1089,31 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if action was handled </dd></dl>
+
+</div>
+</div>
+<a id="ae01cc7d2fa5362020e8e68e8c9dd18e3" name="ae01cc7d2fa5362020e8e68e8c9dd18e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae01cc7d2fa5362020e8e68e8c9dd18e3">&#9670;&#160;</a></span>updNodeDofs_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RodContactModel::updNodeDofs_ </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

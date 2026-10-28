@@ -140,12 +140,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4dd3c0e438d6dbc03263f743e513eb7" id="r_ab4dd3c0e438d6dbc03263f743e513eb7"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#ab4dd3c0e438d6dbc03263f743e513eb7">getMaterialStiff</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const</td></tr>
 <tr class="memdesc:ab4dd3c0e438d6dbc03263f743e513eb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material stiffness matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:ab4dd3c0e438d6dbc03263f743e513eb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81bf6e72440eeb9b20b7d8a76365e549" id="r_a81bf6e72440eeb9b20b7d8a76365e549"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a81bf6e72440eeb9b20b7d8a76365e549">getMaterialStiff</a> (const Matrix &amp;stiff) const</td></tr>
+<tr class="memdesc:a81bf6e72440eeb9b20b7d8a76365e549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a81bf6e72440eeb9b20b7d8a76365e549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45c15609f36ac6f883efe3eca031d342" id="r_a45c15609f36ac6f883efe3eca031d342"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a45c15609f36ac6f883efe3eca031d342">getMaterialStiff</a> (const Matrix &amp;stiff, const idx_t &amp;ielem, const idx_t &amp;ip) const</td></tr>
+<tr class="memdesc:a45c15609f36ac6f883efe3eca031d342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a45c15609f36ac6f883efe3eca031d342"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a183c5e9227c9fdc5b8ee7d37dc5a0406" id="r_a183c5e9227c9fdc5b8ee7d37dc5a0406"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a183c5e9227c9fdc5b8ee7d37dc5a0406">getMaterialMass</a> () const =0</td></tr>
 <tr class="memdesc:a183c5e9227c9fdc5b8ee7d37dc5a0406"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix per unit length.  <br /></td></tr>
 <tr class="separator:a183c5e9227c9fdc5b8ee7d37dc5a0406"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81c8cc5f9f9744164d578de4e9847e35" id="r_a81c8cc5f9f9744164d578de4e9847e35"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a81c8cc5f9f9744164d578de4e9847e35">getMaterialMass</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const</td></tr>
 <tr class="memdesc:a81c8cc5f9f9744164d578de4e9847e35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:a81c8cc5f9f9744164d578de4e9847e35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ee31af1da35764db5f34292f643d5ed" id="r_a9ee31af1da35764db5f34292f643d5ed"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a9ee31af1da35764db5f34292f643d5ed">getMaterialMass</a> (const Matrix &amp;mass) const</td></tr>
+<tr class="memdesc:a9ee31af1da35764db5f34292f643d5ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix per unit length into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a9ee31af1da35764db5f34292f643d5ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9aaeaef43f4bdde46fab5dad319ff6ee" id="r_a9aaeaef43f4bdde46fab5dad319ff6ee"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a9aaeaef43f4bdde46fab5dad319ff6ee">getMaterialMass</a> (const Matrix &amp;mass, const idx_t &amp;ielem, const idx_t &amp;ip) const</td></tr>
+<tr class="memdesc:a9aaeaef43f4bdde46fab5dad319ff6ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a9aaeaef43f4bdde46fab5dad319ff6ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a202a063259682e545ca22de69cb485dc" id="r_a202a063259682e545ca22de69cb485dc"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMaterial.html#a202a063259682e545ca22de69cb485dc">getLumpedMass</a> (const double l) const</td></tr>
 <tr class="memdesc:a202a063259682e545ca22de69cb485dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lumped mass matrix for a given element length.  <br /></td></tr>
 <tr class="separator:a202a063259682e545ca22de69cb485dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -610,7 +622,7 @@ Hierarchy</h1>
 </div>
 </div>
 <a id="a183c5e9227c9fdc5b8ee7d37dc5a0406" name="a183c5e9227c9fdc5b8ee7d37dc5a0406"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a183c5e9227c9fdc5b8ee7d37dc5a0406">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a183c5e9227c9fdc5b8ee7d37dc5a0406">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -639,7 +651,7 @@ Hierarchy</h1>
 </div>
 </div>
 <a id="a81c8cc5f9f9744164d578de4e9847e35" name="a81c8cc5f9f9744164d578de4e9847e35"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81c8cc5f9f9744164d578de4e9847e35">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a81c8cc5f9f9744164d578de4e9847e35">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -686,8 +698,98 @@ Hierarchy</h1>
 
 </div>
 </div>
+<a id="a9ee31af1da35764db5f34292f643d5ed" name="a9ee31af1da35764db5f34292f643d5ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ee31af1da35764db5f34292f643d5ed">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Material::getMaterialMass </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>mass</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default mass matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">mass</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> mass matrix, overwritten </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies <a class="el" href="classMaterial.html#a183c5e9227c9fdc5b8ee7d37dc5a0406" title="Get the material mass matrix per unit length.">getMaterialMass()</a> </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classElasticRodMaterial.html#a0f966f45594c04511877269cc38396d3">ElasticRodMaterial</a>.</p>
+
+</div>
+</div>
+<a id="a9aaeaef43f4bdde46fab5dad319ff6ee" name="a9aaeaef43f4bdde46fab5dad319ff6ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aaeaef43f4bdde46fab5dad319ff6ee">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Material::getMaterialMass </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>mass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ielem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default element-specific mass matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">mass</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> mass matrix, overwritten </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies getMaterialMass(ielem, ip) </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classElasticRodMaterial.html#a10b006048625f38a08bd66fa1754807e">ElasticRodMaterial</a>.</p>
+
+</div>
+</div>
 <a id="a7ce7f4d93d73fe62db2243199c1246b2" name="a7ce7f4d93d73fe62db2243199c1246b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ce7f4d93d73fe62db2243199c1246b2">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ce7f4d93d73fe62db2243199c1246b2">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -716,7 +818,7 @@ Hierarchy</h1>
 </div>
 </div>
 <a id="ab4dd3c0e438d6dbc03263f743e513eb7" name="ab4dd3c0e438d6dbc03263f743e513eb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4dd3c0e438d6dbc03263f743e513eb7">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4dd3c0e438d6dbc03263f743e513eb7">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -761,6 +863,96 @@ Hierarchy</h1>
 <dl class="section note"><dt>Note</dt><dd>Default implementation delegates to <a class="el" href="classMaterial.html#a7ce7f4d93d73fe62db2243199c1246b2" title="Get the material stiffness matrix.">getMaterialStiff()</a> </dd></dl>
 
 <p>Reimplemented in <a class="el" href="classElasticRodMaterial.html#a1f4190caeef04379fbcd3b95341d59b3">ElasticRodMaterial</a>.</p>
+
+</div>
+</div>
+<a id="a81bf6e72440eeb9b20b7d8a76365e549" name="a81bf6e72440eeb9b20b7d8a76365e549"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81bf6e72440eeb9b20b7d8a76365e549">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Material::getMaterialStiff </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>stiff</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default stiffness matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">stiff</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> stiffness matrix, overwritten </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies <a class="el" href="classMaterial.html#a7ce7f4d93d73fe62db2243199c1246b2" title="Get the material stiffness matrix.">getMaterialStiff()</a> </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classElasticRodMaterial.html#a4109f556edd17ca60301ac90a482edaf">ElasticRodMaterial</a>.</p>
+
+</div>
+</div>
+<a id="a45c15609f36ac6f883efe3eca031d342" name="a45c15609f36ac6f883efe3eca031d342"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45c15609f36ac6f883efe3eca031d342">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Material::getMaterialStiff </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>stiff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ielem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default element-specific stiffness matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">stiff</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> stiffness matrix, overwritten </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies getMaterialStiff(ielem, ip) </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classElasticRodMaterial.html#a8eb4be8048e33483214f504d4d347bf6">ElasticRodMaterial</a>.</p>
 
 </div>
 </div>

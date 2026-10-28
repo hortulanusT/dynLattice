@@ -1,13 +1,15 @@
 <map id="Line3D" name="Line3D">
-<area shape="rect" id="Node000001" title="Shape function for 1D line elements in 3D space." alt="" coords="209,123,275,148"/>
+<area shape="rect" id="Node000001" title="Shape function for 1D line elements in 3D space." alt="" coords="266,181,333,207"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,5,68,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,39,86,69,123,96,167,115,209,126,208,131,165,120,121,101,83,73,53,43"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,43,66,101,85,131,109,155,137,167,178,176,266,187,266,193,177,182,135,172,106,160,80,134,61,103,40,45"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="92,5,152,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="127,44,134,72,149,97,178,116,209,127,208,132,175,121,145,100,129,74,122,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="119,44,115,70,115,100,121,130,136,155,157,168,191,177,266,188,266,193,190,182,155,173,132,159,116,132,110,101,110,70,114,43"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="215,5,269,31"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,44,245,123,239,123,239,44"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="238,45,232,98,236,128,246,156,257,169,271,179,268,183,253,173,241,159,230,129,227,98,233,44"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="326,5,390,31"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="357,45,348,74,331,101,305,119,276,130,274,125,302,114,327,97,343,71,352,44"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="484,5,547,31"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="514,46,505,75,496,89,485,101,469,110,446,117,390,127,276,136,275,130,389,122,445,112,467,105,482,97,492,86,500,72,509,44"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="359,45,351,98,343,129,331,159,313,183,309,180,326,156,338,127,346,97,354,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="416,5,615,31"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="520,44,520,71,516,102,506,133,488,159,461,173,420,183,333,193,333,188,419,178,459,168,484,155,502,130,511,101,515,71,515,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="639,5,701,31"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="665,45,637,104,615,135,586,160,566,169,538,176,468,187,333,195,333,189,468,181,537,171,564,164,583,155,611,131,632,101,660,43"/>
 </map>

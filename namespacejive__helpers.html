@@ -123,6 +123,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ae42d7761ccb90542c70d63c22c1e8f3e" id="r_ae42d7761ccb90542c70d63c22c1e8f3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#ae42d7761ccb90542c70d63c22c1e8f3e">mul3</a> (const Matrix &amp;C, const Matrix &amp;A, const Matrix &amp;B)</td></tr>
 <tr class="memdesc:ae42d7761ccb90542c70d63c22c1e8f3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">C = A * B for 3 x 3 matrices without heap allocation.  <br /></td></tr>
 <tr class="separator:ae42d7761ccb90542c70d63c22c1e8f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3655fb2bd8a6e87d955b95913a7d31ad" id="r_a3655fb2bd8a6e87d955b95913a7d31ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#a3655fb2bd8a6e87d955b95913a7d31ad">mul3</a> (const Vector &amp;y, const Matrix &amp;A, const Vector &amp;x)</td></tr>
+<tr class="memdesc:a3655fb2bd8a6e87d955b95913a7d31ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">y = A * x for a 3 x 3 matrix without heap allocation.  <br /></td></tr>
+<tr class="separator:a3655fb2bd8a6e87d955b95913a7d31ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1831aed12a74679c81a2c462d1072029" id="r_a1831aed12a74679c81a2c462d1072029"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#a1831aed12a74679c81a2c462d1072029">expVec</a> (const Matrix &amp;Exp, const Vector &amp;v)</td></tr>
 <tr class="memdesc:a1831aed12a74679c81a2c462d1072029"><td class="mdescLeft">&#160;</td><td class="mdescRight">compute the exponential of a axial vector.  <br /></td></tr>
 <tr class="separator:a1831aed12a74679c81a2c462d1072029"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,9 +147,18 @@ Functions</h2></td></tr>
 <tr class="memitem:ac93eb1a5ee06a740f26e2c57ed134768" id="r_ac93eb1a5ee06a740f26e2c57ed134768"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#ac93eb1a5ee06a740f26e2c57ed134768">skew</a> (const Vector &amp;vec)</td></tr>
 <tr class="memdesc:ac93eb1a5ee06a740f26e2c57ed134768"><td class="mdescLeft">&#160;</td><td class="mdescRight">construct a skew symetric matrix from a given vector.  <br /></td></tr>
 <tr class="separator:ac93eb1a5ee06a740f26e2c57ed134768"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2a629b2ae6f33c0d6274d924441d151" id="r_aa2a629b2ae6f33c0d6274d924441d151"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#aa2a629b2ae6f33c0d6274d924441d151">skew</a> (const Matrix &amp;S, const Vector &amp;vec)</td></tr>
+<tr class="memdesc:aa2a629b2ae6f33c0d6274d924441d151"><td class="mdescLeft">&#160;</td><td class="mdescRight">fill an existing 3 x 3 matrix with the skew symmetric matrix of a vector  <br /></td></tr>
+<tr class="separator:aa2a629b2ae6f33c0d6274d924441d151"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b5f66e8ad4468a3dfe2fdb9208df005" id="r_a0b5f66e8ad4468a3dfe2fdb9208df005"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#a0b5f66e8ad4468a3dfe2fdb9208df005">unskew</a> (const Matrix &amp;mat)</td></tr>
 <tr class="memdesc:a0b5f66e8ad4468a3dfe2fdb9208df005"><td class="mdescLeft">&#160;</td><td class="mdescRight">construct a axial vector from a given skew-symmetric matrix  <br /></td></tr>
 <tr class="separator:a0b5f66e8ad4468a3dfe2fdb9208df005"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a435aadcd5baa69f6d9fa6de54924cb6c" id="r_a435aadcd5baa69f6d9fa6de54924cb6c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#a435aadcd5baa69f6d9fa6de54924cb6c">setDofValue</a> (jive::util::Constraints &amp;cons, const idx_t idof, const double rval)</td></tr>
+<tr class="memdesc:a435aadcd5baa69f6d9fa6de54924cb6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">prescribe the value of a dof, i.e. constrain idof = rval.  <br /></td></tr>
+<tr class="separator:a435aadcd5baa69f6d9fa6de54924cb6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab199a88125d67faad029ac27ef65af1" id="r_aab199a88125d67faad029ac27ef65af1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacejive__helpers.html#aab199a88125d67faad029ac27ef65af1">linkDofs</a> (jive::util::Constraints &amp;cons, const idx_t idof, const idx_t jdof, const double coeff)</td></tr>
+<tr class="memdesc:aab199a88125d67faad029ac27ef65af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">link a slave dof to a master dof, i.e. constrain idof = coeff * jdof.  <br /></td></tr>
+<tr class="separator:aab199a88125d67faad029ac27ef65af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -502,6 +514,55 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="aab199a88125d67faad029ac27ef65af1" name="aab199a88125d67faad029ac27ef65af1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab199a88125d67faad029ac27ef65af1">&#9670;&#160;</a></span>linkDofs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void jive_helpers::linkDofs </td>
+          <td>(</td>
+          <td class="paramtype">jive::util::Constraints &amp;&#160;</td>
+          <td class="paramname"><em>cons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t&#160;</td>
+          <td class="paramname"><em>idof</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t&#160;</td>
+          <td class="paramname"><em>jdof</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>coeff</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">cons</td><td>constraints to modify </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">idof</td><td>slave dof index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">jdof</td><td>master dof index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coeff</td><td>coefficient of the master dof </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a6bade51c32b4c72d3edf1b701f5c4b01" name="a6bade51c32b4c72d3edf1b701f5c4b01"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6bade51c32b4c72d3edf1b701f5c4b01">&#9670;&#160;</a></span>logMat()</h2>
 
@@ -599,7 +660,7 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a id="ae42d7761ccb90542c70d63c22c1e8f3e" name="ae42d7761ccb90542c70d63c22c1e8f3e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae42d7761ccb90542c70d63c22c1e8f3e">&#9670;&#160;</a></span>mul3()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae42d7761ccb90542c70d63c22c1e8f3e">&#9670;&#160;</a></span>mul3() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -629,7 +690,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The product is formed on the stack first, so C may alias A or B. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>The product is formed on the stack first, so C may alias A or B (unlike jem::numeric::matmul(C, A, B)); the 3 x 3 sizes are fixed, which makes it faster than the general matmul. Use it for every 3 x 3 product in hot code. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">C</td><td>3 x 3 result </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>3 x 3 left factor </td></tr>
@@ -640,8 +701,127 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a3655fb2bd8a6e87d955b95913a7d31ad" name="a3655fb2bd8a6e87d955b95913a7d31ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3655fb2bd8a6e87d955b95913a7d31ad">&#9670;&#160;</a></span>mul3() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void jive_helpers::mul3 </td>
+          <td>(</td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>x</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>x is copied first, so y may alias x. The sums are formed in the same order as in jem::numeric::matmul (starting from zero), so the results are the same. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">y</td><td>3 vector result </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>3 x 3 matrix (may be a transposed view) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>3 vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a435aadcd5baa69f6d9fa6de54924cb6c" name="a435aadcd5baa69f6d9fa6de54924cb6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a435aadcd5baa69f6d9fa6de54924cb6c">&#9670;&#160;</a></span>setDofValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void jive_helpers::setDofValue </td>
+          <td>(</td>
+          <td class="paramtype">jive::util::Constraints &amp;&#160;</td>
+          <td class="paramname"><em>cons</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t&#160;</td>
+          <td class="paramname"><em>idof</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double&#160;</td>
+          <td class="paramname"><em>rval</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">cons</td><td>constraints to modify </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">idof</td><td>dof index to prescribe </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rval</td><td>prescribed value </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa2a629b2ae6f33c0d6274d924441d151" name="aa2a629b2ae6f33c0d6274d924441d151"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2a629b2ae6f33c0d6274d924441d151">&#9670;&#160;</a></span>skew() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void jive_helpers::skew </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>S</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>vec</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Does not create a new matrix, so it is the form for hot code. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">S</td><td>3 x 3 skew symmetric matrix </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>Vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ac93eb1a5ee06a740f26e2c57ed134768" name="ac93eb1a5ee06a740f26e2c57ed134768"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac93eb1a5ee06a740f26e2c57ed134768">&#9670;&#160;</a></span>skew()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac93eb1a5ee06a740f26e2c57ed134768">&#9670;&#160;</a></span>skew() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -655,7 +835,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Convenient form for set-up code; it creates a new matrix. In hot code use the form below with a work matrix. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">vec</td><td>Vector to be changed to a skew-symmetric matrix </td></tr>
   </table>

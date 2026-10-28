@@ -108,23 +108,23 @@ Collaboration diagram for ElasticRodMaterial:</div>
 <div class="dyncontent">
 <div class="center"><img src="classElasticRodMaterial__coll__graph.png" border="0" usemap="#aElasticRodMaterial_coll__map" alt="Collaboration graph"/></div>
 <map name="aElasticRodMaterial_coll__map" id="aElasticRodMaterial_coll__map">
-<area shape="rect" title="Linear elastic rod material with configurable cross&#45;sectional properties." alt="" coords="309,211,453,236"/>
+<area shape="rect" title="Linear elastic rod material with configurable cross&#45;sectional properties." alt="" coords="309,225,453,251"/>
 <area shape="rect" href="classMaterial.html" title="Abstract base class for material models." alt="" coords="76,93,152,119"/>
-<area shape="poly" title=" " alt="" coords="133,128,162,158,199,184,254,204,309,215,308,220,252,210,197,189,159,162,129,131"/>
+<area shape="poly" title=" " alt="" coords="130,129,158,166,176,184,197,199,223,212,252,221,309,231,308,237,251,226,221,217,194,204,172,188,154,169,125,132"/>
 <area shape="rect" title=" " alt="" coords="5,5,116,31"/>
 <area shape="poly" title=" " alt="" coords="77,41,109,91,104,94,73,44"/>
 <area shape="rect" title=" " alt="" coords="140,5,195,31"/>
 <area shape="poly" title=" " alt="" coords="155,44,124,94,119,91,151,41"/>
 <area shape="rect" title=" " alt="" coords="176,93,231,119"/>
-<area shape="poly" title=" " alt="" coords="205,132,209,160,214,173,222,185,236,193,256,200,309,211,308,216,255,205,233,198,219,189,210,176,204,162,200,133"/>
+<area shape="poly" title=" " alt="" coords="203,132,206,168,211,185,221,199,235,208,256,215,309,226,308,231,254,221,232,213,217,203,207,187,200,169,198,133"/>
 <area shape="rect" title=" " alt="" coords="287,93,349,119"/>
-<area shape="poly" title=" " alt="" coords="315,133,314,159,322,185,333,198,348,208,346,213,330,202,317,188,309,160,310,132"/>
+<area shape="poly" title=" " alt="" coords="315,132,312,166,315,184,322,200,333,213,348,223,346,227,330,217,317,203,310,185,307,167,309,132"/>
 <area shape="rect" title=" " alt="" coords="413,93,473,119"/>
-<area shape="poly" title=" " alt="" coords="440,133,430,160,416,188,396,212,392,209,412,185,425,158,434,131"/>
+<area shape="poly" title=" " alt="" coords="441,133,432,167,416,203,397,226,393,223,412,200,427,165,436,132"/>
 <area shape="rect" title=" " alt="" coords="535,93,599,119"/>
-<area shape="poly" title=" " alt="" coords="565,133,553,162,533,189,495,210,454,221,452,216,493,205,530,185,549,160,560,131"/>
+<area shape="poly" title=" " alt="" coords="568,134,558,170,549,188,536,203,517,217,497,226,453,237,452,232,495,221,515,212,532,199,544,185,553,168,562,132"/>
 <area shape="rect" title=" " alt="" coords="646,93,705,119"/>
-<area shape="poly" title=" " alt="" coords="674,133,663,162,654,177,642,189,609,203,561,213,453,223,453,217,561,208,608,198,639,184,650,174,658,160,669,131"/>
+<area shape="poly" title=" " alt="" coords="677,133,669,169,660,188,646,203,613,219,564,229,453,238,453,233,563,224,611,214,643,199,655,185,664,168,672,131"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -145,12 +145,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1f4190caeef04379fbcd3b95341d59b3" id="r_a1f4190caeef04379fbcd3b95341d59b3"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a1f4190caeef04379fbcd3b95341d59b3">getMaterialStiff</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
 <tr class="memdesc:a1f4190caeef04379fbcd3b95341d59b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material stiffness matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:a1f4190caeef04379fbcd3b95341d59b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4109f556edd17ca60301ac90a482edaf" id="r_a4109f556edd17ca60301ac90a482edaf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a4109f556edd17ca60301ac90a482edaf">getMaterialStiff</a> (const Matrix &amp;stiff) const override</td></tr>
+<tr class="memdesc:a4109f556edd17ca60301ac90a482edaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a4109f556edd17ca60301ac90a482edaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eb4be8048e33483214f504d4d347bf6" id="r_a8eb4be8048e33483214f504d4d347bf6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a8eb4be8048e33483214f504d4d347bf6">getMaterialStiff</a> (const Matrix &amp;stiff, const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
+<tr class="memdesc:a8eb4be8048e33483214f504d4d347bf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a8eb4be8048e33483214f504d4d347bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a515831336781b04964c54927ea31f1a2" id="r_a515831336781b04964c54927ea31f1a2"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a515831336781b04964c54927ea31f1a2">getMaterialMass</a> () const override</td></tr>
 <tr class="memdesc:a515831336781b04964c54927ea31f1a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix per unit length.  <br /></td></tr>
 <tr class="separator:a515831336781b04964c54927ea31f1a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75cbf33e68b02c29c887caa21eb6d5eb" id="r_a75cbf33e68b02c29c887caa21eb6d5eb"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a75cbf33e68b02c29c887caa21eb6d5eb">getMaterialMass</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
 <tr class="memdesc:a75cbf33e68b02c29c887caa21eb6d5eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:a75cbf33e68b02c29c887caa21eb6d5eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f966f45594c04511877269cc38396d3" id="r_a0f966f45594c04511877269cc38396d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a0f966f45594c04511877269cc38396d3">getMaterialMass</a> (const Matrix &amp;mass) const override</td></tr>
+<tr class="memdesc:a0f966f45594c04511877269cc38396d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix per unit length into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a0f966f45594c04511877269cc38396d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10b006048625f38a08bd66fa1754807e" id="r_a10b006048625f38a08bd66fa1754807e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a10b006048625f38a08bd66fa1754807e">getMaterialMass</a> (const Matrix &amp;mass, const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
+<tr class="memdesc:a10b006048625f38a08bd66fa1754807e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a10b006048625f38a08bd66fa1754807e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5103906b497a910767613d52c731e601" id="r_a5103906b497a910767613d52c731e601"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a5103906b497a910767613d52c731e601">getLumpedMass</a> (const double l) const override</td></tr>
 <tr class="memdesc:a5103906b497a910767613d52c731e601"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lumped mass matrix for a given element length.  <br /></td></tr>
 <tr class="separator:a5103906b497a910767613d52c731e601"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -244,7 +256,7 @@ Static Public Attributes</h2></td></tr>
 <tr class="memdesc:a3940039a4d70224b29fb192ddb0e89a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements property key.  <br /></td></tr>
 <tr class="separator:a3940039a4d70224b29fb192ddb0e89a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9672a3dcc8ca49872f456977778c0fc" id="r_ac9672a3dcc8ca49872f456977778c0fc"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#ac9672a3dcc8ca49872f456977778c0fc">EDGE_FACTOR</a> = &quot;edge_factor&quot;</td></tr>
-<tr class="memdesc:ac9672a3dcc8ca49872f456977778c0fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edge factor for lattice materials property key.  <br /></td></tr>
+<tr class="memdesc:ac9672a3dcc8ca49872f456977778c0fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edge factor f property key: edge elements get stiffness blocks scaled by f^2, f^3, f^4 and mass blocks by (2-f)^2, (2-f)^3, (2-f)^4.  <br /></td></tr>
 <tr class="separator:ac9672a3dcc8ca49872f456977778c0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf37a722d2350dd52cfeebd9b5f70490" id="r_aaf37a722d2350dd52cfeebd9b5f70490"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#aaf37a722d2350dd52cfeebd9b5f70490">EDGE_ELEMS</a> = &quot;edge_elements&quot;</td></tr>
 <tr class="memdesc:aaf37a722d2350dd52cfeebd9b5f70490"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of edge elements property key.  <br /></td></tr>
@@ -328,6 +340,11 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a94ae8094c1d2ffc81a4dc633ab732656" id="r_a94ae8094c1d2ffc81a4dc633ab732656"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a94ae8094c1d2ffc81a4dc633ab732656">energyPot_</a></td></tr>
 <tr class="memdesc:a94ae8094c1d2ffc81a4dc633ab732656"><td class="mdescLeft">&#160;</td><td class="mdescRight">Potential energy storage.  <br /></td></tr>
 <tr class="separator:a94ae8094c1d2ffc81a4dc633ab732656"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae89bcac45bdd39c2a86b946107304397" id="r_ae89bcac45bdd39c2a86b946107304397"><td class="memItemLeft" align="right" valign="top">jem::numeric::MatmulChain&lt; double, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#ae89bcac45bdd39c2a86b946107304397">matvec_</a></td></tr>
+<tr class="separator:ae89bcac45bdd39c2a86b946107304397"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7780567101b9b0c7de9d219ae4e1c1e9" id="r_a7780567101b9b0c7de9d219ae4e1c1e9"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a7780567101b9b0c7de9d219ae4e1c1e9">stiffWork_</a></td></tr>
+<tr class="memdesc:a7780567101b9b0c7de9d219ae4e1c1e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Work array for the stiffness in getStress and applyDeform.  <br /></td></tr>
+<tr class="separator:a7780567101b9b0c7de9d219ae4e1c1e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a531a373d5a16daba84a76c9908d8c2e0" id="r_a531a373d5a16daba84a76c9908d8c2e0"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a531a373d5a16daba84a76c9908d8c2e0">rodName_</a></td></tr>
 <tr class="memdesc:a531a373d5a16daba84a76c9908d8c2e0"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> instance name.  <br /></td></tr>
 <tr class="separator:a531a373d5a16daba84a76c9908d8c2e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -801,7 +818,7 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a515831336781b04964c54927ea31f1a2" name="a515831336781b04964c54927ea31f1a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a515831336781b04964c54927ea31f1a2">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a515831336781b04964c54927ea31f1a2">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -830,7 +847,7 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a75cbf33e68b02c29c887caa21eb6d5eb" name="a75cbf33e68b02c29c887caa21eb6d5eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a75cbf33e68b02c29c887caa21eb6d5eb">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a75cbf33e68b02c29c887caa21eb6d5eb">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -877,8 +894,98 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a0f966f45594c04511877269cc38396d3" name="a0f966f45594c04511877269cc38396d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f966f45594c04511877269cc38396d3">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElasticRodMaterial::getMaterialMass </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>mass</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default mass matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">mass</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> mass matrix, overwritten </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies <a class="el" href="classElasticRodMaterial.html#a515831336781b04964c54927ea31f1a2" title="Get the material mass matrix per unit length.">getMaterialMass()</a> </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classMaterial.html#a9ee31af1da35764db5f34292f643d5ed">Material</a>.</p>
+
+</div>
+</div>
+<a id="a10b006048625f38a08bd66fa1754807e" name="a10b006048625f38a08bd66fa1754807e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10b006048625f38a08bd66fa1754807e">&#9670;&#160;</a></span>getMaterialMass() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElasticRodMaterial::getMaterialMass </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>mass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ielem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default element-specific mass matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">mass</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> mass matrix, overwritten </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies getMaterialMass(ielem, ip) </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classMaterial.html#a9aaeaef43f4bdde46fab5dad319ff6ee">Material</a>.</p>
+
+</div>
+</div>
 <a id="aed1c2c29be2824240bf1940c2eee1759" name="aed1c2c29be2824240bf1940c2eee1759"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed1c2c29be2824240bf1940c2eee1759">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aed1c2c29be2824240bf1940c2eee1759">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -907,7 +1014,7 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a1f4190caeef04379fbcd3b95341d59b3" name="a1f4190caeef04379fbcd3b95341d59b3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f4190caeef04379fbcd3b95341d59b3">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f4190caeef04379fbcd3b95341d59b3">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -952,6 +1059,96 @@ Protected Attributes</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>Default implementation delegates to <a class="el" href="classElasticRodMaterial.html#aed1c2c29be2824240bf1940c2eee1759" title="Get the material stiffness matrix.">getMaterialStiff()</a> </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classMaterial.html#ab4dd3c0e438d6dbc03263f743e513eb7">Material</a>.</p>
+
+</div>
+</div>
+<a id="a4109f556edd17ca60301ac90a482edaf" name="a4109f556edd17ca60301ac90a482edaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4109f556edd17ca60301ac90a482edaf">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElasticRodMaterial::getMaterialStiff </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>stiff</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default stiffness matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">stiff</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> stiffness matrix, overwritten </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies <a class="el" href="classElasticRodMaterial.html#aed1c2c29be2824240bf1940c2eee1759" title="Get the material stiffness matrix.">getMaterialStiff()</a> </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classMaterial.html#a81bf6e72440eeb9b20b7d8a76365e549">Material</a>.</p>
+
+</div>
+</div>
+<a id="a8eb4be8048e33483214f504d4d347bf6" name="a8eb4be8048e33483214f504d4d347bf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eb4be8048e33483214f504d4d347bf6">&#9670;&#160;</a></span>getMaterialStiff() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElasticRodMaterial::getMaterialStiff </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix &amp;&#160;</td>
+          <td class="paramname"><em>stiff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ielem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const idx_t &amp;&#160;</td>
+          <td class="paramname"><em>ip</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Default element-specific stiffness matrix in output form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">stiff</td><td><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> stiffness matrix, overwritten </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ielem</td><td>Element index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ip</td><td>Integration point index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Default implementation copies getMaterialStiff(ielem, ip) </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classMaterial.html#a45c15609f36ac6f883efe3eca031d342">Material</a>.</p>
 
 </div>
 </div>
@@ -1629,6 +1826,29 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ae89bcac45bdd39c2a86b946107304397" name="ae89bcac45bdd39c2a86b946107304397"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae89bcac45bdd39c2a86b946107304397">&#9670;&#160;</a></span>matvec_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">jem::numeric::MatmulChain&lt;double, 1&gt; ElasticRodMaterial::matvec_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Matrix-vector products without creating new arrays; the result is valid until the next call (see the note in <a class="el" href="helpers_8h.html" title="file containing some basic helper functions">utils/helpers.h</a>) </p>
+
+</div>
+</div>
 <a id="a3940039a4d70224b29fb192ddb0e89a8" name="a3940039a4d70224b29fb192ddb0e89a8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3940039a4d70224b29fb192ddb0e89a8">&#9670;&#160;</a></span>N_ELEM</h2>
 
@@ -1975,6 +2195,28 @@ Protected Attributes</h2></td></tr>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7780567101b9b0c7de9d219ae4e1c1e9" name="a7780567101b9b0c7de9d219ae4e1c1e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7780567101b9b0c7de9d219ae4e1c1e9">&#9670;&#160;</a></span>stiffWork_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Matrix ElasticRodMaterial::stiffWork_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

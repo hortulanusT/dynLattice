@@ -97,7 +97,7 @@ $(function() {
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Solver.integrator.dofs_SO3 = ["rx", "ry", "rz"];</code>   </td><td class="markdownTableBodyNone">tell the integrator which degrees of freedom are rotations living on SO(3), so it can update/interpolate them consistently    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>Solver.integrator.lengthScale = 3.7500000000000003e-05;</code>   </td><td class="markdownTableBodyNone">a characteristic length (here the rod's half cross-section side length) used internally to non-dimensionalize the adaptive error estimate    </td></tr>
+<td class="markdownTableBodyNone"><code>Solver.integrator.lengthScale = 3.7500000000000003e-05;</code>   </td><td class="markdownTableBodyNone">a characteristic length used internally to non-dimensionalize the adaptive error estimate    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Solver.integrator.precision = .3e-4;</code>   </td><td class="markdownTableBodyNone">set the target relative error used by the adaptive step-size control    </td></tr>
 <tr class="markdownTableRowEven">
@@ -130,7 +130,7 @@ input.pro</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Input.input.onelab.Rotation = "180";</code>   </td><td class="markdownTableBodyNone">set the GMSH <code>onelab</code> parameter <code>Rotation</code> (rotates the whole structure by 180°)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>Input.input.onelab.BaseWidth="0.0083";</code>   </td><td class="markdownTableBodyNone">set the honeycomb's base bar width \(b=.3\)mm    </td></tr>
+<td class="markdownTableBodyNone"><code>Input.input.onelab.BaseWidth="0.0083";</code>   </td><td class="markdownTableBodyNone">set the honeycomb's base bar width \(b\) (before scaling)    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Input.input.onelab.LengthRatio="0.5883253012048192";</code>   </td><td class="markdownTableBodyNone">set the ratio between the two bar lengths of the re-entrant unit cell    </td></tr>
 <tr class="markdownTableRowEven">
@@ -177,7 +177,7 @@ model.pro</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>model.model.lattice.prefix = "beam_";</code>   </td><td class="markdownTableBodyNone">prefix used for the individual rod element names    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>model.model.lattice.child.type = 'specialCosseratRod";</code>   </td><td class="markdownTableBodyNone">each rod in the lattice is again a <a class="el" href="classSpecialCosseratRodModel.html" title="Special Cosserat rod finite element model with geometrically exact kinematics.">SpecialCosseratRodModel</a>    </td></tr>
+<td class="markdownTableBodyNone"><code>model.model.lattice.child.type = "specialCosseratRod";</code>   </td><td class="markdownTableBodyNone">each rod in the lattice is again a <a class="el" href="classSpecialCosseratRodModel.html" title="Special Cosserat rod finite element model with geometrically exact kinematics.">SpecialCosseratRodModel</a>    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>model.model.lattice.child.dofNamesTrans = ["dx", "dy", "dz"];</code>   </td><td class="markdownTableBodyNone">translational degrees of freedom    </td></tr>
 <tr class="markdownTableRowEven">
@@ -201,7 +201,7 @@ model.pro</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>model.model.lattice.child.material.kinematicTensor = [...];</code>   </td><td class="markdownTableBodyNone">define the 6×6 kinematic-hardening modulus tensor, scaled from a reference hardening modulus of 20 GPa down to the 1.75 GPa hardening modulus fitted to the Johnson-Cook material model used experimentally    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>model.model.lattice.child.material.edge_factor = 1.25;</code>   </td><td class="markdownTableBodyNone">increase the rod's effective bending stiffness by 25% to account for the stiffening effect of the physical joints connecting the rods    </td></tr>
+<td class="markdownTableBodyNone"><code>model.model.lattice.child.material.edge_factor = 1.25;</code>   </td><td class="markdownTableBodyNone">modify the elements at both ends of each rod (<code>edge_elements</code>, default 1) to account for the stiffening effect of the physical joints connecting the rods: their stiffness blocks (translational, coupling, rotational) are multiplied by \(f^2\), \(f^3\), \(f^4\) and their mass blocks by \((2-f)^2\), \((2-f)^3\), \((2-f)^4\) with \(f=1.25\), i.e. the edge elements become stiffer and, on purpose, lighter    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Self-Contact</b>   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
@@ -271,7 +271,7 @@ model.pro</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>model.model.models += "plate_springs";</code>   </td><td class="markdownTableBodyNone">add a further sub-model representing the support plate    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>model.model.plate_springs.type = 'springMass";</code>   </td><td class="markdownTableBodyNone"><a class="el" href="classSpringMassModel.html" title="Model for spring-mass systems at domain boundaries.">SpringMassModel</a>, used to model the compliant support as a small elastic rod rather than a rigid boundary    </td></tr>
+<td class="markdownTableBodyNone"><code>model.model.plate_springs.type = "SpringMass";</code>   </td><td class="markdownTableBodyNone"><a class="el" href="classSpringMassModel.html" title="Model for spring-mass systems at domain boundaries.">SpringMassModel</a>, used to model the compliant support as a small elastic rod rather than a rigid boundary    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>model.model.plate_springs.boundary = "ymin";</code>   </td><td class="markdownTableBodyNone">attach the spring to the bottom ("ymin") edge    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -283,7 +283,7 @@ model.pro</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>model.model.plate_springs.plate1.pElem = 1;</code>   </td><td class="markdownTableBodyNone">use linear (order 1) elements for the spring rod    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>model.model.plate_springs.plate1.type = 'specialCosseratRod";</code>   </td><td class="markdownTableBodyNone">the spring itself is again a <a class="el" href="classSpecialCosseratRodModel.html" title="Special Cosserat rod finite element model with geometrically exact kinematics.">SpecialCosseratRodModel</a>    </td></tr>
+<td class="markdownTableBodyNone"><code>model.model.plate_springs.plate1.type = "specialCosseratRod";</code>   </td><td class="markdownTableBodyNone">the spring itself is again a <a class="el" href="classSpecialCosseratRodModel.html" title="Special Cosserat rod finite element model with geometrically exact kinematics.">SpecialCosseratRodModel</a>    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>model.model.plate_springs.plate1.dofNamesTrans = [ "dx", "dy", "dz" ];</code>   </td><td class="markdownTableBodyNone">translational degrees of freedom    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -293,6 +293,10 @@ model.pro</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>model.model.plate_springs.plate1.material = "ElasticRod" { ... };</code>   </td><td class="markdownTableBodyNone">a purely elastic rod representing a steel plate, \(0.18\)m wide and 0.75mm thick, used to give the support a realistic, finite stiffness rather than being perfectly rigid   </td></tr>
 </table>
+<dl class="section note"><dt>Note</dt><dd>The same yield surface \(\sum_i \lvert s_i/(c_i-h_i)\rvert^{p_i}-1\) can also be evaluated natively, which is faster than the interpreted <code>yieldCond</code> and gives the same results up to rounding. Replace the <code>yieldCond</code> lines (they cannot be combined) by <div class="fragment"><div class="line">model.model.lattice.child.material.yieldType     = &quot;SuperEllipse&quot;;</div>
+<div class="line">model.model.lattice.child.material.yieldStrength = [&quot;280/450*205*0.75^2&quot;, &quot;280/450*205*0.75^2&quot;, &quot;280/450*467.5*0.75^2&quot;, &quot;280/450*0.1175*0.75^3&quot;, &quot;280/450*0.1175*0.75^3&quot;, &quot;280/450*0.09375*0.75^3&quot;];</div>
+<div class="line">model.model.lattice.child.material.yieldExponent = [2.68, 2.68, 1.75, 1.93, 1.93, 1.70];</div>
+</div><!-- fragment --> <code>yieldStrength</code> holds the strengths \(c_i\) and <code>yieldExponent</code> the exponents \(p_i\) (one per DOF, written as floats); \(h_i\) are the kinematic hardening stresses. With isotropic hardening the constant becomes \(1+h_0\).</dd></dl>
 <h1><a class="anchor" id="output2"></a>
 output.pro</h1>
 <p>The <code>output.pro</code> file defines the output modules used to record the impact response and produce the ParaView visualization.</p>
@@ -308,7 +312,7 @@ output.pro</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Output Module Configuration</b>   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>Output.modules = ["groupOut", 'sampling", "paraview"];</code>   </td><td class="markdownTableBodyNone">define three output modules: group averaging, CSV sampling, and ParaView visualization    </td></tr>
+<td class="markdownTableBodyNone"><code>Output.modules = ["groupOut", "sampling", "paraview"];</code>   </td><td class="markdownTableBodyNone">define three output modules: group averaging, CSV sampling, and ParaView visualization    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Output.groupOut.type = "GroupOutput";</code>   </td><td class="markdownTableBodyNone"><a class="el" href="classGroupOutputModule.html" title="Module for extracting and storing group-based output data.">GroupOutputModule</a>, used to compute averaged group quantities used below    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -318,7 +322,7 @@ output.pro</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>CSV Output Configuration</b>   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>Output.sampling.type = 'sample";</code>   </td><td class="markdownTableBodyNone">SampleModule, used to write a CSV time history    </td></tr>
+<td class="markdownTableBodyNone"><code>Output.sampling.type = "Sample";</code>   </td><td class="markdownTableBodyNone">SampleModule, used to write a CSV time history    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Output.sampling.file = "$(CASE_NAME)/data.csv";</code>   </td><td class="markdownTableBodyNone">output file path    </td></tr>
 <tr class="markdownTableRowEven">
@@ -352,7 +356,7 @@ output.pro</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Output.paraview.output_format = "$(CASE_NAME)/vis%i";</code>   </td><td class="markdownTableBodyNone">output file naming pattern    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>Output.paraview.sampleWhen = "(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo &gt; 0.002) OR (i&lt;=1)";</code>   </td><td class="markdownTableBodyNone">write a ParaView frame every 1% strain    </td></tr>
+<td class="markdownTableBodyNone"><code>Output.paraview.sampleWhen = "(Output.paraview.sampleInfo-Output.paraview.oldSampleInfo &gt; 0.01) OR (i&lt;=1)";</code>   </td><td class="markdownTableBodyNone">write a ParaView frame every 1% strain    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Output.paraview.sampleInfo="abs(ymax.disp.dy/SIZE.Y)";</code>   </td><td class="markdownTableBodyNone">define strain measure for Output   </td></tr>
 </table>

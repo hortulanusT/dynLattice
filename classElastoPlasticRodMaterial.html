@@ -77,9 +77,11 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classElastoPlasticRodMaterial-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ElastoPlasticRodMaterial Class Reference</div></div>
 </div><!--header-->
@@ -108,33 +110,42 @@ Collaboration diagram for ElastoPlasticRodMaterial:</div>
 <div class="dyncontent">
 <div class="center"><img src="classElastoPlasticRodMaterial__coll__graph.png" border="0" usemap="#aElastoPlasticRodMaterial_coll__map" alt="Collaboration graph"/></div>
 <map name="aElastoPlasticRodMaterial_coll__map" id="aElastoPlasticRodMaterial_coll__map">
-<area shape="rect" title="Elasto&#45;plastic rod material implementing yield conditions with isotropic and kinematic hardening." alt="" coords="299,332,483,357"/>
-<area shape="rect" href="classElasticRodMaterial.html" title="Linear elastic rod material with configurable cross&#45;sectional properties." alt="" coords="319,227,463,253"/>
-<area shape="poly" title=" " alt="" coords="394,267,394,332,389,332,389,267"/>
-<area shape="rect" href="classMaterial.html" title="Abstract base class for material models." alt="" coords="364,93,440,119"/>
-<area shape="poly" title=" " alt="" coords="407,132,407,143,407,187,398,228,393,227,402,186,402,143,401,133"/>
-<area shape="rect" title=" " alt="" coords="293,5,404,31"/>
-<area shape="poly" title=" " alt="" coords="365,41,397,91,392,94,361,44"/>
-<area shape="rect" title=" " alt="" coords="428,5,483,31"/>
-<area shape="poly" title=" " alt="" coords="443,44,412,94,407,91,439,41"/>
+<area shape="rect" title="Elasto&#45;plastic rod material implementing yield conditions with isotropic and kinematic hardening." alt="" coords="457,420,641,445"/>
+<area shape="rect" href="classElasticRodMaterial.html" title="Linear elastic rod material with configurable cross&#45;sectional properties." alt="" coords="249,279,393,304"/>
+<area shape="poly" title=" " alt="" coords="339,313,375,355,398,376,423,394,453,408,484,417,482,422,451,413,421,398,395,380,371,358,335,317"/>
+<area shape="rect" href="classMaterial.html" title="Abstract base class for material models." alt="" coords="89,93,165,119"/>
+<area shape="poly" title=" " alt="" coords="147,127,215,199,264,243,307,277,304,281,261,247,211,203,144,131"/>
+<area shape="rect" title=" " alt="" coords="19,5,129,31"/>
+<area shape="poly" title=" " alt="" coords="91,41,122,91,118,94,86,44"/>
+<area shape="rect" title=" " alt="" coords="153,5,208,31"/>
+<area shape="poly" title=" " alt="" coords="168,44,137,94,132,91,164,41"/>
 <area shape="rect" title=" " alt="" coords="5,93,60,119"/>
-<area shape="poly" title=" " alt="" coords="38,132,45,164,57,201,76,237,104,267,149,295,200,315,251,328,299,336,299,341,250,333,198,320,147,300,100,271,72,240,52,203,40,165,33,133"/>
-<area shape="poly" title=" " alt="" coords="48,129,71,159,102,184,145,201,182,204,221,204,269,208,346,225,345,230,268,213,220,209,182,210,144,206,99,189,67,162,44,132"/>
-<area shape="rect" title=" " alt="" coords="464,93,527,119"/>
-<area shape="poly" title=" " alt="" coords="480,131,402,229,398,226,475,128"/>
-<area shape="rect" title=" " alt="" coords="280,93,340,119"/>
-<area shape="poly" title=" " alt="" coords="305,132,302,159,308,185,330,209,358,225,356,230,327,213,304,188,297,159,300,132"/>
-<area shape="rect" title=" " alt="" coords="147,93,211,119"/>
-<area shape="poly" title=" " alt="" coords="178,132,176,163,177,199,186,236,204,268,228,290,257,307,288,320,318,329,317,335,286,325,255,312,225,294,200,271,181,237,172,200,170,163,173,132"/>
-<area shape="poly" title=" " alt="" coords="188,131,199,159,218,185,238,196,267,206,336,225,335,230,266,212,236,201,215,189,194,162,183,133"/>
-<area shape="rect" title=" " alt="" coords="614,93,673,119"/>
-<area shape="poly" title=" " alt="" coords="669,127,678,142,684,165,678,188,656,218,629,245,599,268,566,287,501,316,443,335,442,329,499,311,564,282,596,263,625,241,652,215,673,185,679,165,673,144,665,130"/>
-<area shape="poly" title=" " alt="" coords="615,128,596,144,582,167,576,178,565,189,516,215,464,231,463,225,514,210,562,185,572,175,577,164,592,141,612,124"/>
-<area shape="rect" title=" " alt="" coords="835,227,964,253"/>
-<area shape="poly" title=" " alt="" coords="862,261,793,287,713,311,594,331,484,342,483,336,593,326,712,305,792,282,860,256"/>
+<area shape="poly" title=" " alt="" coords="35,132,39,165,49,200,71,252,93,291,122,323,167,355,202,374,238,389,314,411,389,423,457,429,456,434,389,429,313,416,236,394,199,378,165,360,119,327,89,294,66,254,43,202,34,166,30,133"/>
+<area shape="poly" title=" " alt="" coords="42,131,56,171,72,199,107,221,160,242,275,276,274,281,159,247,104,226,68,203,51,173,37,132"/>
+<area shape="rect" title=" " alt="" coords="473,93,536,119"/>
+<area shape="poly" title=" " alt="" coords="551,107,634,117,671,126,695,141,703,156,705,170,695,202,687,215,677,227,606,340,558,421,553,419,602,337,673,224,683,212,690,200,699,170,698,158,691,145,669,131,633,122,550,112"/>
+<area shape="poly" title=" " alt="" coords="490,132,429,203,380,247,338,281,335,276,377,243,425,199,486,128"/>
+<area shape="rect" title=" " alt="" coords="189,93,249,119"/>
+<area shape="poly" title=" " alt="" coords="220,133,221,166,231,200,246,224,265,245,304,276,301,281,262,249,242,227,226,202,216,167,215,133"/>
+<area shape="rect" title=" " alt="" coords="347,93,411,119"/>
+<area shape="poly" title=" " alt="" coords="410,125,424,141,441,171,450,198,458,248,464,298,472,326,486,356,511,391,537,418,533,421,507,394,481,359,467,327,459,299,453,249,445,200,436,173,420,144,406,129"/>
+<area shape="poly" title=" " alt="" coords="357,130,347,144,333,181,326,219,323,279,318,278,321,218,328,179,342,141,352,127"/>
+<area shape="rect" title=" " alt="" coords="675,93,734,119"/>
+<area shape="poly" title=" " alt="" coords="724,129,753,174,780,234,789,266,792,298,787,330,772,359,746,386,713,406,678,419,642,428,640,423,676,414,711,401,742,382,768,356,782,328,786,298,784,267,775,235,749,177,720,131"/>
+<area shape="poly" title=" " alt="" coords="685,131,639,169,610,188,579,204,533,216,495,216,457,216,412,228,368,253,335,280,331,276,365,249,410,223,457,211,495,211,532,211,577,199,607,184,636,165,681,127"/>
+<area shape="rect" title=" " alt="" coords="940,279,1069,304"/>
+<area shape="poly" title=" " alt="" coords="984,315,955,338,922,360,852,391,778,412,706,424,641,431,641,426,705,419,777,406,850,386,919,355,952,333,981,311"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:afbf44e32642944e0937fd7be921a0dd7" id="r_afbf44e32642944e0937fd7be921a0dd7"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7">YieldType</a> { <a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7a23fd9d4b072c5126acdc4104959fcb56">EXPRESSION</a>
+, <a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7a0a8edc2e84c2f0a3cf9d73e679c10f86">SUPER_ELLIPSE</a>
+ }</td></tr>
+<tr class="memdesc:afbf44e32642944e0937fd7be921a0dd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Yield condition implementations, selected by the property <code>yieldType</code>  <a href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7">More...</a><br /></td></tr>
+<tr class="separator:afbf44e32642944e0937fd7be921a0dd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab2a4aec4ca76d0678075d5f330db3524" id="r_ab2a4aec4ca76d0678075d5f330db3524"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#ab2a4aec4ca76d0678075d5f330db3524">ElastoPlasticRodMaterial</a> (const String &amp;name, const Properties &amp;conf, const Properties &amp;props, const Properties &amp;globdat)</td></tr>
@@ -183,12 +194,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1f4190caeef04379fbcd3b95341d59b3 inherit pub_methods_classElasticRodMaterial" id="r_a1f4190caeef04379fbcd3b95341d59b3"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a1f4190caeef04379fbcd3b95341d59b3">getMaterialStiff</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
 <tr class="memdesc:a1f4190caeef04379fbcd3b95341d59b3 inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material stiffness matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:a1f4190caeef04379fbcd3b95341d59b3 inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4109f556edd17ca60301ac90a482edaf inherit pub_methods_classElasticRodMaterial" id="r_a4109f556edd17ca60301ac90a482edaf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a4109f556edd17ca60301ac90a482edaf">getMaterialStiff</a> (const Matrix &amp;stiff) const override</td></tr>
+<tr class="memdesc:a4109f556edd17ca60301ac90a482edaf inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a4109f556edd17ca60301ac90a482edaf inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eb4be8048e33483214f504d4d347bf6 inherit pub_methods_classElasticRodMaterial" id="r_a8eb4be8048e33483214f504d4d347bf6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a8eb4be8048e33483214f504d4d347bf6">getMaterialStiff</a> (const Matrix &amp;stiff, const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
+<tr class="memdesc:a8eb4be8048e33483214f504d4d347bf6 inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material stiffness matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a8eb4be8048e33483214f504d4d347bf6 inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a515831336781b04964c54927ea31f1a2 inherit pub_methods_classElasticRodMaterial" id="r_a515831336781b04964c54927ea31f1a2"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a515831336781b04964c54927ea31f1a2">getMaterialMass</a> () const override</td></tr>
 <tr class="memdesc:a515831336781b04964c54927ea31f1a2 inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix per unit length.  <br /></td></tr>
 <tr class="separator:a515831336781b04964c54927ea31f1a2 inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75cbf33e68b02c29c887caa21eb6d5eb inherit pub_methods_classElasticRodMaterial" id="r_a75cbf33e68b02c29c887caa21eb6d5eb"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a75cbf33e68b02c29c887caa21eb6d5eb">getMaterialMass</a> (const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
 <tr class="memdesc:a75cbf33e68b02c29c887caa21eb6d5eb inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the material mass matrix for specific element and integration point.  <br /></td></tr>
 <tr class="separator:a75cbf33e68b02c29c887caa21eb6d5eb inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f966f45594c04511877269cc38396d3 inherit pub_methods_classElasticRodMaterial" id="r_a0f966f45594c04511877269cc38396d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a0f966f45594c04511877269cc38396d3">getMaterialMass</a> (const Matrix &amp;mass) const override</td></tr>
+<tr class="memdesc:a0f966f45594c04511877269cc38396d3 inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix per unit length into an existing matrix (no allocation, for hot code)  <br /></td></tr>
+<tr class="separator:a0f966f45594c04511877269cc38396d3 inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10b006048625f38a08bd66fa1754807e inherit pub_methods_classElasticRodMaterial" id="r_a10b006048625f38a08bd66fa1754807e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a10b006048625f38a08bd66fa1754807e">getMaterialMass</a> (const Matrix &amp;mass, const idx_t &amp;ielem, const idx_t &amp;ip) const override</td></tr>
+<tr class="memdesc:a10b006048625f38a08bd66fa1754807e inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the material mass matrix for an element and integration point into an existing matrix.  <br /></td></tr>
+<tr class="separator:a10b006048625f38a08bd66fa1754807e inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5103906b497a910767613d52c731e601 inherit pub_methods_classElasticRodMaterial" id="r_a5103906b497a910767613d52c731e601"><td class="memItemLeft" align="right" valign="top">virtual Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a5103906b497a910767613d52c731e601">getLumpedMass</a> (const double l) const override</td></tr>
 <tr class="memdesc:a5103906b497a910767613d52c731e601 inherit pub_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lumped mass matrix for a given element length.  <br /></td></tr>
 <tr class="separator:a5103906b497a910767613d52c731e601 inherit pub_methods_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -230,6 +253,15 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:a98ff6ce7557c3ea2ef902f57371ab8aa" id="r_a98ff6ce7557c3ea2ef902f57371ab8aa"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a98ff6ce7557c3ea2ef902f57371ab8aa">YIELD_DERIV_PROP</a> = &quot;yieldDeriv&quot;</td></tr>
 <tr class="memdesc:a98ff6ce7557c3ea2ef902f57371ab8aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Yield condition derivatives.  <br /></td></tr>
 <tr class="separator:a98ff6ce7557c3ea2ef902f57371ab8aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad04d13f26b8dabfa5887e52b29033eca" id="r_ad04d13f26b8dabfa5887e52b29033eca"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#ad04d13f26b8dabfa5887e52b29033eca">YIELD_TYPE_PROP</a> = &quot;yieldType&quot;</td></tr>
+<tr class="memdesc:ad04d13f26b8dabfa5887e52b29033eca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Yield condition type (see YieldType)  <br /></td></tr>
+<tr class="separator:ad04d13f26b8dabfa5887e52b29033eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af13decf7afcc666aa63a70613d3cec72" id="r_af13decf7afcc666aa63a70613d3cec72"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#af13decf7afcc666aa63a70613d3cec72">YIELD_STRENGTH_PROP</a> = &quot;yieldStrength&quot;</td></tr>
+<tr class="memdesc:af13decf7afcc666aa63a70613d3cec72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strengths c_i of the super-ellipse yield condition.  <br /></td></tr>
+<tr class="separator:af13decf7afcc666aa63a70613d3cec72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a643401a3dc6690ecd5d5842b42a01721" id="r_a643401a3dc6690ecd5d5842b42a01721"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a643401a3dc6690ecd5d5842b42a01721">YIELD_EXPONENT_PROP</a> = &quot;yieldExponent&quot;</td></tr>
+<tr class="memdesc:a643401a3dc6690ecd5d5842b42a01721"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponents p_i of the super-ellipse yield condition.  <br /></td></tr>
+<tr class="separator:a643401a3dc6690ecd5d5842b42a01721"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83c6b1228ae12361dbc400588aa7732a" id="r_a83c6b1228ae12361dbc400588aa7732a"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a83c6b1228ae12361dbc400588aa7732a">ISO_HARD_PROP</a> = &quot;isotropicCoefficient&quot;</td></tr>
 <tr class="memdesc:a83c6b1228ae12361dbc400588aa7732a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Isotropic hardening parameters.  <br /></td></tr>
 <tr class="separator:a83c6b1228ae12361dbc400588aa7732a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -279,7 +311,7 @@ Static Public Attributes</h2></td></tr>
 <tr class="memdesc:a3940039a4d70224b29fb192ddb0e89a8 inherit pub_static_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements property key.  <br /></td></tr>
 <tr class="separator:a3940039a4d70224b29fb192ddb0e89a8 inherit pub_static_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9672a3dcc8ca49872f456977778c0fc inherit pub_static_attribs_classElasticRodMaterial" id="r_ac9672a3dcc8ca49872f456977778c0fc"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#ac9672a3dcc8ca49872f456977778c0fc">EDGE_FACTOR</a> = &quot;edge_factor&quot;</td></tr>
-<tr class="memdesc:ac9672a3dcc8ca49872f456977778c0fc inherit pub_static_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edge factor for lattice materials property key.  <br /></td></tr>
+<tr class="memdesc:ac9672a3dcc8ca49872f456977778c0fc inherit pub_static_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edge factor f property key: edge elements get stiffness blocks scaled by f^2, f^3, f^4 and mass blocks by (2-f)^2, (2-f)^3, (2-f)^4.  <br /></td></tr>
 <tr class="separator:ac9672a3dcc8ca49872f456977778c0fc inherit pub_static_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf37a722d2350dd52cfeebd9b5f70490 inherit pub_static_attribs_classElasticRodMaterial" id="r_aaf37a722d2350dd52cfeebd9b5f70490"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#aaf37a722d2350dd52cfeebd9b5f70490">EDGE_ELEMS</a> = &quot;edge_elements&quot;</td></tr>
 <tr class="memdesc:aaf37a722d2350dd52cfeebd9b5f70490 inherit pub_static_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of edge elements property key.  <br /></td></tr>
@@ -294,6 +326,18 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:abdd7ca9ef5440c5a42b9dda278a1f9eb" id="r_abdd7ca9ef5440c5a42b9dda278a1f9eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#abdd7ca9ef5440c5a42b9dda278a1f9eb">~ElastoPlasticRodMaterial</a> ()</td></tr>
 <tr class="memdesc:abdd7ca9ef5440c5a42b9dda278a1f9eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the elasto-plastic rod material.  <br /></td></tr>
 <tr class="separator:abdd7ca9ef5440c5a42b9dda278a1f9eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9274827de1dbe22515cb837db90b4b3a" id="r_a9274827de1dbe22515cb837db90b4b3a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a9274827de1dbe22515cb837db90b4b3a">getYield_</a> (const Vector &amp;args) const</td></tr>
+<tr class="memdesc:a9274827de1dbe22515cb837db90b4b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the yield condition.  <br /></td></tr>
+<tr class="separator:a9274827de1dbe22515cb837db90b4b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afad84d6fe2c81d964cb03e5bd13bc2d4" id="r_afad84d6fe2c81d964cb03e5bd13bc2d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#afad84d6fe2c81d964cb03e5bd13bc2d4">getYieldGrad_</a> (const Vector &amp;grad, const Vector &amp;args) const</td></tr>
+<tr class="memdesc:afad84d6fe2c81d964cb03e5bd13bc2d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient of the yield condition with respect to args.  <br /></td></tr>
+<tr class="separator:afad84d6fe2c81d964cb03e5bd13bc2d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa17cc62fc2259d2772100bd588c53ce6" id="r_aa17cc62fc2259d2772100bd588c53ce6"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#aa17cc62fc2259d2772100bd588c53ce6">getSuperEllipse_</a> (const Vector &amp;args) const</td></tr>
+<tr class="memdesc:aa17cc62fc2259d2772100bd588c53ce6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Super-ellipse yield condition f = sum_i |s_i/(c_i-h_i)|^p_i - (1+h_0)  <br /></td></tr>
+<tr class="separator:aa17cc62fc2259d2772100bd588c53ce6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bea9870b43be060e4d9e45b16f32752" id="r_a4bea9870b43be060e4d9e45b16f32752"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a4bea9870b43be060e4d9e45b16f32752">getSuperEllipseGrad_</a> (const Vector &amp;grad, const Vector &amp;args) const</td></tr>
+<tr class="memdesc:a4bea9870b43be060e4d9e45b16f32752"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient of the super-ellipse yield condition (zero stress derivative for |s_i| &lt; EPS)  <br /></td></tr>
+<tr class="separator:a4bea9870b43be060e4d9e45b16f32752"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classElasticRodMaterial"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classElasticRodMaterial')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classElasticRodMaterial.html">ElasticRodMaterial</a></td></tr>
 <tr class="memitem:acacc418722ef64329e66bf5def1944f0 inherit pro_methods_classElasticRodMaterial" id="r_acacc418722ef64329e66bf5def1944f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#acacc418722ef64329e66bf5def1944f0">~ElasticRodMaterial</a> ()</td></tr>
 <tr class="memdesc:acacc418722ef64329e66bf5def1944f0 inherit pro_methods_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the elastic rod material.  <br /></td></tr>
@@ -311,6 +355,15 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a2aa58ff57c5bf1e95cfda3c3e1191092" id="r_a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a2aa58ff57c5bf1e95cfda3c3e1191092">currDeltaFlow_</a></td></tr>
+<tr class="memdesc:a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current plastic flow increment.  <br /></td></tr>
+<tr class="separator:a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa869d579e6ddc4a69eb13be7391545f4" id="r_aa869d579e6ddc4a69eb13be7391545f4"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#aa869d579e6ddc4a69eb13be7391545f4">energyDiss_</a></td></tr>
+<tr class="memdesc:aa869d579e6ddc4a69eb13be7391545f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dissipated energy storage.  <br /></td></tr>
+<tr class="separator:aa869d579e6ddc4a69eb13be7391545f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b845b554f1b1b9543be7b3ef4697184" id="r_a5b845b554f1b1b9543be7b3ef4697184"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a5b845b554f1b1b9543be7b3ef4697184">energyHardPot_</a></td></tr>
+<tr class="memdesc:a5b845b554f1b1b9543be7b3ef4697184"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hardening potential energy storage.  <br /></td></tr>
+<tr class="separator:a5b845b554f1b1b9543be7b3ef4697184"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Plasticity algorithm components</div></td></tr>
 <tr class="memitem:a65ae44ac2706e721bc1dcf372bb8c7bf" id="r_a65ae44ac2706e721bc1dcf372bb8c7bf"><td class="memItemLeft" align="right" valign="top">Ref&lt; Function &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a65ae44ac2706e721bc1dcf372bb8c7bf">yieldCond_</a></td></tr>
 <tr class="memdesc:a65ae44ac2706e721bc1dcf372bb8c7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Yield condition function.  <br /></td></tr>
@@ -324,6 +377,21 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a6c3fa412f292cce98b05aa5d2d624e7e" id="r_a6c3fa412f292cce98b05aa5d2d624e7e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a6c3fa412f292cce98b05aa5d2d624e7e">precision_</a></td></tr>
 <tr class="memdesc:a6c3fa412f292cce98b05aa5d2d624e7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence tolerance for stress update.  <br /></td></tr>
 <tr class="separator:a6c3fa412f292cce98b05aa5d2d624e7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a243bcb4335c0733994dece29dfd49d0a" id="r_a243bcb4335c0733994dece29dfd49d0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7">YieldType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a243bcb4335c0733994dece29dfd49d0a">yieldType_</a></td></tr>
+<tr class="memdesc:a243bcb4335c0733994dece29dfd49d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selected yield condition implementation.  <br /></td></tr>
+<tr class="separator:a243bcb4335c0733994dece29dfd49d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0523d04261cf763a93c5b5102cda1d88" id="r_a0523d04261cf763a93c5b5102cda1d88"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a0523d04261cf763a93c5b5102cda1d88">isoHard_</a></td></tr>
+<tr class="memdesc:a0523d04261cf763a93c5b5102cda1d88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Isotropic hardening stress is a yield function argument.  <br /></td></tr>
+<tr class="separator:a0523d04261cf763a93c5b5102cda1d88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add966348ba0bfee3a034fddf62ee6735" id="r_add966348ba0bfee3a034fddf62ee6735"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#add966348ba0bfee3a034fddf62ee6735">kinHard_</a></td></tr>
+<tr class="memdesc:add966348ba0bfee3a034fddf62ee6735"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinematic hardening stresses are yield function arguments.  <br /></td></tr>
+<tr class="separator:add966348ba0bfee3a034fddf62ee6735"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a482963054cf29b292b0188841be65b" id="r_a2a482963054cf29b292b0188841be65b"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a2a482963054cf29b292b0188841be65b">yieldStrength_</a></td></tr>
+<tr class="memdesc:a2a482963054cf29b292b0188841be65b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strengths c_i of the super-ellipse yield condition.  <br /></td></tr>
+<tr class="separator:a2a482963054cf29b292b0188841be65b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9828f39d86ae1218bda7c9891b7b9db" id="r_ab9828f39d86ae1218bda7c9891b7b9db"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#ab9828f39d86ae1218bda7c9891b7b9db">yieldExponent_</a></td></tr>
+<tr class="memdesc:ab9828f39d86ae1218bda7c9891b7b9db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exponents p_i of the super-ellipse yield condition.  <br /></td></tr>
+<tr class="separator:ab9828f39d86ae1218bda7c9891b7b9db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Function argument organization</div></td></tr>
 <tr class="memitem:a269a798fb4d265b8fbe206ef4537dda8" id="r_a269a798fb4d265b8fbe206ef4537dda8"><td class="memItemLeft" align="right" valign="top">idx_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a269a798fb4d265b8fbe206ef4537dda8">dofCount_</a></td></tr>
 <tr class="memdesc:a269a798fb4d265b8fbe206ef4537dda8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Degrees of freedom in stress/strain vectors.  <br /></td></tr>
@@ -347,15 +415,30 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a868ac0f2c44fd8791e599168c0f59161" id="r_a868ac0f2c44fd8791e599168c0f59161"><td class="memItemLeft" align="right" valign="top">Cubix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a868ac0f2c44fd8791e599168c0f59161">currPlastStrains_</a></td></tr>
 <tr class="memdesc:a868ac0f2c44fd8791e599168c0f59161"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current plastic strains.  <br /></td></tr>
 <tr class="separator:a868ac0f2c44fd8791e599168c0f59161"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2aa58ff57c5bf1e95cfda3c3e1191092" id="r_a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a2aa58ff57c5bf1e95cfda3c3e1191092">currDeltaFlow_</a></td></tr>
-<tr class="memdesc:a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current plastic flow increment.  <br /></td></tr>
-<tr class="separator:a2aa58ff57c5bf1e95cfda3c3e1191092"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa869d579e6ddc4a69eb13be7391545f4" id="r_aa869d579e6ddc4a69eb13be7391545f4"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#aa869d579e6ddc4a69eb13be7391545f4">energyDiss_</a></td></tr>
-<tr class="memdesc:aa869d579e6ddc4a69eb13be7391545f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dissipated energy storage.  <br /></td></tr>
-<tr class="separator:aa869d579e6ddc4a69eb13be7391545f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b845b554f1b1b9543be7b3ef4697184" id="r_a5b845b554f1b1b9543be7b3ef4697184"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a5b845b554f1b1b9543be7b3ef4697184">energyHardPot_</a></td></tr>
-<tr class="memdesc:a5b845b554f1b1b9543be7b3ef4697184"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hardening potential energy storage.  <br /></td></tr>
-<tr class="separator:a5b845b554f1b1b9543be7b3ef4697184"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae86de9dfa63ad979a89fb56463b3e87f" id="r_ae86de9dfa63ad979a89fb56463b3e87f"><td class="memItemLeft" align="right" valign="top">Cubix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#ae86de9dfa63ad979a89fb56463b3e87f">oldStresses_</a></td></tr>
+<tr class="memdesc:ae86de9dfa63ad979a89fb56463b3e87f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Elastic stresses from last converged step (set in applyDeform)  <br /></td></tr>
+<tr class="separator:ae86de9dfa63ad979a89fb56463b3e87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Work arrays of getStress</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>Created once in configure and overwritten in every call, so that getStress does not have to create new arrays for every integration point (see the note in <a class="el" href="helpers_8h.html" title="file containing some basic helper functions">utils/helpers.h</a>). Not thread safe. </p>
+</div></td></tr>
+<tr class="memitem:a7ef8e79d1fdd13f56c9e16cb5a05d8cd" id="r_a7ef8e79d1fdd13f56c9e16cb5a05d8cd"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a7ef8e79d1fdd13f56c9e16cb5a05d8cd">plastStrain_</a></td></tr>
+<tr class="memdesc:a7ef8e79d1fdd13f56c9e16cb5a05d8cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plastic strain iterate.  <br /></td></tr>
+<tr class="separator:a7ef8e79d1fdd13f56c9e16cb5a05d8cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53577a5bab3191dcb7b670374b03f306" id="r_a53577a5bab3191dcb7b670374b03f306"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a53577a5bab3191dcb7b670374b03f306">hardParams_</a></td></tr>
+<tr class="memdesc:a53577a5bab3191dcb7b670374b03f306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hardening parameter iterate.  <br /></td></tr>
+<tr class="separator:a53577a5bab3191dcb7b670374b03f306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fbd457551a633e4ec79a40a844a786c" id="r_a1fbd457551a633e4ec79a40a844a786c"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a1fbd457551a633e4ec79a40a844a786c">hardStress_</a></td></tr>
+<tr class="memdesc:a1fbd457551a633e4ec79a40a844a786c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hardening stresses.  <br /></td></tr>
+<tr class="separator:a1fbd457551a633e4ec79a40a844a786c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f60c7f0f14ec445cba753e7538c9409" id="r_a5f60c7f0f14ec445cba753e7538c9409"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a5f60c7f0f14ec445cba753e7538c9409">elasticStrain_</a></td></tr>
+<tr class="memdesc:a5f60c7f0f14ec445cba753e7538c9409"><td class="mdescLeft">&#160;</td><td class="mdescRight">Elastic strain.  <br /></td></tr>
+<tr class="separator:a5f60c7f0f14ec445cba753e7538c9409"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a504de057698b874334b740fa3d4bd67a" id="r_a504de057698b874334b740fa3d4bd67a"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#a504de057698b874334b740fa3d4bd67a">yieldArgs_</a></td></tr>
+<tr class="memdesc:a504de057698b874334b740fa3d4bd67a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Arguments of the yield condition.  <br /></td></tr>
+<tr class="separator:a504de057698b874334b740fa3d4bd67a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9af7962a81987db5be0bfe135677dbf" id="r_ab9af7962a81987db5be0bfe135677dbf"><td class="memItemLeft" align="right" valign="top">Vector&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElastoPlasticRodMaterial.html#ab9af7962a81987db5be0bfe135677dbf">yieldGrad_</a></td></tr>
+<tr class="memdesc:ab9af7962a81987db5be0bfe135677dbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient of the yield condition.  <br /></td></tr>
+<tr class="separator:ab9af7962a81987db5be0bfe135677dbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classElasticRodMaterial"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classElasticRodMaterial')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classElasticRodMaterial.html">ElasticRodMaterial</a></td></tr>
 <tr class="memitem:a33607399cfd0c61e0eb1657a1946525b inherit pro_attribs_classElasticRodMaterial" id="r_a33607399cfd0c61e0eb1657a1946525b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a33607399cfd0c61e0eb1657a1946525b">young_</a></td></tr>
 <tr class="memdesc:a33607399cfd0c61e0eb1657a1946525b inherit pro_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Young's modulus.  <br /></td></tr>
@@ -411,6 +494,11 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a94ae8094c1d2ffc81a4dc633ab732656 inherit pro_attribs_classElasticRodMaterial" id="r_a94ae8094c1d2ffc81a4dc633ab732656"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a94ae8094c1d2ffc81a4dc633ab732656">energyPot_</a></td></tr>
 <tr class="memdesc:a94ae8094c1d2ffc81a4dc633ab732656 inherit pro_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Potential energy storage.  <br /></td></tr>
 <tr class="separator:a94ae8094c1d2ffc81a4dc633ab732656 inherit pro_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae89bcac45bdd39c2a86b946107304397 inherit pro_attribs_classElasticRodMaterial" id="r_ae89bcac45bdd39c2a86b946107304397"><td class="memItemLeft" align="right" valign="top">jem::numeric::MatmulChain&lt; double, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#ae89bcac45bdd39c2a86b946107304397">matvec_</a></td></tr>
+<tr class="separator:ae89bcac45bdd39c2a86b946107304397 inherit pro_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7780567101b9b0c7de9d219ae4e1c1e9 inherit pro_attribs_classElasticRodMaterial" id="r_a7780567101b9b0c7de9d219ae4e1c1e9"><td class="memItemLeft" align="right" valign="top">Matrix&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a7780567101b9b0c7de9d219ae4e1c1e9">stiffWork_</a></td></tr>
+<tr class="memdesc:a7780567101b9b0c7de9d219ae4e1c1e9 inherit pro_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight">Work array for the stiffness in getStress and applyDeform.  <br /></td></tr>
+<tr class="separator:a7780567101b9b0c7de9d219ae4e1c1e9 inherit pro_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a531a373d5a16daba84a76c9908d8c2e0 inherit pro_attribs_classElasticRodMaterial" id="r_a531a373d5a16daba84a76c9908d8c2e0"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classElasticRodMaterial.html#a531a373d5a16daba84a76c9908d8c2e0">rodName_</a></td></tr>
 <tr class="memdesc:a531a373d5a16daba84a76c9908d8c2e0 inherit pro_attribs_classElasticRodMaterial"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classMaterial.html" title="Abstract base class for material models.">Material</a> instance name.  <br /></td></tr>
 <tr class="separator:a531a373d5a16daba84a76c9908d8c2e0 inherit pro_attribs_classElasticRodMaterial"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -421,7 +509,28 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section see"><dt>See also</dt><dd><a href="https://doi.org/10.1007/s00466-024-02572-3">Corresponding Paper</a> </dd></dl>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="afbf44e32642944e0937fd7be921a0dd7" name="afbf44e32642944e0937fd7be921a0dd7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbf44e32642944e0937fd7be921a0dd7">&#9670;&#160;</a></span>YieldType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7">ElastoPlasticRodMaterial::YieldType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="afbf44e32642944e0937fd7be921a0dd7a23fd9d4b072c5126acdc4104959fcb56" name="afbf44e32642944e0937fd7be921a0dd7a23fd9d4b072c5126acdc4104959fcb56"></a>EXPRESSION&#160;</td><td class="fielddoc"><p>"Expression": interpreted function <code>yieldCond</code> (default) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="afbf44e32642944e0937fd7be921a0dd7a0a8edc2e84c2f0a3cf9d73e679c10f86" name="afbf44e32642944e0937fd7be921a0dd7a0a8edc2e84c2f0a3cf9d73e679c10f86"></a>SUPER_ELLIPSE&#160;</td><td class="fielddoc"><p>"SuperEllipse": native Lamé curve, see getSuperEllipse_ </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab2a4aec4ca76d0678075d5f330db3524" name="ab2a4aec4ca76d0678075d5f330db3524"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2a4aec4ca76d0678075d5f330db3524">&#9670;&#160;</a></span>ElastoPlasticRodMaterial()</h2>
 
@@ -945,6 +1054,69 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="aa17cc62fc2259d2772100bd588c53ce6" name="aa17cc62fc2259d2772100bd588c53ce6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa17cc62fc2259d2772100bd588c53ce6">&#9670;&#160;</a></span>getSuperEllipse_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ElastoPlasticRodMaterial::getSuperEllipse_ </td>
+          <td>(</td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>args</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Kinematic hardening h_i shifts the strengths c_i (Herrnböck et al., Comput. Mech. 2023, Eq. 39), isotropic hardening h_0 acts on the sum (Herrnböck et al., Comput. Mech. 2021, Eq. 47). </p>
+
+</div>
+</div>
+<a id="a4bea9870b43be060e4d9e45b16f32752" name="a4bea9870b43be060e4d9e45b16f32752"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bea9870b43be060e4d9e45b16f32752">&#9670;&#160;</a></span>getSuperEllipseGrad_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElastoPlasticRodMaterial::getSuperEllipseGrad_ </td>
+          <td>(</td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>grad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="acee8318c5d901493ec96d5e2ef9656d0" name="acee8318c5d901493ec96d5e2ef9656d0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acee8318c5d901493ec96d5e2ef9656d0">&#9670;&#160;</a></span>getTable()</h2>
 
@@ -1002,6 +1174,81 @@ Protected Attributes</h2></td></tr>
 </dl>
 
 <p>Reimplemented from <a class="el" href="classElasticRodMaterial.html#ab0c8652205e810817a55129a3d65af2b">ElasticRodMaterial</a>.</p>
+
+</div>
+</div>
+<a id="a9274827de1dbe22515cb837db90b4b3a" name="a9274827de1dbe22515cb837db90b4b3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9274827de1dbe22515cb837db90b4b3a">&#9670;&#160;</a></span>getYield_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ElastoPlasticRodMaterial::getYield_ </td>
+          <td>(</td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>args</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Stresses, [isotropic hardening stress], [kinematic hardening stresses] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afad84d6fe2c81d964cb03e5bd13bc2d4" name="afad84d6fe2c81d964cb03e5bd13bc2d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afad84d6fe2c81d964cb03e5bd13bc2d4">&#9670;&#160;</a></span>getYieldGrad_()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ElastoPlasticRodMaterial::getYieldGrad_ </td>
+          <td>(</td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>grad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector &amp;&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">grad</td><td>Gradient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Stresses, [isotropic hardening stress], [kinematic hardening stresses] </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1202,6 +1449,28 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a5f60c7f0f14ec445cba753e7538c9409" name="a5f60c7f0f14ec445cba753e7538c9409"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f60c7f0f14ec445cba753e7538c9409">&#9670;&#160;</a></span>elasticStrain_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::elasticStrain_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa869d579e6ddc4a69eb13be7391545f4" name="aa869d579e6ddc4a69eb13be7391545f4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa869d579e6ddc4a69eb13be7391545f4">&#9670;&#160;</a></span>energyDiss_</h2>
 
@@ -1246,6 +1515,50 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a53577a5bab3191dcb7b670374b03f306" name="a53577a5bab3191dcb7b670374b03f306"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53577a5bab3191dcb7b670374b03f306">&#9670;&#160;</a></span>hardParams_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::hardParams_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1fbd457551a633e4ec79a40a844a786c" name="a1fbd457551a633e4ec79a40a844a786c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fbd457551a633e4ec79a40a844a786c">&#9670;&#160;</a></span>hardStress_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::hardStress_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a83c6b1228ae12361dbc400588aa7732a" name="a83c6b1228ae12361dbc400588aa7732a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a83c6b1228ae12361dbc400588aa7732a">&#9670;&#160;</a></span>ISO_HARD_PROP</h2>
 
@@ -1268,6 +1581,28 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a0523d04261cf763a93c5b5102cda1d88" name="a0523d04261cf763a93c5b5102cda1d88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0523d04261cf763a93c5b5102cda1d88">&#9670;&#160;</a></span>isoHard_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ElastoPlasticRodMaterial::isoHard_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6fef1e86cc4505795a903641752d5a5a" name="a6fef1e86cc4505795a903641752d5a5a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6fef1e86cc4505795a903641752d5a5a">&#9670;&#160;</a></span>KIN_HARD_PROP</h2>
 
@@ -1284,6 +1619,28 @@ Protected Attributes</h2></td></tr>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="add966348ba0bfee3a034fddf62ee6735" name="add966348ba0bfee3a034fddf62ee6735"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add966348ba0bfee3a034fddf62ee6735">&#9670;&#160;</a></span>kinHard_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ElastoPlasticRodMaterial::kinHard_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1378,6 +1735,50 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ae86de9dfa63ad979a89fb56463b3e87f" name="ae86de9dfa63ad979a89fb56463b3e87f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae86de9dfa63ad979a89fb56463b3e87f">&#9670;&#160;</a></span>oldStresses_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Cubix ElastoPlasticRodMaterial::oldStresses_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7ef8e79d1fdd13f56c9e16cb5a05d8cd" name="a7ef8e79d1fdd13f56c9e16cb5a05d8cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ef8e79d1fdd13f56c9e16cb5a05d8cd">&#9670;&#160;</a></span>plastStrain_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::plastStrain_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6c3fa412f292cce98b05aa5d2d624e7e" name="a6c3fa412f292cce98b05aa5d2d624e7e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6c3fa412f292cce98b05aa5d2d624e7e">&#9670;&#160;</a></span>precision_</h2>
 
@@ -1444,6 +1845,28 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a643401a3dc6690ecd5d5842b42a01721" name="a643401a3dc6690ecd5d5842b42a01721"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a643401a3dc6690ecd5d5842b42a01721">&#9670;&#160;</a></span>YIELD_EXPONENT_PROP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ElastoPlasticRodMaterial::YIELD_EXPONENT_PROP = &quot;yieldExponent&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3d4183e0c7ba3207b62f936b8ca2e324" name="a3d4183e0c7ba3207b62f936b8ca2e324"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d4183e0c7ba3207b62f936b8ca2e324">&#9670;&#160;</a></span>YIELD_PROP</h2>
 
@@ -1460,6 +1883,72 @@ Protected Attributes</h2></td></tr>
   </td>
   <td class="mlabels-right">
 <span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af13decf7afcc666aa63a70613d3cec72" name="af13decf7afcc666aa63a70613d3cec72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af13decf7afcc666aa63a70613d3cec72">&#9670;&#160;</a></span>YIELD_STRENGTH_PROP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ElastoPlasticRodMaterial::YIELD_STRENGTH_PROP = &quot;yieldStrength&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad04d13f26b8dabfa5887e52b29033eca" name="ad04d13f26b8dabfa5887e52b29033eca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad04d13f26b8dabfa5887e52b29033eca">&#9670;&#160;</a></span>YIELD_TYPE_PROP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ElastoPlasticRodMaterial::YIELD_TYPE_PROP = &quot;yieldType&quot;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a504de057698b874334b740fa3d4bd67a" name="a504de057698b874334b740fa3d4bd67a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a504de057698b874334b740fa3d4bd67a">&#9670;&#160;</a></span>yieldArgs_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::yieldArgs_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1499,6 +1988,94 @@ Protected Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">FuncUtils::FuncArray ElastoPlasticRodMaterial::yieldDeriv_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab9828f39d86ae1218bda7c9891b7b9db" name="ab9828f39d86ae1218bda7c9891b7b9db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9828f39d86ae1218bda7c9891b7b9db">&#9670;&#160;</a></span>yieldExponent_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::yieldExponent_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab9af7962a81987db5be0bfe135677dbf" name="ab9af7962a81987db5be0bfe135677dbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9af7962a81987db5be0bfe135677dbf">&#9670;&#160;</a></span>yieldGrad_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::yieldGrad_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a482963054cf29b292b0188841be65b" name="a2a482963054cf29b292b0188841be65b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a482963054cf29b292b0188841be65b">&#9670;&#160;</a></span>yieldStrength_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector ElastoPlasticRodMaterial::yieldStrength_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a243bcb4335c0733994dece29dfd49d0a" name="a243bcb4335c0733994dece29dfd49d0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a243bcb4335c0733994dece29dfd49d0a">&#9670;&#160;</a></span>yieldType_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classElastoPlasticRodMaterial.html#afbf44e32642944e0937fd7be921a0dd7">YieldType</a> ElastoPlasticRodMaterial::yieldType_</td>
         </tr>
       </table>
   </td>
