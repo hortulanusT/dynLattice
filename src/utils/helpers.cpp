@@ -164,6 +164,31 @@ void logMat(const Vector &rv, const Matrix &R)
   double theta;                                 // angle of rotation
   double tr_R = trace(R) <= 3. ? trace(R) : 3.; // trace of the matrix
 
+  // Near theta = pi, acos and the division by sin(theta) below lose all precision (at pi - 1e-6 the angle is
+  // off by 1e-4 rad, at pi - 1e-9 the result is garbage). There, cos(theta) < -0.9, take the angle from atan2 and
+  // the axis k from the symmetric part (R + R^T)/2 - cos(theta) I = (1 - cos(theta)) k k^T, using its column with
+  // the largest diagonal entry (the idea of Spurrier's algorithm, Jelenic & Crisfield 1999, CMAME, Note 5).
+  // Elsewhere the formula below is unchanged.
+  if ((tr_R - 1.) / 2. < -0.9)
+  {
+    const double c = (tr_R - 1.) / 2. < -1. ? -1. : (tr_R - 1.) / 2.;
+    const double a[3] = {(R(2, 1) - R(1, 2)) / 2., (R(0, 2) - R(2, 0)) / 2., (R(1, 0) - R(0, 1)) / 2.}; // sin(theta) k
+    const double s = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+    idx_t i = 0;
+    for (idx_t j = 1; j < 3; j++)
+      if (R(j, j) > R(i, i))
+        i = j;
+    double k[3];
+    for (idx_t j = 0; j < 3; j++)
+      k[j] = ((R(j, i) + R(i, j)) / 2. - (j == i ? c : 0.)) / sqrt((R(i, i) - c) * (1. - c));
+    // the sign of the axis from sin(theta) k (undetermined only at theta = pi exactly)
+    const double sign = (k[0] * a[0] + k[1] * a[1] + k[2] * a[2]) < 0. ? -1. : 1.;
+    theta = atan2(s, c);
+    for (idx_t j = 0; j < 3; j++)
+      rv[j] = sign * theta * k[j];
+    return;
+  }
+
   theta = acos((tr_R - 1.) / 2.);
 
   // axial vector of R - R^T

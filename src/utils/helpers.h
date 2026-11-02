@@ -94,6 +94,9 @@ Matrix eye(const idx_t dim = 3);
 /// It returns the axial vector of the rotation matrix.
 /// @see [Wikipedia](https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Log_map_from_SO(3)_to_%F0%9D%94%B0%F0%9D%94%AC(3))
 ///
+/// The angle lies in [0, pi]; close to pi (cos(theta) < -0.9) the angle comes from atan2 and the axis from the
+/// symmetric part of R, which keeps full precision up to theta = pi.
+///
 /// @param[out] rv  3-component rotational vector
 /// @param[in] R  3 x 3 rotational matrix
 void logMat(const Vector &rv, const Matrix &R);
