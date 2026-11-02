@@ -5,7 +5,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20474969.svg)](https://doi.org/10.5281/zenodo.20474969)
 [![Docs: 1.13](https://img.shields.io/badge/Docs-1.13-00a6d6)](https://hortulanust.github.io/dynLattice/)
 
-dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the [Simo & Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) formulation with support for inelastic materials, explicit time marching, and contact mechanics.
+dynLattice is a finite element environment for dynamic simulation of beam networks and lattice metamaterials. It implements geometrically exact beam elements based on the [Simo & Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4) formulation, with the objective interpolation of rotations of [Crisfield & Jelenić (1999)](https://doi.org/10.1098/rspa.1999.0352) and the strain-invariant element of [Jelenić & Crisfield (1999)](https://doi.org/10.1016/S0045-7825(98)00249-7). It supports inelastic materials, explicit time marching, and contact mechanics.
 
 ## Features
 
