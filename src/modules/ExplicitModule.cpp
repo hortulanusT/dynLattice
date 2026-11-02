@@ -419,6 +419,7 @@ void ExplicitModule::updateVec(const Vector &y_new,
     Matrix R_old(rotCount, rotCount);
     Matrix R_new(rotCount, rotCount);
     Matrix V_upd(rotCount, rotCount);
+    Vector y_add(rotCount);
 
     for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
     {
@@ -430,6 +431,27 @@ void ExplicitModule::updateVec(const Vector &y_new,
       mul3(R_new, V_upd, R_old);
 
       logMat(r_node, R_new);
+
+      // keep the rotation vector continuous: logMat gives |r| <= pi, so at |r| = pi it would jump to the opposite
+      // side. Of the equivalent vectors r + 2 pi k r/|r|, take the one closest to the additive prediction
+      // y_old + delta_y (already in y_new); k = 0, i.e. r unchanged, as long as no rotation passes pi.
+      y_add = y_new[rdofs_[inode]];
+      const double r_norm = norm2(r_node);
+      if (r_norm > jive_helpers::TINY)
+      {
+        const double turns = (dotProduct(y_add, r_node) / r_norm - r_norm) / (2. * M_PI);
+        const idx_t k = static_cast<idx_t>(floor(turns + 0.5));
+        if (k != 0)
+          r_node *= (r_norm + 2. * M_PI * static_cast<double>(k)) / r_norm;
+      }
+      else
+      {
+        // no rotation: a multiple of 2 pi about the axis of the prediction
+        const double y_norm = norm2(y_add);
+        const idx_t k = static_cast<idx_t>(floor(y_norm / (2. * M_PI) + 0.5));
+        if (k != 0)
+          r_node += (2. * M_PI * static_cast<double>(k) / y_norm) * y_add;
+      }
 
       y_new[rdofs_[inode]] = r_node;
     }

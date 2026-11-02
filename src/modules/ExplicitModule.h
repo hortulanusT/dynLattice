@@ -224,6 +224,9 @@ class ExplicitModule : public SolverModule
                        const Vector &f_cur) const;
 
   /// @brief Update displacement vectors with optional SO(3) handling
+  /// @details The rotation dofs (dofs_SO3) are rotation vectors and are updated multiplicatively,
+  /// exp(y_new) = exp(delta_y) exp(y_old); of the equivalent rotation vectors the one closest to y_old + delta_y is
+  /// kept, so they stay continuous beyond |y| = pi (no jumps by 2 pi in the state, the output or the error estimate).
   /// @param[out] y_new  New displacement vector
   /// @param[in] y_old  Old displacement vector
   /// @param[in] delta_y  Displacement increment
