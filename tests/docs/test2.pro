@@ -6,6 +6,7 @@ Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 2e-9;
 Solver.integrator.dofs_SO3 = ["rx", "ry", "rz"];
+Solver.integrator.updateWhen = false;
 Solver.integrator.lengthScale = 3.7500000000000003e-05;
 Solver.integrator.precision = .3e-4;
 

@@ -299,7 +299,8 @@ class ExplicitModule : public SolverModule
 
   /// @name DOF management
   /// @{
-  Ref<Function> updCond_; ///< Update condition function
+  Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step once rotation dofs
+                          ///< exist, so that the rotational inertia follows the node rotations)
   Vector massInv_;        ///< Inverse mass matrix
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping

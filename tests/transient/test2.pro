@@ -9,6 +9,7 @@ Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 1e-6;
 Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
 Solver.integrator.rotationScale = 1.;
+Solver.integrator.updateWhen = false;
 // Solver.integrator.precision = 1e-7;
 
 // settings
