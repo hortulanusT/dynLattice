@@ -177,6 +177,39 @@ void expVec(const Matrix &Exp, const Vector &v);
 /// @param[in] vP  Derivative of the axial rotation vector
 void expVecP(const Matrix &ExpP, const Vector &v, const Vector &vP);
 
+/// @brief tangent operator T(v) of the exponential map.
+///
+/// If the rotation vector v of \f$\Lambda = \exp(\hat v)\f$ changes by dv, the rotation changes by the spin
+/// (infinitesimal rotation in the fixed frame) T(v) dv, i.e. \f$d\Lambda\,\Lambda^T = \widehat{T(v)\,dv}\f$, with
+/// \f$T(v) = I + \frac{1-\cos\theta}{\theta^2}\hat v + \frac{\theta-\sin\theta}{\theta^3}\hat v^2\f$, θ = |v|
+/// (also called the left Jacobian of SO(3)). This is \f$T^{-1}\f$ of Jelenic & Crisfield (1999, CMAME), Eq. 2.5
+/// (their Eq. 2.4: \f$\Delta\Theta = T(\Theta)\,\Delta\vartheta\f$), which they write with the dyad
+/// \f$\Theta\Theta^T\f$ instead of \f$\hat\Theta^2\f$:
+/// \f$T^{-1}(\Theta) = \frac{\sin\theta}{\theta} I + \frac{1}{\theta^2}\left(1-\frac{\sin\theta}{\theta}\right)\Theta\Theta^T
+/// + \frac{1-\cos\theta}{\theta^2}\hat\Theta\f$; both forms are equal because
+/// \f$\hat\Theta^2 = \Theta\Theta^T - \theta^2 I\f$. Small angles use the power series (see tangentCoeffs in
+/// helpers.cpp). No heap allocation.
+/// @param[out] T  3 x 3 tangent operator
+/// @param[in] v  rotation vector
+void expTangent(const Matrix &T, const Vector &v);
+
+/// @brief inverse of jive_helpers::expTangent.
+///
+/// \f$T^{-1}(v) = I - \frac12\hat v + \frac{1}{\theta^2}\left(1-\frac{\theta}{2}\cot\frac{\theta}{2}\right)\hat v^2\f$
+/// (singular at θ = 2π). This is T of Jelenic & Crisfield (1999, CMAME), Eq. 2.5, written there as
+/// \f$T(\Theta) = \frac{\theta/2}{\tan(\theta/2)} I + \frac{1}{\theta^2}\left(1-\frac{\theta/2}{\tan(\theta/2)}\right)
+/// \Theta\Theta^T - \frac12\hat\Theta\f$ (equal by \f$\hat\Theta^2 = \Theta\Theta^T - \theta^2 I\f$). Small angles use
+/// the power series. No heap allocation.
+/// @param[out] Tinv  3 x 3 inverse tangent operator
+/// @param[in] v  rotation vector
+void expTangentInv(const Matrix &Tinv, const Vector &v);
+
+/// @brief directional derivative of jive_helpers::expTangent: dT = d/dε T(v + ε w) at ε = 0.
+/// @param[out] dT  3 x 3 derivative
+/// @param[in] v  rotation vector
+/// @param[in] w  direction
+void expTangentD(const Matrix &dT, const Vector &v, const Vector &w);
+
 /// @brief calculate the trace of a matrix.
 ///
 /// @param[in] mat  Matrix to get the trace of

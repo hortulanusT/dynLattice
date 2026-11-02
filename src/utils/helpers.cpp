@@ -22,6 +22,51 @@ inline void skew3(Mat3 &S, const Vec3 &v)
   S(2, 0) = -1 * v[1];
   S(2, 1) = 1 * v[0];
 }
+
+// Coefficients of the tangent operator T(v) = I + a [v x] + b [v x]^2 of the exponential map and their derivatives
+// with respect to t = |v|^2: c = {a, da/dt, b, db/dt}, a = (1 - cos x)/x^2, b = (x - sin x)/x^3, x = |v|. For t < 1
+// the power series a = sum_k (-t)^k/(2k+2)!, b = sum_k (-t)^k/(2k+3)! (9 terms, truncation below 1e-16), above the
+// closed forms (no cancellation there).
+// Why not always sin/cos: for small x the closed forms subtract nearly equal numbers (1 - cos x ~ x^2/2,
+// x - sin x ~ x^3/6) and then divide by x^2 ... x^5, so rounding errors are amplified: at x = 1e-4 only about 8
+// digits of a are left, the derivatives are worse, and x = 0 divides by zero. The relative rotations within an
+// element are mostly far below 1, so the series is the usual branch.
+void tangentCoeffs(double c[4], const double t)
+{
+  static const double A[9] = {1. / 2., -1. / 24., 1. / 720., -1. / 40320., 1. / 3628800., -1. / 479001600.,
+                              1. / 87178291200., -1. / 20922789888000., 1. / 6402373705728000.};
+  static const double B[9] = {1. / 6., -1. / 120., 1. / 5040., -1. / 362880., 1. / 39916800., -1. / 6227020800.,
+                              1. / 1307674368000., -1. / 355687428096000., 1. / 121645100408832000.};
+  if (t < 1.)
+  {
+    for (int i = 0; i < 4; i++)
+      c[i] = 0.;
+    for (int k = 8; k >= 0; k--)
+    {
+      c[0] = c[0] * t + A[k];
+      c[2] = c[2] * t + B[k];
+      if (k >= 1)
+      {
+        c[1] = c[1] * t + k * A[k];
+        c[3] = c[3] * t + k * B[k];
+      }
+    }
+    return;
+  }
+  const double x = sqrt(t);
+  const double s = sin(x);
+  const double co = cos(x);
+  c[0] = (1. - co) / t;
+  c[1] = (x * s - 2. * (1. - co)) / (2. * t * t);
+  c[2] = (x - s) / (x * t);
+  c[3] = (x * (1. - co) - 3. * (x - s)) / (2. * x * t * t);
+}
+
+// Kronecker delta
+inline double kron(const int i, const int j)
+{
+  return i == j ? 1. : 0.;
+}
 } // namespace
 
 namespace jive_helpers
@@ -264,6 +309,56 @@ void expVecP(const Matrix &ExpP, const Vector &psi, const Vector &psiP)
       e += c * KPK(i, j);
       ExpP(i, j) = e;
     }
+}
+
+void expTangent(const Matrix &T, const Vector &v)
+{
+  const double t = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+  const Vec3 p = {v[0], v[1], v[2]};
+  double c[4];
+  tangentCoeffs(c, t);
+  Mat3 S;
+  skew3(S, p);
+  // [v x]^2 = v v^T - t I
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      T(i, j) = kron(i, j) + c[0] * S(i, j) + c[2] * (v[i] * v[j] - t * kron(i, j));
+}
+
+void expTangentInv(const Matrix &Tinv, const Vector &v)
+{
+  const double t = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+  double c;
+  if (t < 0.25) // c = (1 - x/2 cot(x/2))/x^2 = -sum_n (-1)^n B_2n t^(n-1)/(2n)!, B_2n the Bernoulli numbers
+    c = 1. / 12. + t * (1. / 720. + t * (1. / 30240. + t * (1. / 1209600. + t * (1. / 47900160. + t * 691. / 1307674368000.))));
+  else
+  {
+    const double x = sqrt(t);
+    c = 1. / t - (1. + cos(x)) / (2. * x * sin(x));
+  }
+  const Vec3 p = {v[0], v[1], v[2]};
+  Mat3 S;
+  skew3(S, p);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      Tinv(i, j) = kron(i, j) - 0.5 * S(i, j) + c * (v[i] * v[j] - t * kron(i, j));
+}
+
+void expTangentD(const Matrix &dT, const Vector &v, const Vector &w)
+{
+  const double t = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+  const double vw = v[0] * w[0] + v[1] * w[1] + v[2] * w[2];
+  double c[4];
+  tangentCoeffs(c, t);
+  const Vec3 p = {v[0], v[1], v[2]};
+  const Vec3 q = {w[0], w[1], w[2]};
+  Mat3 S, Sw;
+  skew3(S, p);
+  skew3(Sw, q);
+  // [w x][v x] + [v x][w x] = v w^T + w v^T - 2 (v.w) I
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      dT(i, j) = 2. * c[1] * vw * S(i, j) + c[0] * Sw(i, j) + 2. * c[3] * vw * (v[i] * v[j] - t * kron(i, j)) + c[2] * (v[i] * w[j] + w[i] * v[j] - 2. * vw * kron(i, j));
 }
 
 double trace(const Matrix &mat)
