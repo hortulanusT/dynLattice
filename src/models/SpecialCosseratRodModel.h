@@ -113,18 +113,24 @@ using jive_helpers::vec2mat;
 /// - Energy calculation (potential and dissipated)
 /// - Strain and stress output tables
 ///
+/// Structure: Line3D interpolates (shape functions, rotations, generalised shape functions), this class holds the
+/// rod theory (strain measures, virtual strains Xi, push-forward Pi, tangent) and the assembly, the rod materials
+/// the constitutive law (stress resultants and stiffness from the strains).
+///
 /// Notation: Simo & Vu-Quoc (1986) for the element (shape functions N_K, Xi, Pi = diag(Lambda, Lambda),
 /// c = Pi C Pi^T, spatial stress resultants r = (n, m)); Jelenic & Crisfield (1999) symbols only for what Simo &
 /// Vu-Quoc do not have (Lambda_r, phi_IJ, local rotations psi_K = Psi_K^l, generalised shape functions
 /// It_K = I-tilde^K; their I^i is N_K here). Xi-tilde is Xi built with It_K instead of N_K.
 ///
 /// Kinematics and discretisation: the rotation dofs of a node are a rotation vector theta with
-/// Lambda = exp(theta) Lambda_N (Lambda_N: initial frame, material axis 3 along the rod). Rotations and strains at
-/// the integration points follow Crisfield & Jelenic (1999), see Line3D. The element is the Petrov-Galerkin element
-/// of Jelenic & Crisfield (1999): internal force with the test functions N_K (JC Eq. 4.3, Line3D::getXi), rotational
-/// components conjugate to spins (rotations about the global axes, as updated by the explicit integrators for the
-/// dofs_SO3); tangent stiffness along the trial functions It_K (JC Eq. 4.7), and for the rotation columns
-/// d spin = T(theta) d theta (jive_helpers::expTangent), because the nonlinear solvers add their increments to theta.
+/// Lambda = exp(theta) Lambda_N (Lambda_N: initial frame, material axis 3 along the rod). Rotations at the
+/// integration points follow Crisfield & Jelenic (1999), see Line3D; strains Gamma = Lambda^T phi' - Gamma_0,
+/// [K x] = Lambda^T Lambda' - K_0 (CJ Eqs. 3.4, 3.5). The element is the Petrov-Galerkin element of Jelenic &
+/// Crisfield (1999): internal force with the test functions N_K (JC Eq. 4.3, getXi_; Simo & Vu-Quoc Eq. 5.3),
+/// rotational components conjugate to spins (rotations about the global axes, as updated by the explicit
+/// integrators for the dofs_SO3); tangent stiffness along the trial functions It_K (JC Eq. 4.7, getXiTilde_), and
+/// for the rotation columns d spin = T(theta) d theta (jive_helpers::expTangent), because the nonlinear solvers add
+/// their increments to theta.
 ///
 /// @see [Reissner (1981)](https://doi.org/10.1007/BF00946983)
 /// @see [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4)
@@ -282,6 +288,36 @@ class SpecialCosseratRodModel : public Model
                     const Matrix &nodeU,
                     const idx_t ie) const;
 
+  /// @brief Xi of Simo & Vu-Quoc (1986), Eqs. 4.6a and 5.3: the virtual strains of the internal force (allocation free)
+  /// @details With delta Gamma = Lambda^T (delta phi' + [phi' x] delta theta) and delta K = Lambda^T delta theta'
+  /// (Jelenic & Crisfield 1999, Eq. 2.13) and the test functions N_K (their Eq. 3.1; Simo & Vu-Quoc 1986,
+  /// Eq. 5.1), the internal force of node K is f_K = sum_ip w Xi_K r (JC Eq. 4.3) with the spatial stress
+  /// resultants r = (n, m) and (Simo & Vu-Quoc 1986, Eq. 5.3)
+  ///   Xi_K = [ N'_K I               0     ]
+  ///          [ -N_K [phi' x]    N'_K I   ]
+  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
+  void getXi_(const Quadix &Xi,
+              const Matrix &grads,
+              const Matrix &phiP) const;
+
+  /// @brief Xi-tilde: Xi with the generalised shape functions It_K instead of N_K, for the tangent (Jelenic & Crisfield 1999, Eq. 4.7)
+  /// @details The same as getXi_() with the generalised shape functions It_K (Line3D::getGeneralisedShapeFunctions):
+  ///   Xi-tilde_K = [ N'_K I                 0       ]
+  ///                [ -It_K^T [phi' x]    It'_K^T    ]
+  /// so that the change of the material strains is diag(Lambda^T, Lambda^T) Xi-tilde_K^T delta q_K (allocation free).
+  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
+  /// @param[in] genShapes  generalised shape functions It_K
+  /// @param[in] genShapesP  their derivatives It'_K along the line
+  void getXiTilde_(const Quadix &Xi,
+                   const Matrix &grads,
+                   const Matrix &phiP,
+                   const Quadix &genShapes,
+                   const Quadix &genShapesP) const;
+
   /// @brief Get the strains in the integration points of an element
   /// @param[out] strains  Strain components at integration points, strain component by integration point
   /// @param[out] w  Integration point weights
@@ -406,5 +442,6 @@ class SpecialCosseratRodModel : public Model
   mutable Cubix ipLambdaP_;   ///< Their gradients
   mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
   mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
+  mutable Matrix skewPhiP_;   ///< [phi' x] in getXi_ and getXiTilde_, 3 x 3
   mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

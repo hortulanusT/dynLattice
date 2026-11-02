@@ -93,7 +93,6 @@ Line3D::Line3D(const String &name,
   ipLocalRotVecs_.resize(GLOB_RANK, ipointCount());
   ipLocalRotVecsP_.resize(GLOB_RANK, ipointCount());
   rotWork_.resize(GLOB_RANK, GLOB_RANK);
-  skewPhiP_.resize(GLOB_RANK, GLOB_RANK);
 }
 
 void Line3D::getGlobalPoint(const Vector &x,
@@ -147,59 +146,6 @@ void Line3D::getShapeGradients(const Matrix &g,
   gradMemoWeights_.resize(w.size());
   gradMemoWeights_ = w;
   gradMemoValid_ = true;
-}
-
-void Line3D::getXi(const Quadix &Xi,
-                   const Matrix &grads,
-                   const Matrix &phiP) const
-{
-  JEM_ASSERT2(Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size");
-  const Matrix shapes = getShapeFunctions();
-
-  Xi = 0.;
-
-  // test functions interpolated with the shape functions, Jelenic & Crisfield (1999) Eq. 3.1;
-  // the virtual strains follow from their Eq. 2.13
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    skew(skewPhiP_, phiP[ip]);
-
-    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    {
-      for (idx_t i = 0; i < 6; i++)
-        Xi(i, i, iNode, ip) = grads(iNode, ip);
-      Xi(SliceFrom(3), SliceTo(3), iNode, ip) = -1. * shapes(iNode, ip) * skewPhiP_;
-    }
-  }
-}
-
-void Line3D::getXiTilde(const Quadix &Xi,
-                        const Matrix &grads,
-                        const Matrix &phiP,
-                        const Quadix &genShapes,
-                        const Quadix &genShapesP) const
-{
-  JEM_ASSERT2(Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size");
-
-  Matrix work(GLOB_RANK, GLOB_RANK); // not hot code (tangent only)
-
-  Xi = 0.;
-
-  // trial functions: displacements with the shape functions (Jelenic & Crisfield 1999, Eq. 3.4), spins with
-  // the generalised shape functions (Eq. 3.17); strain changes from their Eq. 2.13
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    skew(skewPhiP_, phiP[ip]);
-
-    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    {
-      for (idx_t i = 0; i < 3; i++)
-        Xi(i, i, iNode, ip) = grads(iNode, ip);
-      mul3(work, genShapes[ip][iNode].transpose(), skewPhiP_);
-      Xi(SliceFrom(3), SliceTo(3), iNode, ip) = -1. * work;
-      Xi(SliceFrom(3), SliceFrom(3), iNode, ip) = genShapesP[ip][iNode].transpose();
-    }
-  }
 }
 
 void Line3D::getRotationsAndGradients(const Cubix &Ri,

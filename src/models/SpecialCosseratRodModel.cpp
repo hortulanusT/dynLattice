@@ -15,6 +15,7 @@
 
 #include <jive/algebra/SparseMatrixObject.h>
 using jem::newInstance;
+using jem::SliceTo;
 using jive_helpers::expTangent;
 using jive_helpers::mul3;
 
@@ -614,6 +615,7 @@ void SpecialCosseratRodModel::initShape_()
   ipLambda_.resize(rank, rank, ipCount);
   ipLambdaP_.resize(rank, rank, ipCount);
   lambdaTP_.resize(rank, rank);
+  skewPhiP_.resize(rank, rank);
   strainWork_.resize(dofCount, ipCount);
 }
 
@@ -753,6 +755,62 @@ void SpecialCosseratRodModel::getTangents_(const Matrix &phiP,
   phiP = matmul_.matmul(curPhi_, elemGrads_[ie]);
 }
 
+void SpecialCosseratRodModel::getXi_(const Quadix &Xi,
+                                     const Matrix &grads,
+                                     const Matrix &phiP) const
+{
+  JEM_ASSERT2(Xi.size(0) == 6 && Xi.size(1) == 6, "Xi size does not match the expected size");
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  const Matrix shapes = shapeK_->getShapeFunctions();
+
+  Xi = 0.;
+
+  // test functions interpolated with the shape functions (Simo & Vu-Quoc 1986, Eqs. 5.1, 5.3;
+  // Jelenic & Crisfield 1999, Eq. 3.1); the virtual strains follow from Jelenic & Crisfield Eq. 2.13
+  for (idx_t ip = 0; ip < ipCount; ip++)
+  {
+    skew(skewPhiP_, phiP[ip]);
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      for (idx_t i = 0; i < 6; i++)
+        Xi(i, i, iNode, ip) = grads(iNode, ip);
+      Xi(SliceFrom(3), SliceTo(3), iNode, ip) = -1. * shapes(iNode, ip) * skewPhiP_;
+    }
+  }
+}
+
+void SpecialCosseratRodModel::getXiTilde_(const Quadix &Xi,
+                                          const Matrix &grads,
+                                          const Matrix &phiP,
+                                          const Quadix &genShapes,
+                                          const Quadix &genShapesP) const
+{
+  JEM_ASSERT2(Xi.size(0) == 6 && Xi.size(1) == 6, "Xi size does not match the expected size");
+  const idx_t ipCount = shapeK_->ipointCount();
+  const idx_t nodeCount = shapeK_->nodeCount();
+  Matrix work(3, 3); // not hot code (tangent only)
+
+  Xi = 0.;
+
+  // trial functions: displacements with the shape functions (Jelenic & Crisfield 1999, Eq. 3.4), spins with
+  // the generalised shape functions (Eq. 3.17); strain changes from their Eq. 2.13
+  for (idx_t ip = 0; ip < ipCount; ip++)
+  {
+    skew(skewPhiP_, phiP[ip]);
+
+    for (idx_t iNode = 0; iNode < nodeCount; iNode++)
+    {
+      for (idx_t i = 0; i < 3; i++)
+        Xi(i, i, iNode, ip) = grads(iNode, ip);
+      mul3(work, genShapes[ip][iNode].transpose(), skewPhiP_);
+      Xi(SliceFrom(3), SliceTo(3), iNode, ip) = -1. * work;
+      Xi(SliceFrom(3), SliceFrom(3), iNode, ip) = genShapesP[ip][iNode].transpose();
+    }
+  }
+}
+
 void SpecialCosseratRodModel::getStrains_(
     const Matrix &strains, const Vector &w, const Matrix &nodePhi_0,
     const Matrix &nodeU, const Cubix &nodeLambda, const idx_t ie,
@@ -778,7 +836,7 @@ void SpecialCosseratRodModel::getStrains_(
 
   strains -= matStrain0_[ie];
 
-  // spatial = Pi * material with the block-diagonal Pi = diag(Lambda, Lambda)
+  // spatial = Pi * material with the block-diagonal Pi = diag(Lambda, Lambda) (Simo & Vu-Quoc 1986, Eq. 4.5)
   if (spatial)
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -874,8 +932,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const String &loadCase) const
 {
   // Tangent stiffness of Jelenic & Crisfield (1999, CMAME) Eq. 4.7: the derivative of the internal force (test
-  // functions N_K, Line3D::getXi) along the trial functions (generalised shape functions It_K,
-  // Line3D::getGeneralisedShapeFunctions), plus T(theta) for the rotation-vector dofs (see below).
+  // functions N_K, getXi_) along the trial functions (generalised shape functions It_K,
+  // Line3D::getGeneralisedShapeFunctions, getXiTilde_), plus T(theta) for the rotation-vector dofs (see below).
+  // With It_K = N_K I it reduces to the tangent of Simo & Vu-Quoc (1986) Eqs. 4.11-4.14.
   if (!nodeDofsValid_)
     updNodeDofs_();
 
@@ -924,9 +983,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // get the (spatial) stresses; the strains leave the tangents ipPhiP_ and the
     // rotations ipLambda_ of this element
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
-    shapeK_->getXi(XI, elemGrads_[ie], ipPhiP_);
+    getXi_(XI, elemGrads_[ie], ipPhiP_);
     shapeK_->getGeneralisedShapeFunctions(genShapes, genShapesP, elemGrads_[ie], nodeLambda);
-    shapeK_->getXiTilde(XItilde, elemGrads_[ie], ipPhiP_, genShapes, genShapesP);
+    getXiTilde_(XItilde, elemGrads_[ie], ipPhiP_, genShapes, genShapesP);
 
     // The rotation dofs are rotation vectors theta (Lambda = exp(theta) Lambda_N) that the
     // nonlinear solver updates additively, while the trial functions are spins:
@@ -942,7 +1001,7 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      // get the spatial stiffness c = Pi C Pi^T, Pi = diag(Lambda, Lambda)
+      // get the spatial stiffness c = Pi C Pi^T, Pi = diag(Lambda, Lambda) (Simo & Vu-Quoc 1986, Eqs. 4.5, 4.11)
       material_->getMaterialStiff(materialC, ie, ip);
       PI = 0.;
       PI(TRANS_PART, TRANS_PART) = ipLambda_[ip];
@@ -1029,7 +1088,7 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     // get the (spatial) stresses; the strains leave the tangents ipPhiP_ of this element for Xi
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
     // internal force with the test functions N_K, Jelenic & Crisfield (1999) Eq. 4.3
-    shapeK_->getXi(XI, elemGrads_[ie], ipPhiP_);
+    getXi_(XI, elemGrads_[ie], ipPhiP_);
 
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)

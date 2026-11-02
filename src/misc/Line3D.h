@@ -31,9 +31,12 @@ using jive_helpers::Quadix;
 /// in 3D space. Supports 2, 3, and 4-node line elements with configurable
 /// integration schemes (default: reduced Gauss integration, nodeCount - 1 points).
 ///
-/// @section RotationInterpolation Rotation interpolation and virtual work (Crisfield & Jelenic 1999)
-/// Rod theory of Simo & Vu-Quoc (1986). References: CJ = Crisfield & Jelenic (1999), Proc. R. Soc. A 455;
-/// JC = Jelenic & Crisfield (1999), Comput. Methods Appl. Mech. Engrg. 171.
+/// @section RotationInterpolation Rotation interpolation (Crisfield & Jelenic 1999)
+/// Line3D holds the interpolation (discretisation) only; the strain measures, the virtual strains (Xi) and the
+/// tangent of the rod theory are in SpecialCosseratRodModel, the constitutive law in the rod materials.
+/// References: SVQ = Simo & Vu-Quoc (1986), Comput. Methods Appl. Mech. Engrg. 58 (rod theory and element);
+/// CJ = Crisfield & Jelenic (1999), Proc. R. Soc. A 455; JC = Jelenic & Crisfield (1999), Comput. Methods Appl.
+/// Mech. Engrg. 171.
 /// Notation: Simo & Vu-Quoc (1986) for the element (shape functions N_K, Xi, Pi = diag(Lambda, Lambda),
 /// c = Pi C Pi^T, spatial stress resultants r = (n, m)); Jelenic & Crisfield (1999) symbols only for what Simo &
 /// Vu-Quoc do not have (Lambda_r, phi_IJ, local rotations psi_K = Psi_K^l, generalised shape functions
@@ -41,12 +44,10 @@ using jive_helpers::Quadix;
 ///  - Rotations (CJ Eqs. 5.6-5.8 and 6.2; JC Eqs. 3.8-3.12): reference rotation Lambda_r = Lambda_I exp(phi/2),
 ///    phi = log(Lambda_I^T Lambda_J), from the nodes I = (n-1)/2 and J = n/2 (0-based, integer division; I = J for
 ///    odd n); local nodal rotation vectors psi_K = log(Lambda_r^T Lambda_K), interpolated with the shape functions,
-///    psi(s) = sum_K N_K(s) psi_K; Lambda(s) = Lambda_r exp(psi(s)).
-///  - Test functions (virtual displacements and spins): the shape functions N_K (JC Eq. 3.1), see getXi().
-///  - Trial functions (changes of the configuration, for the tangent): delta theta(s) = sum_K It_K(s) delta theta_K
-///    with the generalised shape functions It_K (JC Eqs. 3.17-3.19; I-tilde^i in JC), see
-///    getGeneralisedShapeFunctions() and getXiTilde().
-/// Test and trial functions differ: a Petrov-Galerkin method with a nonsymmetric tangent (JC Section 3, Eq. 4.7).
+///    psi(s) = sum_K N_K(s) psi_K; Lambda(s) = Lambda_r exp(psi(s)), see getRotationsAndGradients().
+///  - Spin of the cross section for nodal spins: delta theta(s) = sum_K It_K(s) delta theta_K with the generalised
+///    shape functions It_K (JC Eqs. 3.17-3.19; I-tilde^i in JC), see getGeneralisedShapeFunctions(). They are the
+///    trial functions of the tangent; the test functions are the shape functions N_K (JC Eq. 3.1, SVQ Eq. 5.1).
 /// T(v) below is the tangent operator of the exponential map, jive_helpers::expTangent (the spin of exp(v) for a
 /// change dv); it is the inverse of the matrix T of JC Eqs. 2.4-2.5.
 ///
@@ -173,34 +174,6 @@ class Line3D : public Shape
                                     const Matrix &grads,
                                     const Cubix &nodeLambda) const;
 
-  /// @brief Xi of Simo & Vu-Quoc (1986), Eqs. 4.6a and 5.3: the virtual strains of the internal force (allocation free)
-  /// @details With delta Gamma = Lambda^T (delta phi' + [phi' x] delta theta) and delta K = Lambda^T delta theta'
-  /// (JC Eq. 2.13) and the test functions of JC Eq. 3.1, the internal force of node K is
-  /// f_K = sum_ip w Xi_K r (JC Eq. 4.3) with the spatial stress resultants r = (n, m) and
-  ///   Xi_K = [ N'_K I               0     ]
-  ///          [ -N_K [phi' x]    N'_K I   ]
-  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
-  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
-  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
-  void getXi(const Quadix &Xi,
-             const Matrix &grads,
-             const Matrix &phiP) const;
-
-  /// @brief Xi-tilde: Xi with the generalised shape functions It_K instead of N_K, for the tangent (JC Eq. 4.7) (allocation free)
-  /// @details The same as getXi() with the generalised shape functions:
-  ///   Xi-tilde_K = [ N'_K I                    0       ]
-  ///                [ -It_K^T [phi' x]     It'_K^T     ]
-  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
-  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
-  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
-  /// @param[in] genShapes  generalised shape functions It_K (see getGeneralisedShapeFunctions)
-  /// @param[in] genShapesP  their derivatives along the line
-  void getXiTilde(const Quadix &Xi,
-                  const Matrix &grads,
-                  const Matrix &phiP,
-                  const Quadix &genShapes,
-                  const Quadix &genShapesP) const;
-
   //------------------------------------------------
   // local location functions
   //------------------------------------------------
@@ -254,7 +227,6 @@ class Line3D : public Shape
   mutable Matrix ipLocalRotVecs_;         ///< psi at the integration points, 3 x ipointCount
   mutable Matrix ipLocalRotVecsP_;        ///< psi' at the integration points, 3 x ipointCount
   mutable Matrix rotWork_;                ///< 3 x 3 work matrix for relative rotations
-  mutable Matrix skewPhiP_;               ///< [phi' x], skew symmetric matrix of the tangent, 3 x 3
 
   /// @name Memo of the last getShapeGradients() call
   /// @details The gradients only depend on the node coordinates, and the same
