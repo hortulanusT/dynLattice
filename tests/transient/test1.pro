@@ -5,6 +5,8 @@ control.runWhile = "t <= 30";
 Solver.modules = [ "integrator" ];
 Solver.integrator.type = "MilneDevice";
 Solver.integrator.deltaTime = 5e-5;
+Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];
+Solver.integrator.rotationScale = 1.;
 
 // settings
 params.rod_details.material.type = "ElasticRod";
