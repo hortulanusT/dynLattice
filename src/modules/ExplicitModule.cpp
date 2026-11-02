@@ -24,6 +24,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
+const char *ExplicitModule::ROT_SCALE = "rotationScale";
 const char *ExplicitModule::MASS_MATRIX = "explicitMass";
 
 //-----------------------------------------------------------------------
@@ -40,6 +41,7 @@ ExplicitModule::ExplicitModule
   valid_ = false;
   fintCacheValid_ = false;
   lenScale_ = 1e-3;
+  rotScale_ = lenScale_;
   dofsSO3_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
@@ -77,6 +79,9 @@ Module::Status ExplicitModule::init
   // get the length scale
   myProps.find(lenScale_, LEN_SCALE);
   myConf.set(LEN_SCALE, lenScale_);
+  rotScale_ = lenScale_;
+  myProps.find(rotScale_, ROT_SCALE);
+  myConf.set(ROT_SCALE, rotScale_);
 
   // returning an address of an object pointing to the Model
 
@@ -609,10 +614,14 @@ ExplicitModule::getPrecision() const
 double
 ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
+  // displacements / lengthScale; rotations * rotationScale / lengthScale, written as one
+  // division so that rotationScale = lengthScale (the default) leaves them unchanged
   Vector y_diff = Vector(y_pre - y_cor);
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;
+    else
+      y_diff[i] /= lenScale_ / rotScale_;
   return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }
 

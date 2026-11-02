@@ -8,8 +8,8 @@
 | `Solver.modules = [ "integrator" ];` | defines the modules that make up the solver; again only one, called `integrator` |
 | `Solver.integrator.type = "MilneDevice";` | use the same adaptive MilneDeviceModule integrator as in \ref prop1 |
 | `Solver.integrator.deltaTime = 2e-9;` | start with a much smaller time step \f$2\times10^{-9}\f$s than Test 1, since the impact loading and thin rods involve much higher characteristic frequencies |
-| `Solver.integrator.dofs_SO3 = ["rx", "ry", "rz"];` | tell the integrator which degrees of freedom are rotations living on SO(3), so it can update/interpolate them consistently |
-| `Solver.integrator.lengthScale = 3.7500000000000003e-05;` | a characteristic length used internally to non-dimensionalize the adaptive error estimate |
+| `Solver.integrator.dofs_SO3 = ["rx", "ry", "rz"];` | tell the integrator which degrees of freedom are rotations: they are updated with the exponential map (multiplicatively, on SO(3)). Without this line they are updated by adding increments to the rotation vector, which is only correct for rotations about one fixed axis (2D) |
+| `Solver.integrator.lengthScale = 3.7500000000000003e-05;` | a characteristic length used internally to non-dimensionalize the adaptive error estimate: displacement errors are divided by it (default \f$10^{-3}\f$); rotation errors in rad are taken as they are, unless `rotationScale` (default: `lengthScale`) is set |
 | `Solver.integrator.precision = .3e-4;` | set the target relative error used by the adaptive step-size control |
 | **File Includes** | |
 | `include "input.pro";` | include the \ref input2 file defining input modules, the parameterized geometry and periodic node groups |

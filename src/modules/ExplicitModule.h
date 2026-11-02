@@ -109,6 +109,7 @@ class ExplicitModule : public SolverModule
   static const char *STEP_COUNT; ///< Step count property
   static const char *SO3_DOFS;   ///< SO(3) DOF types property
   static const char *LEN_SCALE;  ///< Length scale property
+  static const char *ROT_SCALE;  ///< Rotation scale property (length; default: the length scale)
   static const char *MASS_MATRIX; ///< globdat key of the published mass matrix
   /// @}
 
@@ -249,7 +250,10 @@ class ExplicitModule : public SolverModule
                   const Vector &fext,
                   const Properties &globdat);
 
-  /// @brief Get solution quality measure
+  /// @brief Get solution quality measure: RMS over all dofs of the scaled difference y_pre - y_cor
+  /// @details Displacements are divided by lengthScale. A rotation (a dofs_SO3 dof) error dtheta counts like a
+  /// displacement error dtheta * rotationScale (the displacement at that distance from the axis), i.e. it is divided
+  /// by lengthScale / rotationScale. The default rotationScale = lengthScale takes rotations in rad as they are.
   /// @param[in] y_pre  Predicted solution
   /// @param[in] y_cor  Corrected solution
   /// @return Quality measure
@@ -285,6 +289,7 @@ class ExplicitModule : public SolverModule
   MassMode mode_;   ///< Mass matrix mode
   idx_t order_;     ///< Integration order
   double lenScale_; ///< Characteristic length scale
+  double rotScale_; ///< A rotation error dtheta counts like a displacement error dtheta * rotScale_
   /// @}
 
   /// @name DOF management
