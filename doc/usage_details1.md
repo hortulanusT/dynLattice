@@ -8,7 +8,7 @@
 | `Solver.modules = [ "integrator" ];` | defines the modules, that make up the solver. In our case it is only one, called `integrator`. |
 | `Solver.integrator.type = "MilneDevice";` | defines the type of the `integrator` module, in our case it's a MilneDeviceModule (this type needs to agree with the name it is declared under in the [ModuleFactory](https://jive-manual.dynaflow.com/classjive_1_1app_1_1ModuleFactory.html)) |
 | `Solver.integrator.deltaTime = 5e-5;` | set the starting time step size for the `integrator` to \f$5 \times 10^{-5}\f$ seconds |
-| `Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];` | tell the integrator which degrees of freedom are rotations: they are updated with the exponential map (multiplicatively, on SO(3)). Without this line they are updated by adding increments to the rotation vector, which is only correct for rotations about one fixed axis (2D) |
+| `Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];` | tell the integrator which degrees of freedom are rotations: they are updated with the exponential map (multiplicatively, on SO(3)). If the line is missing, the rotation dofs reported by the rod model are used; if it differs from them, the run stops with an error |
 | `Solver.integrator.rotationScale = 1.;` | in the adaptive error estimate, a rotation error \f$\delta\theta\f$ counts like a displacement error \f$\delta\theta\f$ times this length (default: `lengthScale`, i.e. rotations in rad compare with displacements in units of `lengthScale`). 1 m keeps the step sizes this example had before `dofs_SO3` was set |
 | **Material Properties** | |
 | `params.rod_details.material.type = "ElasticRod";` | define the type of the material to be ElasticRodMaterial |

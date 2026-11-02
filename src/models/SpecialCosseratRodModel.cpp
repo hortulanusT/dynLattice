@@ -8,6 +8,7 @@
  */
 
 #include "models/SpecialCosseratRodModel.h"
+#include "utils/SolverNames.h"
 
 #include <jem/base/ClassTemplate.h>
 #include <math.h>
@@ -214,6 +215,21 @@ bool SpecialCosseratRodModel::takeAction
   // REPORT(action)
   // TEST_CONTEXT(myName_)
   // TEST_CONTEXT(params)
+
+  if (action == SolverNames::GET_ROT_DOFS)
+  {
+    // the rotation dofs of this rod are rotation vectors: tell the explicit integrators (dofs_SO3)
+    Array<String> names(ROT_DOF_COUNT);
+    Array<String> known;
+    for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+      names[i] = dofs_->getTypeName(rotTypes_[i]);
+    if (params.find(known, SolverNames::ROT_DOFS))
+      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+        if (!(known[i] == names[i]))
+          throw jem::IllegalInputException(getContext(), "rods with different rotation dof names");
+    params.set(SolverNames::ROT_DOFS, names);
+    return true;
+  }
 
   if (action == Actions::INIT)
   {

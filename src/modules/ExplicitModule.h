@@ -89,8 +89,10 @@ using jive_helpers::mul3;
 
 /// @brief Base class for explicit time integration schemes
 /// @details Provides foundation for explicit solvers with support for rotational DOFs,
-/// adaptive time stepping, and both lumped and consistent mass matrices. Handles
-/// special integration of SO(3) rotational degrees of freedom using exponential maps.
+/// adaptive time stepping, and both lumped and consistent mass matrices. The rotation dofs
+/// (dofs_SO3, or if not given those the model reports with SolverNames::GET_ROT_DOFS) are
+/// rotation vectors; they are updated with the exponential map, Lambda_new = exp(dt omega) Lambda_old,
+/// their velocities being spatial angular velocities. All other dofs are updated additively.
 class ExplicitModule : public SolverModule
 {
  public:
@@ -107,7 +109,7 @@ class ExplicitModule : public SolverModule
   /// @{
   static const char *TYPE_NAME;  ///< Module type name
   static const char *STEP_COUNT; ///< Step count property
-  static const char *SO3_DOFS;   ///< SO(3) DOF types property
+  static const char *SO3_DOFS;   ///< SO(3) DOF types property (default: the rotation dofs reported by the model)
   static const char *LEN_SCALE;  ///< Length scale property
   static const char *ROT_SCALE;  ///< Rotation scale property (length; default: the length scale)
   static const char *MASS_MATRIX; ///< globdat key of the published mass matrix

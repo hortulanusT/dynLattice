@@ -6,9 +6,12 @@
  */
 
 #include "modules/ExplicitModule.h"
+#include "utils/SolverNames.h"
 #include "utils/testing.h"
 
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalInputException.h>
+#include <jem/util/StringUtils.h>
 
 //=======================================================================
 //   class ExplicitModule
@@ -66,6 +69,7 @@ Module::Status ExplicitModule::init
 
 {
   using jem::util::connect;
+  using jem::util::StringUtils;
   using jive::implict::PropNames;
 
   Properties myConf = conf.makeProps(myName_);
@@ -97,9 +101,33 @@ Module::Status ExplicitModule::init
   connect(dofs_->newSizeEvent, this, &Self::invalidate_);
   connect(dofs_->newOrderEvent, this, &Self::invalidate_);
 
-  // get the SO3 dof names
+  // get the SO3 dof names: given by dofs_SO3 or reported by the model (rods); without them the
+  // rotation dofs would be updated additively, which is wrong for rotations about changing axes
 
-  if (myProps.find(SO3_dof_names, SO3_DOFS))
+  StringVector modelRotDofs;
+  const bool modelHasRot = model_->takeAction(SolverNames::GET_ROT_DOFS, params, globdat) &&
+                           params.find(modelRotDofs, SolverNames::ROT_DOFS);
+  params.clear();
+  const bool givenRot = myProps.find(SO3_dof_names, SO3_DOFS);
+
+  if (givenRot && modelHasRot)
+  {
+    bool same = SO3_dof_names.size() == modelRotDofs.size();
+    for (idx_t i = 0; same && i < SO3_dof_names.size(); i++)
+      same = SO3_dof_names[i] == modelRotDofs[i];
+    if (!same)
+      throw jem::IllegalInputException(getContext(), String(SO3_DOFS) + " = [" + StringUtils::join(SO3_dof_names, ", ") +
+                                                         "] differs from the rotation dofs of the model [" +
+                                                         StringUtils::join(modelRotDofs, ", ") + "]");
+  }
+  if (!givenRot && modelHasRot)
+  {
+    SO3_dof_names.ref(modelRotDofs);
+    jem::System::info(myName_) << " ...rotation dofs from the model (" << SO3_DOFS << " not given): "
+                               << StringUtils::join(SO3_dof_names, ", ") << "\n";
+  }
+
+  if (givenRot || modelHasRot)
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
     dofsSO3_.resize(SO3_dof_names.size());
