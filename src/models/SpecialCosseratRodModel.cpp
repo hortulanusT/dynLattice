@@ -14,6 +14,7 @@
 
 #include <jive/algebra/SparseMatrixObject.h>
 using jem::newInstance;
+using jive_helpers::expTangent;
 using jive_helpers::mul3;
 
 //=======================================================================
@@ -727,40 +728,6 @@ void SpecialCosseratRodModel::initRotation_()
   }
 }
 
-void SpecialCosseratRodModel::getGeomtericStiffness_(const Cubix &B,
-                                                     const Matrix &stresses,
-                                                     const Matrix &nodePhi_0,
-                                                     const Matrix &nodeU) const
-{
-  const idx_t dofCount = dofs_->typeCount();
-  const idx_t globRank = shapeK_->globalRank();
-  const idx_t nodeCount = shapeK_->nodeCount();
-  const idx_t ipCount = shapeK_->ipointCount();
-
-  Vector w(ipCount);
-  Matrix shapeGrads(nodeCount, ipCount);
-  Matrix phiP(globRank, ipCount);
-
-  // get phi_prime
-  shapeK_->getShapeGradients(shapeGrads, w, nodePhi_0);
-  phiP = matmul(Matrix(nodePhi_0 + nodeU), shapeGrads);
-
-  // for every iPoint assemble the B-Matrix
-  for (idx_t ip = 0; ip < ipCount; ip++)
-  {
-    B[ip] = 0.;
-    B[ip](TRANS_PART, SliceFrom(dofCount)) -=
-        skew(stresses[ip][TRANS_PART]);
-    B[ip](ROT_PART, SliceFrom(dofCount)) -= skew(stresses[ip][ROT_PART]);
-    B[ip](SliceFrom(dofCount), TRANS_PART) +=
-        skew(stresses[ip][TRANS_PART]);
-    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) +=
-        matmul(stresses[ip][TRANS_PART], phiP[ip]);
-    B[ip](SliceFrom(dofCount), SliceFrom(dofCount)) -=
-        dot(stresses[ip][TRANS_PART], phiP[ip]) * eye();
-  }
-}
-
 void SpecialCosseratRodModel::getTangents_(const Matrix &phiP,
                                            const Matrix &nodePhi_0,
                                            const Matrix &nodeU,
@@ -784,7 +751,8 @@ void SpecialCosseratRodModel::getStrains_(
   getTangents_(ipPhiP_, nodePhi_0, nodeU, ie);
   shapeK_->getRotationsAndGradients(ipLambda_, ipLambdaP_, grads, nodeLambda);
 
-  // get the strains (material + spatial );
+  // material strains Gamma = Lambda^T phi' and K = unskew(Lambda^T Lambda') minus the initial strains
+  // (Crisfield & Jelenic 1999, Eqs. 3.4 and 3.5; Jelenic & Crisfield 1999, Eq. 2.12)
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     mul3(strains[ip][TRANS_PART], ipLambda_[ip].transpose(), ipPhiP_[ip]);
@@ -876,6 +844,7 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
     idofs_rot.ref(nodeDofs_(ROT_PART, rodNodes_[inodes[inode]]));
 
     nodeU[inode] = disp[idofs_trans];
+    // the rotation dofs are a rotation vector theta: Lambda = exp(theta) Lambda_N (Lambda_N from initRotation_)
     for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
       rotVec[i] = disp[idofs_rot[i]];
     expVec(nodeLambda[inode], rotVec);
@@ -888,6 +857,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
+  // Tangent stiffness of Jelenic & Crisfield (1999, CMAME) Eq. 4.7: the derivative of the internal force (test
+  // functions N_K, Line3D::getXi) along the trial functions (generalised shape functions It_K,
+  // Line3D::getGeneralisedShapeFunctions), plus T(theta) for the rotation-vector dofs (see below).
   if (!nodeDofsValid_)
     updNodeDofs_();
 
@@ -896,6 +868,7 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   const idx_t elemCount = rodElems_.size();
   const idx_t dofCount = dofs_->typeCount();
   const idx_t rank = shapeK_->globalRank();
+  const Matrix shapes = shapeK_->getShapeFunctions();
   MatmulChain<double, 3> mc3;
 
   // PER ELEMENT VALUES
@@ -905,12 +878,17 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   Matrix stress(dofCount, ipCount);
   Vector weights(ipCount);
   Quadix XI(dofCount, dofCount, nodeCount, ipCount);
-  Quadix PSI(dofCount, dofCount + TRANS_DOF_COUNT, nodeCount, ipCount);
-  Cubix PI(dofCount, dofCount, ipCount);
+  Quadix XItilde(dofCount, dofCount, nodeCount, ipCount);
+  Quadix genShapes(rank, rank, nodeCount, ipCount);
+  Quadix genShapesP(rank, rank, nodeCount, ipCount);
+  Matrix PI(dofCount, dofCount);
   Matrix materialC(dofCount, dofCount);
   Matrix spatialC(dofCount, dofCount);
-  Cubix geomStiff(dofCount + TRANS_DOF_COUNT, dofCount + TRANS_DOF_COUNT,
-                  ipCount);
+  Cubix nodeExpTangent(rank, rank, nodeCount);
+  Vector rotVec(ROT_DOF_COUNT);
+  Matrix skewN(rank, rank);
+  Matrix skewM(rank, rank);
+  Matrix skewPhiP(rank, rank);
 
   // DOF INDICES
   IdxVector inodes(nodeCount);
@@ -918,68 +896,76 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
   IdxVector Jdofs(dofCount);
 
   // HELPERS
-  Matrix addS(dofCount, dofCount);
-  Matrix addT(dofCount, dofCount);
+  Matrix blockK(dofCount, dofCount);
 
   // iterate through the elements
   for (idx_t ie = 0; ie < elemCount; ie++)
   {
-    // REPORT(ie)
     allElems_.getElemNodes(inodes, rodElems_.getIndex(ie));
-    // TEST_CONTEXT( rodElems_.getIndex(ie) )
-    // TEST_CONTEXT( inodes )
     // get nice Positions
     getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
-    // TEST_CONTEXT(inodes)
-    // TEST_CONTEXT(nodePhi_0)
-    // TEST_CONTEXT(nodeU)
-    // TEST_CONTEXT(nodeLambda)
-
-    // get the XI, PSI and PI values for this
-    shapeK_->getXi(XI, weights, nodeU, nodePhi_0);
-    shapeK_->getPsi(PSI, weights, nodePhi_0);
-    shapeK_->getPi(PI, nodeLambda);
-    // TEST_CONTEXT(XI)
-    // TEST_CONTEXT(PSI)
-    // TEST_CONTEXT(PI)
-    // get the (spatial) stresses
+    // get the (spatial) stresses; the strains leave the tangents ipPhiP_ and the
+    // rotations ipLambda_ of this element
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
-    // get the gemetric stiffness
-    getGeomtericStiffness_(geomStiff, stress, nodePhi_0, nodeU);
-    // TEST_CONTEXT(geomStiff)
+    shapeK_->getXi(XI, elemGrads_[ie], ipPhiP_);
+    shapeK_->getGeneralisedShapeFunctions(genShapes, genShapesP, elemGrads_[ie], nodeLambda);
+    shapeK_->getXiTilde(XItilde, elemGrads_[ie], ipPhiP_, genShapes, genShapesP);
+
+    // The rotation dofs are rotation vectors theta (Lambda = exp(theta) Lambda_N) that the
+    // nonlinear solver updates additively, while the trial functions are spins:
+    // d spin = T(theta) d theta, so the rotation columns are multiplied by T(theta)
+    for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
+    {
+      Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
+      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+        rotVec[i] = disp[Jdofs[TRANS_DOF_COUNT + i]];
+      expTangent(nodeExpTangent[Jnode], rotVec);
+    }
 
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      // get the spatial stiffness
+      // get the spatial stiffness c = Pi C Pi^T, Pi = diag(Lambda, Lambda)
       material_->getMaterialStiff(materialC, ie, ip);
-      spatialC = mc3.matmul(PI[ip], materialC, PI[ip].transpose());
-      // TEST_CONTEXT(PI[ip])
-      // TEST_CONTEXT(material_->getMaterialStiff(ie, ip))
+      PI = 0.;
+      PI(TRANS_PART, TRANS_PART) = ipLambda_[ip];
+      PI(ROT_PART, ROT_PART) = ipLambda_[ip];
+      spatialC = mc3.matmul(PI, materialC, PI.transpose());
+
+      // spatial forces n and moments m, and the tangent phi'
+      skew(skewN, stress[ip][TRANS_PART]);
+      skew(skewM, stress[ip][ROT_PART]);
+      skew(skewPhiP, ipPhiP_[ip]);
 
       for (idx_t Inode = 0; Inode < nodeCount; Inode++)
       {
         Idofs.ref(nodeDofs_[rodNodes_[inodes[Inode]]]);
+        const double NI = shapes(Inode, ip);
+        const double dNI = elemGrads_[ie](Inode, ip);
 
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         {
-          // SUBHEADER2( Inode, Jnode)
           Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
+          const Matrix genShapeJ = genShapes[ip][Jnode];
+          const double dNJ = elemGrads_[ie](Jnode, ip);
 
-          // Stiffness contribution S ( element stiffness matrix )
-          addS = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
-                                          XI[ip][Jnode].transpose());
-          // TEST_CONTEXT(addS)
-          mbld.addBlock(Idofs, Jdofs, addS);
+          // material stiffness w Xi_I c Xi-tilde_J^T (Simo & Vu-Quoc 1986, Section 5.1.2, with Xi-tilde for node J)
+          blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
+                                            XItilde[ip][Jnode].transpose());
 
-          // Stiffness contribution T ( element geometric
-          // stiffness matrix)
-          addT = weights[ip] * mc3.matmul(PSI[ip][Inode], geomStiff[ip],
-                                          PSI[ip][Jnode].transpose());
-          // TEST_CONTEXT(addT)
           if (!symOnly_)
-            mbld.addBlock(Idofs, Jdofs, addT);
+          {
+            // geometric stiffness: the rotation of n and m with the cross section (spin It_J of node J)
+            // and the change of phi' in the test functions; columns = (displacement, spin) of node J
+            blockK(TRANS_PART, ROT_PART) -= weights[ip] * dNI * matmul(skewN, genShapeJ);
+            blockK(ROT_PART, TRANS_PART) += weights[ip] * NI * dNJ * skewN;
+            blockK(ROT_PART, ROT_PART) += weights[ip] * (NI * mc3.matmul(skewPhiP, skewN, genShapeJ) - dNI * matmul(skewM, genShapeJ));
+
+            // columns = (displacement, rotation vector) of node J
+            blockK(ALL, ROT_PART) = matmul(Matrix(blockK(ALL, ROT_PART).clone()), nodeExpTangent[Jnode]);
+          }
+          mbld.addBlock(Idofs, Jdofs, blockK);
         }
         fint[Idofs] += weights[ip] * matmul(XI[ip][Inode], stress[ip]);
       }
@@ -1024,11 +1010,10 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     // TEST_CONTEXT(nodeU)
     // TEST_CONTEXT(nodeLambda)
 
-    // get the XI values for this
-    getTangents_(ipPhiP_, nodePhi_0, nodeU, ie);
-    shapeK_->getXi(XI, elemGrads_[ie], ipPhiP_);
-    // get the (spatial) stresses
+    // get the (spatial) stresses; the strains leave the tangents ipPhiP_ of this element for Xi
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
+    // internal force with the test functions N_K, Jelenic & Crisfield (1999) Eq. 4.3
+    shapeK_->getXi(XI, elemGrads_[ie], ipPhiP_);
 
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
