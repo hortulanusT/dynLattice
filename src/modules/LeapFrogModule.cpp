@@ -80,7 +80,35 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   ABupdate(du, v_new);
   updateVec(u_new, u_old, du, true);
 
+  // store the new state
+  StateVector::store(u_new, STATE[0], dofs_, globdat);
+  StateVector::store(v_new, STATE[1], dofs_, globdat);
+
+  // no error estimate: the step is fixed (see init)
   info.set(SolverInfo::RESIDUAL, 0.);
+}
+
+//-----------------------------------------------------------------------
+//   init, configure
+//-----------------------------------------------------------------------
+
+Module::Status LeapFrogModule::init(const Properties &conf, const Properties &props, const Properties &globdat)
+{
+  Status status = Super::init(conf, props, globdat);
+
+  // without an error estimate the adaptive control would grow the step every step: keep deltaTime
+  minDtime_ = dtime_;
+  maxDtime_ = dtime_;
+  getConfig(conf, globdat);
+
+  return status;
+}
+
+void LeapFrogModule::configure(const Properties &props, const Properties &globdat)
+{
+  Super::configure(props, globdat);
+  minDtime_ = dtime_;
+  maxDtime_ = dtime_;
 }
 
 //-----------------------------------------------------------------------

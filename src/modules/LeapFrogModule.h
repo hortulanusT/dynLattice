@@ -23,7 +23,10 @@
 /// The leap-frog method is symplectic and second-order accurate, making it
 /// well-suited for long-time dynamic simulations where energy conservation
 /// is important. It inherits basic explicit integration functionality from
-/// ExplicitModule.
+/// ExplicitModule. It has no error estimate, so it runs with the fixed step
+/// deltaTime (minDTime and maxDTime are set to it; a step from the CFL limit is planned).
+/// The stored velocities are those of the half steps, so the kinetic energy output
+/// lags half a step behind the potential energy.
 /// @see [Leap-frog integration](https://en.wikipedia.org/wiki/Leapfrog_integration)
 class LeapFrogModule : public ExplicitModule
 {
@@ -47,6 +50,18 @@ class LeapFrogModule : public ExplicitModule
   /// 2. Update velocities using current and previous accelerations
   /// 3. Update positions using updated velocities
   virtual void solve(const Properties &info, const Properties &globdat) override;
+
+  /// @brief Initialise as ExplicitModule, then fix the step size to deltaTime
+  /// @param[out] conf  Actually used configuration properties (output)
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
+  /// @return Module status
+  virtual Status init(const Properties &conf, const Properties &props, const Properties &globdat) override;
+
+  /// @brief Configure as ExplicitModule, then fix the step size to deltaTime
+  /// @param[in] props  User-specified module properties
+  /// @param[in] globdat  Global data container
+  virtual void configure(const Properties &props, const Properties &globdat) override;
 
   /// @brief Factory method for creating new LeapFrogModule instances
   /// @param[in] name  Module name
