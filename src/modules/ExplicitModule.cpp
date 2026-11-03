@@ -180,7 +180,7 @@ Module::Status ExplicitModule::init
   myConf.set("stepSaftey", saftey_);
   myProps.find(incrFact_, "increaseFactor", 1., 2.);
   myConf.set("increaseFactor", incrFact_);
-  myProps.find(decrFact_, "decreaseFactor", 1., 2.);
+  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
   myConf.set("decreaseFactor", decrFact_);
 
   // Initialize solver
