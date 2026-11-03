@@ -364,7 +364,8 @@ bool ExplicitModule::commit(const Properties &globdat)
   else
   {
     dropCommittedForce_(globdat);
-    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
+    // a step rejected by the model (CHECK_COMMIT) can have a small error
+    dtime_ = jem::min(jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_), maxDtime_);
   }
 
   jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
