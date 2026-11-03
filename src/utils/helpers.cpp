@@ -23,14 +23,10 @@ inline void skew3(Mat3 &S, const Vec3 &v)
   S(2, 1) = 1 * v[0];
 }
 
-// Coefficients of the tangent operator T(v) = I + a [v x] + b [v x]^2 of the exponential map and their derivatives
-// with respect to t = |v|^2: c = {a, da/dt, b, db/dt}, a = (1 - cos x)/x^2, b = (x - sin x)/x^3, x = |v|. For t < 1
-// the power series a = sum_k (-t)^k/(2k+2)!, b = sum_k (-t)^k/(2k+3)! (9 terms, truncation below 1e-16), above the
-// closed forms (no cancellation there).
-// Why not always sin/cos: for small x the closed forms subtract nearly equal numbers (1 - cos x ~ x^2/2,
-// x - sin x ~ x^3/6) and then divide by x^2 ... x^5, so rounding errors are amplified: at x = 1e-4 only about 8
-// digits of a are left, the derivatives are worse, and x = 0 divides by zero. The relative rotations within an
-// element are mostly far below 1, so the series is the usual branch.
+// Coefficients of T(v) = I + a [v x] + b [v x]^2 and their derivatives in t = |v|^2: c = {a, da/dt, b, db/dt},
+// a = (1 - cos x)/x^2, b = (x - sin x)/x^3, x = |v|. For t < 1 the power series a = sum_k (-t)^k/(2k+2)!,
+// b = sum_k (-t)^k/(2k+3)! (9 terms, error < 1e-16), else the closed forms. Not sin/cos throughout: for small x they
+// subtract nearly equal numbers (at x = 1e-4 about 8 digits of a are left) and x = 0 divides by zero.
 void tangentCoeffs(double c[4], const double t)
 {
   static const double A[9] = {1. / 2., -1. / 24., 1. / 720., -1. / 40320., 1. / 3628800., -1. / 479001600.,
@@ -163,24 +159,24 @@ void logMat(const Vector &rv, const Matrix &R)
 {
   double theta;                                 // angle of rotation
   double tr_R = trace(R) <= 3. ? trace(R) : 3.; // trace of the matrix
+  const double cosTheta = (tr_R - 1.) / 2.;
 
-  // Near theta = pi, acos and the division by sin(theta) below lose all precision (at pi - 1e-6 the angle is
-  // off by 1e-4 rad, at pi - 1e-9 the result is garbage). There, cos(theta) < -0.9, take the angle from atan2 and
-  // the axis k from the symmetric part (R + R^T)/2 - cos(theta) I = (1 - cos(theta)) k k^T, using its column with
-  // the largest diagonal entry (the idea of Spurrier's algorithm, Jelenic & Crisfield 1999, CMAME, Note 5).
-  // Elsewhere the formula below is unchanged.
-  if ((tr_R - 1.) / 2. < -0.9)
+  // Near theta = pi (cos theta < -0.9) acos and the division by sin(theta) lose precision: angle from atan2, axis k
+  // from (R + R^T)/2 - cos(theta) I = (1 - cos(theta)) k k^T, column with the largest diagonal entry (Spurrier's
+  // idea, Jelenic & Crisfield 1999, CMAME, Note 5)
+  if (cosTheta < -0.9)
   {
-    const double c = (tr_R - 1.) / 2. < -1. ? -1. : (tr_R - 1.) / 2.;
+    const double c = cosTheta < -1. ? -1. : cosTheta;
     const double a[3] = {(R(2, 1) - R(1, 2)) / 2., (R(0, 2) - R(2, 0)) / 2., (R(1, 0) - R(0, 1)) / 2.}; // sin(theta) k
     const double s = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
     idx_t i = 0;
     for (idx_t j = 1; j < 3; j++)
       if (R(j, j) > R(i, i))
         i = j;
+    const double kNorm = sqrt((R(i, i) - c) * (1. - c));
     double k[3];
     for (idx_t j = 0; j < 3; j++)
-      k[j] = ((R(j, i) + R(i, j)) / 2. - (j == i ? c : 0.)) / sqrt((R(i, i) - c) * (1. - c));
+      k[j] = ((R(j, i) + R(i, j)) / 2. - (j == i ? c : 0.)) / kNorm;
     // the sign of the axis from sin(theta) k (undetermined only at theta = pi exactly)
     const double sign = (k[0] * a[0] + k[1] * a[1] + k[2] * a[2]) < 0. ? -1. : 1.;
     theta = atan2(s, c);
@@ -189,7 +185,7 @@ void logMat(const Vector &rv, const Matrix &R)
     return;
   }
 
-  theta = acos((tr_R - 1.) / 2.);
+  theta = acos(cosTheta);
 
   // axial vector of R - R^T
   rv[0] = (R(2, 1) - R(1, 2)) - (R(1, 2) - R(2, 1));
