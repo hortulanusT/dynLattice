@@ -31,25 +31,16 @@ using jive_helpers::Quadix;
 /// in 3D space. Supports 2, 3, and 4-node line elements with configurable
 /// integration schemes (default: reduced Gauss integration, nodeCount - 1 points).
 ///
-/// @section RotationInterpolation Rotation interpolation (Crisfield & Jelenic 1999)
-/// Line3D holds the interpolation (discretisation) only; the strain measures, the virtual strains (Xi) and the
-/// tangent of the rod theory are in SpecialCosseratRodModel, the constitutive law in the rod materials.
-/// References: SVQ = Simo & Vu-Quoc (1986), Comput. Methods Appl. Mech. Engrg. 58 (rod theory and element);
-/// CJ = Crisfield & Jelenic (1999), Proc. R. Soc. A 455; JC = Jelenic & Crisfield (1999), Comput. Methods Appl.
-/// Mech. Engrg. 171.
-/// Notation: Simo & Vu-Quoc (1986) for the element (shape functions N_K, Xi, Pi = diag(Lambda, Lambda),
-/// c = Pi C Pi^T, spatial stress resultants r = (n, m)); Jelenic & Crisfield (1999) symbols only for what Simo &
-/// Vu-Quoc do not have (Lambda_r, phi_IJ, local rotations psi_K = Psi_K^l, generalised shape functions
-/// It_K = I-tilde^K; their I^i is N_K here). Xi-tilde is Xi built with It_K instead of N_K.
-///  - Rotations (CJ Eqs. 5.6-5.8 and 6.2; JC Eqs. 3.8-3.12): reference rotation Lambda_r = Lambda_I exp(phi/2),
-///    phi = log(Lambda_I^T Lambda_J), from the nodes I = (n-1)/2 and J = n/2 (0-based, integer division; I = J for
-///    odd n); local nodal rotation vectors psi_K = log(Lambda_r^T Lambda_K), interpolated with the shape functions,
-///    psi(s) = sum_K N_K(s) psi_K; Lambda(s) = Lambda_r exp(psi(s)), see getRotationsAndGradients().
-///  - Spin of the cross section for nodal spins: delta theta(s) = sum_K It_K(s) delta theta_K with the generalised
-///    shape functions It_K (JC Eqs. 3.17-3.19; I-tilde^i in JC), see getGeneralisedShapeFunctions(). They are the
-///    trial functions of the tangent; the test functions are the shape functions N_K (JC Eq. 3.1, SVQ Eq. 5.1).
-/// T(v) below is the tangent operator of the exponential map, jive_helpers::expTangent (the spin of exp(v) for a
-/// change dv); it is the inverse of the matrix T of JC Eqs. 2.4-2.5.
+/// @section RotationInterpolation Rotation interpolation
+/// Interpolation only; the rod theory is in SpecialCosseratRodModel. References: SVQ = Simo & Vu-Quoc (1986), CMAME
+/// 58; CJ = Crisfield & Jelenic (1999), Proc. R. Soc. A 455; JC = Jelenic & Crisfield (1999), CMAME 171.
+/// Notation: shape functions N_K (I^i in JC); from JC: Lambda_r, phi, psi_K (Psi_K^l), It_K (I-tilde^i).
+///  - Rotations (CJ Eqs. 5.6-5.8, 6.2; JC Eqs. 3.8-3.12): Lambda_r = Lambda_I exp(phi/2), phi = log(Lambda_I^T Lambda_J),
+///    I = (n-1)/2, J = n/2 (0-based, I = J for odd n); psi_K = log(Lambda_r^T Lambda_K), psi = sum_K N_K psi_K,
+///    Lambda = Lambda_r exp(psi); see getRotationsAndGradients().
+///  - Spins (JC Eqs. 3.17-3.19): delta theta = sum_K It_K delta theta_K, the trial functions of the tangent; the test
+///    functions are N_K (JC Eq. 3.1, SVQ Eq. 5.1); see getGeneralisedShapeFunctions().
+/// T(v) = jive_helpers::expTangent (spin of exp(v) per dv), the inverse of T in JC Eqs. 2.4-2.5.
 ///
 /// @section SupportedElements Supported Elements
 /// - 2-node linear line (StdLine2)
@@ -153,9 +144,8 @@ class Line3D : public Shape
                                 const Matrix &grads,
                                 const Cubix &nodeLambda) const;
 
-  /// @brief Generalised shape functions It_K and their derivatives It'_K at the integration points (JC Eqs. 3.17-3.19)
-  /// @details JC Eqs. 3.13-3.19, with T as in the class description: the spin of Lambda(s) for nodal spins
-  /// delta theta_K is
+  /// @brief Generalised shape functions It_K and It'_K at the integration points (JC Eqs. 3.13-3.19)
+  /// @details The spin of Lambda(s) for nodal spins delta theta_K is
   ///   delta theta(s) = delta theta_r + Lambda_r T(psi) delta psi(s)                        (JC Eq. 3.13)
   ///   delta psi_K = T^-1(psi_K) Lambda_r^T (delta theta_K - delta theta_r)                  (JC Eq. 3.14)
   ///   delta theta_r = Lambda_r (r_I Lambda_r^T delta theta_I + r_J Lambda_r^T delta theta_J) (JC Eq. 3.15)
@@ -163,8 +153,7 @@ class Line3D : public Shape
   /// I = J). Written in the frame of Lambda_r: It_K = Lambda_r X_K Lambda_r^T, X_K = a_K + a_r r_K with
   ///   a_K = N_K T(psi) T^-1(psi_K),  a_r = I - sum_K a_K,
   /// and It'_K the same with a'_K = (N_K dT(psi; psi') + N'_K T(psi)) T^-1(psi_K), a'_r = -sum_K a'_K (JC Eq. 3.19).
-  /// If all nodes have the same rotation, It_K = N_K I. Checked against finite differences of the
-  /// strains.
+  /// If all nodes have the same rotation, It_K = N_K I.
   /// @param[out] genShapes generalised shape functions, genShapes(.,.,K,i) for node K at the i-th integration point
   /// @param[out] genShapesP their derivatives along the line, same shape
   /// @param[in] grads shape gradients, shapeFuncCount x ipointCount

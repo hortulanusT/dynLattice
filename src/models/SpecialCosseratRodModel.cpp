@@ -766,8 +766,7 @@ void SpecialCosseratRodModel::getXi_(const Quadix &Xi,
 
   Xi = 0.;
 
-  // test functions interpolated with the shape functions (Simo & Vu-Quoc 1986, Eqs. 5.1, 5.3;
-  // Jelenic & Crisfield 1999, Eq. 3.1); the virtual strains follow from Jelenic & Crisfield Eq. 2.13
+  // Xi_K (SVQ Eqs. 5.1, 5.3; JC Eqs. 2.13, 3.1)
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     skew(skewPhiP_, phiP[ip]);
@@ -794,8 +793,7 @@ void SpecialCosseratRodModel::getXiTilde_(const Quadix &Xi,
 
   Xi = 0.;
 
-  // trial functions: displacements with the shape functions (Jelenic & Crisfield 1999, Eq. 3.4), spins with
-  // the generalised shape functions (Eq. 3.17); strain changes from their Eq. 2.13
+  // Xi-tilde_K (JC Eqs. 2.13, 3.4, 3.17)
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     skew(skewPhiP_, phiP[ip]);
@@ -825,8 +823,7 @@ void SpecialCosseratRodModel::getStrains_(
   getTangents_(ipPhiP_, nodePhi_0, nodeU, ie);
   shapeK_->getRotationsAndGradients(ipLambda_, ipLambdaP_, grads, nodeLambda);
 
-  // material strains Gamma = Lambda^T phi' and K = unskew(Lambda^T Lambda') minus the initial strains
-  // (Crisfield & Jelenic 1999, Eqs. 3.4 and 3.5; Jelenic & Crisfield 1999, Eq. 2.12)
+  // material strains Gamma = Lambda^T phi' - Gamma_0, K = unskew(Lambda^T Lambda') - K_0 (CJ Eqs. 3.4, 3.5)
   for (idx_t ip = 0; ip < ipCount; ip++)
   {
     mul3(strains[ip][TRANS_PART], ipLambda_[ip].transpose(), ipPhiP_[ip]);
@@ -836,7 +833,7 @@ void SpecialCosseratRodModel::getStrains_(
 
   strains -= matStrain0_[ie];
 
-  // spatial = Pi * material with the block-diagonal Pi = diag(Lambda, Lambda) (Simo & Vu-Quoc 1986, Eq. 4.5)
+  // spatial = Pi * material with the block-diagonal Pi = diag(Lambda, Lambda) (SVQ Eq. 4.5)
   if (spatial)
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
@@ -931,10 +928,8 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
                                         const Vector &disp,
                                         const String &loadCase) const
 {
-  // Tangent stiffness of Jelenic & Crisfield (1999, CMAME) Eq. 4.7: the derivative of the internal force (test
-  // functions N_K, getXi_) along the trial functions (generalised shape functions It_K,
-  // Line3D::getGeneralisedShapeFunctions, getXiTilde_), plus T(theta) for the rotation-vector dofs (see below).
-  // With It_K = N_K I it reduces to the tangent of Simo & Vu-Quoc (1986) Eqs. 4.11-4.14.
+  // Tangent of JC Eq. 4.7: w Xi_I c Xi-tilde_J^T plus the geometric part, rotation columns times T(theta).
+  // With It_K = N_K I it is the tangent of SVQ Eqs. 4.11-4.14.
   if (!nodeDofsValid_)
     updNodeDofs_();
 
@@ -980,8 +975,7 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // get nice Positions
     getDisplacments_(nodePhi_0, nodeU, nodeLambda, disp, inodes);
 
-    // get the (spatial) stresses; the strains leave the tangents ipPhiP_ and the
-    // rotations ipLambda_ of this element
+    // spatial stresses; also fills ipPhiP_ and ipLambda_ of this element
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
     getXi_(XI, elemGrads_[ie], ipPhiP_);
     shapeK_->getGeneralisedShapeFunctions(genShapes, genShapesP, elemGrads_[ie], nodeLambda);
@@ -1001,7 +995,7 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // iterate through the integration Points
     for (idx_t ip = 0; ip < ipCount; ip++)
     {
-      // get the spatial stiffness c = Pi C Pi^T, Pi = diag(Lambda, Lambda) (Simo & Vu-Quoc 1986, Eqs. 4.5, 4.11)
+      // spatial stiffness c = Pi C Pi^T (SVQ Eqs. 4.5, 4.11)
       material_->getMaterialStiff(materialC, ie, ip);
       PI = 0.;
       PI(TRANS_PART, TRANS_PART) = ipLambda_[ip];
@@ -1089,9 +1083,9 @@ void SpecialCosseratRodModel::assemble_(const Vector &fint,
     // TEST_CONTEXT(nodeU)
     // TEST_CONTEXT(nodeLambda)
 
-    // get the (spatial) stresses; the strains leave the tangents ipPhiP_ of this element for Xi
+    // spatial stresses; also fills ipPhiP_ and ipLambda_ of this element
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
-    // internal force with the test functions N_K, Jelenic & Crisfield (1999) Eq. 4.3
+    // internal force with the test functions N_K (JC Eq. 4.3)
     getXi_(XI, elemGrads_[ie], ipPhiP_);
 
     // iterate through the integration Points

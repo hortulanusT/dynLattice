@@ -26,12 +26,9 @@ using jive_helpers::expVec;
 using jive_helpers::expVecP;
 using jive_helpers::logMat;
 using jive_helpers::mul3;
-using jive_helpers::skew;
 
 using jem::ALL;
 using jem::newInstance;
-using jem::SliceFrom;
-using jem::SliceTo;
 using jem::numeric::matmul;
 using jem::numeric::MatmulChain;
 using jem::numeric::norm2;
@@ -82,7 +79,7 @@ Line3D::Line3D(const String &name,
 
   intLine_ = newInstance<ParametricLine>("internalLine", ischeme, stdline);
 
-  // reference nodes of Lambda_r, Crisfield & Jelenic (1999) Eq. 6.2 with 0-based numbers
+  // reference nodes of Lambda_r (CJ Eq. 6.2, 0-based)
   refNodeI_ = (nodeCount() - 1) / 2;
   refNodeJ_ = nodeCount() / 2;
 
@@ -155,12 +152,10 @@ void Line3D::getRotationsAndGradients(const Cubix &Ri,
 {
   JEM_ASSERT2(LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size");
 
-  // Lambda_r and psi_K (Crisfield & Jelenic 1999, Eqs. 5.8 and 6.2), psi and psi' (Eq. 5.7);
-  // the same as Jelenic & Crisfield (1999) Eqs. 3.9-3.12
   getLocalNodeRotVecs_(nodeLambda);
   getLocalIpRotVecs_(grads);
 
-  // Lambda = Lambda_r exp(psi) (Eq. 5.6; Jelenic & Crisfield Eq. 3.8) and Lambda' = Lambda_r d/ds exp(psi)
+  // Lambda = Lambda_r exp(psi), Lambda' = Lambda_r exp(psi)' (CJ Eq. 5.6, JC Eq. 3.8)
   for (idx_t ip = 0; ip < ipointCount(); ip++)
   {
     expVec(Ri[ip], ipLocalRotVecs_[ip]);
@@ -199,8 +194,7 @@ void Line3D::getGeneralisedShapeFunctions(const Quadix &genShapes,
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
     expTangentInv(nodeExpTangentInv[iNode], nodeLocalRotVecs_[iNode]);
 
-  // shares of the reference nodes in the spin of Lambda_r (in its frame; Jelenic & Crisfield 1999, Eq. 3.15):
-  // r_J = 1/2 T(phi/2) T^-1(phi) = (I + exp[phi/2 x])^-1 = v_J, r_I = I - r_J = v_I; for I = J, r_I = I
+  // r_I, r_J: shares of the reference nodes in the spin of Lambda_r (JC Eq. 3.15, v_I and v_J there)
   if (I != J)
   {
     expTangent(work, halfRelRotIJ_);
@@ -219,8 +213,7 @@ void Line3D::getGeneralisedShapeFunctions(const Quadix &genShapes,
     expTangent(ipExpTangent, ipLocalRotVecs_[ip]);
     expTangentD(ipExpTangentP, ipLocalRotVecs_[ip], ipLocalRotVecsP_[ip]);
 
-    // from Jelenic & Crisfield (1999) Eqs. 3.13, 3.14 (T here = their T^-1): a_K = N_K T(psi) T^-1(psi_K),
-    // a'_K = (N_K dT(psi; psi') + N'_K T(psi)) T^-1(psi_K); weights of the reference spin a_r = I - sum a_K, a'_r = -sum a'_K
+    // a_K, a'_K and a_r, a'_r (JC Eqs. 3.13, 3.14, 3.19)
     for (idx_t i = 0; i < 3; i++)
       for (idx_t j = 0; j < 3; j++)
       {
@@ -239,8 +232,7 @@ void Line3D::getGeneralisedShapeFunctions(const Quadix &genShapes,
       localRefWeightP -= localGenShapesP[iNode];
     }
 
-    // generalised shape functions in the frame of Lambda_r (Eqs. 3.18, 3.19): X_K = a_K + a_r r_K
-    // (r_K = 0 for the nodes other than I and J; r_I = I for I = J)
+    // X_K = a_K + a_r r_K (JC Eqs. 3.18, 3.19; r_K = 0 for K other than I, J; r_I = I for I = J)
     if (I == J)
     {
       localGenShapes[I] += localRefWeight;
@@ -274,15 +266,14 @@ void Line3D::getGeneralisedShapeFunctions(const Quadix &genShapes,
 //------------------------------------------------------
 void Line3D::getLocalNodeRotVecs_(const Cubix &Rn) const
 {
-  // Lambda_r = Lambda_I exp(phi/2), phi = log(Lambda_I^T Lambda_J): Crisfield & Jelenic (1999) Eq. 5.8 with c = 1/2,
-  // Jelenic & Crisfield (1999) Eqs. 3.9, 3.10
+  // Lambda_r = Lambda_I exp(phi/2), phi = log(Lambda_I^T Lambda_J) (CJ Eq. 5.8, JC Eqs. 3.9, 3.10)
   mul3(rotWork_, Rn[refNodeI_].transpose(), Rn[refNodeJ_]);
   logMat(relRotIJ_, rotWork_);
   halfRelRotIJ_ = 0.5 * relRotIJ_;
   expVec(refRotation_, halfRelRotIJ_);
   mul3(refRotation_, Rn[refNodeI_], refRotation_);
 
-  // local nodal rotation vectors psi_K = log(Lambda_r^T Lambda_K) (Jelenic & Crisfield 1999, Eq. 3.12)
+  // psi_K = log(Lambda_r^T Lambda_K) (JC Eq. 3.12)
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
   {
     mul3(rotWork_, refRotation_.transpose(), Rn[iNode]);
@@ -292,8 +283,7 @@ void Line3D::getLocalNodeRotVecs_(const Cubix &Rn) const
 
 void Line3D::getLocalIpRotVecs_(const Matrix &grads) const
 {
-  // psi = sum_K N_K psi_K (Jelenic & Crisfield 1999, Eq. 3.11) and psi' = sum_K N'_K psi_K
-  // (copied, matmul_ overwrites its result)
+  // psi = sum_K N_K psi_K (JC Eq. 3.11), psi' = sum_K N'_K psi_K (copied: matmul_ reuses its result)
   ipLocalRotVecs_ = matmul_.matmul(nodeLocalRotVecs_, getShapeFunctions());
   ipLocalRotVecsP_ = matmul_.matmul(nodeLocalRotVecs_, grads);
 }
