@@ -606,7 +606,7 @@ void RodContactModel::computeContacts_
         iNodeA = 1;
       }
 
-      uB = getClosestPoint_(possB[iNodeA], possA);
+      uB = getClosestPoint_(possA[iNodeA], possB);
       if (!(shape_->containsLocalPoint(Vector({uB}))))
       {
         if (verbose_)
@@ -865,7 +865,7 @@ void RodContactModel::computeBlacklist_
         iNodeA = 1;
       }
 
-      uB = getClosestPoint_(possB[iNodeA], possA);
+      uB = getClosestPoint_(possA[iNodeA], possB);
       if (!(shape_->containsLocalPoint(Vector({uB}))))
       {
         if (verbose_)
