@@ -242,8 +242,8 @@ void JointContactModel::findContacts_
       // only consider nodes that were not in contact in the undeformed configuration
       if (norm2(posA - posB) <= 2 * radius_ && norm2(posA - dispA - (posB - dispB)) > 2 * radius_)
       {
-        contactsA_.pushBack(ijointA);
-        contactsB_.pushBack(ijointB);
+        contactsA_.pushBack(jointList_[ijointA]);
+        contactsB_.pushBack(jointList_[ijointB]);
       }
     }
   }
@@ -325,18 +325,17 @@ void JointContactModel::computeContact_
   // compute the contact force
   Vector normal = Vector(posB - posA);
   normal /= norm2(normal);
-  Vector force = normal;
-  force *= penalty_ * (2. * radius_ - norm2(posA - posB));
+  Vector force(penalty_ * (2. * radius_ - norm2(posA - posB)) * normal);
 
   // compute the contact stiffness
-  contactStiffness(jem::SliceTo(3), jem::SliceTo(3)) = -penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceTo(3), jem::SliceTo(3)) = penalty_ * matmul(normal, normal);
   contactStiffness(jem::SliceFrom(3), jem::SliceFrom(3)) = penalty_ * matmul(normal, normal);
-  contactStiffness(jem::SliceTo(3), jem::SliceFrom(3)) = penalty_ * matmul(normal, normal);
+  contactStiffness(jem::SliceTo(3), jem::SliceFrom(3)) = -penalty_ * matmul(normal, normal);
   contactStiffness(jem::SliceFrom(3), jem::SliceTo(3)) = -penalty_ * matmul(normal, normal);
 
-  // set the contact force
-  contactForce[jem::SliceTo(3)] = -force;
-  contactForce[jem::SliceFrom(3)] = force;
+  // set the contact force (internal force, repulsive: M a = fext - fint pushes A away from B)
+  contactForce[jem::SliceTo(3)] = force;
+  contactForce[jem::SliceFrom(3)] = -force;
 }
 
 //-----------------------------------------------------------------------
