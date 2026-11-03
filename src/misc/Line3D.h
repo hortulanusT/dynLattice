@@ -164,7 +164,7 @@ class Line3D : public Shape
   ///   a_K = N_K T(psi) T^-1(psi_K),  a_r = I - sum_K a_K,
   /// and It'_K the same with a'_K = (N_K dT(psi; psi') + N'_K T(psi)) T^-1(psi_K), a'_r = -sum_K a'_K (JC Eq. 3.19).
   /// If all nodes have the same rotation, It_K = N_K I. Checked against finite differences of the
-  /// strains. Allocation free.
+  /// strains.
   /// @param[out] genShapes generalised shape functions, genShapes(.,.,K,i) for node K at the i-th integration point
   /// @param[out] genShapesP their derivatives along the line, same shape
   /// @param[in] grads shape gradients, shapeFuncCount x ipointCount

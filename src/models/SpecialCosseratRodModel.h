@@ -117,10 +117,7 @@ using jive_helpers::vec2mat;
 /// rod theory (strain measures, virtual strains Xi, push-forward Pi, tangent) and the assembly, the rod materials
 /// the constitutive law (stress resultants and stiffness from the strains).
 ///
-/// Notation: Simo & Vu-Quoc (1986) for the element (shape functions N_K, Xi, Pi = diag(Lambda, Lambda),
-/// c = Pi C Pi^T, spatial stress resultants r = (n, m)); Jelenic & Crisfield (1999) symbols only for what Simo &
-/// Vu-Quoc do not have (Lambda_r, phi_IJ, local rotations psi_K = Psi_K^l, generalised shape functions
-/// It_K = I-tilde^K; their I^i is N_K here). Xi-tilde is Xi built with It_K instead of N_K.
+/// Notation: as in Line3D (Simo & Vu-Quoc 1986; Jelenic & Crisfield 1999 only for what Simo & Vu-Quoc do not have).
 ///
 /// Kinematics and discretisation: the rotation dofs of a node are a rotation vector theta with
 /// Lambda = exp(theta) Lambda_N (Lambda_N: initial frame, material axis 3 along the rod). Rotations at the
@@ -306,7 +303,7 @@ class SpecialCosseratRodModel : public Model
   /// @details The same as getXi_() with the generalised shape functions It_K (Line3D::getGeneralisedShapeFunctions):
   ///   Xi-tilde_K = [ N'_K I                 0       ]
   ///                [ -It_K^T [phi' x]    It'_K^T    ]
-  /// so that the change of the material strains is diag(Lambda^T, Lambda^T) Xi-tilde_K^T delta q_K (allocation free).
+  /// so that the change of the material strains is diag(Lambda^T, Lambda^T) Xi-tilde_K^T delta q_K.
   /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
   /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
   /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
