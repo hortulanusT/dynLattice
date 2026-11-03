@@ -74,7 +74,7 @@ The `model.pro` file defines the lattice, its material and contact behavior, and
 | `model.model.lattice.contact.penaltySTS=56250.0;` | segment-to-segment contact penalty stiffness |
 | `model.model.lattice.contact.penaltyNTS=562500.0;` | node-to-segment contact penalty stiffness |
 | `model.model.lattice.jointContact.type = "JointContact";` | additionally enable contact between the rod joints themselves |
-| `model.model.lattice.jointContact.radius=0.0005;` | joint contact radius |
+| `model.model.lattice.jointContact.radius=0.000375;` | joint contact radius |
 | `model.model.lattice.jointContact.penalty=5625000.0;` | joint contact penalty stiffness |
 | **Loading and Support** | |
 | `model.model.load.type = "Multi";` | bundle the impact and support related sub-models together |

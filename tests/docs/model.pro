@@ -40,7 +40,7 @@ model.model.lattice.contact.radius=0.000375;
 model.model.lattice.contact.penaltySTS=56250.0;
 model.model.lattice.contact.penaltyNTS=562500.0;
 model.model.lattice.jointContact.type = "JointContact";
-model.model.lattice.jointContact.radius=0.0005;
+model.model.lattice.jointContact.radius=0.000375;
 model.model.lattice.jointContact.penalty=5625000.0;
 
 model.model.load.type = "Multi";
