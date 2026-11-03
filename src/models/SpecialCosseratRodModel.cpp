@@ -1025,9 +1025,13 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
           const Matrix genShapeJ = genShapes[ip][Jnode];
           const double dNJ = elemGrads_[ie](Jnode, ip);
 
-          // material stiffness w Xi_I c Xi-tilde_J^T (Simo & Vu-Quoc 1986, Section 5.1.2, with Xi-tilde for node J)
-          blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
-                                            XItilde[ip][Jnode].transpose());
+          // material stiffness w Xi_I c Xi-tilde_J^T (Simo & Vu-Quoc 1986, Section 5.1.2, with Xi-tilde for node J);
+          // symmetric_tanget_stiffness: w Xi_I c Xi_J^T only (symmetric, no geometric part, no T(theta))
+          if (symOnly_)
+            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC, XI[ip][Jnode].transpose());
+          else
+            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
+                                              XItilde[ip][Jnode].transpose());
 
           if (!symOnly_)
           {

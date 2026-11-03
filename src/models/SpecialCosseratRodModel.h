@@ -418,7 +418,7 @@ class SpecialCosseratRodModel : public Model
   mutable bool energiesStored_ = false; ///< Debug only: true between applyDeform() and the next assemble_/cancel
 #endif
 
-  bool symOnly_;        ///< Symmetric tangent stiffness flag
+  bool symOnly_;        ///< Symmetric tangent: material part w Xi c Xi^T only
   Vector thickFact_;    ///< Thickening factors
   Vector materialYDir_; ///< Material y-direction
 
