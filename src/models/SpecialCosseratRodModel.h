@@ -113,9 +113,20 @@ using jive_helpers::vec2mat;
 /// - Energy calculation (potential and dissipated)
 /// - Strain and stress output tables
 ///
+/// Structure: Line3D interpolates; this class holds the rod theory (strains, Xi, Pi, tangent) and the assembly; the
+/// rod materials hold the constitutive law. Notation of SVQ (N_K, Xi, Pi = diag(Lambda, Lambda), c = Pi C Pi^T,
+/// r = (n, m)); Lambda_r, psi_K, It_K and the abbreviations SVQ, CJ, JC as in Line3D.
+///
+/// Kinematics: nodal rotation dofs are a rotation vector theta, Lambda = exp(theta) Lambda_N (Lambda_N: initial frame,
+/// material axis 3 along the rod); strains Gamma = Lambda^T phi' - Gamma_0, K = unskew(Lambda^T Lambda') - K_0
+/// (CJ Eqs. 3.4, 3.5). Petrov-Galerkin element of JC: internal force with the test functions N_K (getXi_, JC Eq. 4.3),
+/// moments conjugate to spatial spins; tangent along the trial functions It_K (getXiTilde_, JC Eq. 4.7), rotation
+/// columns times T(theta) (jive_helpers::expTangent) because the nonlinear solvers add their increments to theta.
+///
 /// @see [Reissner (1981)](https://doi.org/10.1007/BF00946983)
 /// @see [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4)
 /// @see [Crisfield, Jelenić (1999)](https://doi.org/10.1098/rspa.1999.0352)
+/// @see [Jelenić, Crisfield (1999)](https://doi.org/10.1016/S0045-7825(98)00249-7)
 /// @see [Antman (2005)](https://doi.org/10.1007/0-387-27649-1)
 /// @see [Eugster (2015)](https://doi.org/10.1007/978-3-319-16495-3)
 class SpecialCosseratRodModel : public Model
@@ -268,15 +279,31 @@ class SpecialCosseratRodModel : public Model
                     const Matrix &nodeU,
                     const idx_t ie) const;
 
-  /// @brief Get the geometric stiffness matrix
-  /// @param[out] B  B-matrices at integration points
-  /// @param[in] stresses  Spatial stress components at integration points
-  /// @param[in] nodePhi_0  Location of the nodes, 3 x nodeCount
-  /// @param[in] nodeU  Translational displacement of nodes, 3 x nodeCount
-  void getGeomtericStiffness_(const Cubix &B,
-                              const Matrix &stresses,
-                              const Matrix &nodePhi_0,
-                              const Matrix &nodeU) const;
+  /// @brief Xi_K of SVQ Eq. 5.3, the test functions of the internal force (allocation free)
+  /// @details f_K = sum_ip w Xi_K r, r = (n, m) (JC Eq. 4.3), with
+  ///   Xi_K = [ N'_K I            0      ]
+  ///          [ -N_K [phi' x]     N'_K I ]
+  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
+  void getXi_(const Quadix &Xi,
+              const Matrix &grads,
+              const Matrix &phiP) const;
+
+  /// @brief Xi-tilde_K: Xi_K with the spins interpolated by It_K, the trial functions of the tangent (JC Eq. 4.7)
+  /// @details delta(Gamma, K) = diag(Lambda^T, Lambda^T) Xi-tilde_K^T delta q_K with
+  ///   Xi-tilde_K = [ N'_K I               0       ]
+  ///                [ -It_K^T [phi' x]     It'_K^T ]
+  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
+  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] phiP  Tangent phi' of the deformed line at the integration points, 3 x ipointCount
+  /// @param[in] genShapes  generalised shape functions It_K
+  /// @param[in] genShapesP  their derivatives It'_K along the line
+  void getXiTilde_(const Quadix &Xi,
+                   const Matrix &grads,
+                   const Matrix &phiP,
+                   const Quadix &genShapes,
+                   const Quadix &genShapesP) const;
 
   /// @brief Get the strains in the integration points of an element
   /// @param[out] strains  Strain components at integration points, strain component by integration point
@@ -378,7 +405,7 @@ class SpecialCosseratRodModel : public Model
   mutable bool energiesStored_ = false; ///< Debug only: true between applyDeform() and the next assemble_/cancel
 #endif
 
-  bool symOnly_;        ///< Symmetric tangent stiffness flag
+  bool symOnly_;        ///< Symmetric tangent: material part w Xi c Xi^T only
   Vector thickFact_;    ///< Thickening factors
   Vector materialYDir_; ///< Material y-direction
 
@@ -394,12 +421,14 @@ class SpecialCosseratRodModel : public Model
 
   // Work arrays of getStrains_, getStresses_ and the assembly: created once in
   // initShape_ and overwritten in every call (see the note in utils/helpers.h).
-  // Not thread safe. ipPhiP_ is filled by getTangents_ and consumed at once.
+  // Not thread safe. getStrains_ fills ipPhiP_, ipLambda_ and ipLambdaP_ for the current element; the assembly
+  // reuses ipPhiP_ and ipLambda_.
   mutable Matrix curPhi_;     ///< Current node locations, 3 x nodeCount
   mutable Matrix ipPhiP_;     ///< Tangents at the integration points, 3 x ipCount
   mutable Cubix ipLambda_;    ///< Rotations at the integration points (Pi = diag(ipLambda_, ipLambda_))
   mutable Cubix ipLambdaP_;   ///< Their gradients
   mutable Matrix lambdaTP_;   ///< Lambda^T Lambda', 3 x 3
   mutable Matrix strainWork_; ///< Material strains, dofCount x ipCount
+  mutable Matrix skewPhiP_;   ///< [phi' x] in getXi_ and getXiTilde_, 3 x 3
   mutable MatmulChain<double, 2> matmul_; ///< Matrix products without allocations
 };

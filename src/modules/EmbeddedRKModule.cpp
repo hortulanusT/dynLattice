@@ -81,7 +81,7 @@ void EmbeddedRKModule::initODE45_()
   a_(3, 1) = -56. / 15.;
   a_(3, 2) = 32. / 9.;
   a_(4, 0) = 19372. / 6561.;
-  a_(4, 1) = -25360. / 3298.;
+  a_(4, 1) = -25360. / 2187.;
   a_(4, 2) = 64448. / 6561.;
   a_(4, 3) = -212. / 729.;
   a_(5, 0) = 9017. / 3168.;
@@ -180,23 +180,30 @@ void EmbeddedRKModule::solve
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
   fres = getForce(fint, fext, globdat);
   getAcce(a_cur, cons_, fres, globdat);
+  // advance() has already moved the time to the end of the step
   globdat.get(t_cur, Globdat::TIME);
+  t_cur -= dtime_;
 
   /////////////////////////////////////////////////
   ////////  walk over the butcher tableau
   /////////////////////////////////////////////////
-  for (idx_t i = 0; i < butchSize_; i++)
+  // stage 0 is the current state: k_0 = dt (v_cur, a_cur)
+  ku_tab[0] = dtime_ * v_cur;
+  kv_tab[0] = dtime_ * a_cur;
+
+  for (idx_t i = 1; i < butchSize_; i++)
   {
     jem::System::info(myName_)
         << "\n ...Runge Kutta Level " << i + 1 << "\n";
 
-    // get the updates (U_j in RKMK reference)
-    dv = dtime_ * a_cur;
+    // stage i: Y_i = y + sum_j a_ij k_j (U_j in the RKMK reference)
+    dv = 0.;
+    du = 0.;
     for (idx_t j = 0; j < i; j++)
+    {
       dv += a_(i, j) * kv_tab[j];
-    du = dtime_ * v_cur;
-    for (idx_t j = 0; j < i; j++)
       du += a_(i, j) * ku_tab[j];
+    }
 
     // use the updates to compute new functions
     updateVec(v_step, v_cur, dv);
@@ -235,13 +242,14 @@ void EmbeddedRKModule::solve
   /////////////////////////////////////////////////
   // compute the values at the current step
 
-  // get the updates (U_j in RKMK reference)
-  dv = dtime_ * a_cur;
+  // y + sum_j b_j k_j with the weights b of the lower order (U_j in the RKMK reference)
+  dv = 0.;
+  du = 0.;
   for (idx_t j = 0; j < butchSize_; j++)
+  {
     dv += b_[j] * kv_tab[j];
-  du = dtime_ * v_cur;
-  for (idx_t j = 0; j < butchSize_; j++)
     du += b_[j] * ku_tab[j];
+  }
 
   // use the updates to compute new functions
   updateVec(v_step, v_cur, dv);
@@ -255,6 +263,9 @@ void EmbeddedRKModule::solve
   error += getQuality(v_step, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, error);
+
+  // the stages moved the time; leave it at the end of the step, as advance() set it
+  globdat.set(Globdat::TIME, t_cur + dtime_);
 
   StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
   StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);

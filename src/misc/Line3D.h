@@ -25,11 +25,22 @@ using jive::geom::ParametricLine;
 using jive::geom::Shape;
 using jive_helpers::Quadix;
 
-/// @brief Shape function for 1D line elements in 3D space.
+/// @brief Shape function for 1D line elements in 3D space, with the rotation interpolation of the rod elements.
 ///
 /// Provides shape functions and geometric operations for line elements embedded
 /// in 3D space. Supports 2, 3, and 4-node line elements with configurable
-/// integration schemes and rotational control functions.
+/// integration schemes (default: reduced Gauss integration, nodeCount - 1 points).
+///
+/// @section RotationInterpolation Rotation interpolation
+/// Interpolation only; the rod theory is in SpecialCosseratRodModel. References: SVQ = Simo & Vu-Quoc (1986), CMAME
+/// 58; CJ = Crisfield & Jelenic (1999), Proc. R. Soc. A 455; JC = Jelenic & Crisfield (1999), CMAME 171.
+/// Notation: shape functions N_K (I^i in JC); from JC: Lambda_r, phi, psi_K (Psi_K^l), It_K (I-tilde^i).
+///  - Rotations (CJ Eqs. 5.6-5.8, 6.2; JC Eqs. 3.8-3.12): Lambda_r = Lambda_I exp(phi/2), phi = log(Lambda_I^T Lambda_J),
+///    I = (n-1)/2, J = n/2 (0-based, I = J for odd n); psi_K = log(Lambda_r^T Lambda_K), psi = sum_K N_K psi_K,
+///    Lambda = Lambda_r exp(psi); see getRotationsAndGradients().
+///  - Spins (JC Eqs. 3.17-3.19): delta theta = sum_K It_K delta theta_K, the trial functions of the tangent; the test
+///    functions are N_K (JC Eq. 3.1, SVQ Eq. 5.1); see getGeneralisedShapeFunctions().
+/// T(v) = jive_helpers::expTangent (spin of exp(v) per dv), the inverse of T in JC Eqs. 2.4-2.5.
 ///
 /// @section SupportedElements Supported Elements
 /// - 2-node linear line (StdLine2)
@@ -123,71 +134,34 @@ class Line3D : public Shape
                          const Vector &w,
                          const Matrix &c) const;
 
-  /// @brief return the rotations at the integration points
-  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotational matrix at the i-th integration point
-  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getRotations(const Cubix &Ri,
-                    const Cubix &Rn) const;
-
-  /// @brief Get the Xi at the integration points
-  /// @param[out] Xi 6 x 6 Xi(.,.,j,i), where j are the nodes and i are the integration points
-  /// @param[out] w weights of the integration points
-  /// @param[in] u displacements of the nodes, u(i,j) is the i-th displacement of the j-th node
-  /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  void getXi(const Quadix &Xi,
-             const Vector &w,
-             const Matrix &u,
-             const Matrix &c) const;
-
-  /// @brief Xi from precomputed shape gradients and tangent (allocation free)
-  /// @param[out] Xi  Xi matrices, 6 x 6 x nodeCount x ipointCount
-  /// @param[in] grads  Shape gradients, shapeFuncCount x ipointCount
-  /// @param[in] phiP  Tangent of the deformed line at the integration points, 3 x ipointCount
-  void getXi(const Quadix &Xi,
-             const Matrix &grads,
-             const Matrix &phiP) const;
-
-  /// @brief Get the Psi at the integration points
-  /// @param[out] Psi 6 x 9 Psi(.,.,j,i), where j are the nodes and i are the integration points
-  /// @param[out] w weights of the integration points
-  /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  void getPsi(const Quadix &Psi,
-              const Vector &w,
-              const Matrix &c) const;
-
-  /// @brief Get the Pi at the integration points
-  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
-  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point
-  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getPi(const Cubix &Pi,
-             const Cubix &Ri,
-             const Cubix &Rn) const;
-
-  /// @brief Get the Pi at the integration points
-  /// @param[out] Pi 6 x 6 Pi(.,.,i) where i are the integration points
-  /// @param[in] Rn nodal rotations, Rn(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getPi(const Cubix &Pi,
-             const Cubix &Rn) const;
-
-  /// @brief Get the rotation gradients at the integration points from the rotations (Crisfield/Jelenic)
-  /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
-  /// @param[out] w integration weights
-  /// @param[in] c coordinates of the nodes, c(i,j) is the i-th coordinate of the j-th node
-  /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
-  void getRotationGradients(const Cubix &LambdaP,
-                            const Vector &w,
-                            const Matrix &c,
-                            const Cubix &nodeLambda) const;
-
-  /// @brief Get the rotations and the rotation gradients at the integration points using one evaluation of the node rotation vectors
-  /// @param[out] Ri 3 x 3 Ri(.,.,i) rotation at the i-th integration point (Pi = diag(Ri, Ri), see getPi)
-  /// @param[out] LambdaP 3 x 3 curvature at the integration points, LambdaP(.,.,i) is the gradient at the i-th point
+  /// @brief Rotations Lambda and their derivatives Lambda' at the integration points (allocation free)
+  /// @param[out] Ri rotations Lambda, 3 x 3 x ipointCount
+  /// @param[out] LambdaP their derivatives Lambda' along the line, 3 x 3 x ipointCount
   /// @param[in] grads shape gradients, shapeFuncCount x ipointCount (see getShapeGradients)
   /// @param[in] nodeLambda nodal rotations, nodeLambda(.,.,i) is the 3 x 3 rotation matrix at the i-th node
   void getRotationsAndGradients(const Cubix &Ri,
                                 const Cubix &LambdaP,
                                 const Matrix &grads,
                                 const Cubix &nodeLambda) const;
+
+  /// @brief Generalised shape functions It_K and It'_K at the integration points (JC Eqs. 3.13-3.19)
+  /// @details The spin of Lambda(s) for nodal spins delta theta_K is
+  ///   delta theta(s) = delta theta_r + Lambda_r T(psi) delta psi(s)                        (JC Eq. 3.13)
+  ///   delta psi_K = T^-1(psi_K) Lambda_r^T (delta theta_K - delta theta_r)                  (JC Eq. 3.14)
+  ///   delta theta_r = Lambda_r (r_I Lambda_r^T delta theta_I + r_J Lambda_r^T delta theta_J) (JC Eq. 3.15)
+  /// with r_J = 1/2 T(phi/2) T^-1(phi) = (I + exp[phi/2 x])^-1 and r_I = I - r_J (v_J and v_I of JC; r_I = I for
+  /// I = J). Written in the frame of Lambda_r: It_K = Lambda_r X_K Lambda_r^T, X_K = a_K + a_r r_K with
+  ///   a_K = N_K T(psi) T^-1(psi_K),  a_r = I - sum_K a_K,
+  /// and It'_K the same with a'_K = (N_K dT(psi; psi') + N'_K T(psi)) T^-1(psi_K), a'_r = -sum_K a'_K (JC Eq. 3.19).
+  /// If all nodes have the same rotation, It_K = N_K I.
+  /// @param[out] genShapes generalised shape functions, genShapes(.,.,K,i) for node K at the i-th integration point
+  /// @param[out] genShapesP their derivatives along the line, same shape
+  /// @param[in] grads shape gradients, shapeFuncCount x ipointCount
+  /// @param[in] nodeLambda nodal rotations, 3 x 3 x nodeCount
+  void getGeneralisedShapeFunctions(const Quadix &genShapes,
+                                    const Quadix &genShapesP,
+                                    const Matrix &grads,
+                                    const Cubix &nodeLambda) const;
 
   //------------------------------------------------
   // local location functions
@@ -217,54 +191,31 @@ class Line3D : public Shape
                                  const Vector &u) const;
 
  private:
-  /// @brief Get the rotations at the integration points from the node rotation vectors
-  /// @param[out] Ri Rotation matrices at the integration points
-  /// @param[in] node_psi Nodal rotation vectors
-  /// @param[in] Lambda_r Reference rotation matrix
-  void getRotations_(const Cubix &Ri,
-                     const Matrix &node_psi,
-                     const Matrix &Lambda_r) const;
+  /// @brief Reference rotation refRotation_, relRotIJ_, halfRelRotIJ_ and the local nodal rotation vectors nodeLocalRotVecs_
+  /// @param[in] Rn nodal rotations, 3 x 3 x nodeCount
+  void getLocalNodeRotVecs_(const Cubix &Rn) const;
 
-  /// @brief Get the rotation gradients at the integration points from the node rotation vectors
-  /// @param[out] LambdaP Rotation gradients at the integration points
-  /// @param[in] grads Shape gradients, shapeFuncCount x ipointCount
-  /// @param[in] ip_psi Rotation vectors at the integration points (node_psi times the shape functions)
-  /// @param[in] node_psi Nodal rotation vectors
-  /// @param[in] Lambda_r Reference rotation matrix
-  void getRotationGradients_(const Cubix &LambdaP,
-                             const Matrix &grads,
-                             const Matrix &ip_psi,
-                             const Matrix &node_psi,
-                             const Matrix &Lambda_r) const;
-
-  /// @brief Get the reference rotation according to Crisfield/Jelenic
-  /// @param[out] Lambda_r Reference rotation matrix
-  /// @param[in] Rn Nodal rotation matrices
-  void getRefRot_(const Matrix Lambda_r,
-                  const Cubix Rn) const;
-
-  /// @brief Get the local node rotation vectors according to Crisfield/Jelenic
-  /// @param[out] psi Nodal rotation vectors
-  /// @param[out] Lambda_r Reference rotation matrix
-  /// @param[in] Rn Nodal rotation matrices
-  void getNodeRotVecs_(const Matrix psi,
-                       const Matrix Lambda_r,
-                       const Cubix Rn) const;
+  /// @brief Rotation vectors ipLocalRotVecs_ = psi(s) and their derivatives ipLocalRotVecsP_ = psi'(s) at the integration points
+  /// @param[in] grads shape gradients, shapeFuncCount x ipointCount
+  void getLocalIpRotVecs_(const Matrix &grads) const;
 
  protected:
   jem::Ref<ParametricLine> intLine_; ///< internal line element for some standard functions
+  idx_t refNodeI_;                   ///< first reference node I of Lambda_r (0-based)
+  idx_t refNodeJ_;                   ///< second reference node J of Lambda_r (I = J for odd node counts)
 
   // Work arrays and matrix product of the functions that run for every element
   // (see the note in utils/helpers.h): created once in the constructor and
   // overwritten in every call. The object is not thread safe.
   // The result of matmul_ is only valid until its next call.
-  mutable Matrix nodePsi_;                ///< relative rotation vectors of the nodes, 3 x nodeCount
-  mutable Matrix lambdaR_;                ///< reference rotation, 3 x 3
-  mutable Matrix ipPsi_;                  ///< rotation vectors at the integration points, 3 x ipointCount
   mutable MatmulChain<double, 2> matmul_; ///< matrix products without allocations
-  mutable Matrix relRot_;                 ///< relative rotation, 3 x 3
-  mutable Matrix skewP_;                  ///< skew symmetric matrix of the tangent, 3 x 3
-  mutable Vector phiIJ_;                  ///< relative rotation vector between the reference nodes
+  mutable Matrix refRotation_;            ///< reference rotation Lambda_r, 3 x 3
+  mutable Vector relRotIJ_;               ///< relative rotation phi = log(Lambda_I^T Lambda_J)
+  mutable Vector halfRelRotIJ_;           ///< phi / 2
+  mutable Matrix nodeLocalRotVecs_;       ///< local nodal rotation vectors psi_K, 3 x nodeCount
+  mutable Matrix ipLocalRotVecs_;         ///< psi at the integration points, 3 x ipointCount
+  mutable Matrix ipLocalRotVecsP_;        ///< psi' at the integration points, 3 x ipointCount
+  mutable Matrix rotWork_;                ///< 3 x 3 work matrix for relative rotations
 
   /// @name Memo of the last getShapeGradients() call
   /// @details The gradients only depend on the node coordinates, and the same

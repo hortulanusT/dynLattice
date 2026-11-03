@@ -19,16 +19,16 @@
 #include <jive/geom/ShapeFactory.h>
 #include <jive/geom/StdLine.h>
 
+using jive_helpers::expTangent;
+using jive_helpers::expTangentD;
+using jive_helpers::expTangentInv;
 using jive_helpers::expVec;
 using jive_helpers::expVecP;
 using jive_helpers::logMat;
 using jive_helpers::mul3;
-using jive_helpers::skew;
 
 using jem::ALL;
 using jem::newInstance;
-using jem::SliceFrom;
-using jem::SliceTo;
 using jem::numeric::matmul;
 using jem::numeric::MatmulChain;
 using jem::numeric::norm2;
@@ -79,12 +79,17 @@ Line3D::Line3D(const String &name,
 
   intLine_ = newInstance<ParametricLine>("internalLine", ischeme, stdline);
 
-  nodePsi_.resize(GLOB_RANK, nodeCount());
-  lambdaR_.resize(GLOB_RANK, GLOB_RANK);
-  ipPsi_.resize(GLOB_RANK, ipointCount());
-  relRot_.resize(GLOB_RANK, GLOB_RANK);
-  skewP_.resize(GLOB_RANK, GLOB_RANK);
-  phiIJ_.resize(GLOB_RANK);
+  // reference nodes of Lambda_r (CJ Eq. 6.2, 0-based)
+  refNodeI_ = (nodeCount() - 1) / 2;
+  refNodeJ_ = nodeCount() / 2;
+
+  refRotation_.resize(GLOB_RANK, GLOB_RANK);
+  relRotIJ_.resize(GLOB_RANK);
+  halfRelRotIJ_.resize(GLOB_RANK);
+  nodeLocalRotVecs_.resize(GLOB_RANK, nodeCount());
+  ipLocalRotVecs_.resize(GLOB_RANK, ipointCount());
+  ipLocalRotVecsP_.resize(GLOB_RANK, ipointCount());
+  rotWork_.resize(GLOB_RANK, GLOB_RANK);
 }
 
 void Line3D::getGlobalPoint(const Vector &x,
@@ -140,137 +145,6 @@ void Line3D::getShapeGradients(const Matrix &g,
   gradMemoValid_ = true;
 }
 
-void Line3D::getRotations(const Cubix &Ri,
-                          const Cubix &Rn) const
-{
-  Matrix Lambda_r(globalRank(), globalRank());
-  Matrix node_psi(globalRank(), nodeCount());
-
-  // get the Rotation matrices and the relative rotations between them
-  getNodeRotVecs_(node_psi, Lambda_r, Rn);
-
-  getRotations_(Ri, node_psi, Lambda_r);
-}
-
-void Line3D::getRotations_(const Cubix &Ri,
-                           const Matrix &node_psi,
-                           const Matrix &Lambda_r) const
-{
-  // get the _local_ rotations in the integration points
-  const Matrix shapeFuncs = getShapeFunctions();
-
-  // get the rotation vectors associated with the local rotations; kept in
-  // ipPsi_ for getRotationGradients_ (matmul_ overwrites its result)
-  ipPsi_ = matmul_.matmul(node_psi, shapeFuncs);
-
-  // construct the local rotation matrices
-  for (idx_t iIp = 0; iIp < ipointCount(); iIp++)
-  {
-    expVec(Ri[iIp], ipPsi_[iIp]);
-    mul3(Ri[iIp], Lambda_r, Ri[iIp]);
-  }
-}
-
-void Line3D::getXi(const Quadix &Xi,
-                   const Vector &w,
-                   const Matrix &u,
-                   const Matrix &c) const
-{
-  Matrix grads(shapeFuncCount(), ipointCount());
-  getShapeGradients(grads, w, c);
-
-  const Matrix phiP = matmul(Matrix(c + u), grads);
-
-  getXi(Xi, grads, phiP);
-}
-
-void Line3D::getXi(const Quadix &Xi,
-                   const Matrix &grads,
-                   const Matrix &phiP) const
-{
-  JEM_ASSERT2(Xi.size(0) == 6 && Xi.size(1) == 6 && Xi.size(2) == nodeCount() && Xi.size(3) == ipointCount(), "Xi size does not match the expected size");
-  const Matrix shapes = getShapeFunctions();
-
-  Xi = 0.;
-
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    skew(skewP_, phiP[ip]);
-
-    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    {
-      for (idx_t i = 0; i < 6; i++)
-        Xi(i, i, iNode, ip) = grads(iNode, ip);
-      Xi(SliceFrom(3), SliceTo(3), iNode, ip) = -1. * shapes(iNode, ip) * skewP_;
-    }
-  }
-}
-
-void Line3D::getPsi(const Quadix &Psi,
-                    const Vector &w,
-                    const Matrix &c) const
-{
-  JEM_ASSERT2(Psi.size(0) == 6 && Psi.size(1) == 9 && Psi.size(2) == nodeCount() && Psi.size(3) == ipointCount(), "Psi size does not match the expected size");
-  Matrix shapes = getShapeFunctions();
-  Matrix grads(shapeFuncCount(), ipointCount());
-  getShapeGradients(grads, w, c);
-
-  Psi = 0.;
-
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
-    {
-      for (idx_t i = 0; i < 6; i++)
-        Psi(i, i, iNode, ip) = grads(iNode, ip);
-      for (idx_t i = 0; i < 3; i++)
-        Psi(i + 3, i + 6, iNode, ip) = shapes(iNode, ip);
-    }
-  }
-}
-
-void Line3D::getPi(const Cubix &Pi,
-                   const Cubix &Rn) const
-{
-  const Cubix Ri(globalRank(), globalRank(), ipointCount());
-
-  getPi(Pi, Ri, Rn);
-}
-
-void Line3D::getPi(const Cubix &Pi,
-                   const Cubix &Ri,
-                   const Cubix &Rn) const
-{
-  getRotations(Ri, Rn);
-
-  Pi = 0.;
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    Pi[ip](SliceTo(3), SliceTo(3)) = Ri[ip];
-    Pi[ip](SliceFrom(3), SliceFrom(3)) = Ri[ip];
-  }
-}
-
-void Line3D::getRotationGradients(const Cubix &LambdaP,
-                                  const Vector &w,
-                                  const Matrix &c,
-                                  const Cubix &nodeLambda) const
-{
-  JEM_ASSERT2(LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size");
-
-  Matrix Lambda_r(globalRank(), globalRank());
-  Matrix node_psi(globalRank(), nodeCount());
-
-  // get the Rotation matrices and the relative rotations between them
-  getNodeRotVecs_(node_psi, Lambda_r, nodeLambda);
-
-  Matrix grads(shapeFuncCount(), ipointCount());
-  getShapeGradients(grads, w, c);
-
-  ipPsi_ = matmul_.matmul(node_psi, getShapeFunctions());
-  getRotationGradients_(LambdaP, grads, ipPsi_, node_psi, Lambda_r);
-}
-
 void Line3D::getRotationsAndGradients(const Cubix &Ri,
                                       const Cubix &LambdaP,
                                       const Matrix &grads,
@@ -278,57 +152,138 @@ void Line3D::getRotationsAndGradients(const Cubix &Ri,
 {
   JEM_ASSERT2(LambdaP.size(0) == globalRank() && LambdaP.size(1) == globalRank() && LambdaP.size(2) == ipointCount(), "LambdaP size does not match the expected size");
 
-  // the node rotation vectors are shared by the rotations and their gradients
-  getNodeRotVecs_(nodePsi_, lambdaR_, nodeLambda);
+  getLocalNodeRotVecs_(nodeLambda);
+  getLocalIpRotVecs_(grads);
 
-  // getRotations_ leaves the rotation vectors at the integration points in ipPsi_
-  getRotations_(Ri, nodePsi_, lambdaR_);
+  // Lambda = Lambda_r exp(psi), Lambda' = Lambda_r exp(psi)' (CJ Eq. 5.6, JC Eq. 3.8)
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    expVec(Ri[ip], ipLocalRotVecs_[ip]);
+    mul3(Ri[ip], refRotation_, Ri[ip]);
+    expVecP(LambdaP[ip], ipLocalRotVecs_[ip], ipLocalRotVecsP_[ip]);
+    mul3(LambdaP[ip], refRotation_, LambdaP[ip]);
+  }
+}
 
-  getRotationGradients_(LambdaP, grads, ipPsi_, nodePsi_, lambdaR_);
+void Line3D::getGeneralisedShapeFunctions(const Quadix &genShapes,
+                                          const Quadix &genShapesP,
+                                          const Matrix &grads,
+                                          const Cubix &nodeLambda) const
+{
+  JEM_ASSERT2(genShapes.size(2) == nodeCount() && genShapes.size(3) == ipointCount() && genShapesP.size(2) == nodeCount() && genShapesP.size(3) == ipointCount(), "genShapes size does not match the expected size");
+
+  // only used for the tangent stiffness (not hot code), so the work arrays are local
+  const idx_t I = refNodeI_;
+  const idx_t J = refNodeJ_;
+  const Matrix shapes = getShapeFunctions();
+  Cubix nodeExpTangentInv(GLOB_RANK, GLOB_RANK, nodeCount()); // T^-1(psi_K) of the nodes
+  Matrix refSpinShareI(GLOB_RANK, GLOB_RANK);                 // r_I, share of node I in the spin of Lambda_r
+  Matrix refSpinShareJ(GLOB_RANK, GLOB_RANK);                 // r_J
+  Cubix localGenShapes(GLOB_RANK, GLOB_RANK, nodeCount());    // X_K = Lambda_r^T It_K Lambda_r
+  Cubix localGenShapesP(GLOB_RANK, GLOB_RANK, nodeCount());   // X'_K = Lambda_r^T It'_K Lambda_r
+  Matrix localRefWeight(GLOB_RANK, GLOB_RANK);                // a_r, weight of the spin of Lambda_r
+  Matrix localRefWeightP(GLOB_RANK, GLOB_RANK);               // a'_r
+  Matrix ipExpTangent(GLOB_RANK, GLOB_RANK);                  // T(psi) at the integration point
+  Matrix ipExpTangentP(GLOB_RANK, GLOB_RANK);                 // dT(psi; psi')
+  Matrix work(GLOB_RANK, GLOB_RANK);
+  Matrix work2(GLOB_RANK, GLOB_RANK);
+
+  getLocalNodeRotVecs_(nodeLambda);
+  getLocalIpRotVecs_(grads);
+
+  for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    expTangentInv(nodeExpTangentInv[iNode], nodeLocalRotVecs_[iNode]);
+
+  // r_I, r_J: shares of the reference nodes in the spin of Lambda_r (JC Eq. 3.15, v_I and v_J there)
+  if (I != J)
+  {
+    expTangent(work, halfRelRotIJ_);
+    expTangentInv(work2, relRotIJ_);
+    mul3(refSpinShareJ, work, work2);
+    for (idx_t i = 0; i < 3; i++)
+      for (idx_t j = 0; j < 3; j++)
+      {
+        refSpinShareJ(i, j) *= 0.5;
+        refSpinShareI(i, j) = (i == j ? 1. : 0.) - refSpinShareJ(i, j);
+      }
+  }
+
+  for (idx_t ip = 0; ip < ipointCount(); ip++)
+  {
+    expTangent(ipExpTangent, ipLocalRotVecs_[ip]);
+    expTangentD(ipExpTangentP, ipLocalRotVecs_[ip], ipLocalRotVecsP_[ip]);
+
+    // a_K, a'_K and a_r, a'_r (JC Eqs. 3.13, 3.14, 3.19)
+    for (idx_t i = 0; i < 3; i++)
+      for (idx_t j = 0; j < 3; j++)
+      {
+        localRefWeight(i, j) = (i == j ? 1. : 0.);
+        localRefWeightP(i, j) = 0.;
+      }
+    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    {
+      const double N = shapes(iNode, ip);
+      const double dN = grads(iNode, ip);
+      mul3(localGenShapes[iNode], ipExpTangent, nodeExpTangentInv[iNode]);
+      localGenShapes[iNode] *= N;
+      work = N * ipExpTangentP + dN * ipExpTangent;
+      mul3(localGenShapesP[iNode], work, nodeExpTangentInv[iNode]);
+      localRefWeight -= localGenShapes[iNode];
+      localRefWeightP -= localGenShapesP[iNode];
+    }
+
+    // X_K = a_K + a_r r_K (JC Eqs. 3.18, 3.19; r_K = 0 for K other than I, J; r_I = I for I = J)
+    if (I == J)
+    {
+      localGenShapes[I] += localRefWeight;
+      localGenShapesP[I] += localRefWeightP;
+    }
+    else
+    {
+      mul3(work, localRefWeight, refSpinShareI);
+      localGenShapes[I] += work;
+      mul3(work, localRefWeight, refSpinShareJ);
+      localGenShapes[J] += work;
+      mul3(work, localRefWeightP, refSpinShareI);
+      localGenShapesP[I] += work;
+      mul3(work, localRefWeightP, refSpinShareJ);
+      localGenShapesP[J] += work;
+    }
+
+    // It_K = Lambda_r X_K Lambda_r^T and It'_K = Lambda_r X'_K Lambda_r^T
+    for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
+    {
+      mul3(work, refRotation_, localGenShapes[iNode]);
+      mul3(genShapes[ip][iNode], work, refRotation_.transpose());
+      mul3(work, refRotation_, localGenShapesP[iNode]);
+      mul3(genShapesP[ip][iNode], work, refRotation_.transpose());
+    }
+  }
 }
 
 //------------------------------------------------------
 // private helper functions
 //------------------------------------------------------
-void Line3D::getRotationGradients_(const Cubix &LambdaP,
-                                   const Matrix &grads,
-                                   const Matrix &ip_psi,
-                                   const Matrix &node_psi,
-                                   const Matrix &Lambda_r) const
+void Line3D::getLocalNodeRotVecs_(const Cubix &Rn) const
 {
-  const Matrix psiP = matmul_.matmul(node_psi, grads);
+  // Lambda_r = Lambda_I exp(phi/2), phi = log(Lambda_I^T Lambda_J) (CJ Eq. 5.8, JC Eqs. 3.9, 3.10)
+  mul3(rotWork_, Rn[refNodeI_].transpose(), Rn[refNodeJ_]);
+  logMat(relRotIJ_, rotWork_);
+  halfRelRotIJ_ = 0.5 * relRotIJ_;
+  expVec(refRotation_, halfRelRotIJ_);
+  mul3(refRotation_, Rn[refNodeI_], refRotation_);
 
-  for (idx_t ip = 0; ip < ipointCount(); ip++)
-  {
-    expVecP(LambdaP[ip], ip_psi[ip], psiP[ip]);
-    mul3(LambdaP[ip], Lambda_r, LambdaP[ip]);
-  }
-}
-
-void Line3D::getRefRot_(const Matrix Lambda_r,
-                        const Cubix Rn) const
-{
-  // first construct the reference rotation (use 0-based numbers instead of Crisfield/Jelenic 1-based numbers)
-  const idx_t I = idx_t(0.5 * (nodeCount() - 1));
-  const idx_t J = idx_t(0.5 * (nodeCount() + 0));
-  const double c = 0.5;
-
-  mul3(relRot_, Rn[I].transpose(), Rn[J]);
-  logMat(phiIJ_, relRot_);
-  phiIJ_ = c * phiIJ_;
-  expVec(Lambda_r, phiIJ_);
-  mul3(Lambda_r, Rn[I], Lambda_r);
-}
-
-void Line3D::getNodeRotVecs_(const Matrix psi,
-                             const Matrix Lambda_r,
-                             const Cubix Rn) const
-{
-  getRefRot_(Lambda_r, Rn);
-
+  // psi_K = log(Lambda_r^T Lambda_K) (JC Eq. 3.12)
   for (idx_t iNode = 0; iNode < nodeCount(); iNode++)
   {
-    mul3(relRot_, Lambda_r.transpose(), Rn[iNode]);
-    logMat(psi[iNode], relRot_);
+    mul3(rotWork_, refRotation_.transpose(), Rn[iNode]);
+    logMat(nodeLocalRotVecs_[iNode], rotWork_);
   }
+}
+
+void Line3D::getLocalIpRotVecs_(const Matrix &grads) const
+{
+  // psi = sum_K N_K psi_K (JC Eq. 3.11), psi' = sum_K N'_K psi_K (copied: matmul_ reuses its result)
+  ipLocalRotVecs_ = matmul_.matmul(nodeLocalRotVecs_, getShapeFunctions());
+  ipLocalRotVecsP_ = matmul_.matmul(nodeLocalRotVecs_, grads);
 }

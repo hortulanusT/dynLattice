@@ -8,6 +8,9 @@
 | `Solver.modules = [ "integrator" ];` | defines the modules, that make up the solver. In our case it is only one, called `integrator`. |
 | `Solver.integrator.type = "MilneDevice";` | defines the type of the `integrator` module, in our case it's a MilneDeviceModule (this type needs to agree with the name it is declared under in the [ModuleFactory](https://jive-manual.dynaflow.com/classjive_1_1app_1_1ModuleFactory.html)) |
 | `Solver.integrator.deltaTime = 5e-5;` | set the starting time step size for the `integrator` to \f$5 \times 10^{-5}\f$ seconds |
+| `Solver.integrator.dofs_SO3 = [ "rx", "ry", "rz" ];` | rotation dofs, updated with the exponential map (on SO(3)). Default: the rotation dofs of the rod model; a different list is an error |
+| `Solver.integrator.rotationScale = 1.;` | length at which a rotation error counts as a displacement error in the step-size control (default: `lengthScale`, i.e. rotations in rad); here 1 m |
+| `Solver.integrator.updateWhen = false;` | keep the mass matrix of the first step (default: rebuilt every step, so that the rotational inertia follows the rotations); same results here, faster |
 | **Material Properties** | |
 | `params.rod_details.material.type = "ElasticRod";` | define the type of the material to be ElasticRodMaterial |
 | `params.rod_details.material.cross_section = "square";` | define the rod to be of square cross-section |

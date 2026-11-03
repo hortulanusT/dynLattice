@@ -89,8 +89,10 @@ using jive_helpers::mul3;
 
 /// @brief Base class for explicit time integration schemes
 /// @details Provides foundation for explicit solvers with support for rotational DOFs,
-/// adaptive time stepping, and both lumped and consistent mass matrices. Handles
-/// special integration of SO(3) rotational degrees of freedom using exponential maps.
+/// adaptive time stepping, and both lumped and consistent mass matrices. The rotation dofs
+/// (dofs_SO3, or if not given those the model reports with SolverNames::GET_ROT_DOFS) are
+/// rotation vectors; they are updated with the exponential map, Lambda_new = exp(dt omega) Lambda_old,
+/// their velocities being spatial angular velocities. All other dofs are updated additively.
 class ExplicitModule : public SolverModule
 {
  public:
@@ -107,8 +109,9 @@ class ExplicitModule : public SolverModule
   /// @{
   static const char *TYPE_NAME;  ///< Module type name
   static const char *STEP_COUNT; ///< Step count property
-  static const char *SO3_DOFS;   ///< SO(3) DOF types property
+  static const char *SO3_DOFS;   ///< SO(3) DOF types property (default: the rotation dofs reported by the model)
   static const char *LEN_SCALE;  ///< Length scale property
+  static const char *ROT_SCALE;  ///< Rotation scale property (length; default: the length scale)
   static const char *MASS_MATRIX; ///< globdat key of the published mass matrix
   /// @}
 
@@ -221,6 +224,8 @@ class ExplicitModule : public SolverModule
                        const Vector &f_cur) const;
 
   /// @brief Update displacement vectors with optional SO(3) handling
+  /// @details dofs_SO3: exp(y_new) = exp(delta_y) exp(y_old), with the rotation vector closest to y_old + delta_y
+  /// (continuous beyond |y| = pi; in 3D not near |y| = 2 pi if the axis changes).
   /// @param[out] y_new  New displacement vector
   /// @param[in] y_old  Old displacement vector
   /// @param[in] delta_y  Displacement increment
@@ -249,7 +254,9 @@ class ExplicitModule : public SolverModule
                   const Vector &fext,
                   const Properties &globdat);
 
-  /// @brief Get solution quality measure
+  /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
+  /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error
+  /// (default lengthScale: rotations in rad).
   /// @param[in] y_pre  Predicted solution
   /// @param[in] y_cor  Corrected solution
   /// @return Quality measure
@@ -285,11 +292,13 @@ class ExplicitModule : public SolverModule
   MassMode mode_;   ///< Mass matrix mode
   idx_t order_;     ///< Integration order
   double lenScale_; ///< Characteristic length scale
+  double rotScale_; ///< A rotation error dtheta counts like a displacement error dtheta * rotScale_
   /// @}
 
   /// @name DOF management
   /// @{
-  Ref<Function> updCond_; ///< Update condition function
+  Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step; it changes only
+                          ///< with rotation dofs, whose inertia follows the rotations)
   Vector massInv_;        ///< Inverse mass matrix
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping

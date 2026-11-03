@@ -94,6 +94,9 @@ Matrix eye(const idx_t dim = 3);
 /// It returns the axial vector of the rotation matrix.
 /// @see [Wikipedia](https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Log_map_from_SO(3)_to_%F0%9D%94%B0%F0%9D%94%AC(3))
 ///
+/// The angle lies in [0, pi]; close to pi (cos(theta) < -0.9) the angle comes from atan2 and the axis from the
+/// symmetric part of R, which keeps full precision up to theta = pi.
+///
 /// @param[out] rv  3-component rotational vector
 /// @param[in] R  3 x 3 rotational matrix
 void logMat(const Vector &rv, const Matrix &R);
@@ -176,6 +179,32 @@ void expVec(const Matrix &Exp, const Vector &v);
 /// @param[in] v  3-component axial rotation vector
 /// @param[in] vP  Derivative of the axial rotation vector
 void expVecP(const Matrix &ExpP, const Vector &v, const Vector &vP);
+
+/// @brief tangent operator T(v) of the exponential map (left Jacobian of SO(3)); no heap allocation.
+///
+/// Spin of \f$\Lambda = \exp(\hat v)\f$ for a change dv: \f$d\Lambda\,\Lambda^T = \widehat{T(v)\,dv}\f$, with
+/// \f$T(v) = I + \frac{1-\cos\theta}{\theta^2}\hat v + \frac{\theta-\sin\theta}{\theta^3}\hat v^2\f$, θ = |v|.
+/// This is \f$T^{-1}\f$ of Jelenic & Crisfield (1999, CMAME), Eqs. 2.4-2.5, written there with the dyad:
+/// \f$T^{-1}(\Theta) = \frac{\sin\theta}{\theta} I + \frac{1}{\theta^2}\left(1-\frac{\sin\theta}{\theta}\right)\Theta\Theta^T
+/// + \frac{1-\cos\theta}{\theta^2}\hat\Theta\f$ (equal, as \f$\hat\Theta^2 = \Theta\Theta^T - \theta^2 I\f$).
+/// Power series for small θ.
+/// @param[out] T  3 x 3 tangent operator
+/// @param[in] v  rotation vector
+void expTangent(const Matrix &T, const Vector &v);
+
+/// @brief inverse of jive_helpers::expTangent; no heap allocation.
+///
+/// \f$T^{-1}(v) = I - \frac12\hat v + \frac{1}{\theta^2}\left(1-\frac{\theta}{2}\cot\frac{\theta}{2}\right)\hat v^2\f$,
+/// singular at θ = 2π: T of Jelenic & Crisfield (1999, CMAME), Eq. 2.5. Power series for small θ.
+/// @param[out] Tinv  3 x 3 inverse tangent operator
+/// @param[in] v  rotation vector
+void expTangentInv(const Matrix &Tinv, const Vector &v);
+
+/// @brief directional derivative of jive_helpers::expTangent: dT = d/dε T(v + ε w) at ε = 0.
+/// @param[out] dT  3 x 3 derivative
+/// @param[in] v  rotation vector
+/// @param[in] w  direction
+void expTangentD(const Matrix &dT, const Vector &v, const Vector &w);
 
 /// @brief calculate the trace of a matrix.
 ///

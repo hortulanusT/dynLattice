@@ -6,9 +6,12 @@
  */
 
 #include "modules/ExplicitModule.h"
+#include "utils/SolverNames.h"
 #include "utils/testing.h"
 
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalInputException.h>
+#include <jem/util/StringUtils.h>
 
 //=======================================================================
 //   class ExplicitModule
@@ -24,6 +27,7 @@ const char *ExplicitModule::TYPE_NAME = "Explicit";
 const char *ExplicitModule::STEP_COUNT = "stepCount";
 const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
+const char *ExplicitModule::ROT_SCALE = "rotationScale";
 const char *ExplicitModule::MASS_MATRIX = "explicitMass";
 
 //-----------------------------------------------------------------------
@@ -40,6 +44,7 @@ ExplicitModule::ExplicitModule
   valid_ = false;
   fintCacheValid_ = false;
   lenScale_ = 1e-3;
+  rotScale_ = lenScale_;
   dofsSO3_.resize(0);
   rdofs_.resize(0, 0);
   prec_ = jive::solver::Solver::PRECISION;
@@ -64,6 +69,7 @@ Module::Status ExplicitModule::init
 
 {
   using jem::util::connect;
+  using jem::util::StringUtils;
   using jive::implict::PropNames;
 
   Properties myConf = conf.makeProps(myName_);
@@ -77,6 +83,9 @@ Module::Status ExplicitModule::init
   // get the length scale
   myProps.find(lenScale_, LEN_SCALE);
   myConf.set(LEN_SCALE, lenScale_);
+  rotScale_ = lenScale_;
+  myProps.find(rotScale_, ROT_SCALE);
+  myConf.set(ROT_SCALE, rotScale_);
 
   // returning an address of an object pointing to the Model
 
@@ -92,9 +101,26 @@ Module::Status ExplicitModule::init
   connect(dofs_->newSizeEvent, this, &Self::invalidate_);
   connect(dofs_->newOrderEvent, this, &Self::invalidate_);
 
-  // get the SO3 dof names
+  // SO(3) dofs: dofs_SO3 if given (must equal the model's), else the rotation dofs the model reports
 
-  if (myProps.find(SO3_dof_names, SO3_DOFS))
+  StringVector modelRotDofs;
+  const bool modelHasRot = model_->takeAction(SolverNames::GET_ROT_DOFS, params, globdat) &&
+                           params.find(modelRotDofs, SolverNames::ROT_DOFS);
+  params.clear();
+  const bool givenRot = myProps.find(SO3_dof_names, SO3_DOFS);
+
+  if (modelHasRot && !givenRot)
+  {
+    SO3_dof_names.ref(modelRotDofs);
+    jem::System::info(myName_) << " ...rotation dofs from the model (" << SO3_DOFS << " not given): "
+                               << StringUtils::join(SO3_dof_names, ", ") << "\n";
+  }
+  else if (modelHasRot && !jem::equal(SO3_dof_names, modelRotDofs))
+    throw jem::IllegalInputException(getContext(), String(SO3_DOFS) + " = [" + StringUtils::join(SO3_dof_names, ", ") +
+                                                       "] differs from the rotation dofs of the model [" +
+                                                       StringUtils::join(modelRotDofs, ", ") + "]");
+
+  if (givenRot || modelHasRot)
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
     dofsSO3_.resize(SO3_dof_names.size());
@@ -147,7 +173,7 @@ Module::Status ExplicitModule::init
   myConf.set("stepSaftey", saftey_);
   myProps.find(incrFact_, "increaseFactor", 1., 2.);
   myConf.set("increaseFactor", incrFact_);
-  myProps.find(decrFact_, "decreaseFactor", 1., 2.);
+  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
   myConf.set("decreaseFactor", decrFact_);
 
   // Initialize solver
@@ -314,12 +340,16 @@ bool ExplicitModule::commit(const Properties &globdat)
   }
   accept = accept && (error <= prec_ || dtime_ <= minDtime_);
 
+  // next step from the error estimate: after an accepted step at most incrFact_ times larger, never below
+  // decrFact_ times the old one, within [minDtime_, maxDtime_] (a step rejected by the model can have a small error)
+  double dtime_next = saftey_ * dtime_opt;
+  if (accept)
+    dtime_next = jem::min(dtime_next, incrFact_ * dtime_);
+  dtime_next = jem::min(jem::max(dtime_next, decrFact_ * dtime_, minDtime_), maxDtime_);
+
   if (accept)
   {
-    dtime_ =
-        jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
-                 decrFact_ * dtime_,
-                 minDtime_);
+    dtime_ = dtime_next;
     params.clear();
     evalCommittedForce_(globdat);
     model_->takeAction(Actions::COMMIT, params, globdat);
@@ -331,7 +361,7 @@ bool ExplicitModule::commit(const Properties &globdat)
   else
   {
     dropCommittedForce_(globdat);
-    dtime_ = jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_);
+    dtime_ = dtime_next;
   }
 
   jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
@@ -386,6 +416,7 @@ void ExplicitModule::updateVec(const Vector &y_new,
     Matrix R_old(rotCount, rotCount);
     Matrix R_new(rotCount, rotCount);
     Matrix V_upd(rotCount, rotCount);
+    Vector y_add(rotCount);
 
     for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
     {
@@ -397,6 +428,25 @@ void ExplicitModule::updateVec(const Vector &y_new,
       mul3(R_new, V_upd, R_old);
 
       logMat(r_node, R_new);
+
+      // logMat gives |r| <= pi: of r + 2 pi k r/|r| take the one closest to the additive prediction y_add
+      y_add = y_new[rdofs_[inode]];
+      const double r_norm = norm2(r_node);
+      if (r_norm > jive_helpers::TINY)
+      {
+        const double turns = (dotProduct(y_add, r_node) / r_norm - r_norm) / (2. * M_PI);
+        const idx_t k = static_cast<idx_t>(floor(turns + 0.5));
+        if (k != 0)
+          r_node *= (r_norm + 2. * M_PI * static_cast<double>(k)) / r_norm;
+      }
+      else
+      {
+        // no rotation: a multiple of 2 pi about the axis of the prediction
+        const double y_norm = norm2(y_add);
+        const idx_t k = static_cast<idx_t>(floor(y_norm / (2. * M_PI) + 0.5));
+        if (k != 0)
+          r_node += (2. * M_PI * static_cast<double>(k) / y_norm) * y_add;
+      }
 
       y_new[rdofs_[inode]] = r_node;
     }
@@ -609,10 +659,14 @@ ExplicitModule::getPrecision() const
 double
 ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
+  // one division for the rotations: lenScale_ / rotScale_ = 1 exactly for the default rotScale_ = lenScale_
+  const double rotDiv = lenScale_ / rotScale_;
   Vector y_diff = Vector(y_pre - y_cor);
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;
+    else
+      y_diff[i] /= rotDiv;
   return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }
 
