@@ -224,10 +224,8 @@ bool SpecialCosseratRodModel::takeAction
     Array<String> known;
     for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
       names[i] = dofs_->getTypeName(rotTypes_[i]);
-    if (params.find(known, SolverNames::ROT_DOFS))
-      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
-        if (!(known[i] == names[i]))
-          throw jem::IllegalInputException(getContext(), "rods with different rotation dof names");
+    if (params.find(known, SolverNames::ROT_DOFS) && !jem::equal(known, names))
+      throw jem::IllegalInputException(getContext(), "rods with different rotation dof names");
     params.set(SolverNames::ROT_DOFS, names);
     return true;
   }
@@ -978,18 +976,19 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
     // spatial stresses; also fills ipPhiP_ and ipLambda_ of this element
     getStresses_(stress, weights, nodePhi_0, nodeU, nodeLambda, ie, true, loadCase);
     getXi_(XI, elemGrads_[ie], ipPhiP_);
-    shapeK_->getGeneralisedShapeFunctions(genShapes, genShapesP, elemGrads_[ie], nodeLambda);
-    getXiTilde_(XItilde, elemGrads_[ie], ipPhiP_, genShapes, genShapesP);
-
-    // The rotation dofs are rotation vectors theta (Lambda = exp(theta) Lambda_N) that the
-    // nonlinear solver updates additively, while the trial functions are spins:
-    // d spin = T(theta) d theta, so the rotation columns are multiplied by T(theta)
-    for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
+    if (!symOnly_)
     {
-      Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
-      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
-        rotVec[i] = disp[Jdofs[TRANS_DOF_COUNT + i]];
-      expTangent(nodeExpTangent[Jnode], rotVec);
+      shapeK_->getGeneralisedShapeFunctions(genShapes, genShapesP, elemGrads_[ie], nodeLambda);
+      getXiTilde_(XItilde, elemGrads_[ie], ipPhiP_, genShapes, genShapesP);
+
+      // T(theta) of the nodes: d spin = T(theta) d theta
+      for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
+      {
+        Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
+        for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+          rotVec[i] = disp[Jdofs[TRANS_DOF_COUNT + i]];
+        expTangent(nodeExpTangent[Jnode], rotVec);
+      }
     }
 
     // iterate through the integration Points
@@ -1016,27 +1015,27 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
         for (idx_t Jnode = 0; Jnode < nodeCount; Jnode++)
         {
           Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
-          const Matrix genShapeJ = genShapes[ip][Jnode];
-          const double dNJ = elemGrads_[ie](Jnode, ip);
 
-          // material stiffness w Xi_I c Xi-tilde_J^T (Simo & Vu-Quoc 1986, Section 5.1.2, with Xi-tilde for node J);
-          // symmetric_tanget_stiffness: w Xi_I c Xi_J^T only (symmetric, no geometric part, no T(theta))
           if (symOnly_)
-            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC, XI[ip][Jnode].transpose());
-          else
-            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC,
-                                              XItilde[ip][Jnode].transpose());
-
-          if (!symOnly_)
           {
-            // geometric stiffness: the rotation of n and m with the cross section (spin It_J of node J)
-            // and the change of phi' in the test functions; columns = (displacement, spin) of node J
+            // symmetric approximation: material part w Xi_I c Xi_J^T only
+            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC, XI[ip][Jnode].transpose());
+          }
+          else
+          {
+            const Matrix genShapeJ = genShapes[ip][Jnode];
+            const double dNJ = elemGrads_[ie](Jnode, ip);
+
+            // material part w Xi_I c Xi-tilde_J^T (SVQ Section 5.1.2)
+            blockK = weights[ip] * mc3.matmul(XI[ip][Inode], spatialC, XItilde[ip][Jnode].transpose());
+
+            // geometric part: n and m rotate with the cross section (spin It_J of node J), phi' changes in Xi_I
             blockK(TRANS_PART, ROT_PART) -= weights[ip] * dNI * matmul(skewN, genShapeJ);
             blockK(ROT_PART, TRANS_PART) += weights[ip] * NI * dNJ * skewN;
             blockK(ROT_PART, ROT_PART) += weights[ip] * (NI * mc3.matmul(skewPhiP, skewN, genShapeJ) - dNI * matmul(skewM, genShapeJ));
 
-            // columns = (displacement, rotation vector) of node J
-            blockK(ALL, ROT_PART) = matmul(Matrix(blockK(ALL, ROT_PART).clone()), nodeExpTangent[Jnode]);
+            // from spin to rotation-vector columns
+            blockK(ALL, ROT_PART) = matmul(blockK(ALL, ROT_PART).clone(), nodeExpTangent[Jnode]);
           }
           mbld.addBlock(Idofs, Jdofs, blockK);
         }
