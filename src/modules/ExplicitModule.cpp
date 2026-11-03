@@ -101,8 +101,7 @@ Module::Status ExplicitModule::init
   connect(dofs_->newSizeEvent, this, &Self::invalidate_);
   connect(dofs_->newOrderEvent, this, &Self::invalidate_);
 
-  // get the SO3 dof names: given by dofs_SO3 or reported by the model (rods); without them the
-  // rotation dofs would be updated additively, which is wrong for rotations about changing axes
+  // SO(3) dofs: dofs_SO3 if given (must equal the model's), else the rotation dofs the model reports
 
   StringVector modelRotDofs;
   const bool modelHasRot = model_->takeAction(SolverNames::GET_ROT_DOFS, params, globdat) &&
@@ -110,22 +109,16 @@ Module::Status ExplicitModule::init
   params.clear();
   const bool givenRot = myProps.find(SO3_dof_names, SO3_DOFS);
 
-  if (givenRot && modelHasRot)
-  {
-    bool same = SO3_dof_names.size() == modelRotDofs.size();
-    for (idx_t i = 0; same && i < SO3_dof_names.size(); i++)
-      same = SO3_dof_names[i] == modelRotDofs[i];
-    if (!same)
-      throw jem::IllegalInputException(getContext(), String(SO3_DOFS) + " = [" + StringUtils::join(SO3_dof_names, ", ") +
-                                                         "] differs from the rotation dofs of the model [" +
-                                                         StringUtils::join(modelRotDofs, ", ") + "]");
-  }
-  if (!givenRot && modelHasRot)
+  if (modelHasRot && !givenRot)
   {
     SO3_dof_names.ref(modelRotDofs);
     jem::System::info(myName_) << " ...rotation dofs from the model (" << SO3_DOFS << " not given): "
                                << StringUtils::join(SO3_dof_names, ", ") << "\n";
   }
+  else if (modelHasRot && !jem::equal(SO3_dof_names, modelRotDofs))
+    throw jem::IllegalInputException(getContext(), String(SO3_DOFS) + " = [" + StringUtils::join(SO3_dof_names, ", ") +
+                                                       "] differs from the rotation dofs of the model [" +
+                                                       StringUtils::join(modelRotDofs, ", ") + "]");
 
   if (givenRot || modelHasRot)
   {
@@ -347,12 +340,16 @@ bool ExplicitModule::commit(const Properties &globdat)
   }
   accept = accept && (error <= prec_ || dtime_ <= minDtime_);
 
+  // next step from the error estimate: after an accepted step at most incrFact_ times larger, never below
+  // decrFact_ times the old one, within [minDtime_, maxDtime_] (a step rejected by the model can have a small error)
+  double dtime_next = saftey_ * dtime_opt;
+  if (accept)
+    dtime_next = jem::min(dtime_next, incrFact_ * dtime_);
+  dtime_next = jem::min(jem::max(dtime_next, decrFact_ * dtime_, minDtime_), maxDtime_);
+
   if (accept)
   {
-    dtime_ =
-        jem::max(jem::min(saftey_ * dtime_opt, incrFact_ * dtime_, maxDtime_),
-                 decrFact_ * dtime_,
-                 minDtime_);
+    dtime_ = dtime_next;
     params.clear();
     evalCommittedForce_(globdat);
     model_->takeAction(Actions::COMMIT, params, globdat);
@@ -364,8 +361,7 @@ bool ExplicitModule::commit(const Properties &globdat)
   else
   {
     dropCommittedForce_(globdat);
-    // a step rejected by the model (CHECK_COMMIT) can have a small error
-    dtime_ = jem::min(jem::max(saftey_ * dtime_opt, decrFact_ * dtime_, minDtime_), maxDtime_);
+    dtime_ = dtime_next;
   }
 
   jem::System::info(myName_) << " ...Adapting time step size to " << dtime_ << "\n";
@@ -433,9 +429,7 @@ void ExplicitModule::updateVec(const Vector &y_new,
 
       logMat(r_node, R_new);
 
-      // keep the rotation vector continuous: logMat gives |r| <= pi, so at |r| = pi it would jump to the opposite
-      // side. Of the equivalent vectors r + 2 pi k r/|r|, take the one closest to the additive prediction
-      // y_old + delta_y (already in y_new); k = 0, i.e. r unchanged, as long as no rotation passes pi.
+      // logMat gives |r| <= pi: of r + 2 pi k r/|r| take the one closest to the additive prediction y_add
       y_add = y_new[rdofs_[inode]];
       const double r_norm = norm2(r_node);
       if (r_norm > jive_helpers::TINY)
@@ -665,14 +659,14 @@ ExplicitModule::getPrecision() const
 double
 ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
 {
-  // displacements / lengthScale; rotations * rotationScale / lengthScale, written as one
-  // division so that rotationScale = lengthScale (the default) leaves them unchanged
+  // one division for the rotations: lenScale_ / rotScale_ = 1 exactly for the default rotScale_ = lenScale_
+  const double rotDiv = lenScale_ / rotScale_;
   Vector y_diff = Vector(y_pre - y_cor);
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;
     else
-      y_diff[i] /= lenScale_ / rotScale_;
+      y_diff[i] /= rotDiv;
   return norm2(y_diff) / sqrt(static_cast<double>(y_diff.size()));
 }
 

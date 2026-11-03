@@ -224,9 +224,8 @@ class ExplicitModule : public SolverModule
                        const Vector &f_cur) const;
 
   /// @brief Update displacement vectors with optional SO(3) handling
-  /// @details The rotation dofs (dofs_SO3) are rotation vectors and are updated multiplicatively,
-  /// exp(y_new) = exp(delta_y) exp(y_old); of the equivalent rotation vectors the one closest to y_old + delta_y is
-  /// kept, so they stay continuous beyond |y| = pi (no jumps by 2 pi in the state, the output or the error estimate).
+  /// @details dofs_SO3: exp(y_new) = exp(delta_y) exp(y_old), with the rotation vector closest to y_old + delta_y
+  /// (continuous beyond |y| = pi; in 3D not near |y| = 2 pi if the axis changes).
   /// @param[out] y_new  New displacement vector
   /// @param[in] y_old  Old displacement vector
   /// @param[in] delta_y  Displacement increment
@@ -255,10 +254,9 @@ class ExplicitModule : public SolverModule
                   const Vector &fext,
                   const Properties &globdat);
 
-  /// @brief Get solution quality measure: RMS over all dofs of the scaled difference y_pre - y_cor
-  /// @details Displacements are divided by lengthScale. A rotation (a dofs_SO3 dof) error dtheta counts like a
-  /// displacement error dtheta * rotationScale (the displacement at that distance from the axis), i.e. it is divided
-  /// by lengthScale / rotationScale. The default rotationScale = lengthScale takes rotations in rad as they are.
+  /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
+  /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error
+  /// (default lengthScale: rotations in rad).
   /// @param[in] y_pre  Predicted solution
   /// @param[in] y_cor  Corrected solution
   /// @return Quality measure
@@ -299,8 +297,8 @@ class ExplicitModule : public SolverModule
 
   /// @name DOF management
   /// @{
-  Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step once rotation dofs
-                          ///< exist, so that the rotational inertia follows the node rotations)
+  Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step; it changes only
+                          ///< with rotation dofs, whose inertia follows the rotations)
   Vector massInv_;        ///< Inverse mass matrix
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping

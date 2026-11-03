@@ -198,11 +198,12 @@ void EmbeddedRKModule::solve
 
     // stage i: Y_i = y + sum_j a_ij k_j (U_j in the RKMK reference)
     dv = 0.;
-    for (idx_t j = 0; j < i; j++)
-      dv += a_(i, j) * kv_tab[j];
     du = 0.;
     for (idx_t j = 0; j < i; j++)
+    {
+      dv += a_(i, j) * kv_tab[j];
       du += a_(i, j) * ku_tab[j];
+    }
 
     // use the updates to compute new functions
     updateVec(v_step, v_cur, dv);
@@ -243,11 +244,12 @@ void EmbeddedRKModule::solve
 
   // y + sum_j b_j k_j with the weights b of the lower order (U_j in the RKMK reference)
   dv = 0.;
-  for (idx_t j = 0; j < butchSize_; j++)
-    dv += b_[j] * kv_tab[j];
   du = 0.;
   for (idx_t j = 0; j < butchSize_; j++)
+  {
+    dv += b_[j] * kv_tab[j];
     du += b_[j] * ku_tab[j];
+  }
 
   // use the updates to compute new functions
   updateVec(v_step, v_cur, dv);

@@ -23,10 +23,8 @@
 /// The leap-frog method is symplectic and second-order accurate, making it
 /// well-suited for long-time dynamic simulations where energy conservation
 /// is important. It inherits basic explicit integration functionality from
-/// ExplicitModule. It has no error estimate, so it runs with the fixed step
-/// deltaTime (minDTime and maxDTime are set to it; a step from the CFL limit is planned).
-/// The stored velocities are those of the half steps, so the kinetic energy output
-/// lags half a step behind the potential energy.
+/// ExplicitModule. It has no error estimate and runs with the fixed step deltaTime.
+/// Velocities are stored at the half steps: E_kin lags E_pot by half a step.
 /// @see [Leap-frog integration](https://en.wikipedia.org/wiki/Leapfrog_integration)
 class LeapFrogModule : public ExplicitModule
 {
