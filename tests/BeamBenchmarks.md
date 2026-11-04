@@ -24,3 +24,13 @@ Test 4 implements Example 7.4 from [Simo, Vu-Quoc (1986)](https://doi.org/10.101
 Test 5 implements Example 7.5 from [Simo, Vu-Quoc (1986)](https://doi.org/10.1016/0045-7825(86)90079-4). This example shows out of plane deformation of a bent beam under a fixed end load. The obtained results agree well with the results reported in literature, showing the capability of the implementation to handle three dimensional scenarios.
 
 ![Test 5 Results](beam5_result.png)
+
+## Test 6
+Test 6 rolls a cantilever up to 4π with an end moment and a dead transverse force, so that the rotation axis changes along the path and the tip passes |θ| = 2π, where the tangent T(θ) of the rotation vector is singular. It checks that all load steps converge within a few Newton iterations, that the rod closes to a full circle at 2π and 4π, and that the rotation vector stays continuous.
+
+![Test 6 Results](beam6_result.png)
+
+## Test 7
+Test 7 rolls the same cantilever up by a prescribed total end rotation with a small dead transverse force. It checks that the rotation dof follows the prescribed total past 2π and that the tip follows the planar circle.
+
+![Test 7 Results](beam7_result.png)

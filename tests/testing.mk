@@ -5,7 +5,7 @@ tests: beam-tests transient-tests plastic-tests contact-tests
 clean-all: clean-tests
 
 # SETTINGS
-beam_cases = 1 2 4 5
+beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1

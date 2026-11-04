@@ -155,6 +155,7 @@ SpecialCosseratRodModel::SpecialCosseratRodModel
   material_ = MaterialFactory::newInstance(joinNames(myName_, "material"), conf, props, globdat);
 
   // get the incremental property
+  staticRun_ = false;
   symOnly_ = false;
   myProps.find(symOnly_, SYMMETRIC_ONLY);
   myConf.set(SYMMETRIC_ONLY, symOnly_);
@@ -287,6 +288,7 @@ bool SpecialCosseratRodModel::takeAction
 
   if (action == Actions::GET_MATRIX0)
   {
+    staticRun_ = true;
     Ref<MatrixBuilder> mbld;
     Vector fint;
     Vector disp;
@@ -402,6 +404,13 @@ bool SpecialCosseratRodModel::takeAction
 
     // if (hinges_)
     //   hinges_->takeAction(action, params, globdat);
+    return true;
+  }
+
+  if (action == Actions::ADVANCE)
+  {
+    if (staticRun_)
+      updateRotShift_(globdat);
     return true;
   }
 
@@ -916,8 +925,56 @@ void SpecialCosseratRodModel::getDisplacments_(const Matrix &nodePhi_0,
     // the rotation dofs are a rotation vector theta: Lambda = exp(theta) Lambda_N (Lambda_N from initRotation_)
     for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
       rotVec[i] = disp[idofs_rot[i]];
+    if (rotShift_.size() > 0)
+      for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+        rotVec[i] -= rotShift_[idofs_rot[i]];
     expVec(nodeLambda[inode], rotVec);
     mul3(nodeLambda[inode], nodeLambda[inode], LambdaN_[rodNodes_[inodes[inode]]]);
+  }
+}
+
+void SpecialCosseratRodModel::updateRotShift_(const Properties &globdat)
+{
+  // T(theta) of the additive rotation vector is singular at |theta| = 2 pi, so Newton is kept away from it: the
+  // state vector keeps the total, Lambda and T use theta - shift. A new shift of 2 pi k along the reduced vector
+  // leaves Lambda unchanged and is taken between load steps only, so the increments of Newton and prescribed
+  // values apply to the total as before. Rods sharing a node: the first one reduces it, the others see no need.
+  using jive::model::StateVector;
+
+  const double limit = 1.5 * M_PI;
+
+  Vector disp;
+  StateVector::get(disp, dofs_, globdat);
+
+  Vector shift;
+  globdat.find(shift, SolverNames::ROT_SHIFT);
+
+  Vector rotVec(ROT_DOF_COUNT);
+  for (idx_t inode = 0; inode < nodeDofs_.size(1); inode++)
+  {
+    for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+    {
+      const idx_t idof = nodeDofs_(TRANS_DOF_COUNT + i, inode);
+      rotVec[i] = disp[idof] - (shift.size() > 0 ? shift[idof] : 0.);
+    }
+    const double norm = norm2(rotVec);
+    if (norm <= limit)
+      continue;
+
+    if (shift.size() == 0)
+    {
+      shift.resize(disp.size());
+      shift = 0.;
+    }
+    const double turns = floor((norm + M_PI) / (2. * M_PI));
+    for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+      shift[nodeDofs_(TRANS_DOF_COUNT + i, inode)] += 2. * M_PI * turns / norm * rotVec[i];
+  }
+
+  if (shift.size() > 0)
+  {
+    globdat.set(SolverNames::ROT_SHIFT, shift);
+    rotShift_.ref(shift);
   }
 }
 
@@ -987,6 +1044,9 @@ void SpecialCosseratRodModel::assemble_(MatrixBuilder &mbld,
         Jdofs.ref(nodeDofs_[rodNodes_[inodes[Jnode]]]);
         for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
           rotVec[i] = disp[Jdofs[TRANS_DOF_COUNT + i]];
+        if (rotShift_.size() > 0)
+          for (idx_t i = 0; i < ROT_DOF_COUNT; i++)
+            rotVec[i] -= rotShift_[Jdofs[TRANS_DOF_COUNT + i]];
         expTangent(nodeExpTangent[Jnode], rotVec);
       }
     }

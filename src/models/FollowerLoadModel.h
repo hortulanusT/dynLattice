@@ -109,8 +109,9 @@ class FollowerLoadModel : public Model
 
   /// @brief Update rotation matrices based on current displacements
   /// @param[in] d  Current displacement vector
+  /// @param[in] globdat  Global data container (rotation shift of static runs, see SolverNames::ROT_SHIFT)
   /// @details Computes rotation matrices from rotational DOF values using exponential map
-  void advance_rots_(const Vector &d) const;
+  void advance_rots_(const Vector &d, const Properties &globdat) const;
 
   /// @name System components
   /// @{
