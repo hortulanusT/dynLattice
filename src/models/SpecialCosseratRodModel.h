@@ -258,6 +258,14 @@ class SpecialCosseratRodModel : public Model
   /// @brief Initialize rotation of elements
   void initRotation_();
 
+  /// @brief Static runs: update the shift between the total and the reduced rotation vector of the nodes
+  /// @details Called before every load step once a tangent was requested. Lambda and T(theta) use the reduced
+  /// vector, |theta - shift| <= 3 pi/2 at the start of a load step, so T stays regular past 2 pi. The state vector
+  /// keeps the total: prescribed values and outputs are total values, and beyond the limit exp(total) is no longer
+  /// the node rotation when the axis has changed. A shift is shared through SolverNames::ROT_SHIFT.
+  /// @param[in] globdat  Global data container
+  void updateRotShift_(const Properties &globdat);
+
   /// @brief Cache the reference shape gradients and integration weights of the elements
   /// @details They only depend on the undeformed node positions, so they are
   /// computed once here and not again in every force evaluation. Also creates
@@ -406,6 +414,8 @@ class SpecialCosseratRodModel : public Model
 #endif
 
   bool symOnly_;        ///< Symmetric tangent: material part w Xi c Xi^T only
+  bool staticRun_;      ///< A tangent was requested: rotations are evaluated in the reduced chart
+  Vector rotShift_;     ///< Static runs: total minus reduced rotation vector, per dof (SolverNames::ROT_SHIFT)
   Vector thickFact_;    ///< Thickening factors
   Vector materialYDir_; ///< Material y-direction
 

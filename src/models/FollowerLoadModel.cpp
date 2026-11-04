@@ -5,6 +5,7 @@
  */
 
 #include "FollowerLoadModel.h"
+#include "utils/SolverNames.h"
 #include <jem/base/ClassTemplate.h>
 
 //=======================================================================
@@ -91,7 +92,7 @@ bool FollowerLoadModel::takeAction
     // Get the last loadstep displacements
     StateVector::get(d, dofs_, globdat);
 
-    advance_rots_(d);
+    advance_rots_(d, globdat);
 
     return true;
   }
@@ -144,8 +145,11 @@ void FollowerLoadModel::get_ext_vec_(const Vector &fext,
 //-----------------------------------------------------------------------
 //   advance_rots
 //-----------------------------------------------------------------------
-void FollowerLoadModel::advance_rots_(const Vector &d) const
+void FollowerLoadModel::advance_rots_(const Vector &d, const Properties &globdat) const
 {
+  Vector shift;
+  globdat.find(shift, SolverNames::ROT_SHIFT);
+
   IdxVector inodes(group_.size());
   IdxVector ir_dofs(iRotDOFs_.size());
 
@@ -160,7 +164,7 @@ void FollowerLoadModel::advance_rots_(const Vector &d) const
     dofs_->getDofIndices(ir_dofs, inodes[inode], iRotDOFs_);
 
     // TEST_CONTEXT(d[ir_dofs])
-    expVec(rotMats_[inode], Vector(d[ir_dofs]));
+    expVec(rotMats_[inode], shift.size() > 0 ? Vector(d[ir_dofs] - shift[ir_dofs]) : Vector(d[ir_dofs]));
   }
   // TEST_CONTEXT(rotMats_)
 }

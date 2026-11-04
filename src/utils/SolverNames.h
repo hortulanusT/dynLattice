@@ -16,6 +16,7 @@ struct SolverNames
   static const char *STEP_SIZE_0;
   static const char *TERMINATE;
   static const char *ROT_DOFS; ///< names of the rotation dofs (rotation vectors), see GET_ROT_DOFS
+  static const char *ROT_SHIFT; ///< static runs: shift of the rotation dofs, total minus reduced rotation vector
 
   // actions
   static const char *CHECK_COMMIT;
