@@ -20,3 +20,9 @@ First two bending frequencies of a slender (L / r = 50) and a stubby (L / r = 10
 ![Test 3a Results](integrator3a_result.png)
 ![Test 3b Results](integrator3b_result.png)
 ![Test 3c Results](integrator3c_result.png)
+
+## Test 4
+Freely spinning rigid body of [Krysl, Endres (2005)](https://doi.org/10.1002/nme.1272), Sect. 4.1, close to its intermediate axis (Dzhanibekov effect), as a stiff rod of one element: the angular velocity in the body frame against their Fig. 3 (read from the vector graphics of the figure, `ref_data/test4_ref_omega.csv`), left, and the convergence of LeapFrog, right. All integrators are first order on rigid rotation at present, and `EmbeddedRK` in 3D is affected by its frozen mass matrix: both are run through, not checked, until they are fixed.
+
+![Test 4a Results](integrator4a_result.png)
+![Test 4b Results](integrator4b_result.png)

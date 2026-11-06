@@ -9,7 +9,7 @@ beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1
-integrator_cases = 1 2 3
+integrator_cases = 1 2 3 4
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -93,6 +93,7 @@ tests/contact/test%.pro: tests/contact/input.pro tests/contact/output.pro tests/
 # writes tests/integrator/<test>/<run>.csv. Settings with a comma go into a variable first.
 # With PARAVIEW=1 the runs that are made also write ParaView frames (every 1e-3) to <test>/<run>_visual/, e.g.
 #   rm tests/integrator/test1/LeapFrog_3D_2.csv; make PARAVIEW=1 tests/integrator/test1/LeapFrog_3D_2.csv
+# PARAVIEW_EVERY=<time> changes the interval of the frames.
 integrator-tests: $(addprefix tests/integrator/test, $(addsuffix /result.pdf, $(integrator_cases)))
 
 tests/integrator/test%/result.pdf: tests/integrator/test%.py
@@ -104,7 +105,7 @@ milne = -p "Solver.integrator.type='MilneDevice'"
 ode23 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode23'"
 ode45 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode45'"
 integrator_paraview = -p "Output.paraview.type='ParaView'" -p "Output.paraview.output_format='$$(@:.csv=_visual)/step%i'" \
-	-p "Output.paraview.sampleWhen='t % 1e-3 < deltaTime'" -p "Output.paraview.groups=['beams']" \
+	-p "Output.paraview.sampleWhen='t % $(or $(PARAVIEW_EVERY),1e-3) < deltaTime'" -p "Output.paraview.groups=['beams']" \
 	-p "Output.paraview.beams.shape='Line2'" -p "Output.paraview.beams.disps=['dx','dy','dz']" \
 	-p "Output.paraview.beams.otherDofs=['rx','ry','rz']" -p "Output.paraview.beams.node_data=['fint','fext']" \
 	-p "Output.paraview.beams.el_data=['strain','stress']"
@@ -186,6 +187,16 @@ $(eval $(call integrator_run,test3,stubby_ode23,$(ode23),2.5e-4,3.65427842442073
 $(eval $(call integrator_run,test3,stubby_ode45,$(ode45),1.25e-4,3.6542784244207325,$(test3_stubby)))
 $(eval $(call integrator_run,test3,stubby_LeapFrog_32,$(leapfrog),1.25e-4,3.6542784244207325,$(test3_stubby) $(test3_32)))
 $(eval $(call integrator_run,test3,stubby_LeapFrog_64,$(leapfrog),6.25e-5,3.6542784244207325,$(test3_stubby) $(test3_64)))
+
+# test 4, freely spinning body of Krysl, Endres (2005), Sect. 4.1, to t = 100: LeapFrog at five steps for the order
+$(eval $(call integrator_run,test4,LeapFrog_0,$(leapfrog),1e-3,100.))
+$(eval $(call integrator_run,test4,LeapFrog_1,$(leapfrog),5e-4,100.))
+$(eval $(call integrator_run,test4,LeapFrog_2,$(leapfrog),2.5e-4,100.))
+$(eval $(call integrator_run,test4,LeapFrog_3,$(leapfrog),1.25e-4,100.))
+$(eval $(call integrator_run,test4,LeapFrog_4,$(leapfrog),6.25e-5,100.))
+$(eval $(call integrator_run,test4,Milne,$(milne),2.5e-4,100.))
+$(eval $(call integrator_run,test4,ode23,$(ode23),1e-3,100.))
+$(eval $(call integrator_run,test4,ode45,$(ode45),1e-3,100.))
 
 # CLEAN UP THE TESTS
 clean-tests:
