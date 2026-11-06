@@ -9,7 +9,7 @@ beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1
-integrator_cases = 1
+integrator_cases = 1 2
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -161,6 +161,12 @@ $(eval $(call integrator_run,test1,ode45_planar_1,$(ode45),1e-4,2.,$(test1_plana
 $(eval $(call integrator_run,test1,ode45_planar_2,$(ode45),5e-5,2.,$(test1_planar)))
 $(eval $(call integrator_run,test1,ode45_planar_3,$(ode45),2.5e-5,2.,$(test1_planar)))
 $(eval $(call integrator_run,test1,ode45_planar_4,$(ode45),1.25e-5,2.,$(test1_planar)))
+
+# test 2, axial wave over three cycles: each integrator at about the same accuracy per cost
+$(eval $(call integrator_run,test2,LeapFrog,$(leapfrog),1e-3,12.))
+$(eval $(call integrator_run,test2,Milne,$(milne),2.5e-4,12.))
+$(eval $(call integrator_run,test2,ode23,$(ode23),1e-3,12.))
+$(eval $(call integrator_run,test2,ode45,$(ode45),2e-3,12.))
 
 # CLEAN UP THE TESTS
 clean-tests:
