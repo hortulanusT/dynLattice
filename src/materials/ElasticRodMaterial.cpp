@@ -110,11 +110,20 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     }
 
     jem::System::info(myName_) << " ...Using direct stiffness matrix input, ignoring other material properties.";
-    jem::System::info(myName_) << " Density will be multiplied with 1 for the mass matrix.\n";
+    jem::System::info(myName_) << " Area, area moments and polar moment only enter the mass matrix (default 1).\n";
+    // the section properties only enter the mass matrix
     area_ = 1.;
     areaMoment_.resize(2);
     areaMoment_ = 1.;
     polarMoment_ = 1.;
+    myProps.find(area_, AREA);
+    myProps.find(areaMoment_, AREA_MOMENT);
+    if (areaMoment_.size() == 1)
+    {
+      areaMoment_.reshape(2);
+      areaMoment_[1] = areaMoment_[0];
+    }
+    myProps.find(polarMoment_, POLAR_MOMENT);
   }
   else
   {
