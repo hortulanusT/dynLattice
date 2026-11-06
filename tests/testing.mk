@@ -9,7 +9,7 @@ beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1
-integrator_cases = 1 2
+integrator_cases = 1 2 3
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -167,6 +167,25 @@ $(eval $(call integrator_run,test2,LeapFrog,$(leapfrog),1e-3,12.))
 $(eval $(call integrator_run,test2,Milne,$(milne),2.5e-4,12.))
 $(eval $(call integrator_run,test2,ode23,$(ode23),1e-3,12.))
 $(eval $(call integrator_run,test2,ode45,$(ode45),2e-3,12.))
+
+# test 3, eigenfrequencies over ten periods of the first Timoshenko mode, 2 pi 10 / w_1: each integrator on 16 elements,
+# and LeapFrog on 32 and 64 elements for the convergence with the mesh
+test3_slender = -p model.model.rodMesh.child.material.radius=0.02
+test3_stubby = -p model.model.rodMesh.child.material.radius=0.1
+test3_32 = -p Input.input.onelab.Elements=32.
+test3_64 = -p Input.input.onelab.Elements=64.
+$(eval $(call integrator_run,test3,slender_LeapFrog,$(leapfrog),2.5e-4,17.88651121317495,$(test3_slender)))
+$(eval $(call integrator_run,test3,slender_Milne,$(milne),1e-4,17.88651121317495,$(test3_slender)))
+$(eval $(call integrator_run,test3,slender_ode23,$(ode23),2.5e-4,17.88651121317495,$(test3_slender)))
+$(eval $(call integrator_run,test3,slender_ode45,$(ode45),1.25e-4,17.88651121317495,$(test3_slender)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_32,$(leapfrog),1.25e-4,17.88651121317495,$(test3_slender) $(test3_32)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_64,$(leapfrog),6.25e-5,17.88651121317495,$(test3_slender) $(test3_64)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog,$(leapfrog),2.5e-4,3.6542784244207325,$(test3_stubby)))
+$(eval $(call integrator_run,test3,stubby_Milne,$(milne),1e-4,3.6542784244207325,$(test3_stubby)))
+$(eval $(call integrator_run,test3,stubby_ode23,$(ode23),2.5e-4,3.6542784244207325,$(test3_stubby)))
+$(eval $(call integrator_run,test3,stubby_ode45,$(ode45),1.25e-4,3.6542784244207325,$(test3_stubby)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_32,$(leapfrog),1.25e-4,3.6542784244207325,$(test3_stubby) $(test3_32)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_64,$(leapfrog),6.25e-5,3.6542784244207325,$(test3_stubby) $(test3_64)))
 
 # CLEAN UP THE TESTS
 clean-tests:

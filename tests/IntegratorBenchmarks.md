@@ -13,3 +13,10 @@ Axial wave in a bar (100 elements) under a constant end force, from rest, over t
 
 ![Test 2a Results](integrator2a_result.png)
 ![Test 2b Results](integrator2b_result.png)
+
+## Test 3
+First two bending frequencies of a slender (L / r = 50) and a stubby (L / r = 10) cantilever after a small tip velocity, from the spectrum of the tip displacement over ten periods, against the clamped-free frequency equation of the Timoshenko beam (Table 9 and Eqs. 109, 110 of [Han, Benaroya, Wei (1999)](https://doi.org/10.1006/jsvi.1999.2257), checked against their example of Sect. 3.5) with the shear coefficient of [Cowper (1966)](https://doi.org/10.1115/1.3625046). All integrators on 16 elements (left, middle); LeapFrog on 16, 32 and 64 elements, where the frequencies converge with the mesh at second order (right).
+
+![Test 3a Results](integrator3a_result.png)
+![Test 3b Results](integrator3b_result.png)
+![Test 3c Results](integrator3c_result.png)
