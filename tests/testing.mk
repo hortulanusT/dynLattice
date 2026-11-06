@@ -9,7 +9,7 @@ beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1
-integrator_cases = 1 2 3 4
+integrator_cases = 1 2 3 4 5
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -197,6 +197,12 @@ $(eval $(call integrator_run,test4,LeapFrog_4,$(leapfrog),6.25e-5,100.))
 $(eval $(call integrator_run,test4,Milne,$(milne),2.5e-4,100.))
 $(eval $(call integrator_run,test4,ode23,$(ode23),1e-3,100.))
 $(eval $(call integrator_run,test4,ode45,$(ode45),1e-3,100.))
+
+# test 5, pure rotation of Holzinger, Gerstmayr (2021), Sect. 7.1.2, to t = 100
+$(eval $(call integrator_run,test5,LeapFrog,$(leapfrog),1e-3,100.))
+$(eval $(call integrator_run,test5,Milne,$(milne),2.5e-4,100.))
+$(eval $(call integrator_run,test5,ode23,$(ode23),1e-3,100.))
+$(eval $(call integrator_run,test5,ode45,$(ode45),1e-3,100.))
 
 # CLEAN UP THE TESTS
 clean-tests:

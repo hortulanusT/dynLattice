@@ -26,3 +26,9 @@ Freely spinning rigid body of [Krysl, Endres (2005)](https://doi.org/10.1002/nme
 
 ![Test 4a Results](integrator4a_result.png)
 ![Test 4b Results](integrator4b_result.png)
+
+## Test 5
+Pure rotation of the free rigid body of [Holzinger, Gerstmayr (2021)](https://doi.org/10.1007/s11044-021-09778-w), Sect. 7.1.2 (with epsilon = 0), about its axis 2 over 100 s, as a stiff rod of one element: the rotation vector against their analytical solution, Eq. (73), while it passes |theta| = 2 pi, 4 pi, ... (left), and the deviation from it (right).
+
+![Test 5a Results](integrator5a_result.png)
+![Test 5b Results](integrator5b_result.png)
