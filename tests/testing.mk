@@ -1,6 +1,6 @@
-.PHONY: tests beam-tests transient-tests clean-tests
+.PHONY: tests beam-tests transient-tests integrator-tests clean-tests
 
-tests: beam-tests transient-tests plastic-tests contact-tests
+tests: beam-tests transient-tests plastic-tests contact-tests integrator-tests
 
 clean-all: clean-tests
 
@@ -9,6 +9,7 @@ beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3
 contact_cases = 1
+integrator_cases = 1
 
 # general dependency of .pro files on .geo files
 %.pro: %.geo
@@ -86,10 +87,86 @@ tests/contact/test%/disp.csv tests/contact/test%/resp.csv:\
 
 tests/contact/test%.pro: tests/contact/input.pro tests/contact/output.pro tests/contact/model.pro
 
+# INTEGRATOR TEST RESULTS
+# Each test runs its input several times, with other integrators, fixed time steps or settings; the scripts only
+# evaluate the runs. $(call integrator_run,<test>,<run>,<integrator>,<time step>,<end time>,<further -p settings>)
+# writes tests/integrator/<test>/<run>.csv. Settings with a comma go into a variable first.
+# With PARAVIEW=1 the runs that are made also write ParaView frames (every 1e-3) to <test>/<run>_visual/, e.g.
+#   rm tests/integrator/test1/LeapFrog_3D_2.csv; make PARAVIEW=1 tests/integrator/test1/LeapFrog_3D_2.csv
+integrator-tests: $(addprefix tests/integrator/test, $(addsuffix /result.pdf, $(integrator_cases)))
+
+tests/integrator/test%/result.pdf: tests/integrator/test%.py
+	@$<
+
+integrator_inputs = tests/integrator/input.pro tests/integrator/model.pro tests/integrator/output.pro
+leapfrog = -p "Solver.integrator.type='LeapFrog'"
+milne = -p "Solver.integrator.type='MilneDevice'"
+ode23 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode23'"
+ode45 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode45'"
+integrator_paraview = -p "Output.paraview.type='ParaView'" -p "Output.paraview.output_format='$$(@:.csv=_visual)/step%i'" \
+	-p "Output.paraview.sampleWhen='t % 1e-3 < deltaTime'" -p "Output.paraview.groups=['beams']" \
+	-p "Output.paraview.beams.shape='Line2'" -p "Output.paraview.beams.disps=['dx','dy','dz']" \
+	-p "Output.paraview.beams.otherDofs=['rx','ry','rz']" -p "Output.paraview.beams.node_data=['fint','fext']" \
+	-p "Output.paraview.beams.el_data=['strain','stress']"
+
+define integrator_run
+tests/integrator/$(1)/result.pdf: tests/integrator/$(1)/$(2).csv
+tests/integrator/$(1)/$(2).csv: $(program) tests/integrator/$(1).pro $(integrator_inputs)
+	@$(MKDIR_P) $$(@D)
+	-@$(program) tests/integrator/$(1).pro $(3) -p Solver.integrator.deltaTime=$(4) -p Solver.integrator.minDTime=$(4) \
+		-p Solver.integrator.maxDTime=$(4) -p "control.runWhile='t < $(5) - $(4) / 2'" -p "Output.sampling.file='$$@'" \
+		$(6) $(if $(PARAVIEW),$(integrator_paraview)) > $$(@:.csv=.log)
+endef
+
+# test 1, convergence order: five steps each, halving, to t = 2 (about three periods of the first mode).
+# MilneDevice only to 0.02, where its damping of the fast modes is small
+test1_planar = -p "model.model.init.veloVals=[1.,0.]"
+$(eval $(call integrator_run,test1,LeapFrog_3D_0,$(leapfrog),5e-5,2.))
+$(eval $(call integrator_run,test1,LeapFrog_3D_1,$(leapfrog),2.5e-5,2.))
+$(eval $(call integrator_run,test1,LeapFrog_3D_2,$(leapfrog),1.25e-5,2.))
+$(eval $(call integrator_run,test1,LeapFrog_3D_3,$(leapfrog),6.25e-6,2.))
+$(eval $(call integrator_run,test1,LeapFrog_3D_4,$(leapfrog),3.125e-6,2.))
+$(eval $(call integrator_run,test1,LeapFrog_planar_0,$(leapfrog),5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_1,$(leapfrog),2.5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_2,$(leapfrog),1.25e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_3,$(leapfrog),6.25e-6,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_4,$(leapfrog),3.125e-6,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,Milne_3D_0,$(milne),2e-5,0.02))
+$(eval $(call integrator_run,test1,Milne_3D_1,$(milne),1e-5,0.02))
+$(eval $(call integrator_run,test1,Milne_3D_2,$(milne),5e-6,0.02))
+$(eval $(call integrator_run,test1,Milne_3D_3,$(milne),2.5e-6,0.02))
+$(eval $(call integrator_run,test1,Milne_3D_4,$(milne),1.25e-6,0.02))
+$(eval $(call integrator_run,test1,Milne_planar_0,$(milne),2e-5,0.02,$(test1_planar)))
+$(eval $(call integrator_run,test1,Milne_planar_1,$(milne),1e-5,0.02,$(test1_planar)))
+$(eval $(call integrator_run,test1,Milne_planar_2,$(milne),5e-6,0.02,$(test1_planar)))
+$(eval $(call integrator_run,test1,Milne_planar_3,$(milne),2.5e-6,0.02,$(test1_planar)))
+$(eval $(call integrator_run,test1,Milne_planar_4,$(milne),1.25e-6,0.02,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode23_3D_0,$(ode23),1e-4,2.))
+$(eval $(call integrator_run,test1,ode23_3D_1,$(ode23),5e-5,2.))
+$(eval $(call integrator_run,test1,ode23_3D_2,$(ode23),2.5e-5,2.))
+$(eval $(call integrator_run,test1,ode23_3D_3,$(ode23),1.25e-5,2.))
+$(eval $(call integrator_run,test1,ode23_3D_4,$(ode23),6.25e-6,2.))
+$(eval $(call integrator_run,test1,ode23_planar_0,$(ode23),1e-4,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode23_planar_1,$(ode23),5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode23_planar_2,$(ode23),2.5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode23_planar_3,$(ode23),1.25e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode23_planar_4,$(ode23),6.25e-6,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode45_3D_0,$(ode45),2e-4,2.))
+$(eval $(call integrator_run,test1,ode45_3D_1,$(ode45),1e-4,2.))
+$(eval $(call integrator_run,test1,ode45_3D_2,$(ode45),5e-5,2.))
+$(eval $(call integrator_run,test1,ode45_3D_3,$(ode45),2.5e-5,2.))
+$(eval $(call integrator_run,test1,ode45_3D_4,$(ode45),1.25e-5,2.))
+$(eval $(call integrator_run,test1,ode45_planar_0,$(ode45),2e-4,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode45_planar_1,$(ode45),1e-4,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode45_planar_2,$(ode45),5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode45_planar_3,$(ode45),2.5e-5,2.,$(test1_planar)))
+$(eval $(call integrator_run,test1,ode45_planar_4,$(ode45),1.25e-5,2.,$(test1_planar)))
+
 # CLEAN UP THE TESTS
 clean-tests:
 	@$(RM_R) tests/beam/test*/	
 	@$(RM_R) tests/transient/test*/
 	@$(RM_R) tests/plastic/test*/
 	@$(RM_R) tests/contact/test*/
+	@$(RM_R) tests/integrator/test*/
 	@$(RM) tests/*.png

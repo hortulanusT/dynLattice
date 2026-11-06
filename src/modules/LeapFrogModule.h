@@ -24,7 +24,8 @@
 /// well-suited for long-time dynamic simulations where energy conservation
 /// is important. It inherits basic explicit integration functionality from
 /// ExplicitModule. It has no error estimate and runs with the fixed step deltaTime.
-/// Velocities are stored at the half steps: E_kin lags E_pot by half a step.
+/// The initial velocity is at t = 0, so the first step is a half kick; from then on velocities are stored at the
+/// half steps: E_kin lags E_pot by half a step.
 /// @see [Leap-frog integration](https://en.wikipedia.org/wiki/Leapfrog_integration)
 class LeapFrogModule : public ExplicitModule
 {

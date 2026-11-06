@@ -72,8 +72,10 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   fres = getForce(fint, fext, globdat);
   getAcce(a_new, cons_, fres, globdat);
 
-  // update velocity
+  // update velocity; the initial velocity is at t = 0, so the first step is a half kick to t = dt / 2
   ABupdate(dv, a_new);
+  if (step == 1)
+    dv *= 0.5;
   updateVec(v_new, v_old, dv);
 
   // update position
