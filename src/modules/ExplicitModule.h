@@ -267,6 +267,17 @@ class ExplicitModule : public SolverModule
                         const Vector &fext,
                         const Properties &globdat);
 
+  /// @brief getForce at the end of the step, for a scheme whose last evaluation is at the new state
+  /// @details The internal force without the gyroscopic term is kept for the commit, so that
+  /// evalCommittedForce_ does not evaluate it again. The gyroscopic term is added as in getForce.
+  /// @param[out] fint  Internal force vector
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
+  /// @return Resulting force vector (external - internal)
+  Vector getEndForce_(const Vector &fint,
+                      const Vector &fext,
+                      const Properties &globdat);
+
   /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
   /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error
   /// (default lengthScale: rotations in rad).
@@ -281,11 +292,13 @@ class ExplicitModule : public SolverModule
   /// @{
   bool valid_;       ///< State validity flag
   bool updMassStep_; ///< updateWhen held at the start of this step: schemes rebuild the mass at their stage states too
+  bool massAtState_; ///< The mass was built at the state of the step end; advance() need not rebuild it
   /// @}
 
   /// @name Internal force at the committed state
   /// @{
   bool fintCacheValid_;  ///< True between commit and the next state change
+  bool fintCacheFresh_;  ///< fintCache_ holds the force of the step end (getEndForce_), not evaluated again at commit
   Vector fintCache_;     ///< Internal force (without gyroscopic term) at the committed state
   Vector fintCacheDisp_; ///< Displacements the cached force belongs to
   /// @}

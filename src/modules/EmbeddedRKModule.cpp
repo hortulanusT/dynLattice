@@ -238,6 +238,8 @@ void EmbeddedRKModule::solve
   {
     u_new = u_step;
     v_new = v_step;
+    // the last stage is the new state: its mass serves the next step
+    massAtState_ = updMassStep_;
   }
   else
     NOT_IMPLEMENTED

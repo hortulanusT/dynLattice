@@ -43,7 +43,9 @@ ExplicitModule::ExplicitModule
   dtime_ = 1.0;
   valid_ = false;
   updMassStep_ = false;
+  massAtState_ = false;
   fintCacheValid_ = false;
+  fintCacheFresh_ = false;
   rotDofsValid_ = false;
   lenScale_ = 1e-3;
   rotScale_ = lenScale_;
@@ -282,11 +284,12 @@ void ExplicitModule::advance(const Properties &globdat)
   globdat.erase(ActionParams::INT_VECTOR);
   globdat.erase(MASS_MATRIX);
 
-  // check if mass needs to be updated
+  // check if mass needs to be updated (not if the last step already built it at its end state)
   updMassStep_ = FuncUtils::evalCond(*updCond_, globdat);
-  valid_ = valid_ && !updMassStep_;
+  valid_ = valid_ && (!updMassStep_ || massAtState_);
   if (!valid_)
     updateMass_(globdat);
+  massAtState_ = false;
 
   // update time in models and boundary conditions
   Globdat::advanceTime(dtime_, globdat);
@@ -303,6 +306,7 @@ void ExplicitModule::cancel(const Properties &globdat)
 
   // update time in models and boundary conditions
   dropCommittedForce_(globdat);
+  massAtState_ = false;
   Globdat::restoreTime(globdat);
   Globdat::restoreStep(globdat);
   StateVector::restoreNew(dofs_, globdat);
@@ -528,6 +532,42 @@ Vector ExplicitModule::getStartForce_(const Vector &fint,
 }
 
 //-----------------------------------------------------------------------
+//   getEndForce_
+//-----------------------------------------------------------------------
+
+Vector ExplicitModule::getEndForce_(const Vector &fint,
+                                    const Vector &fext,
+                                    const Properties &globdat)
+{
+  Properties params;
+
+  fext = 0.0;
+  fint = 0.0;
+
+  params.set(ActionParams::EXT_VECTOR, fext);
+  params.set(ActionParams::INT_VECTOR, fint);
+  params.set(ActionParams::CONSTRAINTS, cons_);
+
+  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
+  model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
+
+  // the evaluation of evalCommittedForce_ (without MATRIX2), kept for the commit
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+  fintCache_.resize(fint.size());
+  fintCache_ = fint;
+  fintCacheValid_ = false;
+  fintCacheFresh_ = true;
+
+  if (mode_ == CONSISTENT)
+  {
+    params.set(ActionParams::MATRIX2, solver_->getMatrix());
+    model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+  }
+
+  return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
 //   evalCommittedForce_
 //-----------------------------------------------------------------------
 
@@ -535,6 +575,13 @@ void ExplicitModule::evalCommittedForce_(const Properties &globdat)
 {
   Properties params;
   const idx_t dofCount = dofs_->dofCount();
+
+  // already evaluated at this state by getEndForce_
+  if (fintCacheFresh_)
+  {
+    fintCacheFresh_ = false;
+    return;
+  }
 
   fintCache_.resize(dofCount);
   fintCache_ = 0.0;
@@ -575,6 +622,7 @@ void ExplicitModule::dropCommittedForce_(const Properties &globdat)
     globdat.erase(ActionParams::INT_VECTOR);
   globdat.erase(MASS_MATRIX);
   fintCacheValid_ = false;
+  fintCacheFresh_ = false;
 }
 
 //-----------------------------------------------------------------------
