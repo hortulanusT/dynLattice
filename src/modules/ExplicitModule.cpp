@@ -42,6 +42,7 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
+  updMassStep_ = false;
   fintCacheValid_ = false;
   rotDofsValid_ = false;
   lenScale_ = 1e-3;
@@ -282,7 +283,8 @@ void ExplicitModule::advance(const Properties &globdat)
   globdat.erase(MASS_MATRIX);
 
   // check if mass needs to be updated
-  valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
+  updMassStep_ = FuncUtils::evalCond(*updCond_, globdat);
+  valid_ = valid_ && !updMassStep_;
   if (!valid_)
     updateMass_(globdat);
 

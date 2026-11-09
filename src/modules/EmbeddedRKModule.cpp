@@ -215,6 +215,10 @@ void EmbeddedRKModule::solve
     StateVector::store(v_step, jive::model::STATE1, dofs_, globdat);
     globdat.set(Globdat::TIME, t_step);
 
+    // the rotational inertia follows the stage rotations (the stages are first order with the mass of u_cur)
+    if (updMassStep_)
+      updateMass_(globdat);
+
     fres = getForce(fint, fext, globdat);
     getAcce(a_step, cons_, fres, globdat);
 

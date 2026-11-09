@@ -279,7 +279,8 @@ class ExplicitModule : public SolverModule
  protected:
   /// @name Module state
   /// @{
-  bool valid_; ///< State validity flag
+  bool valid_;       ///< State validity flag
+  bool updMassStep_; ///< updateWhen held at the start of this step: schemes rebuild the mass at their stage states too
   /// @}
 
   /// @name Internal force at the committed state
