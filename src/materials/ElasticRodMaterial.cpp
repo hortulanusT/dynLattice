@@ -87,6 +87,31 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   myProps.find(elemCount, "elemCount");
   dofCount = dofs->typeCount();
 
+  // a given section: one area moment stands for both axes, and area and area moments must be positive
+  auto checkGivenSection = [&]()
+  {
+    if (areaMoment_.size() == 1)
+    {
+      areaMoment_.reshape(2);
+      areaMoment_[1] = areaMoment_[0];
+    }
+
+    if (area_ <= 0.0)
+    {
+      throw jem::IllegalInputException(
+          getContext() + ": Cross-sectional area must be positive, got " + String(area_));
+    }
+
+    for (idx_t i = 0; i < areaMoment_.size(); ++i)
+    {
+      if (areaMoment_[i] <= 0.0)
+      {
+        throw jem::IllegalInputException(
+            getContext() + ": Area moment of inertia must be positive, got " + String(areaMoment_[i]));
+      }
+    }
+  };
+
   if (myProps.find(materialK_(0, 0), STIFF_PREFIX + jem::String("11")) &&
       myProps.find(materialK_(1, 1), STIFF_PREFIX + jem::String("22")) &&
       myProps.find(materialK_(2, 2), STIFF_PREFIX + jem::String("33")) &&
@@ -118,11 +143,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     polarMoment_ = 1.;
     myProps.find(area_, AREA);
     myProps.find(areaMoment_, AREA_MOMENT);
-    if (areaMoment_.size() == 1)
-    {
-      areaMoment_.reshape(2);
-      areaMoment_[1] = areaMoment_[0];
-    }
+    checkGivenSection();
     myProps.find(polarMoment_, POLAR_MOMENT);
   }
   else
@@ -166,29 +187,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     {
       myProps.get(area_, AREA);
       myProps.get(areaMoment_, AREA_MOMENT);
-
-      // Validate geometric properties
-      if (area_ <= 0.0)
-      {
-        throw jem::IllegalInputException(
-            getContext() + ": Cross-sectional area must be positive, got " + String(area_));
-      }
-
-      if (areaMoment_.size() == 1)
-      {
-        areaMoment_.reshape(2);
-        areaMoment_[1] = areaMoment_[0];
-      }
-
-      // Validate area moments
-      for (idx_t i = 0; i < areaMoment_.size(); ++i)
-      {
-        if (areaMoment_[i] <= 0.0)
-        {
-          throw jem::IllegalInputException(
-              getContext() + ": Area moment of inertia must be positive, got " + String(areaMoment_[i]));
-        }
-      }
+      checkGivenSection();
 
       shearParam_ = 5. / 6.; // standard square cross-section
     }
