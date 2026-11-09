@@ -58,7 +58,9 @@ using jive::util::XTable;
 /// @brief Model for managing lattice structures composed of rod elements
 /// @details Coordinates multiple child models representing rod elements and handles
 /// contact interactions between rods and joints. Provides utilities for computing
-/// global properties like kinetic energy and total mass.
+/// global properties like kinetic energy and total mass. At every commit of a dynamic run it adds the kinetic
+/// energy, the linear momentum and the angular momentum about the origin, all from the assembled mass matrix, to the
+/// global variables kineticEnergy, momentum_x/y/z and angularMomentum_x/y/z.
 class LatticeModel : public Model
 {
  public:
@@ -70,6 +72,10 @@ class LatticeModel : public Model
   static const char *JOINT_CONTACT_PROP; ///< Joint contact model property
   static const char *ROD_LIST_PROP;      ///< Rod list property
   static const char *NAME_PREFIX;        ///< Child name prefix
+  static const char *TRANS_DOF_NAMES;    ///< Translational dof names of the children
+  static const char *ROT_DOF_NAMES;      ///< Rotational dof names of the children
+  static const char *MOMENTUM[3];        ///< Global variables of the linear momentum
+  static const char *ANGULAR_MOMENTUM[3]; ///< Global variables of the angular momentum (about the origin)
   /// @}
 
   JEM_DECLARE_CLASS(LatticeModel, Model);
@@ -136,6 +142,20 @@ class LatticeModel : public Model
   static void declare();
 
  private:
+  /// @brief Kinetic energy 1/2 v^T M v
+  /// @param[in] velo  Velocities
+  /// @param[in] massVelo  M v
+  /// @param[in] globdat  Global data container
+  /// @return Kinetic energy
+  double getKineticEnergy_(const Vector &velo, const Vector &massVelo, const Properties &globdat) const;
+
+  /// @brief Linear and angular momentum (about the origin) from M v
+  /// @param[out] p  Linear momentum, sum of (M v)_trans
+  /// @param[out] l  Angular momentum, sum of x x (M v)_trans + (M v)_rot with the current positions x
+  /// @param[in] massVelo  M v
+  /// @param[in] globdat  Global data container
+  void getMomenta_(const Vector &p, const Vector &l, const Vector &massVelo, const Properties &globdat) const;
+
   /// @name Child models
   /// @{
   Array<Ref<Model>> children_; ///< Array of child rod models
@@ -147,4 +167,7 @@ class LatticeModel : public Model
   /// @{
   Ref<AbstractMatrix> M_; ///< Mass matrix
   /// @}
+
+  StringVector transDofs_; ///< Translational dof names of the rods (for the momenta)
+  StringVector rotDofs_;   ///< Rotational dof names of the rods (for the momenta)
 };
