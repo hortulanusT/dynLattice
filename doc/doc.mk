@@ -23,8 +23,13 @@ docs-clean-only:
 tests/transient/test1_schematic.png: tests/transient/test1_schematic.py tests
 	@$<
 
-tests/transient/test1_animate.gif: tests/transient/test1_animate.py tests
+tests/transient/test1_animate.gif: tests/transient/test1_animate.py tests tests/transient/test1/visual/step.pvd
 	@$<
+
+# the animation needs the ParaView frames of transient test 1, which `tests` only writes with PARAVIEW=1
+tests/transient/test1/visual/step.pvd: $(program) tests/transient/test1.pro
+	@$(MKDIR_P) tests/transient/test1
+	@$^ > tests/transient/test1/run.log
 
 # test2 is a docs-only example (not part of `tests`), so it's run here instead
 tests/docs/test2/vis.pvd: $(program) tests/docs/test2.pro

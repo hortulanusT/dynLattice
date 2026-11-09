@@ -38,7 +38,8 @@ try:
   energy_change = abs(total_energy[-1] / total_energy[0] - 1.)
 
   print(f"  smallest gap of the tips {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}", file=LOG)
-  print(f"  momentum of rod A at the end {rebound:+.3f} of its start (exact -1, limit +- {REBOUND_TOL}), total momentum "
+  print(f"  momentum of rod A at the end {rebound:+.3f} of its start (exact -1, limit +- {REBOUND_TOL}), "
+        f"total momentum "
         f"largest {momentum_error:.2e}", file=LOG)
   print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})", file=LOG)
 
@@ -52,15 +53,17 @@ try:
   fig_b, momentum_axes = plt.subplots(figsize=(16 / 3, 6))
   momentum_axes.plot(times, momentum_a / momentum_a[0], label="rod A")
   momentum_axes.plot(times, momentum_b / momentum_a[0], label="rod B")
-  momentum_axes.axhline(-1., color="k", ls="--", label="reference after the impact: equal elastic\nrods exchange their velocities (exact)")
+  exchange = "reference after the impact: equal elastic\nrods exchange their velocities (exact)"
+  momentum_axes.axhline(-1., color="k", ls="--", label=exchange)
   momentum_axes.axhline(1., color="k", ls="--")
   momentum_axes.set_xlabel("t")
   momentum_axes.set_ylabel("momentum in y / start of rod A")
   momentum_axes.set_title("momentum; dashed: exact after the impact")
   momentum_axes.legend(fontsize=7)
   fig_c, energy_axes = plt.subplots(figsize=(16 / 3, 6))
-  # the penalty energy of the contact is not in E_pot yet (ROADMAP C3), so that the energy dips while the tips touch
-  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label="simulation, without the penalty energy\nof the contact (dips while the tips touch)")
+  # the penalty energy of the contact is not part of E_pot, so that the energy dips while the tips touch
+  label = "simulation, without the penalty energy\nof the contact (dips while the tips touch)"
+  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label=label)
   energy_axes.axhline(1., color="k", ls="--", label="reference: energy conserved")
   energy_axes.set_xlabel("t")
   energy_axes.set_ylabel("(E_pot + E_kin) / E_0")

@@ -2,12 +2,16 @@
 
 # TEST 1: convergence order of the explicit integrators, of the motion and of the energy, free vibration of a cantilever
 import sys
+from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 from termcolor import colored
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import convergence_order, energy_error
 
 OUT = "tests/integrator/test1"
 FORCE = 0.02       # dead tip force in x, its potential is -F dx
@@ -22,28 +26,13 @@ SCHEMES = {"LeapFrog": ("leap-frog", 2.0, 0.1, 2.),
            "ode45": ("EmbeddedRK ode45: Dormand-Prince", 5.0, 0.3, 2.)}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
 MARKERS = {"planar": "o", "3D": "s"}
-# case: (check the motion, check the energy). Not checked, only run through, until ROADMAP C2:
-# EmbeddedRK in 3D is first order, its mass matrix stays frozen during the stages; and in 3D the energy error of every
-# integrator stops at about 2e-4, whatever the step.
+# case: (check the motion, check the energy). Not checked, only run through: EmbeddedRK in 3D, which is first order
+# as its mass matrix stays frozen during the stages; the energy in 3D, whose error stops at about 2e-4 for every
+# integrator, whatever the step.
 CASES = {("LeapFrog", "planar"): (True, True), ("LeapFrog", "3D"): (True, False),
          ("Milne", "planar"): (True, True), ("Milne", "3D"): (True, False),
          ("ode23", "planar"): (True, True), ("ode23", "3D"): (False, False),
          ("ode45", "planar"): (True, True), ("ode45", "3D"): (False, False)}
-
-
-def order_of(steps, errors):
-  """Slope fitted over all steps, and the local order of each pair."""
-  return np.polyfit(np.log(steps), np.log(errors), 1)[0], np.log2(errors[:-1] / errors[1:])
-
-
-def energy_error(run, scheme):
-  """Largest |E(t) / E(0) - 1| of a run. LeapFrog stores the velocity half a step before the displacement: the mean
-  of E_kin in this and the next row is E_kin at the step, to second order."""
-  e_kin, e_pot, dx = run[:, 8], run[:, 7], run[:, 1]
-  if scheme == "LeapFrog":
-    e_kin, e_pot, dx = 0.5 * (e_kin[:-1] + e_kin[1:]), e_pot[:-1], dx[:-1]
-  energy = e_pot + e_kin - FORCE * dx
-  return np.abs(energy / energy[0] - 1.).max()
 
 
 def evaluate(scheme, dim, motion_axes, energy_axes):
@@ -57,10 +46,12 @@ def evaluate(scheme, dim, motion_axes, energy_axes):
   # motion: self-convergence of the tip at the end time, the difference to the run at half the step
   ends = [run[-1, 1:7] for run in runs]
   diffs = np.array([np.linalg.norm(ends[i] - ends[i + 1]) for i in range(RUNS - 1)])
-  motion, motion_local = order_of(steps[:-1], diffs)
-  # energy: the exact solution keeps it, so the error must vanish with the order of the scheme
-  energies = np.array([energy_error(run, scheme) for run in runs])
-  energy, energy_local = order_of(steps, energies)
+  motion, motion_local = convergence_order(steps[:-1], diffs)
+  # energy: the exact solution keeps it, so the error must vanish with the order of the scheme; the potential of the
+  # dead tip force is -F dx; LeapFrog stores the velocity half a step before the displacement
+  energies = np.array([energy_error(run[:, 7] - FORCE * run[:, 1], run[:, 8], half_step=(scheme == "LeapFrog"))
+                       for run in runs])
+  energy, energy_local = convergence_order(steps, energies)
 
   results = []
   for what, measured, local, checked in [("motion", motion, motion_local, check_motion),
@@ -89,7 +80,7 @@ def legend(axes):
 
 
 # details of the checks; on screen only PASSED, FAILED or RUN THROUGH
-LOG = open("tests/integrator/test1/result.log", "w")
+LOG = open(f"{OUT}/result.log", "w")
 
 test_passed = True
 
@@ -112,7 +103,8 @@ except Exception as e:
   test_passed = False
 
 if test_passed:
-  print(colored("INTEGRATOR TEST 1 PASSED", "green") + colored(" (RUN THROUGH: EmbeddedRK in 3D, energy in 3D)", "yellow"))
+  print(colored("INTEGRATOR TEST 1 PASSED", "green")
+        + colored(" (RUN THROUGH: EmbeddedRK in 3D, energy in 3D)", "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b")]:
@@ -120,5 +112,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator1{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 1 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test1/result.log)")
+  print(colored("INTEGRATOR TEST 1 FAILED", "red", attrs=["bold"]) + f" (details: {OUT}/result.log)")
   sys.exit(1)

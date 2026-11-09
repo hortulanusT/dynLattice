@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 from termcolor import colored
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from metrics import interp_on_reference, relative_L2
+from metrics import convergence_order, interp_on_reference, relative_L2
 
 OUT = "tests/integrator/test6"
 END, FREE = 15., 5.       # the load ends at t = 5
@@ -34,15 +34,15 @@ DRIFT_TOL = 1e-3       # energy and angular momentum in the free flight
 SCHEMES = {"LeapFrog": "leap-frog", "Milne": "MilneDevice: Adams-Bashforth-Moulton",
            "ode23": "EmbeddedRK ode23: Bogacki-Shampine", "ode45": "EmbeddedRK ode45: Dormand-Prince"}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
-# checked: (against the references, energy and angular momentum kept in the free flight). Run through: EmbeddedRK in 3D,
-# until ROADMAP C2 (mass frozen in the stages); the energy of MilneDevice, which damps by construction; the angular
-# momentum, until ROADMAP C3: the nodal inertia of the model also holds rho A l^2 / 12 about the transverse axes, which is
-# not in J, so that the angular momentum of Eq. (108) drifts by about 3e-3
-CHECKED = {"LeapFrog": (True, True, False), "Milne": (True, False, False), "ode23": (False, False, False),
-           "ode45": (False, False, False)}
-# LeapFrog at five steps to t = 5, each half the previous one: the relative error of Eq. (76) against the finest run, with
-# order 2 expected (Fig. 8 shows order 2 for their scheme); run through until ROADMAP C2, as the integrators are first
-# order on rigid rotation
+# Checked: LeapFrog and Milne against the references, LeapFrog also the energy in the free flight. Run through:
+# EmbeddedRK in 3D, as its mass matrix stays frozen during the stages; the energy of MilneDevice, which damps by
+# construction; the angular momentum in the free flight, for every integrator: the nodal inertia of the model also holds
+# rho A l^2 / 12 about the transverse axes, which is not in J, so that the angular momentum of Eq. (108) drifts by 3e-3
+CHECK_REFERENCES = ("LeapFrog", "Milne")
+CHECK_ENERGY = ("LeapFrog",)
+# LeapFrog at five steps to t = 5, each half the previous one: the relative error of Eq. (76) against the finest run,
+# order 2 expected (Fig. 8 shows order 2 for their scheme); run through, as the integrators are first order on rigid
+# rotation at present
 ORDER_RUNS, ORDER = 5, 2.
 
 
@@ -58,29 +58,40 @@ def read_reference(path):
   return [data[np.isfinite(data[:, 2 * i]), 2 * i:2 * i + 2] for i in range(data.shape[1] // 2)]
 
 
+def read(name, end):
+  rows = np.loadtxt(f"{OUT}/{name}.csv", delimiter=",", skiprows=1, ndmin=2)
+  if rows[-1, 0] < end - 2. * (rows[1, 0] - rows[0, 0]):
+    raise RuntimeError(f"{name}: the run did not reach t = {end}, see the .log files in {OUT}")
+  return rows
+
+
 def read_state(path):
-  """Node order along the rod: gmsh numbers the end points first, then the interior nodes from the start."""
+  """Times, and displacements, rotations, velocities and angular velocities of the nodes along the rod, each
+  (time, node, 3). gmsh numbers the end points first, then the interior nodes from the start."""
   data = pd.read_csv(path, index_col=["time", "label"], skipinitialspace=True)
   order = [0] + list(range(2, ELEMENTS + 1)) + [1]
-  columns = lambda names: [[f"{name}[{node}]" for name in names] for node in order]
-  shape = lambda frame, names: np.array([frame[col].to_numpy() for col in columns(names)]).transpose(1, 0, 2)
+
+  def nodes(frame, names):
+    return np.stack([frame[[f"{name}[{node}]" for name in names]].to_numpy() for node in order], axis=1)
+
   disp, velo = data.xs("disp", level="label"), data.xs("velo", level="label")
-  return (disp.index.to_numpy(), shape(disp, ["dx", "dy", "dz"]), shape(disp, ["rx", "ry", "rz"]),
-          shape(velo, ["dx", "dy", "dz"]), shape(velo, ["rx", "ry", "rz"]))
+  return (disp.index.to_numpy(), nodes(disp, ["dx", "dy", "dz"]), nodes(disp, ["rx", "ry", "rz"]),
+          nodes(velo, ["dx", "dy", "dz"]), nodes(velo, ["rx", "ry", "rz"]))
 
 
 def momenta(pos, rot, vel, spin):
-  """Linear momentum and angular momentum, Eq. (108), l = int (phi x rho A v + R J R^T w) ds, of the interpolated state:
-  linear between the nodes for the centreline, the rotational part at the nodes with the weights of the trapezoidal rule."""
+  """Linear momentum and angular momentum, Eq. (108), l = int (phi x rho A v + R J R^T w) ds, of the interpolated
+  state: linear between the nodes for the centreline, the rotational part at the nodes with the trapezoidal rule."""
   mass = RHO_A * ELEM / 6.
   pa, pb, va, vb = pos[:, :-1], pos[:, 1:], vel[:, :-1], vel[:, 1:]
   linear = (mass * 3. * (va + vb)).sum(axis=1)
   angular = (mass * (np.cross(2. * pa + pb, va) + np.cross(pa + 2. * pb, vb))).sum(axis=1)
   weights = np.full(ELEMENTS + 1, ELEM)
   weights[[0, -1]] = ELEM / 2.
-  R = Rotation.from_rotvec(rot.reshape(-1, 3)).as_matrix().reshape(*rot.shape[:2], 3, 3)
-  spatial = np.einsum("tnij,jk,tnlk->tnil", R, INERTIA, R)
-  angular = angular + (weights[None, :, None] * np.einsum("tnij,tnj->tni", spatial, spin)).sum(axis=1)
+  # R J R^T w at every node and time (J is symmetric)
+  R = Rotation.from_rotvec(rot.reshape(-1, 3))
+  spatial = R.apply(R.inv().apply(spin.reshape(-1, 3)) @ INERTIA).reshape(spin.shape)
+  angular = angular + (weights[None, :, None] * spatial).sum(axis=1)
   return linear, angular
 
 
@@ -89,12 +100,12 @@ def against(t, values, reference, scale):
           for i, curve in enumerate(reference)]
 
 
-def status(ok, checked=True):
+def status(ok, checked):
   return ("ok" if ok else "off") if checked else "RUN THROUGH"
 
 
 # details of the checks; on screen only PASSED, FAILED or RUN THROUGH
-LOG = open("tests/integrator/test6/result.log", "w")
+LOG = open(f"{OUT}/result.log", "w")
 
 test_passed = True
 
@@ -107,9 +118,7 @@ try:
   fig_a, energy_axes = plt.subplots(figsize=(16 / 3, 6))
   fig_b, momentum_axes = plt.subplots(figsize=(16 / 3, 6))
   for name in SCHEMES:
-    rows = np.loadtxt(f"{OUT}/{name}.csv", delimiter=",", skiprows=1, ndmin=2)
-    if rows[-1, 0] < END - 2. * (rows[1, 0] - rows[0, 0]):
-      raise RuntimeError(f"{name}: the run did not reach t = {END}, see the .log files in {OUT}")
+    rows = read(name, END)
     times, disp, rot, vel, spin = read_state(f"{OUT}/{name}_state.gz")
     pos = ref[None] + disp
     centre = (ELEM / (2. * LENGTH) * (pos[:, :-1] + pos[:, 1:])).sum(axis=1)
@@ -117,23 +126,24 @@ try:
     linear, angular = momenta(pos, rot, vel, spin)
     energy = rows[:, 7] + rows[:, 8]
     energy_errors = against(rows[:, 0], energy[:, None], ref_energy, None)
-    momentum_errors = against(times, np.column_stack([linear[:, 0], angular[:, 1], angular[:, 2]]), ref_momentum, dominant)
+    momenta_compared = np.column_stack([linear[:, 0], angular[:, 1], angular[:, 2]])    # p_1, l_2, l_3
+    momentum_errors = against(times, momenta_compared, ref_momentum, dominant)
     flying, free = rows[:, 0] >= FREE + 0.1, times >= FREE + 0.1
     energy_drift = np.abs(energy[flying] / energy[flying][0] - 1.).max()
     angular_drift = np.linalg.norm(angular[free] - angular[free][0], axis=1).max() / np.linalg.norm(angular[free][0])
     ok_ref = centre_error <= CENTRE_TOL and max(energy_errors + momentum_errors) <= CURVE_TOL
-    ok_energy, ok_angular = energy_drift <= DRIFT_TOL, angular_drift <= DRIFT_TOL
-    test_passed = (test_passed and (ok_ref or not CHECKED[name][0]) and (ok_energy or not CHECKED[name][1])
-                   and (ok_angular or not CHECKED[name][2]))
+    ok_energy = energy_drift <= DRIFT_TOL
+    test_passed = (test_passed and (ok_ref or name not in CHECK_REFERENCES)
+                   and (ok_energy or name not in CHECK_ENERGY))
     print(f"  {name}, step {rows[1, 0] - rows[0, 0]:g}: centre of mass against Eq. (75) {centre_error:.1e} "
           f"(limit {CENTRE_TOL}); against Figs. 5, 6: energy {energy_errors[0]:.4f}, p_1, l_2, l_3 "
-          f"{', '.join(f'{e:.4f}' for e in momentum_errors)} (limit {CURVE_TOL}); E = {energy[-1]:.1f}, "
-          f"l = {np.round(angular[-1], 1)}  {status(ok_ref, CHECKED[name][0])}", file=LOG)
-    print(f"  {name}, free flight: drift of the energy {energy_drift:.1e}  {status(ok_energy, CHECKED[name][1])}, of the "
-          f"angular momentum {angular_drift:.1e}  {status(ok_angular, CHECKED[name][2])} (limit {DRIFT_TOL})", file=LOG)
+          f"{np.round(momentum_errors, 4)} (limit {CURVE_TOL}); E = {energy[-1]:.1f}, l = {np.round(angular[-1], 1)}  "
+          f"{status(ok_ref, name in CHECK_REFERENCES)}", file=LOG)
+    print(f"  {name}, free flight: drift of the energy {energy_drift:.1e}  {status(ok_energy, name in CHECK_ENERGY)}, "
+          f"of the angular momentum {angular_drift:.1e}  RUN THROUGH (limit {DRIFT_TOL})", file=LOG)
     energy_axes.plot(rows[:, 0], energy, color=COLOURS[name], label=SCHEMES[name])
-    for i, value in enumerate([linear[:, 0], angular[:, 1], angular[:, 2]]):
-      momentum_axes.plot(times, value, color=COLOURS[name], ls=["-", "-", "-."][i])
+    for value, style in zip(momenta_compared.T, ["-", "-", "-."]):
+      momentum_axes.plot(times, value, color=COLOURS[name], ls=style)
 
   energy_axes.plot(ref_energy[0][:, 0], ref_energy[0][:, 1], "k--", label="reference: Kinon et al. (2026), Fig. 5")
   energy_axes.set_xlabel("t")
@@ -151,20 +161,21 @@ try:
   momentum_axes.set_title("momenta; dashed: Kinon et al.")
 
   # convergence of LeapFrog at t = 5, Eq. (76): position and velocity of the loaded end against the finest run
-  runs = [np.loadtxt(f"{OUT}/LeapFrog_{i}.csv", delimiter=",", skiprows=1, ndmin=2) for i in range(ORDER_RUNS)]
+  runs = [read(f"LeapFrog_{i}", ORDER_END) for i in range(ORDER_RUNS)]
   steps = np.array([r[1, 0] - r[0, 0] for r in runs])
   fig_c, order_axes = plt.subplots(figsize=(16 / 3, 6))
-  for what, columns, marker in [("position", slice(9, 12), "o"), ("velocity", slice(12, 15), "s")]:
-    ends = [r[np.argmin(np.abs(r[:, 0] - ORDER_END)), columns] + (START if what == "position" else 0.) for r in runs]
-    diffs = np.array([np.linalg.norm(ends[i] - ends[-1]) / np.linalg.norm(ends[-1]) for i in range(ORDER_RUNS - 1)])
-    measured = np.polyfit(np.log(steps[:-1]), np.log(diffs), 1)[0]
-    local = np.log2(diffs[:-1] / diffs[1:])
-    print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER}; local "
-          f"{', '.join(f'{v:.2f}' for v in local)})  {status(False, False)}", file=LOG)
+  # the position of the loaded end is its displacement plus START
+  for what, columns, offset, marker in [("position", slice(9, 12), START, "o"), ("velocity", slice(12, 15), 0., "s")]:
+    ends = [r[np.argmin(np.abs(r[:, 0] - ORDER_END)), columns] + offset for r in runs]
+    diffs = np.array([relative_L2(ends[i], ends[-1]) for i in range(ORDER_RUNS - 1)])
+    measured, local = convergence_order(steps[:-1], diffs)
+    print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER}; "
+          f"local {np.round(local, 2)})  RUN THROUGH", file=LOG)
     order_axes.loglog(steps[:-1], diffs, marker=marker, markerfacecolor="none", ls="", color=COLOURS["LeapFrog"])
     order_axes.loglog(steps[:-1], diffs[-1] * (steps[:-1] / steps[-2])**ORDER, "--", color=COLOURS["LeapFrog"])
-  handles = [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="", label=f"{w}, relative error against the "
-                    "finest run, Eq. (76)") for w, m in [("position", "o"), ("velocity", "s")]]
+  handles = [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="",
+                    label=f"{w}, relative error against the finest run, Eq. (76)")
+             for w, m in [("position", "o"), ("velocity", "s")]]
   handles += [Line2D([], [], color="k", ls="--", label="reference: order 2")]
   order_axes.legend(handles=handles, fontsize=7)
   order_axes.set_xlabel("time step")
@@ -175,7 +186,8 @@ except Exception as e:
   test_passed = False
 
 if test_passed:
-  print(colored("INTEGRATOR TEST 6 PASSED", "green") + colored(" (RUN THROUGH: EmbeddedRK, energy of Milne, angular momentum, order)", "yellow"))
+  print(colored("INTEGRATOR TEST 6 PASSED", "green")
+        + colored(" (RUN THROUGH: EmbeddedRK, energy of Milne, angular momentum, order)", "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b"), (fig_c, "c")]:
@@ -183,5 +195,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator6{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 6 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test6/result.log)")
+  print(colored("INTEGRATOR TEST 6 FAILED", "red", attrs=["bold"]) + f" (details: {OUT}/result.log)")
   sys.exit(1)

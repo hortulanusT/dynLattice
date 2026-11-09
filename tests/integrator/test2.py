@@ -2,11 +2,15 @@
 
 # TEST 2: axial wave in a bar, exact d'Alembert solution
 import sys
+from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from termcolor import colored
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import relative_L2
 
 OUT = "tests/integrator/test2"
 STRAIN = 1e-3      # F / (E A)
@@ -38,7 +42,7 @@ def exact_reaction(t):
 
 
 # details of the checks; on screen only PASSED, FAILED or RUN THROUGH
-LOG = open("tests/integrator/test2/result.log", "w")
+LOG = open(f"{OUT}/result.log", "w")
 
 test_passed = True
 
@@ -50,7 +54,7 @@ try:
     step = rows[1, 0] - rows[0, 0]
     t, tip, reaction = rows[:, 0], rows[:, 2], np.abs(rows[:, 9])
 
-    tip_error = np.linalg.norm(tip - exact_tip(t)) / np.linalg.norm(exact_tip(t))
+    tip_error = relative_L2(tip, exact_tip(t))
     # fronts at the fixed end, where the reaction crosses F: the loading wave arrives at (4 k + 1) L / c, the unloading
     # wave at (4 k + 3) L / c
     fronts = []
@@ -63,8 +67,8 @@ try:
 
     ok = tip_error <= TIP_TOL and front_error <= FRONT_TOL and t[-1] >= END - 2. * step
     test_passed = test_passed and ok
-    print(f"  {name}: tip error {tip_error:.2e} (limit {TIP_TOL}), fronts at the fixed end "
-          f"{', '.join(f'{x:+.4f}' for x in fronts)} from exact (limit +- {FRONT_TOL})" + ("" if ok else "  <-- off"), file=LOG)
+    print(f"  {name}: tip error {tip_error:.2e} (limit {TIP_TOL}), fronts at the fixed end {np.round(fronts, 4)} "
+          f"from exact (limit +- {FRONT_TOL})  {'ok' if ok else 'off'}", file=LOG)
     tip_axes.plot(t, tip / STRAIN, color=COLOURS[name], label=SCHEMES[name])
     reaction_axes.plot(t, reaction / FORCE, color=COLOURS[name], label=SCHEMES[name])
 
@@ -91,5 +95,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator2{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 2 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test2/result.log)")
+  print(colored("INTEGRATOR TEST 2 FAILED", "red", attrs=["bold"]) + f" (details: {OUT}/result.log)")
   sys.exit(1)

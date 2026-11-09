@@ -25,7 +25,7 @@ test_passed = False
 try:
   times, pos_a, vel_a, pos_b, vel_b = read_state(
       "tests/contact/test2/state.gz", (-1., 0., 0.06), (1., 0., 0.06), (0., -1., -0.06), (0., 1., -0.06), ELEMENTS)
-  energy = np.loadtxt("tests/contact/test2/disp.csv", delimiter=",", skiprows=0, ndmin=2)
+  energy = np.loadtxt("tests/contact/test2/disp.csv", delimiter=",", ndmin=2)
 
   # height difference of the centres, where the rods cross
   gap = pos_a[:, ELEMENTS // 2, 2] - pos_b[:, ELEMENTS // 2, 2]
@@ -59,8 +59,9 @@ try:
   momentum_axes.set_title("momentum; dashed: conserved (exact)")
   momentum_axes.legend(fontsize=7)
   fig_c, energy_axes = plt.subplots(figsize=(16 / 3, 6))
-  # the penalty energy of the contact is not in E_pot yet (ROADMAP C3), so that the energy dips while the rods touch
-  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label="simulation, without the penalty energy\nof the contact (dips while the rods touch)")
+  # the penalty energy of the contact is not part of E_pot, so that the energy dips while the rods touch
+  label = "simulation, without the penalty energy\nof the contact (dips while the rods touch)"
+  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label=label)
   energy_axes.axhline(1., color="k", ls="--", label="reference: energy conserved")
   energy_axes.set_xlabel("t")
   energy_axes.set_ylabel("(E_pot + E_kin) / E_0")
@@ -68,7 +69,8 @@ try:
   energy_axes.legend(fontsize=7)
 
   # the rods are flexible, so most of the momentum of rod A goes into bending: the rebound itself is not judged
-  test_passed = gap.min() > 0. and gap.min() < 0.1 and gap[-1] > 0.1 and momentum_error <= 1e-6 and energy_change <= ENERGY_TOL
+  test_passed = (gap.min() > 0. and gap.min() < 0.1 and gap[-1] > 0.1 and momentum_error <= 1e-6
+                 and energy_change <= ENERGY_TOL)
 except Exception as e:
   print(e)
 

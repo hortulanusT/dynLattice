@@ -7,7 +7,7 @@
 // stress resultant model and, reported only, with the fibre integral of J2.
 
 // LOGGING
-log.pattern = "*.info | *.debug"; //
+log.pattern = "*.warn";
 
 // PROGRAM_CONTROL
 control.runWhile = "i<5001";

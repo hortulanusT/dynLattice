@@ -76,8 +76,7 @@ try:
 
   # the phases of the input: first loading, reversal to the lowest curvature, reloading
   steps = (len(moment) - 1) // 5
-  phases = {"end of the first loading": steps - 1, "after reversal, at the lowest curvature": 3 * steps - 1,
-            "after reloading": len(moment) - 1}
+  first, lowest, last = steps - 1, 3 * steps - 1, len(moment) - 1
   # along the whole cycle, against the largest moment (on the elastic branches near zero the ratio is meaningless)
   exact_error = np.max(np.abs(moment - exact)) / np.max(np.abs(exact))
 
@@ -86,15 +85,18 @@ try:
   balance = np.abs(work[1:] - (energy[1:, 0] + energy[1:, 1])).max() / np.abs(work).max()
 
   # moment where the first loading leaves the elastic line by 1 %
-  first = phases["end of the first loading"]
   leaves = int(np.argmax(np.abs(moment[:first]) < 0.99 * np.abs(stiffness * curvature[:first])))
   yield_error = abs(abs(moment[leaves]) / YIELD_MOMENT - 1.)
 
-  for name, i in phases.items():
+  for name, i in [("end of the first loading", first), ("after reversal, at the lowest curvature", lowest),
+                  ("after reloading", last)]:
     print(f"  {name}: moment {moment[i]:.4f}, exact {exact[i]:.4f} ({(moment[i] / exact[i] - 1.) * 100:+.2f} %), "
-          f"fibre J2 {fibre[i]:.4f} (exact against fibre {(exact[i] / fibre[i] - 1.) * 100:+.2f} %, reported only)", file=LOG)
-  print(f"  whole cycle against the exact solution: largest difference over the largest moment {exact_error * 100:.2f} % (limit {EXACT_TOL * 100:.0f} %)", file=LOG)
-  print(f"  leaves the elastic line at {abs(moment[leaves]):.3f} N m (table {YIELD_MOMENT}, limit {YIELD_TOL * 100:.0f} %)", file=LOG)
+          f"fibre J2 {fibre[i]:.4f} (exact against fibre {(exact[i] / fibre[i] - 1.) * 100:+.2f} %, reported only)",
+          file=LOG)
+  print(f"  whole cycle against the exact solution: largest difference over the largest moment "
+        f"{exact_error * 100:.2f} % (limit {EXACT_TOL * 100:.0f} %)", file=LOG)
+  print(f"  leaves the elastic line at {abs(moment[leaves]):.3f} N m (table {YIELD_MOMENT}, "
+        f"limit {YIELD_TOL * 100:.0f} %)", file=LOG)
   print(f"  work against stored energy + dissipation: {balance * 100:.3f} % (limit {ENERGY_TOL * 100:.0f} %)", file=LOG)
 
   plt.figure(figsize=(16 / 3, 6))
@@ -108,7 +110,8 @@ try:
   plt.title("cyclic bending; dashed: exact resultant model")
   plt.legend(fontsize=7)
 
-  test_passed = len(moment) >= 5000 and exact_error <= EXACT_TOL and balance <= ENERGY_TOL and yield_error <= YIELD_TOL
+  test_passed = (len(moment) >= 5000 and exact_error <= EXACT_TOL and balance <= ENERGY_TOL
+                 and yield_error <= YIELD_TOL)
 except Exception as e:
   print(e)
 

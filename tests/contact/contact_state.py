@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 
-
 def read_state(path, start_a, end_a, start_b, end_b, elements):
   """Position, velocity of the nodes of both rods, along each rod: (times, pos_a, vel_a, pos_b, vel_b).
 
@@ -18,7 +17,8 @@ def read_state(path, start_a, end_a, start_b, end_b, elements):
   order_b = [2] + list(range(4 + inner, 4 + 2 * inner)) + [3]
 
   def take(frame, order):
-    return np.array([[frame[f"{dof}[{node}]"].to_numpy() for dof in ("dx", "dy", "dz")] for node in order]).transpose(2, 0, 1)
+    """(time, node, 3) of the nodes in order."""
+    return np.stack([frame[[f"{dof}[{node}]" for dof in ("dx", "dy", "dz")]].to_numpy() for node in order], axis=1)
 
   ref_a = np.linspace(start_a, end_a, elements + 1)
   ref_b = np.linspace(start_b, end_b, elements + 1)

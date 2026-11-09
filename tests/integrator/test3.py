@@ -2,6 +2,7 @@
 
 # TEST 3: bending frequencies of a cantilever against the Timoshenko beam, Han, Benaroya, Wei (1999)
 import sys
+from pathlib import Path
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,6 +10,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 from scipy.optimize import brentq
 from termcolor import colored
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from metrics import convergence_order
 
 OUT = "tests/integrator/test3"
 LENGTH, YOUNG, NU, DENSITY = 1., 1e4, 0.3, 1.
@@ -34,7 +38,7 @@ HAN_RATIOS = [1., 3.991, 8.412, 12.037]
 HAN_TOL = 2e-3                # their values have three or four digits
 
 
-# --- reference: Han, Benaroya, Wei (1999), only evaluated -------------------------------------------------------------
+# --- reference: Han, Benaroya, Wei (1999), only evaluated ---
 def slenderness(area, moment, length):
   """s = L / k with the radius of gyration k = sqrt(I / A) (nomenclature)."""
   return length / np.sqrt(moment / area)
@@ -85,7 +89,7 @@ def timoshenko(radius, count):
   return han_frequency(a, b, gamma) * np.sqrt(YOUNG * moment / (DENSITY * area * LENGTH**4))
 
 
-# --- evaluation ---------------------------------------------------------------------------------------------------------
+# --- evaluation ---
 def measured_frequencies(t, signal, count):
   """Frequencies of the strongest separated peaks of the windowed spectrum, refined by a parabola through the log."""
   samples = signal - signal.mean()
@@ -93,8 +97,8 @@ def measured_frequencies(t, signal, count):
   spectrum = np.abs(np.fft.rfft(samples * np.hanning(len(samples)), padded))
   freqs = np.fft.rfftfreq(padded, t[1] - t[0]) * 2. * np.pi
   log = np.log(spectrum + 1e-300)
-  peaks = [i for i in range(1, len(log) - 1) if log[i] > log[i - 1] and log[i] > log[i + 1]]
-  peaks = sorted(sorted(peaks, key=lambda i: -spectrum[i])[:count])
+  peaks = np.nonzero((log[1:-1] > log[:-2]) & (log[1:-1] > log[2:]))[0] + 1     # local maxima
+  peaks = np.sort(peaks[np.argsort(spectrum[peaks])[::-1][:count]])             # the strongest, by frequency
   result = []
   for i in peaks:
     shift = 0.5 * (log[i - 1] - log[i + 1]) / (log[i - 1] - 2. * log[i] + log[i + 1])
@@ -114,7 +118,7 @@ def status(ok):
 
 
 # details of the checks; on screen only PASSED, FAILED or RUN THROUGH
-LOG = open("tests/integrator/test3/result.log", "w")
+LOG = open(f"{OUT}/result.log", "w")
 
 test_passed = True
 
@@ -142,9 +146,11 @@ try:
       print(f"  {label} {name}, 16 elements: {np.round(found, 4)} rad/s, Timoshenko {np.round(exact, 4)}, error "
             f"{np.round(errors * 100., 3)} % (limit {np.array(SCHEME_TOL) * 100.} %)  {status(ok)}", file=LOG)
       axes.plot(freqs, spectrum / spectrum.max(), color=COLOURS[name], label=SCHEMES[name])
+      if name == "LeapFrog":
+        errors_16 = np.abs(errors)
+    reference = "reference: Timoshenko beam, Han et al. (1999),\nshear coefficient Cowper (1966)"
     for i, w in enumerate(exact):
-      axes.axvline(w, color="k", ls="--", lw=1.,
-                   label="reference: Timoshenko beam, Han et al. (1999),\nshear coefficient Cowper (1966)" if i == 0 else None)
+      axes.axvline(w, color="k", ls="--", lw=1., label=reference if i == 0 else None)
     axes.set_xlim(0., 1.3 * exact[-1])
     axes.set_ylim(0., 1.05)
     axes.set_xlabel("frequency [rad/s]")
@@ -152,19 +158,18 @@ try:
     axes.set_title(f"{label}, L / r = {LENGTH / radius:.0f}, 16 elements; dashed: Timoshenko")
     axes.legend(fontsize=7)
 
-    # convergence with the mesh, LeapFrog
-    errors = []
-    for n in MESHES:
-      rows = read(f"{label}_LeapFrog" + ("" if n == 16 else f"_{n}"), exact)
-      errors.append(measured_frequencies(rows[:, 0], rows[:, 1], MODES)[0] / exact - 1.)
-    errors = np.abs(np.array(errors))
-    order = np.polyfit(np.log(1. / np.array(MESHES)), np.log(errors[:, 1]), 1)[0]
+    # convergence with the mesh, LeapFrog: 16 elements from above, then 32 and 64
+    errors = [errors_16]
+    for n in MESHES[1:]:
+      rows = read(f"{label}_LeapFrog_{n}", exact)
+      errors.append(np.abs(measured_frequencies(rows[:, 0], rows[:, 1], MODES)[0] / exact - 1.))
+    errors = np.array(errors)
+    order = convergence_order(LENGTH / np.array(MESHES), errors[:, 1])[0]
     ok = abs(order - MESH_ORDER) <= MESH_ORDER_TOL and bool(np.all(errors[-1] <= FINE_TOL))
     test_passed = test_passed and ok
-    print(f"  {label} LeapFrog, {' / '.join(map(str, MESHES))} elements: error mode 1 "
-          f"{' / '.join(f'{e * 100:.4f}' for e in errors[:, 0])} %, mode 2 {' / '.join(f'{e * 100:.4f}' for e in errors[:, 1])} %; "
-          f"order of mode 2 {order:.2f} (expected {MESH_ORDER} +- {MESH_ORDER_TOL}), 64 elements within "
-          f"{np.array(FINE_TOL) * 100.} %  {status(ok)}", file=LOG)
+    print(f"  {label} LeapFrog, {MESHES} elements: error mode 1 {np.round(errors[:, 0] * 100., 4)} %, mode 2 "
+          f"{np.round(errors[:, 1] * 100., 4)} %; order of mode 2 {order:.2f} (expected {MESH_ORDER} +- "
+          f"{MESH_ORDER_TOL}), 64 elements within {np.array(FINE_TOL) * 100.} %  {status(ok)}", file=LOG)
     mesh_errors[label] = errors
 
   fig, axes = plt.subplots(figsize=(16 / 3, 6))
@@ -174,7 +179,6 @@ try:
   for label, errors in mesh_errors.items():
     for mode, colour in [(0, "C4"), (1, "C5")]:
       axes.loglog(sizes, errors[:, mode], marker=markers[label], markerfacecolor="none", ls="", color=colour)
-    for mode, colour in [(0, "C4"), (1, "C5")]:
       axes.loglog(sizes, errors[0, mode] * (sizes / sizes[0])**MESH_ORDER, "--", color=colour)
   handles = [Line2D([], [], color="C4", label="mode 1"), Line2D([], [], color="C5", label="mode 2")]
   handles += [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="", label=l) for l, m in markers.items()]
@@ -196,5 +200,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator3{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 3 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test3/result.log)")
+  print(colored("INTEGRATOR TEST 3 FAILED", "red", attrs=["bold"]) + f" (details: {OUT}/result.log)")
   sys.exit(1)
