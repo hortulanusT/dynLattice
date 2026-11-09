@@ -143,6 +143,7 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
     areaMoment_ = 1.;
     polarMoment_ = 1.;
     myProps.find(area_, AREA);
+    myProps.find(areaMoment_, AREA_MOMENT);
     checkGivenSection();
     polarMoment_ = jem::sum(areaMoment_);
     myProps.find(polarMoment_, POLAR_MOMENT);
