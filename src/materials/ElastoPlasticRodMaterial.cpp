@@ -75,7 +75,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   myProps.get(elemCount, "elemCount");
 
   if (ipCount <= 0 || elemCount < 0)
-    throw IllegalInputException(
+    throw jem::IllegalInputException(
         getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
                           String(ipCount) + " and " + String(elemCount));
 

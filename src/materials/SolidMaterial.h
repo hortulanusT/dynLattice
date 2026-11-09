@@ -88,6 +88,24 @@ class SolidMaterial : public Material
   /// @throws IllegalInputException for unknown symmetries or non-physical constants
   Matrix makeStiffness(const Properties &myProps) const;
 
+  /// @brief Read the stiffness of the material from the user input.
+  ///
+  /// Wraps makeStiffness() for the materials that are defined by a stiffness
+  /// matrix. At verbosity > 0 the matrix is printed.
+  ///
+  /// @param[in] props  Properties of all materials
+  /// @param[in] globdat  Global data container
+  /// @returns Stiffness matrix in the global frame (6x6)
+  Matrix readStiffness_(const Properties &props, const Properties &globdat) const;
+
+  /// @brief Write the stiffness as the entries `C_ij` (i <= j) into the configuration.
+  ///
+  /// This is the direct input of makeStiffness(), so the configuration can be read back.
+  ///
+  /// @param[out] conf  Configuration of all materials
+  /// @param[in] stiff  Stiffness matrix in the global frame (6x6)
+  void writeStiffness_(const Properties &conf, const Matrix &stiff) const;
+
   double density_; ///< Density
 
   Matrix materialM_; ///< Mass density matrix (density times identity, 3x3)

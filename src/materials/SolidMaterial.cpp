@@ -7,6 +7,7 @@
 
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/base/System.h>
 #include <jive/util/ObjectConverter.h>
 
 #include <math.h>
@@ -394,4 +395,28 @@ Matrix SolidMaterial::makeStiffness(const Properties &myProps) const
   rotateStiffness_(C, R);
 
   return C;
+}
+
+Matrix SolidMaterial::readStiffness_(const Properties &props, const Properties &globdat) const
+{
+  Properties myProps = props.getProps(myName_);
+  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
+
+  Matrix stiff = makeStiffness(myProps);
+
+  if (verbosity_ > 0)
+    jem::System::debug(myName_)
+        << " ...Stiffness matrix of the material '" << myName_ << "':\n"
+        << stiff << "\n";
+
+  return stiff;
+}
+
+void SolidMaterial::writeStiffness_(const Properties &conf, const Matrix &stiff) const
+{
+  Properties myConf = conf.makeProps(myName_);
+
+  for (idx_t i = 0; i < 6; i++)
+    for (idx_t j = i; j < 6; j++)
+      myConf.set("C_" + String(i + 1) + String(j + 1), stiff(i, j));
 }

@@ -8,8 +8,6 @@
 #include "materials/MaterialFactory.h"
 
 #include <jem/base/ClassTemplate.h>
-#include <jem/base/System.h>
-#include <jive/util/ObjectConverter.h>
 
 using jem::newInstance;
 
@@ -34,27 +32,15 @@ void ElasticSolidMaterial::configure(const Properties &props, const Properties &
 {
   Super::configure(props, globdat);
 
-  Properties myProps = props.getProps(myName_);
-  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
-
   materialK_.resize(6, 6);
-  materialK_ = makeStiffness(myProps);
-
-  if (verbosity_ > 0)
-    jem::System::debug(myName_)
-        << " ...Stiffness matrix of the material '" << myName_ << "':\n"
-        << materialK_ << "\n";
+  materialK_ = readStiffness_(props, globdat);
 }
 
 void ElasticSolidMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
   Super::getConfig(conf, globdat);
 
-  Properties myConf = conf.makeProps(myName_);
-
-  for (idx_t i = 0; i < 6; i++)
-    for (idx_t j = i; j < 6; j++)
-      myConf.set("C_" + String(i + 1) + String(j + 1), materialK_(i, j));
+  writeStiffness_(conf, materialK_);
 }
 
 void ElasticSolidMaterial::getStress(const Vector &stress, const Vector &strain)

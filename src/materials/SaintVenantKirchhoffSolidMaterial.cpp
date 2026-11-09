@@ -8,7 +8,6 @@
 #include "materials/MaterialFactory.h"
 
 #include <jem/base/ClassTemplate.h>
-#include <jive/util/ObjectConverter.h>
 
 using jem::newInstance;
 
@@ -33,22 +32,15 @@ void SaintVenantKirchhoffSolidMaterial::configure(const Properties &props, const
 {
   Super::configure(props, globdat);
 
-  Properties myProps = props.getProps(myName_);
-  myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
-
   materialK_.resize(6, 6);
-  materialK_ = makeStiffness(myProps);
+  materialK_ = readStiffness_(props, globdat);
 }
 
 void SaintVenantKirchhoffSolidMaterial::getConfig(const Properties &conf, const Properties &globdat) const
 {
   Super::getConfig(conf, globdat);
 
-  Properties myConf = conf.makeProps(myName_);
-
-  for (idx_t i = 0; i < 6; i++)
-    for (idx_t j = i; j < 6; j++)
-      myConf.set("C_" + String(i + 1) + String(j + 1), materialK_(i, j));
+  writeStiffness_(conf, materialK_);
 }
 
 double SaintVenantKirchhoffSolidMaterial::calcSecondPK_(double (&S)[3][3], const Matrix &F) const
