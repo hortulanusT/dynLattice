@@ -7,7 +7,7 @@ clean-all: clean-tests
 # SETTINGS
 beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
-plastic_cases = 1 2a 2b 3
+plastic_cases = 1 2a 2b 3 4
 contact_cases = 1
 integrator_cases = 1 2 3 4 5 6
 

@@ -17,3 +17,9 @@ Test 2 implements Example 5.2 from [Smriti, Kumar, Steinmann (2021)](https://doi
 Test 3 implements Example 5.4 from [Herrnböck, Kumar, Steinmann (2023)](https://doi.org/10.1007/s00466-022-02204-8). This example shows the complex elasto-plastic deformation of a beam under three-dimensional loading conditions. The custom implementation shows good agreement with the reported results from an \f$FE^2\f$ approach. The differences are similar to the ones reported in the referenced publication.
 
 ![Test 3 Results](plastic3_result.png)
+
+## Test 4
+Test 4 bends a short rod to +8 %, -8 % and +8 % outer fibre strain, with the section of test 3, and compares the moment over the whole cycle with the exact solution of the stress resultant model. It also checks the moment at first yield and that the work of the moment equals the stored energy plus the dissipation. The return mapping is first order in the load step, which is why the test uses 1000 steps per phase. The integral over the section of J2 fibres with linear hardening, a simplified form of the micro model behind the yield surface of [Herrnböck, Kumar, Steinmann (2021)](https://doi.org/10.1007/s00466-020-01957-4), is shown for comparison and not judged.
+
+![Test 4 Results](plastic4_result.png)
+
