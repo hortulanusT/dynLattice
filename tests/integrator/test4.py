@@ -34,7 +34,10 @@ def read(name):
 
 
 def body_angular_velocity(rows):
-  """Omega = R^T w: the angular velocity of the free end in the frame of the body (the global frame at t = 0)."""
+  """Omega = R^T w: the angular velocity of the free end in the frame of the body (the global frame at t = 0).
+
+  LeapFrog stores w half a step before R, which adds an error of the order of the step; the output is written every
+  0.01 only, so that it cannot be averaged as in test 1. At the step used here it stays well below the limit."""
   return Rotation.from_rotvec(rows[:, 4:7]).inv().apply(rows[:, 9:12])
 
 

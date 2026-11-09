@@ -112,7 +112,9 @@ def energy_error(e_pot, e_kin, half_step=False):
 
     With half_step, e_kin belongs to the velocity half a step before the
     displacement (LeapFrog): the mean of two neighbouring rows is then the
-    kinetic energy at the step, to second order."""
+    kinetic energy at the step, to second order. This needs one row per time
+    step: with output written every few steps it is not the mean of
+    neighbouring steps."""
     e_pot, e_kin = np.asarray(e_pot, dtype=float), np.asarray(e_kin, dtype=float)
     if half_step:
         e_pot, e_kin = e_pot[:-1], 0.5 * (e_kin[:-1] + e_kin[1:])

@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 from termcolor import colored
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from metrics import convergence_order, interp_on_reference, relative_L2
+from metrics import convergence_order, energy_error, interp_on_reference, relative_L2
 
 OUT = "tests/integrator/test6"
 END, FREE = 15., 5.       # the load ends at t = 5
@@ -129,7 +129,8 @@ try:
     momenta_compared = np.column_stack([linear[:, 0], angular[:, 1], angular[:, 2]])    # p_1, l_2, l_3
     momentum_errors = against(times, momenta_compared, ref_momentum, dominant)
     flying, free = rows[:, 0] >= FREE + 0.1, times >= FREE + 0.1
-    energy_drift = np.abs(energy[flying] / energy[flying][0] - 1.).max()
+    # LeapFrog stores the velocity half a step before the displacement
+    energy_drift = energy_error(rows[flying, 7], rows[flying, 8], half_step=(name == "LeapFrog"))
     angular_drift = np.linalg.norm(angular[free] - angular[free][0], axis=1).max() / np.linalg.norm(angular[free][0])
     ok_ref = centre_error <= CENTRE_TOL and max(energy_errors + momentum_errors) <= CURVE_TOL
     ok_energy = energy_drift <= DRIFT_TOL
@@ -160,13 +161,16 @@ try:
   momentum_axes.set_ylabel("linear momentum p_1, angular momentum l_2, l_3")
   momentum_axes.set_title("momenta; dashed: Kinon et al.")
 
-  # convergence of LeapFrog at t = 5, Eq. (76): position and velocity of the loaded end against the finest run
+  # convergence of LeapFrog at t = 5, Eq. (76): position and velocity of the loaded end against the finest run;
+  # the position is the displacement plus START, the velocity at the step the mean of this and the next row, as
+  # LeapFrog stores it half a step before the displacement (the runs go a little beyond t = 5 for it)
   runs = [read(f"LeapFrog_{i}", ORDER_END) for i in range(ORDER_RUNS)]
   steps = np.array([r[1, 0] - r[0, 0] for r in runs])
+  rows_at = [np.argmin(np.abs(r[:, 0] - ORDER_END)) for r in runs]
+  positions = [r[i, 9:12] + START for r, i in zip(runs, rows_at)]
+  velocities = [0.5 * (r[i, 12:15] + r[i + 1, 12:15]) for r, i in zip(runs, rows_at)]
   fig_c, order_axes = plt.subplots(figsize=(16 / 3, 6))
-  # the position of the loaded end is its displacement plus START
-  for what, columns, offset, marker in [("position", slice(9, 12), START, "o"), ("velocity", slice(12, 15), 0., "s")]:
-    ends = [r[np.argmin(np.abs(r[:, 0] - ORDER_END)), columns] + offset for r in runs]
+  for what, ends, marker in [("position", positions, "o"), ("velocity", velocities, "s")]:
     diffs = np.array([relative_L2(ends[i], ends[-1]) for i in range(ORDER_RUNS - 1)])
     measured, local = convergence_order(steps[:-1], diffs)
     print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER}; "

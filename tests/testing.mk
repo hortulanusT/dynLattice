@@ -215,18 +215,18 @@ $(eval $(call integrator_run,test5,ode23,$(ode23),1e-3,100.))
 $(eval $(call integrator_run,test5,ode45,$(ode45),1e-3,100.))
 
 # test 6, flying spaghetti of Kinon, Eugster, Betsch (2026), Sect. 6.1, to t = 15, with the state of all nodes for the
-# momenta; LeapFrog also at five steps to t = 5 for the order, without the state
+# momenta; LeapFrog also at five steps to t = 5.01 for the order at t = 5, without the state
 test6_state = -p "Output.state.file='$$(@:.csv=_state.gz)'"
 test6_no_state = -p "Output.state.type='None'"
 $(eval $(call integrator_run,test6,LeapFrog,$(leapfrog),1e-3,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,Milne,$(milne),2.5e-4,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,ode23,$(ode23),1e-3,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,ode45,$(ode45),1e-3,15.,$(test6_state)))
-$(eval $(call integrator_run,test6,LeapFrog_0,$(leapfrog),1e-3,5.,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_1,$(leapfrog),5e-4,5.,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_2,$(leapfrog),2.5e-4,5.,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_3,$(leapfrog),1.25e-4,5.,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_4,$(leapfrog),6.25e-5,5.,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_0,$(leapfrog),1e-3,5.01,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_1,$(leapfrog),5e-4,5.01,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_2,$(leapfrog),2.5e-4,5.01,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_3,$(leapfrog),1.25e-4,5.01,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_4,$(leapfrog),6.25e-5,5.01,$(test6_no_state)))
 
 # CLEAN UP THE TESTS
 clean-tests:

@@ -18,6 +18,7 @@ HARDENING_MOMENT = 16015e-6      # hardening tensor of test 3, bending entry (He
 ENERGY_TOL = 0.01      # plastic work and stored energy against the loop area
 EXACT_TOL = 0.01       # whole cycle against the exact solution of the resultant model
 YIELD_TOL = 0.05       # moment where the response leaves the elastic line
+STEPS_PER_PHASE = 1000  # load steps for each 8 % of strain, as in tests/plastic/test4.pro
 
 
 def exact_moments(curvatures, stiffness):
@@ -74,9 +75,11 @@ try:
   exact = exact_moments(curvature, stiffness)
   fibre = fibre_moments(curvature)
 
-  # the phases of the input: first loading, reversal to the lowest curvature, reloading
-  steps = (len(moment) - 1) // 5
-  first, lowest, last = steps - 1, 3 * steps - 1, len(moment) - 1
+  # the phases of the input: first loading, reversal to the lowest curvature, reloading; one row per step from
+  # step 1, and STEPS_PER_PHASE steps for each 8 % of strain
+  if len(moment) != 5 * STEPS_PER_PHASE + 1:
+    raise RuntimeError(f"{len(moment)} rows, expected {5 * STEPS_PER_PHASE + 1}: see tests/plastic/test4.pro")
+  first, lowest, last = STEPS_PER_PHASE - 1, 3 * STEPS_PER_PHASE - 1, len(moment) - 1
   # along the whole cycle, against the largest moment (on the elastic branches near zero the ratio is meaningless)
   exact_error = np.max(np.abs(moment - exact)) / np.max(np.abs(exact))
 
@@ -110,7 +113,7 @@ try:
   plt.title("cyclic bending; dashed: exact resultant model")
   plt.legend(fontsize=7)
 
-  test_passed = (len(moment) >= 5000 and exact_error <= EXACT_TOL and balance <= ENERGY_TOL
+  test_passed = (exact_error <= EXACT_TOL and balance <= ENERGY_TOL
                  and yield_error <= YIELD_TOL)
 except Exception as e:
   print(e)
