@@ -8,7 +8,7 @@ clean-all: clean-tests
 beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3 4
-contact_cases = 1 2
+contact_cases = 1 2 3
 integrator_cases = 1 2 3 4 5 6
 
 # general dependency of .pro files on .geo files

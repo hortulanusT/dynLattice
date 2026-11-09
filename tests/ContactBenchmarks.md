@@ -13,3 +13,10 @@ Two free elastic rods crossing at a right angle fly towards each other. They tou
 ![Test 2a Results](contact2a_result.png)
 ![Test 2b Results](contact2b_result.png)
 ![Test 2c Results](contact2c_result.png)
+
+## Test 3
+Two equal free rods on one line meet tip to tip through the joint contact (left). As for equal elastic bars, the velocities are exchanged after a contact of 2 L / c (middle), which the rods reach with the mesh: the momentum of a rod after the impact is -0.962, -0.976 and -0.982 of its start for 10, 20 and 40 elements. An attractive joint force lets the tips pass through each other, and fails this test. As in test 2, the energy dips while the tips touch, as the penalty energy is not part of the potential energy yet (right).
+
+![Test 3a Results](contact3a_result.png)
+![Test 3b Results](contact3b_result.png)
+![Test 3c Results](contact3c_result.png)
