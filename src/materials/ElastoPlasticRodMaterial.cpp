@@ -71,8 +71,14 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   StringVector dofNames = dofs->getTypeNames();
   String args = StringUtils::join(dofNames, ", ");
 
-  myProps.find(ipCount, "ipCount");
-  myProps.find(elemCount, "elemCount");
+  myProps.get(ipCount, "ipCount");
+  myProps.get(elemCount, "elemCount");
+
+  if (ipCount <= 0 || elemCount < 0)
+    throw IllegalInputException(
+        getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
+                          String(ipCount) + " and " + String(elemCount));
+
   dofCount_ = dofs->typeCount();
   argCount_ = dofCount_;
 
@@ -181,8 +187,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   case SUPER_ELLIPSE:
     if (myProps.contains(YIELD_PROP) || myProps.contains(YIELD_DERIV_PROP))
       throw jem::util::PropertyException(
-          "The '" + String(YIELD_PROP) + "' and '" + YIELD_DERIV_PROP + "' properties cannot be combined with "
-          + YIELD_TYPE_PROP + " = \"SuperEllipse\"!");
+          "The '" + String(YIELD_PROP) + "' and '" + YIELD_DERIV_PROP + "' properties cannot be combined with " + YIELD_TYPE_PROP + " = \"SuperEllipse\"!");
     if (argCount_ == dofCount_)
       throw jem::util::PropertyException(
           "The super-ellipse yield condition requires isotropic and/or kinematic hardening!");

@@ -11,6 +11,7 @@
 #include <jem/base/IllegalInputException.h>
 #include <jive/util/ObjectConverter.h>
 
+#include <cmath>
 #include <math.h>
 
 using jem::newInstance;
@@ -58,9 +59,10 @@ double NeoHookeanSolidMaterial::checkedDet_(const Matrix &F) const
                      F(0, 1) * (F(1, 0) * F(2, 2) - F(1, 2) * F(2, 0)) +
                      F(0, 2) * (F(1, 0) * F(2, 1) - F(1, 1) * F(2, 0));
 
-  if (det <= 0.)
+  // also catches NaN, for which every comparison is false, and infinity
+  if (!(det > 0. && std::isfinite(det)))
     throw jem::IllegalInputException(
-        getContext(), "non-positive determinant of the deformation gradient: " + String(det));
+        getContext(), "the determinant of the deformation gradient has to be positive and finite, got " + String(det));
 
   return det;
 }

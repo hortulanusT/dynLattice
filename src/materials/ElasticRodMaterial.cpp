@@ -78,9 +78,14 @@ void ElasticRodMaterial::configure(const Properties &props, const Properties &gl
   idx_t ipCount;
   idx_t elemCount;
   idx_t dofCount;
-  myProps.find(ipCount, "ipCount");
-  myProps.find(elemCount, "elemCount");
+  myProps.get(ipCount, "ipCount");
+  myProps.get(elemCount, "elemCount");
   dofCount = dofs->typeCount();
+
+  if (ipCount <= 0 || elemCount < 0)
+    throw IllegalInputException(
+        getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
+                          String(ipCount) + " and " + String(elemCount));
 
   // a given section: one area moment stands for both axes, and area and area moments must be positive
   auto checkGivenSection = [&]()

@@ -239,10 +239,16 @@ void SolidMaterial::configure(const Properties &props, const Properties &globdat
   for (idx_t i = 0; i < 3; i++)
     materialM_(i, i) = density_;
 
-  idx_t ipCount = 0;
-  idx_t elemCount = 0;
-  myProps.find(ipCount, "ipCount");
-  myProps.find(elemCount, "elemCount");
+  // set by the model: they size the energy storage
+  idx_t ipCount;
+  idx_t elemCount;
+  myProps.get(ipCount, "ipCount");
+  myProps.get(elemCount, "elemCount");
+
+  if (ipCount <= 0 || elemCount < 0)
+    throw IllegalInputException(
+        getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
+                          String(ipCount) + " and " + String(elemCount));
 
   energyPot_.resize(ipCount, elemCount);
   energyPot_ = 0.;

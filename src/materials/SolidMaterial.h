@@ -12,7 +12,11 @@ using jive::Ref;
 /// @brief Common base class of the 3D solid materials.
 ///
 /// Holds density, mass matrix and the energy bookkeeping, and provides the
-/// stiffness input shared by all solids. Property: density.
+/// stiffness input shared by all solids.
+///
+/// Properties: density (optional, default 0). The number of integration points per
+/// element `ipCount` and the number of elements `elemCount` are required; the model
+/// that owns the material sets them.
 ///
 /// @see ElasticSolidMaterial, HyperelasticSolidMaterial
 class SolidMaterial : public Material
