@@ -62,6 +62,11 @@ class LeapFrogModule : public ExplicitModule
   /// @param[in] globdat  Global data container
   virtual void configure(const Properties &props, const Properties &globdat) override;
 
+  /// @brief Commit as ExplicitModule; the first committed step ends the half kick
+  /// @param[in] globdat  Global data container
+  /// @return Whether the step was accepted
+  virtual bool commit(const Properties &globdat) override;
+
   /// @brief Factory method for creating new LeapFrogModule instances
   /// @param[in] name  Module name
   /// @param[out] conf  Actually used configuration properties (output)
@@ -77,4 +82,7 @@ class LeapFrogModule : public ExplicitModule
  protected:
   /// @brief Protected destructor
   virtual ~LeapFrogModule();
+
+ private:
+  bool firstStep_; ///< Until the first step of this module is committed: its velocity update is a half kick
 };
