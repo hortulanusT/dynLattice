@@ -29,7 +29,7 @@ const char *LeapFrogModule::TYPE_NAME = "LeapFrog";
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-LeapFrogModule::LeapFrogModule(const String &name) : Super(name)
+LeapFrogModule::LeapFrogModule(const String &name) : Super(name), firstStep_(true)
 {
 }
 
@@ -47,7 +47,6 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
 
-  idx_t step;
   Properties params;
   Vector fint(dofCount);
   Vector fext(dofCount);
@@ -58,8 +57,6 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   Vector u_new(dofCount);
   Vector v_new(dofCount);
   Vector a_new(dofCount);
-
-  globdat.get(step, Globdat::TIME_STEP);
 
   // Get the state vectors from the last time step (velocities actually at
   // half steps!)
@@ -72,8 +69,10 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   fres = getForce(fint, fext, globdat);
   getAcce(a_new, cons_, fres, globdat);
 
-  // update velocity
+  // update velocity; the initial velocity is at t = 0, so the first step of this module is a half kick to t = dt / 2
   ABupdate(dv, a_new);
+  if (firstStep_)
+    dv *= 0.5;
   updateVec(v_new, v_old, dv);
 
   // update position
@@ -95,6 +94,7 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
 Module::Status LeapFrogModule::init(const Properties &conf, const Properties &props, const Properties &globdat)
 {
   Status status = Super::init(conf, props, globdat);
+  firstStep_ = true;
 
   // without an error estimate the adaptive control would grow the step every step: keep deltaTime
   minDtime_ = dtime_;
@@ -109,6 +109,19 @@ void LeapFrogModule::configure(const Properties &props, const Properties &globda
   Super::configure(props, globdat);
   minDtime_ = dtime_;
   maxDtime_ = dtime_;
+}
+
+//-----------------------------------------------------------------------
+//   commit
+//-----------------------------------------------------------------------
+
+bool LeapFrogModule::commit(const Properties &globdat)
+{
+  // a step rejected by the model is solved again, still as the first one
+  const bool accepted = Super::commit(globdat);
+  if (accepted)
+    firstStep_ = false;
+  return accepted;
 }
 
 //-----------------------------------------------------------------------

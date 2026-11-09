@@ -95,3 +95,29 @@ def curve_distance_2d(sim_xy, ref_xy):
     mean_nn = dist.min(axis=0).mean()
     bbox = ref_xy.max(axis=0) - ref_xy.min(axis=0)
     return float(mean_nn / max(np.linalg.norm(bbox), 1e-12))
+
+
+def convergence_order(steps, errors):
+    """Order of convergence: the slope of log(error) over log(step), fitted over
+    all steps, and the local order of each pair of neighbouring steps (each step
+    half the previous one)."""
+    steps, errors = np.asarray(steps, dtype=float), np.asarray(errors, dtype=float)
+    _check_finite(errors, "errors")
+    fitted = np.polyfit(np.log(steps), np.log(errors), 1)[0]
+    return float(fitted), np.log2(errors[:-1] / errors[1:])
+
+
+def energy_error(e_pot, e_kin, half_step=False):
+    """Largest |E(t) / E(0) - 1| of E = e_pot + e_kin.
+
+    With half_step, e_kin belongs to the velocity half a step before the
+    displacement (LeapFrog): the mean of two neighbouring rows is then the
+    kinetic energy at the step, to second order. This needs one row per time
+    step: with output written every few steps it is not the mean of
+    neighbouring steps."""
+    e_pot, e_kin = np.asarray(e_pot, dtype=float), np.asarray(e_kin, dtype=float)
+    if half_step:
+        e_pot, e_kin = e_pot[:-1], 0.5 * (e_kin[:-1] + e_kin[1:])
+    energy = e_pot + e_kin
+    _check_finite(energy, "energy")
+    return float(np.abs(energy / energy[0] - 1.).max())

@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  push:
   pull_request:
     branches:
       - main
@@ -33,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Apptainer
-        uses: eWaterCycle/setup-apptainer@v2
+        uses: eWaterCycle/setup-apptainer@v3
         with:
           apptainer-version: 1.4.2
       - id: jive-hash
@@ -62,7 +61,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Apptainer
-        uses: eWaterCycle/setup-apptainer@v2
+        uses: eWaterCycle/setup-apptainer@v3
         with:
           apptainer-version: 1.4.2
       - id: jive-hash

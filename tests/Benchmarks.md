@@ -12,6 +12,7 @@ The test suite is organized into scientific categories, each targeting specific 
 - \subpage transientbenchmarks - Dynamic beam benchmarks
 - \subpage plasticbenchmarks - Inelastic material benchmarks
 - \subpage contactbenchmarks - Contact benchmarks
+- \subpage integratorbenchmarks - Explicit integrators against exact and published results
 
 # Test Execution
 
@@ -23,6 +24,7 @@ make beam-tests         # Static beam networks
 make transient-tests    # Dynamic simulations
 make plastic-tests      # Inelastic materials  
 make contact-tests      # Contact mechanics
+make integrator-tests   # Explicit integrators
 ```
 
 # Test Structure
