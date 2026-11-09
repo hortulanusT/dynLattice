@@ -111,7 +111,7 @@ void MilneDeviceModule::solve(const Properties &info, const Properties &globdat)
   ////////  step size adaption
   /////////////////////////////////////////////////
   correction = 0.;
-  correction += getQuality(u_pre, u_new);
+  correction += getQuality(u_pre, u_new, true);
   correction += getQuality(v_pre, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, 0.5 * correction);

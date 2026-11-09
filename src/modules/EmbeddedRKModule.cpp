@@ -266,7 +266,7 @@ void EmbeddedRKModule::solve
   ////////  step size adaption
   /////////////////////////////////////////////////
   error = 0.;
-  error += getQuality(u_step, u_new);
+  error += getQuality(u_step, u_new, true);
   error += getQuality(v_step, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, error);

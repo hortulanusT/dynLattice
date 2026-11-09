@@ -721,11 +721,45 @@ ExplicitModule::getPrecision() const
 //-----------------------------------------------------------------------
 
 double
-ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
+ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor, const bool rot)
 {
   // one division for the rotations: lenScale_ / rotScale_ = 1 exactly for the default rotScale_ = lenScale_
   const double rotDiv = lenScale_ / rotScale_;
   Vector y_diff = Vector(y_pre - y_cor);
+
+  // rotation vectors: the rotation between the two, log(R_pre R_cor^T), so that a jump of a vector by 2 pi is no
+  // error. For parallel vectors (planar runs) that is the plain difference, which is kept.
+  if (rot)
+  {
+    const idx_t rotCount = dofsSO3_.size();
+    Vector r_pre(rotCount);
+    Vector r_cor(rotCount);
+    Vector r_diff(rotCount);
+    Matrix R_pre(rotCount, rotCount);
+    Matrix R_cor(rotCount, rotCount);
+    Matrix R_diff(rotCount, rotCount);
+
+    for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+    {
+      if (rdofs_(0, inode) < 0)
+        continue;
+      r_pre = y_pre[rdofs_[inode]];
+      r_cor = y_cor[rdofs_[inode]];
+      // exactly parallel (zero cross product)
+      if (jem::numeric::abs(r_pre[1] * r_cor[2] - r_pre[2] * r_cor[1]) +
+              jem::numeric::abs(r_pre[2] * r_cor[0] - r_pre[0] * r_cor[2]) +
+              jem::numeric::abs(r_pre[0] * r_cor[1] - r_pre[1] * r_cor[0]) <=
+          0.)
+        continue;
+
+      expVec(R_pre, r_pre);
+      expVec(R_cor, r_cor);
+      mul3(R_diff, R_pre, R_cor.transpose());
+      logMat(r_diff, R_diff);
+      y_diff[rdofs_[inode]] = r_diff;
+    }
+  }
+
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;

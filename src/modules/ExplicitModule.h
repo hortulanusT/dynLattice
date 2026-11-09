@@ -280,12 +280,15 @@ class ExplicitModule : public SolverModule
 
   /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
   /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error
-  /// (default lengthScale: rotations in rad).
+  /// (default lengthScale: rotations in rad). With rot, the dofs_SO3 are rotation vectors and their difference is
+  /// the rotation between them, log(R_pre R_cor^T).
   /// @param[in] y_pre  Predicted solution
   /// @param[in] y_cor  Corrected solution
+  /// @param[in] rot  Flag for rotational DOFs (displacements, not velocities)
   /// @return Quality measure
   double getQuality(const Vector &y_pre,
-                    const Vector &y_cor);
+                    const Vector &y_cor,
+                    const bool rot = false);
 
  protected:
   /// @name Module state
