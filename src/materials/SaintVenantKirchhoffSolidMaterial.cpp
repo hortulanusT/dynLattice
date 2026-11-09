@@ -88,6 +88,8 @@ double SaintVenantKirchhoffSolidMaterial::calcStress_(const Matrix &P, const Mat
   double S[3][3];
   const double energy = calcSecondPK_(S, F);
 
+  // P = F S, collected first: P may be the same array as F
+  double FS[3][3];
   for (idx_t i = 0; i < 3; i++)
   {
     for (idx_t J = 0; J < 3; J++)
@@ -95,9 +97,13 @@ double SaintVenantKirchhoffSolidMaterial::calcStress_(const Matrix &P, const Mat
       double sum = 0.;
       for (idx_t K = 0; K < 3; K++)
         sum += F(i, K) * S[K][J];
-      P(i, J) = sum;
+      FS[i][J] = sum;
     }
   }
+
+  for (idx_t i = 0; i < 3; i++)
+    for (idx_t J = 0; J < 3; J++)
+      P(i, J) = FS[i][J];
 
   return energy;
 }

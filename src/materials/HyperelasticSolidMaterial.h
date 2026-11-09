@@ -39,7 +39,7 @@ class HyperelasticSolidMaterial : public SolidMaterial
   ~HyperelasticSolidMaterial();
 
   /// @brief Compute the first Piola-Kirchhoff stress.
-  /// @param[out] P  Stress (3x3)
+  /// @param[out] P  Stress (3x3), may be the same array as F
   /// @param[in] F  Deformation gradient (3x3)
   /// @returns Energy density at F
   virtual double calcStress_(const Matrix &P, const Matrix &F) const = 0;

@@ -80,6 +80,9 @@ class Material : public NamedObject
   ///
   /// @note Rods: 6 generalized components (shear, axial, bending, torsion).
   ///       Solids: 6 Voigt components (xx, yy, zz, yz, xz, xy).
+  /// @note Pure evaluation: without element and integration point there is no state
+  ///       to update, so neither energy nor history are stored. Use the version with
+  ///       `ielem` and `ip` whenever applyDeform() and getPotentialEnergy() are needed.
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
   /// @brief Compute stress with element and integration point context.
