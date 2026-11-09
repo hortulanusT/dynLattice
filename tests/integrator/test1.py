@@ -48,8 +48,8 @@ def evaluate(scheme, dim, motion_axes, energy_axes):
   diffs = np.array([np.linalg.norm(ends[i] - ends[i + 1]) for i in range(RUNS - 1)])
   motion, motion_local = convergence_order(steps[:-1], diffs)
   # energy: the exact solution keeps it, so the error must vanish with the order of the scheme; the potential of the
-  # dead tip force is -F dx; LeapFrog stores the velocity half a step before the displacement
-  energies = np.array([energy_error(run[:, 7] - FORCE * run[:, 1], run[:, 8], half_step=(scheme == "LeapFrog"))
+  # dead tip force is -F dx
+  energies = np.array([energy_error(run[:, 7] - FORCE * run[:, 1], run[:, 8])
                        for run in runs])
   energy, energy_local = convergence_order(steps, energies)
 
