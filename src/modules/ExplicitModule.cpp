@@ -47,6 +47,7 @@ ExplicitModule::ExplicitModule
   fintCacheValid_ = false;
   fintCacheFresh_ = false;
   rotDofsValid_ = false;
+  minStepCount_ = 0;
   lenScale_ = 1e-3;
   rotScale_ = lenScale_;
   dofsSO3_.resize(0);
@@ -215,6 +216,10 @@ void ExplicitModule::shutdown(const Properties &globdat)
 {
   (void)globdat; // unused
 
+  if (minStepCount_ > 0)
+    jem::System::warn() << myName_ << " : " << minStepCount_
+                        << " steps at the smallest time step were accepted with an error above the precision\n";
+
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -332,6 +337,16 @@ bool ExplicitModule::commit(const Properties &globdat)
     params.find(accept, ActionParams::ACCEPT);
   }
   accept = accept && (error <= prec_ || dtime_ <= minDtime_);
+
+  // at minDTime a step is accepted whatever its error: say so (not for a fixed step, minDTime = maxDTime)
+  if (accept && error > prec_ && minDtime_ < maxDtime_)
+  {
+    if (minStepCount_ == 0)
+      jem::System::warn() << myName_ << " : a step at the smallest time step " << dtime_
+                          << " is accepted with an error of " << error << " > precision " << prec_
+                          << " (counted until the end of the run)\n";
+    minStepCount_++;
+  }
 
   // next step from the error estimate: after an accepted step at most incrFact_ times larger, never below
   // decrFact_ times the old one, within [minDtime_, maxDtime_] (a step rejected by the model can have a small error)

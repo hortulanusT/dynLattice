@@ -315,6 +315,7 @@ class ExplicitModule : public SolverModule
   double saftey_;   ///< Safety factor for step size control
   double incrFact_; ///< Step size increase factor
   double decrFact_; ///< Step size decrease factor
+  idx_t minStepCount_; ///< Steps accepted at minDtime_ with an error above the precision (warned)
   /// @}
 
   /// @name Integration parameters
