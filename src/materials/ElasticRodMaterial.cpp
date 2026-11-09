@@ -7,15 +7,12 @@
 
 #include "materials/MaterialFactory.h"
 #include "utils/helpers.h"
-#include "utils/testing.h"
 
 #include <jem/base/Array.h>
 #include <jem/base/Float.h>
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
 #include <jem/base/System.h>
-#include <jem/numeric/algebra/matmul.h>
-#include <jem/util/StringUtils.h>
 
 #include <jive/util/DofSpace.h>
 #include <jive/util/ObjectConverter.h>
@@ -23,7 +20,6 @@
 #include <math.h>
 
 using jem::newInstance;
-using jem::numeric::matmul;
 using jive::Ref;
 using jive::Vector;
 
@@ -51,7 +47,6 @@ ElasticRodMaterial::ElasticRodMaterial(const String &name,
                                        const Properties &props,
                                        const Properties &globdat) : Super(name, conf, props, globdat)
 {
-  rodName_ = jem::util::StringUtils::split(myName_, '.')[0];
   edgeFact_ = 1.0;
   edgeElems_ = 1;
 
@@ -349,25 +344,25 @@ void ElasticRodMaterial::calcMaterialMass_()
   materialM_(5, 5) = density_ * polarMoment_;
 }
 
-Matrix ElasticRodMaterial::getLumpedMass(const double l) const
+Matrix ElasticRodMaterial::getLumpedMass(const double length) const
 {
-  Matrix M = Matrix(getMaterialMass() * l);
+  Matrix M = Matrix(getMaterialMass() * length);
 
-  M(3, 3) += area_ * density_ * pow(l, 3) / 12.;
-  M(4, 4) += area_ * density_ * pow(l, 3) / 12.;
+  M(3, 3) += area_ * density_ * pow(length, 3) / 12.;
+  M(4, 4) += area_ * density_ * pow(length, 3) / 12.;
 
   return M;
 }
 
-Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const
+Matrix ElasticRodMaterial::getLumpedMass(const double length, const idx_t &ielem) const
 {
   if (jem::numeric::abs(edgeFact_ - 1.0) < jem::Float::EPSILON)
-    return getLumpedMass(l);
+    return getLumpedMass(length);
 
-  // same edge elements and block scaling as getMaterialMass(ielem, ip)
+  // same edge elements and block scaling as getMaterialMass(mass, ielem, ip)
   if (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)
   {
-    Matrix mass = getLumpedMass(l);
+    Matrix mass = getLumpedMass(length);
     mass(jem::SliceTo(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 2);
     mass(jem::SliceTo(3), jem::SliceFrom(3)) *= pow(2. - edgeFact_, 3);
     mass(jem::SliceFrom(3), jem::SliceTo(3)) *= pow(2. - edgeFact_, 3);
@@ -376,19 +371,12 @@ Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) con
     return mass;
   }
 
-  return getLumpedMass(l);
+  return getLumpedMass(length);
 }
 
 Matrix ElasticRodMaterial::getMaterialStiff() const
 {
   return materialK_.clone();
-}
-
-Matrix ElasticRodMaterial::getMaterialStiff(const idx_t &ielem, const idx_t &ip) const
-{
-  Matrix stiff(materialK_.size(0), materialK_.size(1));
-  getMaterialStiff(stiff, ielem, ip);
-  return stiff;
 }
 
 void ElasticRodMaterial::getMaterialStiff(const Matrix &stiff) const
@@ -415,18 +403,6 @@ void ElasticRodMaterial::getMaterialStiff(const Matrix &stiff, const idx_t &iele
 Matrix ElasticRodMaterial::getMaterialMass() const
 {
   return materialM_.clone();
-}
-
-Matrix ElasticRodMaterial::getMaterialMass(const idx_t &ielem, const idx_t &ip) const
-{
-  Matrix mass(materialM_.size(0), materialM_.size(1));
-  getMaterialMass(mass, ielem, ip);
-  return mass;
-}
-
-void ElasticRodMaterial::getMaterialMass(const Matrix &mass) const
-{
-  mass = materialM_;
 }
 
 void ElasticRodMaterial::getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &) const
@@ -458,14 +434,6 @@ void ElasticRodMaterial::getStress(const Vector &stress, const Vector &strain, c
   stress = matvec_.matmul(stiffWork_, strain);
 }
 
-void ElasticRodMaterial::getTable(XTable &, const Vector &, const String &name, const IdxVector &) const
-{
-  using jive::IdxVector;
-  using jive::util::XTable;
-
-  WARN(name + " not supported by this material");
-}
-
 void ElasticRodMaterial::applyDeform()
 {
 
@@ -489,16 +457,6 @@ void ElasticRodMaterial::rejectDeform()
 double ElasticRodMaterial::getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const
 {
   return energyPot_(ip, ielem);
-}
-
-double ElasticRodMaterial::getDissipatedEnergy(const idx_t &, const idx_t &) const
-{
-  return 0.;
-}
-
-double ElasticRodMaterial::getHardeningPotential(const idx_t &, const idx_t &) const
-{
-  return 0.;
 }
 
 Ref<Material> ElasticRodMaterial::makeNew

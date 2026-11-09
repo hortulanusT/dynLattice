@@ -28,11 +28,19 @@ using jive::util::XTable;
 /// MaterialFactory and support multiple integration points per element.
 ///
 /// @section Material Hierarchy
-/// - ElasticRodMaterial: Linear elastic material
+/// - ElasticRodMaterial: Linear elastic rod
 /// - ElastoPlasticRodMaterial: Elasto-plastic with hardening
+/// - SolidMaterial: Base of the solids
+///   - ElasticSolidMaterial: Small-strain linear elastic solid
+///   - HyperelasticSolidMaterial: Base of the finite-strain solids
+///     (SaintVenantKirchhoffSolidMaterial, NeoHookeanSolidMaterial)
+///
+/// Rods and small-strain solids take a strain Vector, finite-strain solids take
+/// the deformation gradient F as Matrix. Calling a material with the form it
+/// does not support throws an exception.
 ///
 /// @author Til Gärtner
-/// @see ElasticRodMaterial, ElastoPlasticRodMaterial, MaterialFactory
+/// @see ElasticRodMaterial, ElastoPlasticRodMaterial, ElasticSolidMaterial, HyperelasticSolidMaterial, MaterialFactory
 class Material : public NamedObject
 {
  public:
@@ -67,13 +75,11 @@ class Material : public NamedObject
 
   /// @brief Compute stress vector from strain vector.
   ///
-  /// Fundamental constitutive relationship defining material response to deformation.
-  /// All derived material classes must implement this method.
-  ///
   /// @param[out] stress  Computed stress vector at current state
   /// @param[in] strain  Input strain vector for stress computation
   ///
-  /// @note For rod elements: 6-dimensional vectors (axial, shear, bending, torsion)
+  /// @note Rods: 6 generalized components (shear, axial, bending, torsion).
+  ///       Solids: 6 Voigt components (xx, yy, zz, yz, xz, xy).
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
   /// @brief Compute stress with element and integration point context.
@@ -86,84 +92,73 @@ class Material : public NamedObject
   ///
   /// @note Default delegates to getStress(stress, strain)
   /// ElastoPlasticRodMaterial overrides for plastic state management
-  virtual inline void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
 
-  /// @brief Get the material stiffness matrix.
+  /// @brief Compute the first Piola-Kirchhoff stress from the deformation gradient.
   ///
-  /// Computes the material stiffness matrix relating stress to strain.
-  /// This matrix represents the tangent modulus of the material at the current state.
+  /// @param[out] stress  First Piola-Kirchhoff stress P (3x3)
+  /// @param[in] F  Deformation gradient (3x3)
+  /// @param[in] ielem  Element index for state tracking
+  /// @param[in] ip  Integration point index
+  /// @param[in] inelastic  Enable inelastic behavior (default: true)
+  ///
+  /// @note Default implementation throws
+  virtual void getStress(const Matrix &stress, const Matrix &F, const idx_t &ielem, const idx_t &ip, const bool inelastic = true);
+
+  /// @brief Get the material stiffness matrix (tangent modulus relating stress to strain).
   ///
   /// @returns Material stiffness matrix
   virtual Matrix getMaterialStiff() const = 0;
 
-  /// @brief Get the material stiffness matrix for specific element and integration point.
-  ///
-  /// Enhanced version that allows state-dependent stiffness computation.
-  ///
-  /// @param[in] ielem  Element index for state tracking
-  /// @param[in] ip  Integration point index within the element
-  /// @returns Material stiffness matrix for the specified location
-  ///
-  /// @note Default implementation delegates to getMaterialStiff()
-  virtual inline Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const;
-
   /// @brief Write the material stiffness matrix into an existing matrix (no allocation, for hot code)
   /// @param[out] stiff  Material stiffness matrix, overwritten
   /// @note Default implementation copies getMaterialStiff()
-  virtual inline void getMaterialStiff(const Matrix &stiff) const;
+  virtual void getMaterialStiff(const Matrix &stiff) const;
 
   /// @brief Write the material stiffness matrix for an element and integration point into an existing matrix
   /// @param[out] stiff  Material stiffness matrix, overwritten
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index
-  /// @note Default implementation copies getMaterialStiff(ielem, ip)
-  virtual inline void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const;
+  /// @note Default implementation copies getMaterialStiff()
+  virtual void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const;
 
-  /// @brief Get the material mass matrix per unit length.
+  /// @brief Write the tangent dP/dF for a deformation gradient into an existing matrix
   ///
-  /// Computes the material mass density matrix used in dynamic analysis.
-  /// The translational part of the mass matrix is typically diagonal with density values.
+  /// The 9x9 tangent is stiff(i + 3*J, k + 3*L) = dP_iJ / dF_kL.
   ///
-  /// @returns Mass matrix per unit length
+  /// @param[out] stiff  Tangent, overwritten
+  /// @param[in] F  Deformation gradient (3x3)
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index
+  /// @note Default implementation throws
+  virtual void getMaterialStiff(const Matrix &stiff, const Matrix &F, const idx_t &ielem, const idx_t &ip) const;
+
+  /// @brief Get the material mass matrix.
+  ///
+  /// @returns Mass matrix per unit length (rods) or per unit volume (solids)
   virtual Matrix getMaterialMass() const = 0;
-
-  /// @brief Get the material mass matrix for specific element and integration point.
-  ///
-  /// Enhanced version for element-specific mass computation.
-  ///
-  /// @param[in] ielem  Element index for potential state tracking
-  /// @param[in] ip  Integration point index within the element
-  /// @returns Material mass matrix for the specified location
-  virtual inline Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const;
-
-  /// @brief Write the material mass matrix per unit length into an existing matrix (no allocation, for hot code)
-  /// @param[out] mass  Material mass matrix, overwritten
-  /// @note Default implementation copies getMaterialMass()
-  virtual inline void getMaterialMass(const Matrix &mass) const;
 
   /// @brief Write the material mass matrix for an element and integration point into an existing matrix
   /// @param[out] mass  Material mass matrix, overwritten
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index
-  /// @note Default implementation copies getMaterialMass(ielem, ip)
-  virtual inline void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const;
+  /// @note Default implementation copies getMaterialMass()
+  virtual void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const;
 
-  /// @brief Get the lumped mass matrix for a given element length.
+  /// @brief Get the lumped mass matrix of a whole element.
   ///
-  /// Computes a lumped (diagonal) mass matrix for the given element length.
+  /// The default is getMaterialMass() * size; rods add rotary inertia terms.
   ///
-  /// @param[in] l  Element length
+  /// @param[in] size  Element length for rods, element volume for solids
   /// @returns Lumped mass matrix for the element
-  virtual Matrix getLumpedMass(const double l) const;
+  virtual Matrix getLumpedMass(const double size) const;
 
-  /// @brief Get the lumped mass matrix for specific element and length.
+  /// @brief Get the lumped mass matrix of a specific element.
   ///
-  /// Element-specific version of lumped mass computation.
-  ///
-  /// @param[in] l  Element length
+  /// @param[in] size  Element length for rods, element volume for solids
   /// @param[in] ielem  Element index for potential customization
   /// @returns Lumped mass matrix for the specified element
-  virtual inline Matrix getLumpedMass(const double l, const idx_t &ielem) const;
+  virtual Matrix getLumpedMass(const double size, const idx_t &ielem) const;
 
   /// @brief Apply computed deformation to the material state.
   ///
@@ -187,25 +182,21 @@ class Material : public NamedObject
   /// @param[in,out] weights  Weight vector for data averaging or integration
   /// @param[in] name  Name identifier for the table data
   /// @param[in] items  Index vector specifying which items to include
-  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const = 0;
+  /// @note Default implementation only warns that the table is not supported
+  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const;
 
   /// @brief Get the dissipated energy at a specific integration point.
-  ///
-  /// Computes the energy dissipated through inelastic processes at the
-  /// specified element and integration point location.
   ///
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index within the element
   /// @returns Total dissipated energy at the specified location
+  /// @note Default implementation returns 0 (no dissipation)
   /// @note Contract: must return the value of the last committed state, i.e. it has
   ///       to be stored in applyDeform(). SpecialCosseratRodModel::getEnergies_ reads
   ///       it right after applyDeform() without re-evaluating strains/stresses.
-  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
+  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const;
 
-  /// @brief Get the potential energy at a specific integration point.
-  ///
-  /// Computes the stored elastic energy at the specified element and
-  /// integration point location.
+  /// @brief Get the stored elastic energy at a specific integration point.
   ///
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index within the element
@@ -213,80 +204,24 @@ class Material : public NamedObject
   /// @note Contract: must return the value of the last committed state, i.e. it has
   ///       to be stored in applyDeform(). SpecialCosseratRodModel::getEnergies_ reads
   ///       it right after applyDeform() without re-evaluating strains/stresses.
-  /// @note 0 for purely elastic materials
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const = 0;
 
-  /// @brief Get the hardening potential energy at a specific integration point.
-  ///
-  /// Computes the energy stored in hardening variables for plasticity models.
-  /// This represents the energy associated with the evolution of the yield surface.
+  /// @brief Get the energy stored in hardening variables at a specific integration point.
   ///
   /// @param[in] ielem  Element index
   /// @param[in] ip  Integration point index within the element
   /// @returns Hardening potential energy at the specified location
-  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const = 0;
+  /// @note Default implementation returns 0 (no hardening)
+  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const;
 
   /// @brief Get the context string for error reporting and debugging.
   ///
   /// @returns Context string identifying this material instance
-  /// @note 0 for purely elastic materials
   virtual String getContext() const override;
 
  protected:
-  /// @brief Destroy the Material object
-  ///
-  /// Virtual destructor ensures proper cleanup of derived classes.
-  /// Each material type can clean up its specific resources.
   virtual ~Material();
 
   /// @brief Verbosity level for material output and debugging
   idx_t verbosity_;
 };
-
-/// @brief Default element-specific stress computation
-void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &, const idx_t &, const bool)
-{
-  getStress(stress, strain);
-}
-
-/// @brief Default element-specific stiffness matrix
-Matrix Material::getMaterialStiff(const idx_t &, const idx_t &) const
-{
-  return getMaterialStiff();
-}
-
-/// @brief Default stiffness matrix in output form
-void Material::getMaterialStiff(const Matrix &stiff) const
-{
-  stiff = getMaterialStiff();
-}
-
-/// @brief Default element-specific stiffness matrix in output form
-void Material::getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const
-{
-  stiff = getMaterialStiff(ielem, ip);
-}
-
-/// @brief Default element-specific mass matrix
-Matrix Material::getMaterialMass(const idx_t &, const idx_t &) const
-{
-  return getMaterialMass();
-}
-
-/// @brief Default mass matrix in output form
-void Material::getMaterialMass(const Matrix &mass) const
-{
-  mass = getMaterialMass();
-}
-
-/// @brief Default element-specific mass matrix in output form
-void Material::getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const
-{
-  mass = getMaterialMass(ielem, ip);
-}
-
-/// @brief Default element-specific lumped mass
-Matrix Material::getLumpedMass(const double l, const idx_t &) const
-{
-  return getLumpedMass(l);
-}

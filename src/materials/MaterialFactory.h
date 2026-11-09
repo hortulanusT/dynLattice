@@ -26,9 +26,12 @@ using jive::util::Factory;
 /// @section SupportedMaterials Supported Materials
 /// - ElasticRodMaterial: Linear elastic rod elements
 /// - ElastoPlasticRodMaterial: Elasto-plastic rod elements with hardening
+/// - ElasticSolidMaterial: Small-strain linear elastic solid
+/// - SaintVenantKirchhoffSolidMaterial: Finite-strain solid, linear in the Green-Lagrange strain
+/// - NeoHookeanSolidMaterial: Compressible Neo-Hookean solid
 ///
 /// @author Til Gärtner
-/// @see Material, ElasticRodMaterial, ElastoPlasticRodMaterial, declareMaterials()
+/// @see Material, declareMaterials()
 class MaterialFactory : public Factory
 {
  public:

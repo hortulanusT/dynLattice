@@ -9,9 +9,6 @@
 #include <jem/numeric/algebra/utilities.h>
 #include <jive/util/FuncUtils.h>
 
-// Forward declarations
-class MaterialFactory;
-
 using jem::idx_t;
 using jem::numeric::Function;
 using jive::Ref;

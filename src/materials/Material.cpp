@@ -6,6 +6,8 @@
  */
 #include "materials/Material.h"
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalOperationException.h>
+#include <jem/base/System.h>
 
 JEM_DEFINE_CLASS(Material);
 
@@ -14,10 +16,8 @@ const char *Material::VERBOSITY_PROP = "verbosity";
 Material::Material(const String &name,
                    const Properties &conf,
                    const Properties &props,
-                   const Properties &globdat) : Super(name)
+                   const Properties &) : Super(name)
 {
-  (void)globdat; // unused
-
   verbosity_ = 1;
 
   Properties myProps = props.findProps(name);
@@ -44,7 +44,59 @@ void Material::getConfig(const Properties &, const Properties &) const
 {
 }
 
-Matrix Material::getLumpedMass(double l) const
+void Material::getStress(const Vector &stress, const Vector &strain, const idx_t &, const idx_t &, const bool)
 {
-  return Matrix(getMaterialMass() * l);
+  getStress(stress, strain);
+}
+
+void Material::getMaterialStiff(const Matrix &stiff) const
+{
+  stiff = getMaterialStiff();
+}
+
+void Material::getMaterialStiff(const Matrix &stiff, const idx_t &, const idx_t &) const
+{
+  stiff = getMaterialStiff();
+}
+
+void Material::getMaterialMass(const Matrix &mass, const idx_t &, const idx_t &) const
+{
+  mass = getMaterialMass();
+}
+
+Matrix Material::getLumpedMass(double size) const
+{
+  return Matrix(getMaterialMass() * size);
+}
+
+Matrix Material::getLumpedMass(double size, const idx_t &) const
+{
+  return getLumpedMass(size);
+}
+
+void Material::getTable(XTable &, const Vector &, const String &name, const IdxVector &) const
+{
+  jem::System::warn() << name << " not supported by this material\n";
+}
+
+double Material::getDissipatedEnergy(const idx_t &, const idx_t &) const
+{
+  return 0.;
+}
+
+double Material::getHardeningPotential(const idx_t &, const idx_t &) const
+{
+  return 0.;
+}
+
+void Material::getStress(const Matrix &, const Matrix &, const idx_t &, const idx_t &, const bool)
+{
+  throw jem::IllegalOperationException(
+      getContext(), "this material does not support deformation gradient input");
+}
+
+void Material::getMaterialStiff(const Matrix &, const Matrix &, const idx_t &, const idx_t &) const
+{
+  throw jem::IllegalOperationException(
+      getContext(), "this material does not support deformation gradient input");
 }

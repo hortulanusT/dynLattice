@@ -14,4 +14,7 @@ void declareMaterials()
 {
   ElasticRodMaterial::declare();
   ElastoPlasticRodMaterial::declare();
+  ElasticSolidMaterial::declare();
+  SaintVenantKirchhoffSolidMaterial::declare();
+  NeoHookeanSolidMaterial::declare();
 }

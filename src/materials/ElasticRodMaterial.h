@@ -8,9 +8,6 @@
 #include "materials/Material.h"
 #include <jem/numeric/algebra/MatmulChain.h>
 
-// Forward declarations
-class MaterialFactory;
-
 using jem::idx_t;
 using jive::Cubix;
 using jive::Ref;
@@ -78,39 +75,27 @@ class ElasticRodMaterial : public Material
 
   virtual Matrix getMaterialStiff() const override;
 
-  virtual Matrix getMaterialStiff(const idx_t &ielem, const idx_t &ip) const override;
-
   virtual void getMaterialStiff(const Matrix &stiff) const override;
 
   virtual void getMaterialStiff(const Matrix &stiff, const idx_t &ielem, const idx_t &ip) const override;
 
   virtual Matrix getMaterialMass() const override;
 
-  virtual Matrix getMaterialMass(const idx_t &ielem, const idx_t &ip) const override;
-
-  virtual void getMaterialMass(const Matrix &mass) const override;
-
   virtual void getMaterialMass(const Matrix &mass, const idx_t &ielem, const idx_t &ip) const override;
 
-  virtual Matrix getLumpedMass(const double l) const override;
+  virtual Matrix getLumpedMass(const double length) const override;
 
-  virtual Matrix getLumpedMass(const double l, const idx_t &ielem) const override;
+  virtual Matrix getLumpedMass(const double length, const idx_t &ielem) const override;
 
   virtual void getStress(const Vector &stress, const Vector &strain) override;
 
-  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = false) override;
-
-  virtual void getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const override;
+  virtual void getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool inelastic = true) override;
 
   virtual void applyDeform() override;
 
   virtual void rejectDeform() override;
 
-  virtual double getDissipatedEnergy(const idx_t &ielem, const idx_t &ip) const override;
-
   virtual double getPotentialEnergy(const idx_t &ielem, const idx_t &ip) const override;
-
-  virtual double getHardeningPotential(const idx_t &ielem, const idx_t &ip) const override;
 
  protected:
   /// @brief Destroy the elastic rod material
@@ -156,7 +141,5 @@ class ElasticRodMaterial : public Material
   /// until the next call (see the note in utils/helpers.h)
   jem::numeric::MatmulChain<double, 1> matvec_;
   Matrix stiffWork_; ///< Work array for the stiffness in getStress and applyDeform
-
-  String rodName_; ///< Material instance name
   /// @}
 };
