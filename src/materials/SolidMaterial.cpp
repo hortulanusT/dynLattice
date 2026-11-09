@@ -18,16 +18,52 @@ JEM_DEFINE_CLASS(SolidMaterial);
 
 const char *SolidMaterial::DENSITY = "density";
 
-namespace
-{
-// Voigt order: xx, yy, zz, yz, xz, xy
-const idx_t VOIGT_I[6] = {0, 1, 2, 1, 0, 0};
-const idx_t VOIGT_J[6] = {0, 1, 2, 2, 2, 1};
+const idx_t SolidMaterial::VOIGT[3][3] = {{0, 5, 4}, {5, 1, 3}, {4, 3, 2}};
+const idx_t SolidMaterial::VOIGT_I[6] = {0, 1, 2, 1, 0, 0};
+const idx_t SolidMaterial::VOIGT_J[6] = {0, 1, 2, 2, 2, 1};
 
-bool readDirectStiffness_(const Matrix &C, const Properties &myProps)
+bool SolidMaterial::isPositiveDefinite_(const Matrix &C)
+{
+  double L[6][6];
+
+  for (idx_t i = 0; i < 6; i++)
+  {
+    for (idx_t j = 0; j <= i; j++)
+    {
+      double sum = C(i, j);
+      for (idx_t k = 0; k < j; k++)
+        sum -= L[i][k] * L[j][k];
+
+      if (i == j)
+      {
+        if (!(sum > 0.)) // also catches NaN
+          return false;
+        L[i][i] = sqrt(sum);
+      }
+      else
+      {
+        L[i][j] = sum / L[j][j];
+      }
+    }
+  }
+
+  return true;
+}
+
+bool SolidMaterial::readDirectStiffness_(const Matrix &C, const Properties &myProps) const
 {
   if (!myProps.contains("C_11"))
     return false;
+
+  // the other stiffness input would be silently ignored
+  static const char *OTHER_INPUT[] = {"symmetry", "young", "poisson_ratio", "shear_modulus", "young_1"};
+  for (const char *key : OTHER_INPUT)
+  {
+    if (myProps.contains(key))
+      throw IllegalInputException(
+          getContext(), String("'") + key + "' given together with 'C_11': specify either the entries "
+                                            "'C_ij' or the elastic constants, not both");
+  }
 
   C = 0.;
   for (idx_t i = 0; i < 6; i++)
@@ -47,11 +83,13 @@ bool readDirectStiffness_(const Matrix &C, const Properties &myProps)
     }
   }
 
+  if (!isPositiveDefinite_(C))
+    throw IllegalInputException(getContext(), "the stiffness 'C_ij' is not positive definite");
+
   return true;
 }
 
-// Local axes as columns of R (given in the global frame)
-void readOrientation_(const Matrix &R, const Properties &myProps, const String &context)
+void SolidMaterial::readOrientation_(const Matrix &R, const Properties &myProps) const
 {
   Vector dir1(3), dir2(3);
   dir1 = 0.;
@@ -68,11 +106,14 @@ void readOrientation_(const Matrix &R, const Properties &myProps, const String &
   }
 
   if (dir1.size() != 3 || dir2.size() != 3)
-    throw IllegalInputException(context, "'dir1' and 'dir2' must have 3 components");
+    throw IllegalInputException(getContext(), "'dir1' and 'dir2' must have 3 components");
 
   double norm1 = sqrt(dir1[0] * dir1[0] + dir1[1] * dir1[1] + dir1[2] * dir1[2]);
-  if (norm1 <= 0.)
-    throw IllegalInputException(context, "'dir1' must not be zero");
+  if (!(norm1 > 0.))
+    throw IllegalInputException(getContext(), "'dir1' must not be zero");
+  double length2 = sqrt(dir2[0] * dir2[0] + dir2[1] * dir2[1] + dir2[2] * dir2[2]);
+  if (!(length2 > 0.))
+    throw IllegalInputException(getContext(), "'dir2' must not be zero");
   for (idx_t i = 0; i < 3; i++)
     R(i, 0) = dir1[i] / norm1;
 
@@ -84,8 +125,9 @@ void readOrientation_(const Matrix &R, const Properties &myProps, const String &
     norm2 += R(i, 1) * R(i, 1);
   }
   norm2 = sqrt(norm2);
-  if (norm2 <= 1.e-12 * norm1)
-    throw IllegalInputException(context, "'dir1' and 'dir2' must not be parallel");
+  // relative to the length of dir2: the result must not depend on the scale of the input
+  if (!(norm2 > 1.e-12 * length2))
+    throw IllegalInputException(getContext(), "'dir1' and 'dir2' must not be parallel");
   for (idx_t i = 0; i < 3; i++)
     R(i, 1) /= norm2;
 
@@ -94,14 +136,13 @@ void readOrientation_(const Matrix &R, const Properties &myProps, const String &
   R(2, 2) = R(0, 0) * R(1, 1) - R(1, 0) * R(0, 1);
 }
 
-// Stiffness of an orthotropic material in its own axes
-Matrix orthotropicStiffness_(double E1, double E2, double E3,
-                             double nu12, double nu13, double nu23,
-                             double G12, double G13, double G23,
-                             const String &context)
+
+Matrix SolidMaterial::orthotropicStiffness_(double E1, double E2, double E3,
+                                            double nu12, double nu13, double nu23,
+                                            double G12, double G13, double G23) const
 {
   if (E1 <= 0. || E2 <= 0. || E3 <= 0. || G12 <= 0. || G13 <= 0. || G23 <= 0.)
-    throw IllegalInputException(context, "Young's and shear moduli must be positive");
+    throw IllegalInputException(getContext(), "Young's and shear moduli must be positive");
 
   double S[3][3] = {{1. / E1, -nu12 / E1, -nu13 / E1},
                     {-nu12 / E1, 1. / E2, -nu23 / E2},
@@ -113,7 +154,7 @@ Matrix orthotropicStiffness_(double E1, double E2, double E3,
                S[0][2] * (S[1][0] * S[2][1] - S[1][1] * S[2][0]);
 
   if (minor2 <= 0. || det <= 0.)
-    throw IllegalInputException(context, "elastic constants do not give a positive definite stiffness");
+    throw IllegalInputException(getContext(), "elastic constants do not give a positive definite stiffness");
 
   Matrix C(6, 6);
   C = 0.;
@@ -136,8 +177,8 @@ Matrix orthotropicStiffness_(double E1, double E2, double E3,
   return C;
 }
 
-// C_global = T C_local T^T with the Voigt stress transformation T
-void rotateStiffness_(const Matrix &C, const Matrix &R)
+
+void SolidMaterial::rotateStiffness_(const Matrix &C, const Matrix &R)
 {
   double T[6][6];
 
@@ -170,7 +211,6 @@ void rotateStiffness_(const Matrix &C, const Matrix &R)
       C(p, q) = sum;
     }
 }
-} // namespace
 
 SolidMaterial::SolidMaterial(const String &name,
                              const Properties &conf,
@@ -192,7 +232,7 @@ void SolidMaterial::configure(const Properties &props, const Properties &globdat
   myProps.find(density_, DENSITY);
   if (density_ < 0.0)
     throw IllegalInputException(
-        getContext() + ": Density cannot be negative, got " + String(density_));
+        getContext(), "Density cannot be negative, got " + String(density_));
 
   materialM_.resize(3, 3);
   materialM_ = 0.;
@@ -245,13 +285,27 @@ void SolidMaterial::getLame(const Properties &myProps, double &mu, double &lambd
   double young;
   myProps.get(young, "young");
 
-  if (young <= 0.0)
+  if (!(young > 0.0))
     throw IllegalInputException(
-        getContext() + ": Young's modulus must be positive, got " + String(young));
+        getContext(), "Young's modulus must be positive, got " + String(young));
 
   double nu;
-  if (myProps.find(mu, "shear_modulus"))
+  const bool hasShear = myProps.contains("shear_modulus");
+  const bool hasPoisson = myProps.contains("poisson_ratio");
+
+  if (hasShear && hasPoisson)
+    throw IllegalInputException(
+        getContext(), "'shear_modulus' and 'poisson_ratio' given together with 'young': "
+                      "the isotropic material is over-determined, give only one of them");
+
+  if (hasShear)
   {
+    myProps.get(mu, "shear_modulus");
+
+    if (!(mu > 0.0))
+      throw IllegalInputException(
+          getContext(), "shear modulus must be positive, got " + String(mu));
+
     nu = young / 2. / mu - 1.;
   }
   else
@@ -260,9 +314,9 @@ void SolidMaterial::getLame(const Properties &myProps, double &mu, double &lambd
     mu = young / 2. / (nu + 1.);
   }
 
-  if (nu <= -1.0 || nu >= 0.5)
+  if (!(nu > -1.0 && nu < 0.5))
     throw IllegalInputException(
-        getContext() + ": Poisson's ratio must be in range (-1, 0.5), got " + String(nu));
+        getContext(), "Poisson's ratio must be in range (-1, 0.5), got " + String(nu));
 
   lambda = young * nu / ((1. + nu) * (1. - 2. * nu));
 }
@@ -305,7 +359,7 @@ Matrix SolidMaterial::makeStiffness(const Properties &myProps) const
       throw IllegalInputException(getContext(), "invalid transverse elastic constants");
 
     C = orthotropicStiffness_(E1, E2, E2, nu12, nu12, nu23,
-                              G12, G12, E2 / 2. / (1. + nu23), getContext());
+                              G12, G12, E2 / 2. / (1. + nu23));
   }
   else if (symmetry == "orthotropic")
   {
@@ -320,7 +374,7 @@ Matrix SolidMaterial::makeStiffness(const Properties &myProps) const
     myProps.get(G13, "shear_13");
     myProps.get(G23, "shear_23");
 
-    C = orthotropicStiffness_(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23, getContext());
+    C = orthotropicStiffness_(E1, E2, E3, nu12, nu13, nu23, G12, G13, G23);
   }
   else
   {
@@ -330,7 +384,7 @@ Matrix SolidMaterial::makeStiffness(const Properties &myProps) const
   }
 
   Matrix R(3, 3);
-  readOrientation_(R, myProps, getContext());
+  readOrientation_(R, myProps);
   rotateStiffness_(C, R);
 
   return C;

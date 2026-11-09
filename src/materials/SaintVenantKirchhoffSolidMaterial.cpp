@@ -16,12 +16,6 @@ JEM_DEFINE_CLASS(SaintVenantKirchhoffSolidMaterial);
 
 const char *SaintVenantKirchhoffSolidMaterial::TYPE_NAME = "SaintVenantKirchhoffSolid";
 
-namespace
-{
-// Voigt index of the tensor component (i,j): xx, yy, zz, yz, xz, xy
-const idx_t VOIGT[3][3] = {{0, 5, 4}, {5, 1, 3}, {4, 3, 2}};
-} // namespace
-
 SaintVenantKirchhoffSolidMaterial::SaintVenantKirchhoffSolidMaterial(const String &name,
                                                                      const Properties &conf,
                                                                      const Properties &props,
