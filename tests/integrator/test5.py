@@ -28,8 +28,11 @@ def analytical(t):
 
 
 def status(ok):
-  return colored("ok", "green") if ok else colored("off", "red")
+  return "ok" if ok else "off"
 
+
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test5/result.log", "w")
 
 test_passed = True
 
@@ -49,7 +52,7 @@ try:
     test_passed = test_passed and ok
     print(f"  {name}, step {step:g}: theta against Eq. (73), relative L2 {', '.join(f'{e:.1e}' for e in errors)} "
           f"(limit {THETA_TOL}); |theta| at the end {np.linalg.norm(theta[-1]) / np.pi:.4f} pi, steps of |theta| within "
-          f"{jump:.1e} of pi dt (limit {JUMP_TOL})  {status(ok)}")
+          f"{jump:.1e} of pi dt (limit {JUMP_TOL})  {status(ok)}", file=LOG)
     theta_axes.plot(t, theta[:, 1] / np.pi, color=COLOURS[name], label=SCHEMES[name])
     error_axes.semilogy(t, np.linalg.norm(theta - exact, axis=1) + 1e-16, color=COLOURS[name], label=SCHEMES[name])
 
@@ -75,5 +78,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator5{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 5 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 5 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test5/result.log)")
   sys.exit(1)

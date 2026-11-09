@@ -66,9 +66,9 @@ def evaluate(scheme, dim, motion_axes, energy_axes):
   for what, measured, local, checked in [("motion", motion, motion_local, check_motion),
                                          ("energy", energy, energy_local, check_energy)]:
     ok = abs(measured - order) <= tol
-    status = (colored("ok", "green") if ok else colored("off", "red")) if checked else colored("RUN THROUGH", "yellow")
+    status = ("ok" if ok else "off") if checked else "RUN THROUGH"
     print(f"  {scheme}, {dim}, {what}: order {measured:.2f} (expected {order} +- {tol}; local "
-          f"{', '.join(f'{x:.2f}' for x in local)})  {status}")
+          f"{', '.join(f'{x:.2f}' for x in local)})  {status}", file=LOG)
     results.append(ok or not checked)
 
   style = dict(color=COLOURS[scheme], marker=MARKERS[dim], markerfacecolor="none", ls="")
@@ -87,6 +87,9 @@ def legend(axes):
   handles += [Line2D([], [], color="k", ls="--", label="reference: order 2, 1, 3, 5")]
   axes.legend(handles=handles, fontsize=7)
 
+
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test1/result.log", "w")
 
 test_passed = True
 
@@ -117,5 +120,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator1{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 1 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 1 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test1/result.log)")
   sys.exit(1)

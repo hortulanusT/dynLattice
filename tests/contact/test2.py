@@ -17,6 +17,9 @@ RHO_A = np.pi * 0.02**2
 ELEMENT = 2. / ELEMENTS
 ENERGY_TOL = 0.01
 
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/contact/test2/result.log", "w")
+
 test_passed = False
 
 try:
@@ -34,10 +37,10 @@ try:
   total_energy = energy[:, 1] + energy[:, 2]
   energy_change = abs(total_energy[-1] / total_energy[0] - 1.)
 
-  print(f"  smallest gap of the centres {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}")
+  print(f"  smallest gap of the centres {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}", file=LOG)
   print(f"  total momentum, largest {momentum_error:.2e} of the momentum of one rod; momentum of rod A at the end "
-        f"{rebound:+.3f} of its start")
-  print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})")
+        f"{rebound:+.3f} of its start", file=LOG)
+  print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})", file=LOG)
 
   fig_a, gap_axes = plt.subplots(figsize=(16 / 3, 6))
   gap_axes.plot(times, gap, label="simulation")
@@ -78,5 +81,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/contact2{tag}_result.png")
 else:
-  print(colored("CONTACT TEST 2 FAILED", "red", attrs=["bold"]))
+  print(colored("CONTACT TEST 2 FAILED", "red", attrs=["bold"]) + " (details: tests/contact/test2/result.log)")
   sys.exit(1)

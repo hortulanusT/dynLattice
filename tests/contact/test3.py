@@ -19,6 +19,9 @@ ELEMENT = 1. / ELEMENTS
 REBOUND_TOL = 0.05
 ENERGY_TOL = 0.02
 
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/contact/test3/result.log", "w")
+
 test_passed = False
 
 try:
@@ -34,10 +37,10 @@ try:
   total_energy = energy[:, 1] + energy[:, 2]
   energy_change = abs(total_energy[-1] / total_energy[0] - 1.)
 
-  print(f"  smallest gap of the tips {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}")
+  print(f"  smallest gap of the tips {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}", file=LOG)
   print(f"  momentum of rod A at the end {rebound:+.3f} of its start (exact -1, limit +- {REBOUND_TOL}), total momentum "
-        f"largest {momentum_error:.2e}")
-  print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})")
+        f"largest {momentum_error:.2e}", file=LOG)
+  print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})", file=LOG)
 
   fig_a, gap_axes = plt.subplots(figsize=(16 / 3, 6))
   gap_axes.plot(times, gap, label="simulation")
@@ -78,5 +81,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/contact3{tag}_result.png")
 else:
-  print(colored("CONTACT TEST 3 FAILED", "red", attrs=["bold"]))
+  print(colored("CONTACT TEST 3 FAILED", "red", attrs=["bold"]) + " (details: tests/contact/test3/result.log)")
   sys.exit(1)

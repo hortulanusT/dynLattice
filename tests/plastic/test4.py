@@ -56,6 +56,9 @@ def fibre_moments(curvatures):
   return np.array(moments)
 
 
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/plastic/test4/result.log", "w")
+
 test_passed = False
 
 try:
@@ -89,10 +92,10 @@ try:
 
   for name, i in phases.items():
     print(f"  {name}: moment {moment[i]:.4f}, exact {exact[i]:.4f} ({(moment[i] / exact[i] - 1.) * 100:+.2f} %), "
-          f"fibre J2 {fibre[i]:.4f} (exact against fibre {(exact[i] / fibre[i] - 1.) * 100:+.2f} %, reported only)")
-  print(f"  whole cycle against the exact solution: largest difference over the largest moment {exact_error * 100:.2f} % (limit {EXACT_TOL * 100:.0f} %)")
-  print(f"  leaves the elastic line at {abs(moment[leaves]):.3f} N m (table {YIELD_MOMENT}, limit {YIELD_TOL * 100:.0f} %)")
-  print(f"  work against stored energy + dissipation: {balance * 100:.3f} % (limit {ENERGY_TOL * 100:.0f} %)")
+          f"fibre J2 {fibre[i]:.4f} (exact against fibre {(exact[i] / fibre[i] - 1.) * 100:+.2f} %, reported only)", file=LOG)
+  print(f"  whole cycle against the exact solution: largest difference over the largest moment {exact_error * 100:.2f} % (limit {EXACT_TOL * 100:.0f} %)", file=LOG)
+  print(f"  leaves the elastic line at {abs(moment[leaves]):.3f} N m (table {YIELD_MOMENT}, limit {YIELD_TOL * 100:.0f} %)", file=LOG)
+  print(f"  work against stored energy + dissipation: {balance * 100:.3f} % (limit {ENERGY_TOL * 100:.0f} %)", file=LOG)
 
   plt.figure(figsize=(16 / 3, 6))
   plt.plot(curvature, moment, label="simulation")
@@ -116,5 +119,5 @@ if test_passed:
   plt.savefig("tests/plastic/test4/result.pdf")
   plt.savefig("tests/plastic4_result.png")
 else:
-  print(colored("PLASTIC TEST 4 FAILED", "red", attrs=["bold"]))
+  print(colored("PLASTIC TEST 4 FAILED", "red", attrs=["bold"]) + " (details: tests/plastic/test4/result.log)")
   sys.exit(1)

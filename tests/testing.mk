@@ -5,6 +5,8 @@ tests: beam-tests transient-tests plastic-tests contact-tests integrator-tests
 clean-all: clean-tests
 
 # SETTINGS
+# the scripts write their figures to files: no display
+export MPLBACKEND = Agg
 beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
 plastic_cases = 1 2a 2b 3 4

@@ -110,8 +110,11 @@ def read(name, exact):
 
 
 def status(ok):
-  return colored("ok", "green") if ok else colored("off", "red")
+  return "ok" if ok else "off"
 
+
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test3/result.log", "w")
 
 test_passed = True
 
@@ -123,7 +126,7 @@ try:
   ok = deviation <= HAN_TOL
   test_passed = test_passed and ok
   print(f"  reference against Han et al. (1999), Sect. 3.5: a {np.round(a, 3)}, b {np.round(b, 3)}, ratios "
-        f"{np.round(ratios, 3)}; largest deviation {deviation:.1e} (limit {HAN_TOL})  {status(ok)}")
+        f"{np.round(ratios, 3)}; largest deviation {deviation:.1e} (limit {HAN_TOL})  {status(ok)}", file=LOG)
 
   figures, mesh_errors = [], {}
   for label, radius in SLENDERNESS:
@@ -137,7 +140,7 @@ try:
       ok = bool(np.all(np.abs(errors) <= SCHEME_TOL))
       test_passed = test_passed and ok
       print(f"  {label} {name}, 16 elements: {np.round(found, 4)} rad/s, Timoshenko {np.round(exact, 4)}, error "
-            f"{np.round(errors * 100., 3)} % (limit {np.array(SCHEME_TOL) * 100.} %)  {status(ok)}")
+            f"{np.round(errors * 100., 3)} % (limit {np.array(SCHEME_TOL) * 100.} %)  {status(ok)}", file=LOG)
       axes.plot(freqs, spectrum / spectrum.max(), color=COLOURS[name], label=SCHEMES[name])
     for i, w in enumerate(exact):
       axes.axvline(w, color="k", ls="--", lw=1.,
@@ -161,7 +164,7 @@ try:
     print(f"  {label} LeapFrog, {' / '.join(map(str, MESHES))} elements: error mode 1 "
           f"{' / '.join(f'{e * 100:.4f}' for e in errors[:, 0])} %, mode 2 {' / '.join(f'{e * 100:.4f}' for e in errors[:, 1])} %; "
           f"order of mode 2 {order:.2f} (expected {MESH_ORDER} +- {MESH_ORDER_TOL}), 64 elements within "
-          f"{np.array(FINE_TOL) * 100.} %  {status(ok)}")
+          f"{np.array(FINE_TOL) * 100.} %  {status(ok)}", file=LOG)
     mesh_errors[label] = errors
 
   fig, axes = plt.subplots(figsize=(16 / 3, 6))
@@ -193,5 +196,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator3{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 3 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 3 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test3/result.log)")
   sys.exit(1)

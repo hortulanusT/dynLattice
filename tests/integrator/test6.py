@@ -90,8 +90,11 @@ def against(t, values, reference, scale):
 
 
 def status(ok, checked=True):
-  return (colored("ok", "green") if ok else colored("off", "red")) if checked else colored("RUN THROUGH", "yellow")
+  return ("ok" if ok else "off") if checked else "RUN THROUGH"
 
+
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test6/result.log", "w")
 
 test_passed = True
 
@@ -125,9 +128,9 @@ try:
     print(f"  {name}, step {rows[1, 0] - rows[0, 0]:g}: centre of mass against Eq. (75) {centre_error:.1e} "
           f"(limit {CENTRE_TOL}); against Figs. 5, 6: energy {energy_errors[0]:.4f}, p_1, l_2, l_3 "
           f"{', '.join(f'{e:.4f}' for e in momentum_errors)} (limit {CURVE_TOL}); E = {energy[-1]:.1f}, "
-          f"l = {np.round(angular[-1], 1)}  {status(ok_ref, CHECKED[name][0])}")
+          f"l = {np.round(angular[-1], 1)}  {status(ok_ref, CHECKED[name][0])}", file=LOG)
     print(f"  {name}, free flight: drift of the energy {energy_drift:.1e}  {status(ok_energy, CHECKED[name][1])}, of the "
-          f"angular momentum {angular_drift:.1e}  {status(ok_angular, CHECKED[name][2])} (limit {DRIFT_TOL})")
+          f"angular momentum {angular_drift:.1e}  {status(ok_angular, CHECKED[name][2])} (limit {DRIFT_TOL})", file=LOG)
     energy_axes.plot(rows[:, 0], energy, color=COLOURS[name], label=SCHEMES[name])
     for i, value in enumerate([linear[:, 0], angular[:, 1], angular[:, 2]]):
       momentum_axes.plot(times, value, color=COLOURS[name], ls=["-", "-", "-."][i])
@@ -157,7 +160,7 @@ try:
     measured = np.polyfit(np.log(steps[:-1]), np.log(diffs), 1)[0]
     local = np.log2(diffs[:-1] / diffs[1:])
     print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER}; local "
-          f"{', '.join(f'{v:.2f}' for v in local)})  {status(False, False)}")
+          f"{', '.join(f'{v:.2f}' for v in local)})  {status(False, False)}", file=LOG)
     order_axes.loglog(steps[:-1], diffs, marker=marker, markerfacecolor="none", ls="", color=COLOURS["LeapFrog"])
     order_axes.loglog(steps[:-1], diffs[-1] * (steps[:-1] / steps[-2])**ORDER, "--", color=COLOURS["LeapFrog"])
   handles = [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="", label=f"{w}, relative error against the "
@@ -180,5 +183,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator6{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 6 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 6 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test6/result.log)")
   sys.exit(1)

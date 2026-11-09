@@ -51,8 +51,11 @@ def energy_error(rows, leapfrog):
 
 
 def status(ok, checked=True):
-  return (colored("ok", "green") if ok else colored("off", "red")) if checked else colored("RUN THROUGH", "yellow")
+  return ("ok" if ok else "off") if checked else "RUN THROUGH"
 
+
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test4/result.log", "w")
 
 test_passed = True
 
@@ -70,7 +73,7 @@ try:
     ok = max(errors) <= OMEGA_TOL
     test_passed = test_passed and (ok or not checked)
     print(f"  {scheme}, step {rows[1, 0] - rows[0, 0]:g}: Omega against Fig. 3, relative L2 "
-          f"{', '.join(f'{e:.4f}' for e in errors)} (limit {OMEGA_TOL})  {status(ok, checked)}")
+          f"{', '.join(f'{e:.4f}' for e in errors)} (limit {OMEGA_TOL})  {status(ok, checked)}", file=LOG)
     if scheme == "LeapFrog":
       for i in range(3):
         omega_axes.plot(rows[:, 0], omega[:, i], color=f"C{i}", label=f"Omega_{i + 1}, leap-frog")
@@ -92,7 +95,7 @@ try:
     measured = np.polyfit(np.log(x), np.log(y), 1)[0]
     local = np.log2(y[:-1] / y[1:])
     print(f"  LeapFrog, {what}: order {measured:.2f} (expected {ORDER}; local {', '.join(f'{v:.2f}' for v in local)})  "
-          f"{status(False, False)}")
+          f"{status(False, False)}", file=LOG)
     order_axes.loglog(x, y, marker=marker, markerfacecolor="none", ls="", color=COLOURS["LeapFrog"])
     order_axes.loglog(x, y[-1] * (x / x[-1])**ORDER, "--", color=COLOURS["LeapFrog"])
   handles = [Line2D([], [], color="k", marker="o", markerfacecolor="none", ls="", label="rotation at t = 100: difference "
@@ -116,5 +119,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator4{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 4 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 4 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test4/result.log)")
   sys.exit(1)

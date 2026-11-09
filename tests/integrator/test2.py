@@ -37,6 +37,9 @@ def exact_reaction(t):
   return np.where((phase > LENGTH) & (phase < 3. * LENGTH), 2., 0.)
 
 
+# details of the checks; on screen only PASSED, FAILED or RUN THROUGH
+LOG = open("tests/integrator/test2/result.log", "w")
+
 test_passed = True
 
 try:
@@ -61,7 +64,7 @@ try:
     ok = tip_error <= TIP_TOL and front_error <= FRONT_TOL and t[-1] >= END - 2. * step
     test_passed = test_passed and ok
     print(f"  {name}: tip error {tip_error:.2e} (limit {TIP_TOL}), fronts at the fixed end "
-          f"{', '.join(f'{x:+.4f}' for x in fronts)} from exact (limit +- {FRONT_TOL})" + ("" if ok else "  <-- off"))
+          f"{', '.join(f'{x:+.4f}' for x in fronts)} from exact (limit +- {FRONT_TOL})" + ("" if ok else "  <-- off"), file=LOG)
     tip_axes.plot(t, tip / STRAIN, color=COLOURS[name], label=SCHEMES[name])
     reaction_axes.plot(t, reaction / FORCE, color=COLOURS[name], label=SCHEMES[name])
 
@@ -88,5 +91,5 @@ if test_passed:
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator2{tag}_result.png")
 else:
-  print(colored("INTEGRATOR TEST 2 FAILED", "red", attrs=["bold"]))
+  print(colored("INTEGRATOR TEST 2 FAILED", "red", attrs=["bold"]) + " (details: tests/integrator/test2/result.log)")
   sys.exit(1)
