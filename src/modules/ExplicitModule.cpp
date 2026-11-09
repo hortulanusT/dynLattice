@@ -446,7 +446,8 @@ void ExplicitModule::updateVec(const Vector &y_new,
 Vector
 ExplicitModule::getForce(const Vector &fint,
                          const Vector &fext,
-                         const Properties &globdat)
+                         const Properties &globdat,
+                         const bool mayReuse)
 {
   Properties params;
 
@@ -466,7 +467,7 @@ ExplicitModule::getForce(const Vector &fint,
   // The state is the committed one if nothing touched it since the commit;
   // then the internal force of the output pass can be reused.
   bool reuse = false;
-  if (fintCacheValid_)
+  if (fintCacheValid_ && mayReuse)
   {
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
@@ -499,6 +500,29 @@ ExplicitModule::getForce(const Vector &fint,
   }
 
   return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
+//   getStartForce_
+//-----------------------------------------------------------------------
+
+Vector ExplicitModule::getStartForce_(const Vector &fint,
+                                      const Vector &fext,
+                                      const Properties &globdat)
+{
+  double t_new;
+  double t_old;
+
+  globdat.get(t_new, Globdat::TIME);
+  globdat.get(t_old, Globdat::OLD_TIME);
+  JEM_ASSERT2(jem::numeric::abs(t_new - dtime_ - t_old) <= 1e-12 * (jem::numeric::abs(t_new) + dtime_),
+              "the old time is not the start of the step");
+
+  globdat.set(Globdat::TIME, t_old);
+  Vector fres = getForce(fint, fext, globdat);
+  globdat.set(Globdat::TIME, t_new);
+
+  return fres;
 }
 
 //-----------------------------------------------------------------------

@@ -249,10 +249,23 @@ class ExplicitModule : public SolverModule
   /// @param[out] fint  Internal force vector
   /// @param[out] fext  External force vector
   /// @param[in] globdat  Global data container
+  /// @param[in] mayReuse  Reuse the internal force of the committed state if the state is still the same
+  /// (the same force, summed in another order: a scheme that always evaluated afresh passes false)
   /// @return Resulting force vector (external - internal)
   Vector getForce(const Vector &fint,
                   const Vector &fext,
-                  const Properties &globdat);
+                  const Properties &globdat,
+                  const bool mayReuse = true);
+
+  /// @brief getForce at the start of the step: with the time of the committed state, t_n
+  /// @details advance() has already set the time to t_n + dt; it is set back to t_n for the evaluation only.
+  /// @param[out] fint  Internal force vector
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
+  /// @return Resulting force vector (external - internal)
+  Vector getStartForce_(const Vector &fint,
+                        const Vector &fext,
+                        const Properties &globdat);
 
   /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
   /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error

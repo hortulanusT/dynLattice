@@ -64,18 +64,6 @@ class MilneDeviceModule : public ExplicitModule
   /// @brief Destructor
   virtual ~MilneDeviceModule();
 
- protected:
-  /// @brief Update forces for corrector step
-  /// @param[in,out] fint  Internal force vector, modified in place
-  /// @param[in] fext  External force vector
-  /// @param[in] globdat  Global data container
-  /// @return Resulting force vector (external - internal)
-  /// @details In the corrector step, only internal forces change due to
-  /// updated displacement field, so external forces remain constant
-  Vector updForce(const Vector &fint,
-                  const Vector &fext,
-                  const Properties &globdat);
-
  private:
   /// @name Adams-Moulton corrector methods
   /// @{
