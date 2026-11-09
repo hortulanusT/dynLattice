@@ -96,16 +96,13 @@ Module::Status LeapFrogModule::init(const Properties &conf, const Properties &pr
   Status status = Super::init(conf, props, globdat);
   firstStep_ = true;
 
-  // without an error estimate the adaptive control would grow the step every step: keep deltaTime
-  minDtime_ = dtime_;
-  maxDtime_ = dtime_;
-  getConfig(conf, globdat);
-
   return status;
 }
 
 void LeapFrogModule::configure(const Properties &props, const Properties &globdat)
 {
+  // also called by init. Without an error estimate the adaptive control would grow the step every step:
+  // keep deltaTime
   Super::configure(props, globdat);
   minDtime_ = dtime_;
   maxDtime_ = dtime_;

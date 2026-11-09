@@ -303,6 +303,7 @@ class ExplicitModule : public SolverModule
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping
   BoolVector isRotDof_;   ///< Mask of rotational DOFs (rebuilt with rdofs_)
+  bool rotDofsValid_;     ///< rdofs_ and isRotDof_ match the dof space
   /// @}
 
   /// @name System components

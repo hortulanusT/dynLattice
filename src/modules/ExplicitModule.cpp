@@ -43,6 +43,7 @@ ExplicitModule::ExplicitModule
   dtime_ = 1.0;
   valid_ = false;
   fintCacheValid_ = false;
+  rotDofsValid_ = false;
   lenScale_ = 1e-3;
   rotScale_ = lenScale_;
   dofsSO3_.resize(0);
@@ -123,15 +124,10 @@ Module::Status ExplicitModule::init
   if (givenRot || modelHasRot)
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
+    // rdofs_ and the mask follow in updateMass_ at the end of init
     dofsSO3_.resize(SO3_dof_names.size());
-    rdofs_.resize(SO3_dof_names.size(), dofs_->dofCount() / dofs_->typeCount());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
-    {
-      IdxVector nodes;
       dofsSO3_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
-      dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, dofsSO3_[i]);
-    }
-    updRotMask_();
     myConf.set(SO3_DOFS, SO3_dof_names);
 
     String modelType;
@@ -155,26 +151,10 @@ Module::Status ExplicitModule::init
   FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
 
   // time stepping settings
-  myProps.find(prec_, PropNames::PRECISION);
-  myConf.set(PropNames::PRECISION, prec_);
-  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
-  myConf.set(PropNames::DELTA_TIME, dtime_);
+  configure(props, globdat);
+  getConfig(conf, globdat);
 
   Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
-
-  minDtime_ = dtime_ / 100.;
-  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
-  myConf.set(PropNames::MIN_DTIME, minDtime_);
-  maxDtime_ = dtime_ * 100.;
-  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
-  myConf.set(PropNames::MAX_DTIME, maxDtime_);
-
-  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
-  myConf.set("stepSaftey", saftey_);
-  myProps.find(incrFact_, "increaseFactor", 1., 2.);
-  myConf.set("increaseFactor", incrFact_);
-  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
-  myConf.set("decreaseFactor", decrFact_);
 
   // Initialize solver
   jive::solver::declareSolvers();
@@ -255,11 +235,15 @@ void ExplicitModule::configure
   myProps.find(prec_, PropNames::PRECISION);
   myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
 
-  minDtime_ = dtime_ / 1000.;
+  minDtime_ = dtime_ / 100.;
   myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
 
-  maxDtime_ = dtime_ * 1000.;
+  maxDtime_ = dtime_ * 100.;
   myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
+
+  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
+  myProps.find(incrFact_, "increaseFactor", 1., 2.);
+  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
 }
 
 //-----------------------------------------------------------------------
@@ -280,6 +264,9 @@ void ExplicitModule::getConfig
   myConf.set(PropNames::DELTA_TIME, dtime_);
   myConf.set(PropNames::MIN_DTIME, minDtime_);
   myConf.set(PropNames::MAX_DTIME, maxDtime_);
+  myConf.set("stepSaftey", saftey_);
+  myConf.set("increaseFactor", incrFact_);
+  myConf.set("decreaseFactor", decrFact_);
 }
 
 //-----------------------------------------------------------------------
@@ -576,7 +563,8 @@ void ExplicitModule::updateMass_(const Properties &globdat)
       << " ...Updating mass information for explicit solver\n";
   model_->takeAction(Actions::UPD_MATRIX2, params, globdat);
 
-  if (dofsSO3_.size())
+  // the SO(3) dof indices change only with the dof space
+  if (dofsSO3_.size() && !rotDofsValid_)
   {
     IdxVector iitems(dofs_->getItems()->size());
     iitems = jem::iarray(dofs_->getItems()->size());
@@ -588,6 +576,7 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     for (idx_t idof = 0; idof < dofsSO3_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, dofsSO3_[idof]);
     updRotMask_();
+    rotDofsValid_ = true;
   }
 
   if (mode_ == LUMPED)
@@ -631,6 +620,7 @@ void ExplicitModule::invalidate_()
 {
   valid_ = false;
   fintCacheValid_ = false;
+  rotDofsValid_ = false;
 }
 
 //-----------------------------------------------------------------------
