@@ -34,13 +34,12 @@ DRIFT_TOL = 1e-3       # energy and angular momentum in the free flight
 SCHEMES = {"LeapFrog": "leap-frog", "Milne": "MilneDevice: Adams-Bashforth-Moulton",
            "ode23": "EmbeddedRK ode23: Bogacki-Shampine", "ode45": "EmbeddedRK ode45: Dormand-Prince"}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
-# Checked: all integrators against the references; LeapFrog also the energy in the free flight; LeapFrog, ode23 and
-# ode45 the angular momentum of the model (output of its mass matrix) in the free flight. Run through: the energy of
-# EmbeddedRK in the free flight; MilneDevice in the free flight, which damps by construction; the angular momentum of
-# Eq. (108) with J, for every integrator: the nodal inertia of the model also holds rho A l^2 / 12 about the transverse
-# axes, which is not in J, so that it drifts by 3e-3
+# Checked: all integrators against the references; LeapFrog, ode23 and ode45 also the energy and the angular momentum
+# of the model (output of its mass matrix) in the free flight. Run through: MilneDevice in the free flight, which damps
+# by construction; the angular momentum of Eq. (108) with J, for every integrator: the nodal inertia of the model also
+# holds rho A l^2 / 12 about the transverse axes, which is not in J, so that it drifts by 3e-3
 CHECK_REFERENCES = ("LeapFrog", "Milne", "ode23", "ode45")
-CHECK_ENERGY = ("LeapFrog",)
+CHECK_ENERGY = ("LeapFrog", "ode23", "ode45")
 CHECK_MOMENTUM = ("LeapFrog", "ode23", "ode45")
 # LeapFrog at five steps to t = 5, each half the previous one: the relative error of Eq. (76) against the finest run,
 # order 2 expected (Fig. 8 shows order 2 for their scheme). Checked for the position; the velocity is run through (its
@@ -198,8 +197,7 @@ except Exception as e:
 
 if test_passed:
   print(colored("INTEGRATOR TEST 6 PASSED", "green")
-        + colored(" (RUN THROUGH: Milne and EmbeddedRK energy in the free flight, momentum with J, velocity order)",
-                  "yellow"))
+        + colored(" (RUN THROUGH: Milne in the free flight, momentum with J, velocity order)", "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b"), (fig_c, "c")]:
