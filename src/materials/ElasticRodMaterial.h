@@ -73,6 +73,9 @@ class ElasticRodMaterial : public Material
 
   virtual void getConfig(const Properties &conf, const Properties &globdat) const override;
 
+  using Material::getMaterialStiff;
+  using Material::getStress;
+
   virtual Matrix getMaterialStiff() const override;
 
   virtual void getMaterialStiff(const Matrix &stiff) const override;

@@ -77,6 +77,8 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   /// @param[in] hardParams  Hardening parameters
   virtual void getHardVals(const Vector &hardVals, const Vector &hardParams) const;
 
+  using ElasticRodMaterial::getStress;
+
   /// @brief Elastic stress computation based on elastic rod material model
   /// @throws jem::Exception as this method should not be called directly for elasto-plastic materials
   virtual void getStress(const Vector &stress, const Vector &strain) override;
