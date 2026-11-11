@@ -3,7 +3,7 @@ The integrator tests check the explicit time integrators at fixed time steps aga
 
 # Test Cases
 ## Test 1
-Convergence order of the motion (left) and of the energy error (right) of a vibrating cantilever with an initial tip velocity and a dead tip force, over about three periods of the first mode, for each integrator at five step sizes. There is no closed-form solution of this large-deflection motion: the motion is compared with the run at half the step, and the energy with its conservation. `MilneDevice` at a fixed step is the first-order Adams-Bashforth-Moulton scheme; it damps fast modes and therefore runs to t = 0.02 only. In 3D, `EmbeddedRK` is first order and the energy error of every integrator stops at about 2e-4; these are run through, not checked, until they are fixed.
+Convergence order of the motion (left) and of the energy error (right) of a vibrating cantilever with an initial tip velocity and a dead tip force, over about three periods of the first mode, for each integrator at five step sizes. There is no closed-form solution of this large-deflection motion: the motion is compared with the run at half the step, and the energy with its conservation. `MilneDevice` at a fixed step is the first-order Adams-Bashforth-Moulton scheme; it damps fast modes and therefore runs to t = 0.02 only. In 3D, the energy error of every integrator stops at about 4e-4, whatever the step; it is run through, not checked, until its cause is found.
 
 ![Test 1a Results](integrator1a_result.png)
 ![Test 1b Results](integrator1b_result.png)
@@ -22,7 +22,7 @@ First two bending frequencies of a slender (L / r = 50) and a stubby (L / r = 10
 ![Test 3c Results](integrator3c_result.png)
 
 ## Test 4
-Freely spinning rigid body of [Krysl, Endres (2005)](https://doi.org/10.1002/nme.1272), Sect. 4.1, close to its intermediate axis (Dzhanibekov effect), as a stiff rod of one element: the angular velocity in the body frame against their Fig. 3 (read from the vector graphics of the figure, `ref_data/test4_ref_omega.csv`), left, and the convergence of LeapFrog, right. LeapFrog stores its angular velocity half a step before the rotation, which adds a small error of the order of the step to its curve. All integrators are first order on rigid rotation at present, and `EmbeddedRK` in 3D is affected by its frozen mass matrix: both are run through, not checked, until they are fixed.
+Freely spinning rigid body of [Krysl, Endres (2005)](https://doi.org/10.1002/nme.1272), Sect. 4.1, close to its intermediate axis (Dzhanibekov effect), as a stiff rod of one element: the angular velocity in the body frame against their Fig. 3 (read from the vector graphics of the figure, `ref_data/test4_ref_omega.csv`), left, and the convergence of LeapFrog, right. LeapFrog converges at second order.
 
 ![Test 4a Results](integrator4a_result.png)
 ![Test 4b Results](integrator4b_result.png)
@@ -34,7 +34,7 @@ Pure rotation of the free rigid body of [Holzinger, Gerstmayr (2021)](https://do
 ![Test 5b Results](integrator5b_result.png)
 
 ## Test 6
-Flying spaghetti of [Simo, Vu-Quoc (1988)](https://doi.org/10.1016/0045-7825(88)90073-4) and [Simo, Tarnow, Doblaré (1995)](https://doi.org/10.1002/nme.1620380903), with the parameters of [Kinon, Eugster, Betsch (2026)](https://doi.org/10.1016/j.cma.2026.118966), Sect. 6.1, and the load at the lower end as in Fig. 2 of Simo et al.: total energy (left) and momenta (middle) against Figs. 5 and 6 of Kinon et al. (read from the vector graphics of the figures, `ref_data/test6_ref_*.csv`), the centre of mass against their Eq. (75), and the convergence of LeapFrog after their Eq. (76) (right). Not checked, only run through: `EmbeddedRK` in 3D, the energy of `MilneDevice`, which damps by construction, the angular momentum in the free flight, which drifts with the rotary inertia that the nodal mass counts a second time, and the order, which is first order on rigid rotation at present.
+Flying spaghetti of [Simo, Vu-Quoc (1988)](https://doi.org/10.1016/0045-7825(88)90073-4) and [Simo, Tarnow, Doblaré (1995)](https://doi.org/10.1002/nme.1620380903), with the parameters of [Kinon, Eugster, Betsch (2026)](https://doi.org/10.1016/j.cma.2026.118966), Sect. 6.1, and the load at the lower end as in Fig. 2 of Simo et al.: total energy (left) and momenta (middle) against Figs. 5 and 6 of Kinon et al. (read from the vector graphics of the figures, `ref_data/test6_ref_*.csv`), the centre of mass against their Eq. (75), and the convergence of LeapFrog after their Eq. (76) (right). In the free flight, the angular momentum of the model (from its mass matrix) is checked for LeapFrog and `EmbeddedRK`. Not checked, only run through: `MilneDevice` in the free flight, which damps by construction; the energy of `EmbeddedRK` in the free flight; the angular momentum after Eq. (108) with J, which drifts with the rotary inertia that the nodal mass counts a second time; the order of the velocity, whose coarsest step is not yet in the asymptotic range.
 
 ![Test 6a Results](integrator6a_result.png)
 ![Test 6b Results](integrator6b_result.png)

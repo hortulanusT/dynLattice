@@ -34,15 +34,18 @@ DRIFT_TOL = 1e-3       # energy and angular momentum in the free flight
 SCHEMES = {"LeapFrog": "leap-frog", "Milne": "MilneDevice: Adams-Bashforth-Moulton",
            "ode23": "EmbeddedRK ode23: Bogacki-Shampine", "ode45": "EmbeddedRK ode45: Dormand-Prince"}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
-# Checked: LeapFrog and Milne against the references, LeapFrog also the energy in the free flight. Run through:
-# EmbeddedRK in 3D, as its mass matrix stays frozen during the stages; the energy of MilneDevice, which damps by
-# construction; the angular momentum in the free flight, for every integrator: the nodal inertia of the model also holds
-# rho A l^2 / 12 about the transverse axes, which is not in J, so that the angular momentum of Eq. (108) drifts by 3e-3
-CHECK_REFERENCES = ("LeapFrog", "Milne")
+# Checked: all integrators against the references; LeapFrog also the energy in the free flight; LeapFrog, ode23 and
+# ode45 the angular momentum of the model (output of its mass matrix) in the free flight. Run through: the energy of
+# EmbeddedRK in the free flight; MilneDevice in the free flight, which damps by construction; the angular momentum of
+# Eq. (108) with J, for every integrator: the nodal inertia of the model also holds rho A l^2 / 12 about the transverse
+# axes, which is not in J, so that it drifts by 3e-3
+CHECK_REFERENCES = ("LeapFrog", "Milne", "ode23", "ode45")
 CHECK_ENERGY = ("LeapFrog",)
+CHECK_MOMENTUM = ("LeapFrog", "ode23", "ode45")
 # LeapFrog at five steps to t = 5, each half the previous one: the relative error of Eq. (76) against the finest run,
-# order 2 expected (Fig. 8 shows order 2 for their scheme); run through, as the integrators are first order on rigid
-# rotation at present
+# order 2 expected (Fig. 8 shows order 2 for their scheme). Checked for the position; the velocity is run through (its
+# coarsest step is not yet in the asymptotic range)
+ORDER_TOL = 0.1
 ORDER_RUNS, ORDER = 5, 2.
 
 
@@ -131,16 +134,20 @@ try:
     flying, free = rows[:, 0] >= FREE + 0.1, times >= FREE + 0.1
     energy_drift = energy_error(rows[flying, 7], rows[flying, 8])
     angular_drift = np.linalg.norm(angular[free] - angular[free][0], axis=1).max() / np.linalg.norm(angular[free][0])
+    model_angular = rows[flying, 18:21]
+    model_drift = np.linalg.norm(model_angular - model_angular[0], axis=1).max() / np.linalg.norm(model_angular[0])
     ok_ref = centre_error <= CENTRE_TOL and max(energy_errors + momentum_errors) <= CURVE_TOL
     ok_energy = energy_drift <= DRIFT_TOL
+    ok_momentum = model_drift <= DRIFT_TOL
     test_passed = (test_passed and (ok_ref or name not in CHECK_REFERENCES)
-                   and (ok_energy or name not in CHECK_ENERGY))
+                   and (ok_energy or name not in CHECK_ENERGY) and (ok_momentum or name not in CHECK_MOMENTUM))
     print(f"  {name}, step {rows[1, 0] - rows[0, 0]:g}: centre of mass against Eq. (75) {centre_error:.1e} "
           f"(limit {CENTRE_TOL}); against Figs. 5, 6: energy {energy_errors[0]:.4f}, p_1, l_2, l_3 "
           f"{np.round(momentum_errors, 4)} (limit {CURVE_TOL}); E = {energy[-1]:.1f}, l = {np.round(angular[-1], 1)}  "
           f"{status(ok_ref, name in CHECK_REFERENCES)}", file=LOG)
     print(f"  {name}, free flight: drift of the energy {energy_drift:.1e}  {status(ok_energy, name in CHECK_ENERGY)}, "
-          f"of the angular momentum {angular_drift:.1e}  RUN THROUGH (limit {DRIFT_TOL})", file=LOG)
+          f"of the angular momentum of the model {model_drift:.1e}  {status(ok_momentum, name in CHECK_MOMENTUM)}, "
+          f"of Eq. (108) with J {angular_drift:.1e}  RUN THROUGH (limit {DRIFT_TOL})", file=LOG)
     energy_axes.plot(rows[:, 0], energy, color=COLOURS[name], label=SCHEMES[name])
     for value, style in zip(momenta_compared.T, ["-", "-", "-."]):
       momentum_axes.plot(times, value, color=COLOURS[name], ls=style)
@@ -171,8 +178,10 @@ try:
   for what, ends, marker in [("position", positions, "o"), ("velocity", velocities, "s")]:
     diffs = np.array([relative_L2(ends[i], ends[-1]) for i in range(ORDER_RUNS - 1)])
     measured, local = convergence_order(steps[:-1], diffs)
-    print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER}; "
-          f"local {np.round(local, 2)})  RUN THROUGH", file=LOG)
+    ok = abs(measured - ORDER) <= ORDER_TOL
+    test_passed = test_passed and (ok or what != "position")
+    print(f"  LeapFrog, {what} of the loaded end at t = {ORDER_END:g}: order {measured:.2f} (expected {ORDER} +- "
+          f"{ORDER_TOL}; local {np.round(local, 2)})  {status(ok, what == 'position')}", file=LOG)
     order_axes.loglog(steps[:-1], diffs, marker=marker, markerfacecolor="none", ls="", color=COLOURS["LeapFrog"])
     order_axes.loglog(steps[:-1], diffs[-1] * (steps[:-1] / steps[-2])**ORDER, "--", color=COLOURS["LeapFrog"])
   handles = [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="",
@@ -182,14 +191,15 @@ try:
   order_axes.legend(handles=handles, fontsize=7)
   order_axes.set_xlabel("time step")
   order_axes.set_ylabel("loaded end at t = 5, leap-frog")
-  order_axes.set_title("convergence (run through: first order, open)")
+  order_axes.set_title("convergence of leap-frog")
 except Exception as e:
   print(e)
   test_passed = False
 
 if test_passed:
   print(colored("INTEGRATOR TEST 6 PASSED", "green")
-        + colored(" (RUN THROUGH: EmbeddedRK, energy of Milne, angular momentum, order)", "yellow"))
+        + colored(" (RUN THROUGH: Milne and EmbeddedRK energy in the free flight, momentum with J, velocity order)",
+                  "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b"), (fig_c, "c")]:

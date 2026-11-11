@@ -26,13 +26,12 @@ SCHEMES = {"LeapFrog": ("leap-frog", 2.0, 0.1, 2.),
            "ode45": ("EmbeddedRK ode45: Dormand-Prince", 5.0, 0.3, 2.)}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
 MARKERS = {"planar": "o", "3D": "s"}
-# case: (check the motion, check the energy). Not checked, only run through: EmbeddedRK in 3D, which is first order
-# as its mass matrix stays frozen during the stages; the energy in 3D, whose error stops at about 2e-4 for every
-# integrator, whatever the step.
+# case: (check the motion, check the energy). Not checked, only run through: the energy in 3D, whose error stops at
+# about 4e-4 for every integrator, whatever the step.
 CASES = {("LeapFrog", "planar"): (True, True), ("LeapFrog", "3D"): (True, False),
          ("Milne", "planar"): (True, True), ("Milne", "3D"): (True, False),
-         ("ode23", "planar"): (True, True), ("ode23", "3D"): (False, False),
-         ("ode45", "planar"): (True, True), ("ode45", "3D"): (False, False)}
+         ("ode23", "planar"): (True, True), ("ode23", "3D"): (True, False),
+         ("ode45", "planar"): (True, True), ("ode45", "3D"): (True, False)}
 
 
 def evaluate(scheme, dim, motion_axes, energy_axes):
@@ -104,7 +103,7 @@ except Exception as e:
 
 if test_passed:
   print(colored("INTEGRATOR TEST 1 PASSED", "green")
-        + colored(" (RUN THROUGH: EmbeddedRK in 3D, energy in 3D)", "yellow"))
+        + colored(" (RUN THROUGH: energy in 3D)", "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b")]:

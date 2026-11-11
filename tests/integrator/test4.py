@@ -18,12 +18,11 @@ END = 100.
 # body-frame angular velocity of Krysl, Endres (2005), Fig. 3 (their finest step), read from the vector paths
 REFERENCE = "tests/integrator/ref_data/test4_ref_omega.csv"
 OMEGA_TOL = 0.01      # relative L2 of each component, scaled by the largest one (Omega_2), as in plastic test 3
-# run: checked. Not checked, only run through: EmbeddedRK in 3D, as its mass matrix stays frozen during the stages
-RUNS = {"LeapFrog_0": True, "Milne": True, "ode23": False, "ode45": False}
-# LeapFrog at five steps, each half the previous one: order 2 expected; run through, as the integrators are first
-# order on rigid rotation at present
+# run: checked
+RUNS = {"LeapFrog_0": True, "Milne": True, "ode23": True, "ode45": True}
+# LeapFrog at five steps, each half the previous one: order 2 expected.
 # The runs write their output every 0.01 (tests/testing.mk), so the steps are given here.
-ORDER_STEPS, ORDER = 1e-3 * 0.5**np.arange(5), 2.
+ORDER_STEPS, ORDER, ORDER_TOL = 1e-3 * 0.5**np.arange(5), 2., 0.1
 
 
 def read(name):
@@ -77,8 +76,10 @@ try:
   diffs = np.array([(ends[i].inv() * ends[i + 1]).magnitude() for i in range(len(runs) - 1)])
   steps = ORDER_STEPS[:-1]
   measured, local = convergence_order(steps, diffs)
-  print(f"  LeapFrog, rotation: order {measured:.2f} (expected {ORDER}; local {np.round(local, 2)})  RUN THROUGH",
-        file=LOG)
+  ok = abs(measured - ORDER) <= ORDER_TOL
+  test_passed = test_passed and ok
+  print(f"  LeapFrog, rotation: order {measured:.2f} (expected {ORDER} +- {ORDER_TOL}; local {np.round(local, 2)})  "
+        f"{'ok' if ok else 'off'}", file=LOG)
   fig_b, order_axes = plt.subplots(figsize=(16 / 3, 6))
   order_axes.loglog(steps, diffs, marker="o", markerfacecolor="none", ls="", color="C0",
                     label="rotation at t = 100: difference to the run at half the step [rad]")
@@ -86,14 +87,13 @@ try:
   order_axes.legend(fontsize=7)
   order_axes.set_xlabel("time step")
   order_axes.set_ylabel("error, leap-frog")
-  order_axes.set_title("convergence (run through: first order, open)")
+  order_axes.set_title("convergence of leap-frog")
 except Exception as e:
   print(e)
   test_passed = False
 
 if test_passed:
-  print(colored("INTEGRATOR TEST 4 PASSED", "green") + colored(" (RUN THROUGH: EmbeddedRK, order)",
-                                                                "yellow"))
+  print(colored("INTEGRATOR TEST 4 PASSED", "green"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b")]:
