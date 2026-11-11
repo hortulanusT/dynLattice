@@ -24,6 +24,10 @@ const char *LatticeModel::ROD_CONTACT_PROP = "contact";
 const char *LatticeModel::JOINT_CONTACT_PROP = "jointContact";
 const char *LatticeModel::ROD_LIST_PROP = "rodList";
 const char *LatticeModel::NAME_PREFIX = "prefix";
+const char *LatticeModel::TRANS_DOF_NAMES = "dofNamesTrans";
+const char *LatticeModel::ROT_DOF_NAMES = "dofNamesRot";
+const char *LatticeModel::MOMENTUM[3] = {"momentum_x", "momentum_y", "momentum_z"};
+const char *LatticeModel::ANGULAR_MOMENTUM[3] = {"angularMomentum_x", "angularMomentum_y", "angularMomentum_z"};
 
 //-----------------------------------------------------------------------
 //   constructor
@@ -81,6 +85,10 @@ LatticeModel::LatticeModel
   dummyConf.get(childConf, childName);
   myConf.set(CHILD_PROPS, childConf);
 
+  // dof names of the rods, for the momenta
+  childConf.find(transDofs_, TRANS_DOF_NAMES);
+  childConf.find(rotDofs_, ROT_DOF_NAMES);
+
   JEM_PRECHECK2(children_.size() > 0, jem::makeCString(String::format("No childrens with prefix '%s' found!", prefix)));
 
   // Get the rod contact model
@@ -135,6 +143,11 @@ bool LatticeModel::takeAction
     vars.set("dissipatedEnergy", 0.);
     vars.set("kineticEnergy", 0.);
     vars.set("mass", 0.);
+    for (idx_t i = 0; i < 3; i++)
+    {
+      vars.set(MOMENTUM[i], 0.);
+      vars.set(ANGULAR_MOMENTUM[i], 0.);
+    }
   }
 
   if (action == Actions::GET_TABLE)
@@ -178,11 +191,35 @@ bool LatticeModel::takeAction
     Properties vars = Globdat::getVariables(globdat);
     double E_kin = 0.0;
     double m = 0.0;
+    Vector velo;
 
     vars.find(E_kin, "kineticEnergy");
     vars.find(m, "mass");
 
-    E_kin += getKineticEnergy(globdat);
+    // M v once, for the kinetic energy and the momenta
+    if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat) && M_)
+    {
+      Vector massVelo(velo.size());
+      M_->matmul(massVelo, velo);
+      E_kin += getKineticEnergy_(velo, massVelo, globdat);
+
+      if (transDofs_.size() == 3 && rotDofs_.size() == 3)
+      {
+        Vector p(3);
+        Vector l(3);
+        double sum = 0.;
+        getMomenta_(p, l, massVelo, globdat);
+        for (idx_t i = 0; i < 3; i++)
+        {
+          sum = 0.;
+          vars.find(sum, MOMENTUM[i]);
+          vars.set(MOMENTUM[i], sum + p[i]);
+          sum = 0.;
+          vars.find(sum, ANGULAR_MOMENTUM[i]);
+          vars.set(ANGULAR_MOMENTUM[i], sum + l[i]);
+        }
+      }
+    }
     m += getMass(globdat);
 
     vars.set("kineticEnergy", E_kin);
@@ -222,31 +259,88 @@ void LatticeModel::getKineticEnergy(XTable &energy_table, const Vector &table_we
 
 double LatticeModel::getKineticEnergy(const Properties &globdat) const
 {
-  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
-  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
   Vector velo, temp;
-  IdxVector jtypes(dofs->typeCount());
-  IdxVector idofs(dofs->typeCount());
   double E_kin = 0.0;
 
   if (StateVector::find(velo, jive::model::STATE1, DofSpace::get(globdat, getContext()), globdat) && M_)
   {
     temp.resize(velo.size());
     M_->matmul(temp, velo);
-
-    for (idx_t idof = 0; idof < dofs->typeCount(); idof++)
-    {
-      jtypes[idof] = dofs->getTypeIndex(dofs->getTypeName(idof));
-    }
-
-    for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
-    {
-      dofs->getDofsForItem(idofs, jtypes, iNode);
-      E_kin += 0.5 * dotProduct(velo[idofs], temp[idofs]);
-    }
+    E_kin = getKineticEnergy_(velo, temp, globdat);
   }
 
   return E_kin;
+}
+
+double LatticeModel::getKineticEnergy_(const Vector &velo, const Vector &massVelo, const Properties &globdat) const
+{
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  IdxVector jtypes(dofs->typeCount());
+  IdxVector idofs(dofs->typeCount());
+  double E_kin = 0.0;
+
+  for (idx_t idof = 0; idof < dofs->typeCount(); idof++)
+  {
+    jtypes[idof] = dofs->getTypeIndex(dofs->getTypeName(idof));
+  }
+
+  for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
+  {
+    dofs->getDofsForItem(idofs, jtypes, iNode);
+    E_kin += 0.5 * dotProduct(velo[idofs], massVelo[idofs]);
+  }
+
+  return E_kin;
+}
+
+void LatticeModel::getMomenta_(const Vector &p, const Vector &l, const Vector &massVelo,
+                               const Properties &globdat) const
+{
+  Assignable<jive::fem::NodeSet> allNodes = jive::fem::NodeSet::get(globdat, getContext());
+  Ref<jive::util::DofSpace> dofs = jive::util::DofSpace::get(globdat, getContext());
+  const idx_t rank = allNodes.rank();
+  Vector disp;
+  Vector coords(rank);
+  Vector x(3);
+  Vector mv(3);
+  IdxVector itrans(3);
+  IdxVector irot(3);
+
+  StateVector::get(disp, dofs, globdat);
+
+  for (idx_t i = 0; i < 3; i++)
+  {
+    itrans[i] = dofs->getTypeIndex(transDofs_[i]);
+    irot[i] = dofs->getTypeIndex(rotDofs_[i]);
+  }
+
+  // p = sum (M v)_trans, l = sum x x (M v)_trans + (M v)_rot, x = X + u: exact for the assembled mass, as the
+  // consistent translational mass couples the nodes with the shape functions that interpolate x and v
+  p = 0.;
+  l = 0.;
+  for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)
+  {
+    if (dofs->findDofIndex(iNode, itrans[0]) < 0)
+      continue;
+
+    allNodes.getNodeCoords(coords, iNode);
+    x = 0.;
+    x[jem::SliceTo(rank)] = coords;
+    for (idx_t i = 0; i < 3; i++)
+    {
+      const idx_t idof = dofs->getDofIndex(iNode, itrans[i]);
+      x[i] += disp[idof];
+      mv[i] = massVelo[idof];
+    }
+
+    p += mv;
+    l[0] += x[1] * mv[2] - x[2] * mv[1];
+    l[1] += x[2] * mv[0] - x[0] * mv[2];
+    l[2] += x[0] * mv[1] - x[1] * mv[0];
+    for (idx_t i = 0; i < 3; i++)
+      l[i] += massVelo[dofs->getDofIndex(iNode, irot[i])];
+  }
 }
 
 void LatticeModel::getMass(XTable &mass_table, const Vector &table_weights, const Properties &globdat) const

@@ -157,6 +157,7 @@ void EmbeddedRKModule::solve
   const idx_t dofCount = dofs_->dofCount();
   double error;
   double t_cur;
+  double t_end;
   Vector u_cur(dofCount);
   Vector v_cur(dofCount);
   Vector a_cur(dofCount);
@@ -178,11 +179,11 @@ void EmbeddedRKModule::solve
   // get the current vectors
   StateVector::get(u_cur, jive::model::STATE0, dofs_, globdat);
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
-  fres = getForce(fint, fext, globdat);
+  fres = getStartForce_(fint, fext, globdat);
   getAcce(a_cur, cons_, fres, globdat);
-  // advance() has already moved the time to the end of the step
-  globdat.get(t_cur, Globdat::TIME);
-  t_cur -= dtime_;
+  // advance() has already moved the time to the end of the step; the stages start from the committed time
+  globdat.get(t_cur, Globdat::OLD_TIME);
+  globdat.get(t_end, Globdat::TIME);
 
   /////////////////////////////////////////////////
   ////////  walk over the butcher tableau
@@ -214,6 +215,10 @@ void EmbeddedRKModule::solve
     StateVector::store(v_step, jive::model::STATE1, dofs_, globdat);
     globdat.set(Globdat::TIME, t_step);
 
+    // the rotational inertia follows the stage rotations (the stages are first order with the mass of u_cur)
+    if (updMassStep_)
+      updateMass_(globdat);
+
     fres = getForce(fint, fext, globdat);
     getAcce(a_step, cons_, fres, globdat);
 
@@ -233,6 +238,8 @@ void EmbeddedRKModule::solve
   {
     u_new = u_step;
     v_new = v_step;
+    // the last stage is the new state: its mass serves the next step
+    massAtState_ = updMassStep_;
   }
   else
     NOT_IMPLEMENTED
@@ -259,13 +266,13 @@ void EmbeddedRKModule::solve
   ////////  step size adaption
   /////////////////////////////////////////////////
   error = 0.;
-  error += getQuality(u_step, u_new);
+  error += getQuality(u_step, u_new, true);
   error += getQuality(v_step, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, error);
 
   // the stages moved the time; leave it at the end of the step, as advance() set it
-  globdat.set(Globdat::TIME, t_cur + dtime_);
+  globdat.set(Globdat::TIME, t_end);
 
   StateVector::store(u_new, jive::model::STATE0, dofs_, globdat);
   StateVector::store(v_new, jive::model::STATE1, dofs_, globdat);

@@ -168,6 +168,16 @@ $(eval $(call integrator_run,test1,ode45_planar_1,$(ode45),1e-4,2.,$(test1_plana
 $(eval $(call integrator_run,test1,ode45_planar_2,$(ode45),5e-5,2.,$(test1_planar)))
 $(eval $(call integrator_run,test1,ode45_planar_3,$(ode45),2.5e-5,2.,$(test1_planar)))
 $(eval $(call integrator_run,test1,ode45_planar_4,$(ode45),1.25e-5,2.,$(test1_planar)))
+# test 1, mesh: the 3D energy error of the element, from rest (the same start on every mesh), a rectangle whose two
+# bending stiffnesses differ by 2 and a dead tip force in x and z, so that the motion leaves the plane; LeapFrog with
+# the step proportional to the element size, output about every 1e-3
+test1_mesh = -p "model.model.rodMesh.child.material.cross_section='rectangle'" \
+	-p "model.model.rodMesh.child.material.side_length=[0.1,0.07071067811865475]" \
+	-p "model.model.force.nodeGroups=['free','free']" -p "model.model.force.dofs=['dx','dz']" \
+	-p "model.model.force.factors=[1.,0.5]" -p "model.model.init.veloVals=[0.,0.]"
+$(eval $(call integrator_run,test1,mesh_4,$(leapfrog),2.5e-5,2.,$(test1_mesh) -p Input.input.onelab.Elements=4. -p "Output.sampling.sampleWhen='i % 40 < 1'"))
+$(eval $(call integrator_run,test1,mesh_8,$(leapfrog),1.25e-5,2.,$(test1_mesh) -p Input.input.onelab.Elements=8. -p "Output.sampling.sampleWhen='i % 80 < 1'"))
+$(eval $(call integrator_run,test1,mesh_16,$(leapfrog),6.25e-6,2.,$(test1_mesh) -p Input.input.onelab.Elements=16. -p "Output.sampling.sampleWhen='i % 160 < 1'"))
 
 # test 2, axial wave over three cycles: each integrator at about the same accuracy per cost
 $(eval $(call integrator_run,test2,LeapFrog,$(leapfrog),1e-3,12.))

@@ -67,7 +67,7 @@ void MilneDeviceModule::solve(const Properties &info, const Properties &globdat)
   // get the current vectors
   StateVector::get(u_cur, jive::model::STATE0, dofs_, globdat);
   StateVector::get(v_cur, jive::model::STATE1, dofs_, globdat);
-  fres = getForce(fint, fext, globdat);
+  fres = getStartForce_(fint, fext, globdat);
   getAcce(a_cur, cons_, fres, globdat);
   globdat.get(step, Globdat::TIME_STEP);
 
@@ -87,8 +87,8 @@ void MilneDeviceModule::solve(const Properties &info, const Properties &globdat)
   StateVector::store(u_pre, jive::model::STATE0, dofs_, globdat);
   StateVector::store(v_pre, jive::model::STATE1, dofs_, globdat);
 
-  // predict accelerations
-  fres = updForce(fint, fext, globdat);
+  // predict accelerations, at the end of the step (always evaluated afresh, as before)
+  fres = getForce(fint, fext, globdat, false);
   getAcce(a_pre, cons_, fres, globdat);
 
   /////////////////////////////////////////////////
@@ -111,32 +111,10 @@ void MilneDeviceModule::solve(const Properties &info, const Properties &globdat)
   ////////  step size adaption
   /////////////////////////////////////////////////
   correction = 0.;
-  correction += getQuality(u_pre, u_new);
+  correction += getQuality(u_pre, u_new, true);
   correction += getQuality(v_pre, v_new) * dtime_;
 
   info.set(SolverInfo::RESIDUAL, 0.5 * correction);
-}
-
-//-----------------------------------------------------------------------
-//   updForce
-//-----------------------------------------------------------------------
-Vector
-MilneDeviceModule::updForce(const Vector &fint,
-                            const Vector &fext,
-                            const Properties &globdat)
-{
-  Properties params;
-
-  // update the internal force vector for this configuration
-  fint = 0.0;
-
-  params.set(ActionParams::INT_VECTOR, fint);
-  if (mode_ == CONSISTENT)
-    params.set(ActionParams::MATRIX2, solver_->getMatrix());
-
-  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
-
-  return Vector(fext - fint);
 }
 
 //-----------------------------------------------------------------------

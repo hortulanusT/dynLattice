@@ -3,9 +3,7 @@
  * @author Til Gärtner
  * @brief Implementation of leap-frog time integration algorithm
  *
- * This module implements the leap-frog time integration scheme for explicit
- * dynamic analysis. The method uses staggered time stepping with second-order
- * accuracy and symplectic properties for energy conservation.
+ * Leap-frog in its velocity-Verlet form: all state vectors at the full step.
  */
 
 #include "modules/LeapFrogModule.h"
@@ -29,7 +27,7 @@ const char *LeapFrogModule::TYPE_NAME = "LeapFrog";
 //   constructor & destructor
 //-----------------------------------------------------------------------
 
-LeapFrogModule::LeapFrogModule(const String &name) : Super(name), firstStep_(true)
+LeapFrogModule::LeapFrogModule(const String &name) : Super(name), accValid_(false)
 {
 }
 
@@ -47,43 +45,64 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
   using jive::model::STATE;
   const idx_t dofCount = dofs_->dofCount();
 
-  Properties params;
   Vector fint(dofCount);
   Vector fext(dofCount);
   Vector fres(dofCount);
-  Vector u_old, v_old, a_old;
+  Vector u_old, v_old;
+  Vector a_old(dofCount);
   Vector dv(dofCount);
   Vector du(dofCount);
   Vector u_new(dofCount);
+  Vector v_half(dofCount);
   Vector v_new(dofCount);
   Vector a_new(dofCount);
 
-  // Get the state vectors from the last time step (velocities actually at
-  // half steps!)
+  // the state of the last step, all at t_n
   StateVector::get(u_old, STATE[0], dofs_, globdat);
   StateVector::get(v_old, STATE[1], dofs_, globdat);
-  StateVector::get(a_old, STATE[2], dofs_, globdat);
-  params.clear();
 
-  // Compute new accelerations
-  fres = getForce(fint, fext, globdat);
-  getAcce(a_new, cons_, fres, globdat);
+  // a_n from the end of the last step; on the first step and after a cancel or a dof change from u_n at t_n
+  if (accValid_)
+    StateVector::get(a_old, STATE[2], dofs_, globdat);
+  else
+  {
+    fres = getStartForce_(fint, fext, globdat);
+    getAcce(a_old, cons_, fres, globdat);
+  }
 
-  // update velocity; the initial velocity is at t = 0, so the first step of this module is a half kick to t = dt / 2
-  ABupdate(dv, a_new);
-  if (firstStep_)
-    dv *= 0.5;
-  updateVec(v_new, v_old, dv);
+  // kick: v_{n+1/2} = v_n + dt/2 a_n
+  dv = 0.5 * dtime_ * a_old;
+  updateVec(v_half, v_old, dv);
 
-  // update position
-  ABupdate(du, v_new);
+  // drift: exp(u_{n+1}) = exp(dt v_{n+1/2}) exp(u_n) for the rotations
+  du = dtime_ * v_half;
   updateVec(u_new, u_old, du, true);
 
-  // store the new state
+  // the gyroscopic force at the end needs v_{n+1}, which needs a_{n+1}: predicted with a_n (second order)
+  updateVec(v_new, v_half, dv);
   StateVector::store(u_new, STATE[0], dofs_, globdat);
   StateVector::store(v_new, STATE[1], dofs_, globdat);
 
-  // no error estimate: the step is fixed (see init)
+  // the rotational inertia at u_{n+1}; it serves the next step too
+  if (updMassStep_)
+  {
+    updateMass_(globdat);
+    massAtState_ = true;
+  }
+
+  // a_{n+1} at u_{n+1}, t_{n+1}
+  fres = getEndForce_(fint, fext, globdat);
+  getAcce(a_new, cons_, fres, globdat);
+
+  // kick: v_{n+1} = v_{n+1/2} + dt/2 a_{n+1}
+  dv = 0.5 * dtime_ * a_new;
+  updateVec(v_new, v_half, dv);
+
+  StateVector::store(v_new, STATE[1], dofs_, globdat);
+  StateVector::store(a_new, STATE[2], dofs_, globdat);
+  accValid_ = true;
+
+  // no error estimate: the step is fixed (see configure)
   info.set(SolverInfo::RESIDUAL, 0.);
 }
 
@@ -94,34 +113,36 @@ void LeapFrogModule::solve(const Properties &info, const Properties &globdat)
 Module::Status LeapFrogModule::init(const Properties &conf, const Properties &props, const Properties &globdat)
 {
   Status status = Super::init(conf, props, globdat);
-  firstStep_ = true;
-
-  // without an error estimate the adaptive control would grow the step every step: keep deltaTime
-  minDtime_ = dtime_;
-  maxDtime_ = dtime_;
-  getConfig(conf, globdat);
+  accValid_ = false;
+  jem::util::connect(dofs_->newSizeEvent, this, &Self::invalidateAcce_);
+  jem::util::connect(dofs_->newOrderEvent, this, &Self::invalidateAcce_);
 
   return status;
 }
 
 void LeapFrogModule::configure(const Properties &props, const Properties &globdat)
 {
+  // also called by init. Without an error estimate the adaptive control would grow the step every step:
+  // keep deltaTime
   Super::configure(props, globdat);
   minDtime_ = dtime_;
   maxDtime_ = dtime_;
 }
 
 //-----------------------------------------------------------------------
-//   commit
+//   cancel, invalidateAcce_
 //-----------------------------------------------------------------------
 
-bool LeapFrogModule::commit(const Properties &globdat)
+void LeapFrogModule::cancel(const Properties &globdat)
 {
-  // a step rejected by the model is solved again, still as the first one
-  const bool accepted = Super::commit(globdat);
-  if (accepted)
-    firstStep_ = false;
-  return accepted;
+  // the restored acceleration may not belong to the restored state (first step): evaluate it again
+  Super::cancel(globdat);
+  accValid_ = false;
+}
+
+void LeapFrogModule::invalidateAcce_()
+{
+  accValid_ = false;
 }
 
 //-----------------------------------------------------------------------

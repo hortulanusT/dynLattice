@@ -249,29 +249,59 @@ class ExplicitModule : public SolverModule
   /// @param[out] fint  Internal force vector
   /// @param[out] fext  External force vector
   /// @param[in] globdat  Global data container
+  /// @param[in] mayReuse  Reuse the internal force of the committed state if the state is still the same
+  /// (the same force, summed in another order: a scheme that always evaluated afresh passes false)
   /// @return Resulting force vector (external - internal)
   Vector getForce(const Vector &fint,
                   const Vector &fext,
-                  const Properties &globdat);
+                  const Properties &globdat,
+                  const bool mayReuse = true);
+
+  /// @brief getForce at the start of the step: with the time of the committed state, t_n
+  /// @details advance() has already set the time to t_n + dt; it is set back to t_n for the evaluation only.
+  /// @param[out] fint  Internal force vector
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
+  /// @return Resulting force vector (external - internal)
+  Vector getStartForce_(const Vector &fint,
+                        const Vector &fext,
+                        const Properties &globdat);
+
+  /// @brief getForce at the end of the step, for a scheme whose last evaluation is at the new state
+  /// @details The internal force without the gyroscopic term is kept for the commit, so that
+  /// evalCommittedForce_ does not evaluate it again. The gyroscopic term is added as in getForce.
+  /// @param[out] fint  Internal force vector
+  /// @param[out] fext  External force vector
+  /// @param[in] globdat  Global data container
+  /// @return Resulting force vector (external - internal)
+  Vector getEndForce_(const Vector &fint,
+                      const Vector &fext,
+                      const Properties &globdat);
 
   /// @brief RMS over all dofs of (y_pre - y_cor) / lengthScale; rotation dofs times rotationScale
   /// @details rotationScale: distance from the axis at which a rotation error counts as a displacement error
-  /// (default lengthScale: rotations in rad).
+  /// (default lengthScale: rotations in rad). With rot, the dofs_SO3 are rotation vectors and their difference is
+  /// the rotation between them, log(R_pre R_cor^T).
   /// @param[in] y_pre  Predicted solution
   /// @param[in] y_cor  Corrected solution
+  /// @param[in] rot  Flag for rotational DOFs (displacements, not velocities)
   /// @return Quality measure
   double getQuality(const Vector &y_pre,
-                    const Vector &y_cor);
+                    const Vector &y_cor,
+                    const bool rot = false);
 
  protected:
   /// @name Module state
   /// @{
-  bool valid_; ///< State validity flag
+  bool valid_;       ///< State validity flag
+  bool updMassStep_; ///< updateWhen held at the start of this step: schemes rebuild the mass at their stage states too
+  bool massAtState_; ///< The mass was built at the state of the step end; advance() need not rebuild it
   /// @}
 
   /// @name Internal force at the committed state
   /// @{
   bool fintCacheValid_;  ///< True between commit and the next state change
+  bool fintCacheFresh_;  ///< fintCache_ holds the force of the step end (getEndForce_), not evaluated again at commit
   Vector fintCache_;     ///< Internal force (without gyroscopic term) at the committed state
   Vector fintCacheDisp_; ///< Displacements the cached force belongs to
   /// @}
@@ -285,6 +315,7 @@ class ExplicitModule : public SolverModule
   double saftey_;   ///< Safety factor for step size control
   double incrFact_; ///< Step size increase factor
   double decrFact_; ///< Step size decrease factor
+  idx_t minStepCount_; ///< Steps accepted at minDtime_ with an error above the precision (warned)
   /// @}
 
   /// @name Integration parameters
@@ -303,6 +334,7 @@ class ExplicitModule : public SolverModule
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping
   BoolVector isRotDof_;   ///< Mask of rotational DOFs (rebuilt with rdofs_)
+  bool rotDofsValid_;     ///< rdofs_ and isRotDof_ match the dof space
   /// @}
 
   /// @name System components

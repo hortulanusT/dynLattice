@@ -42,7 +42,12 @@ ExplicitModule::ExplicitModule
 {
   dtime_ = 1.0;
   valid_ = false;
+  updMassStep_ = false;
+  massAtState_ = false;
   fintCacheValid_ = false;
+  fintCacheFresh_ = false;
+  rotDofsValid_ = false;
+  minStepCount_ = 0;
   lenScale_ = 1e-3;
   rotScale_ = lenScale_;
   dofsSO3_.resize(0);
@@ -123,15 +128,10 @@ Module::Status ExplicitModule::init
   if (givenRot || modelHasRot)
   {
     JEM_PRECHECK(SO3_dof_names.size() == 3);
+    // rdofs_ and the mask follow in updateMass_ at the end of init
     dofsSO3_.resize(SO3_dof_names.size());
-    rdofs_.resize(SO3_dof_names.size(), dofs_->dofCount() / dofs_->typeCount());
     for (idx_t i = 0; i < SO3_dof_names.size(); i++)
-    {
-      IdxVector nodes;
       dofsSO3_[i] = dofs_->getTypeIndex(SO3_dof_names[i]);
-      dofs_->getDofsForType(IdxVector(rdofs_(i, ALL)), nodes, dofsSO3_[i]);
-    }
-    updRotMask_();
     myConf.set(SO3_DOFS, SO3_dof_names);
 
     String modelType;
@@ -155,26 +155,10 @@ Module::Status ExplicitModule::init
   FuncUtils::getConfig(myConf, updCond_, PropNames::UPDATE_COND);
 
   // time stepping settings
-  myProps.find(prec_, PropNames::PRECISION);
-  myConf.set(PropNames::PRECISION, prec_);
-  myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
-  myConf.set(PropNames::DELTA_TIME, dtime_);
+  configure(props, globdat);
+  getConfig(conf, globdat);
 
   Globdat::getVariables(globdat).set(PropNames::DELTA_TIME, dtime_);
-
-  minDtime_ = dtime_ / 100.;
-  myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
-  myConf.set(PropNames::MIN_DTIME, minDtime_);
-  maxDtime_ = dtime_ * 100.;
-  myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
-  myConf.set(PropNames::MAX_DTIME, maxDtime_);
-
-  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
-  myConf.set("stepSaftey", saftey_);
-  myProps.find(incrFact_, "increaseFactor", 1., 2.);
-  myConf.set("increaseFactor", incrFact_);
-  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
-  myConf.set("decreaseFactor", decrFact_);
 
   // Initialize solver
   jive::solver::declareSolvers();
@@ -232,6 +216,10 @@ void ExplicitModule::shutdown(const Properties &globdat)
 {
   (void)globdat; // unused
 
+  if (minStepCount_ > 0)
+    jem::System::warn() << myName_ << " : " << minStepCount_
+                        << " steps at the smallest time step were accepted with an error above the precision\n";
+
   model_ = nullptr;
   solver_ = nullptr;
   dofs_ = nullptr;
@@ -255,11 +243,15 @@ void ExplicitModule::configure
   myProps.find(prec_, PropNames::PRECISION);
   myProps.find(dtime_, PropNames::DELTA_TIME, 0., NAN);
 
-  minDtime_ = dtime_ / 1000.;
+  minDtime_ = dtime_ / 100.;
   myProps.find(minDtime_, PropNames::MIN_DTIME, 0., dtime_);
 
-  maxDtime_ = dtime_ * 1000.;
+  maxDtime_ = dtime_ * 100.;
   myProps.find(maxDtime_, PropNames::MAX_DTIME, dtime_, NAN);
+
+  myProps.find(saftey_, "stepSaftey", 0.5, 1.);
+  myProps.find(incrFact_, "increaseFactor", 1., 2.);
+  myProps.find(decrFact_, "decreaseFactor", 0., 1.);
 }
 
 //-----------------------------------------------------------------------
@@ -280,6 +272,9 @@ void ExplicitModule::getConfig
   myConf.set(PropNames::DELTA_TIME, dtime_);
   myConf.set(PropNames::MIN_DTIME, minDtime_);
   myConf.set(PropNames::MAX_DTIME, maxDtime_);
+  myConf.set("stepSaftey", saftey_);
+  myConf.set("increaseFactor", incrFact_);
+  myConf.set("decreaseFactor", decrFact_);
 }
 
 //-----------------------------------------------------------------------
@@ -294,10 +289,12 @@ void ExplicitModule::advance(const Properties &globdat)
   globdat.erase(ActionParams::INT_VECTOR);
   globdat.erase(MASS_MATRIX);
 
-  // check if mass needs to be updated
-  valid_ = valid_ && !FuncUtils::evalCond(*updCond_, globdat);
+  // check if mass needs to be updated (not if the last step already built it at its end state)
+  updMassStep_ = FuncUtils::evalCond(*updCond_, globdat);
+  valid_ = valid_ && (!updMassStep_ || massAtState_);
   if (!valid_)
     updateMass_(globdat);
+  massAtState_ = false;
 
   // update time in models and boundary conditions
   Globdat::advanceTime(dtime_, globdat);
@@ -314,6 +311,7 @@ void ExplicitModule::cancel(const Properties &globdat)
 
   // update time in models and boundary conditions
   dropCommittedForce_(globdat);
+  massAtState_ = false;
   Globdat::restoreTime(globdat);
   Globdat::restoreStep(globdat);
   StateVector::restoreNew(dofs_, globdat);
@@ -339,6 +337,16 @@ bool ExplicitModule::commit(const Properties &globdat)
     params.find(accept, ActionParams::ACCEPT);
   }
   accept = accept && (error <= prec_ || dtime_ <= minDtime_);
+
+  // at minDTime a step is accepted whatever its error: say so (not for a fixed step, minDTime = maxDTime)
+  if (accept && error > prec_ && minDtime_ < maxDtime_)
+  {
+    if (minStepCount_ == 0)
+      jem::System::warn() << myName_ << " : a step at the smallest time step " << dtime_
+                          << " is accepted with an error of " << error << " > precision " << prec_
+                          << " (counted until the end of the run)\n";
+    minStepCount_++;
+  }
 
   // next step from the error estimate: after an accepted step at most incrFact_ times larger, never below
   // decrFact_ times the old one, within [minDtime_, maxDtime_] (a step rejected by the model can have a small error)
@@ -459,7 +467,8 @@ void ExplicitModule::updateVec(const Vector &y_new,
 Vector
 ExplicitModule::getForce(const Vector &fint,
                          const Vector &fext,
-                         const Properties &globdat)
+                         const Properties &globdat,
+                         const bool mayReuse)
 {
   Properties params;
 
@@ -479,7 +488,7 @@ ExplicitModule::getForce(const Vector &fint,
   // The state is the committed one if nothing touched it since the commit;
   // then the internal force of the output pass can be reused.
   bool reuse = false;
-  if (fintCacheValid_)
+  if (fintCacheValid_ && mayReuse)
   {
     Vector disp;
     StateVector::get(disp, dofs_, globdat);
@@ -515,6 +524,65 @@ ExplicitModule::getForce(const Vector &fint,
 }
 
 //-----------------------------------------------------------------------
+//   getStartForce_
+//-----------------------------------------------------------------------
+
+Vector ExplicitModule::getStartForce_(const Vector &fint,
+                                      const Vector &fext,
+                                      const Properties &globdat)
+{
+  double t_new;
+  double t_old;
+
+  globdat.get(t_new, Globdat::TIME);
+  globdat.get(t_old, Globdat::OLD_TIME);
+  JEM_ASSERT2(jem::numeric::abs(t_new - dtime_ - t_old) <= 1e-12 * (jem::numeric::abs(t_new) + dtime_),
+              "the old time is not the start of the step");
+
+  globdat.set(Globdat::TIME, t_old);
+  Vector fres = getForce(fint, fext, globdat);
+  globdat.set(Globdat::TIME, t_new);
+
+  return fres;
+}
+
+//-----------------------------------------------------------------------
+//   getEndForce_
+//-----------------------------------------------------------------------
+
+Vector ExplicitModule::getEndForce_(const Vector &fint,
+                                    const Vector &fext,
+                                    const Properties &globdat)
+{
+  Properties params;
+
+  fext = 0.0;
+  fint = 0.0;
+
+  params.set(ActionParams::EXT_VECTOR, fext);
+  params.set(ActionParams::INT_VECTOR, fint);
+  params.set(ActionParams::CONSTRAINTS, cons_);
+
+  model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
+  model_->takeAction(Actions::GET_EXT_VECTOR, params, globdat);
+
+  // the evaluation of evalCommittedForce_ (without MATRIX2), kept for the commit
+  model_->takeAction(Actions::GET_INT_VECTOR, params, globdat);
+  fintCache_.resize(fint.size());
+  fintCache_ = fint;
+  fintCacheValid_ = false;
+  fintCacheFresh_ = true;
+
+  if (mode_ == CONSISTENT)
+  {
+    params.set(ActionParams::MATRIX2, solver_->getMatrix());
+    model_->takeAction("GET_GYRO_VECTOR", params, globdat);
+  }
+
+  return Vector(fext - fint);
+}
+
+//-----------------------------------------------------------------------
 //   evalCommittedForce_
 //-----------------------------------------------------------------------
 
@@ -522,6 +590,13 @@ void ExplicitModule::evalCommittedForce_(const Properties &globdat)
 {
   Properties params;
   const idx_t dofCount = dofs_->dofCount();
+
+  // already evaluated at this state by getEndForce_
+  if (fintCacheFresh_)
+  {
+    fintCacheFresh_ = false;
+    return;
+  }
 
   fintCache_.resize(dofCount);
   fintCache_ = 0.0;
@@ -562,6 +637,7 @@ void ExplicitModule::dropCommittedForce_(const Properties &globdat)
     globdat.erase(ActionParams::INT_VECTOR);
   globdat.erase(MASS_MATRIX);
   fintCacheValid_ = false;
+  fintCacheFresh_ = false;
 }
 
 //-----------------------------------------------------------------------
@@ -576,7 +652,8 @@ void ExplicitModule::updateMass_(const Properties &globdat)
       << " ...Updating mass information for explicit solver\n";
   model_->takeAction(Actions::UPD_MATRIX2, params, globdat);
 
-  if (dofsSO3_.size())
+  // the SO(3) dof indices change only with the dof space
+  if (dofsSO3_.size() && !rotDofsValid_)
   {
     IdxVector iitems(dofs_->getItems()->size());
     iitems = jem::iarray(dofs_->getItems()->size());
@@ -588,6 +665,7 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     for (idx_t idof = 0; idof < dofsSO3_.size(); idof++)
       dofs_->getDofsForType(rdofs_(idof, ALL), iitems, dofsSO3_[idof]);
     updRotMask_();
+    rotDofsValid_ = true;
   }
 
   if (mode_ == LUMPED)
@@ -631,6 +709,7 @@ void ExplicitModule::invalidate_()
 {
   valid_ = false;
   fintCacheValid_ = false;
+  rotDofsValid_ = false;
 }
 
 //-----------------------------------------------------------------------
@@ -657,11 +736,45 @@ ExplicitModule::getPrecision() const
 //-----------------------------------------------------------------------
 
 double
-ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor)
+ExplicitModule::getQuality(const Vector &y_pre, const Vector &y_cor, const bool rot)
 {
   // one division for the rotations: lenScale_ / rotScale_ = 1 exactly for the default rotScale_ = lenScale_
   const double rotDiv = lenScale_ / rotScale_;
   Vector y_diff = Vector(y_pre - y_cor);
+
+  // rotation vectors: the rotation between the two, log(R_pre R_cor^T), so that a jump of a vector by 2 pi is no
+  // error. For parallel vectors (planar runs) that is the plain difference, which is kept.
+  if (rot)
+  {
+    const idx_t rotCount = dofsSO3_.size();
+    Vector r_pre(rotCount);
+    Vector r_cor(rotCount);
+    Vector r_diff(rotCount);
+    Matrix R_pre(rotCount, rotCount);
+    Matrix R_cor(rotCount, rotCount);
+    Matrix R_diff(rotCount, rotCount);
+
+    for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+    {
+      if (rdofs_(0, inode) < 0)
+        continue;
+      r_pre = y_pre[rdofs_[inode]];
+      r_cor = y_cor[rdofs_[inode]];
+      // exactly parallel (zero cross product)
+      if (jem::numeric::abs(r_pre[1] * r_cor[2] - r_pre[2] * r_cor[1]) +
+              jem::numeric::abs(r_pre[2] * r_cor[0] - r_pre[0] * r_cor[2]) +
+              jem::numeric::abs(r_pre[0] * r_cor[1] - r_pre[1] * r_cor[0]) <=
+          0.)
+        continue;
+
+      expVec(R_pre, r_pre);
+      expVec(R_cor, r_cor);
+      mul3(R_diff, R_pre, R_cor.transpose());
+      logMat(r_diff, R_diff);
+      y_diff[rdofs_[inode]] = r_diff;
+    }
+  }
+
   for (idx_t i = 0; i < y_diff.size(); i++)
     if (i >= isRotDof_.size() || !isRotDof_[i])
       y_diff[i] /= lenScale_;

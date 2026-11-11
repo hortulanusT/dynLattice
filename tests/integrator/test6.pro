@@ -60,5 +60,7 @@ Output.state.vectors = [ "state = disp", "state1 = velo" ];
 Output.state.saveWhen = "t % 0.1 < deltaTime";
 
 // the loaded end, s = 0, for the order (Kinon et al., Eq. 76)
-Output.sampling.header = "t,dx,dy,dz,rx,ry,rz,E_pot,E_kin,x0,y0,z0,vx0,vy0,vz0";
+Output.sampling.header = "t,dx,dy,dz,rx,ry,rz,E_pot,E_kin,x0,y0,z0,vx0,vy0,vz0,px,py,pz,lx,ly,lz";
 Output.sampling.dataSets += [ "fixed.disp.dx", "fixed.disp.dy", "fixed.disp.dz", "fixed.velo.dx", "fixed.velo.dy", "fixed.velo.dz" ];
+// momenta from the mass matrix of the model, for the drift in the free flight
+Output.sampling.dataSets += [ "momentum_x", "momentum_y", "momentum_z", "angularMomentum_x", "angularMomentum_y", "angularMomentum_z" ];
