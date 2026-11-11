@@ -10,7 +10,7 @@
 /// @brief Small-strain linear elastic 3D solid.
 ///
 /// Strain and stress are Voigt vectors (xx, yy, zz, yz, xz, xy) with engineering
-/// shear strains. The stiffness input is described in SolidMaterial::makeStiffness().
+/// shear strains. The stiffness input is described in SolidMaterial::makeStiffness_().
 ///
 /// @see SolidMaterial, SaintVenantKirchhoffSolidMaterial
 class ElasticSolidMaterial : public SolidMaterial

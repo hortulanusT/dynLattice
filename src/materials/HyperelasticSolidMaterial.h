@@ -7,9 +7,9 @@
 #pragma once
 #include "materials/SolidMaterial.h"
 
-/// @brief Base class for finite-strain solids, driven by the deformation gradient F.
+/// @brief Base class of the finite-strain solids, driven by the deformation gradient F.
 ///
-/// A concrete law only has to implement calcStress_() and calcTangent_().
+/// A law provides calcStress_() and calcTangent_().
 ///
 /// @see SolidMaterial, NeoHookeanSolidMaterial, SaintVenantKirchhoffSolidMaterial
 class HyperelasticSolidMaterial : public SolidMaterial

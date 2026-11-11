@@ -71,13 +71,7 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   StringVector dofNames = dofs->getTypeNames();
   String args = StringUtils::join(dofNames, ", ");
 
-  myProps.get(ipCount, "ipCount");
-  myProps.get(elemCount, "elemCount");
-
-  if (ipCount <= 0 || elemCount < 0)
-    throw jem::IllegalInputException(
-        getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
-                          String(ipCount) + " and " + String(elemCount));
+  readCounts_(myProps, ipCount, elemCount);
 
   dofCount_ = dofs->typeCount();
   argCount_ = dofCount_;

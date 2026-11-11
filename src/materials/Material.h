@@ -80,9 +80,9 @@ class Material : public NamedObject
   ///
   /// @note Rods: 6 generalized components (shear, axial, bending, torsion).
   ///       Solids: 6 Voigt components (xx, yy, zz, yz, xz, xy).
-  /// @note Pure evaluation: without element and integration point there is no state
-  ///       to update, so neither energy nor history are stored. Use the version with
-  ///       `ielem` and `ip` whenever applyDeform() and getPotentialEnergy() are needed.
+  /// @note Does not update the state of an integration point; use the version with `ielem`
+  ///       and `ip` for that. ElastoPlasticRodMaterial, which needs the state, throws.
+  /// @note Throws for the finite-strain solids, which take the deformation gradient F.
   virtual void getStress(const Vector &stress, const Vector &strain) = 0;
 
   /// @brief Compute stress with element and integration point context.
@@ -111,6 +111,7 @@ class Material : public NamedObject
   /// @brief Get the material stiffness matrix (tangent modulus relating stress to strain).
   ///
   /// @returns Material stiffness matrix
+  /// @note Throws for the finite-strain solids; use the version with the deformation gradient.
   virtual Matrix getMaterialStiff() const = 0;
 
   /// @brief Write the material stiffness matrix into an existing matrix (no allocation, for hot code)
@@ -224,6 +225,16 @@ class Material : public NamedObject
 
  protected:
   virtual ~Material();
+
+  /// @brief Read the integration point count `ipCount` and element count `elemCount`.
+  ///
+  /// Both are required and set by the model that owns the material.
+  ///
+  /// @param[in] myProps  Properties of the material
+  /// @param[out] ipCount  Integration points per element
+  /// @param[out] elemCount  Number of elements
+  /// @throws IllegalInputException if `ipCount` is not positive or `elemCount` is negative
+  void readCounts_(const Properties &myProps, idx_t &ipCount, idx_t &elemCount) const;
 
   /// @brief Verbosity level for material output and debugging
   idx_t verbosity_;

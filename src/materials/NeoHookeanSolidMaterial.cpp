@@ -8,10 +8,11 @@
 #include "materials/MaterialFactory.h"
 
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/Float.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/numeric/algebra/LUSolver.h>
 #include <jive/util/ObjectConverter.h>
 
-#include <cmath>
 #include <math.h>
 
 using jem::newInstance;
@@ -40,7 +41,12 @@ void NeoHookeanSolidMaterial::configure(const Properties &props, const Propertie
   Properties myProps = props.getProps(myName_);
   myProps.setConverter(newInstance<jive::util::ObjConverter>(globdat));
 
-  getLame(myProps, mu_, lambda_);
+  if (myProps.contains("symmetry") || myProps.contains("C_11"))
+    throw jem::IllegalInputException(
+        getContext(), "the material is isotropic: 'symmetry' and 'C_ij' are not supported, "
+                      "give 'young' and either 'poisson_ratio' or 'shear_modulus'");
+
+  getLame_(myProps, mu_, lambda_);
 }
 
 void NeoHookeanSolidMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -53,78 +59,64 @@ void NeoHookeanSolidMaterial::getConfig(const Properties &conf, const Properties
   myConf.set("shear_modulus", mu_);
 }
 
-double NeoHookeanSolidMaterial::checkedDet_(const Matrix &F) const
+double NeoHookeanSolidMaterial::invertF_(jem::Tuple<double, GLOB_RANK, GLOB_RANK> &Finv, const Matrix &F) const
 {
-  const double det = F(0, 0) * (F(1, 1) * F(2, 2) - F(1, 2) * F(2, 1)) -
-                     F(0, 1) * (F(1, 0) * F(2, 2) - F(1, 2) * F(2, 0)) +
-                     F(0, 2) * (F(1, 0) * F(2, 1) - F(1, 1) * F(2, 0));
+  for (idx_t i = 0; i < GLOB_RANK; i++)
+    for (idx_t j = 0; j < GLOB_RANK; j++)
+      Finv(i, j) = F(i, j);
 
-  // also catches NaN, for which every comparison is false, and infinity
-  if (!(det > 0. && std::isfinite(det)))
+  double detF;
+  jem::numeric::invert(Finv, detF);
+
+  // NaN and infinity fail these comparisons as well
+  if (!(detF > 0. && detF <= jem::Float::MAX_VALUE))
     throw jem::IllegalInputException(
-        getContext(), "the determinant of the deformation gradient has to be positive and finite, got " + String(det));
+        getContext(), "the determinant of the deformation gradient has to be positive and finite, got " + String(detF));
 
-  return det;
-}
-
-void NeoHookeanSolidMaterial::invert_(double (&Finv)[3][3], const Matrix &F, double det)
-{
-  for (idx_t i = 0; i < 3; i++)
-  {
-    for (idx_t j = 0; j < 3; j++)
-    {
-      idx_t i1 = (i + 1) % 3, i2 = (i + 2) % 3;
-      idx_t j1 = (j + 1) % 3, j2 = (j + 2) % 3;
-      Finv[j][i] = (F(i1, j1) * F(i2, j2) - F(i1, j2) * F(i2, j1)) / det;
-    }
-  }
+  return detF;
 }
 
 double NeoHookeanSolidMaterial::calcStress_(const Matrix &P, const Matrix &F) const
 {
-  const double J = checkedDet_(F);
-  const double lnJ = log(J);
-
-  double Finv[3][3];
-  invert_(Finv, F, J);
+  jem::Tuple<double, GLOB_RANK, GLOB_RANK> Finv;
+  const double detF = invertF_(Finv, F); // J = det F, the volume ratio
+  const double lnJ = log(detF);
 
   double I1 = 0.;
-  for (idx_t i = 0; i < 3; i++)
-    for (idx_t j = 0; j < 3; j++)
+  for (idx_t i = 0; i < GLOB_RANK; i++)
+    for (idx_t j = 0; j < GLOB_RANK; j++)
       I1 += F(i, j) * F(i, j);
 
   // P = mu F + (lambda ln J - mu) F^-T
   const double c = lambda_ * lnJ - mu_;
-  for (idx_t i = 0; i < 3; i++)
-    for (idx_t j = 0; j < 3; j++)
-      P(i, j) = mu_ * F(i, j) + c * Finv[j][i];
+  for (idx_t i = 0; i < GLOB_RANK; i++)
+    for (idx_t j = 0; j < GLOB_RANK; j++)
+      P(i, j) = mu_ * F(i, j) + c * Finv(j, i);
 
   return 0.5 * mu_ * (I1 - 3.) - mu_ * lnJ + 0.5 * lambda_ * lnJ * lnJ;
 }
 
 void NeoHookeanSolidMaterial::calcTangent_(const Matrix &A, const Matrix &F) const
 {
-  const double J = checkedDet_(F);
-  const double lnJ = log(J);
-
-  double Finv[3][3];
-  invert_(Finv, F, J);
+  jem::Tuple<double, GLOB_RANK, GLOB_RANK> Finv;
+  const double detF = invertF_(Finv, F); // J = det F, the volume ratio
+  const double lnJ = log(detF);
 
   // dP_iJ / dF_kL = mu delta_ik delta_JL + (mu - lambda ln J) Finv_Jk Finv_Li
-  //                 + lambda Finv_Ji Finv_Lk
+  //                 + lambda Finv_Ji Finv_Lk   (here J and L are indices, ln J = ln det F)
   const double c = mu_ - lambda_ * lnJ;
-  for (idx_t J_ = 0; J_ < 3; J_++)
+  for (idx_t J = 0; J < GLOB_RANK; J++)
   {
-    for (idx_t L = 0; L < 3; L++)
+    for (idx_t L = 0; L < GLOB_RANK; L++)
     {
-      for (idx_t i = 0; i < 3; i++)
+      for (idx_t i = 0; i < GLOB_RANK; i++)
       {
-        for (idx_t k = 0; k < 3; k++)
+        for (idx_t k = 0; k < GLOB_RANK; k++)
         {
-          double value = c * Finv[J_][k] * Finv[L][i] + lambda_ * Finv[J_][i] * Finv[L][k];
-          if (i == k && J_ == L)
+          double value = c * Finv(J, k) * Finv(L, i) + lambda_ * Finv(J, i) * Finv(L, k);
+          if (i == k && J == L)
             value += mu_;
-          A(i + 3 * J_, k + 3 * L) = value;
+          A(i + GLOB_RANK * J, k + GLOB_RANK * L) = value;
         }
       }
     }

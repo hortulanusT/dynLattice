@@ -7,14 +7,18 @@
 #pragma once
 #include "materials/HyperelasticSolidMaterial.h"
 
+#include <jem/base/Tuple.h>
+
 /// @brief Compressible isotropic Neo-Hookean solid.
 ///
-/// Energy density: psi = mu/2 (I1 - 3) - mu ln J + lambda/2 (ln J)^2
+/// Energy density: \f$\psi = \frac{\mu}{2}(I_1 - 3) - \mu \ln J + \frac{\lambda}{2}(\ln J)^2\f$
+/// with \f$I_1 = \mathrm{tr}(F^T F)\f$ and \f$J = \det F\f$
 ///
-/// First Piola-Kirchhoff stress: P = mu (F - F^-T) + lambda ln J F^-T
+/// First Piola-Kirchhoff stress: \f$P = \mu (F - F^{-T}) + \lambda \ln J \, F^{-T}\f$
 ///
-/// Properties: young, poisson_ratio or shear_modulus, density.
-/// For small strains the law reduces to isotropic linear elasticity.
+/// Properties: young and either poisson_ratio or shear_modulus; density. Isotropic only:
+/// `symmetry` and `C_ij` are rejected.
+/// For small strains it reduces to isotropic linear elasticity.
 ///
 /// @see HyperelasticSolidMaterial
 class NeoHookeanSolidMaterial : public HyperelasticSolidMaterial
@@ -46,11 +50,11 @@ class NeoHookeanSolidMaterial : public HyperelasticSolidMaterial
   virtual void calcTangent_(const Matrix &A, const Matrix &F) const override;
 
  private:
-  /// @throws IllegalInputException if det(F) is not positive
-  double checkedDet_(const Matrix &F) const;
-
-  /// Inverse of F for a given determinant
-  static void invert_(double (&Finv)[3][3], const Matrix &F, double det);
+  /// @brief Inverse of F, returns the determinant \f$J = \det F\f$.
+  /// @param[out] Finv  Inverse of F
+  /// @param[in] F  Deformation gradient (3x3)
+  /// @throws IllegalInputException if J is not positive and finite
+  double invertF_(jem::Tuple<double, GLOB_RANK, GLOB_RANK> &Finv, const Matrix &F) const;
 
   double mu_;     ///< Shear modulus
   double lambda_; ///< First Lamé parameter

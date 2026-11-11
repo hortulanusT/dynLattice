@@ -6,10 +6,12 @@
 #include "materials/SaintVenantKirchhoffSolidMaterial.h"
 
 #include "materials/MaterialFactory.h"
+#include "utils/helpers.h"
 
 #include <jem/base/ClassTemplate.h>
 
 using jem::newInstance;
+using jive_helpers::mul3;
 
 JEM_DEFINE_CLASS(SaintVenantKirchhoffSolidMaterial);
 
@@ -32,8 +34,9 @@ void SaintVenantKirchhoffSolidMaterial::configure(const Properties &props, const
 {
   Super::configure(props, globdat);
 
-  materialK_.resize(6, 6);
+  materialK_.resize(STRAIN_COUNT, STRAIN_COUNT);
   materialK_ = readStiffness_(props, globdat);
+  secondPKWork_.resize(GLOB_RANK, GLOB_RANK);
 }
 
 void SaintVenantKirchhoffSolidMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -43,82 +46,66 @@ void SaintVenantKirchhoffSolidMaterial::getConfig(const Properties &conf, const 
   writeStiffness_(conf, materialK_);
 }
 
-double SaintVenantKirchhoffSolidMaterial::calcSecondPK_(double (&S)[3][3], const Matrix &F) const
+double SaintVenantKirchhoffSolidMaterial::calcSecondPK_(const Matrix &S, const Matrix &F) const
 {
   // Green-Lagrange strain in Voigt form (engineering shear)
-  double strain[6];
-  for (idx_t i = 0; i < 3; i++)
+  jem::Tuple<double, STRAIN_COUNT> strain;
+  for (idx_t i = 0; i < GLOB_RANK; i++)
   {
-    for (idx_t j = i; j < 3; j++)
+    for (idx_t j = i; j < GLOB_RANK; j++)
     {
       double e = (i == j) ? -1. : 0.;
-      for (idx_t k = 0; k < 3; k++)
+      for (idx_t k = 0; k < GLOB_RANK; k++)
         e += F(k, i) * F(k, j);
       strain[VOIGT[i][j]] = (i == j) ? 0.5 * e : e;
     }
   }
 
-  double stress[6];
+  jem::Tuple<double, STRAIN_COUNT> stress;
   double energy = 0.;
-  for (idx_t a = 0; a < 6; a++)
+  for (idx_t a = 0; a < STRAIN_COUNT; a++)
   {
     stress[a] = 0.;
-    for (idx_t b = 0; b < 6; b++)
+    for (idx_t b = 0; b < STRAIN_COUNT; b++)
       stress[a] += materialK_(a, b) * strain[b];
     energy += 0.5 * strain[a] * stress[a];
   }
 
-  for (idx_t i = 0; i < 3; i++)
-    for (idx_t j = 0; j < 3; j++)
-      S[i][j] = stress[VOIGT[i][j]];
+  for (idx_t i = 0; i < GLOB_RANK; i++)
+    for (idx_t j = 0; j < GLOB_RANK; j++)
+      S(i, j) = stress[VOIGT[i][j]];
 
   return energy;
 }
 
 double SaintVenantKirchhoffSolidMaterial::calcStress_(const Matrix &P, const Matrix &F) const
 {
-  double S[3][3];
-  const double energy = calcSecondPK_(S, F);
+  const double energy = calcSecondPK_(secondPKWork_, F);
 
-  // P = F S, collected first: P may be the same array as F
-  double FS[3][3];
-  for (idx_t i = 0; i < 3; i++)
-  {
-    for (idx_t J = 0; J < 3; J++)
-    {
-      double sum = 0.;
-      for (idx_t K = 0; K < 3; K++)
-        sum += F(i, K) * S[K][J];
-      FS[i][J] = sum;
-    }
-  }
-
-  for (idx_t i = 0; i < 3; i++)
-    for (idx_t J = 0; J < 3; J++)
-      P(i, J) = FS[i][J];
+  // P = F S; mul3 forms the product first, so P may be the same array as F
+  mul3(P, F, secondPKWork_);
 
   return energy;
 }
 
 void SaintVenantKirchhoffSolidMaterial::calcTangent_(const Matrix &A, const Matrix &F) const
 {
-  double S[3][3];
-  calcSecondPK_(S, F);
+  calcSecondPK_(secondPKWork_, F);
 
   // dP_iJ / dF_kL = delta_ik S_JL + F_iM C_MJNL F_kN
-  for (idx_t J = 0; J < 3; J++)
+  for (idx_t J = 0; J < GLOB_RANK; J++)
   {
-    for (idx_t L = 0; L < 3; L++)
+    for (idx_t L = 0; L < GLOB_RANK; L++)
     {
-      for (idx_t i = 0; i < 3; i++)
+      for (idx_t i = 0; i < GLOB_RANK; i++)
       {
-        for (idx_t k = 0; k < 3; k++)
+        for (idx_t k = 0; k < GLOB_RANK; k++)
         {
-          double sum = (i == k) ? S[J][L] : 0.;
-          for (idx_t M = 0; M < 3; M++)
-            for (idx_t N = 0; N < 3; N++)
+          double sum = (i == k) ? secondPKWork_(J, L) : 0.;
+          for (idx_t M = 0; M < GLOB_RANK; M++)
+            for (idx_t N = 0; N < GLOB_RANK; N++)
               sum += F(i, M) * materialK_(VOIGT[M][J], VOIGT[N][L]) * F(k, N);
-          A(i + 3 * J, k + 3 * L) = sum;
+          A(i + GLOB_RANK * J, k + GLOB_RANK * L) = sum;
         }
       }
     }

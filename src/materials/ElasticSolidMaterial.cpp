@@ -32,7 +32,7 @@ void ElasticSolidMaterial::configure(const Properties &props, const Properties &
 {
   Super::configure(props, globdat);
 
-  materialK_.resize(6, 6);
+  materialK_.resize(STRAIN_COUNT, STRAIN_COUNT);
   materialK_ = readStiffness_(props, globdat);
 }
 
@@ -45,23 +45,35 @@ void ElasticSolidMaterial::getConfig(const Properties &conf, const Properties &g
 
 void ElasticSolidMaterial::getStress(const Vector &stress, const Vector &strain)
 {
-  for (idx_t i = 0; i < 6; i++)
+  // sigma = C epsilon, collected first: stress may be the same array as strain
+  jem::Tuple<double, STRAIN_COUNT> sigma;
+  for (idx_t i = 0; i < STRAIN_COUNT; i++)
   {
-    double sum = 0.;
-    for (idx_t j = 0; j < 6; j++)
-      sum += materialK_(i, j) * strain[j];
-    stress[i] = sum;
+    sigma[i] = 0.;
+    for (idx_t j = 0; j < STRAIN_COUNT; j++)
+      sigma[i] += materialK_(i, j) * strain[j];
   }
+
+  for (idx_t i = 0; i < STRAIN_COUNT; i++)
+    stress[i] = sigma[i];
 }
 
 void ElasticSolidMaterial::getStress(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, const bool)
 {
-  getStress(stress, strain);
-
+  // energy density 1/2 epsilon : sigma, taken before stress may overwrite strain
+  jem::Tuple<double, STRAIN_COUNT> sigma;
   double energy = 0.;
-  for (idx_t i = 0; i < 6; i++)
-    energy += strain[i] * stress[i];
+  for (idx_t i = 0; i < STRAIN_COUNT; i++)
+  {
+    sigma[i] = 0.;
+    for (idx_t j = 0; j < STRAIN_COUNT; j++)
+      sigma[i] += materialK_(i, j) * strain[j];
+    energy += strain[i] * sigma[i];
+  }
   currEnergy_(ip, ielem) = 0.5 * energy;
+
+  for (idx_t i = 0; i < STRAIN_COUNT; i++)
+    stress[i] = sigma[i];
 }
 
 Matrix ElasticSolidMaterial::getMaterialStiff() const

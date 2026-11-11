@@ -6,6 +6,7 @@
  */
 #include "materials/Material.h"
 #include <jem/base/ClassTemplate.h>
+#include <jem/base/IllegalInputException.h>
 #include <jem/base/IllegalOperationException.h>
 #include <jem/base/System.h>
 
@@ -99,4 +100,15 @@ void Material::getMaterialStiff(const Matrix &, const Matrix &, const idx_t &, c
 {
   throw jem::IllegalOperationException(
       getContext(), "this material does not support deformation gradient input");
+}
+
+void Material::readCounts_(const Properties &myProps, idx_t &ipCount, idx_t &elemCount) const
+{
+  myProps.get(ipCount, "ipCount");
+  myProps.get(elemCount, "elemCount");
+
+  if (ipCount <= 0 || elemCount < 0)
+    throw jem::IllegalInputException(
+        getContext(), "'ipCount' has to be positive and 'elemCount' non-negative, got " +
+                          String(ipCount) + " and " + String(elemCount));
 }
