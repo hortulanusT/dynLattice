@@ -19,6 +19,15 @@ using jive::Ref;
 ///
 /// Properties: density (default 0); ipCount and elemCount (required, set by the model).
 ///
+/// Use in a model:
+/// - `ipCount` is the largest number of integration points of any element. The energy of
+///   the points an element does not have stays 0.
+/// - ElasticSolidMaterial takes the Voigt strain vector and returns the stress. The hyperelastic
+///   materials take the deformation gradient F and return P and dP/dF. The other form throws.
+/// - getStress() with `ielem` and `ip` stores the energy density, applyDeform() commits it and
+///   rejectDeform() restores the committed one.
+/// - The lumped mass of an element is getLumpedMass(volume): density times volume on the diagonal.
+///
 /// @see ElasticSolidMaterial, HyperelasticSolidMaterial
 class SolidMaterial : public Material
 {
