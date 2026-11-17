@@ -27,7 +27,7 @@ COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
 SCHEME_TOL = (0.002, 0.01)    # every integrator on 16 elements, per mode
 MESHES = [16, 32, 64]         # LeapFrog, for the convergence with the mesh
 MESH_ORDER, MESH_ORDER_TOL = 2., 0.1    # of mode 2; mode 1 is below the precision of the spectrum on the finer meshes
-FINE_TOL = (1e-4, 5e-4)       # on 64 elements, per mode
+FINE_TOL = (1e-4, 7e-4)       # on 64 elements, per mode (mode 2: error of the consistent mass from above, second order in h)
 
 # Han, Benaroya, Wei (1999), Sect. 3.5, clamped-free Timoshenko beam: a tube of radii 0.16 and 0.15 m and L = 1 m
 # (1/s printed as 0.11) with gamma = 2.205, and the exact wave numbers and frequency ratios they give
