@@ -108,6 +108,8 @@ class JointContactModel : public Model
       (const Vector &disp);
 
   /// @brief Compute contact effects for detected contact pairs
+  /// @param[out] energy  Penalty energy of all contact pairs
+  /// @param[out] nodeEnergy  Penalty energy per node (all nodes), half of a pair's energy to each joint node
   /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
   /// @param[in,out] fint  Internal force vector, updated with contact contributions
   /// @param[in] nodesA  Node IDs of first contact side
@@ -115,20 +117,24 @@ class JointContactModel : public Model
   /// @param[in] disp  Displacement vector of all elements
   virtual void computeContacts_
 
-      (MatrixBuilder &mbld,
+      (double &energy,
+       Vector &nodeEnergy,
+       MatrixBuilder &mbld,
        const Vector &fint,
        const IdxVector &nodesA,
        const IdxVector &nodesB,
        const Vector &disp);
 
   /// @brief Compute single contact interaction
+  /// @param[out] energy  Penalty energy 1/2 k g^2 of the pair
   /// @param[out] contactStiffness  Contact stiffness matrix
   /// @param[out] contactForce  Contact force vector
   /// @param[in] posA  Position of first joint
   /// @param[in] posB  Position of second joint
   virtual void computeContact_
 
-      (Matrix contactStiffness,
+      (double &energy,
+       Matrix contactStiffness,
        Vector contactForce,
        Vector posA,
        Vector posB);
@@ -147,6 +153,15 @@ class JointContactModel : public Model
   ArrayBuffer<idx_t> contactsA_; ///< First nodes in contact pairs
   ArrayBuffer<idx_t> contactsB_; ///< Second nodes in contact pairs
   Ref<Function> updCond_;        ///< Update condition function
+  /// @}
+
+  /// @name Penalty energy
+  /// @{
+  double contactEnergy_; ///< Penalty energy of the last force evaluation (the committed state at COMMIT)
+  Vector nodeEnergy_;    ///< The same per node
+#ifndef NDEBUG
+  Vector energyDisp_; ///< Displacements of the last force evaluation (checked at COMMIT)
+#endif
   /// @}
 
   /// @name Contact parameters

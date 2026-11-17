@@ -61,6 +61,10 @@ using jive::util::XTable;
 /// global properties like kinetic energy and total mass. At every commit of a dynamic run it adds the kinetic
 /// energy, the linear momentum and the angular momentum about the origin, all from the assembled mass matrix, to the
 /// global variables kineticEnergy, momentum_x/y/z and angularMomentum_x/y/z.
+/// The potential energy is split like the internal energy of Abaqus: the global variables strainEnergy (rod elastic
+/// strain energy, added by the rod model) and contactEnergy (penalty energy, added by the contact models) are reset
+/// here at INIT and ADVANCE, and both are part of potentialEnergy (which is their sum). The node tables of the same
+/// names (ParaView node_data) are distributed such that they sum to the global value.
 class LatticeModel : public Model
 {
  public:

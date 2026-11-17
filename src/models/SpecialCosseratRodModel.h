@@ -373,13 +373,15 @@ class SpecialCosseratRodModel : public Model
                     double &E_diss,
                     const Vector &disp) const;
 
-  /// @brief Calculate potential energy and fill table
+  /// @brief Calculate the strain energy and fill table
   /// @param[out] energy_table  Output energy table
   /// @param[in,out] table_weights  Table weights
   /// @param[in] disp  Displacement vector
+  /// @param[in] name  Column name: strainEnergy, or potentialEnergy (to which the contact models add their part)
   void getPotentialEnergy_(XTable &energy_table,
                            const Vector &table_weights,
-                           const Vector &disp) const;
+                           const Vector &disp,
+                           const String &name) const;
 
   /// @brief Calculate dissipated energy and fill table
   /// @param[out] energy_table  Output energy table
