@@ -140,6 +140,8 @@ bool LatticeModel::takeAction
   {
     Properties vars = Globdat::getVariables(globdat);
     vars.set("potentialEnergy", 0.);
+    vars.set("strainEnergy", 0.);
+    vars.set("contactEnergy", 0.);
     vars.set("dissipatedEnergy", 0.);
     vars.set("kineticEnergy", 0.);
     vars.set("mass", 0.);

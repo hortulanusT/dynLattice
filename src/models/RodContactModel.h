@@ -172,12 +172,18 @@ class RodContactModel : public Model
                                      const Matrix &elemBoxMax) const;
 
   /// @brief Compute the effects of the contact
+  /// @param[out] energy  Penalty energy of all active contact terms
+  /// @param[out] nodeEnergy  Penalty energy per node (all nodes), summing to energy
   /// @param[in,out] mbld  Stiffness matrix builder, updated with contact contributions
   /// @param[in,out] fint  Internal force vector, updated with contact contributions
   /// @param[in] elementsA  Element indices of one side of the contact
   /// @param[in] elementsB  Element indices of the other side
   /// @param[in] disp  Displacement vector of all elements
-  virtual void computeContacts_(MatrixBuilder &mbld,
+  /// @details The energy of a term is 1/2 k g^2 with the gap g; half of it goes to each rod, and
+  /// within a rod to the two nodes with the shape functions at the contact point.
+  virtual void computeContacts_(double &energy,
+                                Vector &nodeEnergy,
+                                MatrixBuilder &mbld,
                                 const Vector &fint,
                                 const IdxVector &elementsA,
                                 const IdxVector &elementsB,
@@ -216,6 +222,7 @@ class RodContactModel : public Model
                                   const Matrix &possM) const;
 
   /// @brief Compute the force and stiffness contributions of a segment-to-segment contact
+  /// @param[out] energy  Penalty energy of the contact (0 if not active)
   /// @param[out] f_contrib  Force contribution
   /// @param[out] k_contrib  Stiffness contribution
   /// @param[in] possA  Positions of Beam A
@@ -224,7 +231,8 @@ class RodContactModel : public Model
   /// @param[in] uB  Local coordinate Beam B
   /// @return true if contact is active
   /// @see [Wriggers, Zavarise (1999)](https://doi.org/10.1002/(SICI)1099-0887(199706)13:6%3C429::AID-CNM70%3E3.0.CO;2-X)
-  virtual bool computeSTS_(Vector &f_contrib,
+  virtual bool computeSTS_(double &energy,
+                           Vector &f_contrib,
                            Matrix &k_contrib,
                            const Matrix &possA,
                            const Matrix &possB,
@@ -232,6 +240,7 @@ class RodContactModel : public Model
                            const double uB) const;
 
   /// @brief Compute the force and stiffness contributions of a node-to-segment contact
+  /// @param[out] energy  Penalty energy of the contact (0 if not active)
   /// @param[out] f_contrib  Force contribution
   /// @param[out] k_contrib  Stiffness contribution
   /// @param[in] possS  Position of the secondary node
@@ -239,7 +248,8 @@ class RodContactModel : public Model
   /// @param[in] uM  Local coordinate of the main beam
   /// @return true if contact is active
   /// @see [Wriggers, Simo (1985)](https://doi.org/10.1002/cnm.1630010503)
-  virtual bool computeNTS_(Vector &f_contrib,
+  virtual bool computeNTS_(double &energy,
+                           Vector &f_contrib,
                            Matrix &k_contrib,
                            const Vector &possS,
                            const Matrix &possM,
@@ -274,6 +284,12 @@ class RodContactModel : public Model
   ArrayBuffer<idx_t> contactsB_; ///< Contact elements B
 
   Ref<Function> updCond_; ///< Update condition function
+
+  double contactEnergy_; ///< Penalty energy of the last force evaluation (the committed state at COMMIT)
+  Vector nodeEnergy_;    ///< The same per node (see computeContacts_)
+#ifndef NDEBUG
+  Vector energyDisp_; ///< Displacements of the last force evaluation (checked at COMMIT)
+#endif
 
   double penaltySTS_; ///< Segment-to-segment penalty parameter
   double penaltyNTS_; ///< Node-to-segment penalty parameter

@@ -279,8 +279,8 @@ bool SpecialCosseratRodModel::takeAction
       Vector disp;
       StateVector::get(disp, dofs_, globdat);
 
-      if (name == "potentialEnergy")
-        getPotentialEnergy_(*table, weights, disp);
+      if (name == "potentialEnergy" || name == "strainEnergy")
+        getPotentialEnergy_(*table, weights, disp, name);
       if (name == "dissipatedEnergy")
         getDissipatedEnergy_(*table, weights, disp);
     }
@@ -425,9 +425,11 @@ bool SpecialCosseratRodModel::takeAction
     Vector disp;
     Vector velo;
     double E_pot = 0.;
+    double E_strain = 0.;
     double E_diss = 0.;
 
     vars.find(E_pot, "potentialEnergy");
+    vars.find(E_strain, "strainEnergy");
     vars.find(E_diss, "dissipatedEnergy");
 
     StateVector::get(disp, dofs_, globdat);
@@ -439,8 +441,11 @@ bool SpecialCosseratRodModel::takeAction
 #endif
     E_diss += dE_diss;
     E_pot += dE_pot;
+    E_strain += dE_pot;
 
+    // the contact models add their part to potentialEnergy (and contactEnergy) at their COMMIT
     vars.set("potentialEnergy", E_pot);
+    vars.set("strainEnergy", E_strain);
     vars.set("dissipatedEnergy", E_diss);
 
     return true;
@@ -1316,14 +1321,14 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
   }
 }
 
-void SpecialCosseratRodModel::getPotentialEnergy_(XTable &energy_table, const Vector &table_weights, const Vector &disp) const
+void SpecialCosseratRodModel::getPotentialEnergy_(XTable &energy_table, const Vector &table_weights, const Vector &disp, const String &name) const
 {
   const idx_t elemCount = rodElems_.size();
   const idx_t ipCount = shapeK_->ipointCount();
   const idx_t nodeCount = shapeK_->nodeCount();
   const idx_t rank = shapeK_->globalRank();
   const idx_t dofCount = dofs_->typeCount();
-  const idx_t jCol = energy_table.addColumn("potentialEnergy");
+  const idx_t jCol = energy_table.addColumn(name);
 
   // PER ELEMENT VALUES
   Matrix nodeU(rank, nodeCount);

@@ -115,6 +115,11 @@ RodContactModel::RodContactModel
   contactsA_.clear();
   contactsB_.clear();
 
+  // the penalty energy of the last force evaluation
+  contactEnergy_ = 0.;
+  nodeEnergy_.resize(allNodes_.size());
+  nodeEnergy_ = 0.;
+
   // get the verbosity
   verbose_ = false;
   myProps.find(verbose_, VERBOSE_PROP);
@@ -171,6 +176,13 @@ bool RodContactModel::takeAction
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
+    // the energy of this evaluation, zero if no contact is possible (before the early return)
+    contactEnergy_ = 0.;
+    nodeEnergy_ = 0.;
+#ifndef NDEBUG
+    energyDisp_.ref(Vector(disp.clone()));
+#endif
+
     // get the load case
     globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
@@ -194,7 +206,7 @@ bool RodContactModel::takeAction
     }
 
     // Compute the contact effects
-    computeContacts_(*mbld, fint, elemsA, elemsB, disp);
+    computeContacts_(contactEnergy_, nodeEnergy_, *mbld, fint, elemsA, elemsB, disp);
 
     return true;
   }
@@ -208,6 +220,23 @@ bool RodContactModel::takeAction
     params.get(table, ActionParams::TABLE);
     params.get(weights, ActionParams::TABLE_WEIGHTS);
     params.get(name, ActionParams::TABLE_NAME);
+
+    // the penalty energy per node of the last force evaluation; the rod model adds the strain energy to potentialEnergy
+    if (name == "contactEnergy" || name == "potentialEnergy")
+    {
+      if (table->getRowItems() != allNodes_.getData())
+        return false;
+
+      const idx_t jCol = table->addColumn(name);
+
+      for (idx_t inode = 0; inode < allNodes_.size(); inode++)
+        table->addValue(inode, jCol, nodeEnergy_[inode]);
+
+      // energies are sums over the nodes (no averaging), as in the rod model; the ParaViewModule multiplies by the weights
+      weights = 1.;
+
+      return true;
+    }
 
     IdxVector jtypes(3);
 
@@ -237,7 +266,10 @@ bool RodContactModel::takeAction
 
     if (contactsA_.toArray().size() != 0) // skip the computation if no actual contact possible
     {
-      computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
+      // the energy of this evaluation is not stored (it would count twice at COMMIT)
+      double energy = 0.;
+      Vector nodeEnergy(allNodes_.size());
+      computeContacts_(energy, nodeEnergy, *mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
     }
 
     // Add the contact forces to the table
@@ -257,7 +289,30 @@ bool RodContactModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    // LATER add contact stiffness to potential energy!!
+    // the last force evaluation was made at the committed state (see ExplicitModule::commit)
+#ifndef NDEBUG
+    Vector disp;
+    StateVector::get(disp, dofs_, globdat);
+
+    if (energyDisp_.size() > 0)
+    {
+      JEM_ASSERT2(disp.size() == energyDisp_.size(), "contact energy: state of the last force evaluation differs in size");
+      for (idx_t i = 0; i < disp.size(); i++)
+        JEM_ASSERT2(jem::numeric::abs(disp[i] - energyDisp_[i]) <= 0., "contact energy is not the one of the committed state"); // bit-identical
+    }
+#endif
+
+    Properties vars = Globdat::getVariables(globdat);
+    double E_contact = 0.;
+    double E_pot = 0.;
+
+    vars.find(E_contact, "contactEnergy");
+    vars.find(E_pot, "potentialEnergy");
+
+    vars.set("contactEnergy", E_contact + contactEnergy_);
+    vars.set("potentialEnergy", E_pot + contactEnergy_);
+
+    return true;
   }
 
   return false;
@@ -481,7 +536,9 @@ void RodContactModel::findPossibleElements_
 //-----------------------------------------------------------------------
 void RodContactModel::computeContacts_
 
-    (MatrixBuilder &mbld,
+    (double &energy,
+     Vector &nodeEnergy,
+     MatrixBuilder &mbld,
      const Vector &fint,
      const IdxVector &elementsA,
      const IdxVector &elementsB,
@@ -489,6 +546,17 @@ void RodContactModel::computeContacts_
 {
   const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
+
+  energy = 0.;
+  nodeEnergy = 0.;
+
+  // energy of one term: half to each rod; of the half of a rod, the shape functions at u (Line2) to its two nodes
+  double termEnergy = 0.;
+  const auto shareToRod = [&nodeEnergy](const IdxVector &nodes, const double u, const double e)
+  {
+    nodeEnergy[nodes[0]] += 0.25 * (1. - u) * e;
+    nodeEnergy[nodes[1]] += 0.25 * (1. + u) * e;
+  };
 
   if (verbose_)
   {
@@ -568,7 +636,7 @@ void RodContactModel::computeContacts_
       k_contrib.resize(2 * nodeCount * globalRank, 2 * nodeCount * globalRank);
       k_contrib = 0.;
 
-      contact_closed = computeSTS_(f_contrib, k_contrib, possA, possB, uA, uB);
+      contact_closed = computeSTS_(termEnergy, f_contrib, k_contrib, possA, possB, uA, uB);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "FOUND\n";
@@ -577,6 +645,10 @@ void RodContactModel::computeContacts_
 
       if (!contact_closed)
         continue;
+
+      energy += termEnergy;
+      shareToRod(nodesA, uA, termEnergy);
+      shareToRod(nodesB, uB, termEnergy);
 
       dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[0];
       dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[1];
@@ -614,7 +686,7 @@ void RodContactModel::computeContacts_
         continue;
       }
 
-      contact_closed = computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+      contact_closed = computeNTS_(termEnergy, f_contrib, k_contrib, possA[iNodeA], possB, uB);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "\n";
@@ -623,6 +695,10 @@ void RodContactModel::computeContacts_
 
       if (!contact_closed)
         continue;
+
+      energy += termEnergy;
+      nodeEnergy[nodesA[iNodeA]] += 0.5 * termEnergy;
+      shareToRod(nodesB, uB, termEnergy);
 
       dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsA[iNodeA];
       dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsB[0];
@@ -658,7 +734,7 @@ void RodContactModel::computeContacts_
         continue;
       }
 
-      contact_closed = computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+      contact_closed = computeNTS_(termEnergy, f_contrib, k_contrib, possB[iNodeB], possA, uA);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "\n";
@@ -667,6 +743,10 @@ void RodContactModel::computeContacts_
 
       if (!contact_closed)
         continue;
+
+      energy += termEnergy;
+      nodeEnergy[nodesB[iNodeB]] += 0.5 * termEnergy;
+      shareToRod(nodesA, uA, termEnergy);
 
       dofsAB[SliceFromTo(0 * globalRank, 1 * globalRank)] = dofsB[iNodeB];
       dofsAB[SliceFromTo(1 * globalRank, 2 * globalRank)] = dofsA[0];
@@ -697,11 +777,15 @@ void RodContactModel::computeContacts_
         f_contribLocal = 0.;
         k_contribLocal = 0.;
 
-        if (computeNTS_(f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB))
+        if (computeNTS_(termEnergy, f_contribLocal, k_contribLocal, possA[iNodeA], possB, uB))
         {
           if (verbose_)
             jem::System::debug(myName_)
                 << "FOUND between node " << nodesA[iNodeA] << " and element " << elementsB[iContact] << "; ";
+
+          energy += termEnergy;
+          nodeEnergy[nodesA[iNodeA]] += 0.5 * termEnergy;
+          shareToRod(nodesB, uB, termEnergy);
 
           f_contrib[SliceFromTo(iNodeA * globalRank, (iNodeA + 1) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
           f_contrib[SliceFromTo(2 * globalRank, 4 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
@@ -725,10 +809,14 @@ void RodContactModel::computeContacts_
         f_contribLocal = 0.;
         k_contribLocal = 0.;
 
-        if (computeNTS_(f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA))
+        if (computeNTS_(termEnergy, f_contribLocal, k_contribLocal, possB[iNodeB], possA, uA))
         {
           if (verbose_)
             jem::System::debug(myName_) << "FOUND between node " << nodesB[iNodeB] << " and element " << elementsA[iContact] << "; ";
+
+          energy += termEnergy;
+          nodeEnergy[nodesB[iNodeB]] += 0.5 * termEnergy;
+          shareToRod(nodesA, uA, termEnergy);
 
           f_contrib[SliceFromTo(0 * globalRank, 2 * globalRank)] += f_contribLocal[SliceFrom(globalRank)];
           f_contrib[SliceFromTo((2 + iNodeB) * globalRank, (3 + iNodeB) * globalRank)] += f_contribLocal[SliceTo(globalRank)];
@@ -804,6 +892,7 @@ void RodContactModel::computeBlacklist_
 
   Vector f_contrib(0);
   Matrix k_contrib(0, 0);
+  double energy = 0.; // output of the contact terms, not used here (their force contributions are empty)
 
   bool contact_closed;
 
@@ -839,7 +928,7 @@ void RodContactModel::computeBlacklist_
 
     if (shape_->containsLocalPoint(Vector({uA})) && shape_->containsLocalPoint(Vector({uB})))
     {
-      contact_closed = computeSTS_(f_contrib, k_contrib, possA, possB, uA, uB);
+      contact_closed = computeSTS_(energy, f_contrib, k_contrib, possA, possB, uA, uB);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "STS CONTACT\n";
@@ -873,7 +962,7 @@ void RodContactModel::computeBlacklist_
         continue;
       }
 
-      contact_closed = computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+      contact_closed = computeNTS_(energy, f_contrib, k_contrib, possA[iNodeA], possB, uB);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "NTS CONTACT\n";
@@ -907,7 +996,7 @@ void RodContactModel::computeBlacklist_
         continue;
       }
 
-      contact_closed = computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+      contact_closed = computeNTS_(energy, f_contrib, k_contrib, possB[iNodeB], possA, uA);
 
       if (contact_closed && verbose_)
         jem::System::debug(myName_) << "NTS CONTACT\n";
@@ -929,7 +1018,7 @@ void RodContactModel::computeBlacklist_
         if (!(shape_->containsLocalPoint(Vector({uB}))))
           continue;
 
-        contact_closed |= computeNTS_(f_contrib, k_contrib, possA[iNodeA], possB, uB);
+        contact_closed |= computeNTS_(energy, f_contrib, k_contrib, possA[iNodeA], possB, uB);
       }
 
       // check both ends of B against A
@@ -939,7 +1028,7 @@ void RodContactModel::computeBlacklist_
         if (!(shape_->containsLocalPoint(Vector({uA}))))
           continue;
 
-        contact_closed |= computeNTS_(f_contrib, k_contrib, possB[iNodeB], possA, uA);
+        contact_closed |= computeNTS_(energy, f_contrib, k_contrib, possB[iNodeB], possA, uA);
       }
 
       if (contact_closed && verbose_)
@@ -1064,7 +1153,8 @@ double RodContactModel::getClosestPoint_
 //-----------------------------------------------------------------------
 bool RodContactModel::computeSTS_
 
-    (Vector &f_contrib,
+    (double &energy,
+     Vector &f_contrib,
      Matrix &k_contrib,
      const Matrix &possA,
      const Matrix &possB,
@@ -1073,6 +1163,8 @@ bool RodContactModel::computeSTS_
 {
   const idx_t nodeCount = shape_->nodeCount();
   const idx_t globalRank = shape_->globalRank();
+
+  energy = 0.;
 
   Vector pA(globalRank); // positions
   Vector pB(globalRank);
@@ -1178,6 +1270,7 @@ bool RodContactModel::computeSTS_
           Matrix(H_tilde + matmul(D(1, ALL), dpB).transpose() - matmul(D(0, ALL), dpA).transpose())) /
       distance;
 
+  energy = 0.5 * penaltySTS_ * (distance - 2. * radius_) * (distance - 2. * radius_);
   f_contrib += penaltySTS_ * (distance - 2. * radius_) * matmul(H_tilde.transpose(), contact_normal);
   k_contrib += penaltySTS_ * matmul(matmul(H_tilde.transpose(), matmul(contact_normal, contact_normal)), H_tilde);
   k_contrib += penaltySTS_ * (distance - 2. * radius_) * (E + E.transpose() + G);
@@ -1190,13 +1283,16 @@ bool RodContactModel::computeSTS_
 //-----------------------------------------------------------------------
 bool RodContactModel::computeNTS_
 
-    (Vector &f_contrib,
+    (double &energy,
+     Vector &f_contrib,
      Matrix &k_contrib,
      const Vector &possS,
      const Matrix &possM,
      const double uM) const
 {
   const idx_t globalRank = shape_->globalRank();
+
+  energy = 0.;
 
   Vector pM(globalRank); // position
 
@@ -1235,6 +1331,7 @@ bool RodContactModel::computeNTS_
   Ts[SliceFrom(2 * globalRank)] = -.5 * (1. + uM) * t;
   N[SliceFrom(2 * globalRank)] = n;
 
+  energy = 0.5 * penaltyNTS_ * (distance - 2. * radius_) * (distance - 2. * radius_);
   f_contrib += penaltyNTS_ * (distance - 2. * radius_) * Ns;
   k_contrib += penaltyNTS_ * (matmul(Ns, Ns) - (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * (matmul(N, Ts) + matmul(Ts, N) + (distance - 2. * radius_) / norm2(possM[1] - possM[0]) * matmul(N, N)));
 

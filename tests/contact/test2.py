@@ -15,7 +15,7 @@ from contact_state import linear_momentum, read_state
 ELEMENTS = 20
 RHO_A = np.pi * 0.02**2
 ELEMENT = 2. / ELEMENTS
-ENERGY_TOL = 0.01
+ENERGY_TOL = 1e-3  # whole run, with the penalty energy of the contact
 
 # details of the checks; on screen only PASSED, FAILED or RUN THROUGH
 LOG = open("tests/contact/test2/result.log", "w")
@@ -35,12 +35,14 @@ try:
   momentum_error = np.abs(total).max() / abs(start)
   rebound = momentum_a[-1, 2] / start
   total_energy = energy[:, 1] + energy[:, 2]
-  energy_change = abs(total_energy[-1] / total_energy[0] - 1.)
+  energy_error = np.abs(total_energy / total_energy[0] - 1.)
+  energy_change = energy_error.max()
 
   print(f"  smallest gap of the centres {gap.min():.4f} (contact distance 0.1), final gap {gap[-1]:.4f}", file=LOG)
   print(f"  total momentum, largest {momentum_error:.2e} of the momentum of one rod; momentum of rod A at the end "
         f"{rebound:+.3f} of its start", file=LOG)
-  print(f"  energy at the end against the start: {energy_change:.2e} (limit {ENERGY_TOL})", file=LOG)
+  print(f"  energy, largest deviation from the start over the whole run {energy_change:.2e} (limit {ENERGY_TOL}), "
+        f"at the end {energy_error[-1]:.2e}", file=LOG)
 
   fig_a, gap_axes = plt.subplots(figsize=(16 / 3, 6))
   gap_axes.plot(times, gap, label="simulation")
@@ -59,9 +61,8 @@ try:
   momentum_axes.set_title("momentum; dashed: conserved (exact)")
   momentum_axes.legend(fontsize=7)
   fig_c, energy_axes = plt.subplots(figsize=(16 / 3, 6))
-  # the penalty energy of the contact is not part of E_pot, so that the energy dips while the rods touch
-  label = "simulation, without the penalty energy\nof the contact (dips while the rods touch)"
-  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label=label)
+  # E_pot includes the penalty energy of the contact
+  energy_axes.plot(energy[:, 0], total_energy / total_energy[0], label="simulation")
   energy_axes.axhline(1., color="k", ls="--", label="reference: energy conserved")
   energy_axes.set_xlabel("t")
   energy_axes.set_ylabel("(E_pot + E_kin) / E_0")

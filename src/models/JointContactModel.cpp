@@ -75,6 +75,11 @@ JointContactModel::JointContactModel
   contactsA_.clear();
   contactsB_.clear();
 
+  // the penalty energy of the last force evaluation
+  contactEnergy_ = 0.;
+  nodeEnergy_.resize(allNodes_.size());
+  nodeEnergy_ = 0.;
+
   // get the verbosity
   verbose_ = false;
   myProps.find(verbose_, VERBOSE_PROP);
@@ -115,6 +120,13 @@ bool JointContactModel::takeAction
     // Get the current displacements.
     StateVector::get(disp, dofs_, globdat);
 
+    // the energy of this evaluation, zero if no contact is possible (before the early return)
+    contactEnergy_ = 0.;
+    nodeEnergy_ = 0.;
+#ifndef NDEBUG
+    energyDisp_.ref(Vector(disp.clone()));
+#endif
+
     // get the load case
     globdat.find(loadCase, jive::app::PropNames::LOAD_CASE);
 
@@ -130,7 +142,7 @@ bool JointContactModel::takeAction
     }
 
     // Compute the contact effects
-    computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
+    computeContacts_(contactEnergy_, nodeEnergy_, *mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
 
     return true;
   }
@@ -144,6 +156,23 @@ bool JointContactModel::takeAction
     params.get(table, ActionParams::TABLE);
     params.get(weights, ActionParams::TABLE_WEIGHTS);
     params.get(name, ActionParams::TABLE_NAME);
+
+    // the penalty energy per node of the last force evaluation; the rod model adds the strain energy to potentialEnergy
+    if (name == "contactEnergy" || name == "potentialEnergy")
+    {
+      if (table->getRowItems() != allNodes_.getData())
+        return false;
+
+      const idx_t jCol = table->addColumn(name);
+
+      for (idx_t inode = 0; inode < allNodes_.size(); inode++)
+        table->addValue(inode, jCol, nodeEnergy_[inode]);
+
+      // energies are sums over the nodes (no averaging), as in the rod model; the ParaViewModule multiplies by the weights
+      weights = 1.;
+
+      return true;
+    }
 
     IdxVector jtypes(3);
 
@@ -173,7 +202,10 @@ bool JointContactModel::takeAction
 
     if (contactsA_.toArray().size() != 0) // skip the computation if no actual contact possible
     {
-      computeContacts_(*mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
+      // the energy of this evaluation is not stored (it would count twice at COMMIT)
+      double energy = 0.;
+      Vector nodeEnergy(allNodes_.size());
+      computeContacts_(energy, nodeEnergy, *mbld, fint, contactsA_.toArray(), contactsB_.toArray(), disp);
     }
 
     // Add the contact forces to the table
@@ -193,7 +225,30 @@ bool JointContactModel::takeAction
 
   if (action == Actions::COMMIT)
   {
-    // LATER add contact stiffness to potential energy!!
+    // the last force evaluation was made at the committed state (see ExplicitModule::commit)
+#ifndef NDEBUG
+    Vector disp;
+    StateVector::get(disp, dofs_, globdat);
+
+    if (energyDisp_.size() > 0)
+    {
+      JEM_ASSERT2(disp.size() == energyDisp_.size(), "contact energy: state of the last force evaluation differs in size");
+      for (idx_t i = 0; i < disp.size(); i++)
+        JEM_ASSERT2(jem::numeric::abs(disp[i] - energyDisp_[i]) <= 0., "contact energy is not the one of the committed state"); // bit-identical
+    }
+#endif
+
+    Properties vars = Globdat::getVariables(globdat);
+    double E_contact = 0.;
+    double E_pot = 0.;
+
+    vars.find(E_contact, "contactEnergy");
+    vars.find(E_pot, "potentialEnergy");
+
+    vars.set("contactEnergy", E_contact + contactEnergy_);
+    vars.set("potentialEnergy", E_pot + contactEnergy_);
+
+    return true;
   }
 
   return false;
@@ -262,13 +317,20 @@ void JointContactModel::findContacts_
 //-----------------------------------------------------------------------
 void JointContactModel::computeContacts_
 
-    (MatrixBuilder &mbld,
+    (double &energy,
+     Vector &nodeEnergy,
+     MatrixBuilder &mbld,
      const Vector &fint,
      const IdxVector &nodesA,
      const IdxVector &nodesB,
      const Vector &disp)
 
 {
+  double pairEnergy = 0.;
+
+  energy = 0.;
+  nodeEnergy = 0.;
+
   IdxVector dofsA(allNodes_.rank());
   IdxVector dofsB(allNodes_.rank());
   Vector posA(allNodes_.rank());
@@ -292,7 +354,12 @@ void JointContactModel::computeContacts_
     posB += disp[dofsB];
 
     // compute the contact
-    computeContact_(contactStiffness, contactForce, posA, posB);
+    computeContact_(pairEnergy, contactStiffness, contactForce, posA, posB);
+
+    // half of the energy to each joint node
+    energy += pairEnergy;
+    nodeEnergy[nodesA[iContact]] += 0.5 * pairEnergy;
+    nodeEnergy[nodesB[iContact]] += 0.5 * pairEnergy;
 
     if (verbose_)
     {
@@ -317,7 +384,8 @@ void JointContactModel::computeContacts_
 //-----------------------------------------------------------------------
 void JointContactModel::computeContact_
 
-    (Matrix contactStiffness,
+    (double &energy,
+     Matrix contactStiffness,
      Vector contactForce,
      Vector posA,
      Vector posB)
@@ -326,6 +394,9 @@ void JointContactModel::computeContact_
   Vector normal = Vector(posB - posA);
   normal /= norm2(normal);
   Vector force(penalty_ * (2. * radius_ - norm2(posA - posB)) * normal);
+
+  // penalty energy 1/2 k g^2 with the gap g = |posA - posB| - 2 r
+  energy = 0.5 * penalty_ * (2. * radius_ - norm2(posA - posB)) * (2. * radius_ - norm2(posA - posB));
 
   // compute the contact stiffness
   contactStiffness(jem::SliceTo(3), jem::SliceTo(3)) = penalty_ * matmul(normal, normal);
