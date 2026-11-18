@@ -33,6 +33,8 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   static const char *YIELD_EXPONENT_PROP; ///< Exponents p_i of the super-ellipse yield condition
   static const char *ISO_HARD_PROP;    ///< Isotropic hardening parameters
   static const char *KIN_HARD_PROP;    ///< Kinematic hardening parameters
+  static const char *SUBSTEP_PROP;     ///< Largest trial yield value of a sub-increment (0: no sub-increments)
+  static const char *MAX_SUBSTEP_PROP; ///< Largest number of sub-increments of one strain increment
   /// @}
 
   /// @brief Yield condition implementations, selected by the property `yieldType`
@@ -85,7 +87,11 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   virtual void getStress(const Vector &stress, const Vector &strain) override;
 
   /// @brief Plastic stress computation using convex cutting plane algorithm
-  /// @details Implements iterative return mapping with yield condition evaluation
+  /// @details Implements iterative return mapping with yield condition evaluation. The cutting plane is first order in
+  /// the strain increment, with an error that grows with the overshoot of the elastic trial state (yield function value
+  /// of the trial). With `substepYield` > 0 an increment whose trial exceeds that value is split into
+  /// n = ceil(trial / substepYield) equal sub-increments of strain, each with its own elastic predictor and cutting
+  /// plane iterations from the state of the previous one (sub-incrementation, Sloan 1987).
   /// @param[out] stress  Calculated stress vector
   /// @param[in] strain  Input strain vector
   /// @param[in] ielem  Element index
@@ -119,6 +125,20 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   /// @param[in] args  Stresses, [isotropic hardening stress], [kinematic hardening stresses]
   void getYieldGrad_(const Vector &grad, const Vector &args) const;
 
+  /// @brief Cutting plane iterations (Simo, Hughes 1998, Box 3.6) from the current plastic state to the strain
+  /// @details Starts from plastStrain_ and hardParams_ and updates them; adds the plastic multiplier to deltaFlow
+  /// @param[out] stress  Stress at the end
+  /// @param[in] strain  Total strain
+  /// @param[in] ielem  Element index
+  /// @param[in] ip  Integration point index
+  /// @param[in,out] deltaFlow  Accumulated plastic multiplier
+  /// @param[in] elastic  Only the elastic stress, no plastic correction
+  void returnMap_(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, double &deltaFlow, const bool elastic);
+
+  /// @brief Number of sub-increments of the strain increment to `strain` from the plastic state in plastStrain_
+  /// @details 1 if the trial is elastic, or its yield function value is below `substepYield`
+  idx_t countSubsteps_(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip);
+
   /// @brief Super-ellipse yield condition f = sum_i |s_i/(c_i-h_i)|^p_i - (1+h_0)
   /// @details Kinematic hardening h_i shifts the strengths c_i (Herrnböck et al., Comput. Mech. 2023,
   /// Eq. 39), isotropic hardening h_0 acts on the sum (Herrnböck et al., Comput. Mech. 2021, Eq. 47).
@@ -134,6 +154,8 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   FuncUtils::FuncArray yieldDeriv_; ///< Derivatives of yield condition
   idx_t maxIter_;                   ///< Max iterations for stress update
   double precision_;                ///< Convergence tolerance for stress update
+  double substepYield_;             ///< Largest trial yield value of a sub-increment (0: none)
+  idx_t maxSubsteps_;               ///< Cap of the number of sub-increments
   YieldType yieldType_;             ///< Selected yield condition implementation
   bool isoHard_;                    ///< Isotropic hardening stress is a yield function argument
   bool kinHard_;                    ///< Kinematic hardening stresses are yield function arguments
@@ -170,9 +192,14 @@ class ElastoPlasticRodMaterial : public ElasticRodMaterial
   Vector elasticStrain_; ///< Elastic strain
   Vector yieldArgs_;     ///< Arguments of the yield condition
   Vector yieldGrad_;     ///< Gradient of the yield condition
+  Vector subStrain_;     ///< Strain at the end of a sub-increment
+  Vector subStrainOld_;  ///< Committed strain (start of the first sub-increment)
+  Vector subStress_;     ///< Stress at the start of a sub-increment
+  Vector subPlast_;      ///< Plastic strain at the start of a sub-increment
   /// @}
 
-  Matrix currDeltaFlow_; ///< Current plastic flow increment
+  Matrix currDeltaFlow_;    ///< Current plastic flow increment
+  Matrix currDissipation_;  ///< Current dissipated energy increment (trapezoid over every sub-increment)
   Matrix energyDiss_;    ///< Dissipated energy storage
   Matrix energyHardPot_; ///< Hardening potential energy storage
   /// @}
