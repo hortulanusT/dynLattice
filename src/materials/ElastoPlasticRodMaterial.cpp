@@ -36,6 +36,8 @@ const char *ElastoPlasticRodMaterial::YIELD_STRENGTH_PROP = "yieldStrength";
 const char *ElastoPlasticRodMaterial::YIELD_EXPONENT_PROP = "yieldExponent";
 const char *ElastoPlasticRodMaterial::ISO_HARD_PROP = "isotropicCoefficient";
 const char *ElastoPlasticRodMaterial::KIN_HARD_PROP = "kinematicTensor";
+const char *ElastoPlasticRodMaterial::SUBSTEP_PROP = "substepYield";
+const char *ElastoPlasticRodMaterial::MAX_SUBSTEP_PROP = "maxSubsteps";
 
 ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
                                                    const Properties &conf,
@@ -44,6 +46,8 @@ ElastoPlasticRodMaterial::ElastoPlasticRodMaterial(const String &name,
 {
   maxIter_ = 20;
   precision_ = 1e-5;
+  substepYield_ = 0.;
+  maxSubsteps_ = 250;
   yieldType_ = EXPRESSION;
   materialH_.resize(0);
   argCount_ = 0;
@@ -129,6 +133,10 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
   elasticStrain_.resize(dofCount_);
   yieldArgs_.resize(argCount_);
   yieldGrad_.resize(argCount_);
+  subStrain_.resize(dofCount_);
+  subStrainOld_.resize(dofCount_);
+  subStress_.resize(dofCount_);
+  subPlast_.resize(dofCount_);
 
   oldPlastStrains_.resize(dofCount_, ipCount, elemCount);
   oldPlastStrains_ = 0.;
@@ -140,6 +148,8 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
   currDeltaFlow_.resize(ipCount, elemCount);
   currDeltaFlow_ = 0.;
+  currDissipation_.resize(ipCount, elemCount);
+  currDissipation_ = 0.;
 
   energyDiss_.resize(ipCount, elemCount);
   energyDiss_ = 0.;
@@ -197,6 +207,8 @@ void ElastoPlasticRodMaterial::configure(const Properties &props, const Properti
 
   myProps.find(maxIter_, jive::implict::PropNames::MAX_ITER);
   myProps.find(precision_, jive::implict::PropNames::PRECISION);
+  myProps.find(substepYield_, SUBSTEP_PROP, 0., 1e30);
+  myProps.find(maxSubsteps_, MAX_SUBSTEP_PROP, 1, 1000000);
 }
 
 void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Properties &globdat) const
@@ -245,6 +257,8 @@ void ElastoPlasticRodMaterial::getConfig(const Properties &conf, const Propertie
 
   myConf.set(jive::implict::PropNames::MAX_ITER, maxIter_);
   myConf.set(jive::implict::PropNames::PRECISION, precision_);
+  myConf.set(SUBSTEP_PROP, substepYield_);
+  myConf.set(MAX_SUBSTEP_PROP, maxSubsteps_);
 }
 
 double ElastoPlasticRodMaterial::getYield_(const Vector &args) const
@@ -348,12 +362,62 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
   if (verbosity_ > 1)
     jem::System::debug(myName_) << "elastoplastic material behavior for element " << ielem << " and integration point " << ip << "\n";
   // REPORT("Step 1")
-  idx_t liter = 0;
   // start from the old state of this integration point (copied into the work arrays)
   plastStrain_ = oldPlastStrains_(ALL, ip, ielem);
   hardParams_ = oldHardParams_(ALL, ip, ielem);
   double deltaFlow = 0.;
+  double dissipation = 0.;
 
+  const bool elastic = !inelastic || ((jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1));
+
+  idx_t subCount = 1;
+  if (!elastic && substepYield_ > 0.)
+    subCount = countSubsteps_(stress, strain, ielem, ip);
+
+  if (subCount == 1)
+  {
+    returnMap_(stress, strain, ielem, ip, deltaFlow, elastic);
+
+    if (!elastic && jem::numeric::abs(deltaFlow) > jem::Float::EPSILON)
+      dissipation = dotProduct((oldStresses_(ALL, ip, ielem) + stress) / 2., plastStrain_ - oldPlastStrains_(ALL, ip, ielem));
+  }
+  else
+  {
+    // sub-incrementation: the strain is interpolated linearly from the committed strain, every sub-increment is a
+    // complete update (elastic predictor, cutting plane iterations) from the state of the previous one
+    subStrainOld_ = oldStrains_(ALL, ip, ielem);
+    subStress_ = oldStresses_(ALL, ip, ielem);
+
+    for (idx_t k = 1; k <= subCount; k++)
+    {
+      subPlast_ = plastStrain_;
+      if (k == subCount)
+        subStrain_ = strain;
+      else
+        subStrain_ = subStrainOld_ + (strain - subStrainOld_) * (double(k) / double(subCount));
+
+      double subFlow = 0.;
+      returnMap_(stress, subStrain_, ielem, ip, subFlow, false);
+      deltaFlow += subFlow;
+
+      if (jem::numeric::abs(subFlow) > jem::Float::EPSILON)
+        dissipation += dotProduct((subStress_ + stress) / 2., plastStrain_ - subPlast_);
+      subStress_ = stress;
+    }
+  }
+
+  currStrains_(ALL, ip, ielem) = strain;
+  currPlastStrains_(ALL, ip, ielem) = plastStrain_;
+  currHardParams_(ALL, ip, ielem) = hardParams_;
+  currDeltaFlow_(ip, ielem) = deltaFlow;
+  currDissipation_(ip, ielem) = dissipation;
+}
+
+// Cutting plane iterations of Simo, Hughes (1998) Box 3.6 (Ortiz, Simo 1986) from plastStrain_ and hardParams_ to `strain`
+
+void ElastoPlasticRodMaterial::returnMap_(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip, double &deltaFlow, const bool elastic)
+{
+  idx_t liter = 0;
   double yieldValue = 0.;
   double deltaDeltaFlow = 0.;
 
@@ -364,7 +428,7 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
     Super::getStress(stress, elasticStrain_, ielem, ip, false);
     getHardVals(hardStress_, hardParams_);
 
-    if (!inelastic || ((jem::numeric::abs(edgeFact_ - 1.0) > jem::Float::EPSILON) && (ielem < edgeElems_ || ielem > nElem_ - edgeElems_ - 1)))
+    if (elastic)
     {
       if (verbosity_ > 1)
         jem::System::debug(myName_) << "        elastic calculation\n";
@@ -398,18 +462,42 @@ void ElastoPlasticRodMaterial::getStress(const Vector &stress, const Vector &str
 
     liter++;
   }
+}
 
-  currStrains_(ALL, ip, ielem) = strain;
-  currPlastStrains_(ALL, ip, ielem) = plastStrain_;
-  currHardParams_(ALL, ip, ielem) = hardParams_;
-  currDeltaFlow_(ip, ielem) = deltaFlow;
+// number of sub-increments: the yield function of the elastic trial of the whole increment over substepYield_
+
+idx_t ElastoPlasticRodMaterial::countSubsteps_(const Vector &stress, const Vector &strain, const idx_t &ielem, const idx_t &ip)
+{
+  elasticStrain_ = strain - plastStrain_;
+  Super::getStress(stress, elasticStrain_, ielem, ip, false);
+  getHardVals(hardStress_, hardParams_);
+  yieldArgs_[jem::SliceTo(dofCount_)] = stress;
+  yieldArgs_[jem::SliceFromTo(dofCount_, argCount_)] = hardStress_;
+
+  const double trial = getYield_(yieldArgs_);
+
+  if (trial < substepYield_)
+    return 1;
+
+  const double count = ceil(trial / substepYield_);
+
+  if (count > maxSubsteps_)
+  {
+    static bool warned = false; // reported once for all materials (not thread safe, like the work arrays)
+    if (!warned)
+    {
+      WARN(myName_ << ": the strain increment needs " << count << " sub-increments, limited to " << maxSubsteps_ << " (maxSubsteps); the plastic update is less accurate there (reported once)");
+      warned = true;
+    }
+    return maxSubsteps_;
+  }
+  return static_cast<idx_t>(count);
 }
 
 void ElastoPlasticRodMaterial::applyDeform()
 {
   Vector currElastStrain(currStrains_.size(0));
   Vector currStress(currStrains_.size(0));
-  Vector deltaPlastStrain(currStrains_.size(0));
   Vector currHardParams(currHardParams_.size(0));
 
   for (idx_t ielem = 0; ielem < currStrains_.size(2); ielem++)
@@ -417,7 +505,6 @@ void ElastoPlasticRodMaterial::applyDeform()
     for (idx_t ip = 0; ip < currStrains_.size(1); ip++)
     {
       currElastStrain = currStrains_(ALL, ip, ielem) - currPlastStrains_(ALL, ip, ielem);
-      deltaPlastStrain = currPlastStrains_(ALL, ip, ielem) - oldPlastStrains_(ALL, ip, ielem);
       currHardParams = currHardParams_(ALL, ip, ielem);
       Super::getStress(currStress, currElastStrain);
 
@@ -425,10 +512,7 @@ void ElastoPlasticRodMaterial::applyDeform()
       energyPot_(ip, ielem) = 0.5 * dotProduct(currElastStrain, currStress);
 
       WARN_ASSERT2(currDeltaFlow_(ip, ielem) >= 0., "Negative plastic multiplier");
-      if (jem::numeric::abs(currDeltaFlow_(ip, ielem)) > jem::Float::EPSILON)
-      {
-        energyDiss_(ip, ielem) += dotProduct((oldStresses_(ALL, ip, ielem) + currStress) / 2., deltaPlastStrain);
-      }
+      energyDiss_(ip, ielem) += currDissipation_(ip, ielem);
       oldStresses_(ALL, ip, ielem) = currStress;
     }
   }
@@ -438,6 +522,7 @@ void ElastoPlasticRodMaterial::applyDeform()
   oldStrains_ = currStrains_;
 
   currDeltaFlow_ = 0.;
+  currDissipation_ = 0.;
 }
 
 void ElastoPlasticRodMaterial::rejectDeform()
@@ -447,6 +532,7 @@ void ElastoPlasticRodMaterial::rejectDeform()
   currStrains_ = oldStrains_;
 
   currDeltaFlow_ = 0.;
+  currDissipation_ = 0.;
 }
 
 void ElastoPlasticRodMaterial::getTable(XTable &strain_table, const Vector &weights, const String &name, const IdxVector &items) const

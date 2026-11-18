@@ -12,7 +12,7 @@ export MPLBACKEND = Agg
 paraview = $(if $(PARAVIEW),,-p "Output.paraview.sampleWhen=false")
 beam_cases = 1 2 4 5 6 7
 transient_cases = 1 2 3
-plastic_cases = 1 2a 2b 3 4
+plastic_cases = 1 2a 2b 3 4 5
 contact_cases = 1 2 3
 integrator_cases = 1 2 3 4 5 6
 

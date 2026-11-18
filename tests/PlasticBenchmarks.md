@@ -23,3 +23,7 @@ Test 4 bends a short rod to +8 %, -8 % and +8 % outer fibre strain, with the sec
 
 ![Test 4 Results](plastic4_result.png)
 
+## Test 5
+Test 5 is test 4 with 25 instead of 1000 load steps per phase (0.85 yield curvatures per step) and the plastic update with sub-increments (`substepYield = 0.02`), compared with the same exact solution of the stress resultant model and with the same energy balance. The cutting plane algorithm of the return mapping (convex cutting plane, [Simo, Hughes (1998)](https://doi.org/10.1007/b98904), Box 3.6) is first order in the strain increment; sub-incrementation splits each increment into parts whose elastic trial stays close to the yield surface, so that the result no longer depends on the load step. Without sub-increments the whole cycle is off by about 11 % at this step size, with them by about 0.6 %.
+
+![Test 5 Results](plastic5_result.png)
