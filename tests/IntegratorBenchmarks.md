@@ -10,13 +10,13 @@ Convergence order of the motion (first figure) and of the energy error (second) 
 ![Test 1c Results](integrator1c_result.png)
 
 ## Test 2
-Axial wave in a bar (100 elements) under a constant end force, from rest, over three wave cycles, against the exact d'Alembert solution: displacement of the loaded end (left) and reaction at the fixed end (right), where every front has to arrive within three elements. The oscillations ahead of the wave fronts are the dispersion of the mesh, not of the integrators: with the consistent mass, short waves travel faster than c, see [Gabriel et al. (2010)](https://doi.org/10.1016/j.cam.2009.08.043). `MilneDevice` damps them.
+Axial wave in a bar (100 elements) under a constant end force, from rest, over three wave cycles, against the exact d'Alembert solution: displacement of the loaded end (left) and reaction at the fixed end (right), where every front has to arrive within three elements. The oscillations ahead of the wave fronts are the dispersion of the mesh, not of the integrators: with the consistent mass, short waves travel faster than c, see [Gabriel et al. (2010)](https://doi.org/10.1016/j.cam.2009.08.043). `MilneDevice` damps them. The same runs with the lumped mass (`Solver.integrator.mass = "lumped"`, figures c and d): the short waves travel slower than c, so the fronts arrive late and the oscillations trail them.
 
 ![Test 2a Results](integrator2a_result.png)
 ![Test 2b Results](integrator2b_result.png)
 
 ## Test 3
-First two bending frequencies of a slender (L / r = 50) and a stubby (L / r = 10) cantilever after a small tip velocity, from the spectrum of the tip displacement over ten periods, against the clamped-free frequency equation of the Timoshenko beam (Table 9 and Eqs. 109, 110 of [Han, Benaroya, Wei (1999)](https://doi.org/10.1006/jsvi.1999.2257), checked against their example of Sect. 3.5) with the shear coefficient of [Cowper (1966)](https://doi.org/10.1115/1.3625046). All integrators on 16 elements (left, middle); LeapFrog on 16, 32 and 64 elements, where the frequencies converge with the mesh at second order (right).
+First two bending frequencies of a slender (L / r = 50) and a stubby (L / r = 10) cantilever after a small tip velocity, from the spectrum of the tip displacement over ten periods, against the clamped-free frequency equation of the Timoshenko beam (Table 9 and Eqs. 109, 110 of [Han, Benaroya, Wei (1999)](https://doi.org/10.1006/jsvi.1999.2257), checked against their example of Sect. 3.5) with the shear coefficient of [Cowper (1966)](https://doi.org/10.1115/1.3625046). All integrators on 16 elements (left, middle); LeapFrog on 16, 32 and 64 elements, where the frequencies converge with the mesh at second order (right). The same with the lumped mass (figures d to f): both modes are underestimated by about 0.1 % on 16 elements (limit 0.2 %), where the consistent mass overestimates mode 2 by up to 1 %.
 
 ![Test 3a Results](integrator3a_result.png)
 ![Test 3b Results](integrator3b_result.png)

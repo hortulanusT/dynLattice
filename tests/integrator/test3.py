@@ -24,10 +24,13 @@ SLENDERNESS = [("slender", 0.02), ("stubby", 0.1)]
 SCHEMES = {"LeapFrog": "leap-frog", "Milne": "MilneDevice: Adams-Bashforth-Moulton",
            "ode23": "EmbeddedRK ode23: Bogacki-Shampine", "ode45": "EmbeddedRK ode45: Dormand-Prince"}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
-SCHEME_TOL = (0.002, 0.01)    # every integrator on 16 elements, per mode
+MASSES = [("consistent", ""), ("lumped", "_lumped")]   # the runs of the lumped mass have the suffix _lumped
+# every integrator on 16 elements, per mode; the consistent mass overestimates mode 2 (+1 %), the lumped mass underestimates
+# both modes by 0.1 %
+SCHEME_TOL = {"consistent": (0.002, 0.01), "lumped": (0.002, 0.002)}
 MESHES = [16, 32, 64]         # LeapFrog, for the convergence with the mesh
 MESH_ORDER, MESH_ORDER_TOL = 2., 0.1    # of mode 2; mode 1 is below the precision of the spectrum on the finer meshes
-FINE_TOL = (1e-4, 7e-4)       # on 64 elements, per mode (mode 2: error of the consistent mass from above, second order in h)
+FINE_TOL = (1e-4, 7e-4)       # on 64 elements, per mode (mode 2: error of the mass matrix, second order in h)
 
 # Han, Benaroya, Wei (1999), Sect. 3.5, clamped-free Timoshenko beam: a tube of radii 0.16 and 0.15 m and L = 1 m
 # (1/s printed as 0.11) with gamma = 2.205, and the exact wave numbers and frequency ratios they give
@@ -132,61 +135,63 @@ try:
   print(f"  reference against Han et al. (1999), Sect. 3.5: a {np.round(a, 3)}, b {np.round(b, 3)}, ratios "
         f"{np.round(ratios, 3)}; largest deviation {deviation:.1e} (limit {HAN_TOL})  {status(ok)}", file=LOG)
 
-  figures, mesh_errors = [], {}
-  for label, radius in SLENDERNESS:
-    exact = timoshenko(radius, MODES)
+  figures = []
+  for mass, suffix in MASSES:
+    mesh_errors = {}
+    for label, radius in SLENDERNESS:
+      exact = timoshenko(radius, MODES)
+      fig, axes = plt.subplots(figsize=(16 / 3, 6))
+      figures.append(fig)
+      for name in SCHEMES:
+        rows = read(f"{label}_{name}{suffix}", exact)
+        found, freqs, spectrum = measured_frequencies(rows[:, 0], rows[:, 1], MODES)
+        errors = found / exact - 1.
+        ok = bool(np.all(np.abs(errors) <= SCHEME_TOL[mass]))
+        test_passed = test_passed and ok
+        print(f"  {label} {name}, {mass} mass, 16 elements: {np.round(found, 4)} rad/s, Timoshenko {np.round(exact, 4)}, error "
+              f"{np.round(errors * 100., 3)} % (limit {np.array(SCHEME_TOL[mass]) * 100.} %)  {status(ok)}", file=LOG)
+        axes.plot(freqs, spectrum / spectrum.max(), color=COLOURS[name], label=SCHEMES[name])
+        if name == "LeapFrog":
+          errors_16 = np.abs(errors)
+      reference = "reference: Timoshenko beam, Han et al. (1999),\nshear coefficient Cowper (1966)"
+      for i, w in enumerate(exact):
+        axes.axvline(w, color="k", ls="--", lw=1., label=reference if i == 0 else None)
+      axes.set_xlim(0., 1.3 * exact[-1])
+      axes.set_ylim(0., 1.05)
+      axes.set_xlabel("frequency [rad/s]")
+      axes.set_ylabel("spectrum of the tip displacement / its peak")
+      axes.set_title(f"{label}, {mass} mass, L / r = {LENGTH / radius:.0f}, 16 elements; dashed: Timoshenko", fontsize=9)
+      axes.legend(fontsize=7)
+
+      # convergence with the mesh, LeapFrog: 16 elements from above, then 32 and 64
+      errors = [errors_16]
+      for n in MESHES[1:]:
+        rows = read(f"{label}_LeapFrog_{n}{suffix}", exact)
+        errors.append(np.abs(measured_frequencies(rows[:, 0], rows[:, 1], MODES)[0] / exact - 1.))
+      errors = np.array(errors)
+      order = convergence_order(LENGTH / np.array(MESHES), errors[:, 1])[0]
+      ok = abs(order - MESH_ORDER) <= MESH_ORDER_TOL and bool(np.all(errors[-1] <= FINE_TOL))
+      test_passed = test_passed and ok
+      print(f"  {label} LeapFrog, {mass} mass, {MESHES} elements: error mode 1 {np.round(errors[:, 0] * 100., 4)} %, mode 2 "
+            f"{np.round(errors[:, 1] * 100., 4)} %; order of mode 2 {order:.2f} (expected {MESH_ORDER} +- "
+            f"{MESH_ORDER_TOL}), 64 elements within {np.array(FINE_TOL) * 100.} %  {status(ok)}", file=LOG)
+      mesh_errors[label] = errors
+
     fig, axes = plt.subplots(figsize=(16 / 3, 6))
     figures.append(fig)
-    for name in SCHEMES:
-      rows = read(f"{label}_{name}", exact)
-      found, freqs, spectrum = measured_frequencies(rows[:, 0], rows[:, 1], MODES)
-      errors = found / exact - 1.
-      ok = bool(np.all(np.abs(errors) <= SCHEME_TOL))
-      test_passed = test_passed and ok
-      print(f"  {label} {name}, 16 elements: {np.round(found, 4)} rad/s, Timoshenko {np.round(exact, 4)}, error "
-            f"{np.round(errors * 100., 3)} % (limit {np.array(SCHEME_TOL) * 100.} %)  {status(ok)}", file=LOG)
-      axes.plot(freqs, spectrum / spectrum.max(), color=COLOURS[name], label=SCHEMES[name])
-      if name == "LeapFrog":
-        errors_16 = np.abs(errors)
-    reference = "reference: Timoshenko beam, Han et al. (1999),\nshear coefficient Cowper (1966)"
-    for i, w in enumerate(exact):
-      axes.axvline(w, color="k", ls="--", lw=1., label=reference if i == 0 else None)
-    axes.set_xlim(0., 1.3 * exact[-1])
-    axes.set_ylim(0., 1.05)
-    axes.set_xlabel("frequency [rad/s]")
-    axes.set_ylabel("spectrum of the tip displacement / its peak")
-    axes.set_title(f"{label}, L / r = {LENGTH / radius:.0f}, 16 elements; dashed: Timoshenko")
-    axes.legend(fontsize=7)
-
-    # convergence with the mesh, LeapFrog: 16 elements from above, then 32 and 64
-    errors = [errors_16]
-    for n in MESHES[1:]:
-      rows = read(f"{label}_LeapFrog_{n}", exact)
-      errors.append(np.abs(measured_frequencies(rows[:, 0], rows[:, 1], MODES)[0] / exact - 1.))
-    errors = np.array(errors)
-    order = convergence_order(LENGTH / np.array(MESHES), errors[:, 1])[0]
-    ok = abs(order - MESH_ORDER) <= MESH_ORDER_TOL and bool(np.all(errors[-1] <= FINE_TOL))
-    test_passed = test_passed and ok
-    print(f"  {label} LeapFrog, {MESHES} elements: error mode 1 {np.round(errors[:, 0] * 100., 4)} %, mode 2 "
-          f"{np.round(errors[:, 1] * 100., 4)} %; order of mode 2 {order:.2f} (expected {MESH_ORDER} +- "
-          f"{MESH_ORDER_TOL}), 64 elements within {np.array(FINE_TOL) * 100.} %  {status(ok)}", file=LOG)
-    mesh_errors[label] = errors
-
-  fig, axes = plt.subplots(figsize=(16 / 3, 6))
-  figures.append(fig)
-  sizes = LENGTH / np.array(MESHES)
-  markers = {"slender": "o", "stubby": "s"}
-  for label, errors in mesh_errors.items():
-    for mode, colour in [(0, "C4"), (1, "C5")]:
-      axes.loglog(sizes, errors[:, mode], marker=markers[label], markerfacecolor="none", ls="", color=colour)
-      axes.loglog(sizes, errors[0, mode] * (sizes / sizes[0])**MESH_ORDER, "--", color=colour)
-  handles = [Line2D([], [], color="C4", label="mode 1"), Line2D([], [], color="C5", label="mode 2")]
-  handles += [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="", label=l) for l, m in markers.items()]
-  handles += [Line2D([], [], color="k", ls="--", label="reference: order 2")]
-  axes.legend(handles=handles, fontsize=7)
-  axes.set_xlabel("element length / L")
-  axes.set_ylabel("|frequency / Timoshenko - 1|, LeapFrog")
-  axes.set_title("convergence with the mesh; dashed: order 2")
+    sizes = LENGTH / np.array(MESHES)
+    markers = {"slender": "o", "stubby": "s"}
+    for label, errors in mesh_errors.items():
+      for mode, colour in [(0, "C4"), (1, "C5")]:
+        axes.loglog(sizes, errors[:, mode], marker=markers[label], markerfacecolor="none", ls="", color=colour)
+        axes.loglog(sizes, errors[0, mode] * (sizes / sizes[0])**MESH_ORDER, "--", color=colour)
+    handles = [Line2D([], [], color="C4", label="mode 1"), Line2D([], [], color="C5", label="mode 2")]
+    handles += [Line2D([], [], color="k", marker=m, markerfacecolor="none", ls="", label=l) for l, m in markers.items()]
+    handles += [Line2D([], [], color="k", ls="--", label="reference: order 2")]
+    axes.legend(handles=handles, fontsize=7)
+    axes.set_xlabel("element length / L")
+    axes.set_ylabel("|frequency / Timoshenko - 1|, LeapFrog")
+    axes.set_title(f"convergence with the mesh, {mass} mass; dashed: order 2")
 except Exception as e:
   print(e)
   test_passed = False
@@ -195,7 +200,7 @@ if test_passed:
   print(colored("INTEGRATOR TEST 3 PASSED", "green"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
-    for fig, tag in zip(figures, "abc"):
+    for fig, tag in zip(figures, "abcdef"):
       fig.tight_layout()
       pdf.savefig(fig)
       fig.savefig(f"tests/integrator3{tag}_result.png")

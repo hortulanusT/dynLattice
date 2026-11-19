@@ -109,6 +109,7 @@ leapfrog = -p "Solver.integrator.type='LeapFrog'"
 milne = -p "Solver.integrator.type='MilneDevice'"
 ode23 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode23'"
 ode45 = -p "Solver.integrator.type='EmbeddedRK'" -p "Solver.integrator.kind='ode45'"
+lumped = -p "Solver.integrator.mass='lumped'"
 integrator_paraview = -p "Output.paraview.type='ParaView'" -p "Output.paraview.output_format='$$(@:.csv=_visual)/step%i'" \
 	-p "Output.paraview.sampleWhen='t % $(or $(PARAVIEW_EVERY),1e-3) < deltaTime'" -p "Output.paraview.groups=['beams']" \
 	-p "Output.paraview.beams.shape='Line2'" -p "Output.paraview.beams.disps=['dx','dy','dz']" \
@@ -183,14 +184,19 @@ $(eval $(call integrator_run,test1,mesh_8,$(leapfrog),1.25e-5,2.,$(test1_mesh) -
 $(eval $(call integrator_run,test1,mesh_16,$(leapfrog),6.25e-6,2.,$(test1_mesh) -p Input.input.onelab.Elements=16. -p "Output.sampling.sampleWhen='i % 160 < 1'"))
 $(eval $(call integrator_run,test1,mesh_32,$(leapfrog),3.125e-6,2.,$(test1_mesh) -p Input.input.onelab.Elements=32. -p "Output.sampling.sampleWhen='i % 320 < 1'"))
 
-# test 2, axial wave over three cycles: each integrator at about the same accuracy per cost
+# test 2, axial wave over three cycles: each integrator at about the same accuracy per cost, with the consistent and
+# (_lumped) the lumped mass
 $(eval $(call integrator_run,test2,LeapFrog,$(leapfrog),1e-3,12.))
 $(eval $(call integrator_run,test2,Milne,$(milne),2.5e-4,12.))
 $(eval $(call integrator_run,test2,ode23,$(ode23),1e-3,12.))
 $(eval $(call integrator_run,test2,ode45,$(ode45),2e-3,12.))
+$(eval $(call integrator_run,test2,LeapFrog_lumped,$(leapfrog),1e-3,12.,$(lumped)))
+$(eval $(call integrator_run,test2,Milne_lumped,$(milne),2.5e-4,12.,$(lumped)))
+$(eval $(call integrator_run,test2,ode23_lumped,$(ode23),1e-3,12.,$(lumped)))
+$(eval $(call integrator_run,test2,ode45_lumped,$(ode45),2e-3,12.,$(lumped)))
 
 # test 3, eigenfrequencies over ten periods of the first Timoshenko mode, 2 pi 10 / w_1: each integrator on 16 elements,
-# and LeapFrog on 32 and 64 elements for the convergence with the mesh
+# and LeapFrog on 32 and 64 elements for the convergence with the mesh; consistent and (_lumped) lumped mass
 test3_slender = -p model.model.rodMesh.child.material.radius=0.02
 test3_stubby = -p model.model.rodMesh.child.material.radius=0.1
 test3_slender_end = 17.88651121317495
@@ -209,6 +215,18 @@ $(eval $(call integrator_run,test3,stubby_ode23,$(ode23),2.5e-4,$(test3_stubby_e
 $(eval $(call integrator_run,test3,stubby_ode45,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby)))
 $(eval $(call integrator_run,test3,stubby_LeapFrog_32,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32)))
 $(eval $(call integrator_run,test3,stubby_LeapFrog_64,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
+$(eval $(call integrator_run,test3,slender_Milne_lumped,$(milne),1e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
+$(eval $(call integrator_run,test3,slender_ode23_lumped,$(ode23),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
+$(eval $(call integrator_run,test3,slender_ode45_lumped,$(ode45),1.25e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_slender_end),$(test3_slender) $(test3_32) $(lumped)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_slender_end),$(test3_slender) $(test3_64) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_Milne_lumped,$(milne),1e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_ode23_lumped,$(ode23),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_ode45_lumped,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32) $(lumped)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64) $(lumped)))
 
 # test 4, freely spinning body of Krysl, Endres (2005), Sect. 4.1, to t = 100: LeapFrog at five steps for the order;
 # output every 0.01, i.e. every 0.01 / step steps
