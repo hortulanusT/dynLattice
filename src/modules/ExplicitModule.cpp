@@ -11,7 +11,12 @@
 
 #include <jem/base/ClassTemplate.h>
 #include <jem/base/IllegalInputException.h>
+#include <jem/numeric/algebra/LUSolver.h>
 #include <jem/util/StringUtils.h>
+#include <jive/algebra/SparseMatrixObject.h>
+
+typedef jem::Tuple<double, 3> Vec3;
+typedef jem::Tuple<double, 3, 3> Mat3;
 
 //=======================================================================
 //   class ExplicitModule
@@ -48,6 +53,7 @@ ExplicitModule::ExplicitModule
   fintCacheValid_ = false;
   fintCacheFresh_ = false;
   rotDofsValid_ = false;
+  masslessCount_ = 0;
   minStepCount_ = 0;
   lenScale_ = 1e-3;
   rotScale_ = lenScale_;
@@ -181,21 +187,23 @@ Module::Status ExplicitModule::init
   diagInertia = jem::dynamicCast<DiagMatrixObject>(inertia);
 
   if (diagInertia)
+    mode_ = DIAGONAL;
+  else if (massType == "lumped")
     mode_ = LUMPED;
   else
     mode_ = CONSISTENT;
 
   // prepare solver for modes
-  if (mode_ == LUMPED)
+  if (mode_ == DIAGONAL)
   {
     massInv_.resize(dofs_->dofCount());
     Globdat::storeFor("LumpedMass", diagInertia, this, globdat);
 
-    myConf.set("mode", "lumped");
+    myConf.set("mode", "diagonal");
   }
-
-  if (mode_ == CONSISTENT)
+  else
   {
+    // also LUMPED: the solver is used when constraints link dofs, and its matrix goes to the gyroscopic force
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("explicitSolver", myConf, myProps, sparams, globdat);
@@ -204,7 +212,10 @@ Module::Status ExplicitModule::init
     solver_->configure(myProps);
     solver_->getConfig(myConf);
 
-    myConf.set("mode", "consistent");
+    myConf.set("mode", mode_ == LUMPED ? "lumped" : "consistent");
+
+    if (mode_ == LUMPED)
+      jem::System::info(myName_) << " ...lumped mass: node blocks inverted directly (sparse solver if constraints link dofs)\n";
   }
 
   // Initialize the global simulation time and the time step number as
@@ -404,12 +415,72 @@ void ExplicitModule::getAcce(const Vector &a,
   (void)globdat; // unused
 
   // Compute acceleration
-  if (mode_ == CONSISTENT)
+  if (mode_ == CONSISTENT || (mode_ == LUMPED && cons.get() && cons->masterDofCount() > 0))
   {
+    // linked dofs make the reduced lumped matrix non-diagonal: sparse solver
+    static bool reported = false;
+    if (mode_ == LUMPED && !reported)
+    {
+      reported = true;
+      jem::System::info(myName_) << " ...lumped mass: constraints link dofs, using the sparse solver\n";
+    }
     solver_->solve(a, fres);
   }
+  else if (mode_ == LUMPED)
+  {
+    // fixed dofs only: free dofs outside the rotation blocks by 1/m, per node
+    // M_FF a_F = f_F - M_FS a_S for the rotation dofs (a_S: the values of the fixed dofs)
+    for (idx_t k = 0; k < masslessCount_; k++)
+      if (!cons.get() || !cons->isSlaveDof(massless_[k]))
+        throw jem::ArithmeticException("Zero mass at a free dof cannot be inversed!");
 
-  if (mode_ == LUMPED)
+    a = massInv_ * fres;
+    if (cons.get())
+      jive::util::setSlaveDofs(a, *cons);
+
+    for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+    {
+      if (rdofs_(0, inode) < 0)
+        continue;
+
+      Vec3 slaveVal, rhs;
+      Mat3 B;
+      jem::Tuple<bool, 3> slave;
+      for (idx_t i = 0; i < 3; i++)
+      {
+        slave[i] = cons.get() && cons->isSlaveDof(rdofs_(i, inode));
+        slaveVal[i] = slave[i] ? a[rdofs_(i, inode)] : 0.;
+      }
+      for (idx_t i = 0; i < 3; i++)
+      {
+        rhs[i] = 0.;
+        for (idx_t j = 0; j < 3; j++)
+          B(i, j) = (slave[i] || slave[j]) ? (i == j ? 1. : 0.) : rotMass_(i, j, inode);
+        if (!slave[i])
+        {
+          rhs[i] = fres[rdofs_(i, inode)];
+          for (idx_t j = 0; j < 3; j++)
+            rhs[i] -= rotMass_(i, j, inode) * slaveVal[j];
+        }
+      }
+
+      // B is symmetric positive definite (identity rows for the fixed dofs): closed-form inverse of JEM
+      double det;
+      if (!jem::numeric::invert(B, det) || det < 0.)
+        throw jem::ArithmeticException("Zero (or negative) rotational mass block cannot be inversed!");
+
+      for (idx_t i = 0; i < 3; i++)
+      {
+        if (slave[i])
+          continue;
+        double sum = 0.;
+        for (idx_t j = 0; j < 3; j++)
+          sum += B(i, j) * rhs[j];
+        a[rdofs_(i, inode)] = sum;
+      }
+    }
+  }
+  else
   {
     a = massInv_ * fres;
     jive::util::setSlaveDofs(a, *cons);
@@ -489,7 +560,7 @@ ExplicitModule::getForce(const Vector &fint,
   params.set(ActionParams::EXT_VECTOR, fext);
   params.set(ActionParams::INT_VECTOR, fint);
   params.set(ActionParams::CONSTRAINTS, cons_);
-  if (mode_ == CONSISTENT)
+  if (mode_ != DIAGONAL)
     params.set(ActionParams::MATRIX2, solver_->getMatrix());
 
   model_->takeAction(Actions::GET_CONSTRAINTS, params, globdat);
@@ -509,7 +580,7 @@ ExplicitModule::getForce(const Vector &fint,
   {
     fint = fintCache_;
     // only the gyroscopic term depends on the (new) mass matrix
-    if (mode_ == CONSISTENT)
+    if (mode_ != DIAGONAL)
       model_->takeAction("GET_GYRO_VECTOR", params, globdat);
 
 #ifndef NDEBUG
@@ -517,7 +588,7 @@ ExplicitModule::getForce(const Vector &fint,
     Properties checkParams;
     fintFresh = 0.0;
     checkParams.set(ActionParams::INT_VECTOR, fintFresh);
-    if (mode_ == CONSISTENT)
+    if (mode_ != DIAGONAL)
       checkParams.set(ActionParams::MATRIX2, solver_->getMatrix());
     model_->takeAction(Actions::GET_INT_VECTOR, checkParams, globdat);
     const double scale = 1. + norm2(fintFresh);
@@ -583,7 +654,7 @@ Vector ExplicitModule::getEndForce_(const Vector &fint,
   fintCacheValid_ = false;
   fintCacheFresh_ = true;
 
-  if (mode_ == CONSISTENT)
+  if (mode_ != DIAGONAL)
   {
     params.set(ActionParams::MATRIX2, solver_->getMatrix());
     model_->takeAction("GET_GYRO_VECTOR", params, globdat);
@@ -632,8 +703,8 @@ void ExplicitModule::publishCommittedForce_(const Properties &globdat)
   globdat.set(ActionParams::INT_VECTOR, fintCache_.clone());
 
   // only a reference: output modules can evaluate the gyroscopic force with
-  // it on demand (consistent mass only; lumped mode has no gyroscopic term)
-  if (mode_ == CONSISTENT)
+  // it on demand (not for the DIAGONAL mode, which has no gyroscopic term)
+  if (mode_ != DIAGONAL)
     globdat.set(MASS_MATRIX, solver_->getMatrix());
 }
 
@@ -678,7 +749,7 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     rotDofsValid_ = true;
   }
 
-  if (mode_ == LUMPED)
+  if (mode_ == DIAGONAL)
   {
     Ref<DiagMatrixObject> inertia;
     Globdat::findFor(inertia, "LumpedMass", this, globdat);
@@ -690,7 +761,80 @@ void ExplicitModule::updateMass_(const Properties &globdat)
     massInv_ = 1 / massInv_;
   }
 
+  if (mode_ == LUMPED)
+    updBlocks_();
+
   valid_ = true;
+}
+
+//-----------------------------------------------------------------------
+//   updBlocks_
+//-----------------------------------------------------------------------
+
+void ExplicitModule::updBlocks_()
+{
+  jive::algebra::SparseMatrixObject *sparse =
+      dynamic_cast<jive::algebra::SparseMatrixObject *>(solver_->getMatrix());
+
+  if (!sparse)
+    throw jem::IllegalInputException(getContext(), "mass = \"lumped\" needs a sparse mass matrix");
+
+  const IdxVector rowOffsets(sparse->getRowOffsets());
+  const IdxVector colIndices(sparse->getColumnIndices());
+  const Vector values(sparse->getValues());
+  const idx_t dofCount = dofs_->dofCount();
+  const idx_t nodeCount = rdofs_.size(1);
+
+  massInv_.resize(dofCount);
+  massInv_ = 0.;
+  massless_.resize(dofCount);
+  masslessCount_ = 0;
+  rotMass_.resize(3, 3, nodeCount);
+  rotMass_ = 0.;
+
+  // entries outside the rotation blocks: diagonal
+  for (idx_t irow = 0; irow < dofCount; irow++)
+  {
+    if (isRotDof_[irow])
+      continue;
+
+    double diag = 0.;
+    for (idx_t k = rowOffsets[irow]; k < rowOffsets[irow + 1]; k++)
+    {
+      if (colIndices[k] == irow)
+        diag += values[k];
+      else if (jem::numeric::abs(values[k]) > 0.)
+        throw jem::IllegalInputException(getContext(), "mass = \"lumped\": the mass matrix is not block diagonal");
+    }
+    if (diag < 0.)
+      throw jem::ArithmeticException("Negative masses cannot be inversed!");
+    if (diag <= jem::Limits<double>::TINY_VALUE)
+      massless_[masslessCount_++] = irow; // fine as long as it is constrained, checked in getAcce
+    else
+      massInv_[irow] = 1. / diag;
+  }
+
+  // rotation blocks of the nodes
+  for (idx_t inode = 0; inode < nodeCount; inode++)
+  {
+    if (rdofs_(0, inode) < 0)
+      continue;
+
+    for (idx_t i = 0; i < 3; i++)
+    {
+      const idx_t irow = rdofs_(i, inode);
+      for (idx_t k = rowOffsets[irow]; k < rowOffsets[irow + 1]; k++)
+      {
+        idx_t j = 0;
+        while (j < 3 && rdofs_(j, inode) != colIndices[k])
+          j++;
+        if (j < 3)
+          rotMass_(i, j, inode) += values[k];
+        else if (jem::numeric::abs(values[k]) > 0.)
+          throw jem::IllegalInputException(getContext(), "mass = \"lumped\": the mass matrix is not block diagonal");
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------

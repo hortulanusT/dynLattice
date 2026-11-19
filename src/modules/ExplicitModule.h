@@ -99,8 +99,9 @@ class ExplicitModule : public SolverModule
   /// @brief Mass matrix formulation modes
   enum MassMode
   {
-    LUMPED,    ///< Lumped mass matrix
-    CONSISTENT ///< Consistent mass matrix
+    DIAGONAL,  ///< Diagonal mass matrix (models without rotation dofs), inverted entry by entry
+    LUMPED,    ///< Block-diagonal mass matrix (translation per dof, 3x3 rotation block per node), inverted per node
+    CONSISTENT ///< Sparse mass matrix, solved with a sparse solver
   };
 
   JEM_DECLARE_CLASS(ExplicitModule, SolverModule);
@@ -206,6 +207,9 @@ class ExplicitModule : public SolverModule
   /// @brief Remove the published forces again (they are no longer valid)
   /// @param[in] globdat  Global data container
   void dropCommittedForce_(const Properties &globdat);
+
+  /// @brief LUMPED: read the inverse entries and the rotation blocks from the sparse mass matrix
+  void updBlocks_();
 
   /// @brief Rebuild the rotational DOF mask from rdofs_
   void updRotMask_();
@@ -331,7 +335,10 @@ class ExplicitModule : public SolverModule
   /// @{
   Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step; it changes only
                           ///< with rotation dofs, whose inertia follows the rotations)
-  Vector massInv_;        ///< Inverse mass matrix
+  Vector massInv_;        ///< DIAGONAL: inverse mass matrix; LUMPED: inverse of the entries outside the rotation blocks
+  Cubix rotMass_;         ///< LUMPED: 3x3 rotational mass block of each node (node index as in rdofs_)
+  IdxVector massless_;    ///< LUMPED: dofs without mass outside the rotation blocks (must be constrained when solving)
+  idx_t masslessCount_;   ///< LUMPED: number of entries of massless_
   IdxVector dofsSO3_;     ///< SO(3) DOF type indices
   IdxMatrix rdofs_;       ///< Rotational DOF mapping
   BoolVector isRotDof_;   ///< Mask of rotational DOFs (rebuilt with rdofs_)
