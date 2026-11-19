@@ -351,12 +351,7 @@ void ElasticRodMaterial::calcMaterialMass_()
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l) const
 {
-  Matrix M = Matrix(getMaterialMass() * l);
-
-  M(3, 3) += area_ * density_ * pow(l, 3) / 12.;
-  M(4, 4) += area_ * density_ * pow(l, 3) / 12.;
-
-  return M;
+  return Matrix(getMaterialMass() * l);
 }
 
 Matrix ElasticRodMaterial::getLumpedMass(const double l, const idx_t &ielem) const

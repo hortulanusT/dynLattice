@@ -317,8 +317,8 @@ void LatticeModel::getMomenta_(const Vector &p, const Vector &l, const Vector &m
     irot[i] = dofs->getTypeIndex(rotDofs_[i]);
   }
 
-  // p = sum (M v)_trans, l = sum x x (M v)_trans + (M v)_rot, x = X + u: exact for the assembled mass, as the
-  // consistent translational mass couples the nodes with the shape functions that interpolate x and v
+  // p = sum (M v)_trans, l = sum x x (M v)_trans + (M v)_rot, x = X + u: the momenta of the assembled mass
+  // (consistent mass: exact, the shape functions interpolate x and v; lumped mass: point masses)
   p = 0.;
   l = 0.;
   for (idx_t iNode = 0; iNode < allNodes.size(); iNode++)

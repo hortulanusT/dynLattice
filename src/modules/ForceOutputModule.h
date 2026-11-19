@@ -61,8 +61,8 @@ using jive::util::FuncUtils;
 /// and analysis. Supports selective output of internal, external, and
 /// gyroscopic forces with configurable sampling conditions. The gyroscopic
 /// forces are evaluated on demand with the mass matrix an explicit integrator
-/// with consistent mass publishes (ExplicitModule::MASS_MATRIX); without one
-/// they are not written. Only the DOFs selected via the dofs
+/// publishes (ExplicitModule::MASS_MATRIX; not with a diagonal mass, i.e. without
+/// rotation dofs); without one they are not written. Only the DOFs selected via the dofs
 /// property are written, in the order of the header.
 class ForceOutputModule : public Module
 {

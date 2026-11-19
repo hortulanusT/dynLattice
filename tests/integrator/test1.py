@@ -17,9 +17,12 @@ from metrics import convergence_order, energy_error
 OUT = "tests/integrator/test1"
 FORCE = 0.02       # dead tip force in x, its potential is -F dx
 RUNS = 5           # step sizes per case, each half the previous one (tests/testing.mk)
+# first (largest) step of each scheme (tests/testing.mk); LeapFrog and EmbeddedRK write only every 1e-4, so the step is
+# not the spacing of the output rows
+FIRST_STEP = {"LeapFrog": 2.5e-5, "Milne": 4e-6, "ode23": 5e-5, "ode45": 1e-4}
 # mesh runs (tests/testing.mk): elements, and the dead tip force (x, z) from rest; the energy error of the element in 3D
 # is of second order in the element size
-MESHES, MESH_FORCE, MESH_ORDER, MESH_TOL = [4, 8, 16], (0.02, 0.01), 2.0, 0.1
+MESHES, MESH_FORCE, MESH_ORDER, MESH_TOL = [8, 16, 32], (0.02, 0.01), 2.0, 0.1
 
 # integrator: name in the figure, order by construction and tolerance, end time.
 # MilneDevice at a fixed step is the first-order Adams-Bashforth-Moulton pair; it damps a mode w like
@@ -47,18 +50,19 @@ def total_energy(run):
 
 def energy_difference(coarse, fine):
   """Largest |E(t) - E_fine(t)| / E(0) of a run against the run at half the step, at the times of the coarse run."""
-  fine = fine[1::2]
-  n = min(len(coarse), len(fine))
-  if not np.allclose(coarse[:n, 0], fine[:n, 0]):
-    raise RuntimeError("the run at half the step does not write every step")
-  return np.abs(total_energy(coarse[:n]) - total_energy(fine[:n])).max() / abs(total_energy(coarse)[0])
+  rows = np.searchsorted(fine[:, 0], coarse[:, 0] - 1e-9)
+  rows = rows[rows < len(fine)]
+  n = len(rows)
+  if n < len(coarse) - 1 or not np.allclose(coarse[:n, 0], fine[rows, 0], atol=1e-9):
+    raise RuntimeError("the run at half the step does not write at the times of the coarse run")
+  return np.abs(total_energy(coarse[:n]) - total_energy(fine[rows])).max() / abs(total_energy(coarse)[0])
 
 
 def evaluate(scheme, dim, motion_axes, energy_axes):
   label, order, tol, end = SCHEMES[scheme]
   check_motion, check_energy = CASES[(scheme, dim)]
   runs = [np.loadtxt(f"{OUT}/{scheme}_{dim}_{i}.csv", delimiter=",", skiprows=1, ndmin=2) for i in range(RUNS)]
-  steps = np.array([run[1, 0] - run[0, 0] for run in runs])
+  steps = FIRST_STEP[scheme] / 2.**np.arange(RUNS)
   if any(run[-1, 0] < end - step for run, step in zip(runs, steps)):
     raise RuntimeError(f"{scheme} {dim}: a run did not reach t = {end}, see the .log files in {OUT}")
 

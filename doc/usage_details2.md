@@ -17,6 +17,8 @@
 | `include "model.pro";` | include the \ref model2 file defining the lattice, contact, impact and support models |
 | `include "output.pro";` | include the \ref output2 file defining output modules and data collection |
 
+\note Optional: `Solver.integrator.mass = "lumped";` (default `"consistent"`) lumps the translational mass of the rods to the row sum \f$\rho A\int N_i\,\mathrm{d}s\f$; the rotational inertia stays the nodal block \f$\Lambda J \Lambda^T\f$. The mass matrix is block diagonal and inverted per node (the sparse solver is used when constraints link dofs, as with the `SpringMass` plate here). Short waves then travel slower than the wave speed (consistent mass: faster).
+
 \section input2 input.pro
 The `input.pro` file defines the input modules that read the parameterized geometry and set up the periodic node groups.
 
@@ -121,6 +123,8 @@ model.model.lattice.child.material.yieldStrength = ["280/450*205*0.75^2", "280/4
 model.model.lattice.child.material.yieldExponent = [2.68, 2.68, 1.75, 1.93, 1.93, 1.70];
 ```
 `yieldStrength` holds the strengths \f$c_i\f$ and `yieldExponent` the exponents \f$p_i\f$ (one per DOF, written as floats); \f$h_i\f$ are the kinematic hardening stresses. With isotropic hardening the constant becomes \f$1+h_0\f$.
+
+\note The plastic update is a convex cutting-plane return mapping, which is first order in the strain increment of a step. With `model.model.lattice.child.material.substepYield = 0.005;` (default 0, off) the increment is split into \f$n=\lceil f_\mathrm{trial}/\mathrm{substepYield}\rceil\f$ equal sub-increments, each a full return mapping from the previous sub-state, so that the result no longer depends on the load or time step (\f$f_\mathrm{trial}\f$: the yield function value of the elastic trial state; 0.02 corresponds to about 0.01 yield strains per sub-increment, and the error of the update is proportional to the value). `maxSubsteps` (default 250) caps \f$n\f$ and warns once when it is reached; `maxIter` still limits the iterations of one sub-increment.
 
 \section output2 output.pro
 The `output.pro` file defines the output modules used to record the impact response and produce the ParaView visualization.

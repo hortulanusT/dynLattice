@@ -181,7 +181,7 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
 
     if (gyroOut_)
     {
-      // only an explicit integrator with consistent mass publishes its mass
+      // only an explicit integrator with rotation dofs publishes its mass
       jem::Ref<jive::algebra::AbstractMatrix> mass;
       if (globdat.find(mass, ExplicitModule::MASS_MATRIX))
       {
@@ -195,7 +195,7 @@ Module::Status ForceOutputModule::run(const Properties &globdat)
       else if (!started) // only warn once per simulation
       {
         jem::System::warn() << myName_ << " : no gyroscopic forces available "
-                            << "(explicit integrator with consistent mass "
+                            << "(explicit integrator with rotation dofs "
                             << "required); not writing them\n";
       }
     }

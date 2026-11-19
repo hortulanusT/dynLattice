@@ -15,6 +15,7 @@ const char *SolverNames::STEP_SIZE_0 = "StepSize0";
 const char *SolverNames::TERMINATE = "Terminate";
 const char *SolverNames::ROT_DOFS = "RotDofs";
 const char *SolverNames::ROT_SHIFT = "RotShift";
+const char *SolverNames::LUMPED_MASS = "LumpedRodMass";
 
 // actions
 const char *SolverNames::CHECK_COMMIT = "CheckCommit";
