@@ -46,6 +46,7 @@ CHECK_ANGULAR = ("LeapFrog", "ode23", "ode45")
 # coarsest step is not yet in the asymptotic range)
 ORDER_TOL = 0.1
 ORDER_RUNS, ORDER = 5, 2.
+ORDER_STEPS = [1e-3 / 2**i for i in range(ORDER_RUNS)]    # tests/testing.mk; the output spacing is 1e-3 for all
 
 
 def exact_centre(t):
@@ -171,7 +172,7 @@ try:
   # convergence of LeapFrog at t = 5, Eq. (76): position and velocity of the loaded end against the finest run;
   # the position is the displacement plus START
   runs = [read(f"LeapFrog_{i}", ORDER_END) for i in range(ORDER_RUNS)]
-  steps = np.array([r[1, 0] - r[0, 0] for r in runs])
+  steps = np.array(ORDER_STEPS)
   rows_at = [np.argmin(np.abs(r[:, 0] - ORDER_END)) for r in runs]
   positions = [r[i, 9:12] + START for r, i in zip(runs, rows_at)]
   velocities = [r[i, 12:15] for r, i in zip(runs, rows_at)]
