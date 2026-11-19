@@ -29,6 +29,7 @@ const char *ExplicitModule::SO3_DOFS = "dofs_SO3";
 const char *ExplicitModule::LEN_SCALE = "lengthScale";
 const char *ExplicitModule::ROT_SCALE = "rotationScale";
 const char *ExplicitModule::MASS_MATRIX = "explicitMass";
+const char *ExplicitModule::MASS_TYPE = "mass";
 
 //-----------------------------------------------------------------------
 //   constructor & destructor
@@ -91,6 +92,15 @@ Module::Status ExplicitModule::init
   rotScale_ = lenScale_;
   myProps.find(rotScale_, ROT_SCALE);
   myConf.set(ROT_SCALE, rotScale_);
+
+  // mass of the rods (the rotational inertia is lumped per node in both): rods read the choice from globdat
+  String massType = "consistent";
+  myProps.find(massType, MASS_TYPE);
+  if (massType != "consistent" && massType != "lumped")
+    throw jem::IllegalInputException(getContext(), String(MASS_TYPE) + " = \"" + massType +
+                                                       "\": use \"consistent\" or \"lumped\"");
+  myConf.set(MASS_TYPE, massType);
+  globdat.set(SolverNames::LUMPED_MASS, massType == "lumped");
 
   // returning an address of an object pointing to the Model
 

@@ -113,6 +113,7 @@ class ExplicitModule : public SolverModule
   static const char *LEN_SCALE;  ///< Length scale property
   static const char *ROT_SCALE;  ///< Rotation scale property (length; default: the length scale)
   static const char *MASS_MATRIX; ///< globdat key of the published mass matrix
+  static const char *MASS_TYPE;   ///< Mass of the rods: "consistent" (default) or "lumped" translational mass
   /// @}
 
   /// @brief Initialize the module

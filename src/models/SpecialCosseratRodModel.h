@@ -220,8 +220,10 @@ class SpecialCosseratRodModel : public Model
   /// @brief Assemble mass matrix
   /// @param[in,out] mbld  Mass matrix builder
   /// @param[in] disp  Current DOF values
+  /// @param[in] lumped  Translational mass lumped (row sum of the consistent mass, block diagonal matrix)
   void assembleM_(MatrixBuilder &mbld,
-                  Vector &disp) const;
+                  Vector &disp,
+                  bool lumped) const;
 
   /// @brief Fill table with strain values per element
   /// @param[out] strain_table  Output strain table

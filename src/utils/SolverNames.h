@@ -17,6 +17,7 @@ struct SolverNames
   static const char *TERMINATE;
   static const char *ROT_DOFS; ///< names of the rotation dofs (rotation vectors), see GET_ROT_DOFS
   static const char *ROT_SHIFT; ///< static runs: shift of the rotation dofs, total minus reduced rotation vector
+  static const char *LUMPED_MASS; ///< globdat (bool, set by ExplicitModule): rods assemble the translational mass lumped
 
   // actions
   static const char *CHECK_COMMIT;

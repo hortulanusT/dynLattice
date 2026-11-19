@@ -335,10 +335,13 @@ bool SpecialCosseratRodModel::takeAction
     Ref<MatrixBuilder> mbld;
     Vector disp;
 
+    bool lumped = false;
+
     params.get(mbld, ActionParams::MATRIX2);
     StateVector::get(disp, dofs_, globdat);
+    globdat.find(lumped, SolverNames::LUMPED_MASS);
 
-    assembleM_(*mbld, disp);
+    assembleM_(*mbld, disp, lumped);
 
     // // DEBUGGING
     // IdxVector dofList(dofs_->dofCount());
@@ -1232,7 +1235,7 @@ void SpecialCosseratRodModel::assembleGyro_(const Vector &fgyro,
   }
 }
 
-void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) const
+void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp, bool lumped) const
 {
   if (!nodeDofsValid_)
     updNodeDofs_();
@@ -1298,12 +1301,16 @@ void SpecialCosseratRodModel::assembleM_(MatrixBuilder &mbld, Vector &disp) cons
       idofs.ref(nodeDofs_[rodNodes_[inodes[inode]]]);
       for (idx_t jnode = 0; jnode < nodeCount; jnode++)
       {
+        // lumped: row sum of the consistent mass (partition of unity), block diagonal
+        if (lumped && jnode != inode)
+          continue;
+
         jdofs.ref(nodeDofs_[rodNodes_[inodes[jnode]]]);
 
         spatialInertia = 0;
 
         for (idx_t ip = 0; ip < ipCount; ip++)
-          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * shapes(jnode, ip) * ipMass[ip];
+          spatialInertia(TRANS_PART, TRANS_PART) += weights[ip] * shapes(inode, ip) * (lumped ? 1. : shapes(jnode, ip)) * ipMass[ip];
         if (inode == jnode)
         {
           // node rotational inertia Λ_N·J·Λ_Nᵀ, formed as Λ_N·(J·Λ_Nᵀ)
