@@ -200,6 +200,9 @@ Module::Status ExplicitModule::init
     Globdat::storeFor("LumpedMass", diagInertia, this, globdat);
 
     myConf.set("mode", "diagonal");
+
+    if (massType == "lumped")
+      jem::System::info(myName_) << " ...diagonal mass matrix (no rotation dofs): " << MASS_TYPE << " = \"lumped\" has no further effect\n";
   }
   else
   {
@@ -795,7 +798,8 @@ void ExplicitModule::updBlocks_()
   // entries outside the rotation blocks: diagonal
   for (idx_t irow = 0; irow < dofCount; irow++)
   {
-    if (isRotDof_[irow])
+    // isRotDof_ is empty for models without rotation dofs
+    if (irow < isRotDof_.size() && isRotDof_[irow])
       continue;
 
     double diag = 0.;

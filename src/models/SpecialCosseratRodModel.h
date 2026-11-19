@@ -143,7 +143,6 @@ class SpecialCosseratRodModel : public Model
   static const char *MATERIAL_Y_DIR;    ///< Material y-direction property
   static const char *GIVEN_NODES;       ///< Given direction nodes property
   static const char *GIVEN_DIRS;        ///< Given directions property
-  static const char *LUMPED_MASS;       ///< Lumped mass property
   static const char *HINGES;            ///< Hinges property
   /// @}
 

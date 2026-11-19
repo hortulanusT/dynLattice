@@ -38,7 +38,6 @@ const char *SpecialCosseratRodModel::SYMMETRIC_ONLY = "symmetric_tanget_stiffnes
 const char *SpecialCosseratRodModel::MATERIAL_Y_DIR = "material_ey";
 const char *SpecialCosseratRodModel::GIVEN_NODES = "given_dir_nodes";
 const char *SpecialCosseratRodModel::GIVEN_DIRS = "given_dir_dirs";
-const char *SpecialCosseratRodModel::LUMPED_MASS = "lumpedMass";
 const char *SpecialCosseratRodModel::HINGES = "hinges";
 const idx_t SpecialCosseratRodModel::TRANS_DOF_COUNT = 3;
 const idx_t SpecialCosseratRodModel::ROT_DOF_COUNT = 3;

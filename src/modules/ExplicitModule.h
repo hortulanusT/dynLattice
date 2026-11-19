@@ -197,8 +197,8 @@ class ExplicitModule : public SolverModule
 
   /// @brief Publish the internal force of the committed state in globdat
   /// Not compatible with TangentOutputModule.
-  /// With a consistent mass a reference to the mass matrix of the finished
-  /// step is published as well (MASS_MATRIX), so that output modules can
+  /// Unless the mass matrix is diagonal (no rotation dofs), a reference to the
+  /// mass matrix of the finished step is published as well (MASS_MATRIX), so that output modules can
   /// evaluate the gyroscopic force on demand (GET_GYRO_VECTOR); the solver
   /// itself does not use it.
   /// @param[in] globdat  Global data container
