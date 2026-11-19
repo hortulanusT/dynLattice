@@ -17,7 +17,7 @@
 | `include "model.pro";` | include the \ref model2 file defining the lattice, contact, impact and support models |
 | `include "output.pro";` | include the \ref output2 file defining output modules and data collection |
 
-\note Optional integrator settings not used in this example: `Solver.integrator.mass = "lumped";` selects the lumped mass of the rods (default `"consistent"`). The translational mass is then the row sum \f$\rho A\int N_i\,\mathrm{d}s\f$ of the consistent one, the rotational inertia stays the rotated nodal block \f$\Lambda J \Lambda^T\f$, so the mass matrix is block diagonal and inverted per node (no sparse solve; falls back to the sparse solver when constraints link dofs, as with the `SpringMass` plate here). The gyroscopic force is included. With the lumped mass, short waves travel slower than the wave speed (consistent mass: faster), and the 3D energy balance no longer carries the inertia coupling of the driven nodes.
+\note Optional: `Solver.integrator.mass = "lumped";` (default `"consistent"`) lumps the translational mass of the rods to the row sum \f$\rho A\int N_i\,\mathrm{d}s\f$; the rotational inertia stays the nodal block \f$\Lambda J \Lambda^T\f$. The mass matrix is block diagonal and inverted per node (the sparse solver is used when constraints link dofs, as with the `SpringMass` plate here). Short waves then travel slower than the wave speed (consistent mass: faster).
 
 \section input2 input.pro
 The `input.pro` file defines the input modules that read the parameterized geometry and set up the periodic node groups.

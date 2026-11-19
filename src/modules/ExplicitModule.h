@@ -89,7 +89,7 @@ using jive_helpers::mul3;
 
 /// @brief Base class for explicit time integration schemes
 /// @details Provides foundation for explicit solvers with support for rotational DOFs,
-/// adaptive time stepping, and both lumped and consistent mass matrices. The rotation dofs
+/// adaptive time stepping, and a consistent or lumped rod mass (input `mass`). The rotation dofs
 /// (dofs_SO3, or if not given those the model reports with SolverNames::GET_ROT_DOFS) are
 /// rotation vectors; they are updated with the exponential map, Lambda_new = exp(dt omega) Lambda_old,
 /// their velocities being spatial angular velocities. All other dofs are updated additively.
@@ -197,10 +197,9 @@ class ExplicitModule : public SolverModule
 
   /// @brief Publish the internal force of the committed state in globdat
   /// Not compatible with TangentOutputModule.
-  /// Unless the mass matrix is diagonal (no rotation dofs), a reference to the
-  /// mass matrix of the finished step is published as well (MASS_MATRIX), so that output modules can
-  /// evaluate the gyroscopic force on demand (GET_GYRO_VECTOR); the solver
-  /// itself does not use it.
+  /// Unless the mass is diagonal (no rotation dofs), a reference to the mass matrix of the
+  /// finished step is published as well (MASS_MATRIX), so that output modules can evaluate
+  /// the gyroscopic force on demand (GET_GYRO_VECTOR); the solver itself does not use it.
   /// @param[in] globdat  Global data container
   void publishCommittedForce_(const Properties &globdat);
 
@@ -335,7 +334,7 @@ class ExplicitModule : public SolverModule
   /// @{
   Ref<Function> updCond_; ///< updateWhen: when to rebuild the mass matrix (default: every step; it changes only
                           ///< with rotation dofs, whose inertia follows the rotations)
-  Vector massInv_;        ///< DIAGONAL: inverse mass matrix; LUMPED: inverse of the entries outside the rotation blocks
+  Vector massInv_;        ///< DIAGONAL: 1/m; LUMPED: 1/m of the dofs outside the rotation blocks
   Cubix rotMass_;         ///< LUMPED: 3x3 rotational mass block of each node (node index as in rdofs_)
   IdxVector massless_;    ///< LUMPED: dofs without mass outside the rotation blocks (must be constrained when solving)
   idx_t masslessCount_;   ///< LUMPED: number of entries of massless_

@@ -99,7 +99,7 @@ Module::Status ExplicitModule::init
   myProps.find(rotScale_, ROT_SCALE);
   myConf.set(ROT_SCALE, rotScale_);
 
-  // mass of the rods (the rotational inertia is lumped per node in both): rods read the choice from globdat
+  // mass type of the rods, read by the rod model from globdat
   String massType = "consistent";
   myProps.find(massType, MASS_TYPE);
   if (massType != "consistent" && massType != "lumped")
@@ -206,7 +206,7 @@ Module::Status ExplicitModule::init
   }
   else
   {
-    // also LUMPED: the solver is used when constraints link dofs, and its matrix goes to the gyroscopic force
+    // CONSISTENT, and LUMPED (needed when constraints link dofs; its matrix also feeds the gyroscopic force)
     sparams = newSolverParams(globdat, inertia, nullptr, dofs_);
     model_->takeAction(Actions::GET_SOLVER_PARAMS, sparams, globdat);
     solver_ = newSolver("explicitSolver", myConf, myProps, sparams, globdat);
@@ -417,10 +417,9 @@ void ExplicitModule::getAcce(const Vector &a,
 {
   (void)globdat; // unused
 
-  // Compute acceleration
+  // Compute acceleration; linked dofs make the reduced lumped matrix non-diagonal: sparse solver
   if (mode_ == CONSISTENT || (mode_ == LUMPED && cons.get() && cons->masterDofCount() > 0))
   {
-    // linked dofs make the reduced lumped matrix non-diagonal: sparse solver
     static bool reported = false;
     if (mode_ == LUMPED && !reported)
     {
@@ -429,64 +428,57 @@ void ExplicitModule::getAcce(const Vector &a,
     }
     solver_->solve(a, fres);
   }
-  else if (mode_ == LUMPED)
+  else
   {
-    // fixed dofs only: free dofs outside the rotation blocks by 1/m, per node
-    // M_FF a_F = f_F - M_FS a_S for the rotation dofs (a_S: the values of the fixed dofs)
-    for (idx_t k = 0; k < masslessCount_; k++)
-      if (!cons.get() || !cons->isSlaveDof(massless_[k]))
-        throw jem::ArithmeticException("Zero mass at a free dof cannot be inversed!");
-
+    // a = f / m, fixed dofs get their value (DIAGONAL: all dofs; LUMPED: all but the rotations)
     a = massInv_ * fres;
     if (cons.get())
       jive::util::setSlaveDofs(a, *cons);
 
-    for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
+    if (mode_ == LUMPED)
     {
-      if (rdofs_(0, inode) < 0)
-        continue;
+      for (idx_t k = 0; k < masslessCount_; k++)
+        if (!cons.get() || !cons->isSlaveDof(massless_[k]))
+          throw jem::ArithmeticException("Zero mass at a free dof cannot be inversed!");
 
-      Vec3 slaveVal, rhs;
-      Mat3 B;
-      jem::Tuple<bool, 3> slave;
-      for (idx_t i = 0; i < 3; i++)
+      for (idx_t inode = 0; inode < rdofs_.size(1); inode++)
       {
-        slave[i] = cons.get() && cons->isSlaveDof(rdofs_(i, inode));
-        slaveVal[i] = slave[i] ? a[rdofs_(i, inode)] : 0.;
-      }
-      for (idx_t i = 0; i < 3; i++)
-      {
-        rhs[i] = 0.;
-        for (idx_t j = 0; j < 3; j++)
-          B(i, j) = (slave[i] || slave[j]) ? (i == j ? 1. : 0.) : rotMass_(i, j, inode);
-        if (!slave[i])
+        if (rdofs_(0, inode) < 0)
+          continue;
+
+        // rotations of the node: M_FF a_F = f_F - M_FS a_S, F free and S fixed dofs (a holds a_S, zero at the free dofs);
+        // the fixed dofs get identity rows, which keeps B symmetric positive definite
+        Vec3 rhs;
+        Mat3 B;
+        jem::Tuple<bool, 3> fixed;
+        for (idx_t i = 0; i < 3; i++)
+          fixed[i] = cons.get() && cons->isSlaveDof(rdofs_(i, inode));
+        for (idx_t i = 0; i < 3; i++)
         {
-          rhs[i] = fres[rdofs_(i, inode)];
+          rhs[i] = fixed[i] ? 0. : fres[rdofs_(i, inode)];
           for (idx_t j = 0; j < 3; j++)
-            rhs[i] -= rotMass_(i, j, inode) * slaveVal[j];
+          {
+            B(i, j) = (fixed[i] || fixed[j]) ? (i == j ? 1. : 0.) : rotMass_(i, j, inode);
+            if (!fixed[i])
+              rhs[i] -= rotMass_(i, j, inode) * a[rdofs_(j, inode)];
+          }
+        }
+
+        double det;
+        if (!jem::numeric::invert(B, det) || det < 0.) // closed-form 3x3 inverse of JEM
+          throw jem::ArithmeticException("Zero (or negative) rotational mass block cannot be inversed!");
+
+        for (idx_t i = 0; i < 3; i++)
+        {
+          if (fixed[i])
+            continue;
+          double sum = 0.;
+          for (idx_t j = 0; j < 3; j++)
+            sum += B(i, j) * rhs[j];
+          a[rdofs_(i, inode)] = sum;
         }
       }
-
-      // B is symmetric positive definite (identity rows for the fixed dofs): closed-form inverse of JEM
-      double det;
-      if (!jem::numeric::invert(B, det) || det < 0.)
-        throw jem::ArithmeticException("Zero (or negative) rotational mass block cannot be inversed!");
-
-      for (idx_t i = 0; i < 3; i++)
-      {
-        if (slave[i])
-          continue;
-        double sum = 0.;
-        for (idx_t j = 0; j < 3; j++)
-          sum += B(i, j) * rhs[j];
-        a[rdofs_(i, inode)] = sum;
-      }
     }
-  }
-  else
-  {
-    a = massInv_ * fres;
-    jive::util::setSlaveDofs(a, *cons);
   }
 }
 
@@ -705,8 +697,7 @@ void ExplicitModule::publishCommittedForce_(const Properties &globdat)
   // Publish the cached force to the global data container
   globdat.set(ActionParams::INT_VECTOR, fintCache_.clone());
 
-  // only a reference: output modules can evaluate the gyroscopic force with
-  // it on demand (not for the DIAGONAL mode, which has no gyroscopic term)
+  // only a reference; output modules evaluate the gyroscopic force with it (none for DIAGONAL)
   if (mode_ != DIAGONAL)
     globdat.set(MASS_MATRIX, solver_->getMatrix());
 }
@@ -788,6 +779,8 @@ void ExplicitModule::updBlocks_()
   const idx_t dofCount = dofs_->dofCount();
   const idx_t nodeCount = rdofs_.size(1);
 
+  const char *notBlockDiagonal = "mass = \"lumped\": the mass matrix is not block diagonal";
+
   massInv_.resize(dofCount);
   massInv_ = 0.;
   massless_.resize(dofCount);
@@ -808,7 +801,7 @@ void ExplicitModule::updBlocks_()
       if (colIndices[k] == irow)
         diag += values[k];
       else if (jem::numeric::abs(values[k]) > 0.)
-        throw jem::IllegalInputException(getContext(), "mass = \"lumped\": the mass matrix is not block diagonal");
+        throw jem::IllegalInputException(getContext(), notBlockDiagonal);
     }
     if (diag < 0.)
       throw jem::ArithmeticException("Negative masses cannot be inversed!");
@@ -835,7 +828,7 @@ void ExplicitModule::updBlocks_()
         if (j < 3)
           rotMass_(i, j, inode) += values[k];
         else if (jem::numeric::abs(values[k]) > 0.)
-          throw jem::IllegalInputException(getContext(), "mass = \"lumped\": the mass matrix is not block diagonal");
+          throw jem::IllegalInputException(getContext(), notBlockDiagonal);
       }
     }
   }
