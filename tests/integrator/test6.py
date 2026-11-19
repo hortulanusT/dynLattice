@@ -34,13 +34,13 @@ DRIFT_TOL = 1e-3       # energy and angular momentum in the free flight
 SCHEMES = {"LeapFrog": "leap-frog", "Milne": "MilneDevice: Adams-Bashforth-Moulton",
            "ode23": "EmbeddedRK ode23: Bogacki-Shampine", "ode45": "EmbeddedRK ode45: Dormand-Prince"}
 COLOURS = {"LeapFrog": "C0", "Milne": "C1", "ode23": "C2", "ode45": "C3"}
-# Checked: all integrators against the references; LeapFrog, ode23 and ode45 also the energy and the angular momentum
-# of the model (output of its mass matrix) in the free flight. Run through: MilneDevice in the free flight, which damps
-# by construction; the angular momentum of Eq. (108) with J, for every integrator: the nodal inertia of the model also
-# holds rho A l^2 / 12 about the transverse axes, which is not in J, so that it drifts by 3e-3
+# Checked: all integrators against the references; LeapFrog, ode23 and ode45 also the energy, the angular momentum
+# of the model (output of its mass matrix) and the angular momentum of Eq. (108) with J in the free flight (with the
+# consistent mass; the nodal inertia holds J only). Run through: MilneDevice in the free flight, which damps by construction
 CHECK_REFERENCES = ("LeapFrog", "Milne", "ode23", "ode45")
 CHECK_ENERGY = ("LeapFrog", "ode23", "ode45")
 CHECK_MOMENTUM = ("LeapFrog", "ode23", "ode45")
+CHECK_ANGULAR = ("LeapFrog", "ode23", "ode45")
 # LeapFrog at five steps to t = 5, each half the previous one: the relative error of Eq. (76) against the finest run,
 # order 2 expected (Fig. 8 shows order 2 for their scheme). Checked for the position; the velocity is run through (its
 # coarsest step is not yet in the asymptotic range)
@@ -138,15 +138,17 @@ try:
     ok_ref = centre_error <= CENTRE_TOL and max(energy_errors + momentum_errors) <= CURVE_TOL
     ok_energy = energy_drift <= DRIFT_TOL
     ok_momentum = model_drift <= DRIFT_TOL
+    ok_angular = angular_drift <= DRIFT_TOL
     test_passed = (test_passed and (ok_ref or name not in CHECK_REFERENCES)
-                   and (ok_energy or name not in CHECK_ENERGY) and (ok_momentum or name not in CHECK_MOMENTUM))
+                   and (ok_energy or name not in CHECK_ENERGY) and (ok_momentum or name not in CHECK_MOMENTUM)
+                   and (ok_angular or name not in CHECK_ANGULAR))
     print(f"  {name}, step {rows[1, 0] - rows[0, 0]:g}: centre of mass against Eq. (75) {centre_error:.1e} "
           f"(limit {CENTRE_TOL}); against Figs. 5, 6: energy {energy_errors[0]:.4f}, p_1, l_2, l_3 "
           f"{np.round(momentum_errors, 4)} (limit {CURVE_TOL}); E = {energy[-1]:.1f}, l = {np.round(angular[-1], 1)}  "
           f"{status(ok_ref, name in CHECK_REFERENCES)}", file=LOG)
     print(f"  {name}, free flight: drift of the energy {energy_drift:.1e}  {status(ok_energy, name in CHECK_ENERGY)}, "
           f"of the angular momentum of the model {model_drift:.1e}  {status(ok_momentum, name in CHECK_MOMENTUM)}, "
-          f"of Eq. (108) with J {angular_drift:.1e}  RUN THROUGH (limit {DRIFT_TOL})", file=LOG)
+          f"of Eq. (108) with J {angular_drift:.1e}  {status(ok_angular, name in CHECK_ANGULAR)} (limit {DRIFT_TOL})", file=LOG)
     energy_axes.plot(rows[:, 0], energy, color=COLOURS[name], label=SCHEMES[name])
     for value, style in zip(momenta_compared.T, ["-", "-", "-."]):
       momentum_axes.plot(times, value, color=COLOURS[name], ls=style)
@@ -197,7 +199,7 @@ except Exception as e:
 
 if test_passed:
   print(colored("INTEGRATOR TEST 6 PASSED", "green")
-        + colored(" (RUN THROUGH: Milne in the free flight, momentum with J, velocity order)", "yellow"))
+        + colored(" (RUN THROUGH: Milne in the free flight, velocity order)", "yellow"))
 
   with PdfPages(f"{OUT}/result.pdf") as pdf:
     for fig, tag in [(fig_a, "a"), (fig_b, "b"), (fig_c, "c")]:
