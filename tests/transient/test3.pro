@@ -69,5 +69,5 @@ Output.paraview.beams.node_data = ["fint", "fext", "fres"];
 Output.paraview.beams.el_data = ["strain", "stress", "mat_stress", "mat_strain"];
 Output.paraview.sampleWhen = "t % 0.05 < deltaTime";
 
-log.pattern = "*";
+log.pattern = "*.warn";
 log.file = "-";

@@ -128,51 +128,50 @@ endef
 
 # test 1, convergence order: five steps each, halving, to t = 2 (about three periods of the first mode).
 # MilneDevice only to 0.02, where its damping of the fast modes is small. The steps start where the fastest mode
-# (rotation and shear of the stubby elements, omega about 2e3) is resolved well enough for the asymptotic range. LeapFrog and
-# EmbeddedRK write every 1e-4 (the same times for every step: every N-th step, N in the call of test1_every),
-# MilneDevice every step
+# (rotation and shear of the stubby elements, omega about 2e3) is resolved well enough for the asymptotic range. All schemes
+# write every 1e-4 (the same times for every step: every N-th step, N in the call of every)
 test1_planar = -p "model.model.init.veloVals=[1.,0.]" -p Solver.integrator.updateWhen=false
-test1_every = -p "Output.sampling.sampleWhen='i % $(1) < 1'"
-$(eval $(call integrator_run,test1,LeapFrog_3D_0,$(leapfrog),2.5e-5,2.,$(call test1_every,4)))
-$(eval $(call integrator_run,test1,LeapFrog_3D_1,$(leapfrog),1.25e-5,2.,$(call test1_every,8)))
-$(eval $(call integrator_run,test1,LeapFrog_3D_2,$(leapfrog),6.25e-6,2.,$(call test1_every,16)))
-$(eval $(call integrator_run,test1,LeapFrog_3D_3,$(leapfrog),3.125e-6,2.,$(call test1_every,32)))
-$(eval $(call integrator_run,test1,LeapFrog_3D_4,$(leapfrog),1.5625e-6,2.,$(call test1_every,64)))
-$(eval $(call integrator_run,test1,LeapFrog_planar_0,$(leapfrog),2.5e-5,2.,$(test1_planar) $(call test1_every,4)))
-$(eval $(call integrator_run,test1,LeapFrog_planar_1,$(leapfrog),1.25e-5,2.,$(test1_planar) $(call test1_every,8)))
-$(eval $(call integrator_run,test1,LeapFrog_planar_2,$(leapfrog),6.25e-6,2.,$(test1_planar) $(call test1_every,16)))
-$(eval $(call integrator_run,test1,LeapFrog_planar_3,$(leapfrog),3.125e-6,2.,$(test1_planar) $(call test1_every,32)))
-$(eval $(call integrator_run,test1,LeapFrog_planar_4,$(leapfrog),1.5625e-6,2.,$(test1_planar) $(call test1_every,64)))
-$(eval $(call integrator_run,test1,Milne_3D_0,$(milne),4e-6,0.02))
-$(eval $(call integrator_run,test1,Milne_3D_1,$(milne),2e-6,0.02))
-$(eval $(call integrator_run,test1,Milne_3D_2,$(milne),1e-6,0.02))
-$(eval $(call integrator_run,test1,Milne_3D_3,$(milne),5e-7,0.02))
-$(eval $(call integrator_run,test1,Milne_3D_4,$(milne),2.5e-7,0.02))
-$(eval $(call integrator_run,test1,Milne_planar_0,$(milne),4e-6,0.02,$(test1_planar)))
-$(eval $(call integrator_run,test1,Milne_planar_1,$(milne),2e-6,0.02,$(test1_planar)))
-$(eval $(call integrator_run,test1,Milne_planar_2,$(milne),1e-6,0.02,$(test1_planar)))
-$(eval $(call integrator_run,test1,Milne_planar_3,$(milne),5e-7,0.02,$(test1_planar)))
-$(eval $(call integrator_run,test1,Milne_planar_4,$(milne),2.5e-7,0.02,$(test1_planar)))
-$(eval $(call integrator_run,test1,ode23_3D_0,$(ode23),5e-5,2.,$(call test1_every,2)))
-$(eval $(call integrator_run,test1,ode23_3D_1,$(ode23),2.5e-5,2.,$(call test1_every,4)))
-$(eval $(call integrator_run,test1,ode23_3D_2,$(ode23),1.25e-5,2.,$(call test1_every,8)))
-$(eval $(call integrator_run,test1,ode23_3D_3,$(ode23),6.25e-6,2.,$(call test1_every,16)))
-$(eval $(call integrator_run,test1,ode23_3D_4,$(ode23),3.125e-6,2.,$(call test1_every,32)))
-$(eval $(call integrator_run,test1,ode23_planar_0,$(ode23),5e-5,2.,$(test1_planar) $(call test1_every,2)))
-$(eval $(call integrator_run,test1,ode23_planar_1,$(ode23),2.5e-5,2.,$(test1_planar) $(call test1_every,4)))
-$(eval $(call integrator_run,test1,ode23_planar_2,$(ode23),1.25e-5,2.,$(test1_planar) $(call test1_every,8)))
-$(eval $(call integrator_run,test1,ode23_planar_3,$(ode23),6.25e-6,2.,$(test1_planar) $(call test1_every,16)))
-$(eval $(call integrator_run,test1,ode23_planar_4,$(ode23),3.125e-6,2.,$(test1_planar) $(call test1_every,32)))
+every = -p "Output.sampling.sampleWhen='i % $(1) < 1'"
+$(eval $(call integrator_run,test1,LeapFrog_3D_0,$(leapfrog),2.5e-5,2.,$(call every,4)))
+$(eval $(call integrator_run,test1,LeapFrog_3D_1,$(leapfrog),1.25e-5,2.,$(call every,8)))
+$(eval $(call integrator_run,test1,LeapFrog_3D_2,$(leapfrog),6.25e-6,2.,$(call every,16)))
+$(eval $(call integrator_run,test1,LeapFrog_3D_3,$(leapfrog),3.125e-6,2.,$(call every,32)))
+$(eval $(call integrator_run,test1,LeapFrog_3D_4,$(leapfrog),1.5625e-6,2.,$(call every,64)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_0,$(leapfrog),2.5e-5,2.,$(test1_planar) $(call every,4)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_1,$(leapfrog),1.25e-5,2.,$(test1_planar) $(call every,8)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_2,$(leapfrog),6.25e-6,2.,$(test1_planar) $(call every,16)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_3,$(leapfrog),3.125e-6,2.,$(test1_planar) $(call every,32)))
+$(eval $(call integrator_run,test1,LeapFrog_planar_4,$(leapfrog),1.5625e-6,2.,$(test1_planar) $(call every,64)))
+$(eval $(call integrator_run,test1,Milne_3D_0,$(milne),4e-6,0.02,$(call every,25)))
+$(eval $(call integrator_run,test1,Milne_3D_1,$(milne),2e-6,0.02,$(call every,50)))
+$(eval $(call integrator_run,test1,Milne_3D_2,$(milne),1e-6,0.02,$(call every,100)))
+$(eval $(call integrator_run,test1,Milne_3D_3,$(milne),5e-7,0.02,$(call every,200)))
+$(eval $(call integrator_run,test1,Milne_3D_4,$(milne),2.5e-7,0.02,$(call every,400)))
+$(eval $(call integrator_run,test1,Milne_planar_0,$(milne),4e-6,0.02,$(test1_planar) $(call every,25)))
+$(eval $(call integrator_run,test1,Milne_planar_1,$(milne),2e-6,0.02,$(test1_planar) $(call every,50)))
+$(eval $(call integrator_run,test1,Milne_planar_2,$(milne),1e-6,0.02,$(test1_planar) $(call every,100)))
+$(eval $(call integrator_run,test1,Milne_planar_3,$(milne),5e-7,0.02,$(test1_planar) $(call every,200)))
+$(eval $(call integrator_run,test1,Milne_planar_4,$(milne),2.5e-7,0.02,$(test1_planar) $(call every,400)))
+$(eval $(call integrator_run,test1,ode23_3D_0,$(ode23),5e-5,2.,$(call every,2)))
+$(eval $(call integrator_run,test1,ode23_3D_1,$(ode23),2.5e-5,2.,$(call every,4)))
+$(eval $(call integrator_run,test1,ode23_3D_2,$(ode23),1.25e-5,2.,$(call every,8)))
+$(eval $(call integrator_run,test1,ode23_3D_3,$(ode23),6.25e-6,2.,$(call every,16)))
+$(eval $(call integrator_run,test1,ode23_3D_4,$(ode23),3.125e-6,2.,$(call every,32)))
+$(eval $(call integrator_run,test1,ode23_planar_0,$(ode23),5e-5,2.,$(test1_planar) $(call every,2)))
+$(eval $(call integrator_run,test1,ode23_planar_1,$(ode23),2.5e-5,2.,$(test1_planar) $(call every,4)))
+$(eval $(call integrator_run,test1,ode23_planar_2,$(ode23),1.25e-5,2.,$(test1_planar) $(call every,8)))
+$(eval $(call integrator_run,test1,ode23_planar_3,$(ode23),6.25e-6,2.,$(test1_planar) $(call every,16)))
+$(eval $(call integrator_run,test1,ode23_planar_4,$(ode23),3.125e-6,2.,$(test1_planar) $(call every,32)))
 $(eval $(call integrator_run,test1,ode45_3D_0,$(ode45),1e-4,2.))
-$(eval $(call integrator_run,test1,ode45_3D_1,$(ode45),5e-5,2.,$(call test1_every,2)))
-$(eval $(call integrator_run,test1,ode45_3D_2,$(ode45),2.5e-5,2.,$(call test1_every,4)))
-$(eval $(call integrator_run,test1,ode45_3D_3,$(ode45),1.25e-5,2.,$(call test1_every,8)))
-$(eval $(call integrator_run,test1,ode45_3D_4,$(ode45),6.25e-6,2.,$(call test1_every,16)))
+$(eval $(call integrator_run,test1,ode45_3D_1,$(ode45),5e-5,2.,$(call every,2)))
+$(eval $(call integrator_run,test1,ode45_3D_2,$(ode45),2.5e-5,2.,$(call every,4)))
+$(eval $(call integrator_run,test1,ode45_3D_3,$(ode45),1.25e-5,2.,$(call every,8)))
+$(eval $(call integrator_run,test1,ode45_3D_4,$(ode45),6.25e-6,2.,$(call every,16)))
 $(eval $(call integrator_run,test1,ode45_planar_0,$(ode45),1e-4,2.,$(test1_planar)))
-$(eval $(call integrator_run,test1,ode45_planar_1,$(ode45),5e-5,2.,$(test1_planar) $(call test1_every,2)))
-$(eval $(call integrator_run,test1,ode45_planar_2,$(ode45),2.5e-5,2.,$(test1_planar) $(call test1_every,4)))
-$(eval $(call integrator_run,test1,ode45_planar_3,$(ode45),1.25e-5,2.,$(test1_planar) $(call test1_every,8)))
-$(eval $(call integrator_run,test1,ode45_planar_4,$(ode45),6.25e-6,2.,$(test1_planar) $(call test1_every,16)))
+$(eval $(call integrator_run,test1,ode45_planar_1,$(ode45),5e-5,2.,$(test1_planar) $(call every,2)))
+$(eval $(call integrator_run,test1,ode45_planar_2,$(ode45),2.5e-5,2.,$(test1_planar) $(call every,4)))
+$(eval $(call integrator_run,test1,ode45_planar_3,$(ode45),1.25e-5,2.,$(test1_planar) $(call every,8)))
+$(eval $(call integrator_run,test1,ode45_planar_4,$(ode45),6.25e-6,2.,$(test1_planar) $(call every,16)))
 # test 1, mesh: the 3D energy error of the element, from rest (the same start on every mesh), a rectangle whose two
 # bending stiffnesses differ by 2 and a dead tip force in x and z, so that the motion leaves the plane; LeapFrog with
 # the step proportional to the element size, output about every 1e-3
@@ -196,37 +195,38 @@ $(eval $(call integrator_run,test2,ode23_lumped,$(ode23),1e-3,12.,$(lumped)))
 $(eval $(call integrator_run,test2,ode45_lumped,$(ode45),2e-3,12.,$(lumped)))
 
 # test 3, eigenfrequencies over ten periods of the first Timoshenko mode, 2 pi 10 / w_1: each integrator on 16 elements,
-# and LeapFrog on 32 and 64 elements for the convergence with the mesh; consistent and (_lumped) lumped mass
+# and LeapFrog on 32 and 64 elements for the convergence with the mesh; consistent and (_lumped) lumped mass; output every 2e-3
+# (more than 30 samples per period of the second mode)
 test3_slender = -p model.model.rodMesh.child.material.radius=0.02
 test3_stubby = -p model.model.rodMesh.child.material.radius=0.1
 test3_slender_end = 17.88651121317495
 test3_stubby_end = 3.6542784244207325
 test3_32 = -p Input.input.onelab.Elements=32.
 test3_64 = -p Input.input.onelab.Elements=64.
-$(eval $(call integrator_run,test3,slender_LeapFrog,$(leapfrog),2.5e-4,$(test3_slender_end),$(test3_slender)))
-$(eval $(call integrator_run,test3,slender_Milne,$(milne),1e-4,$(test3_slender_end),$(test3_slender)))
-$(eval $(call integrator_run,test3,slender_ode23,$(ode23),2.5e-4,$(test3_slender_end),$(test3_slender)))
-$(eval $(call integrator_run,test3,slender_ode45,$(ode45),1.25e-4,$(test3_slender_end),$(test3_slender)))
-$(eval $(call integrator_run,test3,slender_LeapFrog_32,$(leapfrog),1.25e-4,$(test3_slender_end),$(test3_slender) $(test3_32)))
-$(eval $(call integrator_run,test3,slender_LeapFrog_64,$(leapfrog),6.25e-5,$(test3_slender_end),$(test3_slender) $(test3_64)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog,$(leapfrog),2.5e-4,$(test3_stubby_end),$(test3_stubby)))
-$(eval $(call integrator_run,test3,stubby_Milne,$(milne),1e-4,$(test3_stubby_end),$(test3_stubby)))
-$(eval $(call integrator_run,test3,stubby_ode23,$(ode23),2.5e-4,$(test3_stubby_end),$(test3_stubby)))
-$(eval $(call integrator_run,test3,stubby_ode45,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog_32,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog_64,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64)))
-$(eval $(call integrator_run,test3,slender_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
-$(eval $(call integrator_run,test3,slender_Milne_lumped,$(milne),1e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
-$(eval $(call integrator_run,test3,slender_ode23_lumped,$(ode23),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
-$(eval $(call integrator_run,test3,slender_ode45_lumped,$(ode45),1.25e-4,$(test3_slender_end),$(test3_slender) $(lumped)))
-$(eval $(call integrator_run,test3,slender_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_slender_end),$(test3_slender) $(test3_32) $(lumped)))
-$(eval $(call integrator_run,test3,slender_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_slender_end),$(test3_slender) $(test3_64) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_Milne_lumped,$(milne),1e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_ode23_lumped,$(ode23),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_ode45_lumped,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32) $(lumped)))
-$(eval $(call integrator_run,test3,stubby_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64) $(lumped)))
+$(eval $(call integrator_run,test3,slender_LeapFrog,$(leapfrog),2.5e-4,$(test3_slender_end),$(test3_slender) $(call every,8)))
+$(eval $(call integrator_run,test3,slender_Milne,$(milne),1e-4,$(test3_slender_end),$(test3_slender) $(call every,20)))
+$(eval $(call integrator_run,test3,slender_ode23,$(ode23),2.5e-4,$(test3_slender_end),$(test3_slender) $(call every,8)))
+$(eval $(call integrator_run,test3,slender_ode45,$(ode45),1.25e-4,$(test3_slender_end),$(test3_slender) $(call every,16)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_32,$(leapfrog),1.25e-4,$(test3_slender_end),$(test3_slender) $(test3_32) $(call every,16)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_64,$(leapfrog),6.25e-5,$(test3_slender_end),$(test3_slender) $(test3_64) $(call every,32)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog,$(leapfrog),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(call every,8)))
+$(eval $(call integrator_run,test3,stubby_Milne,$(milne),1e-4,$(test3_stubby_end),$(test3_stubby) $(call every,20)))
+$(eval $(call integrator_run,test3,stubby_ode23,$(ode23),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(call every,8)))
+$(eval $(call integrator_run,test3,stubby_ode45,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(call every,16)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_32,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32) $(call every,16)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_64,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64) $(call every,32)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped) $(call every,8)))
+$(eval $(call integrator_run,test3,slender_Milne_lumped,$(milne),1e-4,$(test3_slender_end),$(test3_slender) $(lumped) $(call every,20)))
+$(eval $(call integrator_run,test3,slender_ode23_lumped,$(ode23),2.5e-4,$(test3_slender_end),$(test3_slender) $(lumped) $(call every,8)))
+$(eval $(call integrator_run,test3,slender_ode45_lumped,$(ode45),1.25e-4,$(test3_slender_end),$(test3_slender) $(lumped) $(call every,16)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_slender_end),$(test3_slender) $(test3_32) $(lumped) $(call every,16)))
+$(eval $(call integrator_run,test3,slender_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_slender_end),$(test3_slender) $(test3_64) $(lumped) $(call every,32)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_lumped,$(leapfrog),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped) $(call every,8)))
+$(eval $(call integrator_run,test3,stubby_Milne_lumped,$(milne),1e-4,$(test3_stubby_end),$(test3_stubby) $(lumped) $(call every,20)))
+$(eval $(call integrator_run,test3,stubby_ode23_lumped,$(ode23),2.5e-4,$(test3_stubby_end),$(test3_stubby) $(lumped) $(call every,8)))
+$(eval $(call integrator_run,test3,stubby_ode45_lumped,$(ode45),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(lumped) $(call every,16)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_32_lumped,$(leapfrog),1.25e-4,$(test3_stubby_end),$(test3_stubby) $(test3_32) $(lumped) $(call every,16)))
+$(eval $(call integrator_run,test3,stubby_LeapFrog_64_lumped,$(leapfrog),6.25e-5,$(test3_stubby_end),$(test3_stubby) $(test3_64) $(lumped) $(call every,32)))
 
 # test 4, freely spinning body of Krysl, Endres (2005), Sect. 4.1, to t = 100: LeapFrog at five steps for the order;
 # output every 0.01, i.e. every 0.01 / step steps
@@ -240,25 +240,25 @@ $(eval $(call integrator_run,test4,Milne,$(milne),2.5e-4,100.,-p "Output.samplin
 $(eval $(call integrator_run,test4,ode23,$(ode23),1e-3,100.,$(test4_every_10)))
 $(eval $(call integrator_run,test4,ode45,$(ode45),1e-3,100.,$(test4_every_10)))
 
-# test 5, pure rotation of Holzinger, Gerstmayr (2021), Sect. 7.1.2, to t = 100
-$(eval $(call integrator_run,test5,LeapFrog,$(leapfrog),1e-3,100.))
-$(eval $(call integrator_run,test5,Milne,$(milne),2.5e-4,100.))
-$(eval $(call integrator_run,test5,ode23,$(ode23),1e-3,100.))
-$(eval $(call integrator_run,test5,ode45,$(ode45),1e-3,100.))
+# test 5, pure rotation of Holzinger, Gerstmayr (2021), Sect. 7.1.2, to t = 100, output every 1e-2
+$(eval $(call integrator_run,test5,LeapFrog,$(leapfrog),1e-3,100.,$(call every,10)))
+$(eval $(call integrator_run,test5,Milne,$(milne),2.5e-4,100.,$(call every,40)))
+$(eval $(call integrator_run,test5,ode23,$(ode23),1e-3,100.,$(call every,10)))
+$(eval $(call integrator_run,test5,ode45,$(ode45),1e-3,100.,$(call every,10)))
 
 # test 6, flying spaghetti of Kinon, Eugster, Betsch (2026), Sect. 6.1, to t = 15, with the state of all nodes for the
-# momenta; LeapFrog also at five steps to t = 5.01 for the order at t = 5, without the state
+# momenta; LeapFrog also at five steps to t = 5.01 for the order at t = 5, without the state, output every 1e-3
 test6_state = -p "Output.state.file='$$(@:.csv=_state.gz)'"
 test6_no_state = -p "Output.state.type='None'"
 $(eval $(call integrator_run,test6,LeapFrog,$(leapfrog),1e-3,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,Milne,$(milne),2.5e-4,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,ode23,$(ode23),1e-3,15.,$(test6_state)))
 $(eval $(call integrator_run,test6,ode45,$(ode45),1e-3,15.,$(test6_state)))
-$(eval $(call integrator_run,test6,LeapFrog_0,$(leapfrog),1e-3,5.01,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_1,$(leapfrog),5e-4,5.01,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_2,$(leapfrog),2.5e-4,5.01,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_3,$(leapfrog),1.25e-4,5.01,$(test6_no_state)))
-$(eval $(call integrator_run,test6,LeapFrog_4,$(leapfrog),6.25e-5,5.01,$(test6_no_state)))
+$(eval $(call integrator_run,test6,LeapFrog_0,$(leapfrog),1e-3,5.01,$(test6_no_state) $(call every,1)))
+$(eval $(call integrator_run,test6,LeapFrog_1,$(leapfrog),5e-4,5.01,$(test6_no_state) $(call every,2)))
+$(eval $(call integrator_run,test6,LeapFrog_2,$(leapfrog),2.5e-4,5.01,$(test6_no_state) $(call every,4)))
+$(eval $(call integrator_run,test6,LeapFrog_3,$(leapfrog),1.25e-4,5.01,$(test6_no_state) $(call every,8)))
+$(eval $(call integrator_run,test6,LeapFrog_4,$(leapfrog),6.25e-5,5.01,$(test6_no_state) $(call every,16)))
 
 # CLEAN UP THE TESTS
 clean-tests:
